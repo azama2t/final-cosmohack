@@ -38,10 +38,7 @@ cd service\frontend; npm ci; npm run build; cd ..\..      # сборка кла�
 
 Регионы на карте сейчас:
 
-| Регион | Тайл | Даты | Модель | Индекс, ‰ | Находок | Площадь пятен, км² | Зон |
-|---|---|---|---|---|---|---|---|
-| Дурбан | 36JUN | 2019-04-24 | mdd | 12.86 | 78 | 2.16 | — |
-| Гондурасский залив | 16PCC | 2025-04-05 | mdd | 40.18 | 1 329 | 20.83 | 10 |
+{{derived.regions_table}}
 
 ## Показатель: доля наблюдаемой воды с признаками мусора
 
@@ -63,7 +60,7 @@ share (‰) = 1000 × flagged_water_px / observed_water_px
 
 | Модель | Что это | Где используется |
 |---|---|---|
-| **LightGBM (наша)** | пиксельный градиентный бустинг: 19 признаков (11 каналов Sentinel-2 и спектральные индексы FDI, FAI, NDVI, NDWI, NDMI, SI, BSI, NRD), бинарная задача «Marine Debris против всего остального», порог 0.27 подобран на val | обучена и оценена на MARIDA, дополнительный слой на живых сценах |
+| **LightGBM (наша)** | пиксельный градиентный бустинг: {{l3_lgbm.n_features}} признаков (11 каналов Sentinel-2 и спектральные индексы FDI, FAI, NDVI, NDWI, NDMI, SI, BSI, NRD), бинарная задача «Marine Debris против всего остального», порог {{l3_lgbm.threshold|f2}} подобран на val | обучена и оценена на MARIDA, дополнительный слой на живых сценах |
 | **marinedebrisdetector** (Rußwurm et al., 2023) | сторонняя модель UNet++, лицензия MIT, вход — 12 каналов Sentinel-2 L2A | основной слой находок на живых сценах L2A |
 
 marinedebrisdetector обучался в том числе на MARIDA, поэтому на MARIDA мы его **не оцениваем**: такая оценка не была бы независимой.
@@ -72,19 +69,15 @@ marinedebrisdetector обучался в том числе на MARIDA, поэт
 
 Модель, признаки и порог выбирались только по официальному val-сплиту. Test посчитан один раз для финальной модели, и после этого ничего не менялось. Метрики считаются по пулу всех размеченных пикселей (неразмеченные игнорируются).
 
-| Модель | Сплит | F1 Marine Debris | IoU Marine Debris | Precision | Recall | Порог |
-|---|---|---|---|---|---|---|
-| LightGBM (наша) | val (выбор) | 0.893 | 0.806 | 0.886 | 0.899 | 0.27 |
-| LightGBM (наша) | test (один раз) | — | — | — | — | — |
-| RF + индексы (статья MARIDA, Table 4) | test | 0.80 | 0.67 | | | |
+{{derived.metrics_table}}
 
-Разброс F1 на val по seed: —. Строка RF взята из статьи MARIDA и приведена для ориентира: там другая модель и другой протокол.
+Разброс F1 на val по seed: {{derived.l3_noise}}. Строка RF взята из статьи MARIDA и приведена для ориентира: там другая модель и другой протокол.
 
 ## Данные и лицензии
 
 | Источник | Что берём | Лицензия |
 |---|---|---|
-| [MARIDA](https://doi.org/10.5281/zenodo.5151941) (Kikaki et al., 2022) | патчи 256×256 (1 381 шт., сцен: 63), 11 каналов (ACOLITE rhorc), 15 классов и уверенность разметки; Marine Debris — 3 399 px | CC BY 4.0 (данные), MIT (код) |
+| [MARIDA](https://doi.org/10.5281/zenodo.5151941) (Kikaki et al., 2022) | патчи 256×256 ({{data.marida.n_patches|int}} шт., сцен: {{data.marida.n_scenes}}), 11 каналов (ACOLITE rhorc), 15 классов и уверенность разметки; Marine Debris — {{data.marida.md_px|int}} px | CC BY 4.0 (данные), MIT (код) |
 | [MADOS](https://zenodo.org/records/10664073) (Kikaki et al., 2024) | дополнительный набор разметки (опционально) | CC BY 4.0 |
 | [marinedebrisdetector](https://github.com/MarcCoru/marinedebrisdetector) | предобученные веса UNet++ | MIT |
 | Sentinel-2 L2A через [Earth Search](https://earth-search.aws.element84.com/v1) (запасной канал — Planetary Computer) | живые сцены, COG | Copernicus Sentinel data, свободное использование с атрибуцией |
@@ -92,7 +85,7 @@ marinedebrisdetector обучался в том числе на MARIDA, поэт
 
 Атрибуция снимков: «Contains modified Copernicus Sentinel data 2015–2026». Полные ссылки и цитирование — в [reports/sources.md](reports/sources.md).
 
-Размечена только часть пикселей MARIDA (0.93 %), поэтому площадь загрязнения по её маскам не считается.
+Размечена только часть пикселей MARIDA ({{data.marida.labelled_pct}} %), поэтому площадь загрязнения по её маскам не считается.
 
 ## Структура репозитория
 

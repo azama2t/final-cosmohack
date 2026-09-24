@@ -25,3 +25,11 @@
 | `scripts/eda_marida.py` | EDA MARIDA → `reports/eda/` (eda.md + 8 PNG), `reports/marida_scenes.csv`, `reports/marida_regions.md` | вручную |
 | `scripts/check_mados_overlap.py` | пересечения сцен MARIDA↔MADOS по тайлу+дате | дорожка MADOS |
 | `reports/eda/`, `reports/marida_scenes.csv`, `reports/marida_regions.md`, `reports/sources.md` | EDA, таблица 63 сцен, регионы по MD px, источники и лицензии | отчёт, выбор регионов |
+| `README.md.tmpl` → `README.md` | шаблон README; README генерирует `scripts/render_docs.py` (правь только .tmpl) | render_docs |
+| `reports/report.md.tmpl` → `reports/report.md` | шаблон отчёта | render_docs |
+| `run.ps1` | запуск одной командой: venv, сборка фронта, сервис, браузер (`-Port -DataRoot -NoBrowser`), UTF-8 с BOM | пользователь |
+| `TOMORROW.md` | первые 60 минут хакатона: команды и развилки | команда |
+| `reports/qa.md` | вопросы жюри с ответами | защита |
+| `scripts/final_numbers.py` | артефакты → `reports/final_numbers.json` (единственный источник чисел) | render_docs, make_deck |
+| `scripts/render_docs.py` | `*.tmpl` + final_numbers → README.md, report.md | вручную |
+| `scripts/make_deck.py` | `reports/deck.pptx` (10 слайдов), `--preview` → PNG через LibreOffice | вручную |
