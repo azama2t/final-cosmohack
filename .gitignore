@@ -25,3 +25,8 @@ __pycache__/
 /NIGHT_DONE
 /run_night.ps1
 /logs/
+/*.zip
+/reports/tasklog/
+.pytest_cache/
+/test-results/
+/playwright-report/
