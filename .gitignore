@@ -1,0 +1,22 @@
+# данные и артефакты (не в git)
+/data/
+/data_cache/
+/out/
+/weights_exp/
+/models/
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+.env
+# служебные файлы оркестрации
+/START-PROMPT.md
+/ORCHESTRATOR-PROMPT-v2.md
+/ЗАПУСК_ДЛЯ_ЛЮДЕЙ.md
+/spec/
+/.claude/
+/PROGRESS.md
+/METRICS.md
+/SPEC-GAPS.md
+/run*.json
+/run*.err
