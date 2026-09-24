@@ -30,3 +30,4 @@ __pycache__/
 .pytest_cache/
 /test-results/
 /playwright-report/
+/service/demo_fixtures/

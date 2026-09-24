@@ -5,3 +5,19 @@
 | `docs/CONTRACTS.md` | форматы файлов слоя данных сервиса (manifest, prob, detections, h3, zones, drift, timeseries) | все дорожки |
 | `scripts/make_fixtures.py` | валидные фейковые данные по контрактам за секунды | фронт/API/тесты |
 | `scripts/gpu_queue.py` | единственная очередь GPU-задач, лог `out/gpu_queue.log` | обучение, MDD-инференс |
+| `src/macroplastic/__init__.py` | константы: классы MARIDA, IGNORE_INDEX, MARINE_DEBRIS, слияние 12..15→7 | все модули |
+| `src/macroplastic/utils.py` | ROOT, seed_everything, available_cpus (affinity), cuda_usable, логгер, load_yaml | все дорожки |
+| `src/macroplastic/io.py` | чтение/запись GeoTIFF (C,H,W)+profile, наборы каналов, win_path, read_marida_patch | данные, модели, inference |
+| `src/macroplastic/metrics.py` | конфьюжн-матрица по пулу пикселей (ignore=0), P/R/F1/IoU, mIoU, бинарные F1/IoU Marine Debris | обучение, final_numbers |
+| `src/macroplastic/splits.py` | официальные сплиты MARIDA, scene_of/parse_patch, группы по сцене | данные, обучение |
+| `src/macroplastic/indices.py` | FDI, FAI, NDVI, NDWI, NDMI, SI, BSI, NRD | признаки, fdi_rule |
+| `src/macroplastic/models/registry.py` | реестр предикторов (lgbm, mdd, запасной fdi_rule) с ленивой загрузкой | inference.py, живые сцены |
+| `configs/channels.yaml` | порядок каналов наборов marida / s2_l2a_12 / mdd_input | io |
+| `inference.py` | CLI: папка GeoTIFF → `<name>_prob.tif` (uint8) и `<name>_mask.tif`; коды выхода 0/1/2 | пользователь, QA |
+| `tests/test_core.py`, `tests/conftest.py` | тесты ядра (13), фикстура MARIDA (skip без данных) | pytest |
+| `pyproject.toml`, `requirements.txt` | настройки pytest; список пакетов | установка |
+| `service/__main__.py` | `python -m service [--port --data-root]` → uvicorn | пользователь |
+| `service/app.py` | FastAPI: /health, /api/*, /data/*, /assets/*, SPA-фоллбэк, GZip | фронт |
+| `service/core.py` | выбор корня данных, кеш JSON, KPI/compare/diff, экспорт CSV/GeoJSON, safe_path | app.py |
+| `tests/test_api.py` | тесты API на временных фикстурах | pytest |
+| `scripts/serve.ps1` | однострочный запуск сервиса | пользователь |

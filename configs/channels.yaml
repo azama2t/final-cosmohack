@@ -1,0 +1,14 @@
+# Channel sets (band order inside GeoTIFFs). Loaded by macroplastic.io.channel_names(<set>).
+# Names use the canonical form B1..B8, B8A, B9, B11, B12 (no zero padding).
+
+# MARIDA patches: ACOLITE Rayleigh-corrected reflectance (rhorc) from L1C, float ~0..1,
+# all bands resampled to 10 m, no B9/B10.
+marida: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B11, B12]
+
+# Live Sentinel-2 L2A (Sen2Cor) scenes cut by lane L6: surface reflectance 0..1
+# (scale/offset from STAC raster:bands already applied), no B10.
+s2_l2a_12: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11, B12]
+
+# Input order of marinedebrisdetector (MarcCoru/marinedebrisdetector, L2A_BANDS):
+# 12 L2A bands; the model itself expects DN and multiplies by 1e-4 internally.
+mdd_input: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11, B12]

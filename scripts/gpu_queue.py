@@ -74,6 +74,9 @@ def run():
         t0 = time.time()
         env = dict(os.environ)
         env.pop("CUDA_VISIBLE_DEVICES", None)
+        exe = Path(job["cwd"]) / job["cmd"][0]  # Windows CreateProcess does not resolve relative ".venv/Scripts/python.exe"
+        if job["cmd"] and not Path(job["cmd"][0]).is_absolute() and exe.exists():
+            job["cmd"][0] = str(exe.resolve())
         with (LOGS / f"{stem}.log").open("w", encoding="utf-8") as lf:
             try:
                 code = subprocess.call(job["cmd"], cwd=job["cwd"], stdout=lf, stderr=subprocess.STDOUT, env=env)
