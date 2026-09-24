@@ -20,3 +20,8 @@ __pycache__/
 /SPEC-GAPS.md
 /run*.json
 /run*.err
+/service/data/
+/INBOX.md
+/NIGHT_DONE
+/run_night.ps1
+/logs/
