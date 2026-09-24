@@ -21,3 +21,7 @@
 | `service/core.py` | выбор корня данных, кеш JSON, KPI/compare/diff, экспорт CSV/GeoJSON, safe_path | app.py |
 | `tests/test_api.py` | тесты API на временных фикстурах | pytest |
 | `scripts/serve.ps1` | однострочный запуск сервиса | пользователь |
+| `src/macroplastic/data/marida.py` | загрузчик MARIDA: патчи по сплитам, (img, cl, conf, profile), CLASS_NAMES, merge_water, iter_split | обучение, EDA |
+| `scripts/eda_marida.py` | EDA MARIDA → `reports/eda/` (eda.md + 8 PNG), `reports/marida_scenes.csv`, `reports/marida_regions.md` | вручную |
+| `scripts/check_mados_overlap.py` | пересечения сцен MARIDA↔MADOS по тайлу+дате | дорожка MADOS |
+| `reports/eda/`, `reports/marida_scenes.csv`, `reports/marida_regions.md`, `reports/sources.md` | EDA, таблица 63 сцен, регионы по MD px, источники и лицензии | отчёт, выбор регионов |
