@@ -1,4 +1,4 @@
-"""Offline demo check (L21): open the map with ALL external requests blocked.
+"""Offline demo check: open the map with ALL external requests blocked.
 
 Every request whose host is not 127.0.0.1 / localhost (or a data:/blob: URL) is aborted via
 Playwright `route`, i.e. the browser behaves as if the internet were gone while the local
@@ -301,7 +301,7 @@ def static_audit() -> list[str]:
 
 def write_md(md: Path, runs: list[Run], base: str, gl: str, out: Path):
     L = [
-        "# Офлайн-проверка карты (L21)",
+        "# Офлайн-проверка карты",
         "",
         f"Сгенерировано `scripts/offline_check.py` · {dt.datetime.now():%Y-%m-%d %H:%M} · {base} · WebGL: {gl} · окно 1920×1080.",
         "Офлайн = Playwright `route`: все запросы не к 127.0.0.1/localhost обрываются (`internetdisconnected`).",

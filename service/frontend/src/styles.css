@@ -310,6 +310,24 @@ h3 {
   right: 16px;
   width: calc(var(--rw) - 16px);
 }
+/* 16 px strip between a side panel and the window edge: map labels there were cut to fragments
+   («ue», «oni/W/Sur»). Cover it with the page background from the stage top down to the footer. */
+.panel-left::before,
+.panel-right::before {
+  content: '';
+  position: absolute;
+  top: -17px;
+  bottom: -16px;
+  width: 17px;
+  background: var(--bg);
+  pointer-events: none;
+}
+.panel-left::before {
+  right: 100%;
+}
+.panel-right::before {
+  left: 100%;
+}
 .panel.collapsed {
   width: 32px;
   background: var(--panel);

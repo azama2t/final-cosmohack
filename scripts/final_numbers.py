@@ -486,14 +486,14 @@ def collect_rehearsal() -> dict:
            "private_asis": None, "private_trained": None, "private_trained_prev": None, "trained_submit_min": None,
            "labelled_no_seasnot_f1": None, "labelled_f1_asis": None, "best_all_px_f1": None, "best_all_px_thr": None,
            "unlabelled_pct": None, "n_test_chips": None, "n_scenes": None}
-    m = re.search(r"первого валидного сабмита:\s*(\d+)\s*с\b.*?\(L30:\s*(\d+)\s*мин\s*(\d+)\s*с\)", t2)
+    m = re.search(r"первого валидного сабмита:\s*(\d+)\s*с\b.*?\((?:L30|репетиция 1):\s*(\d+)\s*мин\s*(\d+)\s*с\)", t2)
     if m:
         res["first_submit_s"] = int(m.group(1))
         res["first_submit_s_prev"] = int(m.group(2)) * 60 + int(m.group(3))
     m = re.search(r"человека по оценке\s*(\d+)[–-](\d+)\s*мин", t2)
     if m:
         res["human_min"] = [int(m.group(1)), int(m.group(2))]
-    m = re.search(r"Как есть / после обучения:\s*([\d.]+)\s*→\s*([\d.]+)\*\*\s*\(L30:\s*([\d.]+)\s*→\s*([\d.]+)\)", t2)
+    m = re.search(r"Как есть / после обучения:\s*([\d.]+)\s*→\s*([\d.]+)\*\*\s*\((?:L30|репетиция 1):\s*([\d.]+)\s*→\s*([\d.]+)\)", t2)
     if m:
         res["private_asis"], res["private_trained"] = _fl(m.group(1)), _fl(m.group(2))
         res["private_trained_prev"] = _fl(m.group(4))

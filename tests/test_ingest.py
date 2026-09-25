@@ -5,6 +5,7 @@ import csv
 import importlib.util
 import io
 import json
+import os
 import tarfile
 import zipfile
 from pathlib import Path
@@ -13,7 +14,7 @@ import numpy as np
 import pytest
 
 REPO = Path(__file__).resolve().parents[1]
-FIRE_BS = Path(r"C:\Users\User\hack\fire-monitoring\data\train\bs")
+FIRE_BS = Path(os.environ.get("FIRE_MONITORING_DIR", Path.home() / "hack" / "fire-monitoring")) / "data" / "train" / "bs"  # optional external dataset
 
 
 def _load_script(name):

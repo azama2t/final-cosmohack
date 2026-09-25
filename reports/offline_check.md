@@ -1,4 +1,4 @@
-# Офлайн-проверка карты (L21)
+# Офлайн-проверка карты
 
 Сгенерировано `scripts/offline_check.py` · 2026-09-25 06:13 · http://127.0.0.1:8000 · WebGL: swiftshader · окно 1920×1080.
 Офлайн = Playwright `route`: все запросы не к 127.0.0.1/localhost обрываются (`internetdisconnected`).

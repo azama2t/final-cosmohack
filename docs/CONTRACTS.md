@@ -1,6 +1,6 @@
 # Контракты файлов слоя данных сервиса
 
-Все дорожки пишут и читают эти форматы. Генератор валидных фейковых файлов: `python scripts/make_fixtures.py --out service/demo_fixtures`.
+Все модули пишут и читают эти форматы. Генератор валидных фейковых файлов: `python scripts/make_fixtures.py --out service/demo_fixtures`.
 Корень данных сервиса: `service/data/` (полный, не в git) или `service/demo/` (маленький, в git). Сервис берёт `service/data/`, если там есть `manifest.json`, иначе `service/demo/`.
 Все пути в `manifest.json` — относительные от корня данных, разделитель `/`.
 
@@ -18,7 +18,7 @@
 <root>/<region>/<date>/<model>/h3.geojson
 <root>/<region>/<date>/<model>/zones.json
 ```
-`<region>` — латиница, snake_case (`honduras`, `durban`). `<date>` — `YYYY-MM-DD`. `<model>` ∈ `mdd` (marinedebrisdetector), `lgbm` (наша модель L3); будущие — своё короткое имя.
+`<region>` — латиница, snake_case (`honduras`, `durban`). `<date>` — `YYYY-MM-DD`. `<model>` ∈ `mdd` (marinedebrisdetector), `lgbm` (наша LightGBM); будущие — своё короткое имя.
 
 ## detections.geojson
 FeatureCollection, Polygon/MultiPolygon в WGS84 (EPSG:4326), упрощение до ≤ 2 МБ на файл.
@@ -62,7 +62,7 @@ FeatureCollection, Polygon = граница ячейки H3 res 8. Только 
 Файлы модели для даты: `<region>/<date>/<model>/{prob.png,prob.tif,detections.geojson,h3.geojson,zones.json}`. `drift` — null, если нет.
 
 ## reports/final_numbers.json
-Все метрики для README/отчёта/деки/UI. Плоский словарь с вложенными секциями по дорожкам: `{"l3_lgbm": {"val": {"f1_md":..,"iou_md":..,"threshold":..}, "test": {...}}, "l4_unet": {...}, "data": {...}, "regions": {...}}`. Генерируется скриптом `scripts/final_numbers.py`, руками не правится.
+Все метрики для README/отчёта/деки/UI. Плоский словарь с вложенными секциями по этапам: `{"l3_lgbm": {"val": {"f1_md":..,"iou_md":..,"threshold":..}, "test": {...}}, "l4_unet": {...}, "data": {...}, "regions": {...}}`. Генерируется скриптом `scripts/final_numbers.py`, руками не правится.
 
 ## Дополнения (03:35)
 - `manifest.regions[].dates[].thumb` (необязательно): `<region>/<date>/thumb.jpg` — превью rgb 256 px по длинной стороне, ≤ 30 КБ; фронт берёт его для списка регионов.
@@ -70,9 +70,9 @@ FeatureCollection, Polygon = граница ячейки H3 res 8. Только 
 - `/api/compare` → `{"a":{region,date,model,kpi},"b":{...},"diff":{<kpi>:{"delta": b−a, "ratio": b/a | null}}}`; kpi: total_debris_area_m2, n_detections, mean_index, max_index, cloud_frac, observed_cells, flagged_cells.
 - Корень данных сервиса: `--data-root` → `$MACROPLASTIC_DATA` → `service/data` → `service/demo` → `service/demo_fixtures` → «нет данных».
 - `manifest.regions[].dates[].quality` = `{"glint_or_haze": bool, "haze": bool, "note": str}` (haze = `water_b8_median > 0.006` или `glint_or_haze` из scene.json; note «дымка/блик — находки могут быть завышены»; то же в `zones.json.quality` и в `reason` зон); `summary.latest_date` и `regions[].default_date` — последняя дата без haze, если такая есть.
-- L15 «уверенные находки» (необязательно; только даты с ≥ 2 моделями): `detections.geojson` `properties.confirmed` (bool — у другой модели есть пиксель P ≥ её порога на наблюдаемой воде в радиусе 2 px = 20 м от объекта) и `confirmed_by` (id модели или null); `manifest.regions[].dates[].n_confirmed` = `{"mdd": k, "lgbm": m}`; `zones.json` `zones[].n_confirmed` (подтверждённые находки, чей пиксель максимума P лежит в ячейке); H3-индекс не меняется; подпись в UI — «согласие моделей, не проверка на месте».
+- «Уверенные находки» (необязательно; только даты с ≥ 2 моделями): `detections.geojson` `properties.confirmed` (bool — у другой модели есть пиксель P ≥ её порога на наблюдаемой воде в радиусе 2 px = 20 м от объекта) и `confirmed_by` (id модели или null); `manifest.regions[].dates[].n_confirmed` = `{"mdd": k, "lgbm": m}`; `zones.json` `zones[].n_confirmed` (подтверждённые находки, чей пиксель максимума P лежит в ячейке); H3-индекс не меняется; подпись в UI — «согласие моделей, не проверка на месте».
 
-## API: зоны, место, календарь, проверка (L19)
+## API: зоны, место, календарь, проверка
 Модули: `service/place.py` (зона, место, календарь, вырезки), `service/pdf.py` (справка PDF), `service/review.py` (очередь, метки, дообучение). Ошибки: 404 `{"detail"}` — нет района/даты/модели/файла; 422 `{"detail"}` — плохой параметр. Живые сцены (для вырезок 10 м и ложного цвета): `$MACROPLASTIC_LIVE` или `data/live/<region>/<date>/bands.tif`; без них вырезка берётся из `rgb.png` корня данных.
 
 **Приоритет обследования (формула, `src/macroplastic/grid/zones.py`):** `score = flagged_water_px × mean_prob × (1 + 0.5 × (repeat_dates − 1))`; ранжируются ячейки с `observed_frac ≥ 0.5`; топ ≤ 10. Это ранжирование, не измеренная опасность и не масса.

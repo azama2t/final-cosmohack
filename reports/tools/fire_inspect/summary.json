@@ -1,5 +1,5 @@
 {
- "data_dir": "C:\\Users\\User\\hack\\fire-monitoring\\data\\train",
+ "data_dir": "<путь к данным>\\fire-monitoring\\data\\train",
  "generated": "2026-09-25T02:42:22",
  "n_rasters": 2604,
  "n_rasters_scanned": 2604,
@@ -1492,7 +1492,7 @@
  "n_pairs_guess": 644,
  "tables": [
   {
-   "path": "C:\\Users\\User\\hack\\fire-monitoring\\data\\train\\af\\meta.csv",
+   "path": "<путь к данным>\\fire-monitoring\\data\\train\\af\\meta.csv",
    "ext": ".csv",
    "size_bytes": 65030,
    "rows": 420,
@@ -1891,7 +1891,7 @@
    "rel": "af/meta.csv"
   },
   {
-   "path": "C:\\Users\\User\\hack\\fire-monitoring\\data\\train\\bs\\meta.csv",
+   "path": "<путь к данным>\\fire-monitoring\\data\\train\\bs\\meta.csv",
    "ext": ".csv",
    "size_bytes": 41198,
    "rows": 224,

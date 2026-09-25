@@ -8,6 +8,8 @@ Template syntax:
     {{l3_lgbm.val.f1_md}}          value by dotted path (list items by index: service.regions.0.name)
     {{l3_lgbm.val.f1_md|f3}}       filters: f1 f2 f3 (fixed decimals), pct (x100, 1 decimal, no % sign),
                                    int (thousands separated), km2, raw
+    {{service.n_dates|pl:живой снимок/живых снимка/живых снимков}}
+                                   number + noun agreed by Russian rules (1 / 2-4 / 5+, 11-14 -> 5+)
     {{derived.metrics_table}}      ready-made markdown blocks computed here (see derived())
 Missing or null values render as an em dash "—" and are listed on stdout (exit code stays 0).
 Only placeholders whose path starts with a known top-level key are replaced; any other {{...}} is kept.
@@ -22,7 +24,32 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DASH = "—"
 PAIRS = [("README.md.tmpl", "README.md"), ("reports/report.md.tmpl", "reports/report.md")]
-PH = re.compile(r"\{\{\s*([A-Za-z_][\w.]*)\s*(?:\|\s*(\w+)\s*)?\}\}")
+PH = re.compile(r"\{\{\s*([A-Za-z_][\w.]*)\s*(?:\|\s*(\w+)(?::([^{}]*?))?\s*)?\}\}")
+
+
+def plural_ru(n, one: str, few: str, many: str) -> str:
+    """Russian noun form for integer n: 1 снимок, 2-4 снимка, 5-20 снимков, 21 снимок, 111 снимков."""
+    n = abs(int(n))
+    if n % 100 in (11, 12, 13, 14):
+        return many
+    if n % 10 == 1:
+        return one
+    if n % 10 in (2, 3, 4):
+        return few
+    return many
+
+
+def fmt_pl(v, forms: str) -> str:
+    """'64' + 'живой снимок/живых снимка/живых снимков' -> '64 живых снимка'."""
+    parts = [s.strip() for s in (forms or "").split("/")]
+    if v is None or len(parts) != 3:
+        return fmt(v, None) + (f" {parts[-1]}" if parts and parts[-1] else "")
+    try:
+        n = int(round(float(v)))
+    except (TypeError, ValueError):
+        return f"{v} {parts[2]}"
+    num = f"{n:,}".replace(",", " ")
+    return f"{num} {plural_ru(n, *parts)}"
 
 
 def get_path(data, path: str):
@@ -418,12 +445,14 @@ def render(text: str, ctx: dict, missing: list) -> str:
                          "lgbm_live", "metric_audit", "agreement", "drift", "speed", "test", "derived", "baselines", "l23"}
 
     def sub(m):
-        path, flt = m.group(1), m.group(2)
+        path, flt, arg = m.group(1), m.group(2), m.group(3)
         if path.split(".")[0] not in roots:
             return m.group(0)
         v = get_path(ctx, path)
         if v is None:
             missing.append(path)
+        if flt == "pl":
+            return fmt_pl(v, arg)
         return fmt(v, flt)
 
     return PH.sub(sub, text)

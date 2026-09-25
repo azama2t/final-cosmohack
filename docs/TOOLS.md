@@ -1,11 +1,11 @@
 # TOOLS — первые 60 минут с датасетом организаторов
 
-Инструменты первого часа (главная дорожка — `TOMORROW.md`: ingest → convert → predict_org → train_lgbm_ingest --cv →
+Инструменты первого часа (основной порядок действий — `TOMORROW.md`: ingest → convert → predict_org → train_lgbm_ingest --cv →
 predict_org → score). Все команды — **PowerShell из корня репозитория**, копипастой. Вместо `D:\org\train`
 подставьте папку организаторов, вместо `org` — короткое имя. Все инструменты только читают исходные данные.
 
 ```powershell
-cd C:\Users\User\Documents\GitHub\final-cosmohack
+cd <корень репозитория>
 $env:PYTHONPATH = "src"
 $env:CUDA_VISIBLE_DEVICES = "-1"   # "-1", не "": в PowerShell 5.1 "" удаляет переменную -> lgbm уходит на GPU
 $I = "data\ingest\org"             # <- папка ingest (adapter.yaml, converted\, converted_test\)
@@ -19,7 +19,7 @@ $ORG = "D:\org\train"          # <- папка организаторов
 | 15–25 | как построена разметка | `label_forensics.py` | `reports\tools\org_forensics\forensics.md` |
 | 15–25 (параллельно) | пересечения с нашим train | `provenance_check.py` | `reports\tools\org_provenance\provenance.md` |
 | 25–40 | привести к нашему формату | `organizer_adapter` | `data\organizer\org\` + `manifest.csv` |
-| 40–60 | переобучение L3 (LightGBM) на adapter-выходе, метрика организаторов | L3 | число на val |
+| 40–60 | переобучение LightGBM на adapter-выходе, метрика организаторов | `train_lgbm_ingest.py` | число на val |
 
 ## 1. inspect_dataset.py — что в данных (≈20 с на MARIDA, 15 с на пожарном датасете)
 
@@ -50,7 +50,7 @@ SCL?), какая группа — маски (мало целых значен�
 ```
 По умолчанию берутся ВСЕ найденные пары; выше `--max-files` (3000) — случайная выборка с явным «ВЫБОРКА: N из M».
 Ключ пары по умолчанию — полное имя без суффикса маски (`r05_001_mask` → `r05_001`): одинаковые номера в разных сценах
-больше не склеиваются (L30: молча 30 из 207 пар); совпадения id печатаются как «ВНИМАНИЕ».
+больше не склеиваются (в репетиции 1: молча 30 из 207 пар); совпадения id печатаются как «ВНИМАНИЕ».
 Полезные опции: `--scale 0.0001 --offset 0` (пороги в отражении, а не в DN), `--band-names B2,B3,B4,B8` (если нет descriptions), `--exclude-bands SCL`, `--merge "12,13,14,15:7"`,
 `--meta-csv meta.csv --meta-id-col chip_id --meta-group-col event_id` (группы для сплита), `--split-lists a.txt b.txt`
 (+`--group-by-split` — фолды = сами списки), `--cap 300`, `--no-lgbm`.
@@ -58,7 +58,7 @@ SCL?), какая группа — маски (мало целых значен�
 Как читать `forensics.md`:
 - «ОДИН ПОРОГ почти воспроизводит маску» (CV F1 ≥ 0.9) → разметка, вероятно, сделана порогом индекса: воспроизводим правило, ML не нужен.
 - дерево-3 F1 ≥ 0.9 → разметка — простое правило; правила дерева в конце отчёта.
-- LGBM ≫ дерево и AUC ≈ 1 → класс спектрально отделим, но не одним правилом: бустинг L3 подходит.
+- LGBM ≫ дерево и AUC ≈ 1 → класс спектрально отделим, но не одним правилом: наш бустинг LightGBM подходит.
 - AUC высокий, F1 низкий → редкий класс, ложные срабатывания на больших классах: нужен порог по val и контекст (окна).
 - геометрия: `1-px доля` высокая — точечная разметка; `rect мед.` ≈ 1 на больших компонентах — прямоугольники/полигоны;
   `recall edge ≪ recall int` — буфер/полигон шире объекта; `border8` ≫ 1 — метки режутся краем тайла.
@@ -75,7 +75,7 @@ SCL?), какая группа — маски (мало целых значен�
 Проверки: сцена (MGRS-тайл + дата из имён/тегов), только тайл, только дата, пересечение bbox в WGS84 (> 5 % меньшего),
 SHA-1 файлов, перцептивный хеш и корреляция превью 16×16 (max по 8 поворотам/отражениям). `--within` — дубликаты и
 перекрытия внутри данных организаторов (важно для своего train/val). Маски пропускаются (`--exclude`, по умолчанию файлы
-в папках `masks/labels/gt/annotations` и имена с `_cl|_conf|mask|label|_gt|_lbl`; L30: PNG из `masks/` давали 39 ложных совпадений). Выход: `provenance.md`, `pairs.csv`, `theirs_files.csv`, `summary.json`.
+в папках `masks/labels/gt/annotations` и имена с `_cl|_conf|mask|label|_gt|_lbl`; в репетиции 1 PNG из `masks/` давали 39 ложных совпадений). Выход: `provenance.md`, `pairs.csv`, `theirs_files.csv`, `summary.json`.
 
 Решение: общие сцены/тайлы с MARIDA → в отчёте про метрику на данных организаторов это оговорить или обучить без них;
 перекрытия внутри theirs → групповой сплит по ним.
@@ -108,7 +108,7 @@ L2A после 25.01.2022 в сыром DN — `offset: -0.1` (DN×1e-4 − 0.1)
 .venv\Scripts\python.exe -m pytest tests\test_tools.py tests\test_ingest.py -q
 ```
 
-## 5. ingest: архив → отчёт → автоконфиг → внутренний формат (L18 + L32)
+## 5. ingest: архив → отчёт → автоконфиг → внутренний формат
 
 ```powershell
 .venv\Scripts\python.exe scripts\tools\ingest.py D:\org\dataset.zip --out $I            # отчёт + adapter.yaml, README в консоли
@@ -151,3 +151,11 @@ OOF (сетка до 0.999); финальная модель — на всём t
 ```
 F1/IoU/P/R класса по пулу пикселей всех файлов, F1/IoU по каждому классу, macro-F1 и mIoU, худшие файлы, пропущенные/лишние
 файлы и несовпадение размеров (проверка формата). На репетиции совпадает с `scripts\rehearsal\score_private.py` (TP/FP/FN).
+
+## 9. screenshots.py — кадры UI и замер скорости карты
+
+```powershell
+.venv\Scripts\python.exe scripts\screenshots.py --base-url http://127.0.0.1:8000 --out reports\screens\check --gl gpu
+```
+
+10 кадров PNG и `result.json` (load, fps, ошибки консоли) в папке `--out`. По умолчанию отслеживаемый `reports\ui_perf.md` не меняется; строка замера дописывается туда только с флагом `--log-perf`. `--video` — запись демо-тура, `--gl gpu` — WebGL на видеокарте (по умолчанию swiftshader).

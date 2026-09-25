@@ -6,7 +6,7 @@ asset's STAC `raster:bands` (Earth Search v1). Earth Search README ("Gain/Offset
 "-1000 DN" rule is used anywhere. Planetary Computer items carry no `raster:bands` offset; for them the
 BOA_ADD_OFFSET / QUANTIFICATION_VALUE are read from the product metadata XML of the same item.
 
-Output of one scene: see write_scene() and reports/tasklog/06_live.md (interface with lane L7).
+Output of one scene: see write_scene() and docs/CONTRACTS.md.
 """
 from __future__ import annotations
 
@@ -322,7 +322,7 @@ def water_mask(bands, scl, max_fill_px: int = 100, buffer_px: int = 2, cloud_buf
 def water_quality(bands, water):
     """Scene-level sun-glint / haze proxy: median B11 (SWIR 1.6 um) over observed water. Water absorbs SWIR, so on
     clean scenes it is ~0.000-0.005; > 0.01 means glint/haze/over-correction (MDD false positives on wave texture,
-    see reports/tasklog/06_live.md)."""
+    see reports/report.md, live scenes)."""
     w = water.astype(bool)
     if w.sum() < 100:
         return dict(water_b8_median=None, water_b11_median=None, glint_or_haze=None)

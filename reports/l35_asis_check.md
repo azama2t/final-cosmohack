@@ -1,4 +1,4 @@
-# L35: почему «как есть» на репетиции = 0.058
+# Почему «как есть» на репетиции = 0.058
 
 Дата: 25.09.2026. Модель `weights\lgbm` (порог из meta 0.63). Данные: 147 test-чипов репетиции (`out\rehearsal\private_key.json`) = 11 сцен test-сплита MADOS. Сцены, совпадающие со снимками test MARIDA, исключены ещё генератором. Test MARIDA не читался. Всё на CPU (`CUDA_VISIBLE_DEVICES=-1`).
 Скрипт: `scripts\experiments\l35_asis_check.py`, результат в `reports\l35_asis_check.json`, прогон 56 с. Разбор FP сделан мелкими скриптами `out\l35_tmp_fp.py` и `out\l35_tmp_167.py`.
@@ -18,7 +18,7 @@
 | quant: native → ×1e4, rint, clip 0..65535 → /1e4 | 0.0578 | 206 / 6703 / 11 | 0.3722 | 0.2492 (0.999) | 0.6681 (0.999) |
 | chain: tif организатора → `adapter.yaml` (org_l32), как `predict_org` | 0.0579 | 206 / 6697 / 11 | 0.3722 | 0.2498 (0.999) | 0.6681 (0.999) |
 
-Повторный запуск `predict_org` + `score_private` (`out\l35_tmp\`) воспроизвёл L32 до пикселя: «как есть» 0.0579 (TP 206 / FP 6697 / FN 11), «после обучения» (`org_l32_cv`) 0.3168.
+Повторный запуск `predict_org` + `score_private` (`out\l35_tmp\`) воспроизвёл репетицию 2 (`reports/rehearsal2.md`) до пикселя: «как есть» 0.0579 (TP 206 / FP 6697 / FN 11), «после обучения» (`org_l32_cv`) 0.3168.
 
 ## 2. Упаковка, порядок каналов, масштаб, nodata
 
@@ -38,7 +38,7 @@
 
 ## 4. Проверка гипотезы sea snot
 
-`weights_exp\mados\c_exclplace_s{0,1}` — та же конфигурация, что у итоговой модели, но `mados_extra=true`: oil spill, platform, jellyfish и sea snot идут как негативы. В L13 такая модель дала val MARIDA 0.9153 вместо 0.9226.
+`weights_exp\mados\c_exclplace_s{0,1}` — та же конфигурация, что у итоговой модели, но `mados_extra=true`: oil spill, platform, jellyfish и sea snot идут как негативы. В эксп. 13 такая модель дала val MARIDA 0.9153 вместо 0.9226.
 
 | модель | F1 все px @meta | F1 размеч. @meta | лучший F1 все px (порог) | лучший F1 размеч. | FP Scene_158 @meta |
 |---|---|---|---|---|---|

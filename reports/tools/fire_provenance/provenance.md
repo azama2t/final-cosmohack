@@ -1,6 +1,6 @@
 # Provenance check — MARIDA (all) vs fire train (bs S2 post + af VIIRS)
 
-ours: data/MARIDA/patches → 1381 файлов; theirs: C:/Users/User/hack/fire-monitoring/data/train/bs/sentinel2_post, C:/Users/User/hack/fire-monitoring/data/train/af/viirs → 644 файлов; 17.6 с.
+ours: data/MARIDA/patches → 1381 файлов; theirs: <путь к данным>/fire-monitoring/data/train/bs/sentinel2_post, <путь к данным>/fire-monitoring/data/train/af/viirs → 644 файлов; 17.6 с.
 
 | проверка | файлов theirs с совпадением |
 |---|---|

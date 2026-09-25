@@ -1,645 +1,645 @@
 theirs,tiles,dates,bbox,n_scene,n_tile,n_date,n_bbox,n_identical,n_content,n_phash
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000001_Sentinel-2_post.tif,,,"[44.88491, 48.53705, 45.02389, 48.62923]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000002_Sentinel-2_post.tif,,,"[44.62691, 45.77215, 44.75923, 45.86467]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000003_Sentinel-2_post.tif,,,"[47.11156, 48.69936, 47.25475, 48.79405]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000004_Sentinel-2_post.tif,,,"[46.5411, 48.24847, 46.68201, 48.3425]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000005_Sentinel-2_post.tif,,,"[44.75474, 46.69409, 44.88909, 46.78645]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000006_Sentinel-2_post.tif,,,"[41.40419, 46.0211, 41.54059, 46.11604]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000007_Sentinel-2_post.tif,,,"[42.83636, 47.68761, 42.97654, 47.78218]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000008_Sentinel-2_post.tif,,,"[43.09609, 48.06075, 43.23686, 48.15503]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000009_Sentinel-2_post.tif,,,"[40.10954, 47.42476, 40.24746, 47.51828]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000010_Sentinel-2_post.tif,,,"[44.16069, 50.28415, 44.30603, 50.37718]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000011_Sentinel-2_post.tif,,,"[42.67921, 48.14525, 42.82092, 48.24]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000012_Sentinel-2_post.tif,,,"[40.44794, 49.81577, 40.59326, 49.9097]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000013_Sentinel-2_post.tif,,,"[40.29826, 49.54141, 40.44248, 49.63516]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000014_Sentinel-2_post.tif,,,"[40.9944, 49.25431, 41.13902, 49.34888]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000015_Sentinel-2_post.tif,,,"[46.52474, 47.69592, 46.66409, 47.78991]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000016_Sentinel-2_post.tif,,,"[45.86239, 48.90123, 46.00394, 48.99446]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000017_Sentinel-2_post.tif,,,"[44.04768, 48.71743, 44.18862, 48.8106]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000018_Sentinel-2_post.tif,,,"[46.95471, 48.24169, 47.09631, 48.33619]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000019_Sentinel-2_post.tif,,,"[42.4796, 46.57453, 42.61739, 46.66946]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000020_Sentinel-2_post.tif,,,"[43.78431, 48.07007, 43.92391, 48.16355]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000021_Sentinel-2_post.tif,,,"[40.56658, 49.07719, 40.70991, 49.17126]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000022_Sentinel-2_post.tif,,,"[44.20023, 47.88944, 44.33862, 47.98243]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000023_Sentinel-2_post.tif,,,"[42.44466, 47.31099, 42.58446, 47.40598]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000024_Sentinel-2_post.tif,,,"[42.8816, 49.8995, 43.02814, 49.99405]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000025_Sentinel-2_post.tif,,,"[46.16332, 49.81932, 46.30812, 49.91292]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000026_Sentinel-2_post.tif,,,"[41.98555, 45.82528, 42.12219, 45.92072]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000027_Sentinel-2_post.tif,,,"[39.15776, 46.97043, 39.29288, 47.06284]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000028_Sentinel-2_post.tif,,,"[46.15457, 49.451, 46.29826, 49.54458]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000029_Sentinel-2_post.tif,,,"[41.4082, 46.11317, 41.54484, 46.20812]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000030_Sentinel-2_post.tif,,,"[42.07851, 46.56501, 42.2169, 46.66038]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000031_Sentinel-2_post.tif,,,"[39.42625, 46.87729, 39.5616, 46.97001]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000032_Sentinel-2_post.tif,,,"[40.95823, 48.33375, 41.10009, 48.42826]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000033_Sentinel-2_post.tif,,,"[38.61731, 47.15446, 38.75305, 47.24698]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000034_Sentinel-2_post.tif,,,"[40.11148, 47.51688, 40.24965, 47.6104]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000035_Sentinel-2_post.tif,,,"[40.84349, 48.98065, 40.98702, 49.07504]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000036_Sentinel-2_post.tif,,,"[46.01331, 49.45249, 46.15674, 49.54591]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000037_Sentinel-2_post.tif,,,"[39.86081, 48.80913, 40.00209, 48.90236]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000038_Sentinel-2_post.tif,,,"[42.3943, 48.32344, 42.537, 48.41852]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000039_Sentinel-2_post.tif,,,"[38.88852, 46.8786, 39.02314, 46.97081]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000040_Sentinel-2_post.tif,,,"[40.35751, 46.50033, 40.49345, 46.59412]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000041_Sentinel-2_post.tif,,,"[43.65623, 47.7001, 43.79505, 47.79373]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000042_Sentinel-2_post.tif,,,"[41.50145, 48.1383, 41.64369, 48.23342]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000043_Sentinel-2_post.tif,,,"[42.03285, 47.39325, 42.17355, 47.4887]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000044_Sentinel-2_post.tif,,,"[46.28384, 48.98891, 46.4264, 49.08265]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000045_Sentinel-2_post.tif,,,"[41.14302, 49.43569, 41.28844, 49.53044]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000046_Sentinel-2_post.tif,,,"[39.71482, 48.34969, 39.85456, 48.44275]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000047_Sentinel-2_post.tif,,,"[43.35358, 48.6175, 43.49546, 48.71149]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000048_Sentinel-2_post.tif,,,"[40.87122, 49.71708, 41.01701, 49.81151]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000049_Sentinel-2_post.tif,,,"[40.41082, 48.52668, 40.55228, 48.62055]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000050_Sentinel-2_post.tif,,,"[44.18112, 49.08692, 44.32287, 49.17993]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000051_Sentinel-2_post.tif,,,"[39.71741, 48.53392, 39.85767, 48.62698]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000052_Sentinel-2_post.tif,,,"[40.01713, 49.63667, 40.16111, 49.73009]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000053_Sentinel-2_post.tif,,,"[41.475, 47.58608, 41.61565, 47.68115]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000054_Sentinel-2_post.tif,,,"[45.31039, 50.00999, 45.45417, 50.10256]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000055_Sentinel-2_post.tif,,,"[45.16684, 49.82626, 45.3098, 49.91866]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000056_Sentinel-2_post.tif,,,"[43.6633, 47.42376, 43.80138, 47.51738]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000057_Sentinel-2_post.tif,,,"[42.69978, 47.68496, 42.84017, 47.77968]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000058_Sentinel-2_post.tif,,,"[40.64103, 47.04918, 40.77886, 47.1433]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000059_Sentinel-2_post.tif,,,"[39.43605, 48.07504, 39.57455, 48.16777]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000060_Sentinel-2_post.tif,,,"[45.59282, 49.73224, 45.7363, 49.82515]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000061_Sentinel-2_post.tif,,,"[43.90421, 48.9004, 44.04593, 48.99374]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000062_Sentinel-2_post.tif,,,"[43.30673, 49.99857, 43.4528, 50.09263]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000063_Sentinel-2_post.tif,,,"[40.97971, 48.88611, 41.12321, 48.98065]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000064_Sentinel-2_post.tif,,,"[40.87843, 46.12373, 41.01426, 46.21809]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000065_Sentinel-2_post.tif,,,"[41.23841, 48.42043, 41.38101, 48.51526]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000066_Sentinel-2_post.tif,,,"[43.87489, 50.18964, 44.02048, 50.28302]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000067_Sentinel-2_post.tif,,,"[40.72273, 49.53535, 40.86769, 49.6296]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000068_Sentinel-2_post.tif,,,"[43.56242, 51.01507, 43.71121, 51.10883]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000069_Sentinel-2_post.tif,,,"[40.16111, 49.72724, 40.30564, 49.82084]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000070_Sentinel-2_post.tif,,,"[42.82286, 51.18786, 42.97363, 51.28251]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000071_Sentinel-2_post.tif,,,"[40.64671, 47.23339, 40.78503, 47.32751]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000072_Sentinel-2_post.tif,,,"[42.93624, 48.6108, 43.07884, 48.70527]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000073_Sentinel-2_post.tif,,,"[43.57929, 50.46271, 43.72628, 50.55645]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000074_Sentinel-2_post.tif,,,"[42.43571, 47.49509, 42.57602, 47.5901]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000075_Sentinel-2_post.tif,,,"[41.24246, 48.51248, 41.38533, 48.60731]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000076_Sentinel-2_post.tif,,,"[47.01701, 49.80656, 47.16334, 49.90117]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000077_Sentinel-2_post.tif,,,"[43.53908, 51.75145, 43.69035, 51.84524]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000078_Sentinel-2_post.tif,,,"[41.82215, 48.95966, 41.96733, 49.05517]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000079_Sentinel-2_post.tif,,,"[44.59505, 50.01017, 44.73873, 50.10268]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000080_Sentinel-2_post.tif,,,"[42.21044, 49.14835, 42.35588, 49.24366]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000081_Sentinel-2_post.tif,,,"[42.4623, 46.94277, 42.60109, 47.03774]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000082_Sentinel-2_post.tif,,,"[45.29752, 47.89139, 45.43528, 47.98396]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000083_Sentinel-2_post.tif,,,"[40.87477, 49.80912, 41.02085, 49.90356]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000084_Sentinel-2_post.tif,,,"[42.3056, 49.9797, 42.45342, 50.07493]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000085_Sentinel-2_post.tif,,,"[45.16025, 47.79969, 45.29752, 47.8921]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000086_Sentinel-2_post.tif,,,"[44.74071, 49.55007, 44.88276, 49.64241]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000087_Sentinel-2_post.tif,,,"[46.29583, 49.44933, 46.43976, 49.54308]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000088_Sentinel-2_post.tif,,,"[44.33269, 48.2588, 44.47184, 48.35164]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000089_Sentinel-2_post.tif,,,"[43.21118, 48.70751, 43.35358, 48.80166]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000090_Sentinel-2_post.tif,,,"[44.60262, 49.08913, 44.7436, 49.18164]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000091_Sentinel-2_post.tif,,,"[41.7375, 47.39551, 41.87806, 47.49087]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000092_Sentinel-2_post.tif,,,"[41.06308, 47.50258, 41.20282, 47.59718]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000093_Sentinel-2_post.tif,,,"[42.97297, 47.6901, 43.11292, 47.78451]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000094_Sentinel-2_post.tif,,,"[46.55511, 48.70889, 46.69735, 48.80294]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000095_Sentinel-2_post.tif,,,"[47.08507, 48.05498, 47.22637, 48.14962]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000096_Sentinel-2_post.tif,,,"[44.48818, 46.50891, 44.62252, 46.60158]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000097_Sentinel-2_post.tif,,,"[43.61408, 49.26576, 43.75738, 49.35944]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000098_Sentinel-2_post.tif,,,"[39.56847, 47.61364, 39.70596, 47.70653]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000099_Sentinel-2_post.tif,,,"[42.24018, 46.01603, 42.3769, 46.11121]",0,0,0,0,0,0,2
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000100_Sentinel-2_post.tif,,,"[43.9334, 47.51872, 44.07126, 47.61203]",0,0,0,0,0,0,2
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000101_Sentinel-2_post.tif,,,"[42.59282, 47.03774, 42.73164, 47.13256]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000102_Sentinel-2_post.tif,,,"[39.57148, 47.89003, 39.70972, 47.98292]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000103_Sentinel-2_post.tif,,,"[43.04761, 45.66396, 43.1822, 45.75825]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000104_Sentinel-2_post.tif,,,"[41.19513, 47.40783, 41.33483, 47.50258]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000105_Sentinel-2_post.tif,,,"[40.24529, 47.42321, 40.38343, 47.51688]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000106_Sentinel-2_post.tif,,,"[46.40826, 48.43459, 46.54946, 48.52846]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000107_Sentinel-2_post.tif,,,"[44.74168, 49.36586, 44.8832, 49.4582]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000108_Sentinel-2_post.tif,,,"[40.42905, 49.17126, 40.5724, 49.26517]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000109_Sentinel-2_post.tif,,,"[46.15674, 49.54308, 46.30071, 49.63667]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000110_Sentinel-2_post.tif,,,"[41.51953, 48.50641, 41.66285, 48.60156]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000111_Sentinel-2_post.tif,,,"[47.88645, 50.06343, 48.03515, 50.15906]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000112_Sentinel-2_post.tif,,,"[43.33836, 49.0779, 43.4816, 49.17191]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000113_Sentinel-2_post.tif,,,"[39.1583, 47.15472, 39.29389, 47.24713]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000114_Sentinel-2_post.tif,,,"[46.12333, 48.06956, 46.26302, 48.16309]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000115_Sentinel-2_post.tif,,,"[43.61149, 49.35784, 43.75506, 49.45153]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000116_Sentinel-2_post.tif,,,"[43.48996, 48.71149, 43.63188, 48.80532]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000117_Sentinel-2_post.tif,,,"[47.11931, 48.88345, 47.26304, 48.97816]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000118_Sentinel-2_post.tif,,,"[42.50492, 46.0221, 42.64125, 46.11699]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000119_Sentinel-2_post.tif,,,"[41.27959, 46.20812, 41.41626, 46.30293]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000120_Sentinel-2_post.tif,,,"[42.80517, 48.42412, 42.94746, 48.51874]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000121_Sentinel-2_post.tif,,,"[43.93897, 47.24235, 44.0761, 47.33565]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000122_Sentinel-2_post.tif,,,"[44.60697, 48.53644, 44.7464, 48.62895]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000123_Sentinel-2_post.tif,,,"[41.14335, 46.11876, 41.27959, 46.21341]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000124_Sentinel-2_post.tif,,,"[41.02103, 46.3976, 41.15778, 46.49213]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000125_Sentinel-2_post.tif,,,"[41.14693, 46.21084, 41.28341, 46.30551]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000126_Sentinel-2_post.tif,,,"[44.19737, 48.07368, 44.33627, 48.16668]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000127_Sentinel-2_post.tif,,,"[42.20743, 46.66038, 42.34588, 46.75562]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000128_Sentinel-2_post.tif,,,"[41.53637, 46.01809, 41.67297, 46.11317]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000129_Sentinel-2_post.tif,,,"[41.80532, 46.10365, 41.94255, 46.19903]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000130_Sentinel-2_post.tif,,,"[40.91383, 47.13677, 41.05234, 47.2312]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000131_Sentinel-2_post.tif,,,"[40.51674, 47.41962, 40.65534, 47.5136]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000132_Sentinel-2_post.tif,,,"[43.10288, 47.87659, 43.24312, 47.97086]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000133_Sentinel-2_post.tif,,,"[43.78648, 47.97796, 43.92583, 48.07143]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000134_Sentinel-2_post.tif,,,"[43.10624, 47.78451, 43.24623, 47.87877]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000135_Sentinel-2_post.tif,,,"[39.02354, 47.8921, 39.16082, 47.98434]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000136_Sentinel-2_post.tif,,,"[43.08924, 48.24491, 43.23054, 48.3392]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000137_Sentinel-2_post.tif,,,"[42.67503, 48.2373, 42.81701, 48.33206]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000138_Sentinel-2_post.tif,,,"[43.04116, 45.84819, 43.17621, 45.94249]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000139_Sentinel-2_post.tif,,,"[40.86069, 49.44093, 41.00562, 49.53535]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000140_Sentinel-2_post.tif,,,"[43.55737, 46.31666, 43.69276, 46.4104]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000141_Sentinel-2_post.tif,,,"[40.85721, 49.34888, 41.00186, 49.44329]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000142_Sentinel-2_post.tif,,,"[40.7036, 48.98297, 40.84689, 49.07719]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000143_Sentinel-2_post.tif,,,"[40.28621, 49.081, 40.42905, 49.17474]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000144_Sentinel-2_post.tif,,,"[39.42772, 47.06157, 39.56354, 47.1543]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000145_Sentinel-2_post.tif,,,"[42.53441, 51.09006, 42.6854, 51.18505]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000146_Sentinel-2_post.tif,,,"[46.66116, 47.69386, 46.80074, 47.78801]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000147_Sentinel-2_post.tif,,,"[45.73911, 50.00752, 45.88369, 50.10061]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000148_Sentinel-2_post.tif,,,"[42.39324, 50.9949, 42.54418, 51.09006]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000149_Sentinel-2_post.tif,,,"[45.1659, 49.54995, 45.30804, 49.64235]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000150_Sentinel-2_post.tif,,,"[45.74195, 50.1917, 45.88709, 50.28479]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000151_Sentinel-2_post.tif,,,"[42.53931, 50.99806, 42.68999, 51.09304]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000152_Sentinel-2_post.tif,,,"[43.21445, 48.61543, 43.35657, 48.70958]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000153_Sentinel-2_post.tif,,,"[42.16861, 47.39667, 42.30909, 47.49197]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000154_Sentinel-2_post.tif,,,"[40.94426, 47.96548, 41.08507, 48.05996]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000155_Sentinel-2_post.tif,,,"[40.74887, 46.21809, 40.88473, 46.31231]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000156_Sentinel-2_post.tif,,,"[42.2216, 46.38424, 42.35931, 46.47945]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000157_Sentinel-2_post.tif,,,"[40.76069, 46.58652, 40.8975, 46.68076]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000158_Sentinel-2_post.tif,,,"[41.95243, 46.37625, 42.0906, 46.4718]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000159_Sentinel-2_post.tif,,,"[40.89429, 46.58423, 41.03131, 46.67862]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000160_Sentinel-2_post.tif,,,"[47.22637, 48.14429, 47.36816, 48.23909]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000161_Sentinel-2_post.tif,,,"[40.63821, 46.95708, 40.77579, 47.0512]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000162_Sentinel-2_post.tif,,,"[38.61598, 47.33875, 38.75219, 47.43126]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000163_Sentinel-2_post.tif,,,"[40.5141, 47.32751, 40.65245, 47.42149]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000164_Sentinel-2_post.tif,,,"[40.22824, 46.68625, 40.36444, 46.77989]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000165_Sentinel-2_post.tif,,,"[41.16879, 46.76334, 41.30673, 46.85804]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000166_Sentinel-2_post.tif,,,"[40.94081, 47.87341, 41.08136, 47.96789]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000167_Sentinel-2_post.tif,,,"[40.95121, 48.14962, 41.09254, 48.24411]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000168_Sentinel-2_post.tif,,,"[41.05948, 47.41051, 41.19897, 47.50511]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000169_Sentinel-2_post.tif,,,"[41.08136, 47.96291, 41.22239, 48.05755]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000170_Sentinel-2_post.tif,,,"[41.70008, 46.65925, 41.8386, 46.75454]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000171_Sentinel-2_post.tif,,,"[39.85149, 48.25647, 39.99121, 48.34969]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000172_Sentinel-2_post.tif,,,"[39.43841, 48.35141, 39.57766, 48.44414]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000173_Sentinel-2_post.tif,,,"[40.00954, 49.26831, 40.15242, 49.36172]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000174_Sentinel-2_post.tif,,,"[39.16053, 47.89183, 39.29805, 47.98423]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000175_Sentinel-2_post.tif,,,"[39.42846, 47.15371, 39.56451, 47.24644]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000176_Sentinel-2_post.tif,,,"[38.75089, 47.5234, 38.88735, 47.61575]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000177_Sentinel-2_post.tif,,,"[40.11343, 47.609, 40.25185, 47.70252]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000178_Sentinel-2_post.tif,,,"[39.43528, 47.98292, 39.57352, 48.07565]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000179_Sentinel-2_post.tif,,,"[40.26985, 48.43636, 40.41082, 48.53008]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000180_Sentinel-2_post.tif,,,"[40.58723, 49.72166, 40.73251, 49.81577]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000181_Sentinel-2_post.tif,,,"[38.88676, 47.70789, 39.0235, 47.80008]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000182_Sentinel-2_post.tif,,,"[39.99121, 48.34731, 40.13143, 48.4407]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000183_Sentinel-2_post.tif,,,"[39.71099, 48.07334, 39.84996, 48.1664]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000184_Sentinel-2_post.tif,,,"[43.22093, 48.43128, 43.36252, 48.52542]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000185_Sentinel-2_post.tif,,,"[43.27, 51.01112, 43.41934, 51.10523]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000186_Sentinel-2_post.tif,,,"[46.25406, 47.79165, 46.39322, 47.88534]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000187_Sentinel-2_post.tif,,,"[41.69551, 46.56721, 41.83377, 46.66249]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000188_Sentinel-2_post.tif,,,"[39.43762, 48.25929, 39.57662, 48.35202]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000189_Sentinel-2_post.tif,,,"[40.26529, 48.25217, 40.40572, 48.34587]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000190_Sentinel-2_post.tif,,,"[43.11255, 51.28497, 43.26309, 51.37927]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000191_Sentinel-2_post.tif,,,"[39.83367, 47.151, 39.97041, 47.2442]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000192_Sentinel-2_post.tif,,,"[40.37862, 47.32938, 40.51674, 47.42321]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000193_Sentinel-2_post.tif,,,"[39.02359, 47.98423, 39.16111, 48.07647]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000194_Sentinel-2_post.tif,,,"[42.52809, 48.41852, 42.67083, 48.51345]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000195_Sentinel-2_post.tif,,,"[39.70472, 47.61272, 39.84244, 47.70577]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000196_Sentinel-2_post.tif,,,"[43.32904, 49.35411, 43.47311, 49.44814]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000197_Sentinel-2_post.tif,,,"[39.29288, 47.06216, 39.42846, 47.15472]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000198_Sentinel-2_post.tif,,,"[43.54205, 51.65941, 43.693, 51.7532]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000199_Sentinel-2_post.tif,,,"[41.67258, 48.77916, 41.81697, 48.87449]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000200_Sentinel-2_post.tif,,,"[45.4533, 50.00934, 45.59735, 50.10209]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000201_Sentinel-2_post.tif,,,"[39.9772, 47.6104, 40.11539, 47.70377]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000202_Sentinel-2_post.tif,,,"[39.29805, 47.98352, 39.43605, 48.07609]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000203_Sentinel-2_post.tif,,,"[44.88512, 48.44492, 45.02384, 48.5371]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000204_Sentinel-2_post.tif,,,"[43.34143, 48.98582, 43.4844, 49.07983]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000205_Sentinel-2_post.tif,,,"[40.90399, 46.86051, 41.04175, 46.95492]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000206_Sentinel-2_post.tif,,,"[39.70596, 47.70485, 39.84393, 47.7979]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000207_Sentinel-2_post.tif,,,"[45.57766, 48.44275, 45.71741, 48.53565]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000208_Sentinel-2_post.tif,,,"[43.3259, 49.44618, 43.47026, 49.54021]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000209_Sentinel-2_post.tif,,,"[41.46709, 50.25784, 41.61565, 50.35299]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000210_Sentinel-2_post.tif,,,"[40.12534, 48.16166, 40.26529, 48.2552]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000211_Sentinel-2_post.tif,,,"[39.29965, 48.2599, 39.43841, 48.35247]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000212_Sentinel-2_post.tif,,,"[44.06963, 47.51991, 44.20726, 47.61306]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000213_Sentinel-2_post.tif,,,"[39.15997, 47.70756, 39.29699, 47.79997]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000214_Sentinel-2_post.tif,,,"[41.04526, 47.0422, 41.18373, 47.13677]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000215_Sentinel-2_post.tif,,,"[41.1725, 46.85541, 41.31068, 46.95012]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000216_Sentinel-2_post.tif,,,"[47.22239, 48.05224, 47.36392, 48.14704]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000217_Sentinel-2_post.tif,,,"[45.85611, 48.53281, 45.99661, 48.62603]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000218_Sentinel-2_post.tif,,,"[42.38125, 45.83501, 42.5173, 45.93003]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000219_Sentinel-2_post.tif,,,"[40.93057, 47.59718, 41.07034, 47.69164]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000220_Sentinel-2_post.tif,,,"[38.88656, 47.80002, 39.02354, 47.89221]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000221_Sentinel-2_post.tif,,,"[41.95518, 46.37748, 42.09328, 46.47298]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000222_Sentinel-2_post.tif,,,"[40.89108, 46.49213, 41.02787, 46.58652]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000223_Sentinel-2_post.tif,,,"[41.61565, 47.67493, 41.75678, 47.77016]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000224_Sentinel-2_post.tif,,,"[45.45417, 50.10144, 45.5985, 50.19418]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000001_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000002_VIIRS_I1-I5.tif,,,"[37.31103, 51.11572, 38.71419, 51.99031]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000003_VIIRS_I1-I5.tif,,,"[38.70873, 51.12243, 40.10671, 51.99066]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000004_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000005_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000006_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000007_VIIRS_I1-I5.tif,,,"[44.72906, 47.66892, 46.02947, 48.5371]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000008_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000009_VIIRS_I1-I5.tif,,,"[41.50363, 51.92609, 42.97476, 52.82628]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000010_VIIRS_I1-I5.tif,,,"[40.52185, 51.0448, 41.97271, 51.95024]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000011_VIIRS_I1-I5.tif,,,"[41.85424, 51.95024, 43.31103, 52.84124]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000012_VIIRS_I1-I5.tif,,,"[41.79035, 52.81204, 43.27774, 53.70379]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000013_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000014_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000015_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000016_VIIRS_I1-I5.tif,,,"[41.91496, 51.08826, 43.34269, 51.97855]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000017_VIIRS_I1-I5.tif,,,"[44.71939, 49.39594, 46.06621, 50.26414]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000018_VIIRS_I1-I5.tif,,,"[46.01237, 47.65052, 47.32905, 48.5325]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000019_VIIRS_I1-I5.tif,,,"[46.02947, 48.51354, 47.36958, 49.39594]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000020_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000021_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000022_VIIRS_I1-I5.tif,,,"[42.22299, 45.91286, 43.50364, 46.79945]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000023_VIIRS_I1-I5.tif,,,"[46.01237, 47.65052, 47.32905, 48.5325]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000024_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000025_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000026_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000027_VIIRS_I1-I5.tif,,,"[38.74588, 44.21326, 39.96558, 45.08146]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000028_VIIRS_I1-I5.tif,,,"[38.74196, 45.07738, 39.98047, 45.94557]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000029_VIIRS_I1-I5.tif,,,"[40.0474, 49.3764, 41.4121, 50.25925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000030_VIIRS_I1-I5.tif,,,"[42.22299, 45.91286, 43.50364, 46.79945]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000031_VIIRS_I1-I5.tif,,,"[42.12995, 47.63866, 43.45496, 48.52638]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000032_VIIRS_I1-I5.tif,,,"[43.37282, 49.38964, 44.72434, 50.2638]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000033_VIIRS_I1-I5.tif,,,"[37.31103, 51.11572, 38.71419, 51.99031]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000034_VIIRS_I1-I5.tif,,,"[37.24271, 52.84124, 38.70299, 53.7163]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000035_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000036_VIIRS_I1-I5.tif,,,"[40.06621, 50.23911, 41.45673, 51.12243]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000037_VIIRS_I1-I5.tif,,,"[40.52185, 51.0448, 41.97271, 51.95024]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000038_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000039_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000040_VIIRS_I1-I5.tif,,,"[37.34269, 50.25275, 38.71939, 51.12712]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000041_VIIRS_I1-I5.tif,,,"[39.95135, 44.19694, 41.18462, 45.07738]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000042_VIIRS_I1-I5.tif,,,"[42.12995, 47.63866, 43.45496, 48.52638]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000043_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000044_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000045_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000046_VIIRS_I1-I5.tif,,,"[38.74588, 44.21326, 39.96558, 45.08146]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000047_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000048_VIIRS_I1-I5.tif,,,"[37.31103, 51.11572, 38.71419, 51.99031]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000049_VIIRS_I1-I5.tif,,,"[38.71419, 50.25925, 40.08596, 51.12747]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000050_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000051_VIIRS_I1-I5.tif,,,"[38.69694, 52.84837, 40.15149, 53.71668]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000052_VIIRS_I1-I5.tif,,,"[44.71939, 49.39594, 46.06621, 50.26414]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000053_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000054_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000055_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000056_VIIRS_I1-I5.tif,,,"[40.52185, 51.0448, 41.97271, 51.95024]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000057_VIIRS_I1-I5.tif,,,"[46.12853, 52.82628, 47.60482, 53.71115]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000058_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000059_VIIRS_I1-I5.tif,,,"[37.31103, 51.11572, 38.71419, 51.99031]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000060_VIIRS_I1-I5.tif,,,"[38.69694, 52.84837, 40.15149, 53.71668]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000061_VIIRS_I1-I5.tif,,,"[40.08596, 51.10165, 41.50363, 51.98547]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000062_VIIRS_I1-I5.tif,,,"[40.52185, 51.0448, 41.97271, 51.95024]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000063_VIIRS_I1-I5.tif,,,"[40.08596, 51.10165, 41.50363, 51.98547]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000064_VIIRS_I1-I5.tif,,,"[41.97271, 50.22612, 43.37282, 51.11572]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000065_VIIRS_I1-I5.tif,,,"[41.85424, 51.95024, 43.31103, 52.84124]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000066_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000067_VIIRS_I1-I5.tif,,,"[41.15245, 44.16802, 42.40218, 45.06056]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000068_VIIRS_I1-I5.tif,,,"[41.4121, 50.20341, 42.82525, 51.10165]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000069_VIIRS_I1-I5.tif,,,"[41.85424, 51.95024, 43.31103, 52.84124]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000070_VIIRS_I1-I5.tif,,,"[43.42887, 47.66299, 44.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000071_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000072_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000073_VIIRS_I1-I5.tif,,,"[37.31103, 51.11572, 38.71419, 51.99031]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000074_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000075_VIIRS_I1-I5.tif,,,"[41.55294, 52.78714, 43.05539, 53.68835]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000076_VIIRS_I1-I5.tif,,,"[42.22299, 45.91286, 43.50364, 46.79945]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000077_VIIRS_I1-I5.tif,,,"[42.17755, 46.77584, 43.47987, 47.66299]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000078_VIIRS_I1-I5.tif,,,"[41.79035, 52.81204, 43.27774, 53.70379]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000079_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000080_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000081_VIIRS_I1-I5.tif,,,"[40.83332, 47.60015, 42.17755, 48.50131]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000082_VIIRS_I1-I5.tif,,,"[46.01237, 47.65052, 47.32905, 48.5325]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000083_VIIRS_I1-I5.tif,,,"[47.50363, 51.92609, 48.97476, 52.82628]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000084_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000085_VIIRS_I1-I5.tif,,,"[40.10671, 51.96405, 41.55294, 52.84837]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000086_VIIRS_I1-I5.tif,,,"[40.12853, 52.82628, 41.60482, 53.71115]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000087_VIIRS_I1-I5.tif,,,"[41.45673, 51.06485, 42.89813, 51.96405]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000088_VIIRS_I1-I5.tif,,,"[41.50363, 51.92609, 42.97476, 52.82628]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000089_VIIRS_I1-I5.tif,,,"[41.85424, 51.95024, 43.31103, 52.84124]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000090_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000091_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000092_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000093_VIIRS_I1-I5.tif,,,"[37.34269, 50.25275, 38.71939, 51.12712]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000094_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000095_VIIRS_I1-I5.tif,,,"[38.69694, 52.84837, 40.15149, 53.71668]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000096_VIIRS_I1-I5.tif,,,"[41.45673, 51.06485, 42.89813, 51.96405]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000097_VIIRS_I1-I5.tif,,,"[42.12995, 47.63866, 43.45496, 48.52638]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000098_VIIRS_I1-I5.tif,,,"[41.85424, 51.95024, 43.31103, 52.84124]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000099_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000100_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000101_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000102_VIIRS_I1-I5.tif,,,"[38.74588, 44.21326, 39.96558, 45.08146]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000103_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000104_VIIRS_I1-I5.tif,,,"[38.74588, 44.21326, 39.96558, 45.08146]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000105_VIIRS_I1-I5.tif,,,"[38.74196, 45.07738, 39.98047, 45.94557]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000106_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000107_VIIRS_I1-I5.tif,,,"[38.72434, 48.5325, 40.0474, 49.40069]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000108_VIIRS_I1-I5.tif,,,"[41.55294, 52.78714, 43.05539, 53.68835]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000109_VIIRS_I1-I5.tif,,,"[41.79035, 52.81204, 43.27774, 53.70379]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000110_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000111_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000112_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000113_VIIRS_I1-I5.tif,,,"[40.0474, 49.3764, 41.4121, 50.25925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000114_VIIRS_I1-I5.tif,,,"[42.02767, 49.3638, 43.40152, 50.25275]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000115_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000116_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000117_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000118_VIIRS_I1-I5.tif,,,"[38.71419, 50.25925, 40.08596, 51.12747]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000119_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000120_VIIRS_I1-I5.tif,,,"[40.34139, 52.76581, 41.85424, 53.67366]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000121_VIIRS_I1-I5.tif,,,"[42.22299, 45.91286, 43.50364, 46.79945]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000122_VIIRS_I1-I5.tif,,,"[41.91496, 51.08826, 43.34269, 51.97855]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000123_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000124_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000125_VIIRS_I1-I5.tif,,,"[41.2904, 47.61792, 42.62677, 48.51354]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000126_VIIRS_I1-I5.tif,,,"[40.83332, 47.60015, 42.17755, 48.50131]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000127_VIIRS_I1-I5.tif,,,"[42.12995, 47.63866, 43.45496, 48.52638]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000128_VIIRS_I1-I5.tif,,,"[41.91496, 51.08826, 43.34269, 51.97855]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000129_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000130_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000131_VIIRS_I1-I5.tif,,,"[41.50363, 51.92609, 42.97476, 52.82628]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000132_VIIRS_I1-I5.tif,,,"[47.55294, 52.78714, 49.05539, 53.68835]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000133_VIIRS_I1-I5.tif,,,"[41.32905, 48.47994, 42.68977, 49.3764]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000134_VIIRS_I1-I5.tif,,,"[42.17755, 46.77584, 43.47987, 47.66299]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000135_VIIRS_I1-I5.tif,,,"[42.12995, 47.63866, 43.45496, 48.52638]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000136_VIIRS_I1-I5.tif,,,"[42.08003, 48.50131, 43.42887, 49.38964]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000137_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000138_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000139_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000140_VIIRS_I1-I5.tif,,,"[37.31103, 51.11572, 38.71419, 51.99031]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000141_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000142_VIIRS_I1-I5.tif,,,"[38.70873, 51.12243, 40.10671, 51.99066]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000143_VIIRS_I1-I5.tif,,,"[40.0474, 49.3764, 41.4121, 50.25925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000144_VIIRS_I1-I5.tif,,,"[41.36958, 49.34177, 42.75587, 50.23911]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000145_VIIRS_I1-I5.tif,,,"[41.45673, 51.06485, 42.89813, 51.96405]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000146_VIIRS_I1-I5.tif,,,"[38.70873, 51.12243, 40.10671, 51.99066]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000147_VIIRS_I1-I5.tif,,,"[40.08596, 51.10165, 41.50363, 51.98547]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000148_VIIRS_I1-I5.tif,,,"[41.45673, 51.06485, 42.89813, 51.96405]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000149_VIIRS_I1-I5.tif,,,"[40.52185, 51.0448, 41.97271, 51.95024]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000150_VIIRS_I1-I5.tif,,,"[40.08596, 51.10165, 41.50363, 51.98547]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000151_VIIRS_I1-I5.tif,,,"[40.52185, 51.0448, 41.97271, 51.95024]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000152_VIIRS_I1-I5.tif,,,"[41.79035, 52.81204, 43.27774, 53.70379]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000153_VIIRS_I1-I5.tif,,,"[38.69694, 52.84837, 40.15149, 53.71668]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000154_VIIRS_I1-I5.tif,,,"[40.06621, 50.23911, 41.45673, 51.12243]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000155_VIIRS_I1-I5.tif,,,"[41.55294, 52.78714, 43.05539, 53.68835]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000156_VIIRS_I1-I5.tif,,,"[40.6055, 50.18396, 42.02767, 51.08826]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000157_VIIRS_I1-I5.tif,,,"[40.52185, 51.0448, 41.97271, 51.95024]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000158_VIIRS_I1-I5.tif,,,"[37.24271, 52.84124, 38.70299, 53.7163]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000159_VIIRS_I1-I5.tif,,,"[40.12853, 52.82628, 41.60482, 53.71115]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000160_VIIRS_I1-I5.tif,,,"[41.55294, 52.78714, 43.05539, 53.68835]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000161_VIIRS_I1-I5.tif,,,"[40.52185, 51.0448, 41.97271, 51.95024]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000162_VIIRS_I1-I5.tif,,,"[40.34139, 52.76581, 41.85424, 53.67366]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000163_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000164_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000165_VIIRS_I1-I5.tif,,,"[37.24271, 52.84124, 38.70299, 53.7163]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000166_VIIRS_I1-I5.tif,,,"[40.12853, 52.82628, 41.60482, 53.71115]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000167_VIIRS_I1-I5.tif,,,"[41.55294, 52.78714, 43.05539, 53.68835]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000168_VIIRS_I1-I5.tif,,,"[40.52185, 51.0448, 41.97271, 51.95024]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000169_VIIRS_I1-I5.tif,,,"[40.34139, 52.76581, 41.85424, 53.67366]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000170_VIIRS_I1-I5.tif,,,"[41.79035, 52.81204, 43.27774, 53.70379]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000171_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000172_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000173_VIIRS_I1-I5.tif,,,"[47.50363, 51.92609, 48.97476, 52.82628]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000174_VIIRS_I1-I5.tif,,,"[41.15245, 44.16802, 42.40218, 45.06056]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000175_VIIRS_I1-I5.tif,,,"[41.18462, 45.03076, 42.45452, 45.92404]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000176_VIIRS_I1-I5.tif,,,"[42.02767, 49.3638, 43.40152, 50.25275]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000177_VIIRS_I1-I5.tif,,,"[41.97271, 50.22612, 43.37282, 51.11572]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000178_VIIRS_I1-I5.tif,,,"[43.42887, 47.66299, 44.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000179_VIIRS_I1-I5.tif,,,"[44.71939, 49.39594, 46.06621, 50.26414]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000180_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000181_VIIRS_I1-I5.tif,,,"[41.2904, 47.61792, 42.62677, 48.51354]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000182_VIIRS_I1-I5.tif,,,"[40.83332, 47.60015, 42.17755, 48.50131]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000183_VIIRS_I1-I5.tif,,,"[41.85424, 51.95024, 43.31103, 52.84124]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000184_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000185_VIIRS_I1-I5.tif,,,"[43.52636, 44.208, 44.74963, 45.08118]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000186_VIIRS_I1-I5.tif,,,"[43.42887, 47.66299, 44.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000187_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000188_VIIRS_I1-I5.tif,,,"[39.96558, 45.06056, 41.21828, 45.94136]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000189_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000190_VIIRS_I1-I5.tif,,,"[37.31103, 51.11572, 38.71419, 51.99031]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000191_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000192_VIIRS_I1-I5.tif,,,"[40.0474, 49.3764, 41.4121, 50.25925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000193_VIIRS_I1-I5.tif,,,"[40.68513, 49.3229, 42.08003, 50.22612]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000194_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000195_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000196_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000197_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000198_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000199_VIIRS_I1-I5.tif,,,"[40.08596, 51.10165, 41.50363, 51.98547]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000200_VIIRS_I1-I5.tif,,,"[40.10671, 51.96405, 41.55294, 52.84837]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000201_VIIRS_I1-I5.tif,,,"[40.761, 48.46163, 42.12995, 49.3638]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000202_VIIRS_I1-I5.tif,,,"[42.02767, 49.3638, 43.40152, 50.25275]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000203_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000204_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000205_VIIRS_I1-I5.tif,,,"[41.15245, 44.16802, 42.40218, 45.06056]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000206_VIIRS_I1-I5.tif,,,"[41.09114, 44.15225, 42.34746, 45.04972]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000207_VIIRS_I1-I5.tif,,,"[40.34139, 52.76581, 41.85424, 53.67366]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000208_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000209_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000210_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000211_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000212_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000213_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000214_VIIRS_I1-I5.tif,,,"[37.27774, 51.97855, 38.70873, 52.85336]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000215_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000216_VIIRS_I1-I5.tif,,,"[40.0474, 49.3764, 41.4121, 50.25925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000217_VIIRS_I1-I5.tif,,,"[41.4121, 50.20341, 42.82525, 51.10165]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000218_VIIRS_I1-I5.tif,,,"[40.68513, 49.3229, 42.08003, 50.22612]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000219_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000220_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000221_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000222_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000223_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000224_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000225_VIIRS_I1-I5.tif,,,"[41.15245, 44.16802, 42.40218, 45.06056]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000226_VIIRS_I1-I5.tif,,,"[42.22299, 45.91286, 43.50364, 46.79945]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000227_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000228_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000229_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000230_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000231_VIIRS_I1-I5.tif,,,"[42.02767, 49.3638, 43.40152, 50.25275]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000232_VIIRS_I1-I5.tif,,,"[43.47987, 45.93577, 44.74196, 46.80925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000233_VIIRS_I1-I5.tif,,,"[44.71939, 49.39594, 46.06621, 50.26414]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000234_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000235_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000236_VIIRS_I1-I5.tif,,,"[37.34269, 50.25275, 38.71939, 51.12712]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000237_VIIRS_I1-I5.tif,,,"[37.31103, 51.11572, 38.71419, 51.99031]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000238_VIIRS_I1-I5.tif,,,"[42.17755, 46.77584, 43.47987, 47.66299]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000239_VIIRS_I1-I5.tif,,,"[46.02947, 48.51354, 47.36958, 49.39594]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000240_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000241_VIIRS_I1-I5.tif,,,"[37.27774, 51.97855, 38.70873, 52.85336]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000242_VIIRS_I1-I5.tif,,,"[40.12853, 52.82628, 41.60482, 53.71115]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000243_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000244_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000245_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000246_VIIRS_I1-I5.tif,,,"[37.24271, 52.84124, 38.70299, 53.7163]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000247_VIIRS_I1-I5.tif,,,"[38.72434, 48.5325, 40.0474, 49.40069]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000248_VIIRS_I1-I5.tif,,,"[42.08003, 48.50131, 43.42887, 49.38964]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000249_VIIRS_I1-I5.tif,,,"[46.02947, 48.51354, 47.36958, 49.39594]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000250_VIIRS_I1-I5.tif,,,"[46.0474, 49.3764, 47.4121, 50.25925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000251_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000252_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000253_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000254_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000255_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000256_VIIRS_I1-I5.tif,,,"[41.15245, 44.16802, 42.40218, 45.06056]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000257_VIIRS_I1-I5.tif,,,"[41.45673, 51.06485, 42.89813, 51.96405]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000258_VIIRS_I1-I5.tif,,,"[41.09114, 44.15225, 42.34746, 45.04972]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000259_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000260_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000261_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000262_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000263_VIIRS_I1-I5.tif,,,"[37.34269, 50.25275, 38.71939, 51.12712]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000264_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000265_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000266_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000267_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000268_VIIRS_I1-I5.tif,,,"[47.36958, 49.34177, 48.75587, 50.23911]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000269_VIIRS_I1-I5.tif,,,"[47.55294, 52.78714, 49.05539, 53.68835]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000270_VIIRS_I1-I5.tif,,,"[37.31103, 51.11572, 38.71419, 51.99031]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000271_VIIRS_I1-I5.tif,,,"[37.27774, 51.97855, 38.70873, 52.85336]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000272_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000273_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000274_VIIRS_I1-I5.tif,,,"[41.45673, 51.06485, 42.89813, 51.96405]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000275_VIIRS_I1-I5.tif,,,"[41.91496, 51.08826, 43.34269, 51.97855]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000276_VIIRS_I1-I5.tif,,,"[41.85424, 51.95024, 43.31103, 52.84124]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000277_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000278_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000279_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000280_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000281_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000282_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000283_VIIRS_I1-I5.tif,,,"[39.95135, 44.19694, 41.18462, 45.07738]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000284_VIIRS_I1-I5.tif,,,"[42.26638, 45.04972, 43.52636, 45.93577]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000285_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000286_VIIRS_I1-I5.tif,,,"[42.17755, 46.77584, 43.47987, 47.66299]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000287_VIIRS_I1-I5.tif,,,"[43.47987, 45.93577, 44.74196, 46.80925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000288_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000289_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000290_VIIRS_I1-I5.tif,,,"[43.42887, 47.66299, 44.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000291_VIIRS_I1-I5.tif,,,"[46.01237, 47.65052, 47.32905, 48.5325]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000292_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000293_VIIRS_I1-I5.tif,,,"[37.24271, 52.84124, 38.70299, 53.7163]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000294_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000295_VIIRS_I1-I5.tif,,,"[41.91496, 51.08826, 43.34269, 51.97855]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000296_VIIRS_I1-I5.tif,,,"[37.24271, 52.84124, 38.70299, 53.7163]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000297_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000298_VIIRS_I1-I5.tif,,,"[41.45673, 51.06485, 42.89813, 51.96405]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000299_VIIRS_I1-I5.tif,,,"[42.22299, 45.91286, 43.50364, 46.79945]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000300_VIIRS_I1-I5.tif,,,"[42.02767, 49.3638, 43.40152, 50.25275]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000301_VIIRS_I1-I5.tif,,,"[41.85424, 51.95024, 43.31103, 52.84124]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000302_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000303_VIIRS_I1-I5.tif,,,"[41.97271, 50.22612, 43.37282, 51.11572]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000304_VIIRS_I1-I5.tif,,,"[41.91496, 51.08826, 43.34269, 51.97855]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000305_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000306_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000307_VIIRS_I1-I5.tif,,,"[37.31103, 51.11572, 38.71419, 51.99031]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000308_VIIRS_I1-I5.tif,,,"[37.24271, 52.84124, 38.70299, 53.7163]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000309_VIIRS_I1-I5.tif,,,"[41.55294, 52.78714, 43.05539, 53.68835]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000310_VIIRS_I1-I5.tif,,,"[40.52185, 51.0448, 41.97271, 51.95024]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000311_VIIRS_I1-I5.tif,,,"[41.79035, 52.81204, 43.27774, 53.70379]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000312_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000313_VIIRS_I1-I5.tif,,,"[38.69694, 52.84837, 40.15149, 53.71668]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000314_VIIRS_I1-I5.tif,,,"[40.06621, 50.23911, 41.45673, 51.12243]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000315_VIIRS_I1-I5.tif,,,"[40.12853, 52.82628, 41.60482, 53.71115]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000316_VIIRS_I1-I5.tif,,,"[40.34139, 52.76581, 41.85424, 53.67366]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000317_VIIRS_I1-I5.tif,,,"[47.55294, 52.78714, 49.05539, 53.68835]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000318_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000319_VIIRS_I1-I5.tif,,,"[42.17755, 46.77584, 43.47987, 47.66299]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000320_VIIRS_I1-I5.tif,,,"[44.69694, 52.84837, 46.15149, 53.71668]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000321_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000322_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000323_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000324_VIIRS_I1-I5.tif,,,"[43.42887, 47.66299, 44.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000325_VIIRS_I1-I5.tif,,,"[46.0474, 49.3764, 47.4121, 50.25925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000326_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000327_VIIRS_I1-I5.tif,,,"[37.34269, 50.25275, 38.71939, 51.12712]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000328_VIIRS_I1-I5.tif,,,"[41.91496, 51.08826, 43.34269, 51.97855]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000329_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000330_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000331_VIIRS_I1-I5.tif,,,"[38.73786, 45.94136, 39.99605, 46.80954]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000332_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000333_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000334_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000335_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000336_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000337_VIIRS_I1-I5.tif,,,"[42.22299, 45.91286, 43.50364, 46.79945]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000338_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000339_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000340_VIIRS_I1-I5.tif,,,"[37.31103, 51.11572, 38.71419, 51.99031]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000341_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000342_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000343_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000344_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000345_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000346_VIIRS_I1-I5.tif,,,"[38.74196, 45.07738, 39.98047, 45.94557]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000347_VIIRS_I1-I5.tif,,,"[38.73786, 45.94136, 39.99605, 46.80954]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000348_VIIRS_I1-I5.tif,,,"[39.95135, 44.19694, 41.18462, 45.07738]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000349_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000350_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000351_VIIRS_I1-I5.tif,,,"[43.42887, 47.66299, 44.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000352_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000353_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000354_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000355_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000356_VIIRS_I1-I5.tif,,,"[38.74588, 44.21326, 39.96558, 45.08146]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000357_VIIRS_I1-I5.tif,,,"[38.74196, 45.07738, 39.98047, 45.94557]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000358_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000359_VIIRS_I1-I5.tif,,,"[43.42887, 47.66299, 44.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000360_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000361_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000362_VIIRS_I1-I5.tif,,,"[37.31103, 51.11572, 38.71419, 51.99031]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000363_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000364_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000365_VIIRS_I1-I5.tif,,,"[41.91496, 51.08826, 43.34269, 51.97855]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000366_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000367_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000368_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000369_VIIRS_I1-I5.tif,,,"[37.27774, 51.97855, 38.70873, 52.85336]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000370_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000371_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000372_VIIRS_I1-I5.tif,,,"[41.45673, 51.06485, 42.89813, 51.96405]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000373_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000374_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000375_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000376_VIIRS_I1-I5.tif,,,"[37.27774, 51.97855, 38.70873, 52.85336]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000377_VIIRS_I1-I5.tif,,,"[37.24271, 52.84124, 38.70299, 53.7163]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000378_VIIRS_I1-I5.tif,,,"[40.02947, 48.51354, 41.36958, 49.39594]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000379_VIIRS_I1-I5.tif,,,"[42.02767, 49.3638, 43.40152, 50.25275]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000380_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000381_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000382_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000383_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000384_VIIRS_I1-I5.tif,,,"[37.34269, 50.25275, 38.71939, 51.12712]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000385_VIIRS_I1-I5.tif,,,"[37.27774, 51.97855, 38.70873, 52.85336]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000386_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000387_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000388_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000389_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000390_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000391_VIIRS_I1-I5.tif,,,"[38.71419, 50.25925, 40.08596, 51.12747]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000392_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000393_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000394_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000395_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000396_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000397_VIIRS_I1-I5.tif,,,"[38.71419, 50.25925, 40.08596, 51.12747]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000398_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000399_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000400_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000401_VIIRS_I1-I5.tif,,,"[40.43391, 51.90542, 41.91496, 52.81204]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000402_VIIRS_I1-I5.tif,,,"[41.79035, 52.81204, 43.27774, 53.70379]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000403_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000404_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000405_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000406_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000407_VIIRS_I1-I5.tif,,,"[43.24271, 52.84124, 44.70299, 53.7163]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000408_VIIRS_I1-I5.tif,,,"[44.72906, 47.66892, 46.02947, 48.5371]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000409_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000410_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000411_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000412_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000413_VIIRS_I1-I5.tif,,,"[38.71419, 50.25925, 40.08596, 51.12747]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000414_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000415_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000416_VIIRS_I1-I5.tif,,,"[40.0474, 49.3764, 41.4121, 50.25925]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000417_VIIRS_I1-I5.tif,,,"[40.10671, 51.96405, 41.55294, 52.84837]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000418_VIIRS_I1-I5.tif,,,"[41.36958, 49.34177, 42.75587, 50.23911]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000419_VIIRS_I1-I5.tif,,,"[40.43391, 51.90542, 41.91496, 52.81204]",0,0,0,0,0,0,0
-C:\Users\User\hack\fire-monitoring\data\train\af\viirs\AF_tr_000420_VIIRS_I1-I5.tif,,,"[43.24271, 52.84124, 44.70299, 53.7163]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000001_Sentinel-2_post.tif,,,"[44.88491, 48.53705, 45.02389, 48.62923]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000002_Sentinel-2_post.tif,,,"[44.62691, 45.77215, 44.75923, 45.86467]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000003_Sentinel-2_post.tif,,,"[47.11156, 48.69936, 47.25475, 48.79405]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000004_Sentinel-2_post.tif,,,"[46.5411, 48.24847, 46.68201, 48.3425]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000005_Sentinel-2_post.tif,,,"[44.75474, 46.69409, 44.88909, 46.78645]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000006_Sentinel-2_post.tif,,,"[41.40419, 46.0211, 41.54059, 46.11604]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000007_Sentinel-2_post.tif,,,"[42.83636, 47.68761, 42.97654, 47.78218]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000008_Sentinel-2_post.tif,,,"[43.09609, 48.06075, 43.23686, 48.15503]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000009_Sentinel-2_post.tif,,,"[40.10954, 47.42476, 40.24746, 47.51828]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000010_Sentinel-2_post.tif,,,"[44.16069, 50.28415, 44.30603, 50.37718]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000011_Sentinel-2_post.tif,,,"[42.67921, 48.14525, 42.82092, 48.24]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000012_Sentinel-2_post.tif,,,"[40.44794, 49.81577, 40.59326, 49.9097]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000013_Sentinel-2_post.tif,,,"[40.29826, 49.54141, 40.44248, 49.63516]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000014_Sentinel-2_post.tif,,,"[40.9944, 49.25431, 41.13902, 49.34888]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000015_Sentinel-2_post.tif,,,"[46.52474, 47.69592, 46.66409, 47.78991]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000016_Sentinel-2_post.tif,,,"[45.86239, 48.90123, 46.00394, 48.99446]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000017_Sentinel-2_post.tif,,,"[44.04768, 48.71743, 44.18862, 48.8106]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000018_Sentinel-2_post.tif,,,"[46.95471, 48.24169, 47.09631, 48.33619]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000019_Sentinel-2_post.tif,,,"[42.4796, 46.57453, 42.61739, 46.66946]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000020_Sentinel-2_post.tif,,,"[43.78431, 48.07007, 43.92391, 48.16355]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000021_Sentinel-2_post.tif,,,"[40.56658, 49.07719, 40.70991, 49.17126]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000022_Sentinel-2_post.tif,,,"[44.20023, 47.88944, 44.33862, 47.98243]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000023_Sentinel-2_post.tif,,,"[42.44466, 47.31099, 42.58446, 47.40598]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000024_Sentinel-2_post.tif,,,"[42.8816, 49.8995, 43.02814, 49.99405]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000025_Sentinel-2_post.tif,,,"[46.16332, 49.81932, 46.30812, 49.91292]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000026_Sentinel-2_post.tif,,,"[41.98555, 45.82528, 42.12219, 45.92072]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000027_Sentinel-2_post.tif,,,"[39.15776, 46.97043, 39.29288, 47.06284]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000028_Sentinel-2_post.tif,,,"[46.15457, 49.451, 46.29826, 49.54458]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000029_Sentinel-2_post.tif,,,"[41.4082, 46.11317, 41.54484, 46.20812]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000030_Sentinel-2_post.tif,,,"[42.07851, 46.56501, 42.2169, 46.66038]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000031_Sentinel-2_post.tif,,,"[39.42625, 46.87729, 39.5616, 46.97001]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000032_Sentinel-2_post.tif,,,"[40.95823, 48.33375, 41.10009, 48.42826]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000033_Sentinel-2_post.tif,,,"[38.61731, 47.15446, 38.75305, 47.24698]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000034_Sentinel-2_post.tif,,,"[40.11148, 47.51688, 40.24965, 47.6104]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000035_Sentinel-2_post.tif,,,"[40.84349, 48.98065, 40.98702, 49.07504]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000036_Sentinel-2_post.tif,,,"[46.01331, 49.45249, 46.15674, 49.54591]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000037_Sentinel-2_post.tif,,,"[39.86081, 48.80913, 40.00209, 48.90236]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000038_Sentinel-2_post.tif,,,"[42.3943, 48.32344, 42.537, 48.41852]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000039_Sentinel-2_post.tif,,,"[38.88852, 46.8786, 39.02314, 46.97081]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000040_Sentinel-2_post.tif,,,"[40.35751, 46.50033, 40.49345, 46.59412]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000041_Sentinel-2_post.tif,,,"[43.65623, 47.7001, 43.79505, 47.79373]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000042_Sentinel-2_post.tif,,,"[41.50145, 48.1383, 41.64369, 48.23342]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000043_Sentinel-2_post.tif,,,"[42.03285, 47.39325, 42.17355, 47.4887]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000044_Sentinel-2_post.tif,,,"[46.28384, 48.98891, 46.4264, 49.08265]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000045_Sentinel-2_post.tif,,,"[41.14302, 49.43569, 41.28844, 49.53044]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000046_Sentinel-2_post.tif,,,"[39.71482, 48.34969, 39.85456, 48.44275]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000047_Sentinel-2_post.tif,,,"[43.35358, 48.6175, 43.49546, 48.71149]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000048_Sentinel-2_post.tif,,,"[40.87122, 49.71708, 41.01701, 49.81151]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000049_Sentinel-2_post.tif,,,"[40.41082, 48.52668, 40.55228, 48.62055]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000050_Sentinel-2_post.tif,,,"[44.18112, 49.08692, 44.32287, 49.17993]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000051_Sentinel-2_post.tif,,,"[39.71741, 48.53392, 39.85767, 48.62698]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000052_Sentinel-2_post.tif,,,"[40.01713, 49.63667, 40.16111, 49.73009]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000053_Sentinel-2_post.tif,,,"[41.475, 47.58608, 41.61565, 47.68115]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000054_Sentinel-2_post.tif,,,"[45.31039, 50.00999, 45.45417, 50.10256]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000055_Sentinel-2_post.tif,,,"[45.16684, 49.82626, 45.3098, 49.91866]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000056_Sentinel-2_post.tif,,,"[43.6633, 47.42376, 43.80138, 47.51738]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000057_Sentinel-2_post.tif,,,"[42.69978, 47.68496, 42.84017, 47.77968]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000058_Sentinel-2_post.tif,,,"[40.64103, 47.04918, 40.77886, 47.1433]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000059_Sentinel-2_post.tif,,,"[39.43605, 48.07504, 39.57455, 48.16777]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000060_Sentinel-2_post.tif,,,"[45.59282, 49.73224, 45.7363, 49.82515]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000061_Sentinel-2_post.tif,,,"[43.90421, 48.9004, 44.04593, 48.99374]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000062_Sentinel-2_post.tif,,,"[43.30673, 49.99857, 43.4528, 50.09263]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000063_Sentinel-2_post.tif,,,"[40.97971, 48.88611, 41.12321, 48.98065]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000064_Sentinel-2_post.tif,,,"[40.87843, 46.12373, 41.01426, 46.21809]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000065_Sentinel-2_post.tif,,,"[41.23841, 48.42043, 41.38101, 48.51526]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000066_Sentinel-2_post.tif,,,"[43.87489, 50.18964, 44.02048, 50.28302]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000067_Sentinel-2_post.tif,,,"[40.72273, 49.53535, 40.86769, 49.6296]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000068_Sentinel-2_post.tif,,,"[43.56242, 51.01507, 43.71121, 51.10883]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000069_Sentinel-2_post.tif,,,"[40.16111, 49.72724, 40.30564, 49.82084]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000070_Sentinel-2_post.tif,,,"[42.82286, 51.18786, 42.97363, 51.28251]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000071_Sentinel-2_post.tif,,,"[40.64671, 47.23339, 40.78503, 47.32751]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000072_Sentinel-2_post.tif,,,"[42.93624, 48.6108, 43.07884, 48.70527]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000073_Sentinel-2_post.tif,,,"[43.57929, 50.46271, 43.72628, 50.55645]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000074_Sentinel-2_post.tif,,,"[42.43571, 47.49509, 42.57602, 47.5901]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000075_Sentinel-2_post.tif,,,"[41.24246, 48.51248, 41.38533, 48.60731]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000076_Sentinel-2_post.tif,,,"[47.01701, 49.80656, 47.16334, 49.90117]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000077_Sentinel-2_post.tif,,,"[43.53908, 51.75145, 43.69035, 51.84524]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000078_Sentinel-2_post.tif,,,"[41.82215, 48.95966, 41.96733, 49.05517]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000079_Sentinel-2_post.tif,,,"[44.59505, 50.01017, 44.73873, 50.10268]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000080_Sentinel-2_post.tif,,,"[42.21044, 49.14835, 42.35588, 49.24366]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000081_Sentinel-2_post.tif,,,"[42.4623, 46.94277, 42.60109, 47.03774]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000082_Sentinel-2_post.tif,,,"[45.29752, 47.89139, 45.43528, 47.98396]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000083_Sentinel-2_post.tif,,,"[40.87477, 49.80912, 41.02085, 49.90356]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000084_Sentinel-2_post.tif,,,"[42.3056, 49.9797, 42.45342, 50.07493]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000085_Sentinel-2_post.tif,,,"[45.16025, 47.79969, 45.29752, 47.8921]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000086_Sentinel-2_post.tif,,,"[44.74071, 49.55007, 44.88276, 49.64241]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000087_Sentinel-2_post.tif,,,"[46.29583, 49.44933, 46.43976, 49.54308]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000088_Sentinel-2_post.tif,,,"[44.33269, 48.2588, 44.47184, 48.35164]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000089_Sentinel-2_post.tif,,,"[43.21118, 48.70751, 43.35358, 48.80166]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000090_Sentinel-2_post.tif,,,"[44.60262, 49.08913, 44.7436, 49.18164]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000091_Sentinel-2_post.tif,,,"[41.7375, 47.39551, 41.87806, 47.49087]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000092_Sentinel-2_post.tif,,,"[41.06308, 47.50258, 41.20282, 47.59718]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000093_Sentinel-2_post.tif,,,"[42.97297, 47.6901, 43.11292, 47.78451]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000094_Sentinel-2_post.tif,,,"[46.55511, 48.70889, 46.69735, 48.80294]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000095_Sentinel-2_post.tif,,,"[47.08507, 48.05498, 47.22637, 48.14962]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000096_Sentinel-2_post.tif,,,"[44.48818, 46.50891, 44.62252, 46.60158]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000097_Sentinel-2_post.tif,,,"[43.61408, 49.26576, 43.75738, 49.35944]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000098_Sentinel-2_post.tif,,,"[39.56847, 47.61364, 39.70596, 47.70653]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000099_Sentinel-2_post.tif,,,"[42.24018, 46.01603, 42.3769, 46.11121]",0,0,0,0,0,0,2
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000100_Sentinel-2_post.tif,,,"[43.9334, 47.51872, 44.07126, 47.61203]",0,0,0,0,0,0,2
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000101_Sentinel-2_post.tif,,,"[42.59282, 47.03774, 42.73164, 47.13256]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000102_Sentinel-2_post.tif,,,"[39.57148, 47.89003, 39.70972, 47.98292]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000103_Sentinel-2_post.tif,,,"[43.04761, 45.66396, 43.1822, 45.75825]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000104_Sentinel-2_post.tif,,,"[41.19513, 47.40783, 41.33483, 47.50258]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000105_Sentinel-2_post.tif,,,"[40.24529, 47.42321, 40.38343, 47.51688]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000106_Sentinel-2_post.tif,,,"[46.40826, 48.43459, 46.54946, 48.52846]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000107_Sentinel-2_post.tif,,,"[44.74168, 49.36586, 44.8832, 49.4582]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000108_Sentinel-2_post.tif,,,"[40.42905, 49.17126, 40.5724, 49.26517]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000109_Sentinel-2_post.tif,,,"[46.15674, 49.54308, 46.30071, 49.63667]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000110_Sentinel-2_post.tif,,,"[41.51953, 48.50641, 41.66285, 48.60156]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000111_Sentinel-2_post.tif,,,"[47.88645, 50.06343, 48.03515, 50.15906]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000112_Sentinel-2_post.tif,,,"[43.33836, 49.0779, 43.4816, 49.17191]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000113_Sentinel-2_post.tif,,,"[39.1583, 47.15472, 39.29389, 47.24713]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000114_Sentinel-2_post.tif,,,"[46.12333, 48.06956, 46.26302, 48.16309]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000115_Sentinel-2_post.tif,,,"[43.61149, 49.35784, 43.75506, 49.45153]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000116_Sentinel-2_post.tif,,,"[43.48996, 48.71149, 43.63188, 48.80532]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000117_Sentinel-2_post.tif,,,"[47.11931, 48.88345, 47.26304, 48.97816]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000118_Sentinel-2_post.tif,,,"[42.50492, 46.0221, 42.64125, 46.11699]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000119_Sentinel-2_post.tif,,,"[41.27959, 46.20812, 41.41626, 46.30293]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000120_Sentinel-2_post.tif,,,"[42.80517, 48.42412, 42.94746, 48.51874]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000121_Sentinel-2_post.tif,,,"[43.93897, 47.24235, 44.0761, 47.33565]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000122_Sentinel-2_post.tif,,,"[44.60697, 48.53644, 44.7464, 48.62895]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000123_Sentinel-2_post.tif,,,"[41.14335, 46.11876, 41.27959, 46.21341]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000124_Sentinel-2_post.tif,,,"[41.02103, 46.3976, 41.15778, 46.49213]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000125_Sentinel-2_post.tif,,,"[41.14693, 46.21084, 41.28341, 46.30551]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000126_Sentinel-2_post.tif,,,"[44.19737, 48.07368, 44.33627, 48.16668]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000127_Sentinel-2_post.tif,,,"[42.20743, 46.66038, 42.34588, 46.75562]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000128_Sentinel-2_post.tif,,,"[41.53637, 46.01809, 41.67297, 46.11317]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000129_Sentinel-2_post.tif,,,"[41.80532, 46.10365, 41.94255, 46.19903]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000130_Sentinel-2_post.tif,,,"[40.91383, 47.13677, 41.05234, 47.2312]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000131_Sentinel-2_post.tif,,,"[40.51674, 47.41962, 40.65534, 47.5136]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000132_Sentinel-2_post.tif,,,"[43.10288, 47.87659, 43.24312, 47.97086]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000133_Sentinel-2_post.tif,,,"[43.78648, 47.97796, 43.92583, 48.07143]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000134_Sentinel-2_post.tif,,,"[43.10624, 47.78451, 43.24623, 47.87877]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000135_Sentinel-2_post.tif,,,"[39.02354, 47.8921, 39.16082, 47.98434]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000136_Sentinel-2_post.tif,,,"[43.08924, 48.24491, 43.23054, 48.3392]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000137_Sentinel-2_post.tif,,,"[42.67503, 48.2373, 42.81701, 48.33206]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000138_Sentinel-2_post.tif,,,"[43.04116, 45.84819, 43.17621, 45.94249]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000139_Sentinel-2_post.tif,,,"[40.86069, 49.44093, 41.00562, 49.53535]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000140_Sentinel-2_post.tif,,,"[43.55737, 46.31666, 43.69276, 46.4104]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000141_Sentinel-2_post.tif,,,"[40.85721, 49.34888, 41.00186, 49.44329]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000142_Sentinel-2_post.tif,,,"[40.7036, 48.98297, 40.84689, 49.07719]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000143_Sentinel-2_post.tif,,,"[40.28621, 49.081, 40.42905, 49.17474]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000144_Sentinel-2_post.tif,,,"[39.42772, 47.06157, 39.56354, 47.1543]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000145_Sentinel-2_post.tif,,,"[42.53441, 51.09006, 42.6854, 51.18505]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000146_Sentinel-2_post.tif,,,"[46.66116, 47.69386, 46.80074, 47.78801]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000147_Sentinel-2_post.tif,,,"[45.73911, 50.00752, 45.88369, 50.10061]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000148_Sentinel-2_post.tif,,,"[42.39324, 50.9949, 42.54418, 51.09006]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000149_Sentinel-2_post.tif,,,"[45.1659, 49.54995, 45.30804, 49.64235]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000150_Sentinel-2_post.tif,,,"[45.74195, 50.1917, 45.88709, 50.28479]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000151_Sentinel-2_post.tif,,,"[42.53931, 50.99806, 42.68999, 51.09304]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000152_Sentinel-2_post.tif,,,"[43.21445, 48.61543, 43.35657, 48.70958]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000153_Sentinel-2_post.tif,,,"[42.16861, 47.39667, 42.30909, 47.49197]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000154_Sentinel-2_post.tif,,,"[40.94426, 47.96548, 41.08507, 48.05996]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000155_Sentinel-2_post.tif,,,"[40.74887, 46.21809, 40.88473, 46.31231]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000156_Sentinel-2_post.tif,,,"[42.2216, 46.38424, 42.35931, 46.47945]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000157_Sentinel-2_post.tif,,,"[40.76069, 46.58652, 40.8975, 46.68076]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000158_Sentinel-2_post.tif,,,"[41.95243, 46.37625, 42.0906, 46.4718]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000159_Sentinel-2_post.tif,,,"[40.89429, 46.58423, 41.03131, 46.67862]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000160_Sentinel-2_post.tif,,,"[47.22637, 48.14429, 47.36816, 48.23909]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000161_Sentinel-2_post.tif,,,"[40.63821, 46.95708, 40.77579, 47.0512]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000162_Sentinel-2_post.tif,,,"[38.61598, 47.33875, 38.75219, 47.43126]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000163_Sentinel-2_post.tif,,,"[40.5141, 47.32751, 40.65245, 47.42149]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000164_Sentinel-2_post.tif,,,"[40.22824, 46.68625, 40.36444, 46.77989]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000165_Sentinel-2_post.tif,,,"[41.16879, 46.76334, 41.30673, 46.85804]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000166_Sentinel-2_post.tif,,,"[40.94081, 47.87341, 41.08136, 47.96789]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000167_Sentinel-2_post.tif,,,"[40.95121, 48.14962, 41.09254, 48.24411]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000168_Sentinel-2_post.tif,,,"[41.05948, 47.41051, 41.19897, 47.50511]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000169_Sentinel-2_post.tif,,,"[41.08136, 47.96291, 41.22239, 48.05755]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000170_Sentinel-2_post.tif,,,"[41.70008, 46.65925, 41.8386, 46.75454]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000171_Sentinel-2_post.tif,,,"[39.85149, 48.25647, 39.99121, 48.34969]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000172_Sentinel-2_post.tif,,,"[39.43841, 48.35141, 39.57766, 48.44414]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000173_Sentinel-2_post.tif,,,"[40.00954, 49.26831, 40.15242, 49.36172]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000174_Sentinel-2_post.tif,,,"[39.16053, 47.89183, 39.29805, 47.98423]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000175_Sentinel-2_post.tif,,,"[39.42846, 47.15371, 39.56451, 47.24644]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000176_Sentinel-2_post.tif,,,"[38.75089, 47.5234, 38.88735, 47.61575]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000177_Sentinel-2_post.tif,,,"[40.11343, 47.609, 40.25185, 47.70252]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000178_Sentinel-2_post.tif,,,"[39.43528, 47.98292, 39.57352, 48.07565]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000179_Sentinel-2_post.tif,,,"[40.26985, 48.43636, 40.41082, 48.53008]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000180_Sentinel-2_post.tif,,,"[40.58723, 49.72166, 40.73251, 49.81577]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000181_Sentinel-2_post.tif,,,"[38.88676, 47.70789, 39.0235, 47.80008]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000182_Sentinel-2_post.tif,,,"[39.99121, 48.34731, 40.13143, 48.4407]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000183_Sentinel-2_post.tif,,,"[39.71099, 48.07334, 39.84996, 48.1664]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000184_Sentinel-2_post.tif,,,"[43.22093, 48.43128, 43.36252, 48.52542]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000185_Sentinel-2_post.tif,,,"[43.27, 51.01112, 43.41934, 51.10523]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000186_Sentinel-2_post.tif,,,"[46.25406, 47.79165, 46.39322, 47.88534]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000187_Sentinel-2_post.tif,,,"[41.69551, 46.56721, 41.83377, 46.66249]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000188_Sentinel-2_post.tif,,,"[39.43762, 48.25929, 39.57662, 48.35202]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000189_Sentinel-2_post.tif,,,"[40.26529, 48.25217, 40.40572, 48.34587]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000190_Sentinel-2_post.tif,,,"[43.11255, 51.28497, 43.26309, 51.37927]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000191_Sentinel-2_post.tif,,,"[39.83367, 47.151, 39.97041, 47.2442]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000192_Sentinel-2_post.tif,,,"[40.37862, 47.32938, 40.51674, 47.42321]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000193_Sentinel-2_post.tif,,,"[39.02359, 47.98423, 39.16111, 48.07647]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000194_Sentinel-2_post.tif,,,"[42.52809, 48.41852, 42.67083, 48.51345]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000195_Sentinel-2_post.tif,,,"[39.70472, 47.61272, 39.84244, 47.70577]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000196_Sentinel-2_post.tif,,,"[43.32904, 49.35411, 43.47311, 49.44814]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000197_Sentinel-2_post.tif,,,"[39.29288, 47.06216, 39.42846, 47.15472]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000198_Sentinel-2_post.tif,,,"[43.54205, 51.65941, 43.693, 51.7532]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000199_Sentinel-2_post.tif,,,"[41.67258, 48.77916, 41.81697, 48.87449]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000200_Sentinel-2_post.tif,,,"[45.4533, 50.00934, 45.59735, 50.10209]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000201_Sentinel-2_post.tif,,,"[39.9772, 47.6104, 40.11539, 47.70377]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000202_Sentinel-2_post.tif,,,"[39.29805, 47.98352, 39.43605, 48.07609]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000203_Sentinel-2_post.tif,,,"[44.88512, 48.44492, 45.02384, 48.5371]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000204_Sentinel-2_post.tif,,,"[43.34143, 48.98582, 43.4844, 49.07983]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000205_Sentinel-2_post.tif,,,"[40.90399, 46.86051, 41.04175, 46.95492]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000206_Sentinel-2_post.tif,,,"[39.70596, 47.70485, 39.84393, 47.7979]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000207_Sentinel-2_post.tif,,,"[45.57766, 48.44275, 45.71741, 48.53565]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000208_Sentinel-2_post.tif,,,"[43.3259, 49.44618, 43.47026, 49.54021]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000209_Sentinel-2_post.tif,,,"[41.46709, 50.25784, 41.61565, 50.35299]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000210_Sentinel-2_post.tif,,,"[40.12534, 48.16166, 40.26529, 48.2552]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000211_Sentinel-2_post.tif,,,"[39.29965, 48.2599, 39.43841, 48.35247]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000212_Sentinel-2_post.tif,,,"[44.06963, 47.51991, 44.20726, 47.61306]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000213_Sentinel-2_post.tif,,,"[39.15997, 47.70756, 39.29699, 47.79997]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000214_Sentinel-2_post.tif,,,"[41.04526, 47.0422, 41.18373, 47.13677]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000215_Sentinel-2_post.tif,,,"[41.1725, 46.85541, 41.31068, 46.95012]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000216_Sentinel-2_post.tif,,,"[47.22239, 48.05224, 47.36392, 48.14704]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000217_Sentinel-2_post.tif,,,"[45.85611, 48.53281, 45.99661, 48.62603]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000218_Sentinel-2_post.tif,,,"[42.38125, 45.83501, 42.5173, 45.93003]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000219_Sentinel-2_post.tif,,,"[40.93057, 47.59718, 41.07034, 47.69164]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000220_Sentinel-2_post.tif,,,"[38.88656, 47.80002, 39.02354, 47.89221]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000221_Sentinel-2_post.tif,,,"[41.95518, 46.37748, 42.09328, 46.47298]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000222_Sentinel-2_post.tif,,,"[40.89108, 46.49213, 41.02787, 46.58652]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000223_Sentinel-2_post.tif,,,"[41.61565, 47.67493, 41.75678, 47.77016]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\bs\sentinel2_post\BS_tr_000224_Sentinel-2_post.tif,,,"[45.45417, 50.10144, 45.5985, 50.19418]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000001_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000002_VIIRS_I1-I5.tif,,,"[37.31103, 51.11572, 38.71419, 51.99031]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000003_VIIRS_I1-I5.tif,,,"[38.70873, 51.12243, 40.10671, 51.99066]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000004_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000005_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000006_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000007_VIIRS_I1-I5.tif,,,"[44.72906, 47.66892, 46.02947, 48.5371]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000008_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000009_VIIRS_I1-I5.tif,,,"[41.50363, 51.92609, 42.97476, 52.82628]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000010_VIIRS_I1-I5.tif,,,"[40.52185, 51.0448, 41.97271, 51.95024]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000011_VIIRS_I1-I5.tif,,,"[41.85424, 51.95024, 43.31103, 52.84124]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000012_VIIRS_I1-I5.tif,,,"[41.79035, 52.81204, 43.27774, 53.70379]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000013_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000014_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000015_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000016_VIIRS_I1-I5.tif,,,"[41.91496, 51.08826, 43.34269, 51.97855]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000017_VIIRS_I1-I5.tif,,,"[44.71939, 49.39594, 46.06621, 50.26414]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000018_VIIRS_I1-I5.tif,,,"[46.01237, 47.65052, 47.32905, 48.5325]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000019_VIIRS_I1-I5.tif,,,"[46.02947, 48.51354, 47.36958, 49.39594]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000020_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000021_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000022_VIIRS_I1-I5.tif,,,"[42.22299, 45.91286, 43.50364, 46.79945]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000023_VIIRS_I1-I5.tif,,,"[46.01237, 47.65052, 47.32905, 48.5325]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000024_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000025_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000026_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000027_VIIRS_I1-I5.tif,,,"[38.74588, 44.21326, 39.96558, 45.08146]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000028_VIIRS_I1-I5.tif,,,"[38.74196, 45.07738, 39.98047, 45.94557]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000029_VIIRS_I1-I5.tif,,,"[40.0474, 49.3764, 41.4121, 50.25925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000030_VIIRS_I1-I5.tif,,,"[42.22299, 45.91286, 43.50364, 46.79945]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000031_VIIRS_I1-I5.tif,,,"[42.12995, 47.63866, 43.45496, 48.52638]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000032_VIIRS_I1-I5.tif,,,"[43.37282, 49.38964, 44.72434, 50.2638]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000033_VIIRS_I1-I5.tif,,,"[37.31103, 51.11572, 38.71419, 51.99031]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000034_VIIRS_I1-I5.tif,,,"[37.24271, 52.84124, 38.70299, 53.7163]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000035_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000036_VIIRS_I1-I5.tif,,,"[40.06621, 50.23911, 41.45673, 51.12243]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000037_VIIRS_I1-I5.tif,,,"[40.52185, 51.0448, 41.97271, 51.95024]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000038_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000039_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000040_VIIRS_I1-I5.tif,,,"[37.34269, 50.25275, 38.71939, 51.12712]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000041_VIIRS_I1-I5.tif,,,"[39.95135, 44.19694, 41.18462, 45.07738]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000042_VIIRS_I1-I5.tif,,,"[42.12995, 47.63866, 43.45496, 48.52638]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000043_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000044_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000045_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000046_VIIRS_I1-I5.tif,,,"[38.74588, 44.21326, 39.96558, 45.08146]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000047_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000048_VIIRS_I1-I5.tif,,,"[37.31103, 51.11572, 38.71419, 51.99031]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000049_VIIRS_I1-I5.tif,,,"[38.71419, 50.25925, 40.08596, 51.12747]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000050_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000051_VIIRS_I1-I5.tif,,,"[38.69694, 52.84837, 40.15149, 53.71668]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000052_VIIRS_I1-I5.tif,,,"[44.71939, 49.39594, 46.06621, 50.26414]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000053_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000054_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000055_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000056_VIIRS_I1-I5.tif,,,"[40.52185, 51.0448, 41.97271, 51.95024]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000057_VIIRS_I1-I5.tif,,,"[46.12853, 52.82628, 47.60482, 53.71115]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000058_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000059_VIIRS_I1-I5.tif,,,"[37.31103, 51.11572, 38.71419, 51.99031]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000060_VIIRS_I1-I5.tif,,,"[38.69694, 52.84837, 40.15149, 53.71668]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000061_VIIRS_I1-I5.tif,,,"[40.08596, 51.10165, 41.50363, 51.98547]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000062_VIIRS_I1-I5.tif,,,"[40.52185, 51.0448, 41.97271, 51.95024]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000063_VIIRS_I1-I5.tif,,,"[40.08596, 51.10165, 41.50363, 51.98547]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000064_VIIRS_I1-I5.tif,,,"[41.97271, 50.22612, 43.37282, 51.11572]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000065_VIIRS_I1-I5.tif,,,"[41.85424, 51.95024, 43.31103, 52.84124]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000066_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000067_VIIRS_I1-I5.tif,,,"[41.15245, 44.16802, 42.40218, 45.06056]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000068_VIIRS_I1-I5.tif,,,"[41.4121, 50.20341, 42.82525, 51.10165]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000069_VIIRS_I1-I5.tif,,,"[41.85424, 51.95024, 43.31103, 52.84124]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000070_VIIRS_I1-I5.tif,,,"[43.42887, 47.66299, 44.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000071_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000072_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000073_VIIRS_I1-I5.tif,,,"[37.31103, 51.11572, 38.71419, 51.99031]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000074_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000075_VIIRS_I1-I5.tif,,,"[41.55294, 52.78714, 43.05539, 53.68835]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000076_VIIRS_I1-I5.tif,,,"[42.22299, 45.91286, 43.50364, 46.79945]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000077_VIIRS_I1-I5.tif,,,"[42.17755, 46.77584, 43.47987, 47.66299]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000078_VIIRS_I1-I5.tif,,,"[41.79035, 52.81204, 43.27774, 53.70379]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000079_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000080_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000081_VIIRS_I1-I5.tif,,,"[40.83332, 47.60015, 42.17755, 48.50131]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000082_VIIRS_I1-I5.tif,,,"[46.01237, 47.65052, 47.32905, 48.5325]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000083_VIIRS_I1-I5.tif,,,"[47.50363, 51.92609, 48.97476, 52.82628]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000084_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000085_VIIRS_I1-I5.tif,,,"[40.10671, 51.96405, 41.55294, 52.84837]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000086_VIIRS_I1-I5.tif,,,"[40.12853, 52.82628, 41.60482, 53.71115]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000087_VIIRS_I1-I5.tif,,,"[41.45673, 51.06485, 42.89813, 51.96405]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000088_VIIRS_I1-I5.tif,,,"[41.50363, 51.92609, 42.97476, 52.82628]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000089_VIIRS_I1-I5.tif,,,"[41.85424, 51.95024, 43.31103, 52.84124]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000090_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000091_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000092_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000093_VIIRS_I1-I5.tif,,,"[37.34269, 50.25275, 38.71939, 51.12712]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000094_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000095_VIIRS_I1-I5.tif,,,"[38.69694, 52.84837, 40.15149, 53.71668]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000096_VIIRS_I1-I5.tif,,,"[41.45673, 51.06485, 42.89813, 51.96405]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000097_VIIRS_I1-I5.tif,,,"[42.12995, 47.63866, 43.45496, 48.52638]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000098_VIIRS_I1-I5.tif,,,"[41.85424, 51.95024, 43.31103, 52.84124]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000099_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000100_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000101_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000102_VIIRS_I1-I5.tif,,,"[38.74588, 44.21326, 39.96558, 45.08146]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000103_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000104_VIIRS_I1-I5.tif,,,"[38.74588, 44.21326, 39.96558, 45.08146]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000105_VIIRS_I1-I5.tif,,,"[38.74196, 45.07738, 39.98047, 45.94557]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000106_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000107_VIIRS_I1-I5.tif,,,"[38.72434, 48.5325, 40.0474, 49.40069]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000108_VIIRS_I1-I5.tif,,,"[41.55294, 52.78714, 43.05539, 53.68835]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000109_VIIRS_I1-I5.tif,,,"[41.79035, 52.81204, 43.27774, 53.70379]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000110_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000111_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000112_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000113_VIIRS_I1-I5.tif,,,"[40.0474, 49.3764, 41.4121, 50.25925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000114_VIIRS_I1-I5.tif,,,"[42.02767, 49.3638, 43.40152, 50.25275]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000115_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000116_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000117_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000118_VIIRS_I1-I5.tif,,,"[38.71419, 50.25925, 40.08596, 51.12747]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000119_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000120_VIIRS_I1-I5.tif,,,"[40.34139, 52.76581, 41.85424, 53.67366]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000121_VIIRS_I1-I5.tif,,,"[42.22299, 45.91286, 43.50364, 46.79945]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000122_VIIRS_I1-I5.tif,,,"[41.91496, 51.08826, 43.34269, 51.97855]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000123_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000124_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000125_VIIRS_I1-I5.tif,,,"[41.2904, 47.61792, 42.62677, 48.51354]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000126_VIIRS_I1-I5.tif,,,"[40.83332, 47.60015, 42.17755, 48.50131]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000127_VIIRS_I1-I5.tif,,,"[42.12995, 47.63866, 43.45496, 48.52638]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000128_VIIRS_I1-I5.tif,,,"[41.91496, 51.08826, 43.34269, 51.97855]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000129_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000130_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000131_VIIRS_I1-I5.tif,,,"[41.50363, 51.92609, 42.97476, 52.82628]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000132_VIIRS_I1-I5.tif,,,"[47.55294, 52.78714, 49.05539, 53.68835]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000133_VIIRS_I1-I5.tif,,,"[41.32905, 48.47994, 42.68977, 49.3764]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000134_VIIRS_I1-I5.tif,,,"[42.17755, 46.77584, 43.47987, 47.66299]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000135_VIIRS_I1-I5.tif,,,"[42.12995, 47.63866, 43.45496, 48.52638]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000136_VIIRS_I1-I5.tif,,,"[42.08003, 48.50131, 43.42887, 49.38964]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000137_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000138_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000139_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000140_VIIRS_I1-I5.tif,,,"[37.31103, 51.11572, 38.71419, 51.99031]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000141_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000142_VIIRS_I1-I5.tif,,,"[38.70873, 51.12243, 40.10671, 51.99066]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000143_VIIRS_I1-I5.tif,,,"[40.0474, 49.3764, 41.4121, 50.25925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000144_VIIRS_I1-I5.tif,,,"[41.36958, 49.34177, 42.75587, 50.23911]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000145_VIIRS_I1-I5.tif,,,"[41.45673, 51.06485, 42.89813, 51.96405]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000146_VIIRS_I1-I5.tif,,,"[38.70873, 51.12243, 40.10671, 51.99066]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000147_VIIRS_I1-I5.tif,,,"[40.08596, 51.10165, 41.50363, 51.98547]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000148_VIIRS_I1-I5.tif,,,"[41.45673, 51.06485, 42.89813, 51.96405]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000149_VIIRS_I1-I5.tif,,,"[40.52185, 51.0448, 41.97271, 51.95024]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000150_VIIRS_I1-I5.tif,,,"[40.08596, 51.10165, 41.50363, 51.98547]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000151_VIIRS_I1-I5.tif,,,"[40.52185, 51.0448, 41.97271, 51.95024]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000152_VIIRS_I1-I5.tif,,,"[41.79035, 52.81204, 43.27774, 53.70379]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000153_VIIRS_I1-I5.tif,,,"[38.69694, 52.84837, 40.15149, 53.71668]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000154_VIIRS_I1-I5.tif,,,"[40.06621, 50.23911, 41.45673, 51.12243]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000155_VIIRS_I1-I5.tif,,,"[41.55294, 52.78714, 43.05539, 53.68835]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000156_VIIRS_I1-I5.tif,,,"[40.6055, 50.18396, 42.02767, 51.08826]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000157_VIIRS_I1-I5.tif,,,"[40.52185, 51.0448, 41.97271, 51.95024]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000158_VIIRS_I1-I5.tif,,,"[37.24271, 52.84124, 38.70299, 53.7163]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000159_VIIRS_I1-I5.tif,,,"[40.12853, 52.82628, 41.60482, 53.71115]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000160_VIIRS_I1-I5.tif,,,"[41.55294, 52.78714, 43.05539, 53.68835]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000161_VIIRS_I1-I5.tif,,,"[40.52185, 51.0448, 41.97271, 51.95024]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000162_VIIRS_I1-I5.tif,,,"[40.34139, 52.76581, 41.85424, 53.67366]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000163_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000164_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000165_VIIRS_I1-I5.tif,,,"[37.24271, 52.84124, 38.70299, 53.7163]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000166_VIIRS_I1-I5.tif,,,"[40.12853, 52.82628, 41.60482, 53.71115]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000167_VIIRS_I1-I5.tif,,,"[41.55294, 52.78714, 43.05539, 53.68835]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000168_VIIRS_I1-I5.tif,,,"[40.52185, 51.0448, 41.97271, 51.95024]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000169_VIIRS_I1-I5.tif,,,"[40.34139, 52.76581, 41.85424, 53.67366]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000170_VIIRS_I1-I5.tif,,,"[41.79035, 52.81204, 43.27774, 53.70379]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000171_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000172_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000173_VIIRS_I1-I5.tif,,,"[47.50363, 51.92609, 48.97476, 52.82628]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000174_VIIRS_I1-I5.tif,,,"[41.15245, 44.16802, 42.40218, 45.06056]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000175_VIIRS_I1-I5.tif,,,"[41.18462, 45.03076, 42.45452, 45.92404]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000176_VIIRS_I1-I5.tif,,,"[42.02767, 49.3638, 43.40152, 50.25275]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000177_VIIRS_I1-I5.tif,,,"[41.97271, 50.22612, 43.37282, 51.11572]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000178_VIIRS_I1-I5.tif,,,"[43.42887, 47.66299, 44.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000179_VIIRS_I1-I5.tif,,,"[44.71939, 49.39594, 46.06621, 50.26414]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000180_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000181_VIIRS_I1-I5.tif,,,"[41.2904, 47.61792, 42.62677, 48.51354]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000182_VIIRS_I1-I5.tif,,,"[40.83332, 47.60015, 42.17755, 48.50131]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000183_VIIRS_I1-I5.tif,,,"[41.85424, 51.95024, 43.31103, 52.84124]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000184_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000185_VIIRS_I1-I5.tif,,,"[43.52636, 44.208, 44.74963, 45.08118]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000186_VIIRS_I1-I5.tif,,,"[43.42887, 47.66299, 44.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000187_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000188_VIIRS_I1-I5.tif,,,"[39.96558, 45.06056, 41.21828, 45.94136]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000189_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000190_VIIRS_I1-I5.tif,,,"[37.31103, 51.11572, 38.71419, 51.99031]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000191_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000192_VIIRS_I1-I5.tif,,,"[40.0474, 49.3764, 41.4121, 50.25925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000193_VIIRS_I1-I5.tif,,,"[40.68513, 49.3229, 42.08003, 50.22612]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000194_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000195_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000196_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000197_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000198_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000199_VIIRS_I1-I5.tif,,,"[40.08596, 51.10165, 41.50363, 51.98547]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000200_VIIRS_I1-I5.tif,,,"[40.10671, 51.96405, 41.55294, 52.84837]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000201_VIIRS_I1-I5.tif,,,"[40.761, 48.46163, 42.12995, 49.3638]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000202_VIIRS_I1-I5.tif,,,"[42.02767, 49.3638, 43.40152, 50.25275]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000203_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000204_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000205_VIIRS_I1-I5.tif,,,"[41.15245, 44.16802, 42.40218, 45.06056]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000206_VIIRS_I1-I5.tif,,,"[41.09114, 44.15225, 42.34746, 45.04972]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000207_VIIRS_I1-I5.tif,,,"[40.34139, 52.76581, 41.85424, 53.67366]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000208_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000209_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000210_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000211_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000212_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000213_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000214_VIIRS_I1-I5.tif,,,"[37.27774, 51.97855, 38.70873, 52.85336]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000215_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000216_VIIRS_I1-I5.tif,,,"[40.0474, 49.3764, 41.4121, 50.25925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000217_VIIRS_I1-I5.tif,,,"[41.4121, 50.20341, 42.82525, 51.10165]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000218_VIIRS_I1-I5.tif,,,"[40.68513, 49.3229, 42.08003, 50.22612]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000219_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000220_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000221_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000222_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000223_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000224_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000225_VIIRS_I1-I5.tif,,,"[41.15245, 44.16802, 42.40218, 45.06056]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000226_VIIRS_I1-I5.tif,,,"[42.22299, 45.91286, 43.50364, 46.79945]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000227_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000228_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000229_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000230_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000231_VIIRS_I1-I5.tif,,,"[42.02767, 49.3638, 43.40152, 50.25275]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000232_VIIRS_I1-I5.tif,,,"[43.47987, 45.93577, 44.74196, 46.80925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000233_VIIRS_I1-I5.tif,,,"[44.71939, 49.39594, 46.06621, 50.26414]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000234_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000235_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000236_VIIRS_I1-I5.tif,,,"[37.34269, 50.25275, 38.71939, 51.12712]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000237_VIIRS_I1-I5.tif,,,"[37.31103, 51.11572, 38.71419, 51.99031]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000238_VIIRS_I1-I5.tif,,,"[42.17755, 46.77584, 43.47987, 47.66299]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000239_VIIRS_I1-I5.tif,,,"[46.02947, 48.51354, 47.36958, 49.39594]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000240_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000241_VIIRS_I1-I5.tif,,,"[37.27774, 51.97855, 38.70873, 52.85336]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000242_VIIRS_I1-I5.tif,,,"[40.12853, 52.82628, 41.60482, 53.71115]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000243_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000244_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000245_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000246_VIIRS_I1-I5.tif,,,"[37.24271, 52.84124, 38.70299, 53.7163]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000247_VIIRS_I1-I5.tif,,,"[38.72434, 48.5325, 40.0474, 49.40069]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000248_VIIRS_I1-I5.tif,,,"[42.08003, 48.50131, 43.42887, 49.38964]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000249_VIIRS_I1-I5.tif,,,"[46.02947, 48.51354, 47.36958, 49.39594]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000250_VIIRS_I1-I5.tif,,,"[46.0474, 49.3764, 47.4121, 50.25925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000251_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000252_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000253_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000254_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000255_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000256_VIIRS_I1-I5.tif,,,"[41.15245, 44.16802, 42.40218, 45.06056]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000257_VIIRS_I1-I5.tif,,,"[41.45673, 51.06485, 42.89813, 51.96405]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000258_VIIRS_I1-I5.tif,,,"[41.09114, 44.15225, 42.34746, 45.04972]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000259_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000260_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000261_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000262_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000263_VIIRS_I1-I5.tif,,,"[37.34269, 50.25275, 38.71939, 51.12712]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000264_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000265_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000266_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000267_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000268_VIIRS_I1-I5.tif,,,"[47.36958, 49.34177, 48.75587, 50.23911]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000269_VIIRS_I1-I5.tif,,,"[47.55294, 52.78714, 49.05539, 53.68835]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000270_VIIRS_I1-I5.tif,,,"[37.31103, 51.11572, 38.71419, 51.99031]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000271_VIIRS_I1-I5.tif,,,"[37.27774, 51.97855, 38.70873, 52.85336]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000272_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000273_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000274_VIIRS_I1-I5.tif,,,"[41.45673, 51.06485, 42.89813, 51.96405]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000275_VIIRS_I1-I5.tif,,,"[41.91496, 51.08826, 43.34269, 51.97855]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000276_VIIRS_I1-I5.tif,,,"[41.85424, 51.95024, 43.31103, 52.84124]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000277_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000278_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000279_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000280_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000281_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000282_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000283_VIIRS_I1-I5.tif,,,"[39.95135, 44.19694, 41.18462, 45.07738]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000284_VIIRS_I1-I5.tif,,,"[42.26638, 45.04972, 43.52636, 45.93577]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000285_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000286_VIIRS_I1-I5.tif,,,"[42.17755, 46.77584, 43.47987, 47.66299]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000287_VIIRS_I1-I5.tif,,,"[43.47987, 45.93577, 44.74196, 46.80925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000288_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000289_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000290_VIIRS_I1-I5.tif,,,"[43.42887, 47.66299, 44.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000291_VIIRS_I1-I5.tif,,,"[46.01237, 47.65052, 47.32905, 48.5325]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000292_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000293_VIIRS_I1-I5.tif,,,"[37.24271, 52.84124, 38.70299, 53.7163]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000294_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000295_VIIRS_I1-I5.tif,,,"[41.91496, 51.08826, 43.34269, 51.97855]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000296_VIIRS_I1-I5.tif,,,"[37.24271, 52.84124, 38.70299, 53.7163]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000297_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000298_VIIRS_I1-I5.tif,,,"[41.45673, 51.06485, 42.89813, 51.96405]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000299_VIIRS_I1-I5.tif,,,"[42.22299, 45.91286, 43.50364, 46.79945]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000300_VIIRS_I1-I5.tif,,,"[42.02767, 49.3638, 43.40152, 50.25275]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000301_VIIRS_I1-I5.tif,,,"[41.85424, 51.95024, 43.31103, 52.84124]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000302_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000303_VIIRS_I1-I5.tif,,,"[41.97271, 50.22612, 43.37282, 51.11572]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000304_VIIRS_I1-I5.tif,,,"[41.91496, 51.08826, 43.34269, 51.97855]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000305_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000306_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000307_VIIRS_I1-I5.tif,,,"[37.31103, 51.11572, 38.71419, 51.99031]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000308_VIIRS_I1-I5.tif,,,"[37.24271, 52.84124, 38.70299, 53.7163]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000309_VIIRS_I1-I5.tif,,,"[41.55294, 52.78714, 43.05539, 53.68835]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000310_VIIRS_I1-I5.tif,,,"[40.52185, 51.0448, 41.97271, 51.95024]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000311_VIIRS_I1-I5.tif,,,"[41.79035, 52.81204, 43.27774, 53.70379]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000312_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000313_VIIRS_I1-I5.tif,,,"[38.69694, 52.84837, 40.15149, 53.71668]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000314_VIIRS_I1-I5.tif,,,"[40.06621, 50.23911, 41.45673, 51.12243]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000315_VIIRS_I1-I5.tif,,,"[40.12853, 52.82628, 41.60482, 53.71115]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000316_VIIRS_I1-I5.tif,,,"[40.34139, 52.76581, 41.85424, 53.67366]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000317_VIIRS_I1-I5.tif,,,"[47.55294, 52.78714, 49.05539, 53.68835]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000318_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000319_VIIRS_I1-I5.tif,,,"[42.17755, 46.77584, 43.47987, 47.66299]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000320_VIIRS_I1-I5.tif,,,"[44.69694, 52.84837, 46.15149, 53.71668]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000321_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000322_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000323_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000324_VIIRS_I1-I5.tif,,,"[43.42887, 47.66299, 44.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000325_VIIRS_I1-I5.tif,,,"[46.0474, 49.3764, 47.4121, 50.25925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000326_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000327_VIIRS_I1-I5.tif,,,"[37.34269, 50.25275, 38.71939, 51.12712]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000328_VIIRS_I1-I5.tif,,,"[41.91496, 51.08826, 43.34269, 51.97855]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000329_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000330_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000331_VIIRS_I1-I5.tif,,,"[38.73786, 45.94136, 39.99605, 46.80954]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000332_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000333_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000334_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000335_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000336_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000337_VIIRS_I1-I5.tif,,,"[42.22299, 45.91286, 43.50364, 46.79945]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000338_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000339_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000340_VIIRS_I1-I5.tif,,,"[37.31103, 51.11572, 38.71419, 51.99031]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000341_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000342_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000343_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000344_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000345_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000346_VIIRS_I1-I5.tif,,,"[38.74196, 45.07738, 39.98047, 45.94557]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000347_VIIRS_I1-I5.tif,,,"[38.73786, 45.94136, 39.99605, 46.80954]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000348_VIIRS_I1-I5.tif,,,"[39.95135, 44.19694, 41.18462, 45.07738]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000349_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000350_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000351_VIIRS_I1-I5.tif,,,"[43.42887, 47.66299, 44.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000352_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000353_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000354_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000355_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000356_VIIRS_I1-I5.tif,,,"[38.74588, 44.21326, 39.96558, 45.08146]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000357_VIIRS_I1-I5.tif,,,"[38.74196, 45.07738, 39.98047, 45.94557]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000358_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000359_VIIRS_I1-I5.tif,,,"[43.42887, 47.66299, 44.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000360_VIIRS_I1-I5.tif,,,"[37.52636, 44.208, 38.74963, 45.08118]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000361_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000362_VIIRS_I1-I5.tif,,,"[37.31103, 51.11572, 38.71419, 51.99031]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000363_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000364_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000365_VIIRS_I1-I5.tif,,,"[41.91496, 51.08826, 43.34269, 51.97855]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000366_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000367_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000368_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000369_VIIRS_I1-I5.tif,,,"[37.27774, 51.97855, 38.70873, 52.85336]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000370_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000371_VIIRS_I1-I5.tif,,,"[38.70299, 51.98547, 40.12853, 52.85373]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000372_VIIRS_I1-I5.tif,,,"[41.45673, 51.06485, 42.89813, 51.96405]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000373_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000374_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000375_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000376_VIIRS_I1-I5.tif,,,"[37.27774, 51.97855, 38.70873, 52.85336]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000377_VIIRS_I1-I5.tif,,,"[37.24271, 52.84124, 38.70299, 53.7163]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000378_VIIRS_I1-I5.tif,,,"[40.02947, 48.51354, 41.36958, 49.39594]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000379_VIIRS_I1-I5.tif,,,"[42.02767, 49.3638, 43.40152, 50.25275]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000380_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000381_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000382_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000383_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000384_VIIRS_I1-I5.tif,,,"[37.34269, 50.25275, 38.71939, 51.12712]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000385_VIIRS_I1-I5.tif,,,"[37.27774, 51.97855, 38.70873, 52.85336]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000386_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000387_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000388_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000389_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000390_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000391_VIIRS_I1-I5.tif,,,"[38.71419, 50.25925, 40.08596, 51.12747]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000392_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000393_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000394_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000395_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000396_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000397_VIIRS_I1-I5.tif,,,"[38.71419, 50.25925, 40.08596, 51.12747]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000398_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000399_VIIRS_I1-I5.tif,,,"[37.45496, 46.79945, 38.73786, 47.67308]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000400_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000401_VIIRS_I1-I5.tif,,,"[40.43391, 51.90542, 41.91496, 52.81204]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000402_VIIRS_I1-I5.tif,,,"[41.79035, 52.81204, 43.27774, 53.70379]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000403_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000404_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000405_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000406_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000407_VIIRS_I1-I5.tif,,,"[43.24271, 52.84124, 44.70299, 53.7163]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000408_VIIRS_I1-I5.tif,,,"[44.72906, 47.66892, 46.02947, 48.5371]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000409_VIIRS_I1-I5.tif,,,"[37.50364, 45.07195, 38.74588, 45.94528]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000410_VIIRS_I1-I5.tif,,,"[37.47987, 45.93577, 38.74196, 46.80925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000411_VIIRS_I1-I5.tif,,,"[37.42887, 47.66299, 38.73357, 48.53679]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000412_VIIRS_I1-I5.tif,,,"[38.72906, 47.66892, 40.02947, 48.5371]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000413_VIIRS_I1-I5.tif,,,"[38.71419, 50.25925, 40.08596, 51.12747]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000414_VIIRS_I1-I5.tif,,,"[37.40152, 48.52638, 38.72906, 49.40036]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000415_VIIRS_I1-I5.tif,,,"[37.37282, 49.38964, 38.72434, 50.2638]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000416_VIIRS_I1-I5.tif,,,"[40.0474, 49.3764, 41.4121, 50.25925]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000417_VIIRS_I1-I5.tif,,,"[40.10671, 51.96405, 41.55294, 52.84837]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000418_VIIRS_I1-I5.tif,,,"[41.36958, 49.34177, 42.75587, 50.23911]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000419_VIIRS_I1-I5.tif,,,"[40.43391, 51.90542, 41.91496, 52.81204]",0,0,0,0,0,0,0
+<путь к данным>\fire-monitoring\data\train\af\viirs\AF_tr_000420_VIIRS_I1-I5.tif,,,"[43.24271, 52.84124, 44.70299, 53.7163]",0,0,0,0,0,0,0

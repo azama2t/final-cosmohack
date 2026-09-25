@@ -1,5 +1,5 @@
 {
- "data_dir": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA",
+ "data_dir": "data\\MARIDA",
  "generated": "2026-09-25T02:42:51",
  "n_rasters": 4143,
  "n_rasters_scanned": 4143,
@@ -563,7 +563,7 @@
  "n_pairs_guess": 1381,
  "tables": [
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\labels_mapping.txt",
+   "path": "data\\MARIDA\\labels_mapping.txt",
    "ext": ".txt",
    "size_bytes": 101688,
    "lines": 1,
@@ -573,7 +573,7 @@
    "rel": "labels_mapping.txt"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_1-12-19_48MYU.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_1-12-19_48MYU.shp",
    "ext": ".shp",
    "size_bytes": 10324,
    "rows": 56,
@@ -596,7 +596,7 @@
    "rel": "shapefiles/S2_1-12-19_48MYU.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_11-1-19_19QDA.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_11-1-19_19QDA.shp",
    "ext": ".shp",
    "size_bytes": 3148,
    "rows": 21,
@@ -619,7 +619,7 @@
    "rel": "shapefiles/S2_11-1-19_19QDA.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_11-6-18_16PCC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_11-6-18_16PCC.shp",
    "ext": ".shp",
    "size_bytes": 52380,
    "rows": 241,
@@ -642,7 +642,7 @@
    "rel": "shapefiles/S2_11-6-18_16PCC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_12-1-17_16PCC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_12-1-17_16PCC.shp",
    "ext": ".shp",
    "size_bytes": 20580,
    "rows": 108,
@@ -665,7 +665,7 @@
    "rel": "shapefiles/S2_12-1-17_16PCC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_12-1-17_16PEC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_12-1-17_16PEC.shp",
    "ext": ".shp",
    "size_bytes": 29220,
    "rows": 178,
@@ -688,7 +688,7 @@
    "rel": "shapefiles/S2_12-1-17_16PEC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_12-1-19_16PEC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_12-1-19_16PEC.shp",
    "ext": ".shp",
    "size_bytes": 35452,
    "rows": 209,
@@ -711,7 +711,7 @@
    "rel": "shapefiles/S2_12-1-19_16PEC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_12-12-20_16PCC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_12-12-20_16PCC.shp",
    "ext": ".shp",
    "size_bytes": 7836,
    "rows": 55,
@@ -734,7 +734,7 @@
    "rel": "shapefiles/S2_12-12-20_16PCC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_13-12-18_16PCC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_13-12-18_16PCC.shp",
    "ext": ".shp",
    "size_bytes": 14188,
    "rows": 89,
@@ -757,7 +757,7 @@
    "rel": "shapefiles/S2_13-12-18_16PCC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_14-11-18_48PZC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_14-11-18_48PZC.shp",
    "ext": ".shp",
    "size_bytes": 19172,
    "rows": 112,
@@ -780,7 +780,7 @@
    "rel": "shapefiles/S2_14-11-18_48PZC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_14-12-20_18QYF.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_14-12-20_18QYF.shp",
    "ext": ".shp",
    "size_bytes": 10964,
    "rows": 72,
@@ -803,7 +803,7 @@
    "rel": "shapefiles/S2_14-12-20_18QYF.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_14-3-20_18QYF.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_14-3-20_18QYF.shp",
    "ext": ".shp",
    "size_bytes": 25468,
    "rows": 183,
@@ -826,7 +826,7 @@
    "rel": "shapefiles/S2_14-3-20_18QYF.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_14-9-18_16PCC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_14-9-18_16PCC.shp",
    "ext": ".shp",
    "size_bytes": 23548,
    "rows": 129,
@@ -849,7 +849,7 @@
    "rel": "shapefiles/S2_14-9-18_16PCC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_15-10-20_18QYF.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_15-10-20_18QYF.shp",
    "ext": ".shp",
    "size_bytes": 12892,
    "rows": 75,
@@ -872,7 +872,7 @@
    "rel": "shapefiles/S2_15-10-20_18QYF.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_15-11-20_16PCC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_15-11-20_16PCC.shp",
    "ext": ".shp",
    "size_bytes": 11508,
    "rows": 70,
@@ -895,7 +895,7 @@
    "rel": "shapefiles/S2_15-11-20_16PCC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_15-9-20_18QYF.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_15-9-20_18QYF.shp",
    "ext": ".shp",
    "size_bytes": 16764,
    "rows": 117,
@@ -918,7 +918,7 @@
    "rel": "shapefiles/S2_15-9-20_18QYF.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_16-2-18_16PEC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_16-2-18_16PEC.shp",
    "ext": ".shp",
    "size_bytes": 13156,
    "rows": 80,
@@ -941,7 +941,7 @@
    "rel": "shapefiles/S2_16-2-18_16PEC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_17-7-16_51PTS.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_17-7-16_51PTS.shp",
    "ext": ".shp",
    "size_bytes": 3732,
    "rows": 26,
@@ -964,7 +964,7 @@
    "rel": "shapefiles/S2_17-7-16_51PTS.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_18-1-18_48PZC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_18-1-18_48PZC.shp",
    "ext": ".shp",
    "size_bytes": 13932,
    "rows": 83,
@@ -987,7 +987,7 @@
    "rel": "shapefiles/S2_18-1-18_48PZC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_18-5-19_51PTS.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_18-5-19_51PTS.shp",
    "ext": ".shp",
    "size_bytes": 2260,
    "rows": 14,
@@ -1010,7 +1010,7 @@
    "rel": "shapefiles/S2_18-5-19_51PTS.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_18-9-20_16PCC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_18-9-20_16PCC.shp",
    "ext": ".shp",
    "size_bytes": 84924,
    "rows": 555,
@@ -1033,7 +1033,7 @@
    "rel": "shapefiles/S2_18-9-20_16PCC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_18-9-20_16PDC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_18-9-20_16PDC.shp",
    "ext": ".shp",
    "size_bytes": 13740,
    "rows": 83,
@@ -1056,7 +1056,7 @@
    "rel": "shapefiles/S2_18-9-20_16PDC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_19-3-20_18QYF.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_19-3-20_18QYF.shp",
    "ext": ".shp",
    "size_bytes": 15596,
    "rows": 109,
@@ -1079,7 +1079,7 @@
    "rel": "shapefiles/S2_19-3-20_18QYF.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_19-9-18_16PCC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_19-9-18_16PCC.shp",
    "ext": ".shp",
    "size_bytes": 21852,
    "rows": 135,
@@ -1102,7 +1102,7 @@
    "rel": "shapefiles/S2_19-9-18_16PCC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_19-9-18_16PDC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_19-9-18_16PDC.shp",
    "ext": ".shp",
    "size_bytes": 10076,
    "rows": 63,
@@ -1125,7 +1125,7 @@
    "rel": "shapefiles/S2_19-9-18_16PDC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_20-10-20_18QYF.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_20-10-20_18QYF.shp",
    "ext": ".shp",
    "size_bytes": 7420,
    "rows": 47,
@@ -1148,7 +1148,7 @@
    "rel": "shapefiles/S2_20-10-20_18QYF.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_20-4-18_30VWH.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_20-4-18_30VWH.shp",
    "ext": ".shp",
    "size_bytes": 5428,
    "rows": 34,
@@ -1171,7 +1171,7 @@
    "rel": "shapefiles/S2_20-4-18_30VWH.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_21-2-17_16PCC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_21-2-17_16PCC.shp",
    "ext": ".shp",
    "size_bytes": 18644,
    "rows": 98,
@@ -1194,7 +1194,7 @@
    "rel": "shapefiles/S2_21-2-17_16PCC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_21-2-18_16PCC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_21-2-18_16PCC.shp",
    "ext": ".shp",
    "size_bytes": 5284,
    "rows": 30,
@@ -1217,7 +1217,7 @@
    "rel": "shapefiles/S2_21-2-18_16PCC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_22-12-20_18QYF.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_22-12-20_18QYF.shp",
    "ext": ".shp",
    "size_bytes": 4852,
    "rows": 34,
@@ -1240,7 +1240,7 @@
    "rel": "shapefiles/S2_22-12-20_18QYF.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_22-3-20_18QWF.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_22-3-20_18QWF.shp",
    "ext": ".shp",
    "size_bytes": 19660,
    "rows": 37,
@@ -1263,7 +1263,7 @@
    "rel": "shapefiles/S2_22-3-20_18QWF.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_23-1-21_18QYF.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_23-1-21_18QYF.shp",
    "ext": ".shp",
    "size_bytes": 3204,
    "rows": 10,
@@ -1286,7 +1286,7 @@
    "rel": "shapefiles/S2_23-1-21_18QYF.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_23-9-20_16PCC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_23-9-20_16PCC.shp",
    "ext": ".shp",
    "size_bytes": 39796,
    "rows": 232,
@@ -1309,7 +1309,7 @@
    "rel": "shapefiles/S2_23-9-20_16PCC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_24-10-18_16PDC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_24-10-18_16PDC.shp",
    "ext": ".shp",
    "size_bytes": 8452,
    "rows": 54,
@@ -1332,7 +1332,7 @@
    "rel": "shapefiles/S2_24-10-18_16PDC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_24-11-19_48PZC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_24-11-19_48PZC.shp",
    "ext": ".shp",
    "size_bytes": 2956,
    "rows": 17,
@@ -1355,7 +1355,7 @@
    "rel": "shapefiles/S2_24-11-19_48PZC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_24-3-20_18QYF.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_24-3-20_18QYF.shp",
    "ext": ".shp",
    "size_bytes": 1980,
    "rows": 13,
@@ -1378,7 +1378,7 @@
    "rel": "shapefiles/S2_24-3-20_18QYF.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_24-4-19_36JUN.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_24-4-19_36JUN.shp",
    "ext": ".shp",
    "size_bytes": 13692,
    "rows": 61,
@@ -1401,7 +1401,7 @@
    "rel": "shapefiles/S2_24-4-19_36JUN.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_24-8-20_16PCC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_24-8-20_16PCC.shp",
    "ext": ".shp",
    "size_bytes": 26588,
    "rows": 153,
@@ -1424,7 +1424,7 @@
    "rel": "shapefiles/S2_24-8-20_16PCC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_25-5-19_48MXU.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_25-5-19_48MXU.shp",
    "ext": ".shp",
    "size_bytes": 2644,
    "rows": 18,
@@ -1447,7 +1447,7 @@
    "rel": "shapefiles/S2_25-5-19_48MXU.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_26-2-18_16PCC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_26-2-18_16PCC.shp",
    "ext": ".shp",
    "size_bytes": 22692,
    "rows": 132,
@@ -1470,7 +1470,7 @@
    "rel": "shapefiles/S2_26-2-18_16PCC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_27-1-19_16PCC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_27-1-19_16PCC.shp",
    "ext": ".shp",
    "size_bytes": 16308,
    "rows": 110,
@@ -1493,7 +1493,7 @@
    "rel": "shapefiles/S2_27-1-19_16PCC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_27-1-19_16QED.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_27-1-19_16QED.shp",
    "ext": ".shp",
    "size_bytes": 20324,
    "rows": 116,
@@ -1516,7 +1516,7 @@
    "rel": "shapefiles/S2_27-1-19_16QED.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_28-9-20_16PCC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_28-9-20_16PCC.shp",
    "ext": ".shp",
    "size_bytes": 12044,
    "rows": 77,
@@ -1539,7 +1539,7 @@
    "rel": "shapefiles/S2_28-9-20_16PCC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_28-9-20_16PDC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_28-9-20_16PDC.shp",
    "ext": ".shp",
    "size_bytes": 10796,
    "rows": 57,
@@ -1562,7 +1562,7 @@
    "rel": "shapefiles/S2_28-9-20_16PDC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_29-11-15_16PEC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_29-11-15_16PEC.shp",
    "ext": ".shp",
    "size_bytes": 7628,
    "rows": 53,
@@ -1585,7 +1585,7 @@
    "rel": "shapefiles/S2_29-11-15_16PEC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_29-11-20_18QYF.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_29-11-20_18QYF.shp",
    "ext": ".shp",
    "size_bytes": 8356,
    "rows": 60,
@@ -1608,7 +1608,7 @@
    "rel": "shapefiles/S2_29-11-20_18QYF.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_29-12-20_18QYF.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_29-12-20_18QYF.shp",
    "ext": ".shp",
    "size_bytes": 29684,
    "rows": 190,
@@ -1631,7 +1631,7 @@
    "rel": "shapefiles/S2_29-12-20_18QYF.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_29-8-17_51RVQ.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_29-8-17_51RVQ.shp",
    "ext": ".shp",
    "size_bytes": 2228,
    "rows": 14,
@@ -1654,7 +1654,7 @@
    "rel": "shapefiles/S2_29-8-17_51RVQ.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_3-1-21_18QYF.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_3-1-21_18QYF.shp",
    "ext": ".shp",
    "size_bytes": 13652,
    "rows": 98,
@@ -1677,7 +1677,7 @@
    "rel": "shapefiles/S2_3-1-21_18QYF.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_3-11-16_16PDC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_3-11-16_16PDC.shp",
    "ext": ".shp",
    "size_bytes": 26572,
    "rows": 179,
@@ -1700,7 +1700,7 @@
    "rel": "shapefiles/S2_3-11-16_16PDC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_3-11-18_16PDC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_3-11-18_16PDC.shp",
    "ext": ".shp",
    "size_bytes": 21092,
    "rows": 142,
@@ -1723,7 +1723,7 @@
    "rel": "shapefiles/S2_3-11-18_16PDC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_30-8-17_16PCC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_30-8-17_16PCC.shp",
    "ext": ".shp",
    "size_bytes": 6932,
    "rows": 40,
@@ -1746,7 +1746,7 @@
    "rel": "shapefiles/S2_30-8-17_16PCC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_30-8-18_16PCC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_30-8-18_16PCC.shp",
    "ext": ".shp",
    "size_bytes": 42540,
    "rows": 213,
@@ -1769,7 +1769,7 @@
    "rel": "shapefiles/S2_30-8-18_16PCC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_4-12-20_18QYF.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_4-12-20_18QYF.shp",
    "ext": ".shp",
    "size_bytes": 8052,
    "rows": 44,
@@ -1792,7 +1792,7 @@
    "rel": "shapefiles/S2_4-12-20_18QYF.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_4-3-18_50LLR.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_4-3-18_50LLR.shp",
    "ext": ".shp",
    "size_bytes": 27580,
    "rows": 181,
@@ -1815,7 +1815,7 @@
    "rel": "shapefiles/S2_4-3-18_50LLR.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_4-9-16_16PCC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_4-9-16_16PCC.shp",
    "ext": ".shp",
    "size_bytes": 64780,
    "rows": 377,
@@ -1838,7 +1838,7 @@
    "rel": "shapefiles/S2_4-9-16_16PCC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_4-9-19_16PCC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_4-9-19_16PCC.shp",
    "ext": ".shp",
    "size_bytes": 14972,
    "rows": 95,
@@ -1861,7 +1861,7 @@
    "rel": "shapefiles/S2_4-9-19_16PCC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_6-12-17_48MYU.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_6-12-17_48MYU.shp",
    "ext": ".shp",
    "size_bytes": 5108,
    "rows": 36,
@@ -1884,7 +1884,7 @@
    "rel": "shapefiles/S2_6-12-17_48MYU.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_6-12-18_48MXU.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_6-12-18_48MXU.shp",
    "ext": ".shp",
    "size_bytes": 27844,
    "rows": 184,
@@ -1907,7 +1907,7 @@
    "rel": "shapefiles/S2_6-12-18_48MXU.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_7-10-18_52SDD.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_7-10-18_52SDD.shp",
    "ext": ".shp",
    "size_bytes": 15980,
    "rows": 95,
@@ -1930,7 +1930,7 @@
    "rel": "shapefiles/S2_7-10-18_52SDD.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_7-3-20_18QYG.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_7-3-20_18QYG.shp",
    "ext": ".shp",
    "size_bytes": 17604,
    "rows": 124,
@@ -1953,7 +1953,7 @@
    "rel": "shapefiles/S2_7-3-20_18QYG.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_8-3-18_16PEC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_8-3-18_16PEC.shp",
    "ext": ".shp",
    "size_bytes": 6428,
    "rows": 41,
@@ -1976,7 +1976,7 @@
    "rel": "shapefiles/S2_8-3-18_16PEC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_8-3-18_16QED.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_8-3-18_16QED.shp",
    "ext": ".shp",
    "size_bytes": 18724,
    "rows": 114,
@@ -1999,7 +1999,7 @@
    "rel": "shapefiles/S2_8-3-18_16QED.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\shapefiles\\S2_9-10-17_16PEC.shp",
+   "path": "data\\MARIDA\\shapefiles\\S2_9-10-17_16PEC.shp",
    "ext": ".shp",
    "size_bytes": 32236,
    "rows": 199,
@@ -2022,7 +2022,7 @@
    "rel": "shapefiles/S2_9-10-17_16PEC.shp"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\splits\\test_X.txt",
+   "path": "data\\MARIDA\\splits\\test_X.txt",
    "ext": ".txt",
    "size_bytes": 6379,
    "lines": 359,
@@ -2036,7 +2036,7 @@
    "rel": "splits/test_X.txt"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\splits\\train_X.txt",
+   "path": "data\\MARIDA\\splits\\train_X.txt",
    "ext": ".txt",
    "size_bytes": 12181,
    "lines": 694,
@@ -2050,7 +2050,7 @@
    "rel": "splits/train_X.txt"
   },
   {
-   "path": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\splits\\val_X.txt",
+   "path": "data\\MARIDA\\splits\\val_X.txt",
    "ext": ".txt",
    "size_bytes": 5792,
    "lines": 328,

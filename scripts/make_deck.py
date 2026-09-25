@@ -228,7 +228,7 @@ SPEECH = [
      "Ячейка, видимая меньше чем наполовину, — серая, «нет данных», а не ноль. Это индекс по снимку, не масса пластика. "
      "Покажу вживую. [Alt+Tab в браузер, пауза 2 с]"),
     (6, "1:50–2:20",
-     "[Обзор уже на экране] {n_regions} районов, {n_dates} дат, справа рейтинг «где искать в первую очередь». "
+     "[Обзор уже на экране] {n_regions_txt}, {n_dates_txt}, справа рейтинг «где искать в первую очередь». "
      "[клик: Манильский залив] Снимок Sentinel-2, кольца — найденные пятна. На живых снимках L2A основной слой — "
      "открытая модель marinedebrisdetector, наша модель — второй слой. [клик по крупному пятну] Карточка находки: "
      "вырезка снимка, площадь помеченной области, уверенность модели."),
@@ -255,7 +255,7 @@ SPEECH = [
 def speech_of(n: int, N: dict) -> tuple[str, str]:
     for k, t, s in SPEECH:
         if k == n:
-            return t, s.format_map(N)
+            return t, s.format_map({**N, 'n_regions_txt': f"{N['n_regions']} {plural(N['n_regions'], 'район', 'района', 'районов')}", 'n_dates_txt': f"{N['n_dates']} {plural(N['n_dates'], 'дата', 'даты', 'дат')}"})
     return "", ""
 
 
@@ -500,7 +500,7 @@ def build(fn: dict, only: int | None = None) -> Presentation:
     slides.append(s5)
 
     def s6(s, n, t):
-        header(s, n, t, f"{N['n_regions']} районов, {N['n_dates']} дат: карта показывает, где искать первым",
+        header(s, n, t, f"{N['n_regions']} {plural(N['n_regions'], 'район', 'района', 'районов')}, {N['n_dates']} {plural(N['n_dates'], 'дата', 'даты', 'дат')}: карта показывает, где искать первым",
                "Живая карта")
         picture(s, M, TOP - Inches(0.35), Inches(7.75), Inches(4.9), ["01_overview_1920.png"],
                 "Обзор: рейтинг «где искать первым»")
@@ -514,7 +514,7 @@ def build(fn: dict, only: int | None = None) -> Presentation:
         picture(s, M, TOP - Inches(0.15), Inches(5.6), Inches(4.75), ["21_zone_card.png"],
                 "Зона №1: «почему это место первое»", crop=(336, 70, 1136, 900), left=True)
         big_number(s, Inches(5.5), TOP + Inches(0.1), Inches(7.2), N["conf_total"],
-                   f"пятен видят обе модели в радиусе {N['agr_r']} м\n(на {N['conf_dates']} из {N['n_dates']} дат)\n"
+                   f"пятен видят обе модели в радиусе {N['agr_r']} м\n(на {N['conf_dates']} из {N['n_dates']} {plural(N['n_dates'], 'даты', 'дат', 'дат')})\n"
                    "Это согласие моделей, не проверка на месте", size=88)
     slides.append(s7)
 
@@ -616,7 +616,7 @@ def speech_md(N: dict) -> str:
         "",
     ]
     for k, t, s in SPEECH:
-        out += [f"### {t} — слайд {k}. {SLIDE_TITLES.get(k, '')}", "", s.format_map(N), ""]
+        out += [f"### {t} — слайд {k}. {SLIDE_TITLES.get(k, '')}", "", s.format_map({**N, 'n_regions_txt': f"{N['n_regions']} {plural(N['n_regions'], 'район', 'района', 'районов')}", 'n_dates_txt': f"{N['n_dates']} {plural(N['n_dates'], 'дата', 'даты', 'дат')}"}), ""]
     out += [
         "## Демо внутри речи (1:50–3:05) и связь с docs/DEMO.md",
         "",

@@ -1,5 +1,5 @@
 # EXAMPLE organizer config, tested end-to-end on the fire dataset of the previous hackathon
-# (C:\Users\User\hack\fire-monitoring\data\train\bs, read-only): Sentinel-2 L2A DN uint16, 20 m, bands named
+# (<путь к данным>\fire-monitoring\data\train\bs, read-only): Sentinel-2 L2A DN uint16, 20 m, bands named
 # in GeoTIFF descriptions, SCL band inside, masks in a sibling folder with a different suffix.
 # Copy this file to configs/adapter_organizer.yaml tomorrow and change only what inspect_dataset.py tells you.
 #
@@ -7,7 +7,7 @@
 # python -m macroplastic.organizer_adapter --config configs/adapter_example.yaml --out data/organizer --limit 20
 
 name: fire_bs_example
-root: C:/Users/User/hack/fire-monitoring/data/train/bs   # absolute, or relative to repo root
+root: <путь к данным>/fire-monitoring/data/train/bs   # absolute, or relative to repo root
 
 layout:
   # A) one multi-band file per sample:

@@ -54,7 +54,7 @@ except Exception:  # pragma: no cover
 MARIDA_CLASSES = {1: "Marine Debris", 2: "Dense Sargassum", 3: "Sparse Sargassum", 4: "Natural Organic Material",
                   5: "Ship", 6: "Clouds", 7: "Marine Water", 8: "Sediment-Laden Water", 9: "Foam", 10: "Turbid Water",
                   11: "Shallow Water", 12: "Waves", 13: "Cloud Shadows", 14: "Wakes", 15: "Mixed Water"}
-FIRE_ROOT = Path(r"C:\Users\User\hack\fire-monitoring\data\train")
+FIRE_ROOT = Path(os.environ.get("FIRE_MONITORING_DIR", Path.home() / "hack" / "fire-monitoring")) / "data" / "train"  # optional external dataset
 
 PRESETS = {
     "marida": dict(

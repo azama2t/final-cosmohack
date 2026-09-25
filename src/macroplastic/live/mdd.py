@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[3]
 # Display / flagging threshold for live L2A scenes (the checkpoint threshold 0.0639 is kept as threshold_checkpoint).
 # Chosen from live scenes only, not MARIDA: on calm clean-water scenes (Honduras 2025-01-30/02-19, Haiti 2021-01-03,
 # Durban 2026-05-04) P>=0.0639 flags 0.15-3 permille of the water, mostly wave texture, while P>=0.5 flags 0-225 px;
-# on the known debris event Durban 2019-04-24 (paper case) 2717 px remain at 0.5. See reports/tasklog/06_live.md.
+# on the known debris event Durban 2019-04-24 (paper case) 2717 px remain at 0.5.
 DISPLAY_THRESHOLD = 0.5
 DEFAULT_CKPT = ROOT / "models" / "mdd" / "unet++1" / "epoch=54-val_loss=0.50-auroc=0.987.ckpt"
 

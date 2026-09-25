@@ -8,7 +8,8 @@ Usage (from repo root):
 
 Writes 10 PNG frames:
   01_overview_1920 02_region 03_detection_card 04_prob_layer 05_h3_2d 06_h3_3d 07_zones 08_compare 09_drift 10_overview_1366
-and appends a row to reports/ui_perf.md (load_ms, console errors, fps during drift animation and during flyTo).
+and <out>/result.json (load_ms, console errors, fps during drift animation and during flyTo).
+With --log-perf the same numbers are also appended as a row to reports/ui_perf.md (tracked in git; off by default).
 """
 from __future__ import annotations
 
@@ -917,7 +918,8 @@ def main():
     ap.add_argument("--headed", action="store_true")
     ap.add_argument("--gl", choices=list(GL_ARGS), default="swiftshader", help="WebGL backend: swiftshader (default) or gpu")
     ap.add_argument("--extra", action="store_true", help="also shoot 11_region_1366")
-    ap.add_argument("--no-perf", action="store_true", help="do not append to reports/ui_perf.md")
+    ap.add_argument("--log-perf", action="store_true", help="append a row to reports/ui_perf.md (off by default)")
+    ap.add_argument("--no-perf", action="store_true", help="kept for old commands: ui_perf.md is not written anyway")
     ap.add_argument("--l20", action="store_true",
                     help="also shoot L20 frames 21-25 (zone card, place card, calendar, review tab)")
     ap.add_argument("--only-l20", action="store_true", help="only the L20 frames (fast iteration)")
@@ -943,7 +945,7 @@ def main():
         res = run(args)
     finally:
         stop_server(server)
-    if not args.no_perf:
+    if args.log_perf and not args.no_perf:
         append_perf(res)
     out = Path(args.out) if Path(args.out).is_absolute() else ROOT / args.out
     (out / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")

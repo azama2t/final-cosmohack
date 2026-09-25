@@ -1,4 +1,4 @@
-# Устойчивость инференса (L24)
+# Устойчивость инференса
 
 Сгенерировано `scripts/robustness_report.py` за 39 с. Модели: `lgbm` (weights/lgbm, порог 0.63), `fdi_rule` (порог 0.5). Устройство: CPU.
 
@@ -99,10 +99,10 @@
 |---|---|---|---|
 | `8.mixed_folder` | good files processed; broken/empty/truncated/1-band tif skipped with a per-file ERROR naming the file; .txt/.jpg/dir ignored; exit 1 (some files failed) | exit 1; good outputs True; bad files named {'broken': True, 'empty': True, 'truncated': True, 'single_band': True}; no bad outputs True; txt/jpg silent True | **PASS** |
 | `8.truncated` | truncated tif -> read error, skipped | skipped with error | **PASS** |
-| `8.no_images` | exit 1 'no input *.tif' | exit 1; ERROR: no input *.tif in C:\Users\User\Documents\GitHub\final-cosmohack\out\robustness\8_broken\only_txt (files ending with _cl/_conf/_prob/_mask are skipped) | **PASS** |
-| `8.missing_dir` | exit 1 'data directory not found' | exit 1; ERROR: data directory not found: C:\Users\User\Documents\GitHub\final-cosmohack\out\robustness\8_broken\does_not_exist | **PASS** |
-| `8.only_broken` | exit 1, error names x.tif | exit 1; ERROR: cannot read C:\Users\User\Documents\GitHub\final-cosmohack\out\robustness\8_broken\only_broken\x.tif: RasterioIOError: '\\?\C:\Users\User\Documents\GitHub\final-cosmohack\out\robustness\8_broken\only_broken\x.tif' not recognized as being in a supported file format. \| ERROR: 1 of 1 file(s) fai | **PASS** |
-| `8.output_is_file` | exit 1 with a message, no traceback | exit 1; ERROR: cannot write outputs to C:\Users\User\Documents\GitHub\final-cosmohack\out\robustness\8_broken\out_is_file: FileExistsError: [WinError 183] Невозможно создать файл, так как он уже существует: '\\\\?\\C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\out\\robustness\\8_broken\\out_is_file' | **PASS** |
+| `8.no_images` | exit 1 'no input *.tif' | exit 1; ERROR: no input *.tif in out\robustness\8_broken\only_txt (files ending with _cl/_conf/_prob/_mask are skipped) | **PASS** |
+| `8.missing_dir` | exit 1 'data directory not found' | exit 1; ERROR: data directory not found: out\robustness\8_broken\does_not_exist | **PASS** |
+| `8.only_broken` | exit 1, error names x.tif | exit 1; ERROR: cannot read out\robustness\8_broken\only_broken\x.tif: RasterioIOError: 'out\robustness\8_broken\only_broken\x.tif' not recognized as being in a supported file format. \| ERROR: 1 of 1 file(s) fai | **PASS** |
+| `8.output_is_file` | exit 1 with a message, no traceback | exit 1; ERROR: cannot write outputs to out\robustness\8_broken\out_is_file: FileExistsError: [WinError 183] Невозможно создать файл, так как он уже существует: 'out\\robustness\\8_broken\\out_is_file' | **PASS** |
 | `8.live_scene_folder` | data/live/<region>/<date> layout: bands.tif processed; 1-band helper rasters (scl, prob_lgbm) ideally ignored | exit 0; bands processed True; 06:41:32 WARNING inference: skipped prob_lgbm.tif: 1 band: not a multispectral S2 image (mask / SCL / probability raster) \| 06:41:32 WARNING inference: skipped scl.tif: 1 band: not a multispectral S2 image (mask / SCL / probability raster) | **PASS** |
 
 ## 9. Пути: пробелы, кириллица, aux.tif

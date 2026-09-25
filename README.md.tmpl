@@ -4,7 +4,7 @@
 
 Полный отчёт — [reports/report.md](reports/report.md), журнал экспериментов — [reports/experiments.md](reports/experiments.md), презентация — `reports/deck.pptx`.
 
-![Обзор: {{service.n_regions}} районов, индекс по последнему снимку](docs/img/overview.jpg)
+![Обзор: {{service.n_regions|pl:район/района/районов}}, индекс по последнему снимку](docs/img/overview.jpg)
 
 | Район с находками и зонами обследования | Дрейф 0–72 ч от найденных пятен |
 |---|---|
@@ -12,10 +12,10 @@
 
 ## Главное
 
-- **Модель**: пиксельный LightGBM ({{l3_lgbm.n_features}} признаков: 11 каналов, спектральные индексы, статистики окна вокруг пикселя), обучен на MARIDA train и MADOS. F1 класса Marine Debris на val MARIDA — **{{l3_lgbm.val.f1_md|f3}}** (IoU {{l3_lgbm.val.iou_md|f3}}, порог {{l3_lgbm.threshold|f2}}), 95 % интервал по сценам {{metric_audit.scene_bootstrap_ci95.0|f3}}–{{metric_audit.scene_bootstrap_ci95.1|f3}}.
+- **Модель**: пиксельный LightGBM ({{l3_lgbm.n_features|pl:признак/признака/признаков}}: 11 каналов, спектральные индексы, статистики окна вокруг пикселя), обучен на MARIDA train и MADOS. F1 класса Marine Debris на val MARIDA — **{{l3_lgbm.val.f1_md|f3}}** (IoU {{l3_lgbm.val.iou_md|f3}}, порог {{l3_lgbm.threshold|f2}}), 95 % интервал по сценам {{metric_audit.scene_bootstrap_ci95.0|f3}}–{{metric_audit.scene_bootstrap_ci95.1|f3}}.
 - **Новый район**: если район целиком убрать из обучения, F1 — **{{metric_audit.lro.mean_f1|f3}}**. Это наш прогноз для незнакомого места.
 - {{derived.test_sentence}}
-- **Карта**: {{service.n_regions}} районов, {{service.n_dates}} живых снимков Sentinel-2 L2A, две модели (marinedebrisdetector и наша LightGBM), {{service.n_confirmed_total|int}} уверенных находок (пятно видят обе модели в радиусе 20 м — согласие моделей, не проверка на месте), дрейф для {{drift.n_scenes}} снимков.
+- **Карта**: {{service.n_regions|pl:район/района/районов}}, {{service.n_dates|pl:живой снимок/живых снимка/живых снимков}} Sentinel-2 L2A, две модели (marinedebrisdetector и наша LightGBM), {{service.n_confirmed_total|pl:уверенная находка/уверенные находки/уверенных находок}} (пятно видят обе модели в радиусе 20 м — согласие моделей, не проверка на месте), дрейф для {{drift.n_scenes}} снимков.
 - **Скорость**: 300 чипов 256×256 холодным стартом — {{speed_threads.final.gpu|f2}} с на GPU, {{speed_threads.final.cpu20|f1}} с на CPU с 20 потоками, {{speed_threads.final.cpu8|f1}} с на 8 потоках (таблица ниже).
 - **Данные организаторов**: на репетиции с незнакомым архивом первый валидный сабмит — через {{rehearsal.first_submit_s}} с после распаковки; обучение на их train — {{rehearsal.private_asis|f3}} → {{rehearsal.private_trained|f3}} F1 на скрытой разметке.
 
@@ -29,8 +29,10 @@ powershell -ExecutionPolicy Bypass -File run.ps1
 
 `run.ps1` при первом запуске создаёт `.venv`, ставит пакеты, при необходимости собирает фронтенд (нужен Node.js 18+; собранный фронтенд уже лежит в `service\static`), поднимает сервис и открывает http://127.0.0.1:8000. Параметры: `-Port 8080`, `-DataRoot <папка с manifest.json>`, `-NoBrowser`.
 
-- В репозитории лежит демо-набор: {{service_demo.n_regions}} районов, {{service_demo.n_dates}} дат с находками, зонами и дрейфом. Полный слой ({{service.n_regions}} районов, {{service.n_dates}} дат) собирается командами из раздела «Воспроизведение».
-- `requirements.txt` ставит PyTorch с CUDA 12.8 (около 3 ГБ). Без GPU удалите строку `--extra-index-url`: карта и LightGBM работают на CPU.
+- В репозитории лежит демо-набор: {{service_demo.n_regions|pl:район/района/районов}}, {{service_demo.n_dates|pl:дата/даты/дат}} с находками, зонами и дрейфом. Полный слой ({{service.n_regions|pl:район/района/районов}}, {{service.n_dates|pl:дата/даты/дат}}) собирается командами из раздела «Воспроизведение».
+- `requirements.txt` ставит PyTorch 2.11.0 с CUDA 12.8 (наш `.venv` с этой сборкой и всеми пакетами — около 5,7 ГБ; с CPU-сборкой torch — около 1,6 ГБ). Без GPU удалите строку `--extra-index-url`: карта и LightGBM работают на CPU.
+- Точные версии всех пакетов, с которыми получены числа, — в `requirements-lock.txt` (`.venv\Scripts\python.exe -m pip install -r requirements-lock.txt`).
+- Прогноз дрейфа (OpenDrift) необязателен и ставится отдельно: `.venv\Scripts\python.exe -m pip install -r requirements-drift.txt`. Карта показывает готовый дрейф и без него.
 - Проверка: http://127.0.0.1:8000/health, документация API — http://127.0.0.1:8000/docs.
 
 Инференс по своей папке GeoTIFF (вероятность и маска в той же сетке, коды выхода 0/1/2):
@@ -74,8 +76,8 @@ powershell -ExecutionPolicy Bypass -File run.ps1
 
 | Источник | Что берём | Лицензия |
 |---|---|---|
-| [MARIDA](https://doi.org/10.5281/zenodo.5151941) (Kikaki et al., 2022) | {{data.marida.n_patches|int}} патчей из {{data.marida.n_scenes}} сцен, {{data.marida.md_px|int}} px Marine Debris | CC BY 4.0 (данные), MIT (код) |
-| [MADOS](https://zenodo.org/records/10664073) (Kikaki et al., 2024) | {{l3_lgbm.mados.n_patches|int}} патчей из {{l3_lgbm.mados.n_scenes}} сцен, {{l3_lgbm.mados.n_md_px|int}} px Marine Debris | CC BY 4.0 |
+| [MARIDA](https://doi.org/10.5281/zenodo.5151941) (Kikaki et al., 2022) | {{data.marida.n_patches|pl:патч/патча/патчей}} из {{data.marida.n_scenes}} сцен, {{data.marida.md_px|int}} px Marine Debris | CC BY 4.0 (данные), MIT (код) |
+| [MADOS](https://zenodo.org/records/10664073) (Kikaki et al., 2024) | {{l3_lgbm.mados.n_patches|pl:патч/патча/патчей}} из {{l3_lgbm.mados.n_scenes}} сцен, {{l3_lgbm.mados.n_md_px|int}} px Marine Debris | CC BY 4.0 |
 | [marinedebrisdetector](https://github.com/MarcCoru/marinedebrisdetector) | предобученные веса UNet++ (основной слой на живых снимках L2A) | MIT |
 | Sentinel-2 L2A через [Earth Search](https://earth-search.aws.element84.com/v1) и Planetary Computer | живые снимки | Copernicus, свободно с атрибуцией |
 | HYCOM ESPC-D-V02, NCEP GFS | течения и ветер для дрейфа | открытые данные |

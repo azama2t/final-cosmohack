@@ -28,7 +28,7 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
-FIRE_BS = Path(r"C:\Users\User\hack\fire-monitoring\data\train\bs")
+FIRE_BS = Path(os.environ.get("FIRE_MONITORING_DIR", Path.home() / "hack" / "fire-monitoring")) / "data" / "train" / "bs"  # optional external dataset
 
 
 def _marida_patches(n: int, seed: int, need_md: bool = True) -> list[Path]:

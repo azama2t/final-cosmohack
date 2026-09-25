@@ -1,4 +1,4 @@
-[adapter] marida: 1381 samples, 1381 with mask, splits={'train': 694, 'val': 328, 'test': 359}, root=C:\Users\User\Documents\GitHub\final-cosmohack\data\MARIDA\patches
+[adapter] marida: 1381 samples, 1381 with mask, splits={'train': 694, 'val': 328, 'test': 359}, root=data\MARIDA\patches
 [adapter] verify vs marida.load_patch: {"n_checked": 60, "max_abs_diff_image": 0.0, "mask_mismatch_px": 0, "identical": true}
 [adapter] 1/1381 S2_1-12-19_48MYU_0
 [adapter] 201/1381 S2_12-12-20_16PCC_18

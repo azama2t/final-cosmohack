@@ -1,6 +1,6 @@
 # Provenance check — fire BS: S2 pre vs S2 post (same chips, different dates)
 
-ours: C:/Users/User/hack/fire-monitoring/data/train/bs/sentinel2_pre → 224 файлов; theirs: C:/Users/User/hack/fire-monitoring/data/train/bs/sentinel2_post → 224 файлов; 5.9 с.
+ours: <путь к данным>/fire-monitoring/data/train/bs/sentinel2_pre → 224 файлов; theirs: <путь к данным>/fire-monitoring/data/train/bs/sentinel2_post → 224 файлов; 5.9 с.
 
 | проверка | файлов theirs с совпадением |
 |---|---|
