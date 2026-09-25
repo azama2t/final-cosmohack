@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import { MapboxOverlay } from '@deck.gl/mapbox';
-import { BitmapLayer, GeoJsonLayer } from '@deck.gl/layers';
+import { BitmapLayer, GeoJsonLayer, ScatterplotLayer } from '@deck.gl/layers';
+import { centroid } from '../map/layers';
 import type { Basemap, Manifest, SceneRef } from '../types';
 import { getImage, loadDetections } from '../lib/data';
 import { darkStyle, offlineStyle, satelliteStyle } from '../map/controller';
@@ -113,6 +114,21 @@ function Pane({
               lineWidthUnits: 'pixels',
               getLineWidth: 1.5,
               lineWidthMinPixels: 1,
+            }),
+          det &&
+            det.features.length <= 400 &&
+            new ScatterplotLayer({
+              id: `cmp-halo-${side}`,
+              data: det.features,
+              getPosition: (f: any) => centroid(f),
+              getRadius: (f: any) => Math.min(20, 8 + 0.1 * Math.sqrt(Math.max(0, f.properties.area_m2))),
+              radiusUnits: 'pixels',
+              stroked: true,
+              filled: true,
+              getFillColor: [...ACCENT_RGB, 55],
+              getLineColor: [...ACCENT_RGB, 240],
+              lineWidthUnits: 'pixels',
+              getLineWidth: 2.5,
             }),
         ].filter(Boolean) as any,
       });

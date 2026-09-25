@@ -102,15 +102,19 @@ export default function ComparePanel({ manifest, compare, model, setCompare }: P
               const va = a ? row.get(a) : null;
               const vb = b ? row.get(b) : null;
               const d = va !== null && vb !== null ? vb - va : null;
-              const rel = d !== null && va ? d / Math.abs(va) : null;
-              const cls = d === null || !row.higherIsWorse || Math.abs(d) < 1e-9 ? '' : d > 0 ? 'worse' : 'better';
+              // «+400 %» from 0.0001 → 0.0005 is noise: hide the relative change when A or B − A rounds to zero
+              const looksZero = (v: number | null) => v === null || /^0(\s|$|,0*(\s|$))/.test(row.fmt(Math.abs(v)));
+              const tiny = (v: number | null) => looksZero(v) || row.fmt(Math.abs(v as number)).startsWith('<');
+              const rel = d !== null && va && !tiny(va) && !tiny(d) ? d / Math.abs(va) : null;
+              const dZero = d !== null && looksZero(d);
+              const cls = d === null || !row.higherIsWorse || Math.abs(d) < 1e-9 || looksZero(d) ? '' : d > 0 ? 'worse' : 'better';
               return (
                 <tr key={row.label}>
                   <td>{row.label}</td>
                   <td className="num">{stats ? row.fmt(va) : '…'}</td>
                   <td className="num">{stats ? row.fmt(vb) : '…'}</td>
                   <td className={`num delta ${cls}`}>
-                    {d === null ? '—' : `${d > 0 ? '+' : ''}${row.fmt(d)}`}
+                    {d === null ? '—' : dZero ? row.fmt(0) : tiny(d) ? '≈ 0' : `${d > 0 ? '+' : ''}${row.fmt(d)}`}
                     {rel !== null && Number.isFinite(rel) && (
                       <small>
                         {rel > 0 ? '+' : ''}

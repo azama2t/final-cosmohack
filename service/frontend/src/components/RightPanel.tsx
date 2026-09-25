@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
-import type { DateEntry, DetProps, FC, Manifest, Region, SceneRef, TsRow, Zone, ZonesFile } from '../types';
+import type { DateEntry, DetProps, FC, H3Props, Manifest, Region, SceneRef, TsRow, Zone, ZonesFile } from '../types';
 import { fmtThr, fmtArea, fmtDate, fmtNum, fmtPct, fmtPermille, modelLabel } from '../lib/style';
 import ExportBox from './ExportBox';
 import ComparePanel from './ComparePanel';
@@ -15,6 +15,7 @@ interface Props {
   timeseries: TsRow[] | null;
   detections: FC<DetProps> | null;
   zones: ZonesFile | null;
+  h3: FC<H3Props> | null;
   collapsed: boolean;
   onCollapse: () => void;
   onRegion: (id: string) => void;
@@ -116,6 +117,7 @@ function RegionView(p: Props & { region: Region; dateEntry: DateEntry }) {
     return () => clearTimeout(t);
   }, []);
   const top = zones[0];
+  const empty = !!p.detections && det.length === 0 && n === 0;
 
   return (
     <>
@@ -136,6 +138,13 @@ function RegionView(p: Props & { region: Region; dateEntry: DateEntry }) {
               {top.lon.toFixed(4)}
             </span>
           </button>
+        )}
+        {empty && (
+          <EmptyScene
+            threshold={p.manifest.models[p.model]?.threshold ?? p.zones?.threshold ?? null}
+            h3={p.h3}
+            cloud={cloud}
+          />
         )}
       </section>
 
@@ -168,6 +177,7 @@ function RegionView(p: Props & { region: Region; dateEntry: DateEntry }) {
         </div>
       </section>
 
+      {!empty && (
       <section className="section">
         <div className="section-head">
           <h3>Приоритет обследования</h3>
@@ -211,6 +221,7 @@ function RegionView(p: Props & { region: Region; dateEntry: DateEntry }) {
           <div className="muted small">Нет зон для этой даты и модели.</div>
         )}
       </section>
+      )}
 
       <section className="section actions">
         <button className="btn block accent-outline" onClick={p.onCompare} data-testid="compare-button">
@@ -245,6 +256,33 @@ export function Kpi({
         {unit && <small> {unit}</small>}
       </div>
       {hint && <div className="kpi-hint">{hint}</div>}
+    </div>
+  );
+}
+
+/** Calm «nothing found» card instead of an empty zones table. */
+function EmptyScene({ threshold, h3, cloud }: { threshold: number | null; h3: FC<H3Props> | null; cloud: number | null }) {
+  let obs: string;
+  if (h3?.features.length) {
+    const water = h3.features.filter((f) => f.properties.observed_water_px > 0);
+    const withData = water.filter((f) => f.properties.share_permille !== null).length;
+    const km2 = water.reduce((a, f) => a + f.properties.observed_water_px, 0) * 100 / 1e6;
+    obs = `данные есть для ${fmtPct(water.length ? withData / water.length : null)} водных ячеек H3 (≈ ${fmtNum(km2, km2 < 10 ? 1 : 0)} км² воды без облаков)`;
+  } else {
+    obs = `наблюдалось ≈ ${fmtPct(cloud === null ? null : 1 - cloud)} сцены без облаков`;
+  }
+  return (
+    <div className="empty-scene" data-testid="empty-scene">
+      <div className="es-icon" aria-hidden>
+        ✓
+      </div>
+      <div>
+        <div className="es-title">На этом снимке признаков мусора не найдено</div>
+        <div className="es-text muted small">
+          Порог {fmtThr(threshold)}; {obs}. Это не значит, что мусора нет: его может не быть на поверхности в момент съёмки
+          или пятна мельче пикселя 10 м.
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Layers, Manifest } from '../types';
-import { DEFAULT_SCALE, fmtThr, modelLabel, NO_DATA_RGB, rgbStr, type H3Scale } from '../lib/style';
+import { DEFAULT_SCALE, fmtThr, H3_LINE_NODATA, H3_LINE_ZERO, modelLabel, probLegendGradient, rgbStr, type H3Scale } from '../lib/style';
 
 interface Props {
   manifest: Manifest;
@@ -24,9 +24,11 @@ export default function Legend({ manifest, model, threshold, layers, scale }: Pr
         <div className="legend-body">
           {layers.detections && (
             <div className="lg-row">
-              <span className="sw-spot" />
+              <span className="sw-halo">
+                <span className="sw-spot-core" />
+              </span>
               <span>
-                <b>Пятно</b> — вероятность ≥ {fmtThr(threshold)} ({modelLabel(model, manifest.models[model]?.name)})
+                <b>Находка</b> — вероятность ≥ {fmtThr(threshold)} ({modelLabel(model, manifest.models[model]?.name)}); кольцо ~ площадь
               </span>
             </div>
           )}
@@ -39,14 +41,20 @@ export default function Legend({ manifest, model, threshold, layers, scale }: Pr
             </div>
           )}
           {layers.prob && (
-            <div className="lg-block">
+            <div className="lg-block" data-testid="legend-prob">
               <div className="lg-title">Вероятность модели</div>
-              <div className="lg-grad prob" />
-              <div className="lg-ticks">
+              <div className="lg-grad prob" style={{ background: probLegendGradient(threshold ?? 0.5) }} />
+              <div className="lg-ticks prob">
                 <span>0.05</span>
-                <span>0.5</span>
+                <span
+                  className="lg-thr"
+                  style={{ left: `${(((Math.min(0.98, Math.max(0.08, threshold ?? 0.5)) - 0.05) / 0.95) * 100).toFixed(1)}%` }}
+                >
+                  порог {fmtThr(threshold)}
+                </span>
                 <span>1.0</span>
               </div>
+              <div className="muted tiny-text">&lt; 0.05 — прозрачно · коралловый — вероятность ≥ порога</div>
             </div>
           )}
           {layers.h3 && (
@@ -65,12 +73,20 @@ export default function Legend({ manifest, model, threshold, layers, scale }: Pr
                   <span key={b}>{b}</span>
                 ))}
               </div>
+              {layers.h3_3d && <div className="lg-row small">▮ высота столбика ~ индекс (лог), максимум сцены — самый высокий</div>}
               <div className="lg-row small">
-                <span className="sw-nodata" style={{ background: rgbStr(NO_DATA_RGB, 0.55) }} />
-                <span>нет данных — наблюдалось &lt; 50 % ячейки (не ноль)</span>
+                <span className="sw-cell zero" style={{ borderColor: rgbStr(H3_LINE_ZERO, 0.9) }} />
+                <span>0 — вода видна, признаков нет</span>
               </div>
+              {!layers.h3_3d && (
+                <div className="lg-row small">
+                  <span className="sw-cell nodata" style={{ borderColor: rgbStr(H3_LINE_NODATA, 1) }} />
+                  <span>нет данных — видно &lt; 50 % ячейки</span>
+                </div>
+              )}
               <div className="muted tiny-text">
-                шкала логарифмическая{scale === DEFAULT_SCALE ? '' : ' (верх — 98-й перцентиль ячеек снимка)'}; 1 пиксель 10 м ≈ 0.14 ‰ ячейки
+                шкала логарифмическая{scale === DEFAULT_SCALE ? '' : ' (верх — 98-й перцентиль ячеек снимка)'}; 1 пиксель 10 м ≈ 0.14 ‰
+                ячейки; суша и вне снимка не показаны
               </div>
             </div>
           )}

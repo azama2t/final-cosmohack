@@ -1017,16 +1017,57 @@ h3 {
   font-weight: 700;
   font-size: 10px;
 }
-.sw-nodata {
+.sw-halo {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background: rgba(255, 107, 74, 0.22);
+  box-shadow: 0 0 10px 3px rgba(255, 107, 74, 0.35);
+}
+.sw-spot-core {
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  background: #ff8a6e;
+}
+.sw-cell {
   width: 16px;
   height: 12px;
   flex: none;
   border-radius: 3px;
+  border: 1px solid;
+}
+.sw-cell.zero {
+  background: rgba(90, 140, 200, 0.08);
+}
+.sw-cell.nodata {
+  background: transparent;
 }
 .lg-grad.prob {
   height: 10px;
   border-radius: 3px;
-  background: linear-gradient(90deg, rgba(255, 87, 40, 0.3), rgb(255, 155, 40), rgb(255, 230, 40));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+.lg-ticks.prob {
+  position: relative;
+  height: 14px;
+}
+.lg-ticks.prob .lg-thr {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  color: var(--accent);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.lg-ticks.prob span:last-child {
+  position: absolute;
+  right: 0;
 }
 .lg-ramp {
   display: flex;
@@ -1162,6 +1203,7 @@ h3 {
 .dc-note {
   font-size: 11px;
   margin-top: 8px;
+  overflow-wrap: anywhere;
 }
 @media (max-height: 800px) {
   .det-card {
@@ -1548,4 +1590,53 @@ h3 {
 
 .compare-panel .btn.block {
   margin-top: 16px;
+}
+
+/* ---------- empty scene card ---------- */
+.empty-scene {
+  margin-top: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(120, 170, 230, 0.07);
+  border: 1px solid rgba(140, 180, 230, 0.18);
+}
+.es-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: 50%;
+  background: rgba(120, 190, 255, 0.14);
+  color: #9fd0ff;
+  font-weight: 700;
+}
+.es-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.es-text {
+  line-height: 1.45;
+}
+
+/* compact legend on small screens (1366×768): keep the scene visible */
+@media (max-height: 800px), (max-width: 1500px) {
+  .legend {
+    width: 256px;
+    font-size: 11px;
+  }
+  .legend .tiny-text {
+    display: none;
+  }
+  .legend-body {
+    gap: 6px;
+  }
+  .legend .lg-formula .mono {
+    font-size: 10px;
+  }
 }

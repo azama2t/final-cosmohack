@@ -1,7 +1,6 @@
 // Palette «ночной океан» + one accent for findings. Keep in sync with styles.css.
 export const ACCENT = '#ff6b4a';
 export const ACCENT_RGB: [number, number, number] = [255, 107, 74];
-export const NO_DATA_RGB: [number, number, number] = [120, 132, 150];
 
 // Fixed log breaks for share_permille (1 px of 10 m in an H3 res-8 cell ≈ 0.14 ‰).
 // Fixed (not per-dataset quantiles) so that colours are comparable between regions and dates.
@@ -63,17 +62,31 @@ export function makeScale(values: (number | null | undefined)[]): H3Scale {
 }
 
 export function h3Color(v: number | null | undefined, scale: H3Scale = DEFAULT_SCALE): [number, number, number, number] {
-  if (v === null || v === undefined || Number.isNaN(v)) return [...NO_DATA_RGB, 90];
-  if (v <= 0) return [90, 140, 200, 18]; // observed, nothing flagged: barely visible
+  if (v === null || v === undefined || Number.isNaN(v)) return [0, 0, 0, 0]; // no data: outline only
+  if (v <= 0) return [90, 140, 200, 8]; // observed, nothing flagged: almost transparent
   let i = 0;
   while (i < scale.breaks.length && v >= scale.breaks[i]) i++;
   const c = scale.colors[i];
-  return [c[0], c[1], c[2], i <= 1 ? 150 : 225]; // trace values calmer, hot cells pop
+  return [c[0], c[1], c[2], i <= 1 ? 170 : 230]; // trace values calmer, hot cells pop
 }
 
-export function h3Elevation(v: number | null | undefined): number {
+/** Cell outline: no data — very pale; zero — thin faint; non-zero — lighter tint of its fill. */
+export const H3_LINE_NODATA: [number, number, number, number] = [150, 165, 190, 38];
+export const H3_LINE_ZERO: [number, number, number, number] = [150, 190, 235, 60];
+export function h3LineColor(v: number | null | undefined): [number, number, number, number] {
+  if (v === null || v === undefined || Number.isNaN(v)) return H3_LINE_NODATA;
+  if (v <= 0) return H3_LINE_ZERO;
+  return [255, 220, 200, 150];
+}
+
+// 3D columns: log height normalised to the scene maximum, so that every non-zero cell is clearly visible
+export const H3_MIN_H = 450; // m, smallest non-zero column
+export const H3_MAX_H = 3200; // m, cap for the scene maximum
+export function h3Elevation(v: number | null | undefined, vmax: number): number {
   if (!v || v <= 0) return 0;
-  return Math.log10(1 + v / 0.14) * 900; // metres; log so single pixels are still visible
+  const lv = Math.log1p(v / 0.14);
+  const lm = Math.max(Math.log1p(Math.max(vmax, v) / 0.14), 1e-6);
+  return H3_MIN_H + (H3_MAX_H - H3_MIN_H) * Math.min(1, lv / lm);
 }
 
 export const rgbStr = (c: number[], a = 1) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
@@ -88,6 +101,8 @@ export function fmtNum(v: number | null | undefined, digits = 0): string {
 
 export function fmtPermille(v: number | null | undefined): string {
   if (v === null || v === undefined || Number.isNaN(v)) return '—';
+  if (v === 0) return '0';
+  if (Math.abs(v) < 0.01) return `< ${nf(2).format(0.01)}`;
   const d = Math.abs(v) >= 10 ? 1 : Math.abs(v) >= 1 ? 2 : 3;
   return nf(d).format(v);
 }
@@ -121,4 +136,13 @@ export const modelLabel = (id: string, name?: string) =>
 export function fmtThr(v: number | null | undefined): string {
   if (v === null || v === undefined || Number.isNaN(v)) return '—';
   return String(Number(Number(v).toPrecision(v >= 0.1 ? 2 : 3)));
+}
+
+// prob.png palette (docs/CONTRACTS.md, «Дополнения 03:35»): P < 0.05 transparent; 0.05…thr ramp
+// #2b6cb0 (α 40) → #b794f4 → #f6ad55 (α 170); P ≥ thr accent #ff6b4a (α 230).
+export function probLegendGradient(thr: number): string {
+  const t = Math.min(0.98, Math.max(0.08, thr));
+  const pos = (p: number) => `${(((p - 0.05) / 0.95) * 100).toFixed(1)}%`;
+  const mid = (0.05 + t) / 2;
+  return `linear-gradient(90deg, rgba(43,108,176,${(40 / 255).toFixed(2)}) 0%, rgba(183,148,244,0.45) ${pos(mid)}, rgba(246,173,85,${(170 / 255).toFixed(2)}) ${pos(t)}, rgba(255,107,74,${(230 / 255).toFixed(2)}) ${pos(t)}, rgba(255,107,74,${(230 / 255).toFixed(2)}) 100%)`;
 }

@@ -1,7 +1,7 @@
 import { BitmapLayer, GeoJsonLayer, PathLayer, ScatterplotLayer } from '@deck.gl/layers';
 import type { Layer, PickingInfo } from '@deck.gl/core';
 import type { Bounds, DetProps, Feature, FC, H3Props, Layers, Region } from '../types';
-import { ACCENT_RGB, h3Color, h3Elevation, type H3Scale } from '../lib/style';
+import { ACCENT_RGB, h3Color, h3Elevation, h3LineColor, type H3Scale } from '../lib/style';
 
 type GeoModule = typeof import('@deck.gl/geo-layers');
 let geo: GeoModule | null = null;
@@ -34,6 +34,11 @@ export interface LayerCtx {
   detections: FC<DetProps> | null;
   h3: FC<H3Props> | null;
   h3Scale: H3Scale;
+  /** max non-zero share_permille of the scene (normalises 3D heights) */
+  h3Max: number;
+  /** current map zoom (halo fades out when polygons become visible) */
+  zoom: number;
+  hoverId: string | null;
   drift: PreparedDrift | null;
   hour: number;
   layers: Layers;
@@ -109,40 +114,104 @@ export function buildLayers(c: LayerCtx): Layer[] {
   if (L.h3 && c.h3 && geo) {
     const H3HexagonLayer = geo.H3HexagonLayer;
     const extruded = L.h3_3d;
+    // land / outside the scene (no observed water at all) is never drawn; in 3D also skip «no data» cells
+    const cells = c.h3.features.filter(
+      (f) => f.properties.observed_water_px > 0 && (!extruded || f.properties.share_permille !== null),
+    );
+    const vmax = c.h3Max;
     out.push(
       new H3HexagonLayer<Feature<H3Props>>({
         id: 'h3',
-        data: c.h3.features,
+        data: cells,
         getHexagon: (f) => f.properties.h3,
         getFillColor: (f) => h3Color(f.properties.share_permille, c.h3Scale) as any,
         extruded,
-        getElevation: (f) => h3Elevation(f.properties.share_permille),
+        getElevation: (f) => h3Elevation(f.properties.share_permille, vmax),
         elevationScale: 1,
-        coverage: extruded ? 0.86 : 1,
+        coverage: extruded ? 0.84 : 1,
         stroked: !extruded,
-        getLineColor: [170, 200, 240, 38],
+        filled: true,
+        getLineColor: (f) => h3LineColor(f.properties.share_permille) as any,
         lineWidthUnits: 'pixels',
-        getLineWidth: 1,
-        material: { ambient: 0.55, diffuse: 0.55, shininess: 24, specularColor: [60, 60, 60] } as any,
+        getLineWidth: (f) => ((f.properties.share_permille ?? 0) > 0 ? 1.2 : 0.8),
+        material: { ambient: 0.6, diffuse: 0.55, shininess: 24, specularColor: [60, 60, 60] } as any,
         pickable: true,
         autoHighlight: true,
         highlightColor: [255, 255, 255, 70],
         transitions: { getElevation: { duration: 900 } } as any,
         onHover: (info: PickingInfo) =>
           c.onHover(info.object ? { x: info.x, y: info.y, kind: 'h3', props: (info.object as any).properties } : null),
-        updateTriggers: { getFillColor: [c.h3, c.h3Scale], getElevation: c.h3 },
+        updateTriggers: {
+          getFillColor: [c.h3, c.h3Scale],
+          getElevation: [c.h3, vmax],
+          getLineColor: c.h3,
+          getLineWidth: c.h3,
+        },
       }) as any,
     );
   }
 
   if (L.detections && c.detections) {
+    const feats = c.detections.features;
+    const onHoverDet = (info: PickingInfo) => {
+      const o = info.object as any;
+      c.onHover(o ? { x: info.x, y: info.y, kind: 'det', props: o.properties } : null);
+    };
+    const onClickDet = (info: PickingInfo) => {
+      if (info.object) c.onClickDet(info.object as any);
+    };
+    // «halo»: screen-space marker at each spot centroid so that 1–3 px spots are findable at region zoom.
+    // Radius grows with sqrt(area); fades out from zoom 13 → 14.5 where the polygons themselves are visible.
+    const fade = Math.min(1, Math.max(0.12, (14.6 - c.zoom) / 1.8));
+    const haloR = (f: Feature<DetProps>) => Math.min(22, 8.5 + 0.11 * Math.sqrt(Math.max(0, f.properties.area_m2)));
+    const dense = feats.length > 400;
+    const hot = c.hoverId ?? c.selectedId;
+    if (!dense)
+      out.push(
+        new ScatterplotLayer<Feature<DetProps>>({
+          id: 'detections-glow',
+          data: feats,
+          getPosition: (f) => centroid(f),
+          getRadius: (f) => haloR(f) * 2.1,
+          radiusUnits: 'pixels',
+          filled: true,
+          stroked: true,
+          getFillColor: [...ACCENT_RGB, Math.round(58 * fade)],
+          getLineColor: [...ACCENT_RGB, Math.round(70 * fade)],
+          lineWidthUnits: 'pixels',
+          getLineWidth: 1,
+          parameters: { depthTest: false } as any,
+          updateTriggers: { getFillColor: fade, getLineColor: fade },
+        }),
+      );
+    out.push(
+      new ScatterplotLayer<Feature<DetProps>>({
+        id: 'detections-halo',
+        data: feats,
+        getPosition: (f) => centroid(f),
+        getRadius: (f) => (f.properties.id === hot ? haloR(f) + 3 : haloR(f)),
+        radiusUnits: 'pixels',
+        stroked: true,
+        filled: true,
+        getFillColor: (f) => (f.properties.id === hot ? [255, 190, 170, Math.round(110 * fade)] : [...ACCENT_RGB, Math.round(60 * fade)]),
+        getLineColor: (f) => (f.properties.id === hot ? [255, 244, 236, 255] : [...ACCENT_RGB, Math.round(245 * fade)]),
+        lineWidthUnits: 'pixels',
+        getLineWidth: (f) => (f.properties.id === hot ? 3 : 2.5),
+        pickable: fade > 0.3,
+        onHover: onHoverDet,
+        onClick: onClickDet,
+        parameters: { depthTest: false } as any,
+        transitions: { getRadius: 150 } as any,
+        updateTriggers: { getFillColor: [fade, hot], getLineColor: [fade, hot], getRadius: hot, getLineWidth: hot },
+      }),
+    );
     out.push(
       new GeoJsonLayer<DetProps>({
         id: 'detections',
         data: c.detections as any,
         stroked: true,
         filled: true,
-        getFillColor: [...ACCENT_RGB, 150],
+        getFillColor: (f: any) => (f.properties.id === hot ? [255, 190, 170, 230] : [...ACCENT_RGB, 170]),
         getLineColor: [255, 190, 170, 255],
         lineWidthUnits: 'pixels',
         getLineWidth: 1.5,
@@ -151,35 +220,13 @@ export function buildLayers(c: LayerCtx): Layer[] {
         autoHighlight: true,
         highlightColor: [255, 236, 214, 230],
         parameters: { depthTest: false } as any,
-        onHover: (info: PickingInfo) =>
-          c.onHover(info.object ? { x: info.x, y: info.y, kind: 'det', props: (info.object as any).properties } : null),
-        onClick: (info: PickingInfo) => {
-          if (info.object) c.onClickDet(info.object as any);
-        },
-      }),
-    );
-    // glow halo around each spot so that tiny spots are visible at region zoom (skip when spots are dense)
-    if (c.detections.features.length <= 150)
-      out.push(
-      new ScatterplotLayer<Feature<DetProps>>({
-        id: 'detections-halo',
-        data: c.detections.features,
-        getPosition: (f) => centroid(f),
-        getRadius: (f) => Math.max(60, Math.sqrt(f.properties.area_m2) * 1.2),
-        radiusUnits: 'meters',
-        radiusMinPixels: 10,
-        radiusMaxPixels: 40,
-        stroked: true,
-        filled: true,
-        getFillColor: [...ACCENT_RGB, 26],
-        getLineColor: [...ACCENT_RGB, 210],
-        lineWidthUnits: 'pixels',
-        getLineWidth: 1.5,
-        parameters: { depthTest: false } as any,
+        onHover: onHoverDet,
+        onClick: onClickDet,
+        updateTriggers: { getFillColor: hot },
       }),
     );
     if (c.selectedId) {
-      const sel = c.detections.features.find((f) => f.properties.id === c.selectedId);
+      const sel = feats.find((f) => f.properties.id === c.selectedId);
       if (sel)
         out.push(
           new GeoJsonLayer({

@@ -174,7 +174,8 @@ def run(args) -> dict:
         manifest = page.evaluate("fetch('/data/manifest.json').then(r => r.json())")
         regions = sorted(
             manifest["regions"],
-            key=lambda r: ((r.get("summary") or {}).get("index_permille") or -1, (r.get("summary") or {}).get("n_detections") or 0),
+            # same rule as the demo tour: most detections on the latest date, ties by index
+            key=lambda r: ((r.get("summary") or {}).get("n_detections") or 0, (r.get("summary") or {}).get("index_permille") or -1),
             reverse=True,
         )
         best = regions[0]
@@ -280,6 +281,31 @@ def run(args) -> dict:
 
         # URL state round-trip check
         res["url_state"] = page.url.replace(base, "")
+
+        # extra: empty state (region with 0 detections on its latest date) ------
+        if args.extra:
+            if page.locator("[data-testid='drift-play']").count():
+                click(page, "layer-toggle-drift")
+            empty = [r for r in regions if not (r.get("summary") or {}).get("n_detections")]
+            if empty:
+                click(page, f"region-item-{empty[0]['id']}")
+                page.wait_for_function("window.__app && window.__app.sceneReady", timeout=15000)
+                wait_idle(page, 800)
+                try:
+                    page.wait_for_selector("[data-testid='empty-scene']", timeout=5000)
+                except Exception:
+                    res["notes"].append("empty-scene card not shown")
+                page.wait_for_timeout(600)
+                shot(page, out, "12_empty_state", res["shots"])
+            # halo at mid zoom vs polygons at close zoom
+            click(page, f"region-item-{best['id']}")
+            page.wait_for_function("window.__app && window.__app.sceneReady", timeout=15000)
+            wait_idle(page, 800)
+            pos = page.evaluate("window.__app.largestDetectionScreen()")
+            if pos:
+                page.evaluate("window.__ctl && window.__ctl.map && window.__ctl.map.easeTo({center: window.__ctl.map.unproject([%d - window.__ctl.map.getContainer().getBoundingClientRect().left, %d - window.__ctl.map.getContainer().getBoundingClientRect().top]), zoom: 15, duration: 0})" % (pos["x"], pos["y"]))
+                wait_idle(page, 1200)
+                shot(page, out, "13_zoom15_polygons", res["shots"])
         ctx.close()
 
         # 10 overview 1366 ------------------------------------------------------
@@ -299,6 +325,10 @@ def run(args) -> dict:
             p2.wait_for_function("window.__app && window.__app.sceneReady", timeout=15000)
             wait_idle(p2, 1200)
             shot(p2, out, "11_region_1366", res["shots"])
+            click(p2, "layer-toggle-h3")
+            p2.wait_for_function("window.__app && window.__app.h3Ready", timeout=15000)
+            p2.wait_for_timeout(1200)
+            shot(p2, out, "14_h3_1366", res["shots"])
         ctx2.close()
 
         # optional: record demo tour ---------------------------------------------

@@ -42,57 +42,73 @@ export async function runTour(apiRef: MutableRefObject<TourApi>, signal: AbortSi
     const t0 = performance.now();
     while (!cond() && performance.now() - t0 < max) await wait(100);
   };
-  const TOTAL = 8;
-  const cap = (i: number, t: string) => api().caption(i, TOTAL, t);
-
   try {
     const m = api().get().manifest;
     if (!m) return;
     const best = bestRegion(m);
     if (!best) return;
+    const latest = best.dates.find((d) => d.date === best.summary?.latest_date) ?? best.dates[best.dates.length - 1];
+    const hasDet = (best.summary?.n_detections ?? 0) > 0;
+    const hasDrift = !!latest?.drift;
+    // steps without data are skipped entirely (no empty pauses); numbering follows the actual plan
+    const TOTAL = 5 + (hasDet ? 2 : 0) + (hasDrift ? 1 : 0);
+    let step = 0;
+    const cap = (t: string) => api().caption(++step, TOTAL, t);
 
     api().closeCompare();
     api().closeDetection();
     api().setLayers({ rgb: true, detections: true, prob: false, h3: false, h3_3d: false, zones: false, drift: false });
-    cap(1, 'Все районы наблюдения. Число у метки — индекс: доля наблюдаемой воды с признаками мусора, ‰.');
+    cap('Все районы наблюдения. Число у метки — индекс: доля наблюдаемой воды с признаками мусора, ‰.');
     api().selectRegion(null);
     await wait(5000);
 
-    cap(2, `Лучший по индексу район — ${best.name}. Летим к свежему снимку Sentinel-2.`);
+    cap(
+      hasDet
+        ? `Больше всего находок на свежем снимке — ${best.name}. Летим к снимку Sentinel-2.`
+        : `${best.name}: летим к свежему снимку Sentinel-2.`,
+    );
     api().selectRegion(best.id);
     await wait(600);
     await api().waitIdle(6000);
     await until(() => !!api().get().detections);
     await wait(1400);
 
-    cap(3, 'Коралловым подсвечены пятна: здесь модель видит признаки плавающего мусора.');
+    cap(
+      hasDet
+        ? 'Коралловые кольца — находки: здесь модель видит признаки плавающего мусора. Размер кольца растёт с площадью пятна.'
+        : 'На этом снимке модель не нашла признаков мусора — так тоже бывает.',
+    );
     await wait(5000);
 
     const det = api().get().detections;
-    if (det?.features.length) {
+    if (hasDet && det?.features.length) {
       const f = [...det.features].sort((a, b) => b.properties.area_m2 - a.properties.area_m2)[0];
-      cap(4, 'Карточка находки: вырезка снимка, площадь помеченной области, уверенность, качество наблюдения.');
+      cap('Карточка находки: вырезка снимка, площадь помеченной области, уверенность, качество наблюдения.');
       api().openDetection(f);
       await wait(7000);
       api().closeDetection();
     }
 
-    cap(5, 'Индекс по сетке H3 (~0.7 км²) в 3D: высота и цвет — доля воды с признаками мусора. Серые — нет данных.');
+    cap('Индекс по сетке H3 (~0.7 км²) в 3D: цвет и высота (лог) — доля наблюдаемой воды с признаками мусора.');
     api().toggleLayer('h3_3d', true);
-    await wait(8500);
+    await wait(8000);
 
-    cap(6, 'Приоритет обследования: топ ячеек по помеченной воде с учётом повторяемости по датам и уверенности.');
-    api().toggleLayer('h3', false);
-    api().toggleLayer('zones', true);
-    await wait(400);
-    const z = api().get().zones?.zones?.[0];
-    if (z) api().showZone(z);
-    await wait(7000);
-    api().closeZone();
+    if (hasDet) {
+      cap('Приоритет обследования: топ ячеек по помеченной воде с учётом повторяемости по датам и уверенности.');
+      api().toggleLayer('h3', false);
+      api().toggleLayer('zones', true);
+      await wait(400);
+      const z = api().get().zones?.zones?.[0];
+      if (z) api().showZone(z);
+      await wait(z ? 7000 : 3000);
+      api().closeZone();
+    } else {
+      api().toggleLayer('h3', false);
+    }
 
     const de = api().get().dateEntry;
-    if (de?.drift) {
-      cap(7, 'Дрейф 0→72 ч — демонстрационный прогноз, без валидации: куда может сместиться мусор.');
+    if (hasDrift && de?.drift) {
+      cap('Дрейф 0→72 ч — демонстрационный прогноз, без валидации: куда может сместиться мусор.');
       api().toggleLayer('zones', false);
       api().toggleLayer('drift', true);
       await until(() => !!(window as any).__driftPlay, 4000);
@@ -103,14 +119,10 @@ export async function runTour(apiRef: MutableRefObject<TourApi>, signal: AbortSi
       await wait(10000);
       (window as any).__driftPlay?.(false);
       api().toggleLayer('drift', false);
-    } else {
-      cap(7, 'Вероятность модели — сырой выход до порога.');
-      api().toggleLayer('prob', true);
-      await wait(5000);
-      api().toggleLayer('prob', false);
     }
 
-    cap(8, 'Сравнение двух районов или дат: снимки рядом и таблица различий.');
+    cap('Сравнение двух районов или дат: снимки рядом и таблица различий.');
+    api().toggleLayer('zones', false);
     api().openCompare();
     await wait(8000);
     api().closeCompare();

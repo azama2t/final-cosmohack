@@ -7,7 +7,7 @@ import { buildLayers, type LayerCtx } from './layers';
 import { anim, ctl, darkStyle, fitOverview, offlineStyle, satelliteStyle } from './controller';
 import { fmtPermille } from '../lib/style';
 
-export interface MapViewProps extends Omit<LayerCtx, 'hour'> {
+export interface MapViewProps extends Omit<LayerCtx, 'hour' | 'zoom'> {
   basemap: Basemap;
   initialCamera?: Camera;
   zones: Zone[] | null;
@@ -74,6 +74,16 @@ export default function MapView(p: MapViewProps) {
       if (tileErrors === 8 && props.current.basemap === 'satellite') props.current.onBasemapFailed('satellite');
       void e;
     });
+    // halo fade depends on zoom: re-render deck layers when the fade bucket changes
+    let fadeBucket = -1;
+    map.on('zoom', () => {
+      const z = map.getZoom();
+      const b = z < 12.6 ? 0 : z > 14.8 ? 99 : Math.round(z * 5);
+      if (b !== fadeBucket) {
+        fadeBucket = b;
+        ctl.render();
+      }
+    });
     map.on('movestart', () => (ctl.moving = true));
     map.on('moveend', () => {
       ctl.moving = false;
@@ -114,7 +124,7 @@ export default function MapView(p: MapViewProps) {
   ctl.render = () => {
     const o = ctl.overlay;
     if (!o) return;
-    o.setProps({ layers: buildLayers({ ...props.current, hour: anim.hour }) });
+    o.setProps({ layers: buildLayers({ ...props.current, hour: anim.hour, zoom: ctl.map?.getZoom() ?? 0 }) });
   };
   useEffect(() => {
     ctl.render();

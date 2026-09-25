@@ -95,13 +95,18 @@ export default function App() {
   );
   const detections = useAsync(scene ? () => loadDetections(scene.r, scene.d, scene.m) : null, [sk]);
   const zones = useAsync(scene ? () => loadZones(scene.r, scene.d, scene.m) : null, [sk]);
-  const needH3 = layers.h3 || !!selected;
+  const noDet = !!detections && detections.features.length === 0;
+  const needH3 = layers.h3 || !!selected || noDet;
   const h3 = useAsync(scene && needH3 ? () => loadH3(scene.r, scene.d, scene.m) : null, [sk, needH3]);
   const driftRaw = useAsync(
     dateEntry?.drift && layers.drift ? () => loadDrift(dateEntry.drift!) : null,
     [dateEntry?.drift, layers.drift],
   );
   const h3Scale = useMemo(() => makeScale(h3?.features.map((f) => f.properties.share_permille) ?? []), [h3]);
+  const h3Max = useMemo(
+    () => (h3?.features ?? []).reduce((a, f) => Math.max(a, f.properties.share_permille ?? 0), 0),
+    [h3],
+  );
   const drift = useMemo(() => (driftRaw ? prepareDrift(driftRaw.particles) : null), [driftRaw]);
   const timeseries = useAsync(region ? () => loadTimeseries(region.id) : null, [region?.id]);
 
@@ -210,7 +215,10 @@ export default function App() {
     const r = region ?? bestRegion(manifest);
     if (!r) return null;
     const a = { region: r.id, date: date && region ? date : r.dates[r.dates.length - 1].date };
-    const other = manifest.regions.find((x) => x.id !== r.id);
+    // B: the other region with most detections (a comparison with an empty scene tells little)
+    const other = manifest.regions
+      .filter((x) => x.id !== r.id)
+      .sort((x, y) => (y.summary?.n_detections ?? 0) - (x.summary?.n_detections ?? 0))[0];
     if (other) return { a, b: { region: other.id, date: other.dates[other.dates.length - 1].date } };
     const prev = r.dates.filter((d) => d.date !== a.date).at(-1);
     return { a, b: { region: r.id, date: prev?.date ?? a.date } };
@@ -354,6 +362,8 @@ export default function App() {
           detections={detections}
           h3={h3}
           h3Scale={h3Scale}
+          h3Max={h3Max}
+          hoverId={hover?.kind === 'det' ? (hover.props as DetProps).id : null}
           drift={drift}
           layers={layers}
           selectedId={selected?.properties.id ?? null}
@@ -408,6 +418,7 @@ export default function App() {
           timeseries={timeseries}
           detections={detections}
           zones={zones}
+          h3={h3}
           collapsed={rightCollapsed}
           onCollapse={() => setRightCollapsed((v) => !v)}
           onRegion={selectRegion}

@@ -72,12 +72,13 @@ export const loadZones = (r: string, d: string, m: string) => getJSONOpt<ZonesFi
 export const loadTimeseries = (r: string) => getJSONOpt<TsRow[]>(`${r}/timeseries.json`);
 export const loadDrift = (path: string) => getJSONOpt<DriftFile>(path);
 
+/** Region for the demo tour: most detections on its latest date (summary), ties broken by index. */
 export function bestRegion(m: Manifest): Region | null {
   if (!m.regions.length) return null;
   return [...m.regions].sort(
     (a, b) =>
-      (b.summary?.index_permille ?? -1) - (a.summary?.index_permille ?? -1) ||
-      (b.summary?.n_detections ?? 0) - (a.summary?.n_detections ?? 0),
+      (b.summary?.n_detections ?? 0) - (a.summary?.n_detections ?? 0) ||
+      (b.summary?.index_permille ?? -1) - (a.summary?.index_permille ?? -1),
   )[0];
 }
 
