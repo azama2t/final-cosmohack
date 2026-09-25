@@ -32,6 +32,8 @@ export interface DateEntry {
   quality?: DateQuality;
   /** optional (L15, dates with >= 2 models): detections confirmed by the other model within 20 m, per model */
   n_confirmed?: Record<string, number>;
+  /** optional (L52, organiser chips without a date): `date` is a placeholder (1900-01-01), UI shows «дата неизвестна» */
+  date_unknown?: boolean;
 }
 
 export interface DateQuality {

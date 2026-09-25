@@ -65,6 +65,7 @@ FeatureCollection, Polygon = граница ячейки H3 res 8. Только 
 Все метрики для README/отчёта/деки/UI. Плоский словарь с вложенными секциями по этапам: `{"l3_lgbm": {"val": {"f1_md":..,"iou_md":..,"threshold":..}, "test": {...}}, "l4_unet": {...}, "data": {...}, "regions": {...}}`. Генерируется скриптом `scripts/final_numbers.py`, руками не правится.
 
 ## Дополнения (03:35)
+- `manifest.regions[].dates[].date_unknown` (необязательно, L52, `kind: "organizer"`): `true` — даты съёмки нет ни в имени, ни в тегах, `date` = заглушка (`org_to_map --unknown-date`, по умолчанию `1900-01-01`); то же поле в `scene.json` сцены; `regions[].date_unknown: true`, если заглушка у всех дат района. Фронт v2 вместо даты пишет «дата неизвестна».
 - `manifest.regions[].dates[].thumb` (необязательно): `<region>/<date>/thumb.jpg` — превью rgb 256 px по длинной стороне, ≤ 30 КБ; фронт берёт его для списка регионов.
 - Палитра `prob.png` (фиксирована, легенда фронта её повторяет): P < 0.05 — прозрачно; 0.05 ≤ P < порог — рампа от `#2b6cb0` (α 40) через `#b794f4` к `#f6ad55` (α 170); P ≥ порог — акцент `#ff6b4a` (α 230).
 - `/api/compare` → `{"a":{region,date,model,kpi},"b":{...},"diff":{<kpi>:{"delta": b−a, "ratio": b/a | null}}}`; kpi: total_debris_area_m2, n_detections, mean_index, max_index, cloud_frac, observed_cells, flagged_cells.

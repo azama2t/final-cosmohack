@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Basemap, LayerKey, Layers, ModelInfo, Projection } from '../types';
-import { modelLabel } from '../lib/style';
+import { fmtThr, modelLabel } from '../lib/style';
 import { AGREE_NOTE } from '../lib/confirm';
 
 interface Props {
@@ -82,7 +82,7 @@ export default function Toolbar(p: Props) {
             <button key={m} className="menu-row" disabled={!p.sceneModels.includes(m)} onClick={() => p.onModel(m)} data-testid={`model-${m}`}>
               <span className={`radio ${p.model === m ? 'on' : ''}`} aria-hidden />
               <span>{modelLabel(m, p.models?.[m]?.name)}</span>
-              <span className="mr-hint">порог {p.models?.[m]?.threshold ?? '—'}</span>
+              <span className="mr-hint">порог {fmtThr(p.models?.[m]?.threshold)}</span>
             </button>
           ))}
           <button className="menu-row" disabled={!p.confAvail} onClick={() => p.onOnlyConfirmed(!p.onlyConfirmed)} data-testid="only-confirmed">

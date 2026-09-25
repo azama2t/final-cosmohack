@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Manifest } from '../types';
 import { apiGet, apiPaths, apiPost, type LabelRec, type RetrainJob, type ReviewItem, type ReviewQueue } from '../lib/api';
 import { shortName } from '../lib/data';
-import { fmtArea, fmtDate, fmtNum, fmtThr, modelLabel } from '../lib/style';
+import { fmtArea, fmtDate, fmtNum, fmtProb, fmtThr, modelLabel } from '../lib/style';
 
 interface Props {
   manifest: Manifest;
@@ -425,7 +425,7 @@ export default function ReviewView({ manifest, initialRegion, onToast, onShowOnM
                     <span className="l-sub">{x.reasons.map((c) => REASON_RU[c] ?? c).join(' · ')}</span>
                   </span>
                   <span className="l-val mono" title="уверенность модели (максимум)">
-                    {x.max_prob === null ? '—' : x.max_prob.toFixed(2)}
+                    {fmtProb(x.max_prob)}
                   </span>
                 </button>
               ))}
@@ -443,7 +443,7 @@ export default function ReviewView({ manifest, initialRegion, onToast, onShowOnM
                     </div>
                     <div style={{ fontSize: 16, fontWeight: 500, marginTop: 4 }}>
                       {fmtDate(it.date)} · {modelLabel(it.model, manifest.models?.[it.model]?.name)} · уверенность{' '}
-                      <span className="accent">{it.max_prob === null ? '—' : it.max_prob.toFixed(2)}</span>
+                      <span className="accent">{fmtProb(it.max_prob)}</span>
                       <span className="muted small"> (порог {fmtThr(it.threshold)})</span>
                     </div>
                   </div>
@@ -503,7 +503,7 @@ export default function ReviewView({ manifest, initialRegion, onToast, onShowOnM
                 </div>
 
                 <div className="small muted" style={{ marginTop: 'var(--s1)' }}>
-                  ср. P {it.mean_prob === null ? '—' : it.mean_prob.toFixed(2)} · площадь {fmtNum(it.area_m2)} м² ·{' '}
+                  ср. P {fmtProb(it.mean_prob)} · площадь {fmtNum(it.area_m2)} м² ·{' '}
                   {it.confirmed === true
                     ? 'вторая модель согласна (согласие моделей, не проверка на месте)'
                     : it.confirmed === false
@@ -873,7 +873,7 @@ function IncidentsTab({
               {inc.max_prob !== null && inc.max_prob !== undefined && (
                 <>
                   <dt>уверенность (макс.)</dt>
-                  <dd>{inc.max_prob.toFixed(2)}</dd>
+                  <dd>{fmtProb(inc.max_prob)}</dd>
                 </>
               )}
               {inc.model && (

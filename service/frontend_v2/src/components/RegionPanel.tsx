@@ -3,7 +3,7 @@ import type { DetProps, Feature, Region } from '../types';
 import type { RightProps } from './RightPanel';
 import { apiGet } from '../lib/api';
 import { apiAvailable, dataUrl, isFlagged, modelPath, regionReliability } from '../lib/data';
-import { fmtArea, fmtDate, fmtDateShort, fmtNum, fmtPct, fmtPermille, modelLabel, rankColor, rgbStr } from '../lib/style';
+import { fmtArea, fmtDate, fmtDateShort, fmtNum, fmtPct, fmtPermille, fmtProb, isUnknownDate, modelLabel, rankColor, rgbStr } from '../lib/style';
 import { centroid } from '../map/layers';
 import { fmtKm } from '../lib/route';
 import TsChart from './TsChart';
@@ -123,7 +123,7 @@ export function FindingsView(p: P) {
                   </span>
                   <span className="l-main">
                     <span>
-                      {a} {u} · уверенность {pr.mean_prob.toFixed(2)}
+                      {a} {u} · уверенность {fmtProb(pr.mean_prob)}
                     </span>
                     <span className="l-sub" style={{ display: 'block' }}>
                       <span className={`status ${STATUS_CLS[st] ?? ''}`} style={{ fontSize: 12 }}>
@@ -266,7 +266,7 @@ export function HistoryView(p: P) {
               title={isFlagged(d) ? 'дымка/блик — находки могут быть завышены' : d.scene_id}
             >
               {fmtDateShort(d.date).slice(0, 5)}
-              <small>{d.date.slice(0, 4)}</small>
+              <small>{isUnknownDate(d.date) ? 'дата ?' : d.date.slice(0, 4)}</small>
             </button>
           ))}
         </div>

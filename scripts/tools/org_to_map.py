@@ -20,7 +20,9 @@ Pipeline:
     mosaic never gets huge when chips are spread over a whole S2 tile.
     Date: from the file name (YYYY-MM-DD, YYYYMMDD, D-M-YY as in MARIDA; --date-order dmy|mdy) or TIFF tags
     (TIFFTAG_DATETIME, DATE*, ACQUISITION*); if none -> --unknown-date (default 1900-01-01, flagged
-    date_unknown in scene.json -- the service needs YYYY-MM-DD).
+    date_unknown in scene.json and in manifest regions[].dates[].date_unknown / regions[].date_unknown; the v2 UI
+    then shows «дата неизвестна» -- the service needs YYYY-MM-DD).
+    Region names are unique: equal group names get the tile, else the UTM zone, else `_g<k>` as a suffix.
  4. Per scene, a live-format folder <work>/<region>/<date>/ (reports/tasklog/06_live.md):
     bands.tif (adapter bands, float32 reflectance, descriptions = band names, NaN outside chips),
     water_mask.tif (NDWI = (B3-B8)/(B3+B8) > --ndwi, holes <= 100 px filled -- the organiser data have no SCL),
@@ -35,7 +37,8 @@ Pipeline:
 
 Predictions (--pred NAME=DIR, repeatable; plain DIR = lgbm): matched to chips by file stem:
 <stem>_prob.tif (inference.py), <stem>.png / <stem>.tif (predict_org.py --prob -> <out>_prob/), uint8 0..255 or
-float 0..1. Pure 0/1 rasters are treated as binary masks (warning). Ungeoreferenced predictions (PNG) take the
+float 0..1. Pure 0/1 rasters are treated as binary masks (warning); all-zero rasters are «no signal» chips
+(counted separately, normal for clean water). Ungeoreferenced predictions (PNG) take the
 chip grid (shapes must match).
 """
 from __future__ import annotations
@@ -77,6 +80,7 @@ WATER_RULE = ("NDWI = (B3 - B8) / (B3 + B8) > {ndwi} on valid pixels, holes <= {
 SCL_RULE = ("pseudo-SCL (not L2A): 0 = outside chips / nodata, 6 = water_mask, 7 = other valid, "
             "8 = bright cloud rule B2 >= 0.06 & B11 >= 0.03 (blobs >= 100 px)")
 MARKER = ".org_to_map"
+ZERO_SIGNAL = "zero"  # read_prob: the raster is 0 everywhere (no signal), counted separately from warnings
 
 
 class OrgMapError(Exception):
@@ -287,13 +291,49 @@ def group_chips(metas: list[dict], mode: str, gap_m: float, max_px: int, order: 
             name = base + (f"_p{pi + 1}" if len(parts) > 1 else "")
             scenes.append({"name": name, "crs": k[0], "date": date, "date_source": ms[0]["date_source"],
                            "tile": tiles[0] if tiles else "", "chips": ms})
-    # unique region ids
+    return unique_names(scenes)
+
+
+def crs_label(crs: str | None) -> str:
+    """EPSG:32616 -> utm16n, EPSG:32733 -> utm33s, else the EPSG code."""
+    m = re.match(r"^EPSG:(32[67])(\d{2})$", crs or "")
+    if m:
+        return f"utm{int(m.group(2))}{'n' if m.group(1) == '326' else 's'}"
+    m = re.match(r"^EPSG:(\d+)$", crs or "")
+    return f"epsg{m.group(1)}" if m else "crs"
+
+
+def unique_names(scenes: list[dict]) -> list[dict]:
+    """Region ids AND display names unique: groups with the same name (anonymous chips `tile_*` of different CRS /
+    dates -> both `tile_p1`) get a suffix -- the tile, else the UTM zone, else the group number `_g<k>`. The
+    region id is the safe_id of the (now unique) name, so the map list never shows two identical names."""
+    from collections import Counter
+
+    for key in ("tile", "crs", None):
+        cnt = Counter(s["name"] for s in scenes)
+        dup = {n for n, c in cnt.items() if c > 1}
+        if not dup:
+            break
+        for s in scenes:
+            if s["name"] not in dup:
+                continue
+            if key == "tile" and s.get("tile") and s["tile"].lower() not in s["name"].lower():
+                s["name"] = f"{s['name']}_{s['tile']}"
+            elif key == "crs" and s.get("crs"):
+                s["name"] = f"{s['name']}_{crs_label(s['crs'])}"
+        if key is None:
+            k: dict[str, int] = defaultdict(int)
+            for s in scenes:
+                if s["name"] in dup:
+                    k[s["name"]] += 1
+                    s["name"] = f"{s['name']}_g{k[s['name']]}"
     seen: dict[str, int] = {}
-    for s in scenes:
+    for s in scenes:  # safety net: different names may still collide after safe_id
         rid = safe_id(s["name"])
         if rid in seen:
             seen[rid] += 1
             rid = f"{rid}_{seen[rid]}"
+            s["name"] = rid
         else:
             seen[rid] = 0
         s["region"] = rid
@@ -369,8 +409,22 @@ def index_dir(d: Path, strip: tuple[str, ...]) -> dict[str, Path]:
     return idx
 
 
-def read_prob(p: Path, g: dict, crs) -> tuple[np.ndarray, str | None]:
-    """-> (float32 0..255 on the chip grid, warning or None)."""
+def pred_scale_255(files: list[Path]) -> bool:
+    """True if any integer prediction raster of the model has a value > 1 -> the folder holds P*255 and a chip
+    with values only in {0, 1} is a LOW probability (<= 1/255), not a binary mask (L52: 2 of 104 rehearsal chips
+    were turned into P = 1 by the per-chip rule)."""
+    for p in files:
+        try:
+            with rasterio.open(p) as ds:
+                if not ds.dtypes[0].startswith("float") and float(ds.read(1).max()) > 1:
+                    return True
+        except Exception:  # noqa: BLE001
+            continue
+    return False
+
+
+def read_prob(p: Path, g: dict, crs, scale255: bool = False) -> tuple[np.ndarray, str | None]:
+    """-> (float32 0..255 on the chip grid, warning or None). scale255: the folder is P*255 (pred_scale_255)."""
     warn = None
     with rasterio.open(p) as ds:
         a = ds.read(1).astype(np.float32)
@@ -386,8 +440,12 @@ def read_prob(p: Path, g: dict, crs) -> tuple[np.ndarray, str | None]:
     fin = a[np.isfinite(a)]
     mx = float(fin.max()) if fin.size else 0.0
     uniq = np.unique(fin[:10000]) if fin.size else np.array([])
+    if mx <= 0.0:  # all zeros (or empty): no signal on this chip -- not a binary mask
+        return np.zeros_like(a), ZERO_SIGNAL
     if dt.startswith("float") and mx <= 1.0 + 1e-6:
         a = a * 255.0
+    elif scale255 and not dt.startswith("float"):
+        pass  # P*255 folder: 0/1 values are P <= 1/255
     elif set(np.unique(fin).tolist()) <= {0.0, 1.0}:
         a, warn = a * 255.0, "бинарная маска 0/1, а не вероятность"
     elif set(uniq.tolist()) <= {0.0, 255.0} and len(uniq) == 2:
@@ -534,14 +592,16 @@ def build_scene(sc: dict, cfg: dict, preds: dict[str, dict[str, Path]], thr: dic
             "bands": names, "models": {}}
     for mname, idx in preds.items():
         prob = np.full((H, W), np.nan, np.float32)
-        n_ok, missing, warns = 0, [], set()
+        n_ok, missing, warns, zero = 0, [], set(), []
         for m, img, _, g in loaded:
             pp = idx.get(m["stem"])
             if pp is None:
                 missing.append(m["stem"])
                 continue
-            pa, w = read_prob(pp, g, crs)
-            if w:
+            pa, w = read_prob(pp, g, crs, a.pred_scale255.get(mname, False))
+            if w == ZERO_SIGNAL:
+                zero.append(m["stem"])
+            elif w:
                 warns.add(w)
             mos.place(prob, pa, g, crs, "max")
             n_ok += 1
@@ -552,7 +612,7 @@ def build_scene(sc: dict, cfg: dict, preds: dict[str, dict[str, Path]], thr: dic
         t, tsrc = thr[mname]
         write_tif(sdir / f"prob_{mname}.tif", p8, mos.transform, crs, "uint8")
         pj = {"model": mname, "threshold": t, "threshold_source": tsrc, "source_dir": str(a.pred_dirs[mname]),
-              "n_chips": n_ok, "missing_chips": missing, "warnings": sorted(warns),
+              "n_chips": n_ok, "missing_chips": missing, "warnings": sorted(warns), "zero_signal_chips": zero,
               "n_above_threshold_water": int(((p8 >= round(t * 255)) & water).sum())}
         if lab_mos is not None:
             deb = np.isin(lab_mos, label_values(a.label_debris))
@@ -571,8 +631,13 @@ def build_scene(sc: dict, cfg: dict, preds: dict[str, dict[str, Path]], thr: dic
         info["models"][mname] = {k: pj[k] for k in ("threshold", "n_chips", "n_above_threshold_water")}
         if "labels" in pj:
             info["models"][mname]["labels"] = pj["labels"]
-        if missing or warns:
-            log(f"  {sc['region']}/{mname}: нет предсказаний для {len(missing)} чипов; {sorted(warns)}")
+        if missing:
+            log(f"  {sc['region']}/{mname}: нет файла предсказания для {len(missing)} чипов, например {missing[:3]}")
+        if zero:
+            log(f"  {sc['region']}/{mname}: {len(zero)} из {n_ok} чипов без сигнала (вероятность 0 во всех пикселях) "
+                "-- это нормально для чистой воды")
+        if warns:
+            log(f"  {sc['region']}/{mname}: {sorted(warns)}")
     json.dump(info, open(sdir / "scene.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     log(f"  {sc['region']}/{sc['date']}: {len(loaded)} чипов -> {W}x{H} px, вода {info['water_frac']:.2f}, "
         f"модели {list(info['models'])}")
@@ -677,6 +742,7 @@ def run(argv=None) -> int:
         if hit == 0:
             raise OrgMapError(f"--pred {k}: ни один файл не совпал по имени с чипами (ожидается <stem>_prob.tif, "
                               f"<stem>.png или <stem>.tif; пример чипа: {metas[0]['stem']})")
+    a.pred_scale255 = {k: pred_scale_255([idx[m["stem"]] for m in metas if m["stem"] in idx]) for k, idx in preds.items()}
     thr = {k: model_threshold(k, {kk: float(v) for kk, v in parse_kv(a.threshold).items()}) for k in preds}
     labels_idx = None
     if a.labels:
@@ -715,6 +781,22 @@ def run(argv=None) -> int:
                             "water_mask_rule": WATER_RULE.format(ndwi=a.ndwi, hole=a.max_hole_px),
                             "scl_rule": SCL_RULE, "config": notes, "haze_check": "off"}
         regs = man.get("regions", [])
+        unknown = {(sc["region"], sc["date"]) for sc in scenes if sc["date_source"] == "unknown"}
+        for r in regs:  # L52: the UI shows «дата неизвестна» instead of the placeholder date (1900-01-01)
+            for d in r["dates"]:
+                if (r["id"], d["date"]) in unknown:
+                    d["date_unknown"] = True
+            if r["dates"] and all(d.get("date_unknown") for d in r["dates"]):
+                r["date_unknown"] = True
+        for k, (t, src) in thr.items():  # threshold given on the CLI = a model of the organiser run, not weights/<k>
+            if src == "--threshold" and k in man.get("models", {}):
+                mm = man["models"][k]
+                if k == "lgbm":
+                    mm["name"] = "LightGBM"
+                mm["threshold"] = t
+                mm["threshold_source"] = "--threshold (org_to_map)"
+                mm["note"] = (f"предсказания из {pred_dirs[k]}; порог задан при сборке карты (--threshold {k}={t}), "
+                              "обычно из meta.json модели, обученной на данных организаторов")
         # region summary = the FIRST --pred model (build_service_data picks mdd or the alphabetically first one)
         prim = next(iter(pred_dirs))
         for r in regs:

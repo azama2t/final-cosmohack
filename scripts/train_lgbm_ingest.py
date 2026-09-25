@@ -1,14 +1,23 @@
-"""Train the L3 pixel LightGBM on an ingested dataset (python -m macroplastic.ingest ... --convert).
+r"""Train the L3 pixel LightGBM on an ingested dataset (python -m macroplastic.ingest ... --convert).
 
-  .venv\\Scripts\\python.exe scripts\\train_lgbm_ingest.py --data-root data\\ingest\\<name>
-  .venv\\Scripts\\python.exe scripts\\train_lgbm_ingest.py --data-root data\\ingest\\<name> --set lgbm.num_boost_round=100
+  .venv\Scripts\python.exe scripts\train_lgbm_ingest.py --data-root data\ingest\<name>
+  .venv\Scripts\python.exe scripts\train_lgbm_ingest.py --data-root data\ingest\<name> --set lgbm.num_boost_round=100
+  .venv\Scripts\python.exe scripts\train_lgbm_ingest.py --data-root data\ingest\<name> --cv 4 --group geo
 
 Re-uses scripts/train_lgbm.py (train_model, sample_train, prob_md, best_threshold, md_metrics) and
 features.pixel.compute_features; scripts/train_lgbm.py itself is unchanged (MARIDA-only by default).
 
 Split: official one if the manifest has both 'train' and 'val' (from folder names / CSV split column);
-otherwise a GROUP split (manifest 'group' column = scene/prefix from the file name, or --group-regex on the id),
-val = --val-frac of groups, positives and negatives groups split separately so val has both.
+otherwise a GROUP split, val = --val-frac of groups, positives and negatives groups split separately so val has
+both. Groups (--group, the same for --cv folds):
+  manifest (default)  manifest 'group' column = scene/prefix from the file name (ingest). With anonymous names
+                      (tile_0001.tif) ingest finds no scenes and group = file: neighbouring crops of one scene land
+                      in different folds and CV is OPTIMISTIC (rehearsal 3: 0.50 by file vs 0.30 by geography,
+                      private 0.35) -> the script prints a warning and suggests --group geo.
+  geo                 spatial clusters: chips whose lon/lat boxes (manifest west/south/east/north) are closer than
+                      --geo-radius-km (default 5 km) are one group (single linkage), whatever the file names.
+  file                every file its own group (explicitly optimistic).
+  --group-regex R     regex on the sample id, group 1 = split group (overrides --group).
 Missing model bands (e.g. no B1/B8 in L2A 20 m stacks) are filled from the nearest-wavelength band present
 (recorded in meta.json as band_fill) -- a crutch, reported, not hidden.
 Chip-level datasets (manifest chip_level=1): additionally chip metrics (score = p95 of pixel probability).
@@ -17,7 +26,7 @@ Output: weights_exp/lgbm_ingest/<name>_s<seed>/{model.txt, meta.json}; never tou
 L32 (organiser metric):
   --zero-as negative|ignore|both   organiser 0 / background (our 99 after ingest) as negative (default) or ignored;
                                    'both' = CV both and keep the better one.
-  --cv K       group K-fold by scene (manifest 'group'), out-of-fold probabilities pooled over ALL valid pixels of
+  --cv K       group K-fold (groups: see --group above), out-of-fold probabilities pooled over ALL valid pixels of
                the organiser train = their metric "F1 of the debris class over all pixels" (99 counted as negative;
                --metric-zero ignore to drop it); threshold = best OOF threshold (grid up to 0.999); the final model is
                then trained on ALL train chips with that threshold (meta.json 'threshold').
@@ -138,17 +147,85 @@ def extract(rows, base, fill, max_px, seed):
 
 
 ZERO_AS = ["negative"]
+GROUPING = [""]  # description of the split/CV groups (assign_groups), for logs and meta.json
+
+
+def geo_clusters(boxes: np.ndarray, radius_km: float) -> np.ndarray:
+    """boxes (N,4) lon/lat west,south,east,north -> cluster label per box: single linkage, boxes closer than
+    radius_km (local equirectangular km; fine for chips, not across the antimeridian)."""
+    n = len(boxes)
+    lat_c = np.radians((boxes[:, 1] + boxes[:, 3]) / 2)
+    kx = 111.32 * np.cos(lat_c)
+    xy = np.stack([boxes[:, 0] * kx, boxes[:, 1] * 110.57, boxes[:, 2] * kx, boxes[:, 3] * 110.57], 1)
+    parent = np.arange(n)
+
+    def find(i):
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+
+    for i in range(n):
+        b = xy[i]
+        dx = np.maximum(0.0, np.maximum(xy[:, 0] - b[2], b[0] - xy[:, 2]))
+        dy = np.maximum(0.0, np.maximum(xy[:, 1] - b[3], b[1] - xy[:, 3]))
+        for j in np.flatnonzero((np.hypot(dx, dy) <= radius_km) & (np.arange(n) > i)):
+            ri, rj = find(i), find(int(j))
+            if ri != rj:
+                parent[rj] = ri
+    roots = [find(i) for i in range(n)]
+    order = {r: k for k, r in enumerate(dict.fromkeys(roots))}
+    return np.array([order[r] for r in roots])
+
+
+def assign_groups(rows, mode="manifest", group_regex=None, radius_km=5.0):
+    """Sets r['_g'] on every row. -> (description for logs/meta, warning or None)."""
+    n = len(rows)
+    warn = None
+    if group_regex:
+        for r in rows:
+            m = re.search(group_regex, r["id"])
+            r["_g"] = (m.group(1) if m.groups() else m.group(0)) if m else r["id"]
+        ng = len({r["_g"] for r in rows})
+        return f"by --group-regex {group_regex}: {ng} groups for {n} files", \
+            ("группы по --group-regex: каждая группа = один файл -> CV оптимистична" if ng == n and n > 1 else None)
+    if mode == "geo":
+        cols = ("west", "south", "east", "north")
+        try:
+            boxes = np.array([[float(r[c]) for c in cols] for r in rows], float)
+            ok = np.isfinite(boxes).all()
+        except (KeyError, TypeError, ValueError):
+            ok = False
+        if ok:
+            lab = geo_clusters(boxes, radius_km)
+            for r, k in zip(rows, lab):
+                r["_g"] = f"geo_{int(k):03d}"
+            ng = int(lab.max()) + 1
+            return (f"by geography: {ng} spatial clusters for {n} files (chip boxes closer than {radius_km:g} km, "
+                    f"single linkage)"), None
+        warn = ("--group geo: в manifest.csv нет координат (west/south/east/north) у всех строк -- "
+                "группировка по колонке group")
+        mode = "manifest"
+    if mode == "file":
+        for r in rows:
+            r["_g"] = r["id"]
+        return f"by file: {n} groups = {n} files (explicit; CV optimistic for crops of one scene)", None
+    for r in rows:
+        r["_g"] = r.get("group") or r["id"]
+    ng = len({r["_g"] for r in rows})
+    if n > 1 and ng == n:
+        w2 = (f"ВНИМАНИЕ: группа = файл ({ng} групп на {n} файлов): в именах не найдены сцены (анонимные имена?). "
+              "Кропы одной сцены попадут в разные фолды -> CV завышена (репетиция 3: 0.50 по файлам против 0.30 по "
+              "географии, private 0.35). Запустите с --group geo (или --group-regex).")
+        return f"by file (manifest group = file id, no scenes in the names): {ng} groups for {n} files", \
+            (warn + "; " + w2 if warn else w2)
+    return f"by scene (manifest 'group' from file names): {ng} groups for {n} files", warn
 
 
 def _groups(rows, group_regex=None):
-    out = []
-    for r in rows:
-        g = r.get("group") or r["id"]
-        if group_regex:
-            m = re.search(group_regex, r["id"])
-            g = (m.group(1) if m.groups() else m.group(0)) if m else r["id"]
-        out.append(g)
-    return out
+    if not all("_g" in r for r in rows):
+        assign_groups(rows, "manifest", group_regex)
+    return [r["_g"] for r in rows]
 
 
 def _counts_at(hist_pos, hist_neg):
@@ -172,6 +249,9 @@ def run_cv(a, rows, man, fill, cfg):
 
     groups = _groups(rows, a.group_regex)
     ug = sorted(set(groups))
+    if len(ug) < 2:
+        raise SystemExit(f"--cv needs >= 2 groups, got {len(ug)} ({GROUPING[0]}); "
+                         "try a smaller --geo-radius-km or --group manifest/file")
     rng = np.random.default_rng(a.seed)
     # pass 1: training pixels per chip (all target + up to --neg-per-chip others) + per-chip target presence
     Xs, Ys, cid = [], [], []
@@ -201,6 +281,9 @@ def run_cv(a, rows, man, fill, cfg):
     rng.shuffle(posg)
     rng.shuffle(negg)
     K = max(2, min(a.cv, len(ug)))
+    if len(posg) < K:
+        print(f"[ingest-train] ВНИМАНИЕ: групп с целевым классом {len(posg)} < {K} фолдов -- в части фолдов нет "
+              "положительных, разброс по фолдам не оценить (уменьшите --cv или --geo-radius-km)", flush=True)
     fold_of = {g: i % K for i, g in enumerate(posg)} | {g: (i + len(posg)) % K for i, g in enumerate(negg)}
     chip_fold = np.array([fold_of[g] for g in groups])
     modes = ["negative", "ignore"] if a.zero_as == "both" else [a.zero_as]
@@ -247,7 +330,8 @@ def run_cv(a, rows, man, fill, cfg):
             b = np.clip((np.nan_to_num(p) * 1000).astype(int), 0, 1000)
             H[key]["pos"][k] += np.bincount(b[yp], minlength=1001)
             H[key]["neg"][k] += np.bincount(b[~yp], minlength=1001)
-    res = {"K": K, "folds": {g: int(f) for g, f in fold_of.items()}, "n_eval_px": n_valid, "n_target_px": n_pos,
+    res = {"K": K, "grouping": GROUPING[0], "n_groups": len(ug), "n_pos_groups": len(posg),
+           "folds": {g: int(f) for g, f in fold_of.items()}, "n_eval_px": n_valid, "n_target_px": n_pos,
            "metric": f"F1 of target over ALL valid pixels of the organiser train (OOF), organiser 0 "
                      f"{'= negative' if zero_neg else 'ignored'}", "variants": {}}
     for key in keys:
@@ -298,12 +382,8 @@ def split_rows(rows, val_frac, seed, group_regex=None):
     if {"train", "val"} <= sp:
         return [r for r in rows if r["split"] == "train"], [r for r in rows if r["split"] == "val"], \
             "official (manifest split column)"
-    for r in rows:
-        g = r.get("group") or r["id"]
-        if group_regex:
-            m = re.search(group_regex, r["id"])
-            g = (m.group(1) if m.groups() else m.group(0)) if m else r["id"]
-        r["_g"] = g
+    if not all("_g" in r for r in rows):
+        assign_groups(rows, "manifest", group_regex)
     groups = {}
     for r in rows:
         groups.setdefault(r["_g"], []).append(r)
@@ -320,7 +400,7 @@ def split_rows(rows, val_frac, seed, group_regex=None):
         val |= set(lst[:k])
     tr = [r for r in rows if r["_g"] not in val]
     va = [r for r in rows if r["_g"] in val]
-    how = (f"group split by {'--group-regex' if group_regex else 'manifest group'}: {len(groups)} groups, "
+    how = (f"group split ({GROUPING[0] or 'manifest group'}): {len(groups)} groups, "
            f"val {len(val)} groups (positive groups {len(pos)}, negative {len(neg)}), seed {seed}")
     return tr, va, how
 
@@ -363,6 +443,11 @@ def main(argv=None):
     ap.add_argument("--cv", type=int, default=0, help="group K-fold OOF on the organiser metric (0 = one split)")
     ap.add_argument("--baseline", action="append", default=None,
                     help="existing model dir evaluated on the same chips (e.g. weights\\lgbm = as-is)")
+    ap.add_argument("--group", choices=["manifest", "geo", "file"], default="manifest",
+                    help="split/CV groups: manifest 'group' column (scene from the file name; = file when names are "
+                         "anonymous -> warning), geo = spatial clusters of chip boxes, file = every file")
+    ap.add_argument("--geo-radius-km", type=float, default=5.0,
+                    help="--group geo: chips whose boxes are closer than this (km) are one group")
     ap.add_argument("--init-model", default=None, help="fine-tune from this model dir (continue boosting)")
     ap.add_argument("--neg-per-chip", type=int, default=4000, help="--cv: non-target training px per chip")
     ap.add_argument("--cv-only", action="store_true", help="--cv: do not train/save the final model")
@@ -391,6 +476,11 @@ def main(argv=None):
         print(f"[ingest-train] missing model bands filled from nearest wavelength: {fill}")
     if a.zero_as == "both" and not a.cv:
         raise SystemExit("--zero-as both needs --cv K")
+    if not ({"train", "val"} <= {r.get("split", "") for r in rows}) or a.cv:
+        GROUPING[0], gwarn = assign_groups(rows, a.group, a.group_regex, a.geo_radius_km)
+        print(f"[ingest-train] groups: {GROUPING[0]}", flush=True)
+        if gwarn:
+            print(f"[ingest-train] {gwarn}", flush=True)
     if a.cv:
         return main_cv(a, rows, man, name, cfg, fill, t0)
     ZERO_AS[0] = a.zero_as
@@ -454,7 +544,8 @@ def main_cv(a, rows, man, name, cfg, fill, t0):
     tv = {k: v for k, v in res["variants"].items() if k.startswith("train:")}
     best_key = max(tv, key=lambda k: tv[k]["f1"])
     mode = best_key[6:]
-    print(f"[ingest-train] CV ({res['K']} folds by scene, {res['n_eval_px']} px, target {res['n_target_px']}; "
+    print(f"[ingest-train] CV ({res['K']} folds, groups {res['grouping']}; positive groups {res['n_pos_groups']}; "
+          f"{res['n_eval_px']} px, target {res['n_target_px']}; "
           f"{res['metric']}):")
     for k, v in res["variants"].items():
         extra = (f"  | at its own thr {v['own_threshold']}: F1 {v['f1_at_own_threshold']}"
@@ -476,7 +567,7 @@ def main_cv(a, rows, man, name, cfg, fill, t0):
             "feature_level": cfg["features"], "features": feature_names(cfg["features"]), "channels": BANDS11,
             "band_fill": fill, "classes": [0, 1], "md_class": 1, "zero_as": mode, "init_model": a.init_model,
             "split": f"final model on ALL {len(rows)} train chips; threshold = best OOF threshold of group "
-                     f"{res['K']}-fold CV", "threshold": thr, "cv": res, "val": tv[best_key],
+                     f"{res['K']}-fold CV (groups {res['grouping']})", "grouping": res["grouping"], "threshold": thr, "cv": res, "val": tv[best_key],
             "n_train_px": int(len(sel)), "n_train_target_px": int((y[sel] == 1).sum()), "config": cfg,
             "seconds": {"total": round(time.time() - t0, 1)},
             "note": "OOF threshold on pooled organiser-train pixels: optimistic; fold spread in cv.fold_f1"}

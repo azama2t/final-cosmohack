@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { Region, TsRow } from '../types';
 import { apiGet, type CalRow, type CalStatus } from '../lib/api';
 import { isFlagged } from '../lib/data';
-import { fmtDate, fmtNum, fmtPct } from '../lib/style';
+import { fmtDate, fmtNum, fmtPct, isUnknownDate } from '../lib/style';
 
 export const CAL_RU: Record<CalStatus, string> = {
   detected: 'обнаружено',
@@ -93,7 +93,7 @@ export default function Calendar({ region, model, date, timeseries, onDate }: { 
 function Year({ y, rows, date, onDate }: { y: string; rows: CalRow[]; date: string | null; onDate: (d: string) => void }) {
   return (
     <>
-      <span>{y}</span>
+      <span>{rows.length && rows.every((r) => isUnknownDate(r.date)) ? 'год ?' : y}</span>
       {Array.from({ length: 12 }, (_, m) => (
         <span key={m} className="cell">
           {rows

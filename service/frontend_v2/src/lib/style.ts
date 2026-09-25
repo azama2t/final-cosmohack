@@ -114,14 +114,33 @@ export function fmtArea(m2: number | null | undefined): [string, string] {
 export const fmtPct = (f: number | null | undefined, digits = 0) =>
   f === null || f === undefined || Number.isNaN(f) ? '—' : `${nf(digits).format(f * 100)} %`;
 
+// L52: organiser chips without a date get a placeholder date (org_to_map --unknown-date, default 1900-01-01),
+// flagged in the manifest as dates[].date_unknown — shown as «дата неизвестна», never as «1 янв 1900».
+export const UNKNOWN_DATE_TEXT = 'дата неизвестна';
+const UNKNOWN_DATES = new Set<string>(['1900-01-01']);
+
+export function registerUnknownDates(m: { regions?: { dates?: { date: string; date_unknown?: boolean }[] }[] } | null | undefined): void {
+  for (const r of m?.regions ?? []) for (const d of r.dates ?? []) if (d.date_unknown) UNKNOWN_DATES.add(d.date);
+}
+
+export const isUnknownDate = (iso: string | null | undefined): boolean => !!iso && UNKNOWN_DATES.has(iso.slice(0, 10));
+
 export function fmtDate(iso: string): string {
+  if (isUnknownDate(iso)) return UNKNOWN_DATE_TEXT;
   const [y, m, d] = iso.split('-').map(Number);
   const months = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
   if (!y || !m || !d) return iso;
   return `${d} ${months[m - 1]} ${y}`;
 }
 
+/** ISO timestamp → «YYYY-MM-DD HH:MM»; a placeholder (unknown) date → «дата неизвестна». */
+export function fmtTs(ts: string | null | undefined): string {
+  const s = String(ts ?? '');
+  return isUnknownDate(s) ? UNKNOWN_DATE_TEXT : s.slice(0, 16).replace('T', ' ');
+}
+
 export function fmtDateShort(iso: string): string {
+  if (isUnknownDate(iso)) return '??.??.??';
   const [y, m, d] = iso.split('-');
   return `${d}.${m}.${y?.slice(2)}`;
 }
@@ -129,10 +148,24 @@ export function fmtDateShort(iso: string): string {
 export const modelLabel = (id: string, name?: string) =>
   id === 'mdd' ? 'MDD' : id === 'lgbm' ? 'LGBM' : name ? name.split(' ')[0] : id.toUpperCase();
 
-/** Threshold / probability with 2–3 significant digits: 0.06387 → 0.0639, 0.5 → 0.5 */
+/** Threshold: never rounded up to «1» (L52: 0.999 → «0.999», 0.995 → «0.995»); 0.63 → «0.63», 0.5 → «0.5»,
+ *  0.06387 → «0.0639». Up to 3 decimals (truncated, not rounded, near 1), trailing zeros dropped. */
 export function fmtThr(v: number | null | undefined): string {
-  if (v === null || v === undefined || Number.isNaN(v)) return '—';
-  return String(Number(Number(v).toPrecision(v >= 0.1 ? 2 : 3)));
+  if (v === null || v === undefined || Number.isNaN(Number(v))) return '—';
+  const x = Number(v);
+  if (x >= 1) return '1';
+  if (x < 0.1) return String(Number(x.toPrecision(3)));
+  let s = x.toFixed(3);
+  if (Number(s) >= 1) s = (Math.floor(x * 1000) / 1000).toFixed(3);
+  return String(Number(s));
+}
+
+/** Probability / confidence: 2 decimals; from 0.99 to < 1 — 3 decimals truncated (0.9964 → «0.996», not «1.00»). */
+export function fmtProb(v: number | null | undefined): string {
+  if (v === null || v === undefined || Number.isNaN(Number(v))) return '—';
+  const x = Number(v);
+  if (x >= 0.99 && x < 1) return (Math.floor(x * 1000) / 1000).toFixed(3);
+  return x.toFixed(2);
 }
 
 // prob.png palette (docs/CONTRACTS.md, «Дополнения 03:35»): P < 0.05 transparent; 0.05…thr ramp

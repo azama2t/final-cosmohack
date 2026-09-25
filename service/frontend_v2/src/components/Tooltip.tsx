@@ -1,7 +1,7 @@
 import type { Manifest } from '../types';
 import type { HoverInfo } from '../map/layers';
 import { artifactOf, artifactRu } from '../lib/artifacts';
-import { fmtArea, fmtPct, fmtPermille, modelLabel } from '../lib/style';
+import { fmtArea, fmtPct, fmtPermille, fmtProb, modelLabel } from '../lib/style';
 
 export default function Tooltip({ hover, manifest }: { hover: HoverInfo; manifest: Manifest }) {
   const p = hover.props;
@@ -11,7 +11,7 @@ export default function Tooltip({ hover, manifest }: { hover: HoverInfo; manifes
     const art = artifactOf(p);
     const [a, u] = fmtArea(p.area_m2);
     title = art ? `Исключено: ${artifactRu(art)}` : `Признаки материала · ${a} ${u}`;
-    sub = `уверенность ${Number(p.mean_prob).toFixed(2)} · ${modelLabel(p.model, manifest.models[p.model]?.name)}${p.confirmed ? ' · вторая модель согласна (сигнал)' : ''}`;
+    sub = `уверенность ${fmtProb(p.mean_prob)} · ${modelLabel(p.model, manifest.models[p.model]?.name)}${p.confirmed ? ' · вторая модель согласна (сигнал)' : ''}`;
   } else if (hover.kind === 'h3') {
     title = p.share_permille === null ? 'Ячейка H3 · мало наблюдаемой воды' : `Индекс ${fmtPermille(p.share_permille)} ‰`;
     sub = `наблюдалось ${fmtPct(p.observed_frac)} · пятен ${p.n_detections} · клик — история места`;

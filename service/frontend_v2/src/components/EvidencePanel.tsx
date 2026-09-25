@@ -5,7 +5,7 @@ import { centroid, featureBBox } from '../map/layers';
 import { artifactOf, artifactText } from '../lib/artifacts';
 import { apiGet, apiPost, apiUrl } from '../lib/api';
 import { isFlagged } from '../lib/data';
-import { fmtArea, fmtDate, fmtNum, fmtPct, fmtPermille, fmtThr, modelLabel } from '../lib/style';
+import { fmtArea, fmtDate, fmtNum, fmtPct, fmtPermille, fmtProb, fmtThr, fmtTs, modelLabel } from '../lib/style';
 import { sceneTime, sensorOf, STATUS_RU } from './RegionPanel';
 
 type Props = RightProps & { feature: Feature<DetProps>; region: Region; dateEntry: DateEntry };
@@ -132,7 +132,7 @@ export default function EvidencePanel(p: Props) {
             {lastOp && (
               <span className="faint">
                 {' '}
-                · {lastOp.user ?? 'оператор'}, {String(lastOp.ts ?? '').slice(0, 16).replace('T', ' ')}
+                · {lastOp.user ?? 'оператор'}, {fmtTs(lastOp.ts)}
               </span>
             )}
           </span>
@@ -241,7 +241,7 @@ export default function EvidencePanel(p: Props) {
             <tr>
               <td>основная · {modelLabel(pr.model)}</td>
               <td className="r">
-                {pr.mean_prob.toFixed(2)} <span className="faint">макс. {pr.max_prob.toFixed(2)}</span>
+                {fmtProb(pr.mean_prob)} <span className="faint">макс. {fmtProb(pr.max_prob)}</span>
               </td>
               <td className="r">отметила (порог {fmtThr(p.threshold)})</td>
             </tr>
@@ -251,7 +251,7 @@ export default function EvidencePanel(p: Props) {
                 <td className="r">
                   {other?.f ? (
                     <>
-                      {other.f.properties.mean_prob.toFixed(2)} <span className="faint">макс. {other.f.properties.max_prob.toFixed(2)}</span>
+                      {fmtProb(other.f.properties.mean_prob)} <span className="faint">макс. {fmtProb(other.f.properties.max_prob)}</span>
                     </>
                   ) : (
                     '—'
@@ -342,7 +342,7 @@ export default function EvidencePanel(p: Props) {
                 .map((h: any, i: number) => (
                   <tr key={i}>
                     <td className="faint" style={{ whiteSpace: 'nowrap' }}>
-                      {String(h.ts ?? '').slice(0, 16).replace('T', ' ')}
+                      {fmtTs(h.ts)}
                     </td>
                     <td>
                       {STATUS_RU[h.to] ?? h.to}

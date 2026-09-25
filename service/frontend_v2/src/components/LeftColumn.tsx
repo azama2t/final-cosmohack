@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import type { Manifest } from '../types';
 import { KIND_CLASS, feedDate, type FeedEvent } from '../lib/feed';
 import { rankRegions, regionReliability, shortName, summaryDate } from '../lib/data';
-import { fmtArea, fmtNum, fmtPermille } from '../lib/style';
+import { fmtArea, fmtNum, fmtPermille, isUnknownDate } from '../lib/style';
 import { plural } from './RegionPanel';
 
 interface Props {
@@ -133,7 +133,7 @@ function RegionRow({ r, on, bad, onClick }: { r: any; on: boolean; bad?: boolean
       </span>
       <span className="ri-sub">
         {r.country ? `${r.country} · ` : ''}
-        {d ? d.date.split('-').reverse().join('.') : '—'}
+        {d ? (isUnknownDate(d.date) ? 'дата ?' : d.date.split('-').reverse().join('.')) : '—'}
       </span>
       <span className="ri-sub" style={{ textAlign: 'right' }}>
         {fmtNum(r.summary?.n_detections)} {plural(r.summary?.n_detections ?? 0, 'участок', 'участка', 'участков')}

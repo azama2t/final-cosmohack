@@ -111,3 +111,53 @@ def test_grouping_names_and_clusters(tool):
     assert tool.name_prefix("scene_20200101_3") == "scene_20200101"
     boxes = np.array([[0, 0, 640, 640], [640, 0, 1280, 640], [50000, 0, 50640, 640]], float)
     assert sorted(map(sorted, tool.cluster_boxes(boxes, 100.0))) == [[0, 1], [2]]
+
+
+def test_date_unknown_and_unique_names(tmp_path, tool):
+    """L52: anonymous chips (no date) in two UTM zones -> unique region ids/names, date_unknown in scene.json and in
+    the manifest dates; an all-zero prob chip is «no signal», not a binary mask; P*255 folder keeps 0/1 chips low."""
+    rng = np.random.default_rng(1)
+    chips, preds = tmp_path / "chips", tmp_path / "pred"
+    base = [0.03, 0.035, 0.04, 0.025, 0.02, 0.015, 0.012, 0.01, 0.009, 0.004, 0.003]
+    for k, (crs, x0) in enumerate([("EPSG:32633", 400000.0), ("EPSG:32633", 400640.0), ("EPSG:32634", 400000.0)]):
+        img = np.stack([v + rng.normal(0, 0.001, (64, 64)) for v in base]).astype(np.float32)
+        prob = np.zeros((64, 64), np.uint8)
+        if k == 0:
+            img[7, 20:23, 10:40] = 0.06
+            prob[20:23, 10:40] = 250
+        if k == 2:
+            prob[5:8, 5:8] = 1  # P = 1/255 in a P*255 folder: must NOT become P = 1
+        _write(chips / f"tile_{k:04d}.tif", img, x0, 4800000.0, crs=crs)
+        _write(preds / f"tile_{k:04d}.tif", prob, x0, 4800000.0, crs=crs)
+    out = tmp_path / "m"
+    assert tool.main(["--chips", str(chips), "--pred", f"lgbm={preds}", "--threshold", "lgbm=0.9", "--out", str(out)]) == 0
+    man = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
+    ids = [r["id"] for r in man["regions"]]
+    names = [r["name"] for r in man["regions"]]
+    assert len(ids) == 2 and len(set(ids)) == 2 and len(set(names)) == 2, (ids, names)
+    assert all("utm33n" in i or "utm34n" in i for i in ids)
+    for r in man["regions"]:
+        assert r["date_unknown"] is True and all(d["date_unknown"] is True for d in r["dates"])
+    assert man["models"]["lgbm"]["threshold"] == 0.9 and "MARIDA" not in man["models"]["lgbm"]["name"]
+    live = Path(str(out) + "_live")
+    for r in man["regions"]:
+        sj = json.loads((live / r["id"] / "1900-01-01" / "scene.json").read_text(encoding="utf-8"))
+        assert sj["date_unknown"] is True and sj["date_source"] == "unknown"
+        pj = json.loads((live / r["id"] / "1900-01-01" / "prob_lgbm.json").read_text(encoding="utf-8"))
+        assert not pj["warnings"], pj["warnings"]  # no «бинарная маска» for all-zero / low-P chips
+    z = [json.loads(p.read_text(encoding="utf-8"))["zero_signal_chips"] for p in live.glob("*/*/prob_lgbm.json")]
+    assert sorted(sum(z, [])) == ["tile_0001"]
+    import rasterio as rio
+
+    r34 = next(r["id"] for r in man["regions"] if "utm34n" in r["id"])
+    with rio.open(live / r34 / "1900-01-01" / f"prob_lgbm.tif") as ds:
+        assert int(ds.read(1).max()) == 1  # stays P = 1/255
+
+
+def test_unique_names_fallbacks(tool):
+    sc = [{"name": "tile_p1", "crs": "EPSG:32616", "tile": ""}, {"name": "tile_p1", "crs": "EPSG:32616", "tile": ""},
+          {"name": "tile_p1", "crs": "EPSG:32751", "tile": ""}, {"name": "x", "crs": None, "tile": "16PCC"}]
+    out = tool.unique_names(sc)
+    assert len({s["region"] for s in out}) == 4 and len({s["name"] for s in out}) == 4
+    assert out[2]["name"] == "tile_p1_utm51s" and out[3]["name"] == "x"
+    assert tool.crs_label("EPSG:32616") == "utm16n" and tool.crs_label("EPSG:3857") == "epsg3857"

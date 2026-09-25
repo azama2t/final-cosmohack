@@ -384,3 +384,42 @@ def test_provenance_skips_mask_folders():
     rx = re.compile(pc.DEFAULT_EXCLUDE, re.I)
     assert rx.search("org/train/masks/r01_001.png") and rx.search("x/S2_1-12-19_48MYU_0_cl.tif")
     assert not rx.search("org/train/images/r01_001.tif")
+
+
+def test_group_geo_and_file_warning(capsys):
+    """L52: --group geo = spatial clusters of chip lon/lat boxes; anonymous names (group = file) -> honest warning."""
+    tr = _load_script("train_lgbm_ingest")
+
+    def row(i, lon, lat):
+        d = 0.0023  # ~250 m chip
+        return {"id": f"tile_{i:04d}", "group": f"tile_{i:04d}", "west": lon, "south": lat, "east": lon + d,
+                "north": lat + d}
+
+    # scene A: 3 touching chips; scene B: 2 chips 3 km apart (one cluster at 5 km); C: 60 km away
+    rows = [row(0, -88.0, 15.8), row(1, -87.9977, 15.8), row(2, -87.9954, 15.8),
+            row(3, -87.5, 16.2), row(4, -87.472, 16.2), row(5, -87.0, 15.9)]
+    desc, warn = tr.assign_groups(rows, "manifest")
+    assert "by file" in desc and warn and "группа = файл" in warn and "--group geo" in warn
+    desc, warn = tr.assign_groups(rows, "geo", radius_km=5.0)
+    g = [r["_g"] for r in rows]
+    assert "by geography: 3 spatial clusters" in desc and warn is None
+    assert g[0] == g[1] == g[2] and g[3] == g[4] and len(set(g)) == 3
+    tr.assign_groups(rows, "geo", radius_km=1.0)
+    assert len({r["_g"] for r in rows}) == 4  # B splits at 1 km
+    desc, _ = tr.assign_groups(rows, "file")
+    assert "by file" in desc and len({r["_g"] for r in rows}) == 6
+    rows2 = [dict(r, group="sceneA" if i < 3 else "sceneB") for i, r in enumerate(rows)]
+    desc, warn = tr.assign_groups(rows2, "manifest")
+    assert desc.startswith("by scene") and warn is None
+    bad = [{k: v for k, v in r.items() if k != "west"} for r in rows]
+    desc, warn = tr.assign_groups(bad, "geo")
+    assert "by file" in desc and "нет координат" in warn
+
+
+def test_train_script_no_syntax_warning():
+    import warnings
+
+    src = (REPO / "scripts" / "train_lgbm_ingest.py").read_text(encoding="utf-8")
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        compile(src, "train_lgbm_ingest.py", "exec")

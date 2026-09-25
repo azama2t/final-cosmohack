@@ -14,7 +14,7 @@ import {
   rankRegions,
 } from './lib/data';
 import { useAsync } from './lib/hooks';
-import { makeScale } from './lib/style';
+import { makeScale, registerUnknownDates } from './lib/style';
 import { DEFAULT_LAYERS, readUrl, writeUrl } from './lib/url';
 import MapView from './map/MapView';
 import { anim, ctl, defaultProjection, fitOverview, flyToArea, flyToBounds, flyToPoint, getCamera, waitIdle } from './map/controller';
@@ -113,6 +113,7 @@ export default function App() {
   useEffect(() => {
     loadManifest().then((m) => {
       if (!m || !m.regions.length) return setManifest(null);
+      registerUnknownDates(m);
       const br = bestRegion(m);
       if (br) ctl.overviewFocus = br.center as [number, number];
       setManifest(m);

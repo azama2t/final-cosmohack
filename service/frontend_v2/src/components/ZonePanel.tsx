@@ -6,7 +6,7 @@ import { centroid } from '../map/layers';
 import { localWhy, PRIORITY_NOTE, repeatFactor, scoreTerms, zonePx, zoneScore } from '../lib/priority';
 import { AGREE_NOTE } from '../lib/confirm';
 import { isFlagged } from '../lib/data';
-import { fmtArea, fmtNum, fmtPct, fmtPermille, fmtThr } from '../lib/style';
+import { fmtArea, fmtNum, fmtPct, fmtPermille, fmtProb, fmtThr } from '../lib/style';
 
 interface Props {
   manifest: Manifest;
@@ -163,7 +163,7 @@ export default function ZonePanel(p: Props) {
           <div className="eq" data-testid="zone-why-eq">
             <Term v={fmtNum(why.terms[0]?.value ?? zonePx(z))} l="пикс. с признаками" />
             <span className="op">×</span>
-            <Term v={(why.terms[1]?.value ?? z.mean_prob ?? 0).toFixed(2)} l="ср. уверенность" />
+            <Term v={fmtProb(why.terms[1]?.value ?? z.mean_prob ?? 0)} l="ср. уверенность" />
             <span className="op">×</span>
             <Term v={`${(why.terms[2]?.contribution ?? repeatFactor(z.repeat_dates)).toFixed(1)}`} l={`повтор, ${why.terms[2]?.value ?? z.repeat_dates ?? 1} дат`} />
             {terms && (
@@ -219,9 +219,9 @@ export default function ZonePanel(p: Props) {
           </div>
           <div>
             <div className="k">Уверенность</div>
-            <div className="v">{z.mean_prob === undefined ? '—' : z.mean_prob.toFixed(2)}</div>
+            <div className="v">{z.mean_prob === undefined ? '—' : fmtProb(z.mean_prob)}</div>
             <div className="h">
-              макс. {maxProb === null ? '—' : maxProb.toFixed(2)} · порог {fmtThr(p.threshold)}
+              макс. {fmtProb(maxProb)} · порог {fmtThr(p.threshold)}
             </div>
           </div>
         </div>

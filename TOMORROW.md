@@ -95,12 +95,15 @@ start $I\report\index.html                        # сверху: текст REA
 
 ## 25–45 мин. Развилка «как есть vs обучение на их train» и «0 = негатив или игнор»
 
-Одна команда: групповой K-fold по сценам, OOF-вероятности на **всех** пикселях их train (их метрика), оба режима нуля и наша модель как есть на тех же пикселях:
+Одна команда: групповой K-fold (по сценам из имён; при анонимных именах `tile_0001` — добавить `--group geo`, см. HACK-START «Проверка групп CV»), OOF-вероятности на **всех** пикселях их train (их метрика), оба режима нуля и наша модель как есть на тех же пикселях:
 
 ```powershell
 & $PY scripts\train_lgbm_ingest.py --data-root $I --cv 4 --zero-as both --baseline weights\lgbm --out weights_exp\lgbm_ingest\org_cv
 # метрика только по размеченным пикселям (если так сказано в ТЗ):  добавить --metric-zero ignore
+# анонимные имена (групп = файлов, скрипт печатает «ВНИМАНИЕ: группа = файл»):  добавить --group geo  [--geo-radius-km 5]
 ```
+
+Первая строка вывода — `groups: by scene | by file | by geography …`. «by file» при кропах одной сцены = CV завышена (репетиция 3: 0.50 по файлам, 0.38 по географии 5 км, 0.26 при 20 км; private 0.35).
 
 Выход: таблица `train:negative | train:ignore | baseline:weights\lgbm` с F1, порогом, P/R, F1 по фолдам и std; финальная модель (лучший режим нуля, **обучена на всём их train**, порог = лучший OOF) → `weights_exp\lgbm_ingest\org_cv\{model.txt, meta.json, cv.json}`.
 
@@ -125,7 +128,10 @@ start $I\report\index.html                        # сверху: текст REA
 & $PY scripts\tools\predict_org.py --config $I\adapter.yaml --images <папка val images> --weights weights_exp\lgbm_ingest\org_cv --out out\val_trained --value-debris 3
 & $PY scripts\tools\score.py --pred out\val_trained --gt <папка val masks> --target 3                    # 0 = негатив (все пиксели)
 & $PY scripts\tools\score.py --pred out\val_trained --gt <папка val masks> --target 3 --zero-as ignore   # только размеченные
+# код мусора в их GT != коду в наших масках (--value-debris):  --target <код GT> --pred-target <наш код>
 ```
+
+Коды: `--value-debris`/`--value-bg` — коды мусора/фона в их сабмите (из ТЗ); `score.py --target` — код мусора в их масках, `--pred-target` — в наших (по умолчанию = `--target`). Строку `per class` при разных кодах не читать, главная — `target_metrics`.
 
 `score.py`: F1/IoU/P/R класса по пулу пикселей всех файлов, F1/IoU по каждому классу, macro-F1 и mIoU, `--ignore 255`, худшие файлы по FN/FP, пропущенные и лишние файлы, несовпадение размеров (= проверка формата сабмита).
 
@@ -165,7 +171,7 @@ start $I\report\index.html                        # сверху: текст REA
 - Имена вида `r05_001` (префикс сцены + номер) — одна группа, пары по полному имени внутри сцены (в репетиции 1: раньше 16 групп и перепутанные пары).
 - Значения классов — по всем маскам (выше 20000 — стратифицированная выборка по сценам, «проверено N из M», `--max-masks`).
 - `adapter.yaml`, правленый вручную, повторный запуск не перезапишет (свежий автоконфиг ляжет в `adapter.auto.yaml`).
-- Обучение без `--cv`: сплит официальный (train/val в папках) или групповой по сцене; с `--cv K` — K-fold по сценам и финальная модель на всём train.
+- Обучение без `--cv`: сплит официальный (train/val в папках) или групповой; с `--cv K` — групповой K-fold и финальная модель на всём train. Группы: `--group manifest` (по умолчанию: сцена из имени; при анонимных именах = файл, с предупреждением), `--group geo` (кластеры по координатам чипов, `--geo-radius-km`, 5 км), `--group file`, `--group-regex`.
 - Модели и метрики: `weights_exp\lgbm_ingest\<name>\{model.txt, meta.json, cv.json}`; `weights\lgbm` не трогается.
 
 ---
@@ -180,13 +186,16 @@ $env:PYTHONPATH = "src"; $env:CUDA_VISIBLE_DEVICES = "-1"
 .venv\Scripts\python.exe scripts\tools\predict_org.py --images <их чипы> --config $I\adapter.yaml --weights <веса> --out out\org_pred --format tif --prob
 #    или: .venv\Scripts\python.exe inference.py --data-dir <их чипы> --output out\org_pred_prob --model lgbm --device cpu
 # 2) чипы + вероятности -> корень данных карты (вторая модель и разметка необязательны)
-.venv\Scripts\python.exe scripts\tools\org_to_map.py --chips <их чипы> --config $I\adapter.yaml --pred lgbm=out\org_pred_prob --out out\org_map [--pred fdi_rule=<папка>] [--labels <их маски> --label-debris 3] [--threshold lgbm=0.63]
+$T = (Get-Content weights_exp\lgbm_ingest\org_cv\meta.json -Raw | ConvertFrom-Json).threshold   # порог модели сабмита
+.venv\Scripts\python.exe scripts\tools\org_to_map.py --chips <их чипы> --config $I\adapter.yaml --pred lgbm=out\org_pred_prob --threshold "lgbm=$T" --out out\org_map [--pred fdi_rule=<папка>] [--labels <их маски> --label-debris 3]
 # 3) карта
-.venv\Scripts\python.exe -m service --port 8090 --data-root out\org_map      # http://127.0.0.1:8090
+.venv\Scripts\python.exe -m service --port 8090 --data-root out\org_map      # http://127.0.0.1:8090, интерфейс v2 по умолчанию
+#    откат на v1:  $env:MACROPLASTIC_UI = "v1"  перед запуском сервиса
 ```
 
 Что проверить:
-- В логе `org_to_map`: «N чипов -> K сцен» — число сцен разумное. Сцена = CRS + дата + префикс имени (`--group name`); `--group date` — все чипы одной даты; `--group adjacency` — только по соседству, смешивает даты (будет предупреждение). Даты берутся из имени (`YYYY-MM-DD`, `YYYYMMDD`, `D-M-YY` как в MARIDA; для M-D-YY нужен `--date-order mdy`) или из тегов TIFF. Если даты нет, ставится `1900-01-01` и в названии «(дата неизвестна)».
+- В логе `org_to_map`: «N чипов -> K сцен» — число сцен разумное. Сцена = CRS + дата + префикс имени (`--group name`); `--group date` — все чипы одной даты; `--group adjacency` — только по соседству, смешивает даты (будет предупреждение). Даты берутся из имени (`YYYY-MM-DD`, `YYYYMMDD`, `D-M-YY` как в MARIDA; для M-D-YY нужен `--date-order mdy`) или из тегов TIFF. Если даты нет, ставится `1900-01-01`, в названии «(дата неизвестна)», в manifest `dates[].date_unknown: true`, и v2 вместо даты пишет «дата неизвестна». Одинаковые имена групп (анонимные `tile_*` в разных зонах UTM) получают суффикс тайла, зоны UTM или `_g<k>`: `tile_p1_utm16n`, `tile_p1_utm51n`.
+- «N из M чипов без сигнала (вероятность 0 во всех пикселях)» — нормально для чистой воды, не ошибка. Папка вероятностей uint8, где хоть в одном файле есть значение > 1, читается как P×255: чип только из 0/1 — это низкая вероятность, а не бинарная маска (до L52 такие чипы становились P = 1).
 - Строка «предсказания lgbm: 60/60 чипов найдено». Если 0 — имена prob-файлов не совпали с чипами: ожидаются `<stem>_prob.tif` или `<stem>.png`/`.tif`.
 - `.venv\Scripts\python.exe scripts\validate_service_data.py out\org_map` → `0 errors`.
 - На карте: снимок лежит на своём месте (не в океане у 0,0), вода не закрашена как суша (`water_frac` в `out\org_map_live\<сцена>\<дата>\scene.json` ≈ доля воды на снимке). Если нет — порог `--ndwi` (по умолчанию 0). Если снимок чёрный или белый — проверьте scale в `adapter.yaml`.
