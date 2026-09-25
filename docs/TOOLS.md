@@ -1,6 +1,6 @@
 # TOOLS — первые 60 минут с датасетом организаторов
 
-Инструменты первого часа (основной порядок действий — `TOMORROW.md`: ingest → convert → predict_org → train_lgbm_ingest --cv →
+Инструменты первого часа (основной порядок действий — `docs/prep/TOMORROW.md`: ingest → convert → predict_org → train_lgbm_ingest --cv →
 predict_org → score). Все команды — **PowerShell из корня репозитория**, копипастой. Вместо `D:\org\train`
 подставьте папку организаторов, вместо `org` — короткое имя. Все инструменты только читают исходные данные.
 

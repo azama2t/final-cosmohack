@@ -28,7 +28,7 @@
 | `README.md.tmpl` → `README.md` | шаблон README (кейс первым, подготовительный этап — в `docs/PREP.md`); README генерирует `scripts/render_docs.py` (правь только .tmpl) | render_docs |
 | `reports/report.md.tmpl` → `reports/report.md` | шаблон отчёта: кейс, затем часть «Подготовка» | render_docs |
 | `run.ps1` | запуск одной командой: venv, сборка фронта, сервис, браузер (`-Port -DataRoot -NoBrowser`), UTF-8 с BOM | пользователь |
-| `TOMORROW.md` | первые 60 минут хакатона: команды и развилки | команда |
+| `docs/prep/TOMORROW.md` | первые 60 минут хакатона: команды и развилки | команда |
 | `docs/QA.md` | 30 вопросов жюри по кейсу с ответами и ссылками на доказательства (генерирует `scripts/make_deck_case.py`) | защита |
 | `scripts/final_numbers.py` | артефакты → `reports/final_numbers.json` (единственный источник чисел; блок `case` — числа кейса из `reports/case_*`, `configs/case_*`, `run_summary.json`) | render_docs, make_deck_case |
 | `scripts/render_docs.py` | `*.tmpl` + final_numbers → README.md, report.md, docs/PREP.md; пустые значения печатает списком | вручную |
@@ -116,7 +116,7 @@
 | `scripts/screenshots_v2.py`, `scripts/contrast_check.py` | смоук-сценарий v2 (кадры, fps, `--offline`); проверка контраста WCAG | ревью |
 | `scripts/tools/org_to_map.py`, `tests/test_org_to_map.py` | данные организаторов (георефер. чипы + предсказания) → мозаика сцен → корень данных карты (kind organizer) | хакатон |
 | `service/routes_incidents.py`, `service/routes_drift_check.py`, `service/routes_context.py` | API: инциденты/лента; проверка прогноза дрейфа (эксперимент) и поля течений/ветра; объекты OSM и пересечение с демо-дрейфом | фронт |
-| `HACK-START.md` | первые 60 минут после выдачи кейса | команда |
+| `docs/prep/HACK-START.md` | первые 60 минут после выдачи кейса | команда |
 
 ## Кейс «Детектирование и оценка концентрации макропластика» (шт./км²)
 

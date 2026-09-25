@@ -51,3 +51,4 @@ __pycache__/
 /reports/selfcheck/jury_*
 /reports/selfcheck/*.log
 /reports/selfcheck/consistency_2*
+/docs/prev-hack/
