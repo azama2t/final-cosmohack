@@ -1,7 +1,10 @@
-"""UI v2 (L48) smoke scenario + screenshots + performance probe.
+"""UI v2 smoke scenario + screenshots + performance probe.
 
-Usage (from repo root; the service must serve the v2 build, e.g. MACROPLASTIC_UI=v2 on port 8070):
-  .venv\\Scripts\\python.exe scripts\\screenshots_v2.py --base-url http://127.0.0.1:8070 --out reports\\screens\\v2_iter1 --gl gpu
+Usage (from repo root; the service must serve the v2 build, the default UI):
+  .venv\\Scripts\\python.exe scripts\\screenshots_v2.py --base-url http://127.0.0.1:8000 --out reports\\screens\\v2_iter1 --gl gpu
+  demo set:  .venv\\Scripts\\python.exe -m service --port 8120 --data-root service\\demo
+             .venv\\Scripts\\python.exe scripts\\screenshots_v2.py --base-url http://127.0.0.1:8120 --out reports\\screens\\v2_demo
+  --out may lie anywhere (also outside the repository).
   add --video to record the demo tour (?tour=1) into <out>/tour.webm; --offline blocks every non-local request;
   --only a,b  shoots only the listed frame groups (globe,region,det,layers,h3,zone,place,drift,flow,check,compare,
               calendar,review,basemap,small,tour)
@@ -10,7 +13,9 @@ Frames (1920×1080 unless noted): 01_globe 02_region 03_detection 04_layers_menu
 09_place 10_drift 11_particles 12_check 13_compare 14_calendar 15_review 16_incidents 17_satellite_offline
 18_overview_1366 19_region_1366 20_detection_1366 21_zone_1366.
 result.json: console errors (external tile hosts separate), fps idle / flyTo / drift / particles, bundle size (gzip).
-Smoke passes when: every step ran, 0 console errors, fps ≥ 50 (with --gl gpu).
+Steps whose feature has no data in the served set (no drift forecast, no current/wind fields, no drift-check pairs,
+no zones / H3) are recorded as «пропущено (нет данных)» (`skipped` in result.json), not as failures.
+Smoke passes (smoke_ok) when: no step failed, 0 console errors. fps ≥ 50 (with --gl gpu) is checked by eye.
 """
 from __future__ import annotations
 
@@ -70,6 +75,25 @@ def click(page: Page, testid: str, timeout: int = 5000):
 
 def exists(page: Page, testid: str) -> bool:
     return page.locator(f"[data-testid='{testid}']").count() > 0
+
+
+class Skip(Exception):
+    """The served data set has no data for this feature: the step is «пропущено (нет данных)», not a failure."""
+
+
+def need(page: Page, testid: str, reason: str):
+    """Skip the step if the control is absent or disabled (the UI disables controls whose data is missing)."""
+    loc = page.locator(f"[data-testid='{testid}']")
+    if loc.count() == 0 or loc.first.is_disabled():
+        raise Skip(reason)
+
+
+def show_path(p: Path) -> str:
+    """Path for the log: relative to the repo root when inside it, else as is (no ValueError for --out elsewhere)."""
+    try:
+        return str(p.resolve().relative_to(ROOT))
+    except ValueError:
+        return str(p)
 
 
 class Console:
@@ -137,13 +161,16 @@ def run(args) -> dict:
         p = out / f"{name}.png"
         page.screenshot(path=str(p))
         res["shots"].append(name)
-        print(f"  [shot] {p.relative_to(ROOT)}")
+        print(f"  [shot] {show_path(p)}")
 
     def step(name: str, fn):
         t0 = time.time()
         try:
             fn()
             res["steps"][name] = {"ok": True, "s": round(time.time() - t0, 1)}
+        except Skip as e:
+            res["steps"][name] = {"ok": True, "skipped": f"пропущено (нет данных): {e}"}
+            print(f"  [skip] {name}: пропущено (нет данных): {e}")
         except Exception as e:  # keep going: the report shows which step failed
             res["steps"][name] = {"ok": False, "error": str(e)[:300]}
             print(f"  [FAIL] {name}: {str(e)[:200]}")
@@ -172,7 +199,7 @@ def run(args) -> dict:
                  const e = g.getExtension('WEBGL_debug_renderer_info'); return g.getParameter(e.UNMASKED_RENDERER_WEBGL); } catch (e) { return String(e); } })()"""
         )
         page.wait_for_function("window.__app && window.__app.nFeed > 0", timeout=20000)
-        # first screen = the demo region (INBOX §4): where / when / what the model marked / what to click
+        # first screen = the demo region: where / when / what the model marked / what to click
         res["fps"]["first_flyin"] = fps_while_moving(page, 6000)
         page.wait_for_function("window.__app && window.__app.sceneReady", timeout=20000)
         wait_idle(page, 1500)
@@ -267,6 +294,10 @@ def run(args) -> dict:
         if want("h3"):
             def s_h3():
                 page.evaluate("window.__layersMenu(true)")
+                page.wait_for_timeout(200)
+                if not exists(page, "layer-h3") or page.locator("[data-testid='layer-h3']").first.is_disabled():
+                    page.evaluate("window.__layersMenu(false)")
+                    raise Skip("нет индекса H3 для этого снимка")
                 click(page, "layer-h3")
                 click(page, "layers-menu")
                 page.wait_for_function("window.__app.h3Ready", timeout=15000)
@@ -286,6 +317,7 @@ def run(args) -> dict:
 
         if want("zone"):
             def s_zone():
+                need(page, "act-zones", "нет зон обследования на этом снимке")
                 click(page, "act-zones")
                 page.wait_for_timeout(600)
                 shot(page, "07b_zones_list")
@@ -298,6 +330,7 @@ def run(args) -> dict:
         if want("place"):
             def s_place():
                 if not exists(page, "zone-open-place"):
+                    need(page, "act-zones", "нет зон обследования на этом снимке")
                     click(page, "act-zones")
                     click(page, "zone-row-1")
                     page.wait_for_timeout(1200)
@@ -314,6 +347,7 @@ def run(args) -> dict:
 
         if want("drift"):
             def s_drift():
+                need(page, "act-drift", "нет прогноза дрейфа")
                 click(page, "act-drift")
                 page.wait_for_function("window.__app.driftReady", timeout=15000)
                 wait_idle(page, 1000)  # the drift view starts playing by itself
@@ -324,7 +358,15 @@ def run(args) -> dict:
 
         if want("flow"):
             def s_flow():
-                click(page, "drift-wind")
+                need(page, "act-drift", "нет прогноза дрейфа")
+                if page.evaluate("window.__app.view") != "drift":
+                    click(page, "act-drift")
+                    page.wait_for_timeout(800)
+                kind = next((k for k in ("drift-wind", "drift-currents")
+                             if exists(page, k) and not page.locator(f"[data-testid='{k}']").first.is_disabled()), None)
+                if kind is None:
+                    raise Skip("нет полей течений и ветра для этой даты")
+                click(page, kind)
                 page.wait_for_function("window.__app.flowFields > 0", timeout=15000)
                 page.wait_for_timeout(1500)
                 res["fps"]["particles_and_drift"] = measure_fps(page, 3000)
@@ -346,10 +388,17 @@ def run(args) -> dict:
 
         if want("check"):
             def s_check():
+                need(page, "act-drift", "нет прогноза дрейфа")
                 click(page, "act-drift")
                 page.wait_for_timeout(800)
+                need(page, "check-open", "нет проверки прогноза дрейфа")
                 click(page, "check-open")
-                page.wait_for_selector("[data-testid='check-pairs']", timeout=10000)
+                page.wait_for_selector("[data-testid='check-pairs'], [data-testid='check-none']", timeout=10000)
+                if exists(page, "check-none"):
+                    shot(page, "12_check_none")
+                    click(page, "panel-close")
+                    page.wait_for_timeout(500)
+                    raise Skip("в этом наборе данных пар для проверки нет")
                 idx = page.evaluate("""(() => { const els = [...document.querySelectorAll('[data-testid^=check-pair-]')];
                     return Math.max(0, els.findIndex(e => e.textContent.includes('попал'))); })()""")
                 click(page, f"check-pair-{idx}")
@@ -480,7 +529,7 @@ def run(args) -> dict:
                 if vid:
                     dst = out / "tour.webm"
                     Path(vid).replace(dst)
-                    res["tour_video"] = str(dst.relative_to(ROOT))
+                    res["tour_video"] = show_path(dst)
             step("tour", s_tour)
 
         browser.close()
@@ -492,6 +541,7 @@ def run(args) -> dict:
     res["bundle"] = bundle_size()
     fps_vals = [v for v in res["fps"].values() if isinstance(v, (int, float))]
     res["fps_min"] = min(fps_vals) if fps_vals else None
+    res["skipped"] = {k: s["skipped"] for k, s in res["steps"].items() if s.get("skipped")}
     res["smoke_ok"] = all(s.get("ok") for s in res["steps"].values()) and not con.errors
     return res
 
@@ -511,7 +561,7 @@ def main():
     if not out.is_absolute():
         out = ROOT / out
     (out / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(json.dumps({k: res.get(k) for k in ("smoke_ok", "fps", "fps_min", "console_errors", "bundle", "steps", "layout_1366", "tour_seconds")}, ensure_ascii=False, indent=1))
+    print(json.dumps({k: res.get(k) for k in ("smoke_ok", "skipped", "fps", "fps_min", "console_errors", "bundle", "steps", "layout_1366", "tour_seconds")}, ensure_ascii=False, indent=1))
 
 
 if __name__ == "__main__":

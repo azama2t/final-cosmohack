@@ -19,7 +19,19 @@ export default function CheckPanel(p: CheckProps & { manifest: Manifest }) {
   const pairs: CheckPair[] = s.pairs ?? [];
   const n = s.n_pairs ?? pairs.length;
   const k = s.k_hit ?? pairs.filter((x) => x.pair_hit).length;
+  const nAll: number = s.n_pairs_all ?? pairs.length;
   const st = p.data?.stats;
+  if (!pairs.length)
+    return (
+      <section className="sec" data-testid="check-summary">
+        <p className="lead">
+          Эксперимент<span className="exp-tag">не валидация</span>
+        </p>
+        <p className="note" style={{ marginTop: 8 }} data-testid="check-none">
+          В этом наборе данных пар для проверки нет.
+        </p>
+      </section>
+    );
   return (
     <>
       <section className="sec" data-testid="check-summary">
@@ -75,6 +87,11 @@ export default function CheckPanel(p: CheckProps & { manifest: Manifest }) {
           <h3>Пары «снимок → следующий снимок»</h3>
           <span className="aside">1–5 дней</span>
         </div>
+        {nAll > pairs.length && (
+          <p className="note" style={{ marginBottom: 8 }} data-testid="check-scope">
+            Показаны пары районов этого набора данных: {pairs.length} из {nAll}.
+          </p>
+        )}
         <div className="list" data-testid="check-pairs">
           {pairs.map((x, i) => {
             const on = p.pair?.url === x.url;

@@ -148,6 +148,25 @@ export function fmtDateShort(iso: string): string {
 export const modelLabel = (id: string, name?: string) =>
   id === 'mdd' ? 'MDD' : id === 'lgbm' ? 'LGBM' : name ? name.split(' ')[0] : id.toUpperCase();
 
+/** Honest model title for the evidence card and the models menu. The threshold always comes from manifest.models.
+ *  On live Sentinel-2 L2A data (manifest.kind ≠ «organizer») the layer «lgbm» is the L2A variant of our model
+ *  (weights/lgbm_live), not the final model trained on MARIDA — the card and the menu say so. */
+export const LGBM_VARIANT_HINT =
+  'Итоговая модель обучена на снимках MARIDA в коррекции ACOLITE, а живые снимки — уровня L2A (сдвиг домена), поэтому на карте работает её вариант, обученный с поправкой на L2A.';
+export function modelTitle(
+  id: string,
+  manifest: { kind?: string; models?: Record<string, { name?: string; threshold?: number; note?: string }> },
+): { label: string; hint: string; variant: boolean } {
+  const m = manifest.models?.[id];
+  const thr = `порог ${fmtThr(m?.threshold)}`;
+  if (id === 'lgbm') {
+    if (manifest.kind !== 'organizer') return { label: `наша модель (вариант для снимков L2A, ${thr})`, hint: LGBM_VARIANT_HINT, variant: true };
+    return { label: `наша модель (${thr})`, hint: 'Модель LightGBM; порог — из файла модели, выбранной при сборке карты.', variant: false };
+  }
+  if (id === 'mdd') return { label: `MDD (${thr})`, hint: 'marinedebrisdetector (Rußwurm et al., 2023, MIT) — открытая модель для сравнения.', variant: false };
+  return { label: `${modelLabel(id, m?.name)} (${thr})`, hint: m?.note ?? '', variant: false };
+}
+
 /** Threshold: never rounded up to «1» (L52: 0.999 → «0.999», 0.995 → «0.995»); 0.63 → «0.63», 0.5 → «0.5»,
  *  0.06387 → «0.0639». Up to 3 decimals (truncated, not rounded, near 1), trailing zeros dropped. */
 export function fmtThr(v: number | null | undefined): string {

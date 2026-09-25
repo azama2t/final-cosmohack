@@ -65,7 +65,7 @@ FeatureCollection, Polygon = граница ячейки H3 res 8. Только 
 Все метрики для README/отчёта/деки/UI. Плоский словарь с вложенными секциями по этапам: `{"l3_lgbm": {"val": {"f1_md":..,"iou_md":..,"threshold":..}, "test": {...}}, "l4_unet": {...}, "data": {...}, "regions": {...}}`. Генерируется скриптом `scripts/final_numbers.py`, руками не правится.
 
 ## Дополнения (03:35)
-- `manifest.regions[].dates[].date_unknown` (необязательно, L52, `kind: "organizer"`): `true` — даты съёмки нет ни в имени, ни в тегах, `date` = заглушка (`org_to_map --unknown-date`, по умолчанию `1900-01-01`); то же поле в `scene.json` сцены; `regions[].date_unknown: true`, если заглушка у всех дат района. Фронт v2 вместо даты пишет «дата неизвестна».
+- `manifest.regions[].dates[].date_unknown` (необязательно, `kind: "organizer"`): `true` — даты съёмки нет ни в имени, ни в тегах, `date` = заглушка (`org_to_map --unknown-date`, по умолчанию `1900-01-01`); то же поле в `scene.json` сцены; `regions[].date_unknown: true`, если заглушка у всех дат района. Фронт v2 вместо даты пишет «дата неизвестна».
 - `manifest.regions[].dates[].thumb` (необязательно): `<region>/<date>/thumb.jpg` — превью rgb 256 px по длинной стороне, ≤ 30 КБ; фронт берёт его для списка регионов.
 - Палитра `prob.png` (фиксирована, легенда фронта её повторяет): P < 0.05 — прозрачно; 0.05 ≤ P < порог — рампа от `#2b6cb0` (α 40) через `#b794f4` к `#f6ad55` (α 170); P ≥ порог — акцент `#ff6b4a` (α 230).
 - `/api/compare` → `{"a":{region,date,model,kpi},"b":{...},"diff":{<kpi>:{"delta": b−a, "ratio": b/a | null}}}`; kpi: total_debris_area_m2, n_detections, mean_index, max_index, cloud_frac, observed_cells, flagged_cells.
@@ -96,7 +96,7 @@ FeatureCollection, Polygon = граница ячейки H3 res 8. Только 
 
 ## Подложки: онлайн CARTO/Esri, офлайн — Sentinel-2 + береговая линия Natural Earth
 
-Решение команды (L44): тайлы CARTO и Esri **не скачиваются и не раздаются сервисом**: условия CARTO запрещают массовую
+Решение команды: тайлы CARTO и Esri **не скачиваются и не раздаются сервисом**: условия CARTO запрещают массовую
 загрузку и серверное кэширование, для офлайна Esri нужен собственный экспорт. Подложки берутся онлайн прямо у поставщиков,
 атрибуция на карте обязательна.
 
@@ -112,7 +112,7 @@ CARTO или ≥ 8 ошибок тайлов Esri → «Без» + тост. В�
 URL-параметр `?b=none|dark|satellite` задаёт подложку явно. Эндпоинта `/tiles/...` в сервисе нет.
 
 ## Контекст: объекты OSM, угрозы, постоянные источники
-Модуль `service/routes_context.py` (L47). Решение команды (INBOX 13:20): **никаких численных предупреждений** («угроза через N ч», проценты), ничего в ленту событий; **метка «постоянный источник» не выдаётся**, находки не привязываются к устьям/выпускам как к виновникам. Объекты: `service/context/<region>.geojson` (папку можно подменить `$MACROPLASTIC_CONTEXT`), генерирует `scripts/fetch_osm_context.py` (Overpass, bbox района ± 10 км, кэш ответов `data_cache/osm/`). Сводка: `scripts/context_report.py` → `reports/context.md`.
+Модуль `service/routes_context.py`. Решение команды: **никаких численных предупреждений** («угроза через N ч», проценты), ничего в ленту событий; **метка «постоянный источник» не выдаётся**, находки не привязываются к устьям/выпускам как к виновникам. Объекты: `service/context/<region>.geojson` (папку можно подменить `$MACROPLASTIC_CONTEXT`), генерирует `scripts/fetch_osm_context.py` (Overpass, bbox района ± 10 км, кэш ответов `data_cache/osm/`). Сводка: `scripts/context_report.py` → `reports/context.md`.
 - `service/context/<region>.geojson` — FeatureCollection WGS84, `{region, bbox, source, fetched, note, features}`; `properties`: `id` (`<region>_osm_<n>`), `kind` ∈ `aquaculture | beach | port | marina | protected_area | river_mouth | outfall | wastewater_plant`, `kind_ru`, `name` (str | null), `osm_id` (`node|way|relation/<id>`), `source` = `© OpenStreetMap contributors (ODbL)`; у `river_mouth` ещё `waterway`, `coast_dist_m`. Полигоны обрезаны по bbox и упрощены (~20 м). Устье — концевой узел реки (последний) / канала (любой конец), не общий с другими водотоками, ≤ 1,5 км от береговой линии OSM. В UI обязательна атрибуция «© OpenStreetMap contributors (ODbL)».
 - `GET /api/context?region=[&kind=a,b]` → этот GeoJSON (`application/geo+json`); 404 — нет района или файла, 422 — плохое имя.
 - `GET /api/threats?region=[&date=][&buffer_m=300 (50–5000)]` — **только для панели дрейфа**, не для ленты событий → `{region, date, feed:false, buffer_m, note:"демо-прогноз, не валидирован", rule, osm_source, n_objects, objects:[{object_id, kind, kind_ru, name, osm_id, lon, lat, text, source}]}`. Объекты `aquaculture|beach|protected_area|marina|port`, в буфер `buffer_m` которых за 72 ч заходит облако частиц `drift.json` (внутренний порог шума — ≥ 1 % частиц). **Без часов, процентов и долей частиц**; `text` — «<вид> «<имя>» — облако частиц демо-прогноза задевает объект». Сортировка по виду, затем по имени. 404 — нет `drift.json` у даты или нет файла объектов.

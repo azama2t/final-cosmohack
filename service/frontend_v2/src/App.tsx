@@ -12,6 +12,7 @@ import {
   loadZones,
   modelPath,
   rankRegions,
+  scopeCheckSummary,
 } from './lib/data';
 import { useAsync } from './lib/hooks';
 import { makeScale, registerUnknownDates } from './lib/style';
@@ -210,7 +211,9 @@ export default function App() {
   useEffect(() => {
     if (!manifest || !paths.size) return;
     let alive = true;
-    loadFeed(manifest, 'mdd').then((f) => alive && setFeed(f));
+    // MDD when the data has it (live scenes), else the first model of the manifest (organiser data: lgbm only)
+    const feedModel = manifest.models?.mdd ? 'mdd' : Object.keys(manifest.models ?? {})[0] ?? 'mdd';
+    loadFeed(manifest, feedModel).then((f) => alive && setFeed(f));
     return () => {
       alive = false;
     };
@@ -252,7 +255,7 @@ export default function App() {
   useEffect(() => {
     if (!layers.drift) return;
     const l = (h: number) => {
-      const b = Math.floor(h / 6) * 6;
+      const b = Math.max(0, Math.floor(h / 6) * 6); // the drift clock may start below 0; /api/flow wants t ≥ 0 (422 otherwise)
       setFlowTick((x) => (x === b ? x : b));
     };
     anim.listeners.add(l);
@@ -284,7 +287,8 @@ export default function App() {
   // ---- drift forecast check (experiment) ----
   useEffect(() => {
     if (!checkMode || checkSummary !== undefined) return;
-    apiGet<any>('/api/drift_check').then((s) => setCheckSummary(s));
+    apiGet<any>('/api/drift_check').then((s) => setCheckSummary(scopeCheckSummary(s, manifest)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checkMode, checkSummary]);
   useEffect(() => {
     if (!checkPair) return setCheckData(null);
@@ -874,6 +878,7 @@ export default function App() {
           contextOk={contextOk}
           nArtifacts={nArts}
           models={manifest.models}
+          kind={manifest.kind}
           model={model}
           sceneModels={dateEntry?.models ?? []}
           onModel={(m) => {

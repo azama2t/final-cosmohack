@@ -1,10 +1,10 @@
-# HACK-START — первые 60 минут после выдачи кейса (черновик L50)
+# HACK-START — первые 60 минут после выдачи кейса
 
 Коротко, по шагам. Подробности и развилки — `TOMORROW.md`, команды инструментов — `docs/TOOLS.md`.
 Все флаги ниже сверены с `--help` (25.09). Test MARIDA не читать. Каждое решение — одна строка в `docs/DECISIONS.md`, каждый сабмит — в `docs/TIMELINE.md`.
 
 ```powershell
-cd C:\Users\User\Documents\GitHub\final-cosmohack
+cd <корень репозитория>          # папка с README.md
 $env:PYTHONPATH = "src"
 $env:CUDA_VISIBLE_DEVICES = "-1"    # именно "-1": в PowerShell 5.1 "" удаляет переменную
 $PY  = ".venv\Scripts\python.exe"
@@ -109,7 +109,7 @@ $T = (Get-Content weights_exp\lgbm_ingest\org_cv\meta.json -Raw | ConvertFrom-Js
 
 Анонимные имена без дат: районы называются `tile_p1…` (одинаковые имена получают суффикс зоны UTM или номера группы: `tile_p1_utm16n`, `tile_p1_utm51n`), дата-заглушка 1900-01-01 помечена в manifest `date_unknown`, и v2 пишет «дата неизвестна». На демо так и говорить: дата снимка неизвестна. «N чипов без сигнала» в логе `org_to_map` — это чипы, где вероятность 0 везде (чистая вода), не ошибка.
 
-(`org_to_map.py` — дорожка L49, пройдено в репетиции 3 и перепроверено в L52. Если скрипт падает — запасной путь «сцены → `data\live\<region>\<date>` → `scripts\build_service_data.py`» из `TOMORROW.md`, раздел «Развилки».)
+(`org_to_map.py` пройден в репетиции 3 и перепроверен после исправлений. Если скрипт падает — запасной путь «сцены → `data\live\<region>\<date>` → `scripts\build_service_data.py`» из `TOMORROW.md`, раздел «Развилки».)
 
 Что переключается на их данные:
 - **manifest.json** корня `out\org_map` с `kind: "organizer"` (`docs/CONTRACTS.md`); сервис берёт корень из `--data-root` (или `$env:MACROPLASTIC_DATA`, или `run.ps1 -DataRoot out\org_map`).

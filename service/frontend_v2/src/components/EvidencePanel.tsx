@@ -5,7 +5,7 @@ import { centroid, featureBBox } from '../map/layers';
 import { artifactOf, artifactText } from '../lib/artifacts';
 import { apiGet, apiPost, apiUrl } from '../lib/api';
 import { isFlagged } from '../lib/data';
-import { fmtArea, fmtDate, fmtNum, fmtPct, fmtPermille, fmtProb, fmtThr, fmtTs, modelLabel } from '../lib/style';
+import { fmtArea, fmtDate, fmtNum, fmtPct, fmtPermille, fmtProb, fmtTs, modelLabel, modelTitle } from '../lib/style';
 import { sceneTime, sensorOf, STATUS_RU } from './RegionPanel';
 
 type Props = RightProps & { feature: Feature<DetProps>; region: Region; dateEntry: DateEntry };
@@ -114,7 +114,8 @@ export default function EvidencePanel(p: Props) {
     }
     return { f: best && bd <= Math.max(60, extM / 2 + 30) ? best : null, d: bd };
   }, [p.otherDet, p.otherModel, lon, lat, mLon, extM]);
-  const thrOther = p.otherModel ? p.manifest.models[p.otherModel]?.threshold : undefined;
+  const mainT = modelTitle(pr.model, p.manifest);
+  const otherT = p.otherModel ? modelTitle(p.otherModel, p.manifest) : null;
 
   const [a, u] = fmtArea(pr.area_m2);
   const coords = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
@@ -239,15 +240,15 @@ export default function EvidencePanel(p: Props) {
           </thead>
           <tbody>
             <tr>
-              <td>основная · {modelLabel(pr.model)}</td>
+              <td title={mainT.hint}>основная · {mainT.label}</td>
               <td className="r">
                 {fmtProb(pr.mean_prob)} <span className="faint">макс. {fmtProb(pr.max_prob)}</span>
               </td>
-              <td className="r">отметила (порог {fmtThr(p.threshold)})</td>
+              <td className="r">отметила</td>
             </tr>
             {p.otherModel && (
               <tr data-testid="evidence-other-model">
-                <td>вторая · {modelLabel(p.otherModel)}</td>
+                <td title={otherT?.hint}>вторая · {otherT?.label}</td>
                 <td className="r">
                   {other?.f ? (
                     <>
@@ -264,12 +265,17 @@ export default function EvidencePanel(p: Props) {
                       ? `отметила рядом, ${fmtNum(other.d)} м`
                       : pr.confirmed
                         ? 'пиксель ≥ порога в 20 м'
-                        : `не отметила (порог ${fmtThr(thrOther)})`}
+                        : 'не отметила'}
                 </td>
               </tr>
             )}
           </tbody>
         </table>
+        {(mainT.variant || otherT?.variant) && (
+          <p className="note" style={{ marginTop: 8 }} data-testid="evidence-model-variant">
+            {mainT.variant ? mainT.hint : otherT?.hint}
+          </p>
+        )}
       </section>
 
       <section className="sec" data-testid="evidence-alternatives">

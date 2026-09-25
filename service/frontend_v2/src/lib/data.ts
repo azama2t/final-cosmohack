@@ -93,6 +93,25 @@ export const shortName = (name: string) => {
   return i > 0 ? name.slice(0, i) : name;
 };
 
+/** Drift-check summary scoped to the regions of the current data root: pairs of other regions are dropped and the
+ *  counts are recomputed from the remaining pairs. `n_pairs_all` keeps the size of the full check for the note. */
+export function scopeCheckSummary(s: any, m: Manifest | null | undefined): any {
+  if (!s || !m) return s;
+  const ids = new Set(m.regions.map((r) => r.id));
+  const all: any[] = s.pairs ?? [];
+  const pairs = all.filter((x) => ids.has(x.region));
+  if (pairs.length === all.length) return { ...s, n_pairs_all: all.length };
+  return {
+    ...s,
+    pairs,
+    n_pairs_all: all.length,
+    n_pairs: pairs.length,
+    n_pairs_with_det2: pairs.filter((x) => (x.n_det2 ?? 0) > 0).length,
+    k_hit: pairs.filter((x) => x.pair_hit).length,
+    k_hit_baseline: pairs.filter((x) => x.pair_hit_baseline).length,
+  };
+}
+
 /** Haze / sun-glint flag of a date (field is optional: older data has no `quality`). */
 export const isFlagged = (d: DateEntry | null | undefined) => !!(d?.quality && (d.quality.haze || d.quality.glint_or_haze));
 

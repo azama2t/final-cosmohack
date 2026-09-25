@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Basemap, LayerKey, Layers, ModelInfo, Projection } from '../types';
-import { fmtThr, modelLabel } from '../lib/style';
+import { modelTitle } from '../lib/style';
 import { AGREE_NOTE } from '../lib/confirm';
 
 interface Props {
@@ -17,6 +17,8 @@ interface Props {
   contextOk: boolean;
   nArtifacts: number;
   models: Record<string, ModelInfo>;
+  /** manifest.kind: «organizer» = organiser chips, otherwise live L2A scenes (model titles depend on it) */
+  kind?: string;
   model: string;
   sceneModels: string[];
   onModel: (m: string) => void;
@@ -78,13 +80,22 @@ export default function Toolbar(p: Props) {
       {open && (
         <div className="menu" data-testid="layers-panel" role="menu">
           <div className="menu-group">Модель</div>
-          {Object.keys(p.models ?? {}).map((m) => (
-            <button key={m} className="menu-row" disabled={!p.sceneModels.includes(m)} onClick={() => p.onModel(m)} data-testid={`model-${m}`}>
-              <span className={`radio ${p.model === m ? 'on' : ''}`} aria-hidden />
-              <span>{modelLabel(m, p.models?.[m]?.name)}</span>
-              <span className="mr-hint">порог {fmtThr(p.models?.[m]?.threshold)}</span>
-            </button>
-          ))}
+          {Object.keys(p.models ?? {}).map((m) => {
+            const t = modelTitle(m, { kind: p.kind, models: p.models });
+            return (
+              <div key={m}>
+                <button className="menu-row" disabled={!p.sceneModels.includes(m)} onClick={() => p.onModel(m)} data-testid={`model-${m}`} title={t.hint}>
+                  <span className={`radio ${p.model === m ? 'on' : ''}`} aria-hidden />
+                  <span>{t.label}</span>
+                </button>
+                {t.variant && (
+                  <div className="menu-group" style={{ paddingTop: 0 }} data-testid={`model-${m}-hint`}>
+                    {t.hint}
+                  </div>
+                )}
+              </div>
+            );
+          })}
           <button className="menu-row" disabled={!p.confAvail} onClick={() => p.onOnlyConfirmed(!p.onlyConfirmed)} data-testid="only-confirmed">
             <span className={`check ${p.onlyConfirmed && p.confAvail ? 'on' : ''}`} aria-hidden />
             <span>Только с согласием второй модели</span>
