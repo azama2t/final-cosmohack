@@ -4,7 +4,7 @@ import { MapboxOverlay } from '@deck.gl/mapbox';
 import { BitmapLayer, GeoJsonLayer, ScatterplotLayer } from '@deck.gl/layers';
 import { centroid } from '../map/layers';
 import type { Basemap, Manifest, SceneRef } from '../types';
-import { getImage, loadDetections } from '../lib/data';
+import { getImage, loadDetections, shortName } from '../lib/data';
 import { darkStyle, offlineStyle, satelliteStyle } from '../map/controller';
 import { ACCENT_RGB, fmtDate } from '../lib/style';
 
@@ -146,7 +146,7 @@ function Pane({
       <div className="compare-label glass">
         <span className="cmp-tag">{side.toUpperCase()}</span>
         <span>
-          <b>{region?.name ?? refScene.region}</b>
+          <b title={region?.name}>{region ? shortName(region.name) : refScene.region}</b>
           <span className="muted"> · {fmtDate(refScene.date)}</span>
         </span>
       </div>

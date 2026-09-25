@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import type { DateEntry, DetProps, FC, H3Props, Manifest, Region, SceneRef, TsRow, Zone, ZonesFile } from '../types';
 import { fmtThr, fmtArea, fmtDate, fmtNum, fmtPct, fmtPermille, modelLabel } from '../lib/style';
 import ExportBox from './ExportBox';
+import { isFlagged, regionHaze, shortName } from '../lib/data';
 import ComparePanel from './ComparePanel';
 
 const TsChart = lazy(() => import('./TsChart'));
@@ -40,7 +41,8 @@ export default function RightPanel(p: Props) {
         {p.collapsed ? '‹' : '›'}
       </button>
       {!p.collapsed && (
-        <div className="panel-scroll">
+        // keyed by view: switching overview / region / compare starts the panel from the top
+        <div className="panel-scroll" key={p.compare ? 'compare' : p.region ? `region-${p.region.id}` : 'overview'}>
           {p.compare ? (
             <ComparePanel manifest={p.manifest} compare={p.compare} model={p.model} setCompare={p.setCompare} />
           ) : p.region && p.dateEntry ? (
@@ -72,10 +74,23 @@ function Overview({ manifest, onRegion, onCompare }: { manifest: Manifest; onReg
           {list.map((r, i) => {
             const v = r.summary?.index_permille ?? 0;
             return (
-              <button key={r.id} className="rank-row" onClick={() => onRegion(r.id)} data-testid={`rank-row-${r.id}`}>
+              <button
+                key={r.id}
+                className="rank-row"
+                onClick={() => onRegion(r.id)}
+                data-testid={`rank-row-${r.id}`}
+                title={`${r.name}${regionHaze(r) ? ' — ' + regionHaze(r) : ''}`}
+              >
                 <span className="rank-n">{i + 1}</span>
                 <span className="rank-body">
-                  <span className="rank-name">{r.name}</span>
+                  <span className="rank-name">
+                    <span className="rank-name-t">{shortName(r.name)}</span>
+                    {regionHaze(r) && (
+                      <span className="ri-haze" title={regionHaze(r)}>
+                        дымка
+                      </span>
+                    )}
+                  </span>
                   <span className="rank-bar">
                     <span style={{ width: `${Math.max(4, (v / max) * 100)}%` }} />
                   </span>
@@ -130,6 +145,16 @@ function RegionView(p: Props & { region: Region; dateEntry: DateEntry }) {
           {fmtDate(p.dateEntry.date)} · {modelLabel(p.model, p.manifest.models[p.model]?.name)} · порог{' '}
           {fmtThr(p.manifest.models[p.model]?.threshold)}
         </div>
+        {isFlagged(p.dateEntry) && (
+          <div className="q-badge" data-testid="quality-badge" title={p.dateEntry.quality?.note || undefined}>
+            <span className="q-icon" aria-hidden>
+              !
+            </span>
+            <span>
+              <b>дымка/блик</b> — находки могут быть завышены
+            </span>
+          </div>
+        )}
         {top && (
           <button className="verdict" onClick={() => p.onZone(top)} data-testid="verdict">
             <span className="verdict-dot" />

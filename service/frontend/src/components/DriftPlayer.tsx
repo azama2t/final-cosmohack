@@ -10,8 +10,27 @@ export default function DriftPlayer({ drift, onRender }: { drift: DriftFile; onR
   const [hour, setHour] = useState(anim.hour);
   const [playing, setPlaying] = useState(anim.playing);
   const [speed, setSpeed] = useState(anim.speed);
+  const [spread, setSpread] = useState(anim.spread);
   const render = useRef(onRender);
   render.current = onRender;
+  const box = useRef<HTMLDivElement>(null);
+  const ens = (drift.ensemble ?? []).filter((m) => m?.particles?.length);
+  const wdfs = ens.map((m) => m.wind_drift_factor).sort((a, b) => a - b);
+
+  // the map scale bar sits right above the player: publish the player height as a CSS variable
+  useEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    const root = document.documentElement;
+    const set = () => root.style.setProperty('--dp-h', `${Math.ceil(el.getBoundingClientRect().height)}px`);
+    set();
+    const ro = new ResizeObserver(set);
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      root.style.removeProperty('--dp-h');
+    };
+  }, []);
 
   useEffect(() => {
     anim.maxHour = maxH;
@@ -52,13 +71,18 @@ export default function DriftPlayer({ drift, onRender }: { drift: DriftFile; onR
     render.current();
   };
   (window as any).__driftPlay = (on: boolean) => setPlaying(on);
+  const toggleSpread = () => {
+    anim.spread = !spread;
+    setSpread(anim.spread);
+    render.current();
+  };
 
   const start = Date.parse(drift.start_time);
   const cur = Number.isFinite(start) ? new Date(start + hour * 3600e3) : null;
   const f = drift.forcing ?? {};
 
   return (
-    <div className="drift-player glass" data-testid="drift-player">
+    <div className="drift-player glass" data-testid="drift-player" ref={box}>
       <div className="dp-row">
         <button
           className={`play-btn ${playing ? 'on' : ''}`}
@@ -100,11 +124,46 @@ export default function DriftPlayer({ drift, onRender }: { drift: DriftFile; onR
           ))}
         </div>
       </div>
-      <div className="dp-caption">
-        <b>Демонстрационный прогноз, без валидации</b> · модель течений: {f.currents ?? '—'}, ветер: {f.wind ?? '—'}, ветровой
-        коэффициент {f.wind_drift_factor ?? '—'} · {f.model ?? ''}
-        {cur && <span className="muted"> · {cur.toISOString().slice(0, 16).replace('T', ' ')} UTC</span>}
+      <div className="dp-row2">
+        <div
+          className="dp-caption"
+          title={`Модель течений: ${f.currents ?? '—'}; ветер: ${f.wind ?? '—'}; ветровой коэффициент ${
+            f.wind_drift_factor ?? '—'
+          }; ${f.model ?? ''}${drift.note ? '. ' + drift.note : ''}`}
+        >
+          <b>Демонстрационный прогноз, без валидации</b> · течения {shortSrc(f.currents)}, ветер {shortSrc(f.wind)}, коэф.
+          ветра {f.wind_drift_factor ?? '—'}
+          {f.model ? ` · ${f.model}` : ''}
+          {cur && <span className="muted"> · {fmtUtc(cur)} UTC</span>}
+        </div>
+        {ens.length > 0 && (
+          <button
+            className={`chip spread-chip ${spread ? 'on' : ''}`}
+            onClick={toggleSpread}
+            data-testid="drift-spread"
+            aria-pressed={spread}
+            title={`Диапазон неопределённости: где были бы частицы при ветровом коэффициенте ${wdfs.join(' и ')} (основной прогноз — ${
+              f.wind_drift_factor ?? '—'
+            })`}
+          >
+            <i className="spread-sw" aria-hidden />
+            разброс ветра<span className="spread-range"> {wdfs.length > 1 ? `${wdfs[0]}–${wdfs[wdfs.length - 1]}` : wdfs[0]}</span>
+          </button>
+        )}
       </div>
     </div>
   );
+}
+
+/** «HYCOM ESPC-D-V02 global 1/12° analysis, …» → «HYCOM ESPC-D-V02»; full text is in the tooltip. */
+function shortSrc(s?: string) {
+  if (!s) return '—';
+  const cut = s.split(/,|\(| global| hourly| 10 m/)[0].trim();
+  return cut || s;
+}
+
+/** 2025-01-08T02:20Z → «08.01.2025 02:20» */
+function fmtUtc(d: Date) {
+  const iso = d.toISOString();
+  return `${iso.slice(8, 10)}.${iso.slice(5, 7)}.${iso.slice(0, 4)} ${iso.slice(11, 16)}`;
 }

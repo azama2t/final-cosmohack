@@ -22,3 +22,8 @@
 | 2026-09-25 03:48 | http://127.0.0.1:8000 | 570 | 0 | None | 11.1 | 0 | gl=swiftshader; ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver); no drift.json in manifest |
 
 **Итерация L9-2 (03:40–03:48, `reports/screens/iter4`).** GPU RTX 4070: flyTo 55–55.7 fps, дрейф TripsLayer 60.2 fps (фикстуры), load 1.2–1.3 с. Swiftshader (для кадров): load 0.52–0.57 с на реальных данных, fps ограничен CPU. Ошибок консоли 0 во всех прогонах. Бандл JS+CSS gzip 1.06 МБ (лимит 3 МБ). Демо-тур на реальных данных: 7 шагов, 44.9 с (дрейфа нет → шаг пропущен); на фикстурах: 8 шагов, 55.2 с.
+| 2026-09-25 05:00 | http://127.0.0.1:8000 | 1616 | 0 | 60.1 | 56.1 | 0 | gl=gpu; ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11) |
+| 2026-09-25 05:16 | http://127.0.0.1:8000 | 1144 | 0 | 60 | 56.1 | 0 | gl=gpu; ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11) |
+| 2026-09-25 05:19 | http://127.0.0.1:8000 | 1190 | 0 | 60.1 | 58.1 | 0 | gl=gpu; ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11) |
+
+**Итерация L9-3 (05:16–05:19, `reports/screens/iter5`, `--gl gpu --extra --video`).** GPU RTX 4070, реальные данные (:8000, 12 районов): load 1.14–1.19 с, flyTo 56.1–58.1 fps, дрейф (Манила, TripsLayer + облако ensemble 200 точек) 60.0–60.1 fps. Ошибок консоли 0 (плюс кадр дрейфа без `ensemble` — тоже 0). Бандл JS+CSS gzip 1.07 МБ (лимит 3 МБ). Демо-тур на реальных данных: лучший район — Манильский залив, 8 шагов с дрейфом, 58.1 с.

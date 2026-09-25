@@ -2,6 +2,7 @@ import { BitmapLayer, GeoJsonLayer, PathLayer, ScatterplotLayer } from '@deck.gl
 import type { Layer, PickingInfo } from '@deck.gl/core';
 import type { Bounds, DetProps, Feature, FC, H3Props, Layers, Region } from '../types';
 import { ACCENT_RGB, h3Color, h3Elevation, h3LineColor, type H3Scale } from '../lib/style';
+import type { DriftFile } from '../types';
 
 type GeoModule = typeof import('@deck.gl/geo-layers');
 let geo: GeoModule | null = null;
@@ -13,9 +14,12 @@ export function loadGeo(): Promise<GeoModule> {
 }
 export const geoLoaded = () => geo !== null;
 
+type Trip = { id: number; path: [number, number][]; ts: number[] };
 export interface PreparedDrift {
-  trips: { id: number; path: [number, number][]; ts: number[] }[];
+  trips: Trip[];
   starts: [number, number][];
+  /** optional ensemble members (other wind drift factors) — uncertainty cloud */
+  ensemble: { wdf: number; trips: Trip[] }[];
 }
 
 export interface HoverInfo {
@@ -41,6 +45,8 @@ export interface LayerCtx {
   hoverId: string | null;
   drift: PreparedDrift | null;
   hour: number;
+  /** show the wind-factor ensemble cloud (player toggle) */
+  spread: boolean;
   layers: Layers;
   selectedId: string | null;
   onHover: (h: HoverInfo | null) => void;
@@ -244,6 +250,32 @@ export function buildLayers(c: LayerCtx): Layer[] {
   }
 
   if (L.drift && c.drift && geo) {
+    if (c.spread && c.drift.ensemble.length) {
+      // uncertainty range: where particles of the other wind-factor runs are at the current hour
+      const pts = c.drift.ensemble.flatMap((m) => m.trips);
+      out.push(
+        new ScatterplotLayer({
+          id: 'drift-spread-glow',
+          data: pts,
+          getPosition: (d: any) => positionAt(d, c.hour),
+          getRadius: 11,
+          radiusUnits: 'pixels',
+          getFillColor: [196, 170, 255, 34],
+          updateTriggers: { getPosition: c.hour },
+          parameters: { depthTest: false } as any,
+        }),
+        new ScatterplotLayer({
+          id: 'drift-spread',
+          data: pts,
+          getPosition: (d: any) => positionAt(d, c.hour),
+          getRadius: 2.2,
+          radiusUnits: 'pixels',
+          getFillColor: [214, 196, 255, 170],
+          updateTriggers: { getPosition: c.hour },
+          parameters: { depthTest: false } as any,
+        }),
+      );
+    }
     out.push(
       new PathLayer({
         id: 'drift-ghost',
@@ -324,11 +356,19 @@ function positionAt(d: { path: [number, number][]; ts: number[] }, h: number): [
   return d.path[d.path.length - 1];
 }
 
-export function prepareDrift(particles: { id: number; path: [number, number, number][] }[]): PreparedDrift {
-  const trips = particles.map((p) => ({
-    id: p.id,
-    path: p.path.map((q) => [q[0], q[1]] as [number, number]),
-    ts: p.path.map((q) => q[2]),
-  }));
-  return { trips, starts: trips.map((t) => t.path[0]) };
+const toTrips = (particles: { id: number; path: [number, number, number][] }[]): Trip[] =>
+  (particles ?? [])
+    .filter((p) => p.path?.length)
+    .map((p) => ({
+      id: p.id,
+      path: p.path.map((q) => [q[0], q[1]] as [number, number]),
+      ts: p.path.map((q) => q[2]),
+    }));
+
+export function prepareDrift(d: DriftFile): PreparedDrift {
+  const trips = toTrips(d.particles);
+  const ensemble = (Array.isArray(d.ensemble) ? d.ensemble : [])
+    .filter((m) => m && Array.isArray(m.particles) && m.particles.length)
+    .map((m) => ({ wdf: m.wind_drift_factor, trips: toTrips(m.particles) }));
+  return { trips, starts: trips.map((t) => t.path[0]), ensemble };
 }

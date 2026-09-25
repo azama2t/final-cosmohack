@@ -28,6 +28,14 @@ export interface DateEntry {
   thumb?: string;
   models: string[];
   drift: string | null;
+  /** optional (newer data): scene quality flags */
+  quality?: DateQuality;
+}
+
+export interface DateQuality {
+  glint_or_haze?: boolean;
+  haze?: boolean;
+  note?: string;
 }
 
 export interface RegionSummary {
@@ -35,6 +43,7 @@ export interface RegionSummary {
   index_permille: number | null;
   n_detections: number;
   total_debris_area_m2: number;
+  haze?: boolean;
 }
 
 export interface Region {
@@ -133,6 +142,8 @@ export interface DriftFile {
   particles: DriftParticle[];
   forcing: { currents?: string; wind?: string; wind_drift_factor?: number; model?: string };
   note?: string;
+  /** optional: extra runs with other wind drift factors (uncertainty range) */
+  ensemble?: { wind_drift_factor: number; particles: DriftParticle[] }[];
 }
 
 export interface TsRow {

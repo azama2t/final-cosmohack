@@ -174,12 +174,22 @@ def run(args) -> dict:
         manifest = page.evaluate("fetch('/data/manifest.json').then(r => r.json())")
         regions = sorted(
             manifest["regions"],
-            # same rule as the demo tour: most detections on the latest date, ties by index
             key=lambda r: ((r.get("summary") or {}).get("n_detections") or 0, (r.get("summary") or {}).get("index_permille") or -1),
             reverse=True,
         )
-        best = regions[0]
+        # same rule as the demo tour (bestRegion in lib/data.ts: clean freshest scene, detections, drift, index)
+        best_id = page.evaluate("window.__app && window.__app.bestRegion")
+        best = next((r for r in regions if r["id"] == best_id), regions[0])
         res["best_region"] = best["id"]
+        # overview hover on a label collapsed to a dot (shows the full label)
+        if args.extra:
+            compact = page.locator(".region-marker.compact")
+            res["overview_compact_labels"] = compact.count()
+            if compact.count():
+                compact.first.hover()
+                page.wait_for_timeout(400)
+                shot(page, out, "17_overview_hover_dot", res["shots"])
+                page.mouse.move(5, 500)
 
         # 02 region: click + measure fps during flyTo -------------------------
         click(page, f"region-item-{best['id']}")
@@ -249,7 +259,7 @@ def run(args) -> dict:
 
         # 09 drift: needs a date with drift.json ------------------------------
         drift_ref = None
-        for r in regions:
+        for r in [best] + [x for x in regions if x is not best]:
             for d in reversed(r["dates"]):
                 if d.get("drift"):
                     drift_ref = (r["id"], d["date"])
@@ -273,7 +283,14 @@ def run(args) -> dict:
             click(page, "drift-play")  # pause
             page.evaluate("window.__app.setDriftHour(36)")
             page.wait_for_timeout(700)
+            res["drift_region"] = drift_ref[0]
+            res["drift_ensemble"] = page.evaluate("window.__app.hasEnsemble")
             shot(page, out, "09_drift", res["shots"])
+            if args.extra and page.locator("[data-testid='drift-spread']").count():
+                click(page, "drift-spread")  # ensemble cloud off
+                page.wait_for_timeout(500)
+                shot(page, out, "09b_drift_no_spread", res["shots"])
+                click(page, "drift-spread")
         else:
             res["fps_drift"] = None
             res["notes"].append("no drift.json in manifest")
@@ -329,7 +346,72 @@ def run(args) -> dict:
             p2.wait_for_function("window.__app && window.__app.h3Ready", timeout=15000)
             p2.wait_for_timeout(1200)
             shot(p2, out, "14_h3_1366", res["shots"])
+            click(p2, "layer-toggle-h3")
+            click(p2, "compare-button")
+            try:
+                p2.wait_for_function("window.__compareReady_a && window.__compareReady_b", timeout=15000)
+            except Exception:
+                res["notes"].append("compare 1366 not ready")
+            p2.wait_for_timeout(1500)
+            shot(p2, out, "15_compare_1366", res["shots"])
+            click(p2, "compare-close")
+            p2.wait_for_timeout(400)
+            if drift_ref:
+                if drift_ref[0] != best["id"]:
+                    click(p2, f"region-item-{drift_ref[0]}")
+                    wait_idle(p2, 800)
+                click(p2, "layer-toggle-drift")
+                p2.wait_for_function("window.__app && window.__app.driftReady", timeout=15000)
+                wait_idle(p2, 800)
+                p2.evaluate("window.__app.setDriftHour(48)")
+                p2.wait_for_timeout(600)
+                shot(p2, out, "16_drift_1366", res["shots"])
+            # a date with the haze/glint flag (badge + yellow timeline ring)
+            flagged = next(((r["id"], d["date"]) for r in regions for d in r["dates"]
+                            if (d.get("quality") or {}).get("haze") or (d.get("quality") or {}).get("glint_or_haze")), None)
+            if flagged:
+                if p2.locator("[data-testid='drift-play']").count():
+                    click(p2, "layer-toggle-drift")
+                click(p2, "region-sort-name")
+                click(p2, f"region-item-{flagged[0]}")
+                wait_idle(p2, 600)
+                click(p2, f"date-dot-{flagged[1]}")
+                p2.wait_for_function("window.__app && window.__app.sceneReady", timeout=15000)
+                wait_idle(p2, 900)
+                res["quality_badge"] = p2.locator("[data-testid='quality-badge']").count()
+                p2.evaluate("""(() => { const r = document.querySelector('.panel-right .panel-scroll'); if (r) r.scrollTop = 0;
+                    const t = document.querySelector("[data-testid='timeline']"); if (t) t.scrollIntoView({block: 'center'}); })()""")
+                p2.wait_for_timeout(300)
+                shot(p2, out, "18_quality_flag_1366", res["shots"])
         ctx2.close()
+
+        # drift without `ensemble` (older drift.json): strip the field on the fly ----------
+        if args.extra and drift_ref:
+            ctx4 = browser.new_context(viewport={"width": 1920, "height": 1080}, device_scale_factor=1)
+
+            def strip_ens(route):
+                r = route.fetch()
+                try:
+                    d = r.json()
+                    d.pop("ensemble", None)
+                    route.fulfill(response=r, body=json.dumps(d), headers={**r.headers, "content-type": "application/json"})
+                except Exception:
+                    route.fulfill(response=r)
+
+            ctx4.route("**/drift.json", strip_ens)
+            p4 = ctx4.new_page()
+            con.attach(p4)
+            p4.goto(base + f"/?r={drift_ref[0]}&d={drift_ref[1]}", wait_until="domcontentloaded")
+            p4.wait_for_function("window.__mapReady === true", timeout=30000)
+            p4.wait_for_function("window.__app && window.__app.sceneReady", timeout=15000)
+            click(p4, "layer-toggle-drift")
+            p4.wait_for_function("window.__app && window.__app.driftReady", timeout=15000)
+            wait_idle(p4, 800)
+            p4.evaluate("window.__app.setDriftHour(36)")
+            p4.wait_for_timeout(600)
+            res["noens_spread_toggle"] = p4.locator("[data-testid='drift-spread']").count()
+            shot(p4, out, "19_drift_without_ensemble", res["shots"])
+            ctx4.close()
 
         # optional: record demo tour ---------------------------------------------
         if args.video:

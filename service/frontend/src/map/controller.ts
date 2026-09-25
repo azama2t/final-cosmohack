@@ -16,6 +16,8 @@ export const anim = {
   playing: false,
   speed: 1, // hours of forecast per 1/6 second of wall time (see DriftPlayer)
   maxHour: 72,
+  /** wind-factor ensemble cloud on/off (DriftPlayer toggle) */
+  spread: true,
   listeners: new Set<(h: number) => void>(),
 };
 
@@ -164,10 +166,11 @@ export function fitOverview(bounds: Bounds[], duration = 2000) {
       [b[0], b[1]],
       [b[2], b[3]],
     ],
-    { padding: { ...pad, right: pad.right + 220, top: pad.top + 40, bottom: pad.bottom + 40 }, maxZoom: 5 },
+    { padding: { ...pad, right: pad.right + 170, top: pad.top + 40, bottom: pad.bottom + 40 }, maxZoom: 5 },
   );
   if (!cam) return;
-  const opts = { center: cam.center, zoom: Math.max(1.2, Math.min(cam.zoom ?? 2, 5)), pitch: 0, bearing: 0 };
+  // no hard minimum around 1.2: on 1366 px the 12 regions need zoom ≈ 0.8, otherwise labels end up under the panels
+  const opts = { center: cam.center, zoom: Math.max(0.4, Math.min(cam.zoom ?? 2, 5)), pitch: 0, bearing: 0 };
   if (duration) map.flyTo({ ...opts, duration, essential: true });
   else map.jumpTo(opts);
 }

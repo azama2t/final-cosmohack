@@ -77,3 +77,7 @@
 | `scripts/make_demo.py` | `service/data` → `service/demo` (≤ 20 МБ, 2 района с дрейфом) | перед коммитом демо |
 | `scripts/validate_service_data.py` | проверка любого корня данных по CONTRACTS (exit 1 при ошибках) | QA |
 | `scripts/make_live_fixture.py`, `tests/test_grid.py` | синтетические сцены для разработки; тесты сетки | pytest |
+| `src/macroplastic/drift/forcing.py` | вырезка форсинга HYCOM ESPC-D-V02 + NCEP GFS (запасные Open-Meteo, константа) в `data_cache/forcing/*.nc` | run_drift |
+| `src/macroplastic/drift/run.py` | старты по детекциям MDD (пропорционально площади), OpenDrift OceanDrift 72 ч, ансамбль ветра 0.01/0.03, drift.json + превью | run_drift |
+| `scripts/run_drift.py`, `tests/test_drift.py`, `reports/drift.md`, `reports/drift_*.png` | CLI дрейфа (`--region/--date`, `--all-fresh`); офлайн-тест контракта; метод и ограничения; превью треков | вручную / отчёт |
+| `scripts/model_agreement.py`, `reports/model_agreement.{md,json}`, `reports/figures/` | согласие MDD и LightGBM на живых сценах, калибровка LightGBM на val, карты согласия | отчёт |

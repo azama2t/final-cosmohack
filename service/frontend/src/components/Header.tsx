@@ -1,3 +1,4 @@
+import { shortName } from '../lib/data';
 import type { Manifest, Region } from '../types';
 
 interface Props {
@@ -33,7 +34,7 @@ export default function Header({ manifest, region, onHome, onTour, tourRunning, 
               Все районы
             </button>
             <span className="crumb-sep">/</span>
-            <span className="crumb-cur">{region.name}</span>
+            <span className="crumb-cur" title={region.name}>{shortName(region.name)}</span>
           </>
         ) : (
           <span className="crumb-cur">Все районы · {manifest.regions.length}</span>

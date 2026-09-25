@@ -1,6 +1,6 @@
 import type { MutableRefObject } from 'react';
 import type { DateEntry, DetProps, Feature, FC, LayerKey, Layers, Manifest, Region, Zone, ZonesFile } from './types';
-import { bestRegion } from './lib/data';
+import { bestRegion, shortName, summaryDate } from './lib/data';
 import { anim } from './map/controller';
 
 export interface TourApi {
@@ -47,7 +47,7 @@ export async function runTour(apiRef: MutableRefObject<TourApi>, signal: AbortSi
     if (!m) return;
     const best = bestRegion(m);
     if (!best) return;
-    const latest = best.dates.find((d) => d.date === best.summary?.latest_date) ?? best.dates[best.dates.length - 1];
+    const latest = summaryDate(best);
     const hasDet = (best.summary?.n_detections ?? 0) > 0;
     const hasDrift = !!latest?.drift;
     // steps without data are skipped entirely (no empty pauses); numbering follows the actual plan
@@ -64,8 +64,8 @@ export async function runTour(apiRef: MutableRefObject<TourApi>, signal: AbortSi
 
     cap(
       hasDet
-        ? `Больше всего находок на свежем снимке — ${best.name}. Летим к снимку Sentinel-2.`
-        : `${best.name}: летим к свежему снимку Sentinel-2.`,
+        ? `Больше всего находок на свежем снимке — ${shortName(best.name)}. Летим к снимку Sentinel-2.`
+        : `${shortName(best.name)}: летим к свежему снимку Sentinel-2.`,
     );
     api().selectRegion(best.id);
     await wait(600);
@@ -108,15 +108,19 @@ export async function runTour(apiRef: MutableRefObject<TourApi>, signal: AbortSi
 
     const de = api().get().dateEntry;
     if (hasDrift && de?.drift) {
-      cap('Дрейф 0→72 ч — демонстрационный прогноз, без валидации: куда может сместиться мусор.');
+      const driftText = 'Дрейф 0→72 ч — демонстрационный прогноз, без валидации: куда может сместиться мусор.';
+      cap(driftText);
       api().toggleLayer('zones', false);
+      anim.spread = true;
       api().toggleLayer('drift', true);
-      await until(() => !!(window as any).__driftPlay, 4000);
+      await until(() => !!(window as any).__app?.driftReady && !!(window as any).__driftPlay, 5000);
+      if ((window as any).__app?.hasEnsemble)
+        api().caption(step, TOTAL, `${driftText} Сиреневое облако — разброс при ветровом коэффициенте 0.01–0.03.`);
       await wait(500);
       anim.hour = 0;
       anim.speed = 1;
       (window as any).__driftPlay?.(true);
-      await wait(10000);
+      await wait(12500); // one full 0→72 h cycle at 1× (6 h/s)
       (window as any).__driftPlay?.(false);
       api().toggleLayer('drift', false);
     }

@@ -1,4 +1,4 @@
-import type { DetProps, DriftFile, FC, H3Props, Manifest, Region, TsRow, ZonesFile } from '../types';
+import type { DateEntry, DetProps, DriftFile, FC, H3Props, Manifest, Region, TsRow, ZonesFile } from '../types';
 
 const DATA_BASE = ((import.meta.env.VITE_DATA_URL as string | undefined) ?? '/data').replace(/\/$/, '');
 
@@ -72,14 +72,48 @@ export const loadZones = (r: string, d: string, m: string) => getJSONOpt<ZonesFi
 export const loadTimeseries = (r: string) => getJSONOpt<TsRow[]>(`${r}/timeseries.json`);
 export const loadDrift = (path: string) => getJSONOpt<DriftFile>(path);
 
-/** Region for the demo tour: most detections on its latest date (summary), ties broken by index. */
+/** Short display name: text before « (» («Гондурасский залив (Омоа – …)» → «Гондурасский залив»). */
+export const shortName = (name: string) => {
+  const i = name.indexOf(' (');
+  return i > 0 ? name.slice(0, i) : name;
+};
+
+/** Haze / sun-glint flag of a date (field is optional: older data has no `quality`). */
+export const isFlagged = (d: DateEntry | null | undefined) => !!(d?.quality && (d.quality.haze || d.quality.glint_or_haze));
+
+/** Date shown for a region by default: summary.latest_date (latest without haze), else the last date. */
+export const summaryDate = (r: Region): DateEntry | undefined =>
+  r.dates.find((d) => d.date === r.summary?.latest_date) ?? r.dates[r.dates.length - 1];
+
+/** Hint text if the region's latest scene (or the scene behind its summary) has the haze/glint flag, else ''. */
+export function regionHaze(r: Region): string {
+  const last = r.dates[r.dates.length - 1];
+  const shown = summaryDate(r);
+  if (r.summary?.haze || isFlagged(shown)) return 'снимок с дымкой/бликом — находки могут быть завышены';
+  if (isFlagged(last) && shown && last)
+    return `последний снимок (${last.date}) с дымкой/бликом; показатели — по снимку ${shown.date} без флага`;
+  return '';
+}
+
+/**
+ * Region for the demo tour and screenshots.
+ * 1) candidates: regions whose freshest scene has no haze/glint flag (the summary date is then that scene);
+ *    a region whose newest scene is flagged is not shown as «the freshest finding»;
+ * 2) max n_detections on that date; tie → region with drift.json; then index;
+ * 3) if no candidate — old rule (summary n_detections, then index) over all regions.
+ */
 export function bestRegion(m: Manifest): Region | null {
   if (!m.regions.length) return null;
-  return [...m.regions].sort(
-    (a, b) =>
-      (b.summary?.n_detections ?? 0) - (a.summary?.n_detections ?? 0) ||
-      (b.summary?.index_permille ?? -1) - (a.summary?.index_permille ?? -1),
-  )[0];
+  const det = (r: Region) => r.summary?.n_detections ?? 0;
+  const idx = (r: Region) => r.summary?.index_permille ?? -1;
+  const drift = (r: Region) => (summaryDate(r)?.drift ? 1 : 0);
+  const clean = m.regions.filter((r) => {
+    const last = r.dates[r.dates.length - 1];
+    const d = summaryDate(r);
+    return !!d && !isFlagged(d) && !r.summary?.haze && d === last && det(r) > 0;
+  });
+  if (clean.length) return [...clean].sort((a, b) => det(b) - det(a) || drift(b) - drift(a) || idx(b) - idx(a))[0];
+  return [...m.regions].sort((a, b) => det(b) - det(a) || idx(b) - idx(a))[0];
 }
 
 // ---- backend API (optional) ----

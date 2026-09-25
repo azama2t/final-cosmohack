@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Manifest, SceneRef } from '../types';
 import { apiCompare, mergeApi, sceneStats, type SceneStats } from '../lib/stats';
+import { isFlagged, shortName } from '../lib/data';
 import { fmtArea, fmtDate, fmtNum, fmtPct, fmtPermille, modelLabel } from '../lib/style';
 
 interface Props {
@@ -64,8 +65,8 @@ export default function ComparePanel({ manifest, compare, model, setCompare }: P
                 <span className="cmp-tag">{side.toUpperCase()}</span>
                 <select value={ref.region} onChange={(e) => set(side, { region: e.target.value })} data-testid={`compare-region-${side}`}>
                   {manifest.regions.map((x) => (
-                    <option key={x.id} value={x.id}>
-                      {x.name}
+                    <option key={x.id} value={x.id} title={x.name}>
+                      {shortName(x.name)}
                     </option>
                   ))}
                 </select>
@@ -73,6 +74,7 @@ export default function ComparePanel({ manifest, compare, model, setCompare }: P
                   {r?.dates.map((d) => (
                     <option key={d.date} value={d.date}>
                       {fmtDate(d.date)}
+                      {isFlagged(d) ? ' · дымка/блик' : ''}
                     </option>
                   ))}
                 </select>

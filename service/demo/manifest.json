@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generated": "2026-09-25T01:59:24+00:00",
+ "generated": "2026-09-25T02:22:09+00:00",
  "kind": "demo",
  "index": {
   "name": "доля наблюдаемой воды с признаками мусора",
@@ -69,7 +69,7 @@
       "lgbm",
       "mdd"
      ],
-     "drift": null,
+     "drift": "honduras/2025-01-30/drift.json",
      "quality": {
       "glint_or_haze": false,
       "haze": false,

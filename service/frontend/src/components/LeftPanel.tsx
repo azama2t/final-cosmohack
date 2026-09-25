@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { Basemap, LayerKey, Layers, Manifest, Region } from '../types';
-import { dataUrl } from '../lib/data';
+import { dataUrl, isFlagged, regionHaze, shortName, summaryDate } from '../lib/data';
 import { fmtThr, fmtDate, fmtDateShort, fmtNum, fmtPermille, modelLabel } from '../lib/style';
 
 interface Props {
@@ -31,14 +31,17 @@ const LAYER_DEFS: { key: LayerKey; label: string; hint: string; testid: string }
 
 export default function LeftPanel(p: Props) {
   const [q, setQ] = useState('');
+  const [sort, setSort] = useState<'index' | 'name'>('index');
   const regions = useMemo(() => {
     const s = q.trim().toLowerCase();
-    const list = [...p.manifest.regions].sort(
-      (a, b) => (b.summary?.index_permille ?? -1) - (a.summary?.index_permille ?? -1),
+    const list = [...p.manifest.regions].sort((a, b) =>
+      sort === 'name'
+        ? shortName(a.name).localeCompare(shortName(b.name), 'ru')
+        : (b.summary?.index_permille ?? -1) - (a.summary?.index_permille ?? -1),
     );
     if (!s) return list;
     return list.filter((r) => `${r.name} ${r.country ?? ''} ${r.id} ${r.tile ?? ''}`.toLowerCase().includes(s));
-  }, [q, p.manifest.regions]);
+  }, [q, sort, p.manifest.regions]);
 
   return (
     <aside className={`panel panel-left glass ${p.collapsed ? 'collapsed' : ''}`} data-testid="left-panel">
@@ -54,8 +57,17 @@ export default function LeftPanel(p: Props) {
         <div className="panel-scroll">
           <section className="section">
             <div className="section-head">
-              <h2>Районы</h2>
-              <span className="muted small">{p.manifest.regions.length}</span>
+              <h2>
+                Районы <span className="muted small">{p.manifest.regions.length}</span>
+              </h2>
+              <div className="segmented small sort-seg" role="tablist" aria-label="Сортировка районов">
+                <button className={`seg ${sort === 'index' ? 'on' : ''}`} onClick={() => setSort('index')} data-testid="region-sort-index" title="Сортировать по индексу (сначала выше)">
+                  <span className="wide-only">по </span>индексу
+                </button>
+                <button className={`seg ${sort === 'name' ? 'on' : ''}`} onClick={() => setSort('name')} data-testid="region-sort-name" title="Сортировать по имени (А–Я)">
+                  <span className="wide-only">по </span>имени
+                </button>
+              </div>
             </div>
             <input
               className="search"
@@ -66,29 +78,36 @@ export default function LeftPanel(p: Props) {
             />
             <div className="region-list">
               {regions.map((r) => {
-                const latest = r.dates.find((d) => d.date === r.summary?.latest_date) ?? r.dates[r.dates.length - 1];
+                const shown = summaryDate(r);
                 const active = r.id === p.region?.id;
+                const hazeHint = regionHaze(r);
+                const n = r.summary?.n_detections ?? 0;
                 return (
                   <button
                     key={r.id}
                     className={`region-item ${active ? 'active' : ''}`}
                     onClick={() => p.onRegion(r.id)}
                     data-testid={`region-item-${r.id}`}
+                    title={`${r.name}${r.country ? ' · ' + r.country : ''}${hazeHint ? ' — ' + hazeHint : ''}`}
                   >
                     <span className="ri-thumb">
-                      {latest && <img src={dataUrl(latest.thumb ?? latest.rgb)} alt="" loading="lazy" decoding="async" />}
+                      {shown && <img src={dataUrl(shown.thumb ?? shown.rgb)} alt="" loading="lazy" decoding="async" />}
+                      {hazeHint && (
+                        <span className="ri-haze-dot" data-testid={`region-haze-${r.id}`} aria-label={hazeHint}>
+                          !
+                        </span>
+                      )}
                     </span>
                     <span className="ri-body">
-                      <span className="ri-name" title={`${r.name}${r.country ? ' · ' + r.country : ''}`}>
-                        {r.name}
-                      </span>
-                      <span className="ri-stats">
+                      <span className="ri-name">{shortName(r.name)}</span>
+                      <span className="ri-row2">
+                        <span className="ri-sub">
+                          <i className="dot-accent" /> {fmtNum(n)} {plural(n, 'пятно', 'пятна', 'пятен')}
+                          {shown && <span className="ri-date"> · {fmtDateShort(shown.date)}</span>}
+                        </span>
                         <span className="ri-index">
                           {fmtPermille(r.summary?.index_permille)}
                           <small> ‰</small>
-                        </span>
-                        <span className="ri-det">
-                          <i className="dot-accent" /> {fmtNum(r.summary?.n_detections)} пятен
                         </span>
                       </span>
                     </span>
@@ -106,7 +125,12 @@ export default function LeftPanel(p: Props) {
                   <h2>Дата снимка</h2>
                   <span className="muted small">{p.date ? fmtDate(p.date) : ''}</span>
                 </div>
-                <Timeline dates={p.region.dates.map((d) => d.date)} value={p.date} onChange={p.onDate} />
+                <Timeline
+                  dates={p.region.dates.map((d) => d.date)}
+                  flagged={p.region.dates.map((d) => isFlagged(d))}
+                  value={p.date}
+                  onChange={p.onDate}
+                />
               </section>
 
               <section className="section">
@@ -206,7 +230,17 @@ export default function LeftPanel(p: Props) {
   );
 }
 
-function Timeline({ dates, value, onChange }: { dates: string[]; value: string | null; onChange: (d: string) => void }) {
+function Timeline({
+  dates,
+  flagged,
+  value,
+  onChange,
+}: {
+  dates: string[];
+  flagged: boolean[];
+  value: string | null;
+  onChange: (d: string) => void;
+}) {
   const t = dates.map((d) => Date.parse(d));
   const min = Math.min(...t),
     max = Math.max(...t);
@@ -230,11 +264,11 @@ function Timeline({ dates, value, onChange }: { dates: string[]; value: string |
       {dates.map((d, i) => (
         <button
           key={d}
-          className={`tl-dot ${d === value ? 'on' : ''}`}
+          className={`tl-dot ${d === value ? 'on' : ''} ${flagged[i] ? 'q-warn' : ''}`}
           style={{ left: `${pos(i)}%` }}
           onClick={() => onChange(d)}
           data-testid={`date-dot-${d}`}
-          title={fmtDate(d)}
+          title={flagged[i] ? `${fmtDate(d)} · дымка/блик — находки могут быть завышены` : fmtDate(d)}
         >
           {showLabel[i] && (
             <span className="tl-label">{fmtDateShort(d)}</span>

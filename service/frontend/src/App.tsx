@@ -3,6 +3,7 @@ import type { Basemap, Camera, DetProps, Feature, LayerKey, Layers, Manifest, Re
 import {
   bestRegion,
   getImage,
+  summaryDate,
   loadDetections,
   loadDrift,
   loadH3,
@@ -58,7 +59,7 @@ export default function App() {
       const r = url.region ? m.regions.find((x) => x.id === url.region) : undefined;
       if (r) {
         setRegionId(r.id);
-        const d = url.date && r.dates.some((x) => x.date === url.date) ? url.date : r.dates[r.dates.length - 1]?.date;
+        const d = url.date && r.dates.some((x) => x.date === url.date) ? url.date : summaryDate(r)?.date;
         setDate(d ?? null);
         const de = r.dates.find((x) => x.date === d);
         if (de && !de.models.includes(model)) setModel(de.models[0]);
@@ -107,14 +108,14 @@ export default function App() {
     () => (h3?.features ?? []).reduce((a, f) => Math.max(a, f.properties.share_permille ?? 0), 0),
     [h3],
   );
-  const drift = useMemo(() => (driftRaw ? prepareDrift(driftRaw.particles) : null), [driftRaw]);
+  const drift = useMemo(() => (driftRaw ? prepareDrift(driftRaw) : null), [driftRaw]);
   const timeseries = useAsync(region ? () => loadTimeseries(region.id) : null, [region?.id]);
 
   // when drift is switched on, frame the whole forecast (particles leave the scene bounds)
   useEffect(() => {
     if (!layers.drift || !drift || !region) return;
     let b = region.bounds;
-    for (const t of drift.trips)
+    for (const t of [...drift.trips, ...drift.ensemble.flatMap((m) => m.trips)])
       for (const [x, y] of t.path) b = [Math.min(b[0], x), Math.min(b[1], y), Math.max(b[2], x), Math.max(b[3], y)];
     flyToBounds(b, { duration: 1500 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -158,7 +159,7 @@ export default function App() {
       const r = manifest.regions.find((x) => x.id === id);
       if (!r) return;
       setRegionId(r.id);
-      const latest = r.dates.find((d) => d.date === r.summary?.latest_date) ?? r.dates[r.dates.length - 1];
+      const latest = summaryDate(r);
       setDate(latest?.date ?? null);
       if (latest && !latest.models.includes(model)) setModel(latest.models[0]);
       flyToBounds(latest?.bounds ?? r.bounds, { pitch: layers.h3_3d ? 50 : 0, bearing: layers.h3_3d ? -18 : 0 });
@@ -214,12 +215,12 @@ export default function App() {
     if (!manifest) return null;
     const r = region ?? bestRegion(manifest);
     if (!r) return null;
-    const a = { region: r.id, date: date && region ? date : r.dates[r.dates.length - 1].date };
+    const a = { region: r.id, date: date && region ? date : summaryDate(r)!.date };
     // B: the other region with most detections (a comparison with an empty scene tells little)
     const other = manifest.regions
       .filter((x) => x.id !== r.id)
       .sort((x, y) => (y.summary?.n_detections ?? 0) - (x.summary?.n_detections ?? 0))[0];
-    if (other) return { a, b: { region: other.id, date: other.dates[other.dates.length - 1].date } };
+    if (other) return { a, b: { region: other.id, date: summaryDate(other)!.date } };
     const prev = r.dates.filter((d) => d.date !== a.date).at(-1);
     return { a, b: { region: r.id, date: prev?.date ?? a.date } };
   }, [manifest, region, date]);
@@ -297,6 +298,8 @@ export default function App() {
       h3Ready: !!h3 && geoReady,
       driftReady: !!drift && geoReady,
       nDetections: detections?.features.length ?? 0,
+      bestRegion: manifest ? bestRegion(manifest)?.id ?? null : null,
+      hasEnsemble: !!driftRaw?.ensemble?.length,
       largestDetectionScreen: () => {
         if (!detections?.features.length || !ctl.map) return null;
         const f = [...detections.features].sort((a, b) => b.properties.area_m2 - a.properties.area_m2)[0];
