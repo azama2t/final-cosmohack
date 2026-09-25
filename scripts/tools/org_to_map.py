@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""org_to_map.py (L49) -- organiser chips + our predictions -> a map data root for `python -m service`.
+"""org_to_map.py -- organiser chips + our predictions -> a map data root for `python -m service`.
 
     $env:CUDA_VISIBLE_DEVICES="-1"; $env:PYTHONPATH="src"
     .venv\\Scripts\\python.exe scripts\\tools\\org_to_map.py --chips <their GeoTIFF chips> `
@@ -23,7 +23,7 @@ Pipeline:
     date_unknown in scene.json and in manifest regions[].dates[].date_unknown / regions[].date_unknown; the v2 UI
     then shows «дата неизвестна» -- the service needs YYYY-MM-DD).
     Region names are unique: equal group names get the tile, else the UTM zone, else `_g<k>` as a suffix.
- 4. Per scene, a live-format folder <work>/<region>/<date>/ (reports/tasklog/06_live.md):
+ 4. Per scene, a live-format folder <work>/<region>/<date>/ (scripts/fetch_live.py):
     bands.tif (adapter bands, float32 reflectance, descriptions = band names, NaN outside chips),
     water_mask.tif (NDWI = (B3-B8)/(B3+B8) > --ndwi, holes <= 100 px filled -- the organiser data have no SCL),
     scl.tif (PSEUDO-SCL, not from L2A: 0 outside chips, 6 water, 7 other, 8 bright-cloud rule B2>=0.06 &
@@ -411,7 +411,7 @@ def index_dir(d: Path, strip: tuple[str, ...]) -> dict[str, Path]:
 
 def pred_scale_255(files: list[Path]) -> bool:
     """True if any integer prediction raster of the model has a value > 1 -> the folder holds P*255 and a chip
-    with values only in {0, 1} is a LOW probability (<= 1/255), not a binary mask (L52: 2 of 104 rehearsal chips
+    with values only in {0, 1} is a LOW probability (<= 1/255), not a binary mask (rehearsal fixes: 2 of 104 rehearsal chips
     were turned into P = 1 by the per-chip rule)."""
     for p in files:
         try:
@@ -782,7 +782,7 @@ def run(argv=None) -> int:
                             "scl_rule": SCL_RULE, "config": notes, "haze_check": "off"}
         regs = man.get("regions", [])
         unknown = {(sc["region"], sc["date"]) for sc in scenes if sc["date_source"] == "unknown"}
-        for r in regs:  # L52: the UI shows «дата неизвестна» instead of the placeholder date (1900-01-01)
+        for r in regs:  # Rehearsal fixes: the UI shows «дата неизвестна» instead of the placeholder date (1900-01-01)
             for d in r["dates"]:
                 if (r["id"], d["date"]) in unknown:
                     d["date_unknown"] = True

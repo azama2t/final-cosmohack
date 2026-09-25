@@ -1,4 +1,4 @@
-"""L31: evidence for the BOA-offset detection threshold (inference._boa_offset_rule, 1000 -> 500 DN).
+"""Mid-size model: evidence for the BOA-offset detection threshold (inference._boa_offset_rule, 1000 -> 500 DN).
 
     PYTHONPATH=src .venv/Scripts/python.exe scripts/experiments/l31_boa_evidence.py
 

@@ -1,8 +1,8 @@
-"""L47: context layer - objects from OpenStreetMap, which of them the demo drift cloud touches, repeated finds.
+"""Context layer - objects from OpenStreetMap, which of them the demo drift cloud touches, repeated finds.
 
 Files: service/context/<region>.geojson (scripts/fetch_osm_context.py; override dir with $MACROPLASTIC_CONTEXT).
 Contract: docs/CONTRACTS.md, section «Контекст: объекты OSM, угрозы, постоянные источники».
-Team decision (INBOX 13:20): no numeric warnings (no hours, no percentages), nothing for the event feed, no
+Team decision: no numeric warnings (no hours, no percentages), nothing for the event feed, no
 "source/polluter" label and no linking of finds to river mouths as culprits.
 
 - GET /api/context?region=[&kind=]        -> GeoJSON FeatureCollection of OSM objects (ODbL attribution)

@@ -92,7 +92,7 @@ def _md_block(d: dict | None, threshold=None) -> dict | None:
     return out
 
 
-# ----------------------------------------------------------------------------------------------- L3
+# ----------------------------------------------------------------------------------------------- LightGBM
 def collect_l3() -> dict:
     res = {"available": False, "model": "LightGBM (пиксельная, MARIDA + MADOS)", "val": None, "val_at_0_5": None,
            "test": None, "noise": {"n_seeds": None, "f1_std": None, "f1_mean": None},
@@ -429,7 +429,7 @@ def collect_speed_threads() -> dict:
 
 
 def collect_rejected(l23: dict, audit: dict) -> dict:
-    """Candidate models that did not pass the rules: light (L23/L26), mid-size (L31), scene-relative features (L33)."""
+    """Candidate models that did not pass the rules: light band-subset models, mid-size model, scene-relative features."""
     final_lro = (audit.get("lro") or {}).get("mean_f1")
     out = {"final_lro": final_lro, "light": None, "mid": None, "zfeat": None}
     # light: val from l23, LRO from weights_exp/l26 (fallback: text of reports/l31_midsize.md)
@@ -536,7 +536,7 @@ def collect_test_status(l3: dict) -> dict:
                      else "Test MARIDA будет посчитан один раз на итоговой модели; до этого все решения принимались только по val.")}
 
 
-# ----------------------------------------------------------------------------------------------- L4
+# ----------------------------------------------------------------------------------------------- UNet
 def collect_l4() -> dict:
     res = {"available": False, "val": None, "test": None, "noise": {"n_seeds": None, "f1_std": None, "f1_mean": None},
            "decision": None, "sources": []}
@@ -680,7 +680,7 @@ def collect_service(roots=None) -> dict:
             **_region_reliability(dates),
         })
     res["n_regions"] = len(res["regions"])
-    # L40: ranking as on the site (rankRegions in service/frontend/src/lib/data.ts): reliable regions by index desc,
+    # Consistency pass: ranking as on the site (rankRegions in service/frontend/src/lib/data.ts): reliable regions by index desc,
     # then unreliable ones by index desc
     by_idx = sorted(res["regions"], key=lambda x: -(x.get("index_permille") if x.get("index_permille") is not None else -1))
     res["ranking_reliable"] = [x["id"] for x in by_idx if x.get("reliable")]
@@ -707,7 +707,7 @@ def _date_unreliable(d) -> str:
 
 
 def _region_reliability(dates) -> dict:
-    """L40: a region is unreliable if its latest scene is unreliable (as on the site)."""
+    """Consistency pass: a region is unreliable if its latest scene is unreliable (as on the site)."""
     ds = sorted((d for d in dates if isinstance(d, dict)), key=lambda d: d.get("date") or "")
     last = ds[-1] if ds else None
     why = _date_unreliable(last)
@@ -1139,6 +1139,42 @@ def _case_selfcheck() -> dict:
             "p95_max_ms": _r(max(p95), 0) if p95 else None}
 
 
+def _case_pairfinder() -> dict:
+    """reports/case_pairfinder/evidence_numbers.json: «Подобрать снимок» на событиях реестра (офлайн, кэш STAC)."""
+    d = _load_json(ROOT / "reports" / "case_pairfinder" / "evidence_numbers.json")
+    if not isinstance(d, dict):
+        return {"available": False}
+    fc = d.get("forecast_hindcast") or {}
+    return {"available": True, "source": "reports/case_pairfinder/evidence_numbers.json (разбор: evidence.md)",
+            "window_h": d.get("max_abs_dt_h_typical_3km"), "naive": d.get("naive_pm1d_meta_accept"),
+            "naive_sync": d.get("naive_pm1d_with_drift"), "cond_date_only": d.get("pairfinder_conditional_date_only"),
+            "cond_quality_accept": (d.get("conditional_with_l61_quality") or {}).get("accept"),
+            "sync_time_known": d.get("pairfinder_synchronous_time_known"),
+            "forecast_n": fc.get("predictions_checked"), "forecast_hit": fc.get("hit_within_5min")}
+
+
+def _case_geometry() -> dict:
+    """data/case/geometry/transects.csv: геометрия трансект S2/S3 по PANGAEA (строка = сегмент)."""
+    f = ROOT / "data" / "case" / "geometry" / "transects.csv"
+    if not f.exists():
+        return {"available": False}
+    import csv as _csv
+    with f.open(encoding="utf-8") as fh:
+        rows = list(_csv.DictReader(fh))
+    return {"available": True, "source": "data/case/geometry/transects.csv (разбор: reports/case_geometry/summary.md)",
+            "n_events": len({r["event_id"] for r in rows}), "n_segments": len(rows),
+            "n_multi": len({r["event_id"] for r in rows if int(float(r.get("n_segments") or 1)) > 1})}
+
+
+def _case_tests() -> dict:
+    """reports/case_run/case_tests.json: фактический прогон тестов кейса (пишет scripts/case/build_docs.py)."""
+    d = _load_json(ROOT / "reports" / "case_run" / "case_tests.json")
+    if not isinstance(d, dict) or d.get("passed") is None:
+        return {"available": False}
+    return {"available": True, "source": "reports/case_run/case_tests.json", **{k: d.get(k) for k in
+            ("passed", "skipped", "failed", "seconds", "when", "command")}}
+
+
 def _case_detector_review() -> dict:
     """reports/case_pairs/detector_review.json: the detector on the real L2A crops of the pairs (types of objects by rules,
     effect of the water_median harmonisation). Rules-based typing, no manual labels."""
@@ -1351,7 +1387,12 @@ def collect_case() -> dict:
     tests = 0
     for p in glob.glob(str(ROOT / "tests" / "test_case_*.py")) + [str(ROOT / "tests" / "test_api_v3.py")]:
         tests += len(re.findall(r"^def test_", _read(str(Path(p).relative_to(ROOT))), re.M))
-    out["n_tests"] = tests or None
+    out["pairfinder"] = _case_pairfinder()
+    out["geometry"] = _case_geometry()
+    out["tests"] = _case_tests()
+    out["n_test_funcs"] = tests or None
+    # число тестов кейса = фактический прогон (build_docs.py); без него — число функций test_ (не прогон)
+    out["n_tests"] = out["tests"].get("passed") if out["tests"].get("available") else (tests or None)
     return out
 
 

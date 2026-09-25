@@ -1,0 +1,112 @@
+object_id,visual_id,scene,set,harmonize,in_strip,stratum,bbox,n_px,prob_max,pair_decision,rule_type,class,confidence,note
+S3_HE460_MarLitter_transect01:H0005,V095,S3_HE460_MarLitter_transect01,H,water_median,False,H_out:S3_HE460_MarLitter_transect01,45 945 46 946,1,0.812,reject cloud,glint,cloud,high,в облачном поле
+S3_HE460_MarLitter_transect01:H0009,V007,S3_HE460_MarLitter_transect01,H,water_median,False,H_out:S3_HE460_MarLitter_transect01,91 952 92 953,1,0.871,reject cloud,cloud_edge,cloud,high,внутри облачного поля
+S3_HE460_MarLitter_transect01:H0019,V089,S3_HE460_MarLitter_transect01,H,water_median,False,H_out:S3_HE460_MarLitter_transect01,1001 1730 1002 1731,1,0.663,reject cloud,cloud_edge,cloud,high,в облачном поле
+S3_HE460_MarLitter_transect01:H0025,V023,S3_HE460_MarLitter_transect01,H,water_median,False,H_out:S3_HE460_MarLitter_transect01,1070 1762 1072 1763,2,0.753,reject cloud,glint,cloud,high,в облачном поле
+S3_HE460_MarLitter_transect01:H0031,V057,S3_HE460_MarLitter_transect01,H,water_median,False,H_out:S3_HE460_MarLitter_transect01,1111 1715 1112 1716,1,0.686,reject cloud,cloud_edge,cloud,high,в облачном поле
+S3_HE460_MarLitter_transect01:H0042,V079,S3_HE460_MarLitter_transect01,H,water_median,False,H_out:S3_HE460_MarLitter_transect01,1211 1862 1212 1863,1,0.714,reject cloud,cloud_edge,cloud,high,в облачном поле
+S3_HE460_MarLitter_transect01:H0048,V059,S3_HE460_MarLitter_transect01,H,water_median,False,H_out:S3_HE460_MarLitter_transect01,1391 1579 1392 1580,1,0.761,reject cloud,cloud_small,cloud,high,в облачном поле (у края вырезки)
+S3_HE460_MarLitter_transect03:H0007,V081,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,37 731 38 732,1,0.745,accept,other_single,foam_whitecap,medium,слабая белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0066,V050,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,380 841 382 842,2,0.949,accept,other_multi,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0067,V054,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,384 813 385 814,1,0.643,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0074,V052,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,477 197 478 198,1,0.867,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0080,V004,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,513 201 514 202,1,0.992,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0088,V086,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,545 1147 546 1148,1,0.788,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0098,V080,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,624 220 625 221,1,0.733,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0106,V071,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,667 1046 669 1047,2,0.98,accept,other_multi,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0139,V033,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,860 388 861 389,1,0.902,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0150,V108,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,904 1157 906 1161,4,0.925,accept,other_multi,foam_whitecap,medium,белое пятнышко 2 пикс. на ряби
+S3_HE460_MarLitter_transect03:H0164,V090,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,972 960 973 961,1,0.706,accept,other_single,foam_whitecap,low,рябь с крапинами; объект слабый
+S3_HE460_MarLitter_transect03:H0172,V092,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,1016 288 1017 289,1,0.714,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0207,V106,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,1200 269 1201 270,1,0.663,accept,other_single,foam_whitecap,low,рябь с крапинами; объект слабый
+S3_HE460_MarLitter_transect03:H0210,V013,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,1211 720 1212 721,1,0.914,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0222,V049,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,1277 896 1278 897,1,0.933,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0232,V031,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,1342 1491 1344 1492,2,0.933,accept,other_multi,ship_wake,low,"яркая точка, белая и в SWIR (возможно лодка); вокруг рябь с крапинами"
+S3_HE460_MarLitter_transect03:H0253,V016,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,1437 1266 1438 1267,1,0.816,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0259,V098,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,1468 1325 1470 1326,2,0.992,accept,other_multi,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0278,V055,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,1558 1311 1559 1312,1,0.788,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0294,V061,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,1624 784 1626 785,2,0.929,accept,other_multi,accumulation,low,"короткая яркая полоса ~50 м без отклика в SWIR: плавучий материал, пена или след лодки"
+S3_HE460_MarLitter_transect03:H0305,V066,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,1672 1004 1673 1005,1,0.737,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0319,V067,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,1723 216 1724 217,1,0.871,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0342,V110,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,1795 133 1796 134,1,0.659,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0344,V072,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,1798 54 1799 55,1,0.69,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0349,V091,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,1808 273 1809 274,1,0.91,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0356,V009,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,1818 1258 1819 1260,2,0.988,accept,other_multi,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0367,V027,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,1842 1525 1844 1526,2,0.906,accept,other_multi,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0397,V094,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,1924 1272 1925 1273,1,0.737,accept,other_single,foam_whitecap,medium,белая крапина на ряби (рядом ещё одна)
+S3_HE460_MarLitter_transect03:H0421,V043,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,1992 35 1993 36,1,0.698,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0436,V085,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,2018 1490 2019 1491,1,0.745,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0446,V010,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,2042 1485 2043 1487,2,0.988,accept,other_multi,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0449,V026,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,2063 229 2064 230,1,0.969,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0462,V068,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,2141 599 2142 600,1,0.663,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0493,V039,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,2222 149 2223 150,1,0.753,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0494,V104,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,2222 1456 2223 1457,1,0.996,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0569,V003,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,2419 1459 2420 1460,1,0.922,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0586,V014,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,2453 102 2454 103,1,0.706,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0587,V096,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,2453 1034 2454 1035,1,0.976,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0606,V060,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,2492 251 2493 252,1,0.663,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0633,V024,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,2537 6 2538 7,1,0.957,accept,other_single,foam_whitecap,medium,белая крапина на ряби (у края вырезки)
+S3_HE460_MarLitter_transect03:H0641,V038,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,2545 959 2546 960,1,0.953,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0649,V022,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,2566 786 2567 787,1,0.992,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0660,V044,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,2590 1201 2591 1202,1,0.851,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0697,V097,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,2668 380 2669 381,1,0.749,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0720,V058,S3_HE460_MarLitter_transect03,H,water_median,False,H_out:S3_HE460_MarLitter_transect03,2704 60 2705 61,1,0.957,accept,other_single,foam_whitecap,medium,белая крапина на ряби (у края вырезки)
+S4_DOORS3_T12:H0001,V020,S4_DOORS3_T12,H,water_median,False,H_out:S4_DOORS3_T12,304 57 305 58,1,0.694,reject glint,glint,glint,medium,бликующая неровная вода; объекта не видно
+S4_DOORS3_T12:H0002,V099,S4_DOORS3_T12,H,water_median,False,H_out:S4_DOORS3_T12,413 600 414 601,1,0.973,reject glint,glint,glint,low,бликующая рябь; объекта не видно
+S4_DOORS3_T12:H0003,V107,S4_DOORS3_T12,H,water_median,False,H_out:S4_DOORS3_T12,573 31 574 32,1,0.91,reject glint,glint,glint,low,бликующая рябь; объекта не видно
+S4_DOORS3_T12:H0004,V056,S4_DOORS3_T12,H,water_median,False,H_out:S4_DOORS3_T12,577 62 578 63,1,0.984,reject glint,glint,glint,low,бликующая рябь; объекта не видно
+S4_DOORS3_T12:H0006,V042,S4_DOORS3_T12,H,water_median,False,H_out:S4_DOORS3_T12,658 582 659 583,1,0.863,reject glint,glint,unclear,low,на краю тёмной полосы (слик?) на бликующей воде; материала не видно
+S4_DOORS3_T13:H0002,V053,S4_DOORS3_T13,H,water_median,False,H_out:S4_DOORS3_T13,28 222 29 223,1,0.992,reject glint,glint,glint,low,бликующая рябь; объекта не видно
+S4_DOORS3_T13:H0003,V105,S4_DOORS3_T13,H,water_median,False,H_out:S4_DOORS3_T13,92 524 93 525,1,0.976,reject glint,glint,seam_artifact,low,на тёмной дуге (слик?) на бликующей воде
+S4_DOORS3_T13:H0004,V041,S4_DOORS3_T13,H,water_median,False,H_out:S4_DOORS3_T13,101 467 102 468,1,0.945,reject glint,glint,glint,low,бликующая рябь; объекта не видно
+S4_DOORS3_T13:H0005,V034,S4_DOORS3_T13,H,water_median,False,H_out:S4_DOORS3_T13,159 72 160 73,1,0.808,reject glint,glint,glint,low,бликующая рябь; объекта не видно
+S4_DOORS3_T13:H0009,V035,S4_DOORS3_T13,H,water_median,False,H_out:S4_DOORS3_T13,444 132 445 133,1,0.875,reject glint,glint,glint,medium,бликующая рябь; объекта не видно
+S4_DOORS3_T14:H0001,V070,S4_DOORS3_T14,H,water_median,False,H_out:S4_DOORS3_T14,7 6 8 7,1,0.965,reject glint,glint,unclear,low,"у края вырезки, шумная вода; объекта не видно"
+S4_DOORS3_T14:H0003,V077,S4_DOORS3_T14,H,water_median,False,H_out:S4_DOORS3_T14,45 534 46 535,1,0.839,reject glint,glint,seam_artifact,medium,на границе бликующей и тёмной воды
+S4_DOORS3_T14:H0015,V074,S4_DOORS3_T14,H,water_median,False,H_out:S4_DOORS3_T14,272 121 273 122,1,0.784,reject glint,glint,glint,low,бликующая рябь; объекта не видно
+S4_DOORS3_T14:H0016,V088,S4_DOORS3_T14,H,water_median,False,H_out:S4_DOORS3_T14,281 471 282 472,1,0.827,reject glint,glint,seam_artifact,medium,на границе бликующей и тёмной воды
+S4_DOORS3_T14:H0022,V006,S4_DOORS3_T14,H,water_median,False,H_out:S4_DOORS3_T14,546 401 547 402,1,0.843,reject glint,glint,seam_artifact,medium,на границе бликующей и тёмной воды (ступень яркости)
+S4_DOORS3_T14:H0027,V025,S4_DOORS3_T14,H,water_median,False,H_out:S4_DOORS3_T14,648 283 649 284,1,0.675,reject glint,glint,glint,medium,бликующая рябь; объекта не видно
+S4_DOORS3_T16:H0006,V019,S4_DOORS3_T16,H,water_median,False,H_out:S4_DOORS3_T16,481 54 482 56,2,0.969,reject glint,other_multi,unclear,low,шум тёмной воды; объекта не видно
+S4_DOORS3_T16:H0014,V103,S4_DOORS3_T16,H,water_median,False,H_out:S4_DOORS3_T16,512 52 513 53,1,0.914,reject glint,other_single,unclear,low,рядом слабая светлая полоса в тёмной воде: блик или линия пены
+S4_DOORS3_T16:H0020,V093,S4_DOORS3_T16,H,water_median,False,H_out:S4_DOORS3_T16,532 29 533 30,1,0.976,reject glint,other_single,unclear,low,шум тёмной воды; объекта не видно
+S4_DOORS3_T16:H0033,V063,S4_DOORS3_T16,H,water_median,False,H_out:S4_DOORS3_T16,557 148 559 149,2,0.941,reject glint,other_multi,unclear,low,шум тёмной воды у бликующей полосы
+S4_DOORS3_T16:H0037,V040,S4_DOORS3_T16,H,water_median,False,H_out:S4_DOORS3_T16,560 85 561 86,1,0.788,reject glint,other_single,unclear,low,шум тёмной воды; объекта не видно
+S4_DOORS3_T16:H0041,V045,S4_DOORS3_T16,H,water_median,False,H_out:S4_DOORS3_T16,563 47 564 48,1,0.725,reject glint,other_single,unclear,low,шум тёмной воды; объекта не видно
+S4_DOORS3_T16:H0050,V012,S4_DOORS3_T16,H,water_median,False,H_out:S4_DOORS3_T16,577 309 578 310,1,0.757,reject glint,other_single,unclear,low,шум тёмной воды у границы бликующей полосы; объекта не видно
+S4_DOORS3_T16:H0055,V008,S4_DOORS3_T16,H,water_median,False,H_out:S4_DOORS3_T16,583 52 584 53,1,0.725,reject glint,other_single,unclear,low,шум тёмной воды; объекта не видно
+S4_DOORS3_T16:H0063,V109,S4_DOORS3_T16,H,water_median,False,H_out:S4_DOORS3_T16,590 290 591 291,1,0.945,reject glint,other_single,unclear,low,шум тёмной воды; объекта не видно
+S4_DOORS3_T16:H0069,V036,S4_DOORS3_T16,H,water_median,False,H_out:S4_DOORS3_T16,605 286 607 287,2,0.937,reject glint,other_multi,unclear,low,шум тёмной воды у бликующей полосы
+S4_DOORS3_T2:H0001,V030,S4_DOORS3_T2,H,water_median,False,H_out:S4_DOORS3_T2,221 12 222 13,1,0.678,accept,ship,ship_wake,high,у яркого судна с кильватером
+S4_DOORS3_T2:H0002,V017,S4_DOORS3_T2,H,water_median,False,H_out:S4_DOORS3_T2,223 14 224 15,1,0.941,accept,ship,ship_wake,high,у крупного яркого вытянутого объекта (судно с кильватером)
+S4_DOORS3_T20:H0001,V069,S4_DOORS3_T20,H,water_median,False,H_out:S4_DOORS3_T20,131 639 132 640,1,0.71,reject glint,glint,cloud,medium,компактное светлое пятно с тёмным пятном-тенью рядом: крошечное облако
+S4_DOORS3_T20:H0003,V032,S4_DOORS3_T20,H,water_median,False,H_out:S4_DOORS3_T20,289 436 290 437,1,0.737,reject glint,cloud_edge,cloud,high,кайма кучевого облака
+S4_DOORS3_T20:H0005,V037,S4_DOORS3_T20,H,water_median,False,H_out:S4_DOORS3_T20,331 228 332 229,1,0.89,reject glint,cloud_edge,cloud,high,мелкие кучевые облака
+S4_DOORS3_T20:H0007,V029,S4_DOORS3_T20,H,water_median,False,H_out:S4_DOORS3_T20,335 217 337 219,2,0.957,reject glint,cloud_small,cloud,high,мелкие кучевые облака
+S4_DOORS3_T20:H0010,V062,S4_DOORS3_T20,H,water_median,False,H_out:S4_DOORS3_T20,423 178 424 179,1,0.816,reject glint,glint,unclear,low,очень слабое пятно на тёмной спокойной воде рядом с облаками
+S4_DOORS3_T20:H0013,V075,S4_DOORS3_T20,H,water_median,False,H_out:S4_DOORS3_T20,456 354 458 355,2,0.996,reject glint,cloud_small,cloud,high,мелкое облачко с тенью
+S4_DOORS3_T21:H0004,V064,S4_DOORS3_T21,H,water_median,False,H_out:S4_DOORS3_T21,166 121 167 124,3,0.984,reject glint,glint,cloud,high,под мелким облачком
+S4_DOORS3_T21:H0007,V065,S4_DOORS3_T21,H,water_median,False,H_out:S4_DOORS3_T21,247 531 248 532,1,0.98,reject glint,cloud_edge,cloud,medium,облачко у берега
+S4_DOORS3_T21:H0008,V028,S4_DOORS3_T21,H,water_median,False,H_out:S4_DOORS3_T21,317 25 319 26,2,0.949,reject glint,cloud_small,cloud,medium,слабая дымка рядом с облачком
+S4_DOORS3_T21:H0017,V084,S4_DOORS3_T21,H,water_median,False,H_out:S4_DOORS3_T21,534 107 535 108,1,0.992,reject glint,glint,cloud,high,яркое облачко с тенью
+S4_DOORS3_T21:H0018,V076,S4_DOORS3_T21,H,water_median,False,H_out:S4_DOORS3_T21,534 110 536 112,3,0.996,reject glint,glint,cloud,high,яркое облачко с тенью
+S4_DOORS3_T21:H0021,V046,S4_DOORS3_T21,H,water_median,False,H_out:S4_DOORS3_T21,612 402 613 403,1,0.776,reject glint,cloud_edge,cloud,high,у облака и его тени
+S4_DOORS3_T25:H0001,V083,S4_DOORS3_T25,H,water_median,False,H_out:S4_DOORS3_T25,526 607 538 634,47,1.0,accept,wake,ship_wake,high,судно с ярким кильватером
+S4_DOORS3_T30:H0003,V100,S4_DOORS3_T30,H,water_median,False,H_out:S4_DOORS3_T30,381 191 382 192,1,0.894,accept,other_single,cloud,high,поле мелких облаков
+S4_DOORS3_T30:H0004,V078,S4_DOORS3_T30,H,water_median,False,H_out:S4_DOORS3_T30,444 237 445 238,1,0.678,accept,other_single,cloud,low,"компактная яркая вытянутая точка с цветной каймой, яркая в SWIR, в поле мелких облаков; возможно лодка"
+S4_DOORS3_T30:H0008,V048,S4_DOORS3_T30,H,water_median,False,H_out:S4_DOORS3_T30,518 669 519 670,1,0.706,accept,other_single,cloud,high,поле мелких облаков
+S4_DOORS3_T30:H0010,V047,S4_DOORS3_T30,H,water_median,False,H_out:S4_DOORS3_T30,588 609 589 610,1,0.941,accept,other_single,cloud,high,поле мелких облаков
+S4_DOORS3_T30:H0017,V111,S4_DOORS3_T30,H,water_median,False,H_out:S4_DOORS3_T30,656 514 657 515,1,0.776,accept,other_single,cloud,high,поле мелких облаков
+S4_DOORS3_T30:H0020,V102,S4_DOORS3_T30,H,water_median,False,H_out:S4_DOORS3_T30,668 628 669 629,1,0.824,accept,other_single,cloud,high,поле мелких облаков
+S4_DOORS3_T31:H0001,V002,S4_DOORS3_T31,H,water_median,False,H_out:S4_DOORS3_T31,540 514 541 515,1,0.69,accept,other_single,cloud,high,пятно среди поля мелких кучевых облаков
+S3_HE460_MarLitter_transect03:H0122,V001,S3_HE460_MarLitter_transect03,H,water_median,True,H_in:S3_HE460_MarLitter_transect03,755 503 756 504,1,0.722,accept,other_single,foam_whitecap,medium,одиночный белый пиксель среди многих таких же белых крапин на ряби
+S3_HE460_MarLitter_transect03:H0453,V087,S3_HE460_MarLitter_transect03,H,water_median,True,H_in:S3_HE460_MarLitter_transect03,2089 1097 2091 1098,2,0.894,accept,other_multi,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:H0538,V021,S3_HE460_MarLitter_transect03,H,water_median,True,H_in:S3_HE460_MarLitter_transect03,2344 1208 2345 1209,1,0.843,accept,other_single,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:N0001,V082,S3_HE460_MarLitter_transect03,N,none,False,N:S3_HE460_MarLitter_transect03,291 1520 292 1521,1,0.939,accept,,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:N0002,V015,S3_HE460_MarLitter_transect03,N,none,False,N:S3_HE460_MarLitter_transect03,835 1475 836 1476,1,0.816,accept,,ship_wake,medium,"компактная яркая точка, яркая и в SWIR (сухой корпус лодки?)"
+S3_HE460_MarLitter_transect03:N0003,V051,S3_HE460_MarLitter_transect03,N,none,False,N:S3_HE460_MarLitter_transect03,978 165 979 166,1,0.678,accept,,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:N0004,V073,S3_HE460_MarLitter_transect03,N,none,False,N:S3_HE460_MarLitter_transect03,1370 621 1371 622,1,0.677,accept,,foam_whitecap,medium,белая крапина на ряби
+S3_HE460_MarLitter_transect03:N0005,V101,S3_HE460_MarLitter_transect03,N,none,False,N:S3_HE460_MarLitter_transect03,1953 1068 1954 1069,1,0.78,accept,,foam_whitecap,medium,белая крапина на ряби
+S4_DOORS3_T14:H0017,V005,S4_DOORS3_T14,H,water_median,True,H_in:S4_DOORS3_T14,355 347 356 348,1,0.714,reject glint,glint,glint,medium,бликующая рябь (светлая в SWIR); отдельного объекта не видно
+S4_DOORS3_T20:H0009,V018,S4_DOORS3_T20,H,water_median,True,H_in:S4_DOORS3_T20,357 372 358 373,1,0.792,reject glint,cloud_small,cloud,high,"мелкое кучевое облачко, рядом тень"
+S4_DOORS3_T21:H0010,V011,S4_DOORS3_T21,H,water_median,True,H_in:S4_DOORS3_T21,385 385 388 387,6,0.937,reject glint,cloud_small,cloud,high,мелкие облачка с тенями

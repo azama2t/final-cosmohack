@@ -5,7 +5,7 @@
   .venv/Scripts/python.exe scripts/case/pair_quality.py --summary-only                      # csv + md from meta.json
 
 Input: data/pairs/best_per_event.csv (scripts/case/find_pairs.py), task/macroplastic_marine_samples.csv (geometry), configs/case_pairs.yaml.
-Geometry (L75, configs/case_pairs.yaml geometry.use): S2/S3 strip = PANGAEA track segments (src/macroplastic/case/geometry.py)
+Geometry (configs/case_pairs.yaml geometry.use): S2/S3 strip = PANGAEA track segments (src/macroplastic/case/geometry.py)
 + buffer; interrupted transects are a MultiLineString, the gap is not part of the strip. Others: CSV line or point + buffer.
 Per pair: data/pairs/quality/<event_id>/{rgb.png, quality.tif, quality.png, prob.tif, mask.png, meta.json}
 (meta.json written last -> a pair with meta.json is done; rerun skips it). Table data/pairs/pair_quality.csv and
@@ -228,7 +228,7 @@ def process_s2(row, g: dict, cfg: dict, pred, outdir: Path) -> dict:
     qa[scl_cloud & valid] = Q_CLOUD
     qa[spc & ~scl_cloud] = Q_SPCLOUD
     qa[glint & ~scl_cloud] = Q_GLINT
-    # pixel glint (L75b, detector_review 7.3): same threshold as the reject rule (decision.glint_b11); such water is not
+    # pixel glint (reports/case_pairs/detector_review.md, 7.3): same threshold as the reject rule (decision.glint_b11); such water is not
     # counted as usable. Decision rule, b11w median, detector input (water_ok) and quality.tif codes are unchanged.
     glint_px = water_ok & (np.nan_to_num(bands[10]) > gc["glint_b11"])
 

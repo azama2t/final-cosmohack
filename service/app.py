@@ -160,7 +160,7 @@ def create_app(data_root: Optional[str | Path] = None) -> FastAPI:
         return Response(json.dumps(obj, ensure_ascii=False).encode("utf-8"), media_type="application/geo+json",
                         headers={"Content-Disposition": f'attachment; filename="{stem}.geojson"'})
 
-    # ------------------------------------------------------------ L19: zones, place, calendar, review
+    # ------------------------------------------------------------ Zones/place/review API: zones, place, calendar, review
     jobs = review.Jobs()
 
     @app.get("/api/zone", tags=["analysis"], summary="Зона приоритета обследования + «почему» (формула)")

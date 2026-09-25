@@ -1,4 +1,4 @@
-"""STAC search + harmonized Sentinel-2 L2A crops for live scenes (lane L6).
+"""STAC search + harmonized Sentinel-2 L2A crops for live scenes.
 
 Scale/offset rule (SPEC §2): reflectance = DN * scale + offset, where scale/offset come ONLY from the
 asset's STAC `raster:bands` (Earth Search v1). Earth Search README ("Gain/Offset in Items after Jan 25, 2022"):
@@ -63,7 +63,7 @@ REGIONS = {
     "jakarta": dict(region_name="Джакартский залив", region_name_en="Jakarta Bay, Indonesia", country="Индонезия",
                     tile="48MXU", center=(106.50, -5.89), md_px=232,  # 48MXU 208 + 48MYU 24
                     marida_dates=["2018-12-06", "2019-05-25"]),
-    # L6b additions. centre = middle of the MARIDA MD bbox of the tile (reports/marida_regions.md), nudged to water.
+    # Live scenes additions. centre = middle of the MARIDA MD bbox of the tile (reports/marida_regions.md), nudged to water.
     "manila": dict(region_name="Манильский залив", region_name_en="Manila Bay, Philippines", country="Филиппины",
                    tile="51PTS", center=(120.82, 14.60), md_px=38, marida_dates=["2016-07-17", "2019-05-18"]),
     "danang": dict(region_name="Дананг (устье Тхубон, Хойан)", region_name_en="Da Nang / Hoi An, Vietnam",
@@ -83,7 +83,7 @@ REGIONS = {
                   tile="30NZM", center=(-0.14, 5.50), md_px=0, marida_dates=[]),
     "lagos": dict(region_name="Лагос (вход в лагуну, порт Апапа)", region_name_en="Lagos harbour entrance, Nigeria",
                   country="Нигерия", tile="31NEG", center=(3.40, 6.30), md_px=0, marida_dates=[]),
-    # L6d: river-plastic "hotspots" outside MARIDA (fresh 2025-2026 scenes only); centre +-12.5 km checked inside the tile
+    # Live scenes: river-plastic "hotspots" outside MARIDA (fresh 2025-2026 scenes only); centre +-12.5 km checked inside the tile
     "mumbai": dict(region_name="Мумбаи (устье Ульхаса, крики Васаи и Малад)", region_name_en="Mumbai (Ulhas / Vasai Creek), India",
                    country="Индия", tile="43QBB", center=(72.78, 19.20), md_px=0, marida_dates=[]),
     "karachi": dict(region_name="Карачи (порт, устье Лиари)", region_name_en="Karachi harbour (Lyari mouth), Pakistan",

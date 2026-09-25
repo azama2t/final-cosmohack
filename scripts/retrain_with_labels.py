@@ -1,4 +1,4 @@
-"""Retrain the pixel LightGBM with human review labels (lane L19, INBOX 1.6). Never replaces weights/ itself.
+"""Retrain the pixel LightGBM with human review labels (zones/place/review API). Never replaces weights/ itself.
 
   .venv/Scripts/python.exe scripts/retrain_with_labels.py [--labels service/labels/labels.jsonl]
         [--out weights_exp/review/<ts>] [--seed 0] [--label-weight 5] [--radius 2]
@@ -14,7 +14,7 @@ Steps
  3. Base training data and config = the accepted final model (weights/lgbm/meta.json: MARIDA train + MADOS,
     scripts/train_lgbm_mados.py pipeline, same seed). Two models: baseline (no labels) and baseline + labels
     (label pixels weight --label-weight).
- 4. F1 Marine Debris on MARIDA val (threshold chosen on val, as in L3/L13) before/after; decision by SPEC 1.7:
+ 4. F1 Marine Debris on MARIDA val (threshold chosen on val, as in LightGBM/MADOS training) before/after; decision by SPEC 1.7:
     accept only if gain >= max(0.01, 2 x 0.0025). MARIDA test is never read.
  5. <out>/model.txt, meta.json, result.json. weights/lgbm is NOT replaced - result.json has the command for it.
 Exit codes: 0 ok, 2 no labels / no usable pixels (result.json has "error").
@@ -36,7 +36,7 @@ sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "scripts"))
 os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
-NOISE_STD = 0.0025  # seed noise of val F1 (3 seeds, L13)
+NOISE_STD = 0.0025  # seed noise of val F1 (3 seeds, MADOS training)
 MIN_GAIN = max(0.01, 2 * NOISE_STD)
 NEG_CODE = {"foam": 9, "algae": 3, "ship_wake": 14, "cloud": 6, "other": 15}
 HALO = 40
@@ -277,7 +277,7 @@ def main():
                                           "пиксели новой модели — оптимистично, не метрика качества"},
         "replace_command": (f'copy /Y "{rel}\\model.txt" weights\\lgbm\\model.txt && copy /Y "{rel}\\meta.json" '
                             "weights\\lgbm\\meta.json" if accepted else None),
-        "replace_note": "веса в weights\\ автоматически не подменяются; подмена — решение оркестратора/человека",
+        "replace_note": "веса в weights\\ автоматически не подменяются; подмена — решение человека",
         "seconds": round(time.time() - t0, 1),
         "caveat": "val MARIDA — ACOLITE rhorc, а метки — с живых сцен L2A: прирост на val мал по построению; "
                   "для оценки на живых сценах нужен отдельный размеченный набор",

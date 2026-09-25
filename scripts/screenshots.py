@@ -26,7 +26,7 @@ from pathlib import Path
 
 from playwright.sync_api import Page, sync_playwright
 
-# L40: the final summary has Cyrillic and «✓»; a Windows console (cp1251/cp866) raised UnicodeEncodeError at the end
+# Consistency pass: the final summary has Cyrillic and «✓»; a Windows console (cp1251/cp866) raised UnicodeEncodeError at the end
 for _s in (sys.stdout, sys.stderr):
     try:
         _s.reconfigure(encoding="utf-8", errors="replace")
@@ -190,7 +190,7 @@ def run(args) -> dict:
         best_id = page.evaluate("window.__app && window.__app.bestRegion")
         best = next((r for r in regions if r["id"] == best_id), regions[0])
         res["best_region"] = best["id"]
-        if args.only_l27:  # quick iteration on the L27 frames only
+        if args.only_l27:  # quick iteration on the UI polish frames only
             ctx.close()
             shoot_l27(browser, base, out, res, con, best["id"], regions)
             browser.close()
@@ -198,7 +198,7 @@ def run(args) -> dict:
             res["external_errors"] = sorted(set(con.external))[:20]
             res["console_warnings"] = con.warnings[:20]
             return res
-        if args.only_l34:  # quick iteration on the L34 frames only
+        if args.only_l34:  # quick iteration on the UI review frames only
             ctx.close()
             shoot_l34(browser, base, out, res, con, best["id"], regions)
             browser.close()
@@ -206,7 +206,7 @@ def run(args) -> dict:
             res["external_errors"] = sorted(set(con.external))[:20]
             res["console_warnings"] = con.warnings[:20]
             return res
-        if args.only_l20:  # quick iteration on the L20 frames only
+        if args.only_l20:  # quick iteration on the zone/review UI frames only
             ctx.close()
             shoot_l20(browser, base, out, res, con, best["id"], regions, args)
             browser.close()
@@ -218,7 +218,7 @@ def run(args) -> dict:
         if args.extra:
             compact = page.locator(".region-marker.compact")
             res["overview_compact_labels"] = compact.count()
-            # L27: on the globe a collapsed dot can sit under a neighbour's dot — hover the first reachable one
+            # UI polish: on the globe a collapsed dot can sit under a neighbour's dot — hover the first reachable one
             idx = page.evaluate("""(() => [...document.querySelectorAll('.region-marker.compact')].findIndex(el => {
                 const r = el.getBoundingClientRect(); const t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
                 return t && el.contains(t); }))()""")
@@ -450,15 +450,15 @@ def run(args) -> dict:
             shot(p4, out, "19_drift_without_ensemble", res["shots"])
             ctx4.close()
 
-        # L20: zone card, place card, calendar, review tab ----------------------------
+        # Zone/review UI: zone card, place card, calendar, review tab ----------------------------
         if args.l20 or args.only_l20 or args.extra:
             shoot_l20(browser, base, out, res, con, best["id"], regions, args)
 
-        # L34: reliability groups, 8-date timeline / calendar / chart, card scrolling at 1366, review legends
+        # UI review: reliability groups, 8-date timeline / calendar / chart, card scrolling at 1366, review legends
         if args.extra:
             shoot_l34(browser, base, out, res, con, best["id"], regions)
 
-        # L27: globe, route, offline coastline, compare opened by a link from the overview ------
+        # UI polish: globe, route, offline coastline, compare opened by a link from the overview ------
         if args.extra:
             shoot_l27(browser, base, out, res, con, best["id"], regions)
 
@@ -509,7 +509,7 @@ def _img_ready(page: Page, testids: list[str], timeout: int = 15000) -> bool:
 
 
 def shoot_l20(browser, base: str, out: Path, res: dict, con: "Console", best_id: str, regions: list, args):
-    """L20 frames: 21 zone card («почему первая»), 22 place card (+PDF), 23 observation calendar,
+    """Zone/review UI frames: 21 zone card («почему первая»), 22 place card (+PDF), 23 observation calendar,
     24 review tab, 25 retrain result (only with --review-write), + 1366 variants."""
     info = res.setdefault("l20", {})
     try:
@@ -662,7 +662,7 @@ def shoot_l20(browser, base: str, out: Path, res: dict, con: "Console", best_id:
                 shot(page, out, "25_review_retrain", res["shots"])
         ctx.close()
 
-    # fallbacks: the same UI against a backend without the L19 endpoints (/openapi.json without paths)
+    # fallbacks: the same UI against a backend without the zones/place/review API endpoints (/openapi.json without paths)
     ctx = browser.new_context(viewport={"width": 1920, "height": 1080}, device_scale_factor=1)
     ctx.route("**/openapi.json", lambda route: route.fulfill(status=200, content_type="application/json", body='{"paths": {}}'))
     page = ctx.new_page()
@@ -690,7 +690,7 @@ def shoot_l20(browser, base: str, out: Path, res: dict, con: "Console", best_id:
 
 
 def shoot_l34(browser, base: str, out: Path, res: dict, con: "Console", best_id: str, regions: list):
-    """L34 frames: 35 ranking groups (overview + left list), 36 region with the most dates (timeline, calendar, chart),
+    """UI review frames: 35 ranking groups (overview + left list), 36 region with the most dates (timeline, calendar, chart),
     38 zone/place cards scrolled to the bottom, 39 review crop legend. Checks go to res['l34']."""
     info = res.setdefault("l34", {})
     many = max(regions, key=lambda r: (len(r["dates"]), (r.get("summary") or {}).get("n_detections") or 0))
@@ -769,7 +769,7 @@ def shoot_l34(browser, base: str, out: Path, res: dict, con: "Console", best_id:
         ctx.close()
 
 def _goto_scene(page: Page, url: str, res: dict, tries: int = 2):
-    """L27: open a region URL and wait for the scene; one retry (reload) if it did not come up."""
+    """UI polish: open a region URL and wait for the scene; one retry (reload) if it did not come up."""
     for i in range(tries):
         page.goto(url, wait_until="load")
         try:
@@ -783,7 +783,7 @@ def _goto_scene(page: Page, url: str, res: dict, tries: int = 2):
 
 
 def shoot_l27(browser, base: str, out: Path, res: dict, con: "Console", best_id: str, regions: list):
-    """L27 frames: 30 globe (+ fps), 31 route + verdicts, 32 offline coastline, 33 compare by link."""
+    """UI polish frames: 30 globe (+ fps), 31 route + verdicts, 32 offline coastline, 33 compare by link."""
     ctx = browser.new_context(viewport={"width": 1920, "height": 1080}, device_scale_factor=1)
     page = ctx.new_page()
     con.attach(page)
@@ -898,7 +898,7 @@ def append_perf(res: dict):
     errs = res.get("console_errors") or []
     err_cell = str(len(errs)) + ("" if not errs else ": " + "; ".join(e.replace("|", "/")[:120] for e in errs[:3]))
     notes = [f"gl={res.get('gl')}", res.get("gpu", "")] + res.get("notes", [])
-    if res.get("fps_globe_flyto") is not None:  # L27
+    if res.get("fps_globe_flyto") is not None:  # UI polish
         notes.insert(1, "globe: rotate {} fps, flyTo {} fps (map flyTo {}); default={}".format(
             res.get("fps_globe_rotate"), res.get("fps_globe_flyto"), res.get("fps_map_flyto"), res.get("projection_default")))
     row = "| {} | {} | {} | {} | {} | {} | {} | {} |\n".format(
@@ -928,12 +928,12 @@ def main():
     ap.add_argument("--log-perf", action="store_true", help="append a row to reports/ui_perf.md (off by default)")
     ap.add_argument("--no-perf", action="store_true", help="kept for old commands: ui_perf.md is not written anyway")
     ap.add_argument("--l20", action="store_true",
-                    help="also shoot L20 frames 21-25 (zone card, place card, calendar, review tab)")
-    ap.add_argument("--only-l20", action="store_true", help="only the L20 frames (fast iteration)")
-    ap.add_argument("--only-l34", action="store_true", help="only the L34 frames 35-39 (ranking groups, 8 dates, 1366 cards, review legend)")
-    ap.add_argument("--only-l27", action="store_true", help="only the L27 frames 30-33 (globe, route, offline, compare link)")
+                    help="also shoot frames 21-25 (zone card, place card, calendar, review tab)")
+    ap.add_argument("--only-l20", action="store_true", help="only frames 21-25 (fast iteration)")
+    ap.add_argument("--only-l34", action="store_true", help="only frames 35-39 (ranking groups, 8 dates, 1366 cards, review legend)")
+    ap.add_argument("--only-l27", action="store_true", help="only frames 30-33 (globe, route, offline, compare link)")
     ap.add_argument("--review-write", action="store_true",
-                    help="L20: allow POST labels / «ложное?» / retrain (writes the backend labels file!) "
+                    help="allow POST labels / «ложное?» / retrain (writes the backend labels file!) "
                          "for frames 24b and 25; use with a backend started with MACROPLASTIC_LABELS=<scratch dir>")
     ap.add_argument("--retrain-timeout", type=int, default=900, help="seconds to wait for the retrain job (frame 25)")
     args = ap.parse_args()

@@ -1,8 +1,8 @@
-"""L31: mid-size CPU model k20_t400_l63 (top-20 features by gain of the final model, 400 trees x 63 leaves, lr 0.05).
+"""Mid-size model: mid-size CPU model k20_t400_l63 (top-20 features by gain of the final model, 400 trees x 63 leaves, lr 0.05).
 
     cd scripts/experiments && PYTHONPATH=../../src ../../.venv/Scripts/python.exe l31_midsize.py [--seeds 0,1,2]
 
-Recipe = l23 (== final model recipe, reproduced bit-for-bit by L23 e_full_s0). Evaluation: MARIDA val, all
+Recipe = l23 (== final model recipe, reproduced bit-for-bit by the band-subset run e_full_s0). Evaluation: MARIDA val, all
 labelled px pooled, threshold chosen on val (grid of the final meta). MARIDA test is never read.
 Writes weights_exp/l31/k20_t400_l63_s<seed>/{model.txt, meta.json} (meta in the product format: a copy of
 weights/lgbm/meta.json with features/threshold/metrics replaced) and weights_exp/l31/train_val.json.

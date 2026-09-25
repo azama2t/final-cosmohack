@@ -39,7 +39,7 @@ import numpy as np
 
 warnings.filterwarnings("ignore")
 RASTER_EXT = {".tif", ".tiff", ".jp2", ".png", ".npy", ".jpg", ".jpeg"}
-DEFAULT_EXCLUDE = (r"((^|[/\\])(masks?|labels?|gt|annotations?|segmentations?)[/\\]"  # files in mask folders (L30: 39 false hits)
+DEFAULT_EXCLUDE = (r"((^|[/\\])(masks?|labels?|gt|annotations?|segmentations?)[/\\]"  # files in mask folders (rehearsal: 39 false hits)
                    r"|(_cl|_conf|mask|label|_gt|_lbl)[^/\\]*$)")
 
 TILE_RE = re.compile(r"(?<![A-Za-z0-9])T?(\d{2}[C-HJ-NP-X][A-HJ-NP-Z]{2})(?![A-Za-z0-9])")

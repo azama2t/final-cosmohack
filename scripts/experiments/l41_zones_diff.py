@@ -1,4 +1,4 @@
-"""L41: zones #1 before/after the rebuild + artefact totals (reads reports/tmp_l41/zones1_before.json, service/data)."""
+"""Wake rule: zones #1 before/after the rebuild + artefact totals (reads reports/tmp_l41/zones1_before.json, service/data)."""
 import json, sys
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]

@@ -1,4 +1,4 @@
-"""L23 task 1: final recipe on band subsets. MARIDA val F1/IoU MD (threshold on val).
+"""Band-subset / light models task 1: final recipe on band subsets. MARIDA val F1/IoU MD (threshold on val).
 
   PYTHONPATH=src .venv/Scripts/python.exe scripts/experiments/l23_channels.py [--seeds 0] [--only name,...]
 Writes out/l23_runs/channels_s<seeds>.json and weights_exp/l23/<subset>_s<seed>/.

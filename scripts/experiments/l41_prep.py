@@ -1,4 +1,4 @@
-"""L41 helper: rebuild labels/bands/water of one scene exactly as scripts/build_service_data.py does before classify."""
+"""Wake rule helper: rebuild labels/bands/water of one scene exactly as scripts/build_service_data.py does before classify."""
 from __future__ import annotations
 import sys
 from pathlib import Path

@@ -1,4 +1,4 @@
-"""L75: геометрия трансект PANGAEA подключена к реестру пар (find_pairs), маскам качества (pair_quality) и API v3.
+"""Геометрия трансект PANGAEA подключена к реестру пар (find_pairs), маскам качества (pair_quality) и API v3.
 
 Офлайн: нужны data/case/pangaea (fetch_pangaea.py) и data/case/geometry/transects.geojson (geometry.py).
 """

@@ -6,10 +6,10 @@ score = base × agreement × date_penalty
     date_penalty = 0.5 if the date is unreliable (haze / glint), else 1
 where
     flagged_water_px - debris-like observed water pixels in the cell on this date (primary key); objects marked as
-                       artefacts (seam / wake / ship, grid.artifacts) are NOT counted (L37)
+                       artefacts (seam / wake / ship, grid.artifacts) are NOT counted (artefact filter)
     mean_prob        - mean model probability over those pixels (confidence)
     repeat_dates     - on how many *reliable* (no haze/glint) dates of the region (same model) the cell had flagged
-                       pixels; the current date always counts (persistence). L37: hazy dates no longer add to it
+                       pixels; the current date always counts (persistence). artefact filter: hazy dates no longer add to it
     confirmed_share  - share of the cell's flagged pixels that belong to detections confirmed by the second model
                        (grid.confirm, 20 m); 0 on single-model dates
 Only cells with a defined index (observed_frac >= 0.5) are ranked. This is a survey priority, not plastic mass.

@@ -1,4 +1,4 @@
-"""L26: leave-region-out for the light L23 model (top-20 features, 200 trees x 31 leaves, lr 0.08) - the same
+"""Robustness fixes: leave-region-out for the light band-subset model (top-20 features, 200 trees x 31 leaves, lr 0.08) - the same
 protocol as scripts/experiments/l16_lro.py, variant 'combined' (MARIDA train+val of the other regions + MADOS
 train+val minus overlapping scenes, MADOS-only classes dropped, caps 30000/class, 60000 water, pos_weight 3).
 
@@ -42,7 +42,7 @@ def main():
     ap.add_argument("--seeds", type=int, nargs="*", default=[0, 1, 2])
     ap.add_argument("--no-control", action="store_true")
     ap.add_argument("--light", nargs="*", default=["light_k20_t200_l31"],
-                    help="L23 configs (weights_exp/l23/<name>_s0/meta.json gives features/leaves/lr/trees)")
+                    help="band-subset configs (weights_exp/l23/<name>_s0/meta.json gives features/leaves/lr/trees)")
     ap.add_argument("--out", default="light_lro.json")
     a = ap.parse_args()
     t0 = time.time()

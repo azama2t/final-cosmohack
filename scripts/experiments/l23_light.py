@@ -1,4 +1,4 @@
-"""L23 task 2: light LightGBM (fewer features / trees / leaves), all-11-band recipe, MARIDA val F1.
+"""Band-subset / light models task 2: light LightGBM (fewer features / trees / leaves), all-11-band recipe, MARIDA val F1.
 
   PYTHONPATH=src .venv/Scripts/python.exe scripts/experiments/l23_light.py [--seeds 0]
 Feature ranking = gain importance of weights_exp/l23/e_full_s0 (== final model, same seed/data).

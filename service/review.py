@@ -1,4 +1,4 @@
-"""Human review ("проверка человеком", lane L19, INBOX 1.6): queue of doubtful detections, labels, retrain jobs.
+"""Human review ("проверка человеком", zones/place/review API): queue of doubtful detections, labels, retrain jobs.
 
 Labels file: $MACROPLASTIC_LABELS (directory -> <dir>/labels.jsonl, or a *.jsonl path), default
 service/labels/labels.jsonl. One JSON object per line, append-only:
@@ -133,7 +133,7 @@ def queue(st: core.Store, rid: str, model: Optional[str] = None, limit: int = 50
                     codes.append("user_flag")
                     prio += 3
                 if art:
-                    # L38: artifacts (seam / wake / ship) are excluded from the index and zones and do not go to the
+                    # Artefacts in API: artifacts (seam / wake / ship) are excluded from the index and zones and do not go to the
                     # queue - except a user flag (above) or a conflict: the second model confirms the object, so the
                     # artifact filter may have removed a real finding.
                     if p.get("confirmed") is True:

@@ -1,4 +1,4 @@
-"""L56: crops for the manual review of top findings / zones (reports/manual_review.md).
+"""Manual review: crops for the manual review of top findings / zones (reports/manual_review.md).
 
 Usage: python scripts/experiments/l56_manual_review.py [--data service/data] [--out reports/manual_review]
         [--targets honduras:2026-05-30,guanabara:2026-07-16,...] [--top-det 5] [--top-zones 3]

@@ -1,4 +1,4 @@
-"""L16: paired scene bootstrap of the MARIDA-val gain final (MARIDA+MADOS) vs backup (MARIDA only).
+"""Metric audit: paired scene bootstrap of the MARIDA-val gain final (MARIDA+MADOS) vs backup (MARIDA only).
 
   .venv/Scripts/python.exe scripts/experiments/l16_paired.py   (needs weights_exp/l16/val_pred_*.npz from l16_recheck)
 """

@@ -1,4 +1,4 @@
-"""Dataset ingest (lane L18): archive/folder -> safe unpack -> human report -> auto adapter config -> internal format.
+"""Dataset ingest: archive/folder -> safe unpack -> human report -> auto adapter config -> internal format.
 
     python -m macroplastic.ingest <archive or folder> [--out data/ingest/<name>]           # report + adapter.yaml
     python -m macroplastic.ingest <archive or folder> [--out data/ingest/<name>] --convert # + internal format

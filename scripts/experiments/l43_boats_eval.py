@@ -1,4 +1,4 @@
-"""L43: brightness of small detections relative to the local water (boats vs floating material).
+"""Boat rule: brightness of small detections relative to the local water (boats vs floating material).
 
 Usage: PYTHONPATH=src python scripts/experiments/l43_boats_eval.py [--marida] [--live] [--jobs 8]
   --marida : per connected component of MARIDA class 1 (Marine Debris) and 5 (Ship): peak vis = mean(B2,B3,B4) and
@@ -102,7 +102,7 @@ def live_one(args):
     lab, n, b, water, raw = d["labels"], d["n"], d["bands"], d["water"], d["raw"]
     if b is None or n == 0:
         return []
-    A.BOAT_REL_VIS = 1e9  # baseline: without the L43 boat rule
+    A.BOAT_REL_VIS = 1e9  # baseline: without the boat rule
     art, f = A.classify(lab, n, b, water, raw)
     b2, b3, b4, b8 = (np.nan_to_num(b[k].astype(np.float32)) for k in ("B2", "B3", "B4", "B8"))
     vis = (b2 + b3 + b4) / 3.0

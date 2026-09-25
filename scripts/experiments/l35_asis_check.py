@@ -1,4 +1,4 @@
-"""L35: why does weights/lgbm "as is" score private F1 0.058 on the rehearsal org dataset (MADOS test)?
+"""As-is check: why does weights/lgbm "as is" score private F1 0.058 on the rehearsal org dataset (MADOS test)?
 
 For every org TEST chip (out/rehearsal/private_key.json) computes P(debris) three ways:
   native : mados.load_patch (float rhorc, MARIDA band order)            -- what the model was trained on

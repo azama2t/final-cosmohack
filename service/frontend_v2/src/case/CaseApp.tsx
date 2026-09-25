@@ -10,6 +10,7 @@ import CaseMap, { ACCENT, CONC_BREAKS, CONC_COLORS, STRIP_NO, STRIP_OK, flyToBox
 import { ObsCard, ZoneCard } from './Cards';
 import PairsDrawer from './PairsDrawer';
 import MetricsPanel from './MetricsPanel';
+import GoList, { rankSites } from './GoList';
 import { plural, color, dateRu, eventRu, label, missionShort, num, profileRu, scopeRu, sourceShort } from './fmt';
 import {
   DEFAULT_QUERY,
@@ -102,7 +103,7 @@ export default function CaseApp() {
   const [mapReady, setMapReady] = useState(false);
   const [drawer, setDrawer] = useState(url.pairs);
   const [pairStatus, setPairStatus] = useState('all');
-  const [leftTab, setLeftTab] = useState<'zones' | 'obs' | 'metrics'>(url.tab === 'metrics' ? 'metrics' : url.tab === 'obs' ? 'obs' : 'zones');
+  const [leftTab, setLeftTab] = useState<'zones' | 'obs' | 'go' | 'metrics'>(url.tab === 'metrics' ? 'metrics' : url.tab === 'obs' ? 'obs' : url.tab === 'go' ? 'go' : 'zones');
   const [toast, setToast] = useState<string | null>(null);
   const [saved, setSaved] = useState<SavedQuery[]>([]);
   const [qName, setQName] = useState('');
@@ -174,6 +175,7 @@ export default function CaseApp() {
   const metrics = useLoad<any>(meta && leftTab === 'metrics' ? (s) => get('/api/v3/metrics', {}, s) : null, meta && leftTab === 'metrics' ? 'm' : '');
 
   const sceneList = scenes.data?.scenes ?? [];
+  const sites = useMemo(() => rankSites(allObs.data, obs.data, zones.data), [allObs.data, obs.data, zones.data]);
   const obsById = useMemo(() => {
     const m = new Map<string, Feat<ObsProps>>();
     for (const f of allObs.data?.features ?? []) m.set(f.id, f);
@@ -599,6 +601,9 @@ export default function CaseApp() {
           <button className={`tab ${leftTab === 'obs' ? 'on' : ''}`} onClick={() => setLeftTab('obs')} data-testid="tab-obs">
             Измерения
           </button>
+          <button className={`tab ${leftTab === 'go' ? 'on' : ''}`} onClick={() => setLeftTab('go')} data-testid="tab-go">
+            Куда идти
+          </button>
           <button className={`tab ${leftTab === 'metrics' ? 'on' : ''}`} onClick={() => setLeftTab('metrics')} data-testid="tab-metrics">
             Метрики
           </button>
@@ -606,6 +611,8 @@ export default function CaseApp() {
         <div className="left-body">
           {leftTab === 'metrics' ? (
             <MetricsPanel m={metrics.data} err={metrics.err} />
+          ) : leftTab === 'go' ? (
+            <GoList meta={meta} sites={sites} sel={selObs} onPick={(s) => openObs(s.best.id)} />
           ) : leftTab === 'obs' ? (
             <ObsList meta={meta} fc={obs.data} sel={selObs} onPick={(id) => openObs(id)} />
           ) : (
@@ -1029,7 +1036,8 @@ function CaseLegend({
   zones: FC<ZoneProps> | null;
   hasDet: boolean;
 }) {
-  const [open, setOpen] = useState(() => window.innerHeight >= 860);
+  // 1366×768 and similar: compact by default (summary + one row of symbols), expands on click
+  const [open, setOpen] = useState(() => window.innerHeight >= 900);
   const qc = meta.quality_classes.filter((c) => c.present !== false && c.id !== 'valid');
   const absent = meta.quality_classes.filter((c) => c.present === false);
   return (
@@ -1045,6 +1053,16 @@ function CaseLegend({
           {open ? '–' : '+'}
         </button>
       </div>
+      {!open && (
+        <button className="c-lg-compact" onClick={() => setOpen(true)} data-testid="legend-compact" title="Развернуть легенду">
+          {summaryText(meta, zones) && <span className="c-lg-summary clamp">{summaryText(meta, zones)}</span>}
+          <span className="c-lg-keys">
+            <span className="c-sw-dot" /> измерение
+            <span className="c-sw-strip-i" /> полоса
+            <span className="c-sw-px" /> пиксели
+          </span>
+        </button>
+      )}
       {open && (
         <>
           {summaryText(meta, zones) && (

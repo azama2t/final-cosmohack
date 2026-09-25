@@ -1,4 +1,4 @@
-"""Cloud / cloud-shadow guards for detections (lane L28, reports/cloud_edge.md).
+"""Cloud / cloud-shadow guards for detections (cloud guards, reports/cloud_edge.md).
 
 Two failure modes seen on live L2A scenes (29 scenes, 2123 components):
   * SCL misses part of the cloud: bright, SWIR-bright cloud pixels are labelled water (SCL 6). E.g. durban

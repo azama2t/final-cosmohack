@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-25T21:25:52+03:00",
+ "generated": "2026-09-25T22:32:12+03:00",
  "note": "генерируется scripts/final_numbers.py; руками не править; null = ещё не посчитано",
  "l3_lgbm": {
   "available": true,
@@ -5200,15 +5200,15 @@
   "selfcheck": {
    "available": true,
    "file": "reports/selfcheck/consistency_latest.json",
-   "when": "2026-09-25T21:17:39",
-   "checks": 283,
-   "ok": 283,
+   "when": "2026-09-25T22:11:51",
+   "checks": 284,
+   "ok": 284,
    "fail": 0,
    "warn": 0,
-   "seconds": 26.0,
+   "seconds": 27.0,
    "invalid_ok": 46,
    "invalid_total": 46,
-   "p95_max_ms": 92.0
+   "p95_max_ms": 89.0
   },
   "control": {
    "n": 12,
@@ -5222,7 +5222,7 @@
   },
   "run": {
    "command": "run_all.py all --offline",
-   "finished": "2026-09-25T21:25:52",
+   "finished": "2026-09-25T22:31:48",
    "versions": {
     "python": "3.12.7",
     "platform": "Windows-10-10.0.19045-SP0",
@@ -5234,19 +5234,19 @@
     "shapely": "2.1.2",
     "fastapi": "0.141.1",
     "yaml": "6.0.3",
-    "git_commit": "3057786210f4e7c8fc47f371532eb1d929f297a2"
+    "git_commit": "3df690af8b294de6678ab2398f3fb23a83ae7e4c"
    },
-   "outputs_fingerprint_short": "bb30422a48ba3185",
+   "outputs_fingerprint_short": "8f765cc35dfefef3",
    "n_outputs": 24,
-   "total_s": 10.3,
+   "total_s": 6.7,
    "step_s": {
     "1_selection": 0.1,
-    "2_pairs": 1.9,
-    "3_quality_detector": 0.6,
+    "2_pairs": 1.6,
+    "3_quality_detector": 0.2,
     "3b_registry": 0.7,
-    "4_concentration": 2.9,
-    "5_detector_marida": 3.0,
-    "6_export_api_v3": 1.2
+    "4_concentration": 2.3,
+    "5_detector_marida": 1.0,
+    "6_export_api_v3": 0.9
    },
    "export": {
     "observations": 935,
@@ -5423,6 +5423,36 @@
    "marida_test_f1": 0.871
   },
   "splits_files": 17,
-  "n_tests": 129
+  "pairfinder": {
+   "available": true,
+   "source": "reports/case_pairfinder/evidence_numbers.json (разбор: evidence.md)",
+   "window_h": 4.17,
+   "naive": 29,
+   "naive_sync": 0,
+   "cond_date_only": 12,
+   "cond_quality_accept": 8,
+   "sync_time_known": 2,
+   "forecast_n": 88,
+   "forecast_hit": 82
+  },
+  "geometry": {
+   "available": true,
+   "source": "data/case/geometry/transects.csv (разбор: reports/case_geometry/summary.md)",
+   "n_events": 104,
+   "n_segments": 108,
+   "n_multi": 4
+  },
+  "tests": {
+   "available": true,
+   "source": "reports/case_run/case_tests.json",
+   "passed": 211,
+   "skipped": 1,
+   "failed": 0,
+   "seconds": 21.5,
+   "when": "25.09.2026 22:32",
+   "command": "python -m pytest -q tests/test_case_conc_model.py tests/test_case_concentration.py tests/test_case_consistency.py tests/test_case_docs_numbers.py tests/test_case_geometry.py tests/test_case_geometry_integration.py tests/test_case_pairfinder.py tests/test_case_run_all.py tests/test_api_v3.py"
+  },
+  "n_test_funcs": 137,
+  "n_tests": 211
  }
 }

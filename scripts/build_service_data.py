@@ -1,9 +1,9 @@
-"""Build the service data layer (docs/CONTRACTS.md) from lane-L6 live scenes.
+"""Build the service data layer (docs/CONTRACTS.md) from live scenes (scripts/fetch_live.py).
 
 Usage:
     python scripts/build_service_data.py --live-dir data/live --out service/data [--regions a,b] [--models mdd,lgbm]
         [--thresholds mdd=0.3] [--demo-region ID [--demo-date YYYY-MM-DD] [--demo-reason TEXT]]
-    python scripts/build_service_data.py --out service/data --manifest-only [--demo-region ID ...]   (L43: only the
+    python scripts/build_service_data.py --out service/data --manifest-only [--demo-region ID ...]   (only the
         manifest `demo` field; without --demo-region it is removed)
 
 Input  (per scene): <live>/<region>/<date>/{scene.json, water_mask.tif, scl.tif, rgb.png, rgb.json,
@@ -13,22 +13,22 @@ Output: <out>/manifest.json, <out>/<region>/timeseries.json, <out>/<region>/<dat
 
 rgb.png / prob.png are warped to a regular lon/lat grid over `bounds` (so the map image overlay is aligned),
 <= 2048 px per side. prob.tif is the model raster on the scene UTM grid (uint8 = P*255, no nodata).
-L15 "confirmed" detections: on dates with >= 2 models every detection gets `confirmed` (bool) and `confirmed_by`
+Cross-model confirmation ("confirmed" detections): on dates with >= 2 models every detection gets `confirmed` (bool) and `confirmed_by`
 (partner model or null): the other model has a pixel >= its threshold on observed water within 2 px (20 m) of the
 object (macroplastic.grid.confirm). Also manifest dates[].n_confirmed {model: k} and zones[].n_confirmed.
-L28 cloud guards (macroplastic.grid.cloudmask, reports/cloud_edge.md), same for all scenes: bright+SWIR-bright
+Cloud guards (macroplastic.grid.cloudmask, reports/cloud_edge.md), same for all scenes: bright+SWIR-bright
 water pixels missed by SCL (B2 >= 0.06 & B11 >= 0.03, blobs >= 100 px) are not observed; components within 5 px
 (Euclidean) of a cloud/shadow (SCL 3, 8, 9, 10 or spectral cloud) are dropped; cloud-shadow artefacts (no NIR
 excess over the 3..10 px water ring AND ring visible brightness < 0.8 x scene water median) are dropped.
-L37 artefacts (macroplastic.grid.artifacts, reports/artifacts.md): straight lines on a brightness boundary
+Artefact filter (macroplastic.grid.artifacts, reports/artifacts.md): straight lines on a brightness boundary
 (detector seam / plume edge), long straight strips (wakes) and bright targets (ships) get properties.artifact
 "seam"|"wake"|"ship" in detections.geojson; they are not counted in h3 flagged_water_px, zones, timeseries
 n_detections / area (timeseries n_artifacts) and n_confirmed. Zones: score x (1 + share of confirmed pixels)
 x 0.5 on a haze/glint date; repeat_dates counts reliable dates only (grid.zones); zones[].score_terms / why.
-L42 cross-model artefacts: collinear pieces of one model are classified as one strip (grid.artifacts
+Cross-model artefacts: collinear pieces of one model are classified as one strip (grid.artifacts
 collinear_groups); an object of one model with >= 30 % of its pixels within 2 px of an artefact of the other model
 gets the same mark and properties.artifact_from = that model; the partner's artefact pixels do not confirm.
-L56 manual marks (configs/manual_artifacts.yaml, --manual-artifacts; reports/manual_review.md): after the automatic
+Manual marks (configs/manual_artifacts.yaml, --manual-artifacts; reports/manual_review.md): after the automatic
 ones, an object (still unmarked) with a pixel within radius_m of a listed point on that region/date/model ("*" = any)
 gets properties.artifact = kind (wake|ship|seam|other) and properties.artifact_source = "manual"; from then on it
 is treated like any artefact.
@@ -95,14 +95,14 @@ SOURCES = [
     {"name": "H3 (Uber) — гексагональная сетка", "url": "https://h3geo.org", "license": "Apache-2.0"},
 ]
 CLOUD_SCL = (3, 8, 9, 10)
-RETRIES, RETRY_WAIT_S = 3, 30  # input scene may be mid-write by lane L6
+RETRIES, RETRY_WAIT_S = 3, 30  # input scene may be mid-write by the live-scene fetch (scripts/fetch_live.py)
 THR_OVERRIDE: dict[str, float] = {}  # --thresholds mdd=0.3,lgbm=0.5  # cloud shadow, cloud medium/high, thin cirrus
 MANUAL_KINDS = ("wake", "ship", "seam", "other")
-MANUAL_RULES: list[dict] = []  # L56: entries of configs/manual_artifacts.yaml (set in main)
+MANUAL_RULES: list[dict] = []  # Manual review: entries of configs/manual_artifacts.yaml (set in main)
 
 
 def load_manual_artifacts(path) -> list[dict]:
-    """L56: list of manual marks {region, date, model|"*", lon, lat, radius_m, kind, reason, who, when}."""
+    """Manual review: list of manual marks {region, date, model|"*", lon, lat, radius_m, kind, reason, who, when}."""
     if not path or not Path(path).exists():
         return []
     import yaml
@@ -119,7 +119,7 @@ def load_manual_artifacts(path) -> list[dict]:
 
 
 def manual_marks(labels, n, transform, crs, region, date, model, rules=None) -> dict[int, str]:
-    """L56: {component index k (0-based, label k+1): kind} for components with a pixel centre within
+    """Manual review: {component index k (0-based, label k+1): kind} for components with a pixel centre within
     radius_m (+ half a pixel) of a manual point for this region/date/model."""
     from rasterio.warp import transform as warp_xy
 
@@ -214,7 +214,7 @@ def save_thumb(rgba: np.ndarray, path: Path, size: int = THUMB_PX, max_bytes: in
 def rgb_display(scene_dir: Path, s_transform, s_crs, s_shape):
     """Return (rgba uint8 HxWx4, bounds [w,s,e,n], dst_transform) on a regular lon/lat grid.
 
-    If L6's rgb.json says EPSG:4326 the PNG already is that grid: reuse its bounds (downscale to <= 2048).
+    If the live scene's rgb.json says EPSG:4326 the PNG already is that grid: reuse its bounds (downscale to <= 2048).
     Otherwise rgb.png is assumed to cover the scene UTM grid (possibly downscaled) and is warped."""
     rj = read_json(scene_dir / "rgb.json") if (scene_dir / "rgb.json").exists() else {}
     im = Image.open(scene_dir / "rgb.png").convert("RGBA")
@@ -298,7 +298,7 @@ def process_scene(region: str, date: str, sdir: Path, models: list[str], out: Pa
         if scl.shape == shape:
             cloud_px |= np.isin(scl, CLOUD_SCL)
     bands = None
-    if (sdir / "bands.tif").exists():  # L28: B2, B3, B4, B8, B11 for the spectral cloud mask and the shadow test
+    if (sdir / "bands.tif").exists():  # Cloud guards: B2, B3, B4, B8, B11 for the spectral cloud mask and the shadow test
         with rasterio.open(sdir / "bands.tif") as ds:
             names = list(ds.descriptions)
             want = ("B2", "B3", "B4", "B8", "B11")
@@ -359,10 +359,10 @@ def process_scene(region: str, date: str, sdir: Path, models: list[str], out: Pa
         labels, n = drop_components(labels, n, near | shadow)
         if n0 != n:
             log(f"  {region}/{date}/{m}: cloud guard dropped {n0 - n} of {n0} components {guard}")
-        # L37: linear artefacts / ships are marked (kept in detections.geojson), not counted in H3 index and zones
+        # Artefact filter: linear artefacts / ships are marked (kept in detections.geojson), not counted in H3 index and zones
         art, _ = classify_artifacts(labels, n, bands, water, raw)
         pre[m] = dict(prob=prob, thr=thr, pj=pj, mdir=mdir, labels=labels, n=n, raw=raw, guard=guard, art=art)
-    # L42: marks of the other model's artefacts (own marks only, no chains)
+    # Cross-model artefacts: marks of the other model's artefacts (own marks only, no chains)
     own = {m: list(v["art"]) for m, v in pre.items()}
     art_from: dict[str, dict[int, str]] = {m: {} for m in pre}
     for m, v in pre.items():
@@ -375,7 +375,7 @@ def process_scene(region: str, date: str, sdir: Path, models: list[str], out: Pa
                     art_from[m][k] = frm
         if art_from[m]:
             log(f"  {region}/{date}/{m}: {len(art_from[m])} objects marked from the other model's artefacts")
-    # L56: manual marks after the automatic ones (objects already marked keep their automatic mark)
+    # Manual review: manual marks after the automatic ones (objects already marked keep their automatic mark)
     manual: dict[str, set] = {m: set() for m in pre}
     for m, v in pre.items():
         for k, kind in manual_marks(v["labels"], v["n"], s_transform, s_crs, region, date, m).items():
@@ -409,7 +409,7 @@ def process_scene(region: str, date: str, sdir: Path, models: list[str], out: Pa
         if a_stat["px"]:
             log(f"  {region}/{date}/{m}: artefacts {a_stat} of {len(recs)} det / {int((labels > 0).sum())} px")
         masks[m] = (labels, n, raw, is_art)
-        # H3 index (flagged = pixels of kept, non-artefact components, i.e. after SPEC §5.4 post-processing + L37)
+        # H3 index (flagged = pixels of kept, non-artefact components, i.e. after SPEC §5.4 post-processing + artefact filter)
         stats = h3_stats(cellr, cells, water, (labels > 0) & ~art_px, prob, [r["pixel"] for r in real])
         # cells without any observed water (land / fully clouded / outside) are not written (map clutter)
         write_json(mdir / "h3.geojson", h3_feature_collection([s for s in stats if s["observed_water_px"] > 0],
@@ -419,7 +419,7 @@ def process_scene(region: str, date: str, sdir: Path, models: list[str], out: Pa
         res["models"][m] = {"threshold": thr, "stats": stats, "recs": recs,
                             "raw_flagged": int(raw.sum()), "clean_flagged": int(((labels > 0) & ~art_px).sum()),
                             "ts": ts_row, "meta": pj, "cloud_guard": guard, "artifacts": a_stat}
-    # L15: cross-model confirmation (rule D, reports/model_agreement.md) — only when >= 2 models on this date
+    # Cross-model confirmation (rule D, reports/model_agreement.md) — only when >= 2 models on this date
     done = list(res["models"])
     for m in done:
         r = res["models"][m]
@@ -430,7 +430,7 @@ def process_scene(region: str, date: str, sdir: Path, models: list[str], out: Pa
             for o in done:
                 if o == m:
                     continue
-                # L42: the partner's artefact pixels do not confirm
+                # Cross-model artefacts: the partner's artefact pixels do not confirm
                 conf = confirmed_components(labels, n, masks[o][2] & ~masks[o][3][masks[o][0]], CONFIRM_RADIUS_PX)
                 for i, k in enumerate(lab_of):
                     if k > 0 and conf[k - 1] and i not in by:
@@ -441,7 +441,7 @@ def process_scene(region: str, date: str, sdir: Path, models: list[str], out: Pa
             for i, rec in enumerate(r["recs"]):
                 rec["props"]["confirmed"] = i in by
                 rec["props"]["confirmed_by"] = by.get(i)
-                if i in by and rec["props"].get("artifact"):  # L37: artefacts are not "уверенные находки"
+                if i in by and rec["props"].get("artifact"):  # Artefact filter: artefacts are not "уверенные находки"
                     n_conf_art += 1
                 elif i in by:
                     n_conf += 1
@@ -500,7 +500,7 @@ def build_region(region: str, scenes: list[dict], out: Path, model_meta: dict) -
         for m, r in sc["models"].items():
             by_model.setdefault(m, []).append((sc, r))
     for m, lst in by_model.items():
-        repeat: dict[str, int] = {}  # L37: persistence counts reliable (no haze/glint) dates only
+        repeat: dict[str, int] = {}  # Artefact filter: persistence counts reliable (no haze/glint) dates only
         for sc, r in lst:
             if sc["quality"]["haze"]:
                 continue
@@ -515,7 +515,7 @@ def build_region(region: str, scenes: list[dict], out: Path, model_meta: dict) -
             if sc["quality"]["haze"]:
                 for z in zones:
                     z["reason"] += "; " + HAZE_NOTE
-            if "n_confirmed" in r:  # L15: confirmed detections (max-prob pixel) in the zone's H3 cell
+            if "n_confirmed" in r:  # Cross-model confirmation: confirmed detections (max-prob pixel) in the zone's H3 cell
                 for z in zones:
                     z["n_confirmed"] = int(r["confirmed_cells"].get(z["h3"], 0))
             r["zones"] = zones
@@ -563,7 +563,7 @@ DEMO_REASON_DEFAULT = "выбран вручную (--demo-region)"
 
 
 def demo_entry(regions: list[dict], rid: str, date: str = "", reason: str = "") -> dict:
-    """L43: manifest `demo` = {region, date, reason}; the region must exist, the date must be one of its dates
+    """Demo region: manifest `demo` = {region, date, reason}; the region must exist, the date must be one of its dates
     (default: the latest one)."""
     reg = next((r for r in regions if r.get("id") == rid), None)
     if reg is None:
@@ -575,7 +575,7 @@ def demo_entry(regions: list[dict], rid: str, date: str = "", reason: str = "") 
 
 
 def write_demo_only(out: Path, rid: str, date: str, reason: str) -> int:
-    """L43: rewrite only the `demo` field of an existing manifest (no scene rebuild). Without --demo-region the
+    """Demo region: rewrite only the `demo` field of an existing manifest (no scene rebuild). Without --demo-region the
     field is removed."""
     mp = out / "manifest.json"
     man = read_json(mp)
@@ -596,14 +596,14 @@ def main(argv=None):
     ap.add_argument("--kind", default="real", choices=["real", "demo", "fixture", "organizer"])
     ap.add_argument("--thresholds", default="", help="override decision thresholds, e.g. mdd=0.3,lgbm=0.5 "
                                                      "(default: threshold from prob_<model>.json)")
-    ap.add_argument("--demo-region", default="", help="L43: region the demo tour / speech open: manifest demo "
+    ap.add_argument("--demo-region", default="", help="region the demo tour / speech open: manifest demo "
                                                        "{region, date, reason} (without the flag the field is not written)")
-    ap.add_argument("--demo-date", default="", help="L43: date for --demo-region (default: the region's latest date)")
-    ap.add_argument("--demo-reason", default="", help="L43: why this region (shown in DEMO.md / report)")
+    ap.add_argument("--demo-date", default="", help="date for --demo-region (default: the region's latest date)")
+    ap.add_argument("--demo-reason", default="", help="why this region (shown in DEMO.md / report)")
     ap.add_argument("--manual-artifacts", default=str(ROOT / "configs" / "manual_artifacts.yaml"),
-                    help="L56: manual artefact marks (yaml; '' = none)")
+                    help="manual artefact marks (yaml; '' = none)")
     ap.add_argument("--manifest-only", action="store_true",
-                    help="L43: do not rebuild scenes, only rewrite manifest.json of --out (demo field)")
+                    help="do not rebuild scenes, only rewrite manifest.json of --out (demo field)")
     a = ap.parse_args(argv)
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     if a.manifest_only:
@@ -637,7 +637,7 @@ def main(argv=None):
                 try:
                     scenes.append(process_scene(region, date, sdir, ms, out, print))
                     break
-                except Exception as e:  # noqa: BLE001 — scene may be being (re)written by L6: wait and retry
+                except Exception as e:  # noqa: BLE001 — scene may be being (re)written by the live-scene fetch: wait and retry
                     shutil.rmtree(out / region / date, ignore_errors=True)
                     if attempt < RETRIES:
                         print(f"  .. {region}/{date}: {type(e).__name__}: {e}; retry in {RETRY_WAIT_S} s")
@@ -685,13 +685,13 @@ def main(argv=None):
         for k, v in g.items():
             tot.setdefault(m, {}).setdefault(k, 0)
             tot[m][k] += v
-    print(f"\ncloud guard (L28), totals per model over {len({r[:2] for r in guard_rows})} scenes: {tot}")
+    print(f"\ncloud guard, totals per model over {len({r[:2] for r in guard_rows})} scenes: {tot}")
     atot: dict = {}
     for reg, date, m, g in art_rows:
         for k, v in g.items():
             atot.setdefault(m, {}).setdefault(k, 0)
             atot[m][k] += v
-    print(f"artefacts (L37), totals per model: {atot}")
+    print(f"artefacts, totals per model: {atot}")
     print(f"\nbuilt {out} in {time.time() - t_all:.1f} s")
     return 0
 

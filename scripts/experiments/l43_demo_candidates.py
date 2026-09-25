@@ -1,4 +1,4 @@
-"""L43: RGB crops (1.5 km) of MDD zones #1-3 on the latest reliable date for the top-N reliable regions.
+"""Boat rule: RGB crops (1.5 km) of MDD zones #1-3 on the latest reliable date for the top-N reliable regions.
 
 Usage: PYTHONPATH=src python scripts/experiments/l43_demo_candidates.py [--top 6] [--data service/data]
 Writes reports/figures/demo_candidates_<region>.png (3 tiles: raw RGB | the same with outlines) and

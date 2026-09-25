@@ -1,4 +1,4 @@
-"""L33: feature (and LightGBM predict) time on a 2500x2500 tile: 48 'win' features vs + L33 extras.
+"""Scene-relative features: feature (and LightGBM predict) time on a 2500x2500 tile: 48 'win' features vs + scene-relative extras.
 
     cd scripts/experiments && PYTHONPATH=../../src ../../.venv/Scripts/python.exe l33_speed.py [--repeats 3]
 Tile = mosaic 10x10 of the first 100 MARIDA val patches (256 px), cropped to 2500x2500 (test never read).

@@ -1,4 +1,4 @@
-"""L19 API: zone / crop / place / place_report.pdf / calendar / review queue + labels + retrain (0 labels).
+"""Zones/place/review API: zone / crop / place / place_report.pdf / calendar / review queue + labels + retrain (0 labels).
 
 Runs on a temporary copy of service/demo (small real data root). Labels go to a temp dir via $MACROPLASTIC_LABELS.
     .venv\\Scripts\\python.exe -m pytest -q tests\\test_api_review.py
@@ -80,7 +80,7 @@ def test_zone_why(client, data_root):
     why = j["why"]
     assert "flagged_water_px" in why["formula"] and isinstance(why["text"], str) and why["text"]
     names = [t["name"] for t in why["terms"]]
-    # L38b: with zones.json score_terms (current build) terms[] carry every multiplier of the final score
+    # Artefacts in API: with zones.json score_terms (current build) terms[] carry every multiplier of the final score
     base_names = ["flagged_water_px", "mean_prob", "repeat_dates"]
     assert names == (base_names + ["agreement", "date_penalty"] if z.get("score_terms") else base_names)
     for t in why["terms"]:
@@ -190,7 +190,7 @@ def _same_rule(client, rid: str, h3: str, model: str):
 
 
 def test_place_calendar_same_unreliable_rule(client, data_root):
-    """L27: /api/place and /api/calendar share place.date_reliability() → identical «ненадёжно» per date."""
+    """UI polish: /api/place and /api/calendar share place.date_reliability() → identical «ненадёжно» per date."""
     rid, _date, model, z = _first_zone(data_root)
     _same_rule(client, rid, z["h3"], model)
 
@@ -282,9 +282,9 @@ def test_retrain_script_no_labels(tmp_path):
     assert "нет меток" in res["error"]
 
 
-# ---------------------------------------------------------------- L38: artifacts + score_terms
+# ---------------------------------------------------------------- Artefacts in API: artifacts + score_terms
 def _strip_build_fields(root: Path) -> None:
-    """L38b: remove the build's own artifact marks and score_terms from the whole temp copy, so the tests below
+    """Artefacts in API: remove the build's own artifact marks and score_terms from the whole temp copy, so the tests below
     control every artifact / score term themselves and do not depend on the current demo data."""
     for p in root.rglob("detections.geojson"):
         fc = json.loads(p.read_text(encoding="utf-8"))
@@ -415,7 +415,7 @@ def test_zone_why_score_terms(art_env):
     base, agree, pen = (t["value"] for t in st)
     assert abs(base * agree * pen - why["score"]) < 0.01 * max(1.0, why["score"])
     assert why["score_mode"] == "mult" and "agreement" in why["formula"] and "score_terms" in why["formula_text"]
-    # L38b: terms[] = the three factors of the base score + agreement + date_penalty; product = final score,
+    # Artefacts in API: terms[] = the three factors of the base score + agreement + date_penalty; product = final score,
     # product of the first three = base score (the frontend reads terms[0..2] by index)
     assert [t["name"] for t in why["terms"]] == ["flagged_water_px", "mean_prob", "repeat_dates", "agreement",
                                                  "date_penalty"]

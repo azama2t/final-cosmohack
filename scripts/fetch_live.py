@@ -141,7 +141,7 @@ def main():
             if stac.item_epsg(it2) == epsg:
                 it = it2
             if d >= "2022-01-25" and stac.source_of(it) != "planetary-computer" and not a.allow_es_clamped:
-                # L6b: e.g. S2C 48MXU 2026-05-28 is missing on PC -> ES pixels would have dark water clamped at DN=1
+                # Live scenes: e.g. S2C 48MXU 2026-05-28 is missing on PC -> ES pixels would have dark water clamped at DN=1
                 print(f"  skip {it.id}: no Planetary Computer item for {d} (ES pixels clamped at DN=1)", flush=True)
                 continue
         crop = stac.read_crop(it, epsg, bounds)

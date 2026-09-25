@@ -1,4 +1,4 @@
-"""L45 step 1: find "next snapshot of the same crop 1-5 days later" for fresh scenes that have drift.json.
+"""Drift check step 1: find "next snapshot of the same crop 1-5 days later" for fresh scenes that have drift.json.
 
   .venv/Scripts/python.exe scripts/experiments/l45_pairs.py screen            # -> out/l45/candidates.json
   .venv/Scripts/python.exe scripts/experiments/l45_pairs.py fetch [--max-dt-h 120] [--per-scene 2]

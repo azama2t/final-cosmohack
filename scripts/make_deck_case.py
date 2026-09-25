@@ -11,17 +11,14 @@ r"""Материалы защиты кейса из reports/final_numbers.json (
     .venv\Scripts\python.exe scripts\make_deck_case.py            # всё
     .venv\Scripts\python.exe scripts\make_deck_case.py --check    # только проверить, что все числа нашлись
 
-Числа руками не пишутся: каждое берётся по пути из final_numbers.json (блок case). Дополнительные источники,
-которых нет в final_numbers.json, читаются из файлов-первоисточников:
-  reports/case_pairfinder/evidence_numbers.json   (подбор снимка под наблюдение)
-  data/case/geometry/transects.csv                (геометрия трансект PANGAEA)
-  data/pairs/pair_quality.csv                     (срабатывания детектора в полосах пар)
-Если хоть одно значение не найдено, скрипт завершается с кодом 1 и печатает список путей (пустых значений 0).
+Числа руками не пишутся: каждое берётся по пути из reports/final_numbers.json (блок case, порог — l3_lgbm), других
+источников чисел нет. Каждый прочитанный путь и его значение записываются в USED — по нему tests/test_case_docs_numbers.py
+сверяет деку, речь, демо и вопросы с final_numbers.json. Если хоть одно значение не найдено, скрипт завершается с кодом 1
+и печатает список путей (пустых значений 0). Полная сборка документов — scripts/case/build_docs.py.
 """
 from __future__ import annotations
 
 import argparse
-import csv
 import json
 import subprocess
 import sys
@@ -29,9 +26,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 FN = ROOT / "reports" / "final_numbers.json"
-PF = ROOT / "reports" / "case_pairfinder" / "evidence_numbers.json"
-GEOM = ROOT / "data" / "case" / "geometry" / "transects.csv"
-PQ = ROOT / "data" / "pairs" / "pair_quality.csv"
 SHOTS = ROOT / "reports" / "screens" / "case_v2" / "iter8"
 IMG_DIR = ROOT / "reports" / "case_deck_img"
 OUT_PPTX = ROOT / "reports" / "case_deck.pptx"
@@ -48,6 +42,7 @@ IMAGES = {
 }
 
 MISSING: list[str] = []
+USED: dict[str, object] = {}  # путь в final_numbers.json -> значение, подставленное в тексты
 
 
 # ----------------------------------------------------------------------------------------------- numbers
@@ -75,6 +70,7 @@ class Src:
         if cur is None:
             MISSING.append(f"{self.name}:{path}")
             return None
+        USED[path] = cur
         return cur
 
 
@@ -134,7 +130,6 @@ def pct(x) -> str:
 def load() -> dict:
     """Все числа, которые идут в деку, речь, демо и вопросы."""
     N = Src(json.loads(FN.read_text(encoding="utf-8")), "final_numbers")
-    P = Src(json.loads(PF.read_text(encoding="utf-8")) if PF.exists() else {}, "pairfinder_evidence")
     c = "case."
     k: dict = {}
     # --- данные и отбор
@@ -249,48 +244,23 @@ def load() -> dict:
     k["fingerprint"] = N(c + "run.outputs_fingerprint_short")
     k["cc_total"] = N(c + "clean_clone.total_min"); k["cc_clone_s"] = N(c + "clean_clone.clone_s")
     k["cc_install"] = N(c + "clean_clone.install_route"); k["cc_map_s"] = N(c + "clean_clone.map_load_s")
-    k["cc_tests"] = N(c + "clean_clone.case_tests_passed"); k["cc_skipped"] = N(c + "clean_clone.case_tests_skipped")
-    k["cc_tests_s"] = N(c + "clean_clone.case_tests_s"); k["cc_full"] = N(c + "clean_clone.full_tests_time")
     k["cc_file"] = N(c + "clean_clone.file")
-    k["n_test_funcs"] = N(c + "n_tests")
-    # --- подбор снимка (первоисточник evidence.md)
-    k["pf_window_h"] = P("max_abs_dt_h_typical_3km"); k["pf_naive"] = P("naive_pm1d_meta_accept")
-    k["pf_naive_drift"] = P("naive_pm1d_with_drift"); k["pf_cond"] = P("pairfinder_conditional_date_only")
-    k["pf_cond_ok"] = P("conditional_with_l61_quality.accept"); k["pf_sync_known"] = P("pairfinder_synchronous_time_known")
-    k["pf_fc_n"] = P("forecast_hindcast.predictions_checked"); k["pf_fc_hit"] = P("forecast_hindcast.hit_within_5min")
-    k["pf_shift_le4"] = P("time_known_shift_le_4h")
-    # --- геометрия PANGAEA
-    if GEOM.exists():
-        with GEOM.open(encoding="utf-8") as fh:
-            rows = list(csv.DictReader(fh))
-        ev = {r["event_id"] for r in rows}
-        k["g_events"] = len(ev); k["g_segments"] = len(rows)
-        k["g_multi"] = len({r["event_id"] for r in rows if int(float(r["n_segments"] or 1)) > 1})
-    else:
-        MISSING.append("geometry:transects.csv")
-        k["g_events"] = k["g_segments"] = k["g_multi"] = None
-    # --- детектор в полосах пар
-    if PQ.exists():
-        with PQ.open(encoding="utf-8") as fh:
-            q = list(csv.DictReader(fh))
-        det = [r for r in q if (r.get("n_det") or "0") not in ("", "0", "0.0")]
-        k["pq_glint_det"] = sorted(r["event_id"].split(":")[-1] for r in det if r["reason"] == "glint")
-        k["pq_accept_det"] = [r["event_id"] for r in det if r["decision"] == "accept"]
-        k["pq_accept_det_n"] = sum(int(float(r["n_det"])) for r in det if r["decision"] == "accept")
-    else:
-        MISSING.append("pair_quality.csv")
-        k["pq_glint_det"], k["pq_accept_det"], k["pq_accept_det_n"] = [], [], None
-    # --- коммиты решения и открытия test
-    k["git"] = {}
-    for h in ("eb35414", "93cf856"):
-        try:
-            out = subprocess.run(["git", "log", "-1", "--format=%ci|%s", h], cwd=ROOT, capture_output=True,
-                                 text=True, encoding="utf-8", timeout=20)
-            ts, subj = out.stdout.strip().split("|", 1)
-            k["git"][h] = (ts[:16], subj)
-        except Exception:  # noqa: BLE001 — без git просто без времени коммита
-            MISSING.append(f"git:{h}")
-            k["git"][h] = ("—", "—")
+    k["n_tests"] = N(c + "n_tests"); k["t_skipped"] = N(c + "tests.skipped"); k["t_failed"] = N(c + "tests.failed")
+    k["t_seconds"] = N(c + "tests.seconds"); k["t_when"] = N(c + "tests.when"); k["n_test_funcs"] = N(c + "n_test_funcs")
+    k["n_sections"] = len(N(c + "sections") or {})
+    # --- разбор детектора на снимках пар
+    r = c + "detector_review."
+    for key in ("n_crops", "n_obj", "n_in_strip", "wo_he460_n_obj", "wo_he460_false_share_pct", "wo_he460_glint_pct",
+                "wo_he460_cloud_pct", "glint_rejected_n_crops", "glint_rejected_n_in_strip", "glint_rejected_in_strip_false",
+                "he460_n_obj", "he460_n_in_strip", "he460_n_out_strip", "no_harmonize_n_obj", "accept_n_in_strip"):
+        k["dr_" + key] = N(r + key)
+    # --- подбор снимка и геометрия трансект
+    f = c + "pairfinder."
+    k["pf_window_h"] = N(f + "window_h"); k["pf_naive"] = N(f + "naive"); k["pf_naive_drift"] = N(f + "naive_sync")
+    k["pf_cond"] = N(f + "cond_date_only"); k["pf_cond_ok"] = N(f + "cond_quality_accept")
+    k["pf_fc_n"] = N(f + "forecast_n"); k["pf_fc_hit"] = N(f + "forecast_hit")
+    k["g_events"] = N(c + "geometry.n_events"); k["g_segments"] = N(c + "geometry.n_segments")
+    k["g_multi"] = N(c + "geometry.n_multi")
     return k
 
 
@@ -308,7 +278,7 @@ def slides(k: dict) -> list[dict]:
             f"Снимок ↔ поле: {num(k['p_events'], 0)} событий → {num(k['p_events_accept_drift'], 0)} синхронных пар; перенос «снимок → шт./км²» не заявляем",
         ],
         big=(num(k["p_events_accept_drift"], 0), "подтверждённых пар «снимок ↔ полевое измерение» — и мы это показываем, а не прячем"),
-        source="reports/final_numbers.json → case.sections (4 раздела с источником и протоколом)",
+        source=f"reports/final_numbers.json → case.sections ({k['n_sections']} разделов с источником и протоколом)",
         speech=(f"Мы решали кейс как два алгоритма, проверенных по отдельности. Детектор по снимку — F1 {num(k['d_lgbm_f1'], 3)} "
                 f"на test MARIDA. Концентрация — по полевым данным. Синхронных пар «снимок — поле» {num(k['p_events_accept_drift'], 0)}, "
                 f"поэтому переноса на снимок мы не заявляем, и карта это прямо говорит."),
@@ -386,22 +356,22 @@ def slides(k: dict) -> list[dict]:
     ))
     S.append(dict(
         time=("1:45", "2:10"), section="Детектор",
-        title=f"Детектор: F1 {num(k['d_lgbm_f1'], 3)} на test MARIDA — лучше RandomForest на {num(k['d_delta'], 3)} и не путает саргассум",
+        title=f"Детектор: F1 {num(k['d_lgbm_f1'], 3)} на test MARIDA, но на снимках пар срабатывает на блике, облаках и барашках",
         bullets=[
-            f"Пиксельный LightGBM, {num(k['n_feat'], 0)} признаков, порог {num(k['thr'], 2)} выбран на val; test ({num(k['d_n_scenes'], 0)} сцен) посчитан один раз",
-            f"ΔF1 к RF {num(k['d_delta'], 3)} {ci(k['d_delta_ci'], 3)} (парный бутстреп по сценам), лучше в {num(k['d_better'], 0)} сценах, хуже в {num(k['d_worse'], 0)}",
+            f"LightGBM, порог {num(k['thr'], 2)} с val; test MARIDA посчитан один раз: ΔF1 к RF {num(k['d_delta'], 3)} {ci(k['d_delta_ci'], 3)}",
             f"Ложные: {num(k['d_fp_total'], 0)}, из них суда {num(k['d_fp_ship'], 0)} и органика {num(k['d_fp_org'], 0)}; на саргассуме и мутной воде — {num(k['d_hard_bg_fp'], 0)} (FDI × NDVI помечает {num(k['d_fdi_sarg_pct'], 0)} % саргассума)",
-            f"На реальных парах: в полосах {num(k['e_n_black_sea_accept_zero_det'], 0)} чистых черноморских пар 0 пикселей; срабатывания — на бликовых сценах ({', '.join(k['pq_glint_det'])}) и на одной паре Северного моря на уровне фона",
+            f"На {num(k['dr_n_crops'], 0)} снимках пар (L2A): {num(k['dr_n_obj'], 0)} объектов, в полосах {num(k['dr_n_in_strip'], 0)}; без HE460 т.03 ложные типы — {num(k['dr_wo_he460_false_share_pct'], 1)} % (блик, облака); {num(k['dr_he460_n_out_strip'], 0)} вне полосы на HE460 т.03 — вероятно барашки/пена",
+            f"Без гармонизации L2A → MARIDA остаётся {num(k['dr_no_harmonize_n_obj'], 0)} объектов из {num(k['dr_n_obj'], 0)}: F1 {num(k['d_lgbm_f1'], 3)} на снимки пар не переносится",
         ],
         bars=dict(title=f"F1 Marine Debris, test MARIDA ({num(k['d_n_scenes'], 0)} сцен)", maxv=1.0, fmt=3, items=[
             ("LightGBM (основной)", k["d_lgbm_f1"], True),
             ("RandomForest, протокол MARIDA", k["d_rf_argmax_f1"], False),
             ("окно FDI × NDVI", k["d_fdi_ndvi_box_f1"], False)]),
-        source="reports/case_detector/compare.md, metrics.json; reports/case_pairs/quality.md",
+        source="reports/case_detector/compare.md; reports/case_pairs/detector_review.md (final_numbers → case.detector_review)",
         speech=(f"Детектор — пиксельный LightGBM. На test MARIDA F1 {num(k['d_lgbm_f1'], 3)}, RandomForest — {num(k['d_rf_argmax_f1'], 3)}, "
-                f"индексы FDI — {num(k['d_fdi_ndvi_box_f1'], 3)}. На саргассуме и мутной воде ложных нет, ошибается на судах и "
-                f"органике. На реальных парах он почти ничего не видит: на пиксель 10 метров приходится меньше одного "
-                f"предмета, а редкие срабатывания — на блике."),
+                f"индексы FDI — {num(k['d_fdi_ndvi_box_f1'], 3)}; саргассум и мутную воду он не путает. На снимках пар это "
+                f"не переносится: из {num(k['dr_n_obj'], 0)} объектов почти все — блик, облака или барашки, а без гармонизации "
+                f"каналов остаётся {num(k['dr_no_harmonize_n_obj'], 0)}. Поэтому на карте это «подозрительные пиксели», а не находки."),
     ))
     S.append(dict(
         time=("2:10", "2:45"), section="Концентрация",
@@ -488,7 +458,7 @@ def slides(k: dict) -> list[dict]:
             "Одна команда: run.ps1 -Case all -Offline (CSV → отбор → пары → маски → детектор → метрики → выгрузка)",
             f"{pl(k['n_outputs'], *TAB)} с одинаковыми sha256 при повторе; отпечаток {k['fingerprint']}…",
             f"Чистый клон: клон {k['cc_clone_s']} с, установка и маршрут {k['cc_install']}, карта {k['cc_map_s']} с",
-            f"Тесты кейса: {num(k['cc_tests'], 0)} passed, {num(k['cc_skipped'], 0)} skipped за {k['cc_tests_s']} с; все числа — из final_numbers.json",
+            f"Тесты кейса ({k['t_when']}): {num(k['n_tests'], 0)} passed, {num(k['t_skipped'], 0)} skipped, {num(k['t_failed'], 0)} failed; числа документов сверяет тест",
         ],
         big=(f"{k['cc_total']} мин", "от git clone до карты на экране, CPU"),
         source=f"{k['cc_file']}; reports/case_run/run_summary.json",
@@ -724,7 +694,6 @@ def demo_md(k: dict) -> str:
 # ----------------------------------------------------------------------------------------------- QA.md
 def qa_items(k: dict) -> list[tuple[str, str, str]]:
     ft2 = k
-    g1, g2 = k["git"]["eb35414"], k["git"]["93cf856"]
     st, rb = k["S2_sch_st"], k["S2_sch_route_buf1"]
     s1e, s1r = k["S1_sch_event"], k["S1_sch_route_buf1"]
     Q = [
@@ -748,7 +717,9 @@ def qa_items(k: dict) -> list[tuple[str, str, str]]:
          "all_litter — не целевая величина. Целевая — суммарный пластик S2. all_litter (весь плавающий мусор Северного и "
          "Чёрного морей) используется только в исследовательском эксперименте, потому что лишь у этих событий есть сцены "
          "в окне. Везде — в API, карточке, легенде, выгрузке — он подписан «весь мусор, не только пластик»; долю пластика "
-         "из публикации на отдельное наблюдение не переносим.",
+         "из публикации на отдельное наблюдение не переносим. Компромисс осознанный: взять all_litter целью значило бы "
+         "подменить задачу про пластик ради снимков, а синхронных пар у него всё равно нет. Мы выбрали правильную цель без "
+         "спутниковой пары и честно показали, что перенос на снимок не проверен.",
          "README.md §1 «Что не является целью»; reports/report.md §1"),
         ("Почему синхронных пар ноль, если по метаданным их 29?",
          f"±1 сут — это совпадение даты, а не места. Вода за |dt| смещается: при типичных {num(k['drift_typical_ms'], 1)} м/с "
@@ -781,15 +752,22 @@ def qa_items(k: dict) -> list[tuple[str, str, str]]:
          f"{num(k['d_fn'], 0)} в трёх сценах, где полосы мусора размечены отдельными точками. Вырезки — в examples/.",
          "reports/case_detector/compare.md «Ложные срабатывания по классам», examples/"),
         ("Что детектор показал на реальных сценах пар?",
-         f"В полосах {num(k['e_n_black_sea_accept_zero_det'], 0)} принятых черноморских пар — 0 пикселей выше порога, хотя полевая "
-         f"плотность всего мусора там {num(k['e_field_min'], 0)}–{num(k['e_field_max'], 0)} шт./км². Это ожидаемо: гораздо меньше "
-         f"одного предмета на пиксель 10 м. Срабатывания есть на бликовых сценах ({', '.join(k['pq_glint_det'])}) — это ложные, "
-         f"такие пары отклоняет маска качества, — и на одной чистой паре Северного моря, где число пикселей в полосе на уровне фона сцены.",
-         "reports/case_pairs/quality.md «Что видит детектор на 10 м»"),
+         f"На {num(k['dr_n_crops'], 0)} вырезках Sentinel-2 L2A пар детектор дал {num(k['dr_n_obj'], 0)} объектов, в полосах обследования — "
+         f"{num(k['dr_n_in_strip'], 0)}. Без сцены HE460 т.03 ложные типы (блик {num(k['dr_wo_he460_glint_pct'], 1)} %, облака "
+         f"{num(k['dr_wo_he460_cloud_pct'], 1)} %, суда, швы) — {num(k['dr_wo_he460_false_share_pct'], 1)} % объектов; все "
+         f"{num(k['dr_glint_rejected_in_strip_false'], 0)} объекта в полосах бликовых пар — ложные. На HE460 т.03 {num(k['dr_he460_n_obj'], 0)} "
+         f"объектов ({num(k['dr_he460_n_in_strip'], 0)} в полосе): одиночные белые пиксели без отклика в SWIR по всей вырезке — вероятно "
+         f"барашки и пена, предметы, которые считало поле, такой сигнал дать не могут. В полосах принятых черноморских пар — 0, "
+         f"хотя плотность всего мусора там {num(k['e_field_min'], 0)}–{num(k['e_field_max'], 0)} шт./км²: меньше одного предмета на пиксель 10 м. "
+         f"Типы назначены правилами, без ручной разметки.",
+         "reports/case_pairs/detector_review.md; final_numbers.json → case.detector_review"),
         ("Детектор проверен на L2A? Ведь MARIDA — ACOLITE.",
-         "Нет, на L2A пар качество по разметке не измерено — это ограничение, оно записано. На вырезках L2A детектор работает "
-         "через гармонизацию по медиане воды. Для развития нужна разметка скоплений на L2A.",
-         "README.md «Ограничения»; reports/report.md §8"),
+         f"Нет, и F1 {num(k['d_lgbm_f1'], 3)} на снимки пар не переносится. На L2A детектор работает через гармонизацию каналов "
+         f"к медиане воды MARIDA; без неё на тех же {num(k['dr_n_crops'], 0)} вырезках остаётся {num(k['dr_no_harmonize_n_obj'], 0)} объектов "
+         f"вместо {num(k['dr_n_obj'], 0)}, но пропадает и явное судно. То есть ответ на L2A почти целиком задаёт сдвиг гармонизации, "
+         f"а какой вариант ближе к правде, без разметки L2A не сказать. Поэтому на карте только «подозрительные пиксели без "
+         f"проверки»; нужна ручная разметка объектов на L2A.",
+         "reports/case_pairs/detector_review.md §3, §6; README.md «Ограничения»"),
         # --- утечки и test
         ("Как вы исключили утечки при проверке концентрации?",
          f"Основной сплит — {num(k['k_blocks'], 0)} непрерывных участков маршрута, из train убраны записи ближе {num(k['buf_days'], 0)} сут к "
@@ -806,8 +784,8 @@ def qa_items(k: dict) -> list[tuple[str, str, str]]:
          "reports/case_conc/metrics.json, baseline.md; reports/report.md §4.2, §7"),
         ("Чем доказать, что отложенный test открыт один раз и после решения?",
          f"Состав test зафиксирован {k['frozen']} (sha256 в configs/case_selection.yaml). Решение — какие модели основные и что "
-         f"делать, если они не лучше медианы, — закоммичено в `eb35414` ({g1[0]}). Test посчитан {k['ft_when']} и закоммичен в "
-         f"`93cf856` ({g2[0]}). Скрипт final_test_conc.py отказывается считать повторно (есть final_test.json) и раньше срока — "
+         f"делать, если они не лучше медианы, — записано {k['ft_decision']} и закоммичено в `eb35414`. Test посчитан {k['ft_when']}, "
+         f"результат закоммичен в `93cf856` (время коммитов: `git log -1 --format=%ci eb35414`, то же для 93cf856). Скрипт final_test_conc.py отказывается считать повторно (есть final_test.json) и раньше срока — "
          f"это проверяют тесты test_final_test_script_refuses_*. Результат не в нашу пользу и не подогнан: модель проиграла медиане.",
          "git show eb35414; git show 93cf856; reports/case_conc/final_test.json; tests/test_case_conc_model.py"),
         ("Test действительно нетронутый?",
@@ -866,10 +844,11 @@ def qa_items(k: dict) -> list[tuple[str, str, str]]:
          f"Каждая метрика пересчитывается отдельной командой (README §7).",
          f"{k['cc_file']}; reports/case_run/run_summary.json; README.md §2, §7"),
         ("Какие тесты есть?",
-         f"Тесты кейса на чистом клоне: {num(k['cc_tests'], 0)} passed, {num(k['cc_skipped'], 0)} skipped за {k['cc_tests_s']} с "
-         f"({num(k['n_test_funcs'], 0)} тестовых функций, часть параметризована). Проверяют формулу и контрольные примеры, "
-         f"непересечение фолдов и test, утечки, однократность test, API и согласованность выгрузки. Вся папка tests — {k['cc_full']}.",
-         "tests/test_case_*.py, tests/test_api_v3.py; README.md §7"),
+         f"Последний прогон тестов кейса ({k['t_when']}): {num(k['n_tests'], 0)} passed, {num(k['t_skipped'], 0)} skipped, "
+         f"{num(k['t_failed'], 0)} failed за {num(k['t_seconds'], 0)} с ({num(k['n_test_funcs'], 0)} тестовых функций, часть "
+         f"параметризована). Проверяют формулу и контрольные примеры, непересечение фолдов и test, утечки, однократность test, "
+         f"API, согласованность выгрузки и то, что числа README, деки, речи и ответов совпадают с final_numbers.json.",
+         "tests/test_case_*.py, tests/test_api_v3.py; reports/case_run/case_tests.json; scripts/case/build_docs.py"),
         # --- доп
         ("Что даёт «Подобрать снимок»?",
          f"Применяет правило дрейфа к новому наблюдению: окно |dt| ≤ {num(k['pf_window_h'], 2)} ч, решение о синхронности с причиной, "
@@ -942,6 +921,33 @@ def preview(S: list[dict], imgs: dict) -> int:
 
 
 # ----------------------------------------------------------------------------------------------- main
+def generate() -> tuple[list[dict], dict, dict]:
+    """Слайды, тексты md и числа — без записи файлов (для тестов). MISSING и USED заполняются заново."""
+    MISSING.clear()
+    USED.clear()
+    k = load()
+    S = slides(k)
+    texts = {OUT_SPEECH: speech_md(S, k), OUT_DEMO: demo_md(k), OUT_QA: qa_md(k)}
+    return S, texts, k
+
+
+def slide_strings(s: dict) -> list[str]:
+    """Все строки, которые build_pptx кладёт на слайд (и в заметки) — для сверки с файлом деки."""
+    out = [s["section"], s["title"], *s["bullets"], "Источник: " + s["source"], s["speech"]]
+    if "big" in s:
+        out += list(s["big"])
+    if s.get("caption"):
+        out.append(s["caption"])
+    if "table" in s:
+        out += [str(c) for row in s["table"] for c in row]
+    if "bars" in s:
+        b = s["bars"]
+        out += [b["title"], *(lab for lab, _, _ in b["items"]), *(num(v, b.get("fmt", 0)) for _, v, _ in b["items"])]
+        if b.get("note"):
+            out.append(b["note"])
+    return out
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="case_deck.pptx + SPEECH.md + DEMO.md + QA.md из final_numbers.json")
     ap.add_argument("--check", action="store_true", help="только проверить, что все значения нашлись")
@@ -950,9 +956,7 @@ def main(argv=None) -> int:
                     help="PNG каждого слайда через LibreOffice -> reports/case_deck_preview/ (не для git)")
     a = ap.parse_args(argv)
     sys.stdout.reconfigure(encoding="utf-8")
-    k = load()
-    S = slides(k)
-    texts = {OUT_SPEECH: speech_md(S, k), OUT_DEMO: demo_md(k), OUT_QA: qa_md(k)}
+    S, texts, k = generate()
     if not a.check:
         imgs = prepare_images()
     if MISSING:

@@ -70,7 +70,7 @@
  },
  "command": "run_all.py all --offline",
  "last_subcommand": "all",
- "finished": "2026-09-25T21:25:52",
+ "finished": "2026-09-25T22:31:48",
  "offline": true,
  "force": false,
  "workdir": null,
@@ -85,7 +85,7 @@
   "shapely": "2.1.2",
   "fastapi": "0.141.1",
   "yaml": "6.0.3",
-  "git_commit": "3057786210f4e7c8fc47f371532eb1d929f297a2"
+  "git_commit": "3df690af8b294de6678ab2398f3fb23a83ae7e4c"
  },
  "inputs": {
   "task/macroplastic_marine_samples.csv": "30ce0a65e3880b833b5dfe3bc6f528ee5f5af14a0d22f25995f4ef8af585a764",
@@ -109,7 +109,7 @@
   "reports/case_conc/consistency.csv": "8ce619025128c25384b37f17ffbf9c9037fdc8419e823c0a725a3b93cf9af86d",
   "reports/case_conc/metrics.json": "77713271b4893f1462de369ba246834838d322b139d336b7c3e7925125314df4",
   "reports/case_run/detector_recomputed.json": "1caae3772b8822b04b4876e7243a9e4c4afd3c4976af8699cfce677d7cbf0b1c",
-  "out/case_export/observations.geojson": "726f36c060041ab1abc3c8204886f666ba41009b63a0f17762972121d3ccebfe",
+  "out/case_export/observations.geojson": "2d58fa53ebdcfd4d0217f60deb638b5e162e1f3902b77c25008f3f4fc5f5041b",
   "out/case_export/observations.csv": "5b7d4d4d38761b44d0ed90b68048a5be12caa6adb36770785e0a8a6c452a9c44",
   "out/case_export/pairs.geojson": "628db7fa26cbf43fe6f81e6f34713d41dfb17f8ed8ce52fb5deee504069d5812",
   "out/case_export/pairs.csv": "507024a241b80fff91104dd20a2de9659fe4a3f176b40b779966cdccdb8eb6f2",
@@ -119,7 +119,7 @@
   "out/case_export/example_pairs_accepted.csv": "c98dfb6d693c97b031d7abb94751e54b4baf7972f9f493e0a2b997bffcae2dbe",
   "out/case_export/example_zones_detected.geojson": "58fd0941b152a511fe654ad736dec6fc78e45ec37dc7e9b29cab9792fe7ca0c6"
  },
- "outputs_fingerprint": "bb30422a48ba318513a2b03abe91bc56cbb2de5390853343aac89c8205a60053",
+ "outputs_fingerprint": "8f765cc35dfefef302d76828b5f5d10005827335e9e4ae3415423d34d85edeab",
  "steps": {
   "1_selection": {
    "step": "1_selection",
@@ -131,13 +131,13 @@
    "step": "2_pairs",
    "ok": true,
    "note": "строк 1774, запросов мимо кэша 0, ошибок 0",
-   "seconds": 1.9
+   "seconds": 1.6
   },
   "3_quality_detector": {
    "step": "3_quality_detector",
    "ok": true,
    "note": "только готовые meta.json; пар с результатом 29",
-   "seconds": 0.6
+   "seconds": 0.2
   },
   "3b_registry": {
    "step": "3b_registry",
@@ -154,7 +154,7 @@
    "step": "4_concentration",
    "ok": true,
    "note": "S2_visual_total_plastic: median MAE 35.9 vs knn5 31.3; S1_trawl_total_plastic: median MAE 456.4 vs knn5 448.9",
-   "seconds": 2.9
+   "seconds": 2.3
   },
   "total_eval": {
    "step": "total_eval",
@@ -165,13 +165,13 @@
    "step": "5_detector_marida",
    "ok": true,
    "note": "test F1 lgbm 0.8713; пересчёт из npz совпал: test=True, val=True",
-   "seconds": 3.0
+   "seconds": 1.0
   },
   "6_export_api_v3": {
    "step": "6_export_api_v3",
    "ok": true,
    "note": "observations.geojson: 935, observations.csv: 935, pairs.geojson: 4436, pairs.csv: 4436, zones.geojson: 29, zones.csv: 29",
-   "seconds": 1.2
+   "seconds": 0.9
   },
   "total_export": {
    "step": "total_export",
@@ -181,7 +181,7 @@
   "total_all": {
    "step": "total_all",
    "ok": true,
-   "seconds": 10.3
+   "seconds": 6.7
   }
  },
  "concentration": {

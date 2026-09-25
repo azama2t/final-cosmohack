@@ -573,7 +573,7 @@ def derived(fn: dict) -> dict:
 
     # --- regions on the map (generated from the service manifest, never by hand)
     sv = fn.get("service") or {}
-    # L40: order as on the site (rankRegions): reliable regions by index, then unreliable ones (latest scene with
+    # Consistency pass: order as on the site (rankRegions): reliable regions by index, then unreliable ones (latest scene with
     # haze/glint or clouds > 50 %) by index, marked in the column «Последний снимок».
     rr = ["| Район | Тайл | Дат | Последний снимок | Дата индекса | Индекс, ‰ | Пятен | из них уверенных | Площадь пятен, га | Дрейф |",
           "|---|---|---|---|---|---|---|---|---|---|"]
@@ -599,7 +599,7 @@ def derived(fn: dict) -> dict:
         rr.append(f"| {DASH} | | | | | | | | | |")
     regions_table = "\n".join(rr)
 
-    # L40: leaders of the rating in prose — only reliable regions (as the site's rating)
+    # Consistency pass: leaders of the rating in prose — only reliable regions (as the site's rating)
     def _short(nm):
         nm = nm or DASH
         i = nm.find(" (")

@@ -1,4 +1,4 @@
-"""L47: vulnerable objects and possible sources from OpenStreetMap (Overpass) for every region in the manifest.
+"""OSM context: vulnerable objects and possible sources from OpenStreetMap (Overpass) for every region in the manifest.
 
 For the bbox of each region (+/- 10 km) one Overpass query fetches aquaculture/farms, beaches, ports/marinas,
 protected areas, outfalls/sewage pipelines/wastewater plants, rivers/canals and the coastline. River/canal mouths are

@@ -14,8 +14,8 @@ Registering a model (other lanes):
 Lazy models: for names in LAZY_MODULES the module is imported on first get_predictor(name).
 The module either calls register(name, loader) at import time, or defines
 `load_predictor(**kw) -> predictor`. Planned modules:
-    'lgbm' -> macroplastic.models.lgbm_predict   (lane L3)
-    'mdd'  -> macroplastic.models.mdd_predict    (lane L6, marinedebrisdetector)
+    'lgbm' -> macroplastic.models.lgbm_predict   (LightGBM)
+    'mdd'  -> macroplastic.models.mdd_predict    (live scenes, marinedebrisdetector)
 If import/loading fails and fallback=True, a warning is logged and the built-in 'fdi_rule' is
 returned; its attribute `fallback_from` holds the requested name.
 """

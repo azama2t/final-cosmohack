@@ -1,4 +1,4 @@
-"""Fast tests (synthetic rasters, < 30 s) for the L5 tools:
+"""Fast tests (synthetic rasters, < 30 s) for the tools tools:
 inspect_dataset, label_forensics, organizer_adapter, provenance_check."""
 from __future__ import annotations
 

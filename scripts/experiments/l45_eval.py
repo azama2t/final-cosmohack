@@ -1,4 +1,4 @@
-"""L45: score the drift forecast against the next snapshot (criterion fixed in reports/tasklog/45_drift_check.md).
+"""Drift check: score the drift forecast against the next snapshot (criterion fixed in reports/drift_check.md).
 
   .venv/Scripts/python.exe scripts/experiments/l45_eval.py
   -> reports/drift_check.json, reports/drift_check/pairs/<region>_<date1>_<date2>.json, reports/figures/drift_check_*.png

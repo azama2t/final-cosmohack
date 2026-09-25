@@ -1,4 +1,4 @@
-"""L49: organiser chips -> map data root (scripts/tools/org_to_map.py), synthetic, < 30 s.
+"""Org_to_map: organiser chips -> map data root (scripts/tools/org_to_map.py), synthetic, < 30 s.
 
 4 georeferenced 64x64 chips (UTM 33N, MARIDA-like 11 bands, reflectance) of one scene in a 2x2 layout, a bright
 debris line in chip 0, prob rasters as inference.py writes them (<stem>_prob.tif) -> data root valid
@@ -114,7 +114,7 @@ def test_grouping_names_and_clusters(tool):
 
 
 def test_date_unknown_and_unique_names(tmp_path, tool):
-    """L52: anonymous chips (no date) in two UTM zones -> unique region ids/names, date_unknown in scene.json and in
+    """Rehearsal fixes: anonymous chips (no date) in two UTM zones -> unique region ids/names, date_unknown in scene.json and in
     the manifest dates; an all-zero prob chip is «no signal», not a binary mask; P*255 folder keeps 0/1 chips low."""
     rng = np.random.default_rng(1)
     chips, preds = tmp_path / "chips", tmp_path / "pred"

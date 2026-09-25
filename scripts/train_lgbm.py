@@ -1,4 +1,4 @@
-"""Lane L3: train pixel LightGBM for Marine Debris on MARIDA, select threshold on val.
+"""LightGBM: train pixel LightGBM for Marine Debris on MARIDA, select threshold on val.
 
   .venv/Scripts/python.exe scripts/train_lgbm.py --config configs/lgbm.yaml --exp bin_min --seed 0
   .venv/Scripts/python.exe scripts/train_lgbm.py --config configs/lgbm.yaml --set task=multiclass features=win --final
@@ -73,7 +73,7 @@ def load_split(split: str, aug=None, aug_seed=0):
     aug (dict or None): if set, every patch is photometrically perturbed (see _augment) with
     a per-patch seed derived from aug_seed - an extra augmented copy of the split.
     """
-    assert split in ALLOWED_SPLITS, f"split {split!r} not allowed in L3 training"
+    assert split in ALLOWED_SPLITS, f"split {split!r} not allowed in LightGBM training"
     CACHE.mkdir(parents=True, exist_ok=True)
     tag = "" if not aug else "_aug" + "_".join(f"{k}{aug[k]}" for k in sorted(aug)) + f"_s{aug_seed}"
     path = CACHE / f"{split}_win{tag}.npz"

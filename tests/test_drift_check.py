@@ -1,4 +1,4 @@
-"""L45 API: /api/drift_check (drift forecast vs next snapshot) and /api/flow (u/v grids for particle animation).
+"""Drift check API: /api/drift_check (drift forecast vs next snapshot) and /api/flow (u/v grids for particle animation).
 
 Offline: synthetic drift_check.json / pair file / CF NetCDF in a temp dir (env MACROPLASTIC_DRIFT_CHECK,
 MACROPLASTIC_FORCING). The last test checks the real reports/drift_check.json if it exists.

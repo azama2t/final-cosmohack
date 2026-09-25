@@ -1,8 +1,8 @@
-"""L23: can a band-subset model (no RGB extras) run through the product LGBMPredictor today?
+"""Band-subset / light models: can a band-subset model (no RGB extras) run through the product LGBMPredictor today?
 
 Trick: the product feature code needs all 11 bands, so missing bands are filled with 0.0 (not NaN - NaN would blank
 every feature). The subset model only uses features whose inputs are present, so its output must equal the output on
-the true 11-band chip. Checked on 20 MARIDA val chips (out/speed_chips); also adds "feature_level": "win" to the L23
+the true 11-band chip. Checked on 20 MARIDA val chips (out/speed_chips); also adds "feature_level": "win" to the band-subset / light models
 subset meta.json files so LGBMPredictor can load them.
 """
 from __future__ import annotations

@@ -1,4 +1,4 @@
-"""L31: cold-start speed of inference.py, final model vs mid-size k20_t400_l63, one interleaved series.
+"""Mid-size model: cold-start speed of inference.py, final model vs mid-size k20_t400_l63, one interleaved series.
 
     .venv/Scripts/python.exe scripts/gpu_queue.py submit --name l31_speed --wait -- \
         .venv/Scripts/python.exe scripts/experiments/l31_speed.py [--repeats 3]

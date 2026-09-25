@@ -9,7 +9,7 @@
   Earth Search v1 sentinel-2-l2a, sentinel-2-l1c; Planetary Computer sentinel-2-l2a, landsat-c2-l2.
 Каждый ответ кэшируется в data/pairs/cache/<sha1>.json, поэтому перезапуск продолжает с места остановки.
 Отказы не выбрасываются: строка с accept=False и reject_reason (через ';').
-Геометрия трансект (по умолчанию, L75): для S2/S3 точка и время берутся из восстановленной геометрии PANGAEA
+Геометрия трансект (по умолчанию): для S2/S3 точка и время берутся из восстановленной геометрии PANGAEA
 (src/macroplastic/case/geometry.py): центр пути по сегментам и середина усилия; у прерванных T18/T22/T35/T49 перерыв
 не считается. Отключение: --no-geometry или geometry.use: false в configs/case_pairs.yaml; allow_approx: false —
 не использовать приближённо восстановленный конец S3 HE460_MarLitter_transect01 (событие остаётся точкой начала).
@@ -221,7 +221,7 @@ def load_geometry_cfg(path: Path) -> dict:
 
 
 def apply_geometry(ev: pd.DataFrame, allow_approx: bool = True) -> pd.DataFrame:
-    """Геометрия трансект S2/S3 по PANGAEA (src/macroplastic/case/geometry.py; L72, подключено в L75): точка события :=
+    """Геометрия трансект S2/S3 по PANGAEA (src/macroplastic/case/geometry.py): точка события :=
     центр пути по сегментам (половина пройденной длины), время := середина усилия (перерывы T18/T22/T35/T49 не
     считаются); добавляет geom_window_start/end, geometry_status и geom_segment_windows (JSON). Прочие события
     (S1, S4) — без изменений."""

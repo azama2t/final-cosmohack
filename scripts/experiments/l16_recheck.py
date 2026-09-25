@@ -1,4 +1,4 @@
-"""L16 tasks 1-2: independent recount of MARIDA val metrics + 'same place' leakage split.
+"""Metric audit tasks 1-2: independent recount of MARIDA val metrics + 'same place' leakage split.
 
   .venv/Scripts/python.exe scripts/experiments/l16_recheck.py
 Writes weights_exp/l16/recheck.json and weights_exp/l16/val_pred_<model>.npz. Test split is never read.

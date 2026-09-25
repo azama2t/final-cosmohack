@@ -1,4 +1,4 @@
-"""L28: compare two service data builds (detections, area, confirmed per model; Honduras 2026-05-30 top zones)."""
+"""Cloud guards: compare two service data builds (detections, area, confirmed per model; Honduras 2026-05-30 top zones)."""
 import json
 import sys
 from pathlib import Path

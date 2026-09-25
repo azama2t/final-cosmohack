@@ -1,4 +1,4 @@
-"""L45: summary figure of reports/drift_check.json -> reports/figures/drift_check_summary.png (two panels, one axis each)."""
+"""Drift check: summary figure of reports/drift_check.json -> reports/figures/drift_check_summary.png (two panels, one axis each)."""
 import json
 from pathlib import Path
 

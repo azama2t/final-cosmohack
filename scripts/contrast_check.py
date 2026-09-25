@@ -1,4 +1,4 @@
-"""WCAG text contrast check for the v2 UI (L48, INBOX §4: text contrast ≥ 4.5:1).
+"""WCAG text contrast check for the v2 UI (frontend v2: text contrast ≥ 4.5:1).
 
 Two checks:
   1) static — the palette of service/frontend_v2/src/styles.css (:root text colours vs surface colours);

@@ -1,4 +1,4 @@
-"""L56: manual artefact marks (configs/manual_artifacts.yaml) in scripts/build_service_data.py."""
+"""Manual review: manual artefact marks (configs/manual_artifacts.yaml) in scripts/build_service_data.py."""
 from __future__ import annotations
 
 import importlib.util

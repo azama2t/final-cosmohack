@@ -1,6 +1,6 @@
-"""L28 diagnostic: are detections near clouds / cloud shadows a cloud-edge artefact?
+"""Cloud guards diagnostic: are detections near clouds / cloud shadows a cloud-edge artefact?
 
-For every live scene and model: rebuild the kept components exactly as scripts/build_service_data.py did before L28
+For every live scene and model: rebuild the kept components exactly as scripts/build_service_data.py did before cloud guards
 (observed water = water_mask & ~edge(4 px) & ~SCL 4/5; clean_mask(min_px=2, buffer_px=1)), then per component:
 Euclidean distance (px) to the nearest cloud/shadow pixel (SCL 3, 8, 9, 10) and to land (non-water, non-cloud,
 valid SCL), area, confirmation by the other model (radius 2 px), top-3 zone membership (service/data zones.json),

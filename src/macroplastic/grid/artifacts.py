@@ -1,4 +1,4 @@
-"""Linear artefacts and ships among detections (lane L37, reports/artifacts.md).
+"""Linear artefacts and ships among detections (artefact filter, reports/artifacts.md).
 
 Objects are *marked*, not removed: a kept component gets `artifact` = "seam" | "wake" | "ship" (or None). Marked
 objects stay in detections.geojson (the front may draw them muted), but are not counted in the H3 index
@@ -36,7 +36,7 @@ Rules (first match wins):
           (Gaussian 3 px, water only) brightness gradient, step_rel >= 0.25, step_cons >= 0.85, obj_excess <= 0.10
     seam  continuation: unmarked object (>= 2 px) whose centre lies <= 3 px from the axis of a "seam" object and
           <= 15 px beyond its end (dashed seam lines break into collinear pieces); applied twice
-    wake  (L41, "ship at the end") length >= 250 m, elong >= 4, and a compact bright cluster ("end ship") lies within
+    wake  (wake rule, "ship at the end") length >= 250 m, elong >= 4, and a compact bright cluster ("end ship") lies within
           END_NEAR_PX = 5 px of one end cap of the major axis (object pixels within 2 px of the axis extreme):
           B8 >= max(0.04, 8 x water median B8), mean(B2,B3,B4) >= 1.3 x water median and B4 >= 0.6 x B3 (a hull /
           whitewater is grey-white; floating vegetation / algae filaments are green with a red dip, B4/B3 ~ 0.3 on the
@@ -49,7 +49,7 @@ Rules (first match wins):
 Curved or irregular objects (dev > 0.08) are never marked by the line rules; big irregular objects that merely
 touch a bright target (ship_frac < 0.5, no straight tail) are not marked.
 
-L42 additions:
+Cross-model artefact additions:
     collinear pieces  a model may break one strip into short pieces (LGBM on the Mumbai wake: pieces <= 160 m). Before
           the line rules, pieces (>= 2 px) are grouped when they lie on one straight line: major axes within
           GROUP_ANGLE = 15 deg (pieces shorter than 4 px have no reliable direction and only have to lie on the
@@ -65,7 +65,7 @@ L42 additions:
           a curved arc continuing another model's straight seam is not a seam (Karachi 2025-11-11). Only B's
           own marks propagate (no chains). The confirmation (grid.confirm) ignores the partner's artefact pixels.
 
-L43 additions (reports/artifacts.md, section L43):
+Boat-rule additions (reports/artifacts.md):
     ship  small boat: compact object (length <= 8 px, <= 30 px) on / within 2 px of a bright point relative to the
           local water (31 px window): B8 >= max(0.04, 8 x median B8), vis >= 1.3 x median vis and a SWIR response
           B11 excess >= max(0.01, 0.25 x B8 excess) (a dry hull reflects SWIR; wet floating material does not); the
@@ -101,21 +101,21 @@ SEAM_LEN_M, SEAM_THICK_PX, SEAM_DEV, SEAM_AZ = 1500.0, 5.0, 0.05, 20.0
 EDGE_LEN_M, EDGE_ELONG, EDGE_DEV, EDGE_STEP, EDGE_CONS = 100.0, 4.0, 0.08, 0.15, 0.85
 EDGE_EXCESS = 0.10
 SMALL_STEP, SMALL_SIGMA, SMALL_MAX_PX = 0.25, 3.0, 30
-# L41: wake with a vessel at one end of the major axis
+# Wake rule: wake with a vessel at one end of the major axis
 END_LEN_M, END_ELONG, END_CAP_PX, END_NEAR_PX = 250.0, 4.0, 2.0, 5.0
 END_B8, END_REL8, END_REL_VIS, END_MAX_PX, END_CONTRAST, END_FLAT = 0.04, 8.0, 1.3, 60, 2.0, 0.6
-# L43: ... or on the continuation of the major axis of a straight object (corridor +-2 px, up to 20 px beyond the end)
+# Boat rule: ... or on the continuation of the major axis of a straight object (corridor +-2 px, up to 20 px beyond the end)
 END_AXIS_PX, END_AXIS_PERP, END_AXIS_DEV = 20.0, 2.0, 0.08
 STEP_OFFSETS = (3, 4, 5, 6)
-# L43: straight line that continues in the image beyond the detection (an old ship wake / lane): total >= 1 km
+# Boat rule: straight line that continues in the image beyond the detection (an old ship wake / lane): total >= 1 km
 TRACE_LEN_M, TRACE_THICK_PX, TRACE_ELONG, TRACE_DEV, TRACE_EXT_PX = 100.0, 3.0, 6.0, 0.08, 80
 TRACE_ON, TRACE_BG, TRACE_CTRL, TRACE_SMOOTH, TRACE_GAP, TRACE_REL = (-1, 0, 1), (4, 5, 6), 12, 5, 3, 0.5
 TRACE_TOTAL_M, TRACE_WIGGLE, TRACE_ARGMAX, TRACE_AXIS_SHARE = 1000.0, 0.6, (-3, -2, -1, 0, 1, 2, 3), 0.75
-# L43: small boat - a small compact detection on / next to a bright point with a SWIR response (a dry hull)
+# Boat rule: small boat - a small compact detection on / next to a bright point with a SWIR response (a dry hull)
 BOAT_MAX_LEN_PX, BOAT_MAX_PX, BOAT_HALF_WIN, BOAT_RING_PX = 8, 30, 15, 2
 BOAT_B8, BOAT_REL8, BOAT_REL_VIS, BOAT_SWIR, BOAT_D11 = 0.04, 8.0, 1.3, 0.25, 0.01
 BOAT_MIN_WATER_PX, BOAT_SPOT_MAX_PX, BOAT_SPOT_RING_WATER = 30, 40, 0.7
-# L42: collinear pieces of one model are one strip for the line rules; cross-model propagation of marks
+# Cross-model artefacts: collinear pieces of one model are one strip for the line rules; cross-model propagation of marks
 GROUP_ANGLE, GROUP_PERP_PX, GROUP_GAP_PX, GROUP_MIN_DIR_PX, GROUP_DEV = 15.0, 2.0, 5.0, 4.0, 0.08
 CROSS_NEAR_PX, CROSS_MIN_SHARE = 2, 0.3
 
@@ -199,7 +199,7 @@ def ship_blobs(b2, b3, b4, b8, water: np.ndarray) -> np.ndarray:
 
 
 def end_bright_clusters(b2, b3, b4, b8, water: np.ndarray, own: np.ndarray) -> np.ndarray:
-    """L41: label image of compact bright clusters (candidate vessels at a wake's end); 0 = none.
+    """Wake rule: label image of compact bright clusters (candidate vessels at a wake's end); 0 = none.
 
     own = pixels of detected objects: they count as water in the ring test (a vessel sits on its own wake)."""
     b8 = np.nan_to_num(b8)
@@ -224,9 +224,9 @@ def end_bright_clusters(b2, b3, b4, b8, water: np.ndarray, own: np.ndarray) -> n
 
 def ship_at_end(labels: np.ndarray, n: int, shp: dict, b8: np.ndarray, clusters: np.ndarray,
                 cand: np.ndarray, straight: np.ndarray | None = None) -> tuple[np.ndarray, np.ndarray]:
-    """L41: (end_ship bool, end_ship_b8 = peak B8 of the matched cluster) for candidate components.
+    """Wake rule: (end_ship bool, end_ship_b8 = peak B8 of the matched cluster) for candidate components.
 
-    L43: for straight components (`straight`, None = all) the cluster may also lie on the continuation of the major
+    boat rule: for straight components (`straight`, None = all) the cluster may also lie on the continuation of the major
     axis: <= END_AXIS_PERP px from the axis line and <= END_AXIS_PX beyond the end."""
     hit = np.zeros(n, bool); peak = np.zeros(n)
     if not cand.any() or not clusters.any():
@@ -250,7 +250,7 @@ def ship_at_end(labels: np.ndarray, n: int, shp: dict, b8: np.ndarray, clusters:
         ue, un = -shp["ny"][k], -shp["nx"][k]  # major axis (east, north)
         pa = xs * ue - ys * un
         med8 = float(np.median(b8[r0:r1, c0:c1][m]))
-        # L43: along the continuation of the major axis of a straight object: a corridor of +-END_AXIS_PERP px around
+        # Boat rule: along the continuation of the major axis of a straight object: a corridor of +-END_AXIS_PERP px around
         # the axis line through the centroid, up to END_AXIS_PX beyond the end (the vessel has moved on from its wake)
         axis_ok = straight is None or bool(straight[k])
         if axis_ok:
@@ -276,7 +276,7 @@ def ship_at_end(labels: np.ndarray, n: int, shp: dict, b8: np.ndarray, clusters:
 
 def small_boats(labels: np.ndarray, n: int, shp: dict, b8: np.ndarray, vis: np.ndarray, b11: np.ndarray,
                 water: np.ndarray, flagged: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """L43: (boat bool, boat_s11 = B11 excess / B8 excess at the peak) per component.
+    """Boat rule: (boat bool, boat_s11 = B11 excess / B8 excess at the peak) per component.
 
     Candidate: length <= BOAT_MAX_LEN_PX and n_px <= BOAT_MAX_PX. Local water = observed water in the 31 px window
     around the object, >= 2 px away from any detection (>= BOAT_MIN_WATER_PX pixels); medians of B8, vis =
@@ -355,7 +355,7 @@ def _profile(vis, valid, c0, r0, dc, dr, nc, nr, ts, on_offs, bg_offs, argmax_of
 
 def line_trace(labels: np.ndarray, n: int, shp: dict, vis: np.ndarray, water: np.ndarray, own: np.ndarray,
                cand: np.ndarray) -> np.ndarray:
-    """L43: total length (px) of the straight bright line an object lies on: object length + how far the line goes on
+    """Boat rule: total length (px) of the straight bright line an object lies on: object length + how far the line goes on
     in the image beyond both ends along the major axis (0 for non-candidates).
 
     Only objects with wiggle <= TRACE_WIGGLE px (std of the mean perpendicular offset in 3 px bins along the axis).
@@ -474,7 +474,7 @@ def brightness_step(labels: np.ndarray, n: int, shp: dict, vis: np.ndarray, vali
 
 
 def collinear_groups(shp: dict) -> np.ndarray:
-    """L42: group id (a component index, 0..n-1; the component's own index when ungrouped) of pieces on one line."""
+    """Cross-model artefacts: group id (a component index, 0..n-1; the component's own index when ungrouped) of pieces on one line."""
     n = len(shp["n_px"])
     parent = np.arange(n)
     if n < 2:
@@ -509,7 +509,7 @@ def collinear_groups(shp: dict) -> np.ndarray:
 
 
 def _group_marks(labels: np.ndarray, n: int, shp: dict, bands, water, flagged, art: list) -> None:
-    """L42: classify straight groups of collinear pieces as one object; wake/seam goes to unmarked members."""
+    """Cross-model artefacts: classify straight groups of collinear pieces as one object; wake/seam goes to unmarked members."""
     grp = collinear_groups(shp)
     shp["group"] = grp
     shp["group_mark"] = [None] * n
@@ -544,7 +544,7 @@ def _group_marks(labels: np.ndarray, n: int, shp: dict, bands, water, flagged, a
 def propagate_artifacts(labels: np.ndarray, n: int, art: list, other_labels: np.ndarray, other_art: list,
                         other_model: str, near_px: int = CROSS_NEAR_PX,
                         min_share: float = CROSS_MIN_SHARE) -> list[tuple[int, str, str, float]]:
-    """L42: marks taken from another model: [(k (0-based component), artifact, other_model, share)] for components
+    """Cross-model artefacts: marks taken from another model: [(k (0-based component), artifact, other_model, share)] for components
     of `labels` without their own mark that intersect / lie within near_px of an artefact of the other model with
     >= min_share of their pixels. Pass the other model's own marks (not propagated ones): no chains."""
     out: list[tuple[int, str, str, float]] = []
@@ -587,7 +587,7 @@ def classify(labels: np.ndarray, n: int, bands: dict | None, water: np.ndarray,
              flagged: np.ndarray | None = None, group: bool = True) -> tuple[list, dict]:
     """Return (artifact per component: None | "seam" | "wake" | "ship", features dict of arrays).
 
-    group=True (L42): straight groups of collinear pieces are also classified as one strip (collinear_groups)."""
+    group=True (cross-model artefacts): straight groups of collinear pieces are also classified as one strip (collinear_groups)."""
     shp = component_shape(labels, n)
     art: list = [None] * n
     if n == 0:

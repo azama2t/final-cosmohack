@@ -1,0 +1,468 @@
+{
+ "created": "2026-09-25T22:24:46",
+ "protocol": "визуальная разметка по вырезкам (не полевая), одним аннотатором (ИИ-агент, осмотр вырезок RGB и SWIR 64 px и контекста 256 px); листы без сцены, типа по правилам и P; порядок случайный; положительный класс = «вероятное скопление / плавучий материал»",
+ "classes": {
+  "accumulation": "вероятное скопление / плавучий материал",
+  "foam_whitecap": "пена / барашки",
+  "glint": "блик",
+  "cloud": "облако / край облака",
+  "ship_wake": "судно / кильватер",
+  "seam_artifact": "шов / артефакт",
+  "unclear": "неясно"
+ },
+ "n_labelled_objects": 111,
+ "n_locations": 111,
+ "H_out": {
+  "population": 969,
+  "n": 100,
+  "k_accumulation": 1,
+  "precision_stratified": 0.0165,
+  "ci95_stratified_bootstrap": [
+   0.0,
+   0.0496
+  ],
+  "ci95_scene_bootstrap": [
+   0.0,
+   0.0209
+  ],
+  "precision_unweighted": 0.01,
+  "ci95_wilson_unweighted": [
+   0.0018,
+   0.0545
+  ],
+  "class_share_stratified": {
+   "accumulation": 0.0165,
+   "foam_whitecap": 0.711,
+   "glint": 0.0232,
+   "cloud": 0.112,
+   "ship_wake": 0.0196,
+   "seam_artifact": 0.017,
+   "unclear": 0.1007
+  },
+  "class_counts_sample": {
+   "accumulation": 1,
+   "foam_whitecap": 43,
+   "glint": 10,
+   "cloud": 25,
+   "ship_wake": 4,
+   "seam_artifact": 4,
+   "unclear": 13
+  }
+ },
+ "H_in_strip": {
+  "n": 6,
+  "k_accumulation": 0,
+  "ci95_wilson": [
+   0.0,
+   0.3903
+  ],
+  "classes": {
+   "S3_HE460_MarLitter_transect03:H0122": "foam_whitecap",
+   "S3_HE460_MarLitter_transect03:H0453": "foam_whitecap",
+   "S3_HE460_MarLitter_transect03:H0538": "foam_whitecap",
+   "S4_DOORS3_T14:H0017": "glint",
+   "S4_DOORS3_T20:H0009": "cloud",
+   "S4_DOORS3_T21:H0010": "cloud"
+  }
+ },
+ "H_all": {
+  "population": 975,
+  "precision_est": 0.0164
+ },
+ "N_none": {
+  "n": 5,
+  "k_accumulation": 0,
+  "ci95_wilson": [
+   -0.0,
+   0.4345
+  ],
+  "classes": {
+   "S3_HE460_MarLitter_transect03:N0001": "foam_whitecap",
+   "S3_HE460_MarLitter_transect03:N0002": "ship_wake",
+   "S3_HE460_MarLitter_transect03:N0003": "foam_whitecap",
+   "S3_HE460_MarLitter_transect03:N0004": "foam_whitecap",
+   "S3_HE460_MarLitter_transect03:N0005": "foam_whitecap"
+  },
+  "note": "без гармонизации детектор на 22 вырезках даёт только эти объекты; разметка — те же места, что у H, если совпадают"
+ },
+ "by_scene": {
+  "S3_HE460_MarLitter_transect01": {
+   "n": 7,
+   "k_accumulation": 0,
+   "classes": {
+    "accumulation": 0,
+    "foam_whitecap": 0,
+    "glint": 0,
+    "cloud": 7,
+    "ship_wake": 0,
+    "seam_artifact": 0,
+    "unclear": 0
+   }
+  },
+  "S3_HE460_MarLitter_transect03": {
+   "n": 48,
+   "k_accumulation": 1,
+   "classes": {
+    "accumulation": 1,
+    "foam_whitecap": 46,
+    "glint": 0,
+    "cloud": 0,
+    "ship_wake": 1,
+    "seam_artifact": 0,
+    "unclear": 0
+   }
+  },
+  "S4_DOORS3_T12": {
+   "n": 5,
+   "k_accumulation": 0,
+   "classes": {
+    "accumulation": 0,
+    "foam_whitecap": 0,
+    "glint": 4,
+    "cloud": 0,
+    "ship_wake": 0,
+    "seam_artifact": 0,
+    "unclear": 1
+   }
+  },
+  "S4_DOORS3_T13": {
+   "n": 5,
+   "k_accumulation": 0,
+   "classes": {
+    "accumulation": 0,
+    "foam_whitecap": 0,
+    "glint": 4,
+    "cloud": 0,
+    "ship_wake": 0,
+    "seam_artifact": 1,
+    "unclear": 0
+   }
+  },
+  "S4_DOORS3_T14": {
+   "n": 7,
+   "k_accumulation": 0,
+   "classes": {
+    "accumulation": 0,
+    "foam_whitecap": 0,
+    "glint": 3,
+    "cloud": 0,
+    "ship_wake": 0,
+    "seam_artifact": 3,
+    "unclear": 1
+   }
+  },
+  "S4_DOORS3_T16": {
+   "n": 10,
+   "k_accumulation": 0,
+   "classes": {
+    "accumulation": 0,
+    "foam_whitecap": 0,
+    "glint": 0,
+    "cloud": 0,
+    "ship_wake": 0,
+    "seam_artifact": 0,
+    "unclear": 10
+   }
+  },
+  "S4_DOORS3_T2": {
+   "n": 2,
+   "k_accumulation": 0,
+   "classes": {
+    "accumulation": 0,
+    "foam_whitecap": 0,
+    "glint": 0,
+    "cloud": 0,
+    "ship_wake": 2,
+    "seam_artifact": 0,
+    "unclear": 0
+   }
+  },
+  "S4_DOORS3_T20": {
+   "n": 7,
+   "k_accumulation": 0,
+   "classes": {
+    "accumulation": 0,
+    "foam_whitecap": 0,
+    "glint": 0,
+    "cloud": 6,
+    "ship_wake": 0,
+    "seam_artifact": 0,
+    "unclear": 1
+   }
+  },
+  "S4_DOORS3_T21": {
+   "n": 7,
+   "k_accumulation": 0,
+   "classes": {
+    "accumulation": 0,
+    "foam_whitecap": 0,
+    "glint": 0,
+    "cloud": 7,
+    "ship_wake": 0,
+    "seam_artifact": 0,
+    "unclear": 0
+   }
+  },
+  "S4_DOORS3_T25": {
+   "n": 1,
+   "k_accumulation": 0,
+   "classes": {
+    "accumulation": 0,
+    "foam_whitecap": 0,
+    "glint": 0,
+    "cloud": 0,
+    "ship_wake": 1,
+    "seam_artifact": 0,
+    "unclear": 0
+   }
+  },
+  "S4_DOORS3_T30": {
+   "n": 6,
+   "k_accumulation": 0,
+   "classes": {
+    "accumulation": 0,
+    "foam_whitecap": 0,
+    "glint": 0,
+    "cloud": 6,
+    "ship_wake": 0,
+    "seam_artifact": 0,
+    "unclear": 0
+   }
+  },
+  "S4_DOORS3_T31": {
+   "n": 1,
+   "k_accumulation": 0,
+   "classes": {
+    "accumulation": 0,
+    "foam_whitecap": 0,
+    "glint": 0,
+    "cloud": 1,
+    "ship_wake": 0,
+    "seam_artifact": 0,
+    "unclear": 0
+   }
+  }
+ },
+ "rule_vs_visual": {
+  "glint": {
+   "cloud": 6,
+   "glint": 11,
+   "unclear": 3,
+   "seam_artifact": 4
+  },
+  "cloud_edge": {
+   "cloud": 8
+  },
+  "cloud_small": {
+   "cloud": 6
+  },
+  "other_single": {
+   "foam_whitecap": 38,
+   "unclear": 7,
+   "cloud": 7
+  },
+  "other_multi": {
+   "foam_whitecap": 8,
+   "ship_wake": 1,
+   "accumulation": 1,
+   "unclear": 3
+  },
+  "ship": {
+   "ship_wake": 2
+  },
+  "wake": {
+   "ship_wake": 1
+  }
+ },
+ "repeatability": {
+  "n": 20,
+  "kappa_7class": 0.7719,
+  "agreement_7class": 0.85,
+  "kappa_binary": null,
+  "agreement_binary": 1.0,
+  "pairs": [
+   {
+    "repeat_id": "W001",
+    "visual_id": "V063",
+    "first": "unclear",
+    "second": "unclear"
+   },
+   {
+    "repeat_id": "W002",
+    "visual_id": "V065",
+    "first": "cloud",
+    "second": "seam_artifact"
+   },
+   {
+    "repeat_id": "W003",
+    "visual_id": "V035",
+    "first": "glint",
+    "second": "unclear"
+   },
+   {
+    "repeat_id": "W004",
+    "visual_id": "V051",
+    "first": "foam_whitecap",
+    "second": "foam_whitecap"
+   },
+   {
+    "repeat_id": "W005",
+    "visual_id": "V059",
+    "first": "cloud",
+    "second": "cloud"
+   },
+   {
+    "repeat_id": "W006",
+    "visual_id": "V077",
+    "first": "seam_artifact",
+    "second": "seam_artifact"
+   },
+   {
+    "repeat_id": "W007",
+    "visual_id": "V047",
+    "first": "cloud",
+    "second": "cloud"
+   },
+   {
+    "repeat_id": "W008",
+    "visual_id": "V097",
+    "first": "foam_whitecap",
+    "second": "foam_whitecap"
+   },
+   {
+    "repeat_id": "W009",
+    "visual_id": "V013",
+    "first": "foam_whitecap",
+    "second": "foam_whitecap"
+   },
+   {
+    "repeat_id": "W010",
+    "visual_id": "V052",
+    "first": "foam_whitecap",
+    "second": "foam_whitecap"
+   },
+   {
+    "repeat_id": "W011",
+    "visual_id": "V048",
+    "first": "cloud",
+    "second": "cloud"
+   },
+   {
+    "repeat_id": "W012",
+    "visual_id": "V003",
+    "first": "foam_whitecap",
+    "second": "glint"
+   },
+   {
+    "repeat_id": "W013",
+    "visual_id": "V094",
+    "first": "foam_whitecap",
+    "second": "foam_whitecap"
+   },
+   {
+    "repeat_id": "W014",
+    "visual_id": "V104",
+    "first": "foam_whitecap",
+    "second": "foam_whitecap"
+   },
+   {
+    "repeat_id": "W015",
+    "visual_id": "V089",
+    "first": "cloud",
+    "second": "cloud"
+   },
+   {
+    "repeat_id": "W016",
+    "visual_id": "V043",
+    "first": "foam_whitecap",
+    "second": "foam_whitecap"
+   },
+   {
+    "repeat_id": "W017",
+    "visual_id": "V011",
+    "first": "cloud",
+    "second": "cloud"
+   },
+   {
+    "repeat_id": "W018",
+    "visual_id": "V032",
+    "first": "cloud",
+    "second": "cloud"
+   },
+   {
+    "repeat_id": "W019",
+    "visual_id": "V106",
+    "first": "foam_whitecap",
+    "second": "foam_whitecap"
+   },
+   {
+    "repeat_id": "W020",
+    "visual_id": "V091",
+    "first": "foam_whitecap",
+    "second": "foam_whitecap"
+   }
+  ],
+  "protocol": "20 случайных мест из разметки, новые номера и новый порядок, переразметка без доступа к первой"
+ },
+ "final_numbers_block": {
+  "source": "scripts/case/pairs_detector_review.py, scripts/case/pairs_visual_review.py, scripts/case/marida_harmonize_val.py",
+  "l2a_crops": 22,
+  "objects_water_median": 975,
+  "objects_in_strips": 6,
+  "objects_harmonize_none": 5,
+  "rule_false_share": 0.1436,
+  "rule_false_share_without_he460_t03": 0.5498,
+  "visual_protocol": "визуальная разметка по вырезкам (не полевая), один аннотатор (ИИ-агент)",
+  "visual_n_labelled": 111,
+  "visual_precision_out_strip": 0.0165,
+  "visual_precision_out_strip_ci95": [
+   0.0,
+   0.0496
+  ],
+  "visual_precision_out_strip_wilson_unweighted": [
+   0.0018,
+   0.0545
+  ],
+  "visual_class_share_out_strip": {
+   "accumulation": 0.0165,
+   "foam_whitecap": 0.711,
+   "glint": 0.0232,
+   "cloud": 0.112,
+   "ship_wake": 0.0196,
+   "seam_artifact": 0.017,
+   "unclear": 0.1007
+  },
+  "visual_in_strips": "0/6",
+  "visual_harmonize_none": "0/5",
+  "visual_repeat_n": 20,
+  "visual_kappa_7class": 0.7719,
+  "visual_agreement_7class": 0.85,
+  "visual_kappa_binary": null,
+  "marida_val_f1_none": 0.9226441631504922,
+  "marida_val_f1_per_scene": 0.8973880597014925,
+  "marida_val_f1_per_patch": 0.8237828522188712,
+  "marida_val_dF1_per_scene": {
+   "delta_f1": -0.0253,
+   "ci95": [
+    -0.0721,
+    -0.0125
+   ],
+   "share_reps_delta_le_0": 1.0,
+   "scenes_better": 1,
+   "scenes_worse": 8,
+   "scenes_equal": 3
+  },
+  "marida_val_dF1_per_patch": {
+   "delta_f1": -0.0989,
+   "ci95": [
+    -0.2587,
+    -0.0428
+   ],
+   "share_reps_delta_le_0": 1.0,
+   "scenes_better": 0,
+   "scenes_worse": 8,
+   "scenes_equal": 4
+  },
+  "marida_val_test_used": false
+ }
+}

@@ -1,4 +1,4 @@
-"""L46 API: incidents with statuses + event feed (/api/incidents*, /api/feed), link with review labels.
+"""Incidents API: incidents with statuses + event feed (/api/incidents*, /api/feed), link with review labels.
 
 Runs on a temporary copy of service/demo; labels + incidents journal go to a temp dir via $MACROPLASTIC_LABELS.
     .venv\\Scripts\\python.exe -m pytest -q tests\\test_incidents.py

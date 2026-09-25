@@ -56,7 +56,7 @@ def prepare_chips(n: int) -> list[Path]:
 
 
 def build_baseline() -> Path:
-    """out/speed_baseline/ = src/, configs/, weights/lgbm from the working tree + git HEAD versions of the L17 files."""
+    """out/speed_baseline/ = src/, configs/, weights/lgbm from the working tree + git HEAD versions of the speed-up files."""
     if BASE.exists():
         shutil.rmtree(BASE)
     shutil.copytree(ROOT / "src", BASE / "src", ignore=shutil.ignore_patterns("__pycache__"))

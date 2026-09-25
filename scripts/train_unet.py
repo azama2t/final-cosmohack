@@ -1,11 +1,11 @@
-"""Lane L4: train/evaluate an smp UNet for Marine Debris on MARIDA (val only; test is never read).
+"""UNet: train/evaluate an smp UNet for Marine Debris on MARIDA (val only; test is never read).
 
     # 1) CPU: cache train/val patches as .npy (once, ~1 min)
     set CUDA_VISIBLE_DEVICES= & .venv\\Scripts\\python.exe scripts\\train_unet.py cache
     # 2) GPU (only through the queue):
     .venv\\Scripts\\python.exe scripts\\gpu_queue.py submit --name unet_s0 --wait -- ^
         .venv\\Scripts\\python.exe scripts\\train_unet.py train --seed 0 [--exp bin_r34] [--set train.epochs=40]
-    # 3) CPU: stack with L3 LightGBM on val (weighted mean / max, weight + threshold picked on val)
+    # 3) CPU: stack with LightGBM on val (weighted mean / max, weight + threshold picked on val)
     .venv\\Scripts\\python.exe scripts\\train_unet.py stack --exp bin_r34 --seeds 0 1 2
 
 Outputs: weights_exp/unet/<exp>_s<seed>/{model.pt, meta.json}, out/l4_unet/val_prob_<exp>_s<seed>.npy (float16,
@@ -278,7 +278,7 @@ def train(cfg: dict) -> dict:
     rows = f1_grid(pv[lab_v], gt_v, grid)
     best = best_of(rows)
     at05 = min(rows, key=lambda r: abs(r["threshold"] - 0.5))
-    # cross-check with the L1 metric on full maps
+    # cross-check with the core metric on full maps
     from macroplastic.metrics import binary_scores
 
     chk = binary_scores([pv[i] >= best["threshold"] for i in range(len(pv))], [Cv[i] for i in range(len(Cv))])
@@ -330,7 +330,7 @@ def stack(exp: str, seeds: list[int], cfg: dict) -> dict:
     grid = grid_of(cfg)
     pl = lgbm_val_prob()[lab]
     base = best_of(f1_grid(pl, gt, grid))
-    print(f"L3 lgbm on val: F1 {base['f1']:.4f} thr {base['threshold']} (expect 0.9078 @ 0.37)")
+    print(f"LightGBM on val: F1 {base['f1']:.4f} thr {base['threshold']} (expect 0.9078 @ 0.37)")
     ws = np.round(np.arange(0.0, 1.0001, 0.1), 2)
     res = {"lgbm": base, "seeds": {}}
     for s in seeds:

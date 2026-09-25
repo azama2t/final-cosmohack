@@ -1,4 +1,4 @@
-"""L66: case-mode (API v3) screenshots + smoke checks for the v2 frontend (service/static_v2, default mode «Кейс»).
+"""Case-mode (API v3) screenshots + smoke checks for the v2 frontend (service/static_v2, default mode «Кейс»).
 
 Usage (repo root; own service instance, never :8000):
   .venv\\Scripts\\python.exe -m service --port 8070 --data-root service\\data
@@ -494,7 +494,7 @@ def run(args) -> dict:
         step("url_restore", s_url)
 
         def s_geom():
-            # L66 it.8: interrupted transect (MultiLineString, 2 segments, gap not joined), reconstructed end, pairfinder
+            # Case-mode UI it.8: interrupted transect (MultiLineString, 2 segments, gap not joined), reconstructed end, pairfinder
             p9 = new_page()
             p9.goto(base + "/", wait_until="domcontentloaded")
             wait_ready(p9)
@@ -545,6 +545,27 @@ def run(args) -> dict:
             p10.context.close()
 
         step("quality_rejected", s_qr)
+
+        def s_go():
+            # «Куда идти»: ranked sites + nearest pass / sync window (pairfinder), 1920 and 1366
+            for w, h, name in ((1920, 1080, "28_go_list"), (1366, 768, "29_go_list_1366")):
+                pg = new_page(w, h)
+                pg.goto(base + "/", wait_until="domcontentloaded")
+                wait_ready(pg)
+                tid(pg, "tab-go").click()
+                pg.wait_for_selector("[data-testid='go-item']", timeout=15000)
+                pg.wait_for_function("[...document.querySelectorAll('[data-testid=go-window]')].every(x => !x.textContent.includes('ищу'))", timeout=120000)
+                pg.locator("[data-testid='go-item']").first.click()
+                pg.wait_for_selector("[data-testid='obs-card']", timeout=15000)
+                wait_idle(pg, 2000)
+                shot(pg, name)
+                if w == 1920:
+                    res["go_first"] = pg.evaluate("[...document.querySelectorAll('[data-testid=go-item]')].slice(0, 3).map(x => x.innerText)")
+                else:
+                    res["legend_1366_h"] = pg.evaluate("document.querySelector('[data-testid=legend]').getBoundingClientRect().height")
+                pg.context.close()
+
+        step("go_list", s_go)
         browser.close()
 
     # never leave test queries in the shared saved-queries file

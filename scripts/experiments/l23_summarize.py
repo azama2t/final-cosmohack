@@ -1,4 +1,4 @@
-"""L23: collect out/l23_runs/*.json -> reports/l23_channels_speed.json (+ prints markdown tables)."""
+"""Band-subset / light models: collect out/l23_runs/*.json -> reports/l23_channels_speed.json (+ prints markdown tables)."""
 from __future__ import annotations
 
 import json

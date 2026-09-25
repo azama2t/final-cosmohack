@@ -1,4 +1,4 @@
-"""L37: before/after tables and RGB figures for the linear-artefact filter (reports/artifacts.md).
+"""Artefact filter: before/after tables and RGB figures for the linear-artefact filter (reports/artifacts.md).
 
 Usage: python scripts/experiments/l37_artifacts_report.py --before reports/tmp_l37/zones1_before.json
        [--survey reports/tmp_l37/survey.csv] [--data service/data] [--live data/live]

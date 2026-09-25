@@ -1,6 +1,6 @@
-"""Synthetic scenes in lane-L6 "live" format (data/live/<region>/<date>/...) on a real UTM grid.
+"""Synthetic scenes in the "live" format (data/live/<region>/<date>/...) on a real UTM grid.
 
-Used by lane L7 to develop/test scripts/build_service_data.py before real scenes exist.
+Used to develop/test scripts/build_service_data.py before real scenes exist.
 
 Usage: python scripts/make_live_fixture.py [--out out/live_fixture] [--size 1000] [--no-bands] [--seed 0]
 

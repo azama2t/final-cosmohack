@@ -1,4 +1,4 @@
-"""Pixel features for Marine Debris detection (lane L3).
+"""Pixel features for Marine Debris detection (LightGBM).
 
 Input: reflectance array (C, H, W) float32 ~0..1 + list of channel names (canonical
 B1..B8, B8A, B9, B11, B12). Only the 11 MARIDA bands are used; extra bands (B9 of L2A)
@@ -116,7 +116,7 @@ def _indices(b: dict, need=None) -> dict:
 def _win_mean_std(x: np.ndarray, w: int, out_mean: np.ndarray | None = None, out_std: np.ndarray | None = None):
     """NaN-aware window mean/std (float64 sums, float32 result).
 
-    Lane L17: same arithmetic as the first version (bit-identical output) with fewer temporaries -
+    speed-up: same arithmetic as the first version (bit-identical output) with fewer temporaries -
     buffers are reused and the count filter of an all-valid chip is cached per (shape, w)."""
     valid = ~np.isnan(x)
     all_valid = bool(valid.all())
@@ -171,7 +171,7 @@ def _local_median(x: np.ndarray, w: int, fill=None) -> np.ndarray:
     k = max(3, int(round(w / f)) | 1)
     if fill is None:
         fill = _nan_fill(x)
-    # lane L26: clamp the subsample start so chips with a side <= f//2 (1..3 px) keep >= 1 sample
+    # Robustness fixes: clamp the subsample start so chips with a side <= f//2 (1..3 px) keep >= 1 sample
     # (same start f//2 as before whenever the side is larger -> bit-identical on normal chips)
     xs = x[min(f // 2, H - 1)::f, min(f // 2, W - 1)::f]
     xs = np.where(np.isnan(xs), fill, xs)
@@ -188,7 +188,7 @@ def _nan_fill(x: np.ndarray):
 def _compute_subset(x: np.ndarray, feats: Sequence[str]) -> np.ndarray:
     """Only the named features (any subset of feature_names('win'), in that order) of band stack x (11,H,W).
 
-    Lane L26 (light model): windows / contrasts / indices that no requested feature needs are not computed.
+    robustness fixes (light model): windows / contrasts / indices that no requested feature needs are not computed.
     Every feature uses exactly the code of the full path -> bit-identical to compute_features(...)[idx]."""
     allowed = set(feature_names("win"))
     unknown = [n for n in feats if n not in allowed]
@@ -240,9 +240,9 @@ def compute_features(arr: np.ndarray, channel_names: Sequence[str], level: str =
                      features: Sequence[str] | None = None) -> np.ndarray:
     """(C,H,W) reflectance -> (F,H,W) float32 features (names: feature_names(level)).
 
-    features: optional subset of feature_names('win') -> only those are computed, in that order (lane L26;
+    features: optional subset of feature_names('win') -> only those are computed, in that order (robustness fixes;
     identical values to the full stack indexed by name). Features are written straight into the
-    preallocated (F,H,W) output (lane L17: fewer copies; values identical to stacking the per-feature arrays)."""
+    preallocated (F,H,W) output (speed-up: fewer copies; values identical to stacking the per-feature arrays)."""
     x = select_bands(arr, channel_names)
     fin = np.isfinite(x)
     if not fin.all():

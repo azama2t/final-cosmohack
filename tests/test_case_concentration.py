@@ -197,7 +197,7 @@ def test_assert_no_overlap_detects_leak():
         P.assert_no_overlap(sp)
 
 
-# ---------------------------------------------------------------- L60b: основной сплит, утечки, правила
+# ---------------------------------------------------------------- основной сплит, утечки, правила
 def test_main_split_no_cruise_day_overlap(samples):
     cfg = S.load_config()
     ms = cfg["main_split"]

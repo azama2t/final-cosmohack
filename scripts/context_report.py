@@ -1,6 +1,6 @@
-"""L47: summary of OSM context, objects touched by the demo drift cloud, repeated finds -> reports/context.md (+ .json).
+"""Summary of OSM context, objects touched by the demo drift cloud, repeated finds -> reports/context.md (+ .json).
 
-Team decision (INBOX 13:20): no hours/percentages for drift, no "source" label, no linking to river mouths.
+Team decision: no hours/percentages for drift, no "source" label, no linking to river mouths.
 
     .venv/Scripts/python.exe scripts/context_report.py
 """

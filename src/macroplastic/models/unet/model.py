@@ -1,4 +1,4 @@
-"""Lane L4 predictor: smp UNet (resnet34) for Marine Debris, trained on MARIDA by scripts/train_unet.py.
+"""UNet predictor: smp UNet (resnet34) for Marine Debris, trained on MARIDA by scripts/train_unet.py.
 
     from macroplastic.models.unet import load_predictor
     pred = load_predictor("weights_exp/unet/bin_r34_s0")        # dir with model.pt + meta.json
@@ -149,7 +149,7 @@ def load_predictor(weights_dir: str | os.PathLike | None = None, weights: str | 
     return UNetPredictor(wd, device=device, **{k: v for k, v in kw.items() if k in ("tile", "overlap", "batch")})
 
 
-try:  # register in the L1 registry if available
+try:  # register in the model registry if available
     from ..registry import register as _register
 
     _register("unet", load_predictor)

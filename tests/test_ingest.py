@@ -1,4 +1,4 @@
-"""Tests for lanes L18 + L32: python -m macroplastic.ingest (safe unpack, format detection, README hints, all-mask class values, blockers, convert train+test), train_lgbm_ingest --cv, predict_org, score, forensics/provenance pairing."""
+"""Tests for lanes ingest + organiser pipeline: python -m macroplastic.ingest (safe unpack, format detection, README hints, all-mask class values, blockers, convert train+test), train_lgbm_ingest --cv, predict_org, score, forensics/provenance pairing."""
 from __future__ import annotations
 
 import csv
@@ -205,14 +205,14 @@ def test_testsets_marida_fire_chips(tmp_path, marida_root):
 
     if FIRE_BS.is_dir():
         tp = mk.make_fire_targz(tmp_path, 8, 0)
-        # burn severity: no "debris" class -> L32 blocker "target class not named"; acknowledged with --force
+        # burn severity: no "debris" class -> organiser pipeline blocker "target class not named"; acknowledged with --force
         s, meta = _run_all(tp, tmp_path / "t2", convert_extra=("--force",))
         assert any(d["level"] == "blocker" and d["topic"] == "целевой класс" for d in s["doubts"])
         assert s["candidates"][0]["format"] == "dirs"
         assert meta["band_fill"] == {"B1": "B2", "B8": "B8A"}
 
 
-# --------------------------------------------------------------------------- L32: organiser pipeline (rehearsal-like set)
+# --------------------------------------------------------------------------- Organiser pipeline: organiser pipeline (rehearsal-like set)
 ORG_ORDER = ["B8", "B4", "B3", "B2", "B11", "B12", "B5", "B6", "B7", "B8A", "B1"]
 README_TXT = ("Dataset: Sentinel-2 chips, GeoTIFF uint16 (DN, reflectance x 10000).\n"
               "Band order: " + ", ".join(ORG_ORDER) + ".\n"
@@ -387,7 +387,7 @@ def test_provenance_skips_mask_folders():
 
 
 def test_group_geo_and_file_warning(capsys):
-    """L52: --group geo = spatial clusters of chip lon/lat boxes; anonymous names (group = file) -> honest warning."""
+    """Rehearsal fixes: --group geo = spatial clusters of chip lon/lat boxes; anonymous names (group = file) -> honest warning."""
     tr = _load_script("train_lgbm_ingest")
 
     def row(i, lon, lat):

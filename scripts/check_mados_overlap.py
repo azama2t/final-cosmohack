@@ -185,7 +185,7 @@ def main():
     if self_check:
         ok = (same["other_scene"] == same["marida_scene"]).all() and same["other_scene"].nunique() == len(A)
         print(f"SELF-CHECK {'OK' if ok else 'FAILED'}: every MARIDA scene matched itself")
-        # MARIDA scenes whose patches span several official splits (info for L1 splits)
+        # MARIDA scenes whose patches span several official splits (info for the official splits)
         multi = A[A["splits"].str.count(":") > 1]
         print(f"MARIDA scenes spread over >1 official split: {len(multi)} of {len(A)}")
     if len(unknown):

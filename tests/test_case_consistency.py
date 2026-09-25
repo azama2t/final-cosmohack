@@ -1,9 +1,9 @@
-"""L67: быстрая самопроверка согласованности API v3 (критерий Т5) на TestClient.
+"""Быстрая самопроверка согласованности API v3 (критерий Т5) на TestClient.
 
 Полная версия (все запросы, алгоритм = JSON = CSV = GeoJSON, скорость, живой экземпляр):
 scripts/case/consistency_check.py -> reports/selfcheck/consistency_*.md|json.
 Сохранённые запросы пишутся во временный файл (case_store.PATHS["queries"] -> tmp_path), service/labels не трогается.
-Тесты с xfail — известные расхождения из reports/tasklog/67_consistency.md: станут XPASS, когда владелец починит.
+Тесты с xfail — известные расхождения из reports/selfcheck/: станут XPASS, когда владелец починит.
 """
 from __future__ import annotations
 
@@ -129,7 +129,7 @@ def test_invalid_inputs_are_4xx_with_message(client):
     assert client.get("/api/v3/queries").json()["queries"] == []  # nothing invalid was saved
 
 
-# ------------------------------------------------------------------ formerly known inconsistencies (fixed in L62e)
+# ------------------------------------------------------------------ formerly known inconsistencies (fixed in API v3)
 def test_export_zones_query_id_equals_run(client):
     qid = _save(client, {"sources": ["S4_BLACK_SEA_DOORS3"]})
     run = client.get(f"/api/v3/queries/{qid}/run").json()

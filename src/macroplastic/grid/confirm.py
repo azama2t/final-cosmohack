@@ -1,4 +1,4 @@
-"""Cross-model confirmation of detections ("уверенная находка", L14 rule D, applied in L15).
+"""Cross-model confirmation of detections ("уверенная находка", rule D of reports/model_agreement.md).
 
 A detection (kept 8-connected component of model A) is *confirmed* by model B when model B has at least one
 pixel with P >= its own threshold on observed water within `radius_px` pixels (Euclidean disk, 2 px = 20 m at

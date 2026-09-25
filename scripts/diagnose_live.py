@@ -1,4 +1,4 @@
-"""Where do detections of a live-scene model sit? (lane L6 diagnostics; CPU)
+"""Where do detections of a live-scene model sit? (live scenes diagnostics; CPU)
 
 For every data/live/<region>/<date>/ with prob_<model>.tif: P quantiles over water, pixel counts above several
 thresholds, share of detections near land (<= 3 px), in turbid water (B4 > 0.04), by SCL class, water NIR level

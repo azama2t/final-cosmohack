@@ -1,4 +1,4 @@
-"""L30 rehearsal: "private leaderboard" scorer for the organizer-style dataset (make_org_dataset.py).
+"""Rehearsal: "private leaderboard" scorer for the organizer-style dataset (make_org_dataset.py).
 
 Checks the submission format exactly as the README promises (one PNG per test image, same stem, uint8,
 240x240, codes 0..3), then computes the organizer metric: F1 of class 3 (marine debris) over ALL pixels of

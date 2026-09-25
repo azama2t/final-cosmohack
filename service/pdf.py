@@ -1,4 +1,4 @@
-"""Place report ("справка по месту") as a 2-page A4 PDF via matplotlib PdfPages (lane L19, INBOX 1.4).
+"""Place report ("справка по месту") as a 2-page A4 PDF via matplotlib PdfPages (zones/place/review API).
 
 matplotlib (Agg) + bundled DejaVu Sans -> Cyrillic works without system fonts; no browser needed (fast, ~1-3 s).
 """
@@ -12,7 +12,7 @@ from typing import Optional
 from . import core, place
 
 STATUS_RU = {"found": "найдено", "clean": "чисто", "no_observation": "нет наблюдения", "no_image": "нет снимка",
-             "unreliable": "ненадёжно"}  # L27: same date rule as /api/calendar
+             "unreliable": "ненадёжно"}  # UI polish: same date rule as /api/calendar
 ACCENT = "#ff6b4a"
 INK = "#13263a"
 MUTED = "#5b6b7c"
@@ -23,7 +23,7 @@ def _wrap(s: str, width: int = 105) -> str:
 
 
 def artifacts_line(st: core.Store, rid: str, date: Optional[str], model: str, zone: Optional[dict]) -> Optional[str]:
-    """L38: one line about objects excluded as artifacts (seam / wake / ship) on the reference date; None if none."""
+    """Artefacts in API: one line about objects excluded as artifacts (seam / wake / ship) on the reference date; None if none."""
     if not date:
         return None
     try:
@@ -99,7 +99,7 @@ def build_place_pdf(st: core.Store, rid: str, h3id: str, model: Optional[str] = 
                 facecolor="#eef3f8", edgecolor="#d5dee8", linewidth=0.6))
             fig.text(x + 0.012, 0.873, k, fontsize=7.5, color=MUTED, va="top")
             fig.text(x + 0.012, 0.852, v, fontsize=13, weight="bold", color=INK, va="top")
-        # L38b: "why" text first - its height decides the size of the crops, so that nothing runs off the page
+        # Artefacts in API: "why" text first - its height decides the size of the crops, so that nothing runs off the page
         why = (zone or {}).get("why") or {}
         f_lines = (why.get("formula") or place.FORMULA).split(";  ")  # full formula, one part per line
         body = why.get("formula_text") or place.FORMULA_TEXT

@@ -1,4 +1,4 @@
-"""Core infrastructure tests (lane L1): io, win_path, metrics, splits, indices, registry, inference.py.
+"""Core infrastructure tests: io, win_path, metrics, splits, indices, registry, inference.py.
 
 All synthetic (temp GeoTIFFs); the last test uses real MARIDA and is skipped if it is not unpacked.
 Run: .venv\\Scripts\\python.exe -m pytest -q tests\\test_core.py

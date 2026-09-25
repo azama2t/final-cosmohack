@@ -1,4 +1,4 @@
-"""Harmonization of Earth Search S2 L2A scale/offset (lane L6). Needs network (Earth Search + AWS COGs).
+"""Harmonization of Earth Search S2 L2A scale/offset (live scenes). Needs network (Earth Search + AWS COGs).
 
 Same tile 16PCC, same 6x6 km open-water box (Gulf of Honduras), open-water pixels (SCL == 6):
  1. same acquisition 2020-08-29 in two processings: _0 (baseline 02.14, offset 0) vs _1 (baseline 05.00, raster:bands

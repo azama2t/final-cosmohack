@@ -1,11 +1,11 @@
-"""Lane L13: MADOS in pixel LightGBM training (MARIDA val is the only judge, SPEC 1.7).
+"""MADOS training: MADOS in pixel LightGBM training (MARIDA val is the only judge, SPEC 1.7).
 
 Sub-commands (repo root, PYTHONPATH=src, CUDA_VISIBLE_DEVICES=""):
   .venv/Scripts/python.exe scripts/train_lgbm_mados.py overlap
       MADOS <-> MARIDA (train+val only; MARIDA test is never read) content de-duplication -> reports/mados_overlap.csv
   .venv/Scripts/python.exe scripts/train_lgbm_mados.py overlap --with-marida-test   (orchestrator only, see --help)
   .venv/Scripts/python.exe scripts/train_lgbm_mados.py train --data marida|mados|combined --seed 0 [--exp NAME]
-      [--set key=value ...]  (same config keys as configs/lgbm.yaml, plus the L13 keys below)
+      [--set key=value ...]  (same config keys as configs/lgbm.yaml, plus the MADOS training keys below)
   .venv/Scripts/python.exe scripts/train_lgbm_mados.py train ... --final   -> weights_exp/mados/final/
 
 Why content matching: MADOS GeoTIFFs are not georeferenced (identity transform, EPSG:4326, no tags) and folder names
@@ -18,7 +18,7 @@ offset; random hits give <= 7 votes (median 2). A MADOS crop is matched to a MAR
 gives a non-empty intersection. A MADOS scene is 'marida_val' if ANY of its crops overlaps a MARIDA val patch ->
 excluded from training entirely (all its crops, all MADOS splits).
 
-L13 config keys (--set):
+MADOS training config keys (--set):
   mados_splits: [train, val]      MADOS splits used for training (MADOS test never used)
   mados_extra: true               MADOS-only classes (oil spill, oil platform, jellyfish, sea snot) as negatives
                                   (codes 16..19); false -> unlabelled (ignored)
@@ -221,7 +221,7 @@ def cmd_overlap(a):
         place_val = any(k == "same_place_other_date" and d["split"] == "val" for (_, k), d in msc.items())
         acq_test = any(k == "same_acquisition" and d["split"] == "test" for (_, k), d in msc.items())
         if set(sp) == {"test"}:
-            use = "NO (MADOS test split: never used in L13)"
+            use = "NO (MADOS test split: never used in MADOS training)"
         elif acq_val:
             use = "NO (same acquisition as MARIDA val)"
         elif acq_test:
@@ -277,7 +277,7 @@ def _extract_mados(name):
 
 def load_mados(split: str):
     """All labelled pixels of a MADOS split with 'win' features, extended MARIDA codes 1..19. Cached."""
-    assert split in ("train", "val"), "MADOS test is not used in L13"
+    assert split in ("train", "val"), "MADOS test is not used in MADOS training"
     CACHE.mkdir(parents=True, exist_ok=True)
     path = CACHE / f"mados_{split}_win.npz"
     names = feature_names("win")

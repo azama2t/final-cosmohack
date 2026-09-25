@@ -1,4 +1,4 @@
-"""L41: effect of the "vessel at the end" wake rule on all live scenes (reports/artifacts.md, tasklog 41).
+"""Wake rule: effect of the "vessel at the end" wake rule on all live scenes (reports/artifacts.md).
 
 Usage: PYTHONPATH=src python scripts/experiments/l41_wake2_eval.py [--before reports/tmp_l41/artifacts_before.py]
 Writes reports/tmp_l41/wake2_marks.csv (one row per newly marked object) and wake2_sheet_<k>.png contact sheets

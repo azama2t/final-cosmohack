@@ -1,4 +1,4 @@
-"""L71: POST /api/v3/pairfinder — есть ли синхронная (с учётом дрейфа) сцена Sentinel-2/Landsat для нового или
+"""POST /api/v3/pairfinder — есть ли синхронная (с учётом дрейфа) сцена Sentinel-2/Landsat для нового или
 планируемого полевого наблюдения. Логика: src/macroplastic/case/pairfinder.py.
 
 Body (JSON):

@@ -1,4 +1,4 @@
-"""Lane L3 predictor: pixel LightGBM for Marine Debris (trained on MARIDA by scripts/train_lgbm.py).
+"""LightGBM predictor: pixel LightGBM for Marine Debris (trained on MARIDA by scripts/train_lgbm.py).
 
     from macroplastic.models.lgbm_predict import load_predictor
     pred = load_predictor()                       # weights/lgbm/{model.txt, meta.json}
@@ -14,7 +14,7 @@ any NaN/inf band -> probability 0. Large tiles are processed in 512 px blocks wi
 Domain note: trained on ACOLITE rhorc (L1C, Rayleigh-corrected); on Sen2Cor L2A the reflectance
 levels differ (see reports/l3_lgbm.md), so the probability is not calibrated there.
 
-Speed (lane L17, reports/speed.md):
+Speed (speed-up, reports/speed.md):
   * CPU backend calls lib_lightgbm directly through ctypes (LGBM_BoosterPredictForMat, the same C
     function lightgbm.Booster.predict uses) - identical output, but no `import lightgbm` (which pulls
     pandas + scikit-learn, ~2 s of a cold start).
@@ -456,7 +456,7 @@ class LGBMPredictor:
             self.level = "win"
         self.fidx = [all_names.index(n) for n in self.features]
         self._fidx_identity = self.fidx == list(range(len(all_names)))
-        # lane L26: a model on a feature subset (e.g. the light top-20 model) computes ONLY its features
+        # Robustness fixes: a model on a feature subset (e.g. the light top-20 model) computes ONLY its features
         # (pixel._compute_subset: same code per feature -> same values as the full stack indexed by fidx)
         self._subset = None if self._fidx_identity else list(self.features)
         self.min_px = int(self.meta.get("postprocess_min_px", 0))
@@ -666,7 +666,7 @@ def load_predictor(weights_dir: str | os.PathLike | None = None, weights: str | 
                          **{k: v for k, v in kw.items() if k in ("block", "num_threads", "harmonize")})
 
 
-try:  # register in the L1 registry if available
+try:  # register in the model registry if available
     from .registry import register as _register
 
     _register("lgbm", load_predictor)

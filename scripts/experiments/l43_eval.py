@@ -1,4 +1,4 @@
-"""L43: effect of the boat rule and the wake-axis extension on all live scenes (classify level, before = HEAD copy).
+"""Boat rule: effect of the boat rule and the wake-axis extension on all live scenes (classify level, before = HEAD copy).
 
 Usage: PYTHONPATH=src python scripts/experiments/l43_eval.py
 Writes reports/tmp_l43/l43_marks.csv (one row per object whose mark changed) and l43_sheet_{wake,ship}_<i>.png.

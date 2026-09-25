@@ -178,7 +178,7 @@ def list_images(data_dir, recursive: bool = True) -> list[Path]:
     """Sorted image GeoTIFFs under data_dir (_cl/_conf masks and our _prob/_mask outputs excluded)."""
     d = Path(data_dir)
     it = d.rglob("*") if recursive else d.glob("*")
-    # lane L26: Path.is_file() is False for Windows reserved names (aux.tif, con.tif, nul.tif, com1.tif, ...)
+    # Robustness fixes: Path.is_file() is False for Windows reserved names (aux.tif, con.tif, nul.tif, com1.tif, ...)
     # -> such files were dropped silently; check through the \\?\ prefix instead
     return sorted(p for p in it if is_image_tif(p) and os.path.isfile(win_path(p)))
 

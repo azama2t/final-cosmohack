@@ -1,4 +1,4 @@
-"""L43: contact sheets of small detections selected by a pandas query over reports/tmp_l43/live_small.csv.
+"""Boat rule: contact sheets of small detections selected by a pandas query over reports/tmp_l43/live_small.csv.
 
 Usage: PYTHONPATH=src python scripts/experiments/l43_boats_sheet.py "<query>" <out.png> [max]
 Each tile: RGB crop 41x41 px (410 m) around the object, stretched per tile; right half = same with object outline.

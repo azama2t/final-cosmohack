@@ -1,4 +1,4 @@
-"""Incidents with statuses and an event feed (lane L46, INBOX 2.5; reference: NOAA ERMA / EMSA CleanSeaNet).
+"""Incidents with statuses and an event feed (incidents; reference: NOAA ERMA / EMSA CleanSeaNet).
 
 Every detection and every priority zone of the data root is an incident:
   detection id = detections.geojson properties.id;  zone id = "zone:<region>:<date>:<model>:<h3>".

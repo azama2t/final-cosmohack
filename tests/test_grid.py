@@ -1,4 +1,4 @@
-"""Lane L7 grid layer: synthetic inputs with known answers."""
+"""Grid layer: synthetic inputs with known answers."""
 from __future__ import annotations
 
 import json
@@ -207,7 +207,7 @@ def test_edge_zone(tmp_path):
 
 
 def test_confirmed_components_radius_2px():
-    """L15: an object is confirmed when the other model has a pixel >= its threshold within 2 px (disk)."""
+    """Cross-model confirmation: an object is confirmed when the other model has a pixel >= its threshold within 2 px (disk)."""
     from macroplastic.grid.confirm import confirmed_components, disk, label_of_records
 
     assert disk(2).sum() == 13  # Euclidean disk r=2: corners (2,1),(2,2) excluded
@@ -233,7 +233,7 @@ def test_confirmed_components_radius_2px():
     assert not confirmed_components(labels, n, np.zeros_like(partner), 2).any()
 
 
-# ---------------------------------------------------------------- L28 cloud guards (synthetic)
+# ---------------------------------------------------------------- Cloud guards (synthetic)
 from macroplastic.grid.cloudmask import (drop_components, near_cloud_components,  # noqa: E402
                                          shadow_components, spectral_cloud)
 
@@ -291,7 +291,7 @@ def test_shadow_component_dark_ring_no_nir_excess():
     assert shadow_components(lab, 2, b2, b3, b4, b8, water).tolist() == [False, False]
 
 
-# ---------------------------------------------------------------- L37: linear artefacts and ships
+# ---------------------------------------------------------------- Artefact filter: linear artefacts and ships
 from scipy import ndimage as _ndi  # noqa: E402
 
 from macroplastic.grid.artifacts import classify, component_shape  # noqa: E402
@@ -381,7 +381,7 @@ def test_artifact_bright_ship_and_ship_with_tail():
 
 
 def test_artifact_vessel_at_end_of_wake_l41():
-    """L41: elongated object (>= 250 m) with a compact grey-white bright cluster <= 5 px beyond one end -> wake."""
+    """Wake rule: elongated object (>= 250 m) with a compact grey-white bright cluster <= 5 px beyond one end -> wake."""
     shape = (160, 160)
     m = np.zeros(shape, bool)
     m[60:62, 40:80] = True  # 400 m straight strip, 2 px: too short for the ship-free wake rule (1 km)
@@ -407,7 +407,7 @@ def test_artifact_vessel_at_end_of_wake_l41():
         bm[k][64:67, 58:61] = 0.05
     bm["B8"][64:67, 58:61] = 0.08
     assert classify(lab, n, bm, water)[0] == [None]
-    # curved filament (dev > 0.08) without a bright point at its ends stays unmarked even with the L41 rule
+    # curved filament (dev > 0.08) without a bright point at its ends stays unmarked even with the wake rule
     mc = np.zeros(shape, bool)
     for c in range(20, 140):
         r = int(100 + 8 * np.sin(c / 12.0))
@@ -448,7 +448,7 @@ def _boat(b, r0, r1, c0, c1):
 
 
 def test_artifact_collinear_pieces_grouped_l42():
-    """L42: a strip broken into short collinear pieces is checked as one strip; curved / far pieces are not merged."""
+    """Cross-model artefacts: a strip broken into short collinear pieces is checked as one strip; curved / far pieces are not merged."""
     from macroplastic.grid.artifacts import collinear_groups
     shape = (160, 160)
     water = np.ones(shape, bool)
@@ -498,7 +498,7 @@ def test_artifact_collinear_pieces_grouped_l42():
 
 
 def test_artifact_marks_propagate_between_models_l42():
-    """L42: objects of model A on / within 2 px of an artefact of model B get B's mark (artifact_from = B)."""
+    """Cross-model artefacts: objects of model A on / within 2 px of an artefact of model B get B's mark (artifact_from = B)."""
     from macroplastic.grid.artifacts import propagate_artifacts
     shape = (120, 120)
     mdd = np.zeros(shape, bool)
@@ -538,7 +538,7 @@ def test_artifact_marks_propagate_between_models_l42():
 
 
 def test_confirmation_ignores_partner_artifact_pixels_l42():
-    """L42: a detection next to an artefact of the other model only is not confirmed."""
+    """Cross-model artefacts: a detection next to an artefact of the other model only is not confirmed."""
     from macroplastic.grid.confirm import confirmed_components
     shape = (60, 60)
     a = np.zeros(shape, bool)
@@ -553,7 +553,7 @@ def test_confirmation_ignores_partner_artifact_pixels_l42():
 
 
 def test_artifact_small_boat_l43():
-    """L43: a small detection on a bright point with a SWIR response (a dry hull) -> ship; a dim spot, a bright but
+    """Boat rule: a small detection on a bright point with a SWIR response (a dry hull) -> ship; a dim spot, a bright but
     wet point (no SWIR excess: floating / awash material) and a bright point on the shore are not boats."""
     shape = (80, 80)
     water = np.ones(shape, bool)
@@ -584,7 +584,7 @@ def test_artifact_small_boat_l43():
 
 
 def test_artifact_vessel_on_axis_continuation_l43():
-    """L43: the vessel may have moved on: a bright cluster on the continuation of the major axis of a straight strip
+    """Boat rule: the vessel may have moved on: a bright cluster on the continuation of the major axis of a straight strip
     (+-2 px corridor, <= 20 px beyond the end) -> wake; the same cluster 6 px off the axis -> untouched."""
     shape = (160, 160)
     m = np.zeros(shape, bool)
@@ -592,7 +592,7 @@ def test_artifact_vessel_on_axis_continuation_l43():
     lab, n = _label(m)
     water = np.ones(shape, bool)
     b = _bands(shape)
-    _boat(b, 60, 62, 91, 94)  # 12 px beyond the end, on the axis (the L41 rule looks only 5 px)
+    _boat(b, 60, 62, 91, 94)  # 12 px beyond the end, on the axis (the wake rule rule looks only 5 px)
     art, f = classify(lab, n, b, water)
     assert art == ["wake"] and f["end_ship"][0]
     bo = _bands(shape)
@@ -604,7 +604,7 @@ def test_artifact_vessel_on_axis_continuation_l43():
 
 
 def test_artifact_line_continues_in_image_l43():
-    """L43: a straight thin detection (600 m) lying on a bright line that goes on in the image beyond both ends
+    """Boat rule: a straight thin detection (600 m) lying on a bright line that goes on in the image beyond both ends
     (an old ship wake / lane) -> wake when the whole line is >= 1 km; without the line beyond the ends -> untouched."""
     shape = (300, 300)
     m = np.zeros(shape, bool)

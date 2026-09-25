@@ -1,4 +1,4 @@
-"""L13: MADOS loader + content de-duplication key (fast: synthetic MADOS scene in tmp_path; 1 real crop if present)."""
+"""MADOS training: MADOS loader + content de-duplication key (fast: synthetic MADOS scene in tmp_path; 1 real crop if present)."""
 from __future__ import annotations
 
 import sys

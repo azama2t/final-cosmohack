@@ -1,4 +1,4 @@
-"""L47: OSM context, objects touched by the demo drift cloud, repeated finds (service/routes_context.py).
+"""OSM context, objects touched by the demo drift cloud, repeated finds (service/routes_context.py).
 .venv\\Scripts\\python.exe -m pytest -q tests\\test_context.py
 """
 from __future__ import annotations

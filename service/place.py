@@ -1,4 +1,4 @@
-"""Zones, place card, observation calendar and image crops (lane L19, INBOX 1.4-1.5).
+"""Zones, place card, observation calendar and image crops (zones/place/review API).
 
 No FastAPI imports here. Everything is read from the service data root (docs/CONTRACTS.md) and, for crops at
 native 10 m and false colour, from the live scene folder <live>/<region>/<date>/bands.tif
@@ -29,7 +29,7 @@ REPEAT_BONUS = 0.5  # = macroplastic.grid.zones.REPEAT_BONUS
 BASE_EXPR = "flagged_water_px × mean_prob × (1 + 0.5 × (repeat_dates − 1))"
 AGREE_W = 1.0       # = macroplastic.grid.zones.AGREE_W
 HAZE_PENALTY = 0.5  # = macroplastic.grid.zones.HAZE_PENALTY
-# L38b: current build formula (src/macroplastic/grid/zones.py): base × agreement × date_penalty
+# Artefacts in API: current build formula (src/macroplastic/grid/zones.py): base × agreement × date_penalty
 FORMULA_BASE = "base = " + BASE_EXPR
 FORMULA_MULTS = "agreement = 1 + confirmed_share;  date_penalty = 0.5 при дымке/блике, иначе 1"
 FORMULA = "score = base × agreement × date_penalty;  " + FORMULA_BASE + ";  " + FORMULA_MULTS
@@ -163,7 +163,7 @@ def det_lonlat(f: dict) -> tuple[Optional[float], Optional[float]]:
 
 def detections_in_cell(st: core.Store, rid: str, date: str, model: str, h3id: str,
                        artifacts: bool = False) -> list[dict]:
-    """Detections whose centre lies in the cell. L38: objects with properties.artifact (seam / wake / ship) are not
+    """Detections whose centre lies in the cell. artefacts in API: objects with properties.artifact (seam / wake / ship) are not
     findings (not in the index and zones) - skipped by default; artifacts=True returns only them."""
     fc = st._optional(rid, date, model, "detections")
     out = []
@@ -204,7 +204,7 @@ def zone_score(flagged_px, mean_prob, repeat_dates) -> float:
     return float(flagged_px or 0) * float(mean_prob or 0.0) * (1.0 + REPEAT_BONUS * max(int(repeat_dates or 1) - 1, 0))
 
 
-# L38: zones.json zones[].score_terms (optional) - terms of the priority formula written by the data build.
+# Artefacts in API: zones.json zones[].score_terms (optional) - terms of the priority formula written by the data build.
 # Accepted shapes (the build's exact format may differ; unknown numeric keys are shown as info, not multiplied):
 #   {"base": 812.3, "agreement": 1.5, "date_penalty": 0.5, "score": 609.2}
 #   {"base": {"value": 812.3, "label": "..."}, ...}
@@ -330,7 +330,7 @@ def explain(zone: dict, zones: list[dict], n_dates: int, quality: Optional[dict]
          "value": rep, "weight": REPEAT_BONUS, "contribution": round(rep_f, 3)},
     ]
     if stt and stt["mode"] == "mult":
-        # L38b: all multipliers of the final score -> product of terms[].contribution == score
+        # Artefacts in API: all multipliers of the final score -> product of terms[].contribution == score
         share = zone.get("confirmed_share")
         if not isinstance(share, (int, float)) or isinstance(share, bool):
             share = (stt["agreement"] - 1.0) / AGREE_W
@@ -418,7 +418,7 @@ def explain(zone: dict, zones: list[dict], n_dates: int, quality: Optional[dict]
     text.append("Это приоритет обследования (ранжирование по формуле), а не измеренная опасность и не масса пластика.")
     out = {"formula": FORMULA_LEGACY, "formula_text": FORMULA_TEXT_LEGACY, "score": round(score, 3), "terms": terms,
            "text": " ".join(text)}
-    if stt:  # L38b: terms[] = all multipliers (mode 'mult'), product = score; base_score = first three
+    if stt:  # Artefacts in API: terms[] = all multipliers (mode 'mult'), product = score; base_score = first three
         out["base_score"] = stt["base"]
         out["score_terms"] = stt["terms"]
         out["score_mode"] = stt["mode"]
@@ -467,7 +467,7 @@ def zone_info(st: core.Store, rid: str, date: Optional[str], model: Optional[str
         "place": f"/api/place?region={rid}&h3={h3id}&model={model}",
         "pdf": f"/api/place_report.pdf?region={rid}&h3={h3id}&model={model}&date={date}",
     }
-    if arts:  # L38: excluded objects in this cell (not in the index and the zone score)
+    if arts:  # Artefacts in API: excluded objects in this cell (not in the index and the zone score)
         out["artifacts"] = arts
         out["n_artifacts"] = len(arts)
     if zone.get("score_terms") is not None:
@@ -564,7 +564,7 @@ def place_info(st: core.Store, rid: str, h3id: str, model: Optional[str] = None)
 
 # ---------------------------------------------------------------- calendar
 def date_reliability(st: core.Store, rid: str, d: dict, model: str) -> dict:
-    """ONE rule for «ненадёжно» (used by /api/calendar AND /api/place, L27).
+    """ONE rule for «ненадёжно» (used by /api/calendar AND /api/place, UI polish).
 
     A date is `unreliable` when any of: cloud_frac > 50 %; quality flag glint_or_haze / haze; observed water < 30 %
     (share of water H3 cells where the index is defined). `has_layer` is False when the model has no layer on the

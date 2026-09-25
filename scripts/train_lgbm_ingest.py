@@ -1,4 +1,4 @@
-r"""Train the L3 pixel LightGBM on an ingested dataset (python -m macroplastic.ingest ... --convert).
+r"""Train the pixel LightGBM on an ingested dataset (python -m macroplastic.ingest ... --convert).
 
   .venv\Scripts\python.exe scripts\train_lgbm_ingest.py --data-root data\ingest\<name>
   .venv\Scripts\python.exe scripts\train_lgbm_ingest.py --data-root data\ingest\<name> --set lgbm.num_boost_round=100
@@ -23,7 +23,7 @@ Missing model bands (e.g. no B1/B8 in L2A 20 m stacks) are filled from the neare
 Chip-level datasets (manifest chip_level=1): additionally chip metrics (score = p95 of pixel probability).
 Output: weights_exp/lgbm_ingest/<name>_s<seed>/{model.txt, meta.json}; never touches weights/lgbm*.
 
-L32 (organiser metric):
+organiser pipeline (organiser metric):
   --zero-as negative|ignore|both   organiser 0 / background (our 99 after ingest) as negative (default) or ignored;
                                    'both' = CV both and keep the better one.
   --cv K       group K-fold (groups: see --group above), out-of-fold probabilities pooled over ALL valid pixels of
@@ -61,7 +61,7 @@ from macroplastic.features.pixel import BANDS11, compute_features, feature_names
 
 UNLAB = 99   # ingest: organiser 0 / background
 NEG0 = 14    # training code for "organiser 0 as negative" (capped separately from water 7, merged to 7 in labels)
-# up to 0.999: on organiser data with 0 = negative the best OOF threshold of L30/L32 sat at the old grid edge
+# up to 0.999: on organiser data with 0 = negative the best OOF threshold of rehearsal/organiser pipeline sat at the old grid edge
 GRID = np.round(np.concatenate([np.arange(0.02, 0.98, 0.01), np.arange(0.98, 0.995, 0.005),
                                 np.arange(0.995, 0.9991, 0.001)]), 3)
 

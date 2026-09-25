@@ -1,10 +1,10 @@
-"""L23 - models on band subsets + a light fast model. Shared helpers.
+"""Band-subset / light models - models on band subsets + a light fast model. Shared helpers.
 
 Data = exactly the final-model recipe (weights/lgbm/meta.json): MARIDA train (sample_train caps, seed) + MADOS
 train+val (exclude_same_place_val=True, mados_extra=False, caps with seed+7919), binary MD, pos_weight 3,
 LightGBM 400 x 63 leaves. Only MARIDA train/val are read (test never). Features:
   * the 48 'win' features from the existing caches out/l3_cache (MARIDA) and out/l13_cache (MADOS) - read only;
-  * 26 extra RGB-only features (L23, computed here, cached in out/l23_cache, same pixel order as the caches):
+  * 26 extra RGB-only features (band-subset / light models, computed here, cached in out/l23_cache, same pixel order as the caches):
       BRI=(B2+B3+B4)/3, NDGR=(B3-B4)/(B3+B4), NDBG=(B2-B3)/(B2+B3); mean/std 3/7/15 of each; value - local median
       (BRI 15/31, NDGR 15/31, NDBG 31) - same window code as features/pixel.py.
 A band subset keeps every feature whose inputs are all in the subset (FEATURE_DEPS).

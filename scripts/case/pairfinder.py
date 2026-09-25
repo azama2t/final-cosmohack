@@ -1,4 +1,4 @@
-"""CLI к src/macroplastic/case/pairfinder.py (L71): есть ли синхронная сцена S2/Landsat для полевого наблюдения.
+"""CLI к src/macroplastic/case/pairfinder.py: есть ли синхронная сцена S2/Landsat для полевого наблюдения.
 
   .venv\\Scripts\\python.exe scripts\\case\\pairfinder.py --lon 30.93 --lat 43.07 --datetime 2024-06-02
   .venv\\Scripts\\python.exe scripts\\case\\pairfinder.py --line 7.1,54.2,7.3,54.3 --datetime 2016-04-08T16:38:30Z --speed-ms 0.1

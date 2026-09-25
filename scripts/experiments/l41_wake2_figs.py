@@ -1,4 +1,4 @@
-"""L41: before/after crops of the objects newly marked by the "vessel at the end" wake rule.
+"""Wake rule: before/after crops of the objects newly marked by the "vessel at the end" wake rule.
 
 Usage: PYTHONPATH=src python scripts/experiments/l41_wake2_figs.py [--marks reports/tmp_l41/wake2_marks.csv]
 Writes reports/figures/artifacts_wake2_<region>_<date>_<model>.png: RGB crop 800 x 800 m (x5), left - before

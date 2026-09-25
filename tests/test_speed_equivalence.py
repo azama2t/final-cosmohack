@@ -1,6 +1,6 @@
-"""Lane L17: the fast inference path gives the same result as the original one (20 MARIDA val chips).
+"""Speed-up: the fast inference path gives the same result as the original one (20 MARIDA val chips).
 
-Reference = a frozen copy of the pre-L17 feature code (below) + lightgbm.Booster.predict per chip.
+Reference = a frozen copy of the pre-speed-up feature code (below) + lightgbm.Booster.predict per chip.
 Checked: features bit-identical; CPU probabilities bit-identical (batched and per-chip API);
 CUDA kernel (only with MACROPLASTIC_TEST_CUDA=1, e.g. through scripts/gpu_queue.py) max |prob_u8 diff|
 <= 1 and identical masks; the DN pre-check equals the full median rule.
@@ -16,7 +16,7 @@ from scipy import ndimage
 
 N_CHIPS = 20
 
-# ----------------------------------------------------------------------------- frozen reference (pre-L17 pixel.py)
+# ----------------------------------------------------------------------------- frozen reference (pre-speed-up pixel.py)
 L4, L8, L11 = 664.8, 832.9, 1612.05
 
 
@@ -98,7 +98,7 @@ def ref_compute_features(arr, channel_names: Sequence[str]):
 
 
 def ref_predict(booster, arr, names, num_threads):
-    """Pre-L17 LGBMPredictor.predict_proba for a 256x256 chip (one block)."""
+    """Pre-speed-up LGBMPredictor.predict_proba for a 256x256 chip (one block)."""
     from macroplastic.features.pixel import select_bands
 
     f = ref_compute_features(arr, names)
@@ -217,8 +217,8 @@ def test_dn_precheck_matches_median():
 
 
 def test_feature_subset_bit_identical(chips):
-    """Lane L26: compute_features(features=subset) (used by models trained on a feature subset, e.g. the light
-    top-20 L23 model) == the full stack indexed by name, bit for bit (NaN/inf chip included)."""
+    """Robustness fixes: compute_features(features=subset) (used by models trained on a feature subset, e.g. the light
+    top-20 band-subset / light models model) == the full stack indexed by name, bit for bit (NaN/inf chip included)."""
     from macroplastic.features.pixel import BANDS11, compute_features, feature_names
 
     names = feature_names("win")

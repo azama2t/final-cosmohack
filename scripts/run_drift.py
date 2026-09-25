@@ -1,4 +1,4 @@
-"""L8: 72 h demonstration drift forecast from MDD detections of fresh (2025-2026) live scenes.
+"""Drift: 72 h demonstration drift forecast from MDD detections of fresh (2025-2026) live scenes.
 
 Usage (from repo root, PYTHONPATH=src):
   .venv\\Scripts\\python.exe scripts\\run_drift.py --region durban --date 2026-05-04

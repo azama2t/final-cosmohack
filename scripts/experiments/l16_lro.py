@@ -1,4 +1,4 @@
-"""L16 tasks 3-4: leave-region-out (LRO) on MARIDA train+val (+ MADOS), and what helps on an unseen region.
+"""Metric audit tasks 3-4: leave-region-out (LRO) on MARIDA train+val (+ MADOS), and what helps on an unseen region.
 
   .venv/Scripts/python.exe scripts/experiments/l16_lro.py [--seeds 0 1 2]
 Writes weights_exp/l16/lro.json (+ OOF probabilities lro_oof.npz). MARIDA test is never read.
@@ -34,7 +34,7 @@ FSETS = {
     "min": [ALL.index(n) for n in feature_names("min")],
     "nowide": [i for i, n in enumerate(ALL) if not (n.endswith("15") or n.endswith("31"))],  # drop 15/31 px context
 }
-AUG = {"offset": 0.01, "gain": 0.1, "blue_mult": 1.5, "clip0": True}  # = weights_exp/lgbm/bin_win_aug1 (L3 H8)
+AUG = {"offset": 0.01, "gain": 0.1, "blue_mult": 1.5, "clip0": True}  # = weights_exp/lgbm/bin_win_aug1 (LightGBM H8)
 
 
 def augment(img, seed):
@@ -55,7 +55,7 @@ def _feat_aug(args):
 
 
 def aug_pixels():
-    """Augmented copy (seed 0) of MARIDA train (L3 cache) + val (computed here, same per-patch seeds)."""
+    """Augmented copy (seed 0) of MARIDA train (LightGBM cache) + val (computed here, same per-patch seeds)."""
     tr = np.load(C.L3_CACHE / "train_win_augblue_mult1.5_clip0True_gain0.1_offset0.01_s0.npz")
     path = C.OUT / "val_win_aug1_s0.npz"
     if not path.is_file():

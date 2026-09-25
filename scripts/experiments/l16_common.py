@@ -1,4 +1,4 @@
-"""L16 metric audit - shared helpers (independent of src/macroplastic/metrics.py and scripts/train_lgbm*.py).
+"""Metric audit - shared helpers (independent of src/macroplastic/metrics.py and scripts/train_lgbm*.py).
 
 Only MARIDA train/val split lists are read. The MARIDA test split list and test patches are never opened.
 Imports from the project: only the feature function (macroplastic.features.pixel) - it is part of the model definition.
@@ -37,7 +37,7 @@ _RE = re.compile(r"^(?:S2_)?(\d{1,2})-(\d{1,2})-(\d{2})_([0-9]{2}[A-Z]{3})_(\d+)
 
 
 def split_names(split: str) -> list[str]:
-    assert split in ("train", "val"), "L16 never reads the MARIDA test split"
+    assert split in ("train", "val"), "the metric audit never reads the MARIDA test split"
     return [ln.strip() for ln in (MARIDA / "splits" / f"{split}_X.txt").read_text().splitlines() if ln.strip()]
 
 
@@ -119,7 +119,7 @@ def rnd(d, k=4):
     return {a: (round(b, k) if isinstance(b, float) else b) for a, b in d.items()}
 
 
-# ------------------------------------------------------------------ caches (read-only, produced by L3/L13)
+# ------------------------------------------------------------------ caches (read-only, produced by LightGBM/MADOS training)
 def marida_pixels():
     """MARIDA train+val labelled pixels with 'win' features from out/l3_cache, + per-pixel split/scene/region."""
     from macroplastic.features.pixel import feature_names

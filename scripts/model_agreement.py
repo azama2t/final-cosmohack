@@ -1,4 +1,4 @@
-"""L14: threshold calibration and MDD vs our LightGBM agreement (analysis only, nothing is modified).
+"""Model agreement: threshold calibration and MDD vs our LightGBM agreement (analysis only, nothing is modified).
 
 Parts
   scenes : every live scene data/live/<region>/<date>/ with prob_mdd.tif + prob_lgbm.tif + water_mask.tif.
@@ -8,7 +8,7 @@ Parts
            Spearman of the probabilities (random water subsample), candidate "confident detection" rules.
            There are NO labels on live scenes: every number here is agreement, not accuracy.
   val    : MARIDA **val** only (official split; test is never read). Our model weights/lgbm_live on the cached
-           L3 val features (out/l3_cache/val_win.npz, all labelled px): reliability diagram, ECE, Brier,
+           LightGBM val features (out/l3_cache/val_win.npz, all labelled px): reliability diagram, ECE, Brier,
            F1/P/R vs threshold, scene bootstrap of the F1 curve. Optional MDD on val patches (--mdd-val) as a
            reference that is NOT independent (MDD was trained on MARIDA); CPU, B9 substituted by B8A.
   figs   : agreement maps (reports/figures/agreement_<region>_<date>.png) + reports/figures/calibration_lgbm_val.png

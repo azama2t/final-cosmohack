@@ -1,4 +1,4 @@
-"""Robustness checks of inference.py and the lgbm / fdi_rule predictors (lane L24).
+"""Robustness checks of inference.py and the lgbm / fdi_rule predictors (reports/robustness.md).
 
     .venv\\Scripts\\python.exe scripts\\robustness_report.py [--out reports/robustness.md] [--work out/robustness]
 
@@ -7,7 +7,7 @@ of a live L2A scene (data/live/manila/2019-05-13, the most "water" 512x512 windo
 Everything synthetic is written under --work (gitignored out/). The same functions are used by
 tests/test_robustness.py (run_checks() -> list of case dicts).
 
-Items (task L24):
+Items:
  1 empty chip (all NaN / all 0)          2 synthetic clouds on half of the chip
  3 sun glint stripes (+B8/B11)            4 radiometric noise / scale / offset (F1 on labelled px)
  5 other sizes                            6 other dtypes (uint16 DN, float64, L2A DN with +1000 offset)

@@ -1,4 +1,4 @@
-"""Robustness of inference.py and the lgbm / fdi_rule predictors (lane L24; report: reports/robustness.md).
+"""Robustness of inference.py and the lgbm / fdi_rule predictors (robustness checks; report: reports/robustness.md).
 
 All checks live in scripts/robustness_report.py and run once per session (~40 s on CPU) on 5 MARIDA
 *val* patches + one 512x512 crop of a live L2A scene; synthetic files go to out/robustness_pytest/
@@ -24,7 +24,7 @@ def _load_script():
     return mod
 
 
-# Known failures (xfail with the reason). Lane L26 fixed all 10 FAILs of L24: tiny chips (pixel._local_median),
+# Known failures (xfail with the reason). robustness fixes fixed all 10 FAILs of robustness checks: tiny chips (pixel._local_median),
 # per-file error isolation in inference.py (5.cli, 7.missing_b8_desc), L2A BOA offset in --scale auto
 # (6.val_u16dn_off1000), Windows reserved names in io.list_images (9.*). Remaining WARNs are allowed by test_case.
 KNOWN_FAIL: dict[str, str] = {}
@@ -85,7 +85,7 @@ def test_case(robustness_results, case):
     assert r["status"] != "FAIL", f"expect: {r['expect']} | result: {r['result']}"
 
 
-# ---------------------------------------------------------------- lane L26: unit checks of inference.py behaviour
+# ---------------------------------------------------------------- Robustness fixes: unit checks of inference.py behaviour
 # (in-process, fake predictors: fast, and they cover paths the report cannot trigger with the real models)
 
 L26_WORK = REPO / "out" / "robustness_pytest" / "l26"
@@ -227,7 +227,7 @@ def test_l26_tiny_chips_all_sizes():
 
 
 def test_l31_boa_offset_threshold_500(monkeypatch):
-    """Lane L31: --scale auto detects the L2A BOA offset from dark-pixel B12 median >= 500 DN (was 1000).
+    """Mid-size model: --scale auto detects the L2A BOA offset from dark-pixel B12 median >= 500 DN (was 1000).
     Water without the offset: B12 DN 10..240; with it: ~950+ (L2A water is often slightly negative -> DN < 1000,
     which the old >= 1000 rule missed and left the whole scene shifted by +0.1)."""
     import json

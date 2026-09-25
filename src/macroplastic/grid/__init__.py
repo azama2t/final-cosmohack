@@ -1,4 +1,4 @@
-"""Grid layer (lane L7): probability raster -> debris polygons, H3 res-8 index, survey-priority zones, timeseries.
+"""Grid layer: probability raster -> debris polygons, H3 res-8 index, survey-priority zones, timeseries.
 
 Index name (UI): "доля наблюдаемой воды с признаками мусора" (per-mille). It is NOT plastic mass or concentration.
 

@@ -23,7 +23,7 @@ KPI_KEYS = ("total_debris_area_m2", "n_detections", "mean_index", "max_index",
 LAYERS = ("detections", "h3", "zones")
 _NAME_RE = re.compile(r"^[A-Za-z0-9_\-]+$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-# L38: detections.geojson properties.artifact (optional) - objects excluded from the index and zones
+# Artefacts in API: detections.geojson properties.artifact (optional) - objects excluded from the index and zones
 ARTIFACT_RU = {"seam": "шов детекторов", "wake": "кильватер", "ship": "судно"}
 
 
@@ -213,7 +213,7 @@ class Store:
             "observed_cells": len(shares),
             "flagged_cells": sum(1 for s in shares if s > 0),
         }
-        if arts:  # L38: excluded from n_detections / area (not in the index and zones)
+        if arts:  # Artefacts in API: excluded from n_detections / area (not in the index and zones)
             kpi["n_artifacts"] = len(arts)
         return {"region": rid, "date": date, "model": model, "kpi": kpi}
 

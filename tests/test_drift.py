@@ -1,4 +1,4 @@
-"""L8 drift: offline check with synthetic constant forcing -> OceanDrift -> drift.json matches the contract."""
+"""Drift: offline check with synthetic constant forcing -> OceanDrift -> drift.json matches the contract."""
 from __future__ import annotations
 
 import datetime as dt

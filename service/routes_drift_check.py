@@ -1,4 +1,4 @@
-"""L45: drift forecast check against the next snapshot + compact current/wind fields for animated particles.
+"""Drift check: drift forecast check against the next snapshot + compact current/wind fields for animated particles.
 
 GET /api/drift_check                         -> summary (reports/drift_check.json) + pairs with data/figure URLs
 GET /api/drift_check/{region}/{date1}[?date2=] -> particle cloud at t2, 90 % contour (GeoJSON), 2nd-snapshot

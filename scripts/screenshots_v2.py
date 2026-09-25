@@ -13,7 +13,7 @@ Frames (1920×1080 unless noted): 01_globe 02_region 03_detection 04_layers_menu
 09_place 10_drift 11_particles 12_check 13_compare 14_calendar 15_review 16_incidents 17_satellite_offline
 18_overview_1366 19_region_1366 20_detection_1366 21_zone_1366.
 result.json: console errors (external tile hosts separate), fps idle / flyTo / drift / particles, bundle size (gzip).
-L55 additions: frame-time probes (`perf`: fps, frames > 50 ms, p95 frame time) while panning the globe / the region by
+frontend v2 polish additions: frame-time probes (`perf`: fps, frames > 50 ms, p95 frame time) while panning the globe / the region by
 mouse drag and during flyTo; `words_first_screen` (visible words outside the map: prose vs data rows); `prefs` (default
 basemap = satellite + globe and stable for 10 s; the user's basemap / projection / model survive a reload; offline:
 the fallback is temporary and the chosen basemap is kept). Frame groups: perf, prefs (run by default).

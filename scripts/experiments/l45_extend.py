@@ -1,4 +1,4 @@
-"""L45: extend the main drift run (wdf 0.02, same seeds = drift.json path[0], same settings) beyond 72 h for pairs whose
+"""Drift check: extend the main drift run (wdf 0.02, same seeds = drift.json path[0], same settings) beyond 72 h for pairs whose
 second snapshot is later than 72 h. Forcing (HYCOM ESPC-D-V02 + NCEP GFS only; Open-Meteo/constant fallbacks are
 REJECTED here) goes to data_cache/forcing_l45/; drift.json is not touched.
 

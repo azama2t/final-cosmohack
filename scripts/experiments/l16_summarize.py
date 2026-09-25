@@ -1,4 +1,4 @@
-"""L16: collect weights_exp/l16/{recheck,paired,lro,harm_val}.json -> reports/l16_metric_audit.json (+ prints tables).
+"""Metric audit: collect weights_exp/l16/{recheck,paired,lro,harm_val}.json -> reports/l16_metric_audit.json (+ prints tables).
 
   .venv/Scripts/python.exe scripts/experiments/l16_summarize.py
 """

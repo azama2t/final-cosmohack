@@ -1,4 +1,4 @@
-"""L71: поиск синхронной сцены для полевого наблюдения (src/macroplastic/case/pairfinder.py, POST /api/v3/pairfinder).
+"""Поиск синхронной сцены для полевого наблюдения (src/macroplastic/case/pairfinder.py, POST /api/v3/pairfinder).
 Сеть не нужна: синтетический поисковик или офлайн-кэш data/pairs/cache."""
 from __future__ import annotations
 
@@ -52,7 +52,7 @@ def test_sync_window_in_response_default_request():
     assert res["count"] == 0 and res["empty_reason"]           # пусто -> причина, не ошибка
     by = pf.parse_request({"geometry": {"lon": 10, "lat": 50}, "datetime": "2020-01-01"}, cfg)
     assert by.scenario == "typical" and by.speed_ms == pytest.approx(0.2)
-    assert by.tolerance_km == pytest.approx(3.005)             # ширина 10 м по умолчанию / 2 + 3 км (как L59b)
+    assert by.tolerance_km == pytest.approx(3.005)             # ширина 10 м по умолчанию / 2 + 3 км (как допуск по дрейфу в find_pairs.py)
 
 
 def test_cache_key_matches_find_pairs(tmp_path, monkeypatch):

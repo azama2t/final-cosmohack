@@ -49,7 +49,7 @@ _DATE_RES = [
 _TILE_RE = re.compile(r"^T?\d{2}[C-X][A-Z]{2}$")
 _NUM_RE = re.compile(r"^\d+$")
 # short "letters + 1-2 digits" tokens are scene/region prefixes (r05, scene3, reg12) and must NOT split a
-# dataset into one group per scene (L30 rehearsal: r01_{n} .. r16_{n} -> 16 groups, class values of 1 group
+# dataset into one group per scene (rehearsal: r01_{n} .. r16_{n} -> 16 groups, class values of 1 group
 # only, pairs mixed between scenes). Sensor / band / product tokens stay literal (they DO define a group).
 _SCENE_TOK_RE = re.compile(r"^([A-Za-z]{1,8})(\d{1,2})$")
 _KEEP_LITERAL_RE = re.compile(r"^(S[123]|L[1-9]|LC0?\d|LT0?\d|LE0?\d|MSI|OLI|B\d{1,2}A?|band\d{1,2}|b\d{1,2}a?|"
@@ -372,7 +372,7 @@ def pair_within(img_hs: list[dict], mask_hs: list[dict], ig: str, mg: str) -> li
 
     1) full name key (stem without mask/image suffix; scene prefix kept) + the closest folder;
     2) only for masks left over: shared sample id, but ONLY if the id is unique on both sides
-       (ids like '001' repeated in every scene are never used -- L30: 8 of 111 pairs were r04 <-> r12)."""
+       (ids like '001' repeated in every scene are never used -- rehearsal: 8 of 111 pairs were r04 <-> r12)."""
     def parent(h):
         return str(Path(h["rel"]).parent).replace("\\", "/")
 

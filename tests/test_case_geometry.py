@@ -1,4 +1,4 @@
-"""L72: геометрия трансект S2/S3 по сохранённым таблицам PANGAEA (офлайн, data/case/pangaea/)."""
+"""Геометрия трансект S2/S3 по сохранённым таблицам PANGAEA (офлайн, data/case/pangaea/)."""
 from __future__ import annotations
 
 import hashlib

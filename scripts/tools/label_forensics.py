@@ -187,7 +187,7 @@ def build_pairs(a) -> list[dict]:
 def _sid(p: Path, id_regex: str | None, mask: bool = False) -> str:
     """Pair key. Default = file stem without the mask/image suffix word, scene prefix KEPT
     ('r05_001_mask' -> 'r05_001'). The old default (numeric id of the name template, '001') collided across
-    scenes: L30 rehearsal silently kept 30 of 207 pairs."""
+    scenes: rehearsal silently kept 30 of 207 pairs."""
     if id_regex:
         m = re.search(id_regex, str(p).replace("\\", "/"))
         if m:

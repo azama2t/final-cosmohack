@@ -1,4 +1,4 @@
-"""Run our LightGBM (lane L3, weights/lgbm) on live scene folders -> prob_lgbm.tif / prob_lgbm.json (CPU).
+"""Run our LightGBM (LightGBM, weights/lgbm) on live scene folders -> prob_lgbm.tif / prob_lgbm.json (CPU).
 
   CUDA_VISIBLE_DEVICES="" .venv/Scripts/python.exe scripts/run_lgbm_live.py --all [--force]
   defaults (orchestrator decision 25.09): --weights weights/lgbm_live --harmonize water_median, water mask = SCL==6

@@ -1,4 +1,4 @@
-"""L33: scene-relative / wide-window extra features - val MARIDA (3 seeds) + leave-region-out (L16 protocol).
+"""Scene-relative features: scene-relative / wide-window extra features - val MARIDA (3 seeds) + leave-region-out (metric audit protocol).
 
     cd scripts/experiments && PYTHONPATH=../../src L16_THREADS=10 ../../.venv/Scripts/python.exe l33_run.py
 Needs out/l33_cache (l33_feats.py). Writes weights_exp/l33/run.json (+ models of seed 0 for the timing script).

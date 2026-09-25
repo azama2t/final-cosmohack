@@ -591,6 +591,11 @@ function ModelEstimate({ meta, p }: { meta: Meta; p: ObsProps }) {
             {fe.lo !== null && fe.lo !== undefined && fe.hi !== null && fe.hi !== undefined ? `[${num(fe.lo)}; ${num(fe.hi)}]` : 'интервал не рассчитан'}
             {fe.interval ? ` · покрытие ${fe.interval}` : ''}
           </div>
+          {scenLine((fe as any).scenarios) && (
+            <div className="c-line" data-testid="obs-field-scenarios">
+              {scenLine((fe as any).scenarios)}
+            </div>
+          )}
         </>
       ) : (
         <div className="c-line">нет оценки для профиля этой записи</div>
@@ -765,4 +770,13 @@ function PairFinder({ obs }: { obs: Feat<ObsProps> }) {
       )}
     </div>
   );
+}
+
+/** field_estimate scenarios (p25 / p50 / p75 of the profile) in one line */
+function scenLine(sc: any): string | null {
+  if (!sc) return null;
+  const get = (k: string) => (Array.isArray(sc) ? sc.find((x: any) => x?.id === k || x?.name === k)?.value : typeof sc[k] === 'object' ? sc[k]?.value : sc[k]);
+  const v = ['p25', 'p50', 'p75'].map(get);
+  if (v.every((x) => typeof x !== 'number')) return null;
+  return `сценарии p25 / p50 / p75: ${v.map((x) => (typeof x === 'number' ? num(x) : '—')).join(' / ')} шт./км²`;
 }

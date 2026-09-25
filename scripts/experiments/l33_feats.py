@@ -1,4 +1,4 @@
-"""L33: scene-relative features (wrapper over macroplastic.features.pixel; pixel.py itself is not changed).
+"""Scene-relative features (wrapper over macroplastic.features.pixel; pixel.py itself is not changed).
 
 Two families of EXTRA features (added to the 48 'win' features, never replacing them):
 

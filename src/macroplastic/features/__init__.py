@@ -1,4 +1,4 @@
-"""Feature engineering for pixel models (lane L3)."""
+"""Feature engineering for pixel models (LightGBM)."""
 from .pixel import (  # noqa: F401
     BANDS11,
     compute_features,

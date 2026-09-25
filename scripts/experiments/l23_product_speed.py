@@ -1,4 +1,4 @@
-"""L23: warm timing through the PRODUCT predictor (LGBMPredictor, ctypes lib_lightgbm, CPU, 10 threads) on the 300
+"""Band-subset / light models: warm timing through the PRODUCT predictor (LGBMPredictor, ctypes lib_lightgbm, CPU, 10 threads) on the 300
 speed chips: final model vs light models. Features = full 48 'win' stack (product code computes all, then selects).
 Adds "feature_level": "win" to the light meta.json files so LGBMPredictor loads them. Two passes, second is reported.
 """

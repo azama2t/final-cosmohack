@@ -1,4 +1,4 @@
-"""L23: inference speed of the final model vs light models on 300 chips 256x256 (out/speed_chips = first 300
+"""Band-subset / light models: inference speed of the final model vs light models on 300 chips 256x256 (out/speed_chips = first 300
 MARIDA *val* patches, prepared by scripts/measure_speed.py; test never used).
 
   PYTHONPATH=src .venv/Scripts/python.exe scripts/experiments/l23_speed.py bench --models weights/lgbm,weights_exp/l23/light_k20_t200_l31_s0 --repeats 3

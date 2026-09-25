@@ -135,7 +135,7 @@ def check_detections(v: V, rel, region, date, model):
                 v.err(w, "negative area")
             if (pr["region"], pr["date"], pr["model"]) != (region, date, model):
                 v.err(w, f"region/date/model mismatch {pr['region']}/{pr['date']}/{pr['model']}")
-            if "confirmed" in pr:  # optional (L15): cross-model confirmation within 20 m
+            if "confirmed" in pr:  # optional (cross-model confirmation): within 20 m
                 cb = pr.get("confirmed_by")
                 if not isinstance(pr["confirmed"], bool):
                     v.err(w, "confirmed must be bool")
@@ -143,7 +143,7 @@ def check_detections(v: V, rel, region, date, model):
                     v.err(w, f"confirmed_by must be the other model's id, got {cb!r}")
                 elif not pr["confirmed"] and cb is not None:
                     v.err(w, "confirmed_by must be null when confirmed is false")
-            if "artifact" in pr and pr["artifact"] not in (None, "seam", "wake", "ship", "other"):  # optional (L37, L56)
+            if "artifact" in pr and pr["artifact"] not in (None, "seam", "wake", "ship", "other"):  # optional (artefact filter, manual review)
                 v.err(w, f"artifact must be seam|wake|ship|other|null, got {pr['artifact']!r}")
         if i > 5000:
             break
@@ -207,8 +207,8 @@ def check_zones(v: V, rel, region, date, model):
                 v.err(w, f"rank {zz['rank']} != {i + 1}")
             if "n_confirmed" in zz and (not isinstance(zz["n_confirmed"], int) or isinstance(zz["n_confirmed"], bool)
                                         or zz["n_confirmed"] < 0):
-                v.err(w, "n_confirmed must be a non-negative int")  # optional (L15)
-            st = zz.get("score_terms")  # optional (L37): base x agreement x date_penalty = score
+                v.err(w, "n_confirmed must be a non-negative int")  # optional (cross-model confirmation)
+            st = zz.get("score_terms")  # optional (artefact filter): base x agreement x date_penalty = score
             if st is not None:
                 try:
                     vals = {k: (st[k]["value"] if isinstance(st[k], dict) else st[k])
@@ -300,7 +300,7 @@ def validate(root: Path) -> V:
         v.need(s, f"manifest.sources[{i}]", {"name": (str,), "license": (str,)})
     if not man["regions"]:
         v.err("manifest", "no regions")
-    if "demo" in man:  # L43: optional explicit demo region {region, date, reason}
+    if "demo" in man:  # optional explicit demo region {region, date, reason}
         dm = man["demo"]
         if v.need(dm, "manifest.demo", {"region": (str,), "date": (str,), "reason": (str,)}):
             reg = next((r for r in man["regions"] if isinstance(r, dict) and r.get("id") == dm["region"]), None)
@@ -362,7 +362,7 @@ def validate(root: Path) -> V:
                         v.err(dm["thumb"], f"{tp.stat().st_size} bytes > 30 KB")
                     if max(Image.open(tp).size) > 256:
                         v.err(dm["thumb"], "thumb larger than 256 px")
-            nc = dm.get("n_confirmed")  # optional (L15): {model: confirmed detections}, only with >= 2 models
+            nc = dm.get("n_confirmed")  # optional (cross-model confirmation): {model: confirmed detections}, only with >= 2 models
             if nc is not None:
                 if not isinstance(nc, dict) or set(nc) != set(dm["models"]) or not all(
                         isinstance(x, int) and not isinstance(x, bool) and x >= 0 for x in nc.values()):

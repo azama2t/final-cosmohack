@@ -1,4 +1,4 @@
-"""L16: does per-scene water-median harmonization hurt in-distribution? Final model on MARIDA val, with/without it.
+"""Metric audit: does per-scene water-median harmonization hurt in-distribution? Final model on MARIDA val, with/without it.
 Also: spatial overlap between held-out regions (bay_islands vs honduras_gulf patches).
 
   .venv/Scripts/python.exe scripts/experiments/l16_harm_val.py

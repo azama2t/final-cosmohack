@@ -962,3 +962,72 @@
   cursor: pointer;
   color: var(--text-3);
 }
+
+/* iteration 10: «Куда идти», compact legend */
+.c-go {
+  grid-template-columns: 18px 1fr;
+}
+.c-go-n {
+  color: var(--text-3);
+  font-size: 12px;
+  align-self: start;
+  padding-top: 1px;
+}
+.c-go-w {
+  color: var(--text-2);
+}
+.c-lg-compact {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: var(--text-2);
+  cursor: pointer;
+  font-size: 12px;
+}
+.c-lg-summary.clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.c-lg-keys {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.c-sw-strip-i {
+  display: inline-block;
+  width: 14px;
+  height: 9px;
+  border: 1.5px dashed #9aa0a8;
+  border-radius: 2px;
+  margin-left: 6px;
+}
+.c-lg-keys .c-sw-px {
+  margin-left: 6px;
+}
+.c-legend.min {
+  width: 300px;
+}
+.app.case .left .tabs {
+  gap: 12px;
+}
+
+.app.case .left .tabs .tab {
+  white-space: nowrap;
+}
+@media (max-width: 1500px) {
+  .app.case .left .tabs {
+    gap: 10px;
+  }
+  .app.case .left .tabs .tab {
+    font-size: 12px;
+  }
+}

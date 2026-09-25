@@ -1,4 +1,4 @@
-"""L30 rehearsal: build an "organizer-style" dataset from the MADOS *test* split only.
+"""Rehearsal: build an "organizer-style" dataset from the MADOS *test* split only.
 
 - Scenes: MADOS test split minus scenes that are the same acquisition as a MARIDA test scene
   (reports/mados_overlap_with_marida_test.csv, marida_split == test & kind == same_acquisition).
