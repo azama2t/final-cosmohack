@@ -1,5 +1,5 @@
 # данные и артефакты (не в git)
-/data/
+/data/*
 /data_cache/
 /out/
 /weights_exp/
@@ -43,3 +43,8 @@ __pycache__/
 /reports/jury_pre*.md
 /reports/cloud_edge_components.csv
 /reports/mados_overlap_selfcheck*.csv
+# данные кейса, нужные для воспроизведения без сети (реестр пар, кэш STAC, маски качества, предсказания детектора)
+!/data/pairs/
+/data/pairs/experiment/
+!/data/case/
+/data/case/detector_preds/*.joblib

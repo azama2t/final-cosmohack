@@ -1,0 +1,49 @@
+{
+ "split": "val",
+ "settings": {
+  "lgbm": {
+   "setting": "P(MD) >= 0.63",
+   "source": "weights/lgbm/meta.json (threshold chosen on val)"
+  },
+  "rf_argmax": {
+   "setting": "argmax of 11 classes (12-15 merged into Marine Water)",
+   "source": "fixed by method (MARIDA paper), trained on MARIDA train, seed 5",
+   "val_f1_tuning_cache": 0.8647
+  },
+  "rf_prob": {
+   "setting": "P(MD) >= 0.36",
+   "source": "threshold grid 0.02..0.98 on val (F1 MD)",
+   "val_f1_tuning_cache": 0.8596
+  },
+  "fdi_ndvi_box": {
+   "setting": "FDI in [0.0234, 0.11202], NDVI in [-0.06544, inf]",
+   "source": "4 thresholds tuned on val (F1 MD)",
+   "val_f1_tuning_cache": 0.4152
+  },
+  "fdi_interval": {
+   "setting": "FDI in [0.03027, 0.05919]",
+   "source": "2 thresholds tuned on val (F1 MD)",
+   "val_f1_tuning_cache": 0.3231
+  },
+  "fdi_threshold": {
+   "setting": "FDI <= 0.08186",
+   "source": "threshold + direction tuned on val (F1 MD)",
+   "val_f1_tuning_cache": 0.0205
+  },
+  "ndvi_threshold": {
+   "setting": "NDVI >= 0.02161",
+   "source": "threshold + direction tuned on val (F1 MD)",
+   "val_f1_tuning_cache": 0.1679
+  }
+ },
+ "models": [
+  "lgbm",
+  "rf_argmax",
+  "rf_prob",
+  "fdi_ndvi_box",
+  "fdi_interval",
+  "fdi_threshold",
+  "ndvi_threshold"
+ ],
+ "note": "masks: np.unpackbits(axis=-1)[..., :256]; probs float16; NaN pixels -> 0"
+}

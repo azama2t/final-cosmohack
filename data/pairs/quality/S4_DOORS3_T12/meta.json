@@ -1,0 +1,114 @@
+{
+ "event_id": "S4:DOORS3:T12",
+ "sample_ids": "MPL-0918",
+ "field_sample_id": "MPL-0918",
+ "field_items_km2": 48.97,
+ "sampling_method": "ship-based visual transect, floating macro litter >2.5 cm",
+ "transect_width_m": null,
+ "transect_length_km": null,
+ "has_line": false,
+ "obs_datetime": "2024-06-04 12:00:00+00:00",
+ "time_known": false,
+ "dt_hours": -27.53,
+ "config": {
+  "strip": {
+   "point_buffer_m": 500,
+   "min_half_width_m": 10,
+   "context_m": 3000,
+   "max_crop_m": 40000
+  },
+  "decision": {
+   "min_coverage": 0.8,
+   "max_cloud_frac": 0.2,
+   "max_land_frac": 0.5,
+   "min_valid_water_frac": 0.5,
+   "glint_b11": 0.01,
+   "glint_scene_spc_frac": 0.5,
+   "glint_scene_max_scl_cloud": 0.01
+  },
+  "detector": {
+   "weights": "weights/lgbm",
+   "harmonize": "water_median",
+   "min_px": 1,
+   "cloud_buffer_px": 5
+  },
+  "network": {
+   "workers": 4,
+   "retries": 4
+  }
+ },
+ "scene_id": "S2A_37TCH_20240603_0_L2A",
+ "scene_id_l59": "S2A_37TCH_20240603_0_L2A",
+ "source": "earth-search/sentinel-2-l2a",
+ "level": "L2A",
+ "scene_datetime": "2024-06-03T08:28:19.787000Z",
+ "tile": "37TCH",
+ "scene_cloud_cover": 0.043789,
+ "epsg": 32637,
+ "bounds_utm": [
+  334980.0,
+  4696680.0,
+  342060.0,
+  4703700.0
+ ],
+ "width": 708,
+ "height": 702,
+ "strip_rule": "point (no transect geometry in samples) + buffer 500 m",
+ "substitution_note": "",
+ "scale_offset_note": "reflectance = DN*scale + offset per asset from STAC metadata (raster:bands scale; raster:bands offset NOT applied (already removed from COG pixels)); offset check: raster:bands offset -0.1; boa_offset_applied=True; SCL-6 water B12 median DN=143 -> offset already removed, not applied; scale/offset used: {\"B1\": [0.0001, 0.0], \"B2\": [0.0001, 0.0], \"B3\": [0.0001, 0.0], \"B4\": [0.0001, 0.0], \"B5\": [0.0001, 0.0], \"B6\": [0.0001, 0.0], \"B7\": [0.0001, 0.0], \"B8\": [0.0001, 0.0], \"B8A\": [0.0001, 0.0], \"B9\": [0.0001, 0.0], \"B11\": [0.0001, 0.0], \"B12\": [0.0001, 0.0]}; no date-based -1000 DN rule; no clipping (values as computed); DN==0 -> NaN; 20/60 m bands resampled to 10 m by nearest (SCL always nearest)",
+ "quality": {
+  "strip_px": 8041,
+  "strip_area_km2": 0.8041,
+  "coverage": 1.0,
+  "valid_water_frac": 1.0,
+  "cloud_frac": 0.0,
+  "scl_cloud_frac": 0.0,
+  "spectral_cloud_frac": 0.0,
+  "land_frac": 0.0,
+  "glint_frac": 0.0,
+  "glint_scene": false,
+  "nodata_frac": 0.0,
+  "glint_b11_median": 0.0143,
+  "crop_valid_frac": 1.0,
+  "crop_water_frac": 1.0
+ },
+ "decision": "reject",
+ "reason": "glint",
+ "detector": {
+  "threshold": 0.63,
+  "n_det_crop": 6,
+  "n_det_crop_raw": 6,
+  "n_dropped_cloud_shadow": 0,
+  "det_px_crop": 6,
+  "det_frac_water_crop": 1.2e-05,
+  "n_det": 0,
+  "det_px_strip": 0,
+  "det_area_m2": 0,
+  "prob_max": 0.0225,
+  "prob_p99_strip": 0.0,
+  "prob_p99_crop_water": 0.0,
+  "harmonize_offset": [
+   -0.040219999849796295,
+   -0.04230999946594238,
+   -0.024310000240802765,
+   -0.0015300000086426735,
+   -0.005169999785721302,
+   -0.0013899999903514981,
+   -0.00039999998989515007,
+   -0.0007600000244565308,
+   7.000000186963007e-05,
+   -0.005100000184029341,
+   -0.00795000046491623
+  ],
+  "runtime_s": 1.0
+ },
+ "files": [
+  "rgb.png",
+  "quality.tif",
+  "quality.png",
+  "prob.tif",
+  "mask.png"
+ ],
+ "elapsed_s": 16.7,
+ "created": "2026-09-25T17:32:05"
+}

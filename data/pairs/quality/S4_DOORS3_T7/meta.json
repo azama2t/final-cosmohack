@@ -1,0 +1,78 @@
+{
+ "event_id": "S4:DOORS3:T7",
+ "sample_ids": "MPL-0908",
+ "field_sample_id": "MPL-0908",
+ "field_items_km2": 131.17,
+ "sampling_method": "ship-based visual transect, floating macro litter >2.5 cm",
+ "transect_width_m": null,
+ "transect_length_km": null,
+ "has_line": false,
+ "obs_datetime": "2024-06-03 12:00:00+00:00",
+ "time_known": false,
+ "dt_hours": 20.53,
+ "config": {
+  "strip": {
+   "point_buffer_m": 500,
+   "min_half_width_m": 10,
+   "context_m": 3000,
+   "max_crop_m": 40000
+  },
+  "decision": {
+   "min_coverage": 0.8,
+   "max_cloud_frac": 0.2,
+   "max_land_frac": 0.5,
+   "min_valid_water_frac": 0.5,
+   "glint_b11": 0.01,
+   "glint_scene_spc_frac": 0.5,
+   "glint_scene_max_scl_cloud": 0.01
+  },
+  "detector": {
+   "weights": "weights/lgbm",
+   "harmonize": "water_median",
+   "min_px": 1,
+   "cloud_buffer_px": 5
+  },
+  "network": {
+   "workers": 4,
+   "retries": 4
+  }
+ },
+ "scene_id": "LC09_L2SP_178030_20240604_02_T2",
+ "scene_id_l59": "LC09_L2SP_178030_20240604_02_T2",
+ "source": "planetary-computer/landsat-c2-l2",
+ "level": "L2SP",
+ "scene_datetime": "2024-06-04T08:32:00.369518Z",
+ "scene_cloud_cover": 41.27,
+ "epsg": 32636,
+ "bounds_utm": [
+  530910.0,
+  4756110.0,
+  537960.0,
+  4763130.0
+ ],
+ "width": 235,
+ "height": 234,
+ "strip_rule": "point (no transect geometry in samples) + buffer 500 m; 30 m QA_PIXEL grid",
+ "substitution_note": "Landsat: QA_PIXEL mask only (bits 0 fill, 1-4 dilated cloud/cirrus/cloud/shadow, 6 clear, 7 water); detector not run (trained on S2 bands)",
+ "quality": {
+  "strip_px": 938,
+  "strip_area_km2": 0.8442,
+  "coverage": 1.0,
+  "valid_water_frac": 0.0,
+  "cloud_frac": 1.0,
+  "land_frac": 0.0,
+  "nodata_frac": 0.0,
+  "glint_b11_median": null,
+  "red_sr_median_strip": 0.016,
+  "red_sr_median_qa_cloud_strip": 0.016
+ },
+ "decision": "reject",
+ "reason": "cloud(qa_suspect:red_sr<0.03)",
+ "detector": null,
+ "files": [
+  "quality.tif",
+  "quality.png"
+ ],
+ "elapsed_s": 1.0,
+ "created": "2026-09-25T17:34:13"
+}

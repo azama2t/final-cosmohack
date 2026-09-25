@@ -1,0 +1,78 @@
+{
+ "event_id": "S3:HE419_MarLitter_transect29",
+ "sample_ids": "MPL-0162;MPL-0163;MPL-0164;MPL-0165;MPL-0166;MPL-0167",
+ "field_sample_id": "MPL-0166",
+ "field_items_km2": 17.3,
+ "sampling_method": "ship-based visual transect (10 m strip), macrolitter >2 cm",
+ "transect_width_m": 10.0,
+ "transect_length_km": 23.093,
+ "has_line": true,
+ "obs_datetime": "2014-04-11 10:41:30+00:00",
+ "time_known": true,
+ "dt_hours": 23.65,
+ "config": {
+  "strip": {
+   "point_buffer_m": 500,
+   "min_half_width_m": 10,
+   "context_m": 3000,
+   "max_crop_m": 40000
+  },
+  "decision": {
+   "min_coverage": 0.8,
+   "max_cloud_frac": 0.2,
+   "max_land_frac": 0.5,
+   "min_valid_water_frac": 0.5,
+   "glint_b11": 0.01,
+   "glint_scene_spc_frac": 0.5,
+   "glint_scene_max_scl_cloud": 0.01
+  },
+  "detector": {
+   "weights": "weights/lgbm",
+   "harmonize": "water_median",
+   "min_px": 1,
+   "cloud_buffer_px": 5
+  },
+  "network": {
+   "workers": 4,
+   "retries": 4
+  }
+ },
+ "scene_id": "LC08_L2SP_196022_20140412_02_T1",
+ "scene_id_l59": "LC08_L2SP_196022_20140412_02_T1",
+ "source": "planetary-computer/landsat-c2-l2",
+ "level": "L2SP",
+ "scene_datetime": "2014-04-12T10:20:44.439949Z",
+ "scene_cloud_cover": 45.59,
+ "epsg": 32632,
+ "bounds_utm": [
+  440700.0,
+  6056730.0,
+  448200.0,
+  6085800.0
+ ],
+ "width": 250,
+ "height": 969,
+ "strip_rule": "transect line + buffer 10 m (width 10.0 m / 2, min 10 m); 30 m QA_PIXEL grid",
+ "substitution_note": "Landsat: QA_PIXEL mask only (bits 0 fill, 1-4 dilated cloud/cirrus/cloud/shadow, 6 clear, 7 water); detector not run (trained on S2 bands)",
+ "quality": {
+  "strip_px": 1333,
+  "strip_area_km2": 1.1997,
+  "coverage": 1.0,
+  "valid_water_frac": 0.0,
+  "cloud_frac": 1.0,
+  "land_frac": 0.0,
+  "nodata_frac": 0.0,
+  "glint_b11_median": null,
+  "red_sr_median_strip": 0.1828,
+  "red_sr_median_qa_cloud_strip": 0.1828
+ },
+ "decision": "reject",
+ "reason": "cloud",
+ "detector": null,
+ "files": [
+  "quality.tif",
+  "quality.png"
+ ],
+ "elapsed_s": 1.9,
+ "created": "2026-09-25T17:34:18"
+}
