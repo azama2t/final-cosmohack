@@ -527,3 +527,60 @@ GET /api/v3/metrics.concentration: + selected {profile: "median_train"}, profile
     statuses→status, missions→mission. Алиас и основное имя одновременно → 400.
   limit/offset работают у /observations, /pairs, /scenes, /zones. Ответ: count (на странице), total (всего), offset, limit.
   export?query_id= с пустым значением → 400 BAD_PARAM (раньше выгружалось всё).
+
+3.8 СТУДИЯ (ДОБАВЛЕНИЯ, 26.09 01:00, L95) — новые эндпоинты, старые не менялись
+Код: service/routes_v3_studio.py (маршруты встраиваются в router routes_v3 перед его catch-all). Тесты: tests/test_api_studio.py.
+Типы и загрузчик для фронта v3: service/frontend_v3/src/views/views.ts.
+Общие правила как в разделе 1 и 3.6: JSON «application/json; charset=utf-8», ошибки {"error": {code, message, details}},
+неизвестный параметр → 400 BAD_PARAM {unknown, allowed, aliases}; алиасы sources→source, levels→level, views→view.
+
+GET /api/v3/studio/scenes?bbox=&date_from=&date_to=&source=&level=&view=&limit=&offset=
+  Все сцены С РЕАЛЬНЫМИ ФАЙЛАМИ (каналы, маски, вероятности) в области/датах. Источники (source_type):
+    pair   — снимки пар кейса data/pairs/quality/<event>/ (+ FDI data/pairs/experiment/<event>/fdi.npy)
+    live   — сцены районов data/live/<region>/<date>/ (bands.tif 12 каналов L2A, scl.tif, prob_lgbm/prob_mdd.tif);
+             даты service/data/<region>/<date>/ без сырья — только «Снимок» из готового rgb.png (EPSG:4326)
+    drift  — data/drift_check/<region>/<date>/ (формат live)
+    search — розыск data/search/<src>/**/<dir>/ с meta.json|scene.json и хотя бы одним растром (cache/src/code пропускаются)
+  source: список pair,live,drift,search; level: A,B,C,D,none; view: сцены, у которых есть ВСЕ перечисленные виды.
+  Ответ: {version:"3.8", count, total, offset, limit, empty_reason, kinds:[{id,label,overlay}], source_types, levels,
+          by_source_type:{pair:n,…}, scenes:[Scene]} — сортировка по datetime, затем id.
+  Scene: id ("pair.<dir>" | "live.<region>.<date>" | "drift.<region>.<date>" | "search.<src>.<путь через ~>"),
+    source_type, source_label, title, datetime (ISO UTC), date, mission, platform ("Sentinel-2A"…), catalog
+    ("earth-search"…), collection ("sentinel-2-l2a"…), product_id, tile, region, event_id,
+    level ("A"|"B"|"C"|"D"|null), level_match ("event_id+scene_id"|"scene_id"|null),
+    coordinates [[lon,lat]×4: tl,tr,br,bl — углы сетки растра, порядок image-source MapLibre], bounds [w,s,e,n], crs,
+    size_px [w,h], pixel_m, views {rgb,spectral,detection,quality: View}, available_views [kind…],
+    quality {decision, reason, valid_water_frac, cloud_frac, …}|null, detector {threshold, n_det|n_above_threshold, …}|null,
+    field {sample_ids, field_items_km2, obs_datetime, dt_hours}|null, links {v3_scene, dir, detections_lgbm, …},
+    footprint_note ("вырезка вокруг наблюдения, не вся сцена" и т.п.).
+  View: {available, label ("Снимок"|"Спектральный"|"Детекция"|"Качество"), overlay (true у detection/quality — PNG
+    с прозрачностью поверх «Снимка»), url|null, source (из каких файлов/каналов), variants|null, reason|null (почему нет)}.
+  В списке нет View.legend и level_records — они в GET /scenes/{id}.
+  Фронт показывает в переключателе ТОЛЬКО available_views (пустых переключателей нет).
+
+GET /api/v3/studio/scenes/{id} — Scene + level_records [{level, event_id, scene_id, reason, file}] + View.legend
+  (detection: {type:"probability", threshold, items}; quality: {type:"classes", palette:"meta.quality_classes", items})
+  + timeline [{id, datetime, source_type, platform, level, available_views}] — все сцены того же event_id (или региона).
+  Параметров нет. Нет сцены → 404 NOT_FOUND.
+
+GET /api/v3/studio/scenes/{id}/view/{kind}.png?px=&variant=
+  kind: rgb | spectral | detection | quality (другое → 400 BAD_PARAM). px: 64..4096, по умолчанию 1024 — максимум
+  стороны, без увеличения. variant: spectral — fdi (по умолчанию) | swir (только при bands.tif); detection — lgbm
+  (по умолчанию) | mdd (если есть prob_mdd.tif); недопустимый для сцены → 400 BAD_PARAM {allowed}.
+  Все виды сцены — в одной сетке (coordinates сцены).
+    rgb       — bands.tif B4,B3,B2, 0..0.16, гамма 1/1.8 (NaN → прозрачно); у пар — rgb.png pair_quality.py.
+    spectral  — FDI (Biermann 2020, src/macroplastic/indices.fdi: B6, B8, B11), палитра magma, растяжка p2..p99.5 по
+                пригодной воде (quality код 1 / SCL 6); swir — B11,B8,B4, p2..p98 по каналу. У пар — fdi.npy тех же вырезок.
+    detection — вероятность детектора: P ≥ порога → #ff2d55f2; 0.2 ≤ P < порога → жёлтый полупрозрачный; иначе
+                прозрачно. При уменьшении — максимум по блоку (одиночные пиксели не теряются). Порог: meta.detector.
+                threshold (пары) / prob_lgbm.json threshold (районы); нет порога → 0.5 и "(default)" в X-View-Scale.
+    quality   — классы качества в палитре /meta.quality_classes: quality.tif (пары, розыск) или SCL (районы:
+                6 вода, 4/5 суша, 3/8/9/10 облако, 0 нет данных, прочее — «нет данных / непригодно»; бликов нет).
+  Ответ 200 image/png; заголовки X-Evidence-Level (A–D|none), X-Scene-Datetime, X-View-Kind, X-View-Variant,
+  X-View-Size ("WxH"), X-View-Scale, X-Detection-Pixels (detection), X-Cache (render|mem|disk), ETag
+  (If-None-Match → 304), Cache-Control: public, max-age=3600; CORS с Access-Control-Expose-Headers для X-*.
+  Нет файла для вида → 404 {"error": {"code": "NO_VIEW", "message", "details": {scene_id, kind, reason,
+  available_views}}}. Кэш PNG: память (96) + диск out/studio_cache/<id>/ (MACROPLASTIC_STUDIO_CACHE), ключ включает
+  mtime/размер исходных файлов.
+  Уровень доказательности — ТОЛЬКО из data/search/*/candidates.csv (поле level; сначала event_id+scene_id, затем
+  scene_id; при нескольких записях — сильнейший, все записи в level_records). Нет записи → null («не оценивался»).

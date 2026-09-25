@@ -1,0 +1,63 @@
+{
+ "stages": [
+  {
+   "label": "События в CSV организаторов",
+   "total": 318,
+   "by_source": {
+    "S1_GPGP2018": 181,
+    "S2_SARGASSO_MSM41": 63,
+    "S3_SE_NORTH_SEA": 41,
+    "S4_BLACK_SEA_DOORS3": 33
+   }
+  },
+  {
+   "label": "Есть снимок S2/Landsat в ±5 сут (точка внутри контура сцены)",
+   "total": 68,
+   "by_source": {
+    "S1_GPGP2018": 0,
+    "S2_SARGASSO_MSM41": 1,
+    "S3_SE_NORTH_SEA": 34,
+    "S4_BLACK_SEA_DOORS3": 33
+   }
+  },
+  {
+   "label": "Отбор по метаданным (|dt| ≤ 1 сут, облачность ≤ 60 %)",
+   "total": 29,
+   "by_source": {
+    "S1_GPGP2018": 0,
+    "S2_SARGASSO_MSM41": 0,
+    "S3_SE_NORTH_SEA": 5,
+    "S4_BLACK_SEA_DOORS3": 24
+   }
+  },
+  {
+   "label": "Прошли маски качества в полосе (облака, блик, покрытие)",
+   "total": 12,
+   "by_source": {
+    "S1_GPGP2018": 0,
+    "S2_SARGASSO_MSM41": 0,
+    "S3_SE_NORTH_SEA": 1,
+    "S4_BLACK_SEA_DOORS3": 11
+   }
+  },
+  {
+   "label": "Синхронны при типичном дрейфе (0.2 м/с, допуск 3 км)",
+   "total": 0,
+   "by_source": {
+    "S1_GPGP2018": 0,
+    "S2_SARGASSO_MSM41": 0,
+    "S3_SE_NORTH_SEA": 0,
+    "S4_BLACK_SEA_DOORS3": 0
+   }
+  }
+ ],
+ "level_A_pairs": 0,
+ "s11_levels": {},
+ "s11_files": [],
+ "quality_reject_reasons": {
+  "glint": 10,
+  "cloud(qa_suspect:red_sr<0.03)": 4,
+  "cloud": 2,
+  "insufficient_coverage": 1
+ }
+}
