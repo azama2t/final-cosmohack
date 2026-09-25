@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generated": "2026-09-25T06:39:51+00:00",
+ "generated": "2026-09-25T08:23:29+00:00",
  "kind": "demo",
  "index": {
   "name": "доля наблюдаемой воды с признаками мусора",
@@ -11,7 +11,7 @@
   "flagged": "пиксели prob ≥ порога на наблюдаемой воде после постобработки (компоненты ≥ 2 px, не касаются облаков/суши в буфере 1 px, не ближе 5 px к облаку/тени, не тень облака — L28; без объектов-артефактов: шов/граница яркости, кильватер, судно — L37, detections.geojson properties.artifact)",
   "artifacts": {
    "ship": "у яркой малой цели (судно, платформа, буй, островок; B8 ≥ 0.06 и B2,B3,B4 ≥ 0.04, ≤ 150 px) — ≥ 50 % пикселей в ≤ 3 px",
-   "wake": "прямая узкая полоса (кильватер): у яркой цели и ≥ 500 м, или ≥ 1 км без цели",
+   "wake": "прямая узкая полоса (кильватер): у яркой цели и ≥ 500 м, или ≥ 1 км без цели; вытянутый объект ≥ 250 м с яркой точкой-судном в ≤ 5 px (50 м) от торца (L41)",
    "seam": "прямая линия по резкой границе яркости воды (шов детекторов / край мутного шлейфа) или ≥ 1,5 км вдоль трека S2"
   },
   "zone_score": "score = flagged_water_px × mean_prob × (1 + 0.5 × (repeat_dates − 1)) × (1 + 1 × confirmed_share) × (0.5 при дымке/блике)",
@@ -31,91 +31,6 @@
   }
  },
  "regions": [
-  {
-   "id": "nile",
-   "name": "Дельта Нила (устье Розетты)",
-   "name_en": "Nile Delta (Rosetta mouth), Egypt",
-   "country": "Египет",
-   "tile": "36RTV",
-   "center": [
-    30.379688,
-    31.484904
-   ],
-   "bounds": [
-    30.244659,
-    31.369391,
-    30.514717,
-    31.600418
-   ],
-   "zoom": 11,
-   "default_date": "2026-01-05",
-   "summary": {
-    "latest_date": "2026-01-05",
-    "model": "mdd",
-    "haze": false,
-    "index_permille": 0.2986,
-    "n_detections": 41,
-    "total_debris_area_m2": 138300.0
-   },
-   "dates": [
-    {
-     "date": "2025-11-11",
-     "scene_id": "S2C_MSIL2A_20251111T084221_R064_T36RTV_20251111T121910",
-     "source": "planetary-computer",
-     "cloud_frac": 0.0017,
-     "bounds": [
-      30.244659,
-      31.369391,
-      30.514717,
-      31.600418
-     ],
-     "rgb": "nile/2025-11-11/rgb.png",
-     "thumb": "nile/2025-11-11/thumb.jpg",
-     "models": [
-      "lgbm",
-      "mdd"
-     ],
-     "drift": "nile/2025-11-11/drift.json",
-     "quality": {
-      "glint_or_haze": false,
-      "haze": false,
-      "note": ""
-     },
-     "n_confirmed": {
-      "lgbm": 1,
-      "mdd": 0
-     }
-    },
-    {
-     "date": "2026-01-05",
-     "scene_id": "S2B_MSIL2A_20260105T084239_R064_T36RTV_20260105T123702",
-     "source": "planetary-computer",
-     "cloud_frac": 0.0,
-     "bounds": [
-      30.244659,
-      31.369391,
-      30.514717,
-      31.600418
-     ],
-     "rgb": "nile/2026-01-05/rgb.png",
-     "thumb": "nile/2026-01-05/thumb.jpg",
-     "models": [
-      "lgbm",
-      "mdd"
-     ],
-     "drift": "nile/2026-01-05/drift.json",
-     "quality": {
-      "glint_or_haze": false,
-      "haze": false,
-      "note": ""
-     },
-     "n_confirmed": {
-      "lgbm": 38,
-      "mdd": 28
-     }
-    }
-   ]
-  },
   {
    "id": "guanabara",
    "name": "Залив Гуанабара (Рио-де-Жанейро)",
@@ -202,6 +117,63 @@
    ]
   },
   {
+   "id": "lagos",
+   "name": "Лагос (вход в лагуну, порт Апапа)",
+   "name_en": "Lagos harbour entrance, Nigeria",
+   "country": "Нигерия",
+   "tile": "31NEG",
+   "center": [
+    3.400167,
+    6.300009
+   ],
+   "bounds": [
+    3.286717,
+    6.186726,
+    3.513616,
+    6.413292
+   ],
+   "zoom": 11,
+   "default_date": "2025-11-10",
+   "summary": {
+    "latest_date": "2025-11-10",
+    "model": "mdd",
+    "haze": false,
+    "index_permille": 0.0555,
+    "n_detections": 9,
+    "total_debris_area_m2": 17600.0
+   },
+   "dates": [
+    {
+     "date": "2025-11-10",
+     "scene_id": "S2B_MSIL2A_20251110T100139_R122_T31NEG_20251110T134828",
+     "source": "planetary-computer",
+     "cloud_frac": 0.142,
+     "bounds": [
+      3.286717,
+      6.186726,
+      3.513616,
+      6.413292
+     ],
+     "rgb": "lagos/2025-11-10/rgb.png",
+     "thumb": "lagos/2025-11-10/thumb.jpg",
+     "models": [
+      "lgbm",
+      "mdd"
+     ],
+     "drift": "lagos/2025-11-10/drift.json",
+     "quality": {
+      "glint_or_haze": false,
+      "haze": false,
+      "note": ""
+     },
+     "n_confirmed": {
+      "lgbm": 0,
+      "mdd": 0
+     }
+    }
+   ]
+  },
+  {
    "id": "mumbai",
    "name": "Мумбаи (устье Ульхаса, крики Васаи и Малад)",
    "name_en": "Mumbai (Ulhas / Vasai Creek), India",
@@ -223,9 +195,9 @@
     "latest_date": "2026-01-01",
     "model": "mdd",
     "haze": false,
-    "index_permille": 0.149,
-    "n_detections": 12,
-    "total_debris_area_m2": 47700.0
+    "index_permille": 0.0514,
+    "n_detections": 10,
+    "total_debris_area_m2": 18000.0
    },
    "dates": [
     {
@@ -281,7 +253,7 @@
      },
      "n_confirmed": {
       "lgbm": 8,
-      "mdd": 5
+      "mdd": 3
      }
     }
    ]

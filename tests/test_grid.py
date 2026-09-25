@@ -380,6 +380,43 @@ def test_artifact_bright_ship_and_ship_with_tail():
     assert art2 == [None]
 
 
+def test_artifact_vessel_at_end_of_wake_l41():
+    """L41: elongated object (>= 250 m) with a compact grey-white bright cluster <= 5 px beyond one end -> wake."""
+    shape = (160, 160)
+    m = np.zeros(shape, bool)
+    m[60:62, 40:80] = True  # 400 m straight strip, 2 px: too short for the ship-free wake rule (1 km)
+    lab, n = _label(m)
+    water = np.ones(shape, bool)
+    b = _bands(shape)
+    for k in ("B2", "B3", "B4"):
+        b[k][59:63, 83:86] = 0.05  # small boat 4 px beyond the east end: visible min < 2 x water, so not a ship blob
+    b["B8"][59:63, 83:86] = 0.08
+    art, f = classify(lab, n, b, water)
+    assert art == ["wake"] and f["end_ship"][0] and f["ship_frac"][0] == 0
+    # the same strip in empty water: untouched
+    art0, f0 = classify(lab, n, _bands(shape), water)
+    assert art0 == [None] and not f0["end_ship"][0]
+    # green bright spot (floating vegetation: red dip, B4 << B3) at the end: not a vessel
+    bg = _bands(shape)
+    bg["B3"][59:63, 83:86], bg["B2"][59:63, 83:86], bg["B4"][59:63, 83:86] = 0.09, 0.05, 0.02
+    bg["B8"][59:63, 83:86] = 0.08
+    assert classify(lab, n, bg, water)[0] == [None]
+    # boat next to the middle of the strip (not at an end): untouched
+    bm = _bands(shape)
+    for k in ("B2", "B3", "B4"):
+        bm[k][64:67, 58:61] = 0.05
+    bm["B8"][64:67, 58:61] = 0.08
+    assert classify(lab, n, bm, water)[0] == [None]
+    # curved filament (dev > 0.08) without a bright point at its ends stays unmarked even with the L41 rule
+    mc = np.zeros(shape, bool)
+    for c in range(20, 140):
+        r = int(100 + 8 * np.sin(c / 12.0))
+        mc[r:r + 2, c] = True
+    labc, nc = _label(mc)
+    artc, fc = classify(labc, nc, _bands(shape), water)
+    assert artc == [None] and not fc["end_ship"][0]
+
+
 def test_component_shape_basic():
     m = np.zeros((50, 50), bool)
     m[10, 5:45] = True  # horizontal 40 px line

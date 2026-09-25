@@ -1,0 +1,35 @@
+# Same packages as requirements.txt, but PyTorch from the CPU-only wheel index (no NVIDIA GPU, no CUDA download).
+# Install: .venv\Scripts\python.exe -m pip install -r requirements-cpu.txt   (or: run.ps1 -Cpu)
+# torch 2.11.0+cpu: inference.py and the map run on CPU; the GPU forest kernel is simply not used. Exact versions: requirements-lock.txt
+--extra-index-url https://download.pytorch.org/whl/cpu
+numpy
+pandas
+rasterio
+lightgbm
+scikit-learn
+torch==2.11.0
+torchvision==0.26.0
+segmentation-models-pytorch
+pystac-client
+odc-stac
+planetary-computer
+h3
+shapely
+pyproj
+geopandas
+fastapi
+uvicorn
+httpx
+pyyaml
+pillow
+matplotlib
+scipy
+scikit-image
+xarray
+netCDF4
+python-pptx
+pytest
+playwright
+requests
+tqdm
+jinja2

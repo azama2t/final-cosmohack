@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-25T10:09:12+03:00",
+ "generated": "2026-09-25T11:23:35+03:00",
  "note": "генерируется scripts/final_numbers.py; руками не править; null = ещё не посчитано",
  "l3_lgbm": {
   "available": true,
@@ -1300,7 +1300,7 @@
   "kind": "real",
   "n_regions": 18,
   "n_dates": 64,
-  "n_detections_total": 214,
+  "n_detections_total": 211,
   "models": [
    "lgbm",
    "mdd"
@@ -1308,9 +1308,9 @@
   "mdd_threshold": 0.5,
   "lgbm_threshold_map": 0.64,
   "n_drift": 44,
-  "n_confirmed_total": 297,
+  "n_confirmed_total": 294,
   "n_dates_with_confirmed": 38,
-  "n_confirmed_latest_total": 57,
+  "n_confirmed_latest_total": 54,
   "regions": [
    {
     "id": "accra",
@@ -1518,12 +1518,12 @@
     ],
     "latest_date": "2019-05-30",
     "model": "mdd",
-    "index_permille": 0.0489,
-    "n_detections": 18,
-    "total_debris_area_km2": 0.0297,
+    "index_permille": 0.023,
+    "n_detections": 17,
+    "total_debris_area_km2": 0.014,
     "n_dates": 2,
     "n_drift": 0,
-    "n_confirmed_latest": 8,
+    "n_confirmed_latest": 7,
     "n_zones": 10,
     "last_date": "2026-04-03",
     "reliable": false,
@@ -1633,13 +1633,13 @@
     ],
     "latest_date": "2026-01-01",
     "model": "mdd",
-    "index_permille": 0.149,
-    "n_detections": 12,
-    "total_debris_area_km2": 0.0477,
+    "index_permille": 0.0514,
+    "n_detections": 10,
+    "total_debris_area_km2": 0.018,
     "n_dates": 3,
     "n_drift": 3,
-    "n_confirmed_latest": 5,
-    "n_zones": 9,
+    "n_confirmed_latest": 3,
+    "n_zones": 7,
     "last_date": "2026-01-01",
     "reliable": true,
     "unreliable_reason": null
@@ -1739,8 +1739,8 @@
   ],
   "ranking_reliable": [
    "guanabara",
-   "mumbai",
    "lagos",
+   "mumbai",
    "honduras",
    "danang",
    "santo_domingo",
@@ -1838,41 +1838,19 @@
   "data_root": "service/demo",
   "kind": "demo",
   "n_regions": 3,
-  "n_dates": 6,
-  "n_detections_total": 62,
+  "n_dates": 5,
+  "n_detections_total": 28,
   "models": [
    "lgbm",
    "mdd"
   ],
   "mdd_threshold": 0.5,
   "lgbm_threshold_map": 0.64,
-  "n_drift": 6,
-  "n_confirmed_total": 37,
-  "n_dates_with_confirmed": 5,
-  "n_confirmed_latest_total": 35,
+  "n_drift": 5,
+  "n_confirmed_total": 7,
+  "n_dates_with_confirmed": 4,
+  "n_confirmed_latest_total": 5,
   "regions": [
-   {
-    "id": "nile",
-    "name": "Дельта Нила (устье Розетты)",
-    "country": "Египет",
-    "tile": "36RTV",
-    "dates": [
-     "2025-11-11",
-     "2026-01-05"
-    ],
-    "latest_date": "2026-01-05",
-    "model": "mdd",
-    "index_permille": 0.2986,
-    "n_detections": 41,
-    "total_debris_area_km2": 0.1383,
-    "n_dates": 2,
-    "n_drift": 2,
-    "n_confirmed_latest": 28,
-    "n_zones": 10,
-    "last_date": "2026-01-05",
-    "reliable": true,
-    "unreliable_reason": null
-   },
    {
     "id": "guanabara",
     "name": "Залив Гуанабара (Рио-де-Жанейро)",
@@ -1896,6 +1874,27 @@
     "unreliable_reason": null
    },
    {
+    "id": "lagos",
+    "name": "Лагос (вход в лагуну, порт Апапа)",
+    "country": "Нигерия",
+    "tile": "31NEG",
+    "dates": [
+     "2025-11-10"
+    ],
+    "latest_date": "2025-11-10",
+    "model": "mdd",
+    "index_permille": 0.0555,
+    "n_detections": 9,
+    "total_debris_area_km2": 0.0176,
+    "n_dates": 1,
+    "n_drift": 1,
+    "n_confirmed_latest": 0,
+    "n_zones": 6,
+    "last_date": "2025-11-10",
+    "reliable": true,
+    "unreliable_reason": null
+   },
+   {
     "id": "mumbai",
     "name": "Мумбаи (устье Ульхаса, крики Васаи и Малад)",
     "country": "Индия",
@@ -1906,21 +1905,21 @@
     ],
     "latest_date": "2026-01-01",
     "model": "mdd",
-    "index_permille": 0.149,
-    "n_detections": 12,
-    "total_debris_area_km2": 0.0477,
+    "index_permille": 0.0514,
+    "n_detections": 10,
+    "total_debris_area_km2": 0.018,
     "n_dates": 2,
     "n_drift": 2,
-    "n_confirmed_latest": 5,
-    "n_zones": 9,
+    "n_confirmed_latest": 3,
+    "n_zones": 7,
     "last_date": "2026-01-01",
     "reliable": true,
     "unreliable_reason": null
    }
   ],
   "ranking_reliable": [
-   "nile",
    "guanabara",
+   "lagos",
    "mumbai"
   ],
   "ranking_unreliable": [],

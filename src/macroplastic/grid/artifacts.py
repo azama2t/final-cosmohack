@@ -36,6 +36,16 @@ Rules (first match wins):
           (Gaussian 3 px, water only) brightness gradient, step_rel >= 0.25, step_cons >= 0.85, obj_excess <= 0.10
     seam  continuation: unmarked object (>= 2 px) whose centre lies <= 3 px from the axis of a "seam" object and
           <= 15 px beyond its end (dashed seam lines break into collinear pieces); applied twice
+    wake  (L41, "ship at the end") length >= 250 m, elong >= 4, and a compact bright cluster ("end ship") lies within
+          END_NEAR_PX = 5 px of one end cap of the major axis (object pixels within 2 px of the axis extreme):
+          B8 >= max(0.04, 8 x water median B8), mean(B2,B3,B4) >= 1.3 x water median and B4 >= 0.6 x B3 (a hull /
+          whitewater is grey-white; floating vegetation / algae filaments are green with a red dip, B4/B3 ~ 0.3 on the
+          Nile 2025-11-11), cluster <= 60 px, >= 70 %
+          of its 2..4 px ring is observed water or the object itself, and its peak B8 >= 2 x the median B8 of the
+          object (the vessel is much brighter than its own wake). Softer than the ship blob above: in turbid
+          water / at 10 m a small boat's visible min(B2,B3,B4) is below 2 x the water median (Mumbai 2026-01-01).
+          Checked only for objects not marked by the rules above; no straightness test (two wakes merged into a
+          V are still wakes), but a curved filament without a bright point at an end stays unmarked.
 Curved or irregular objects (dev > 0.08) are never marked by the line rules; big irregular objects that merely
 touch a bright target (ship_frac < 0.5, no straight tail) are not marked.
 """
@@ -60,11 +70,15 @@ SEAM_LEN_M, SEAM_THICK_PX, SEAM_DEV, SEAM_AZ = 1500.0, 5.0, 0.05, 20.0
 EDGE_LEN_M, EDGE_ELONG, EDGE_DEV, EDGE_STEP, EDGE_CONS = 100.0, 4.0, 0.08, 0.15, 0.85
 EDGE_EXCESS = 0.10
 SMALL_STEP, SMALL_SIGMA, SMALL_MAX_PX = 0.25, 3.0, 30
+# L41: wake with a vessel at one end of the major axis
+END_LEN_M, END_ELONG, END_CAP_PX, END_NEAR_PX = 250.0, 4.0, 2.0, 5.0
+END_B8, END_REL8, END_REL_VIS, END_MAX_PX, END_CONTRAST, END_FLAT = 0.04, 8.0, 1.3, 60, 2.0, 0.6
 STEP_OFFSETS = (3, 4, 5, 6)
 
 RULES_TEXT = {
     "ship": "у яркой малой цели (судно, платформа, буй, островок; B8 ≥ 0.06 и B2,B3,B4 ≥ 0.04, ≤ 150 px) — ≥ 50 % пикселей в ≤ 3 px",
-    "wake": "прямая узкая полоса (кильватер): у яркой цели и ≥ 500 м, или ≥ 1 км без цели",
+    "wake": "прямая узкая полоса (кильватер): у яркой цели и ≥ 500 м, или ≥ 1 км без цели; "
+            "вытянутый объект ≥ 250 м с яркой точкой-судном в ≤ 5 px (50 м) от торца (L41)",
     "seam": "прямая линия по резкой границе яркости воды (шов детекторов / край мутного шлейфа) "
             "или ≥ 1,5 км вдоль трека S2",
 }
@@ -131,6 +145,66 @@ def ship_blobs(b2, b3, b4, b8, water: np.ndarray) -> np.ndarray:
     return ok[lab]
 
 
+def end_bright_clusters(b2, b3, b4, b8, water: np.ndarray, own: np.ndarray) -> np.ndarray:
+    """L41: label image of compact bright clusters (candidate vessels at a wake's end); 0 = none.
+
+    own = pixels of detected objects: they count as water in the ring test (a vessel sits on its own wake)."""
+    b8 = np.nan_to_num(b8)
+    vis = np.nan_to_num((b2 + b3 + b4) / 3.0)
+    wb8, wv = b8[water], vis[water]
+    t8 = max(END_B8, END_REL8 * float(np.median(wb8))) if wb8.size else END_B8
+    tv = END_REL_VIS * float(np.median(wv)) if wv.size else 0.0
+    bright = (b8 >= t8) & (vis >= tv) & (np.nan_to_num(b4) >= END_FLAT * np.nan_to_num(b3))  # grey/white, not green
+    if not bright.any():
+        return np.zeros(b8.shape, np.int32)
+    lab, n = ndimage.label(bright, structure=EIGHT)
+    size = np.bincount(lab.ravel(), minlength=n + 1)
+    near = ndimage.binary_dilation(bright, EIGHT, iterations=4) & ~ndimage.binary_dilation(bright, EIGHT, iterations=1)
+    ring_lab = ndimage.grey_dilation(lab, footprint=np.ones((9, 9), bool))
+    rl = ring_lab[near]
+    tot = np.bincount(rl, minlength=n + 1)
+    wat = np.bincount(rl, weights=(water | own)[near].astype(float), minlength=n + 1)
+    ok = (size <= END_MAX_PX) & (tot > 0) & (wat >= SHIP_RING_WATER * np.maximum(tot, 1))
+    ok[0] = False
+    return np.where(ok[lab], lab, 0).astype(np.int32)
+
+
+def ship_at_end(labels: np.ndarray, n: int, shp: dict, b8: np.ndarray, clusters: np.ndarray,
+                cand: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """L41: (end_ship bool, end_ship_b8 = peak B8 of the matched cluster) for candidate components."""
+    hit = np.zeros(n, bool); peak = np.zeros(n)
+    if not cand.any() or not clusters.any():
+        return hit, peak
+    H, W = labels.shape
+    b8 = np.nan_to_num(b8)
+    cpeak = ndimage.maximum(b8, clusters, index=np.arange(clusters.max() + 1))
+    objs = ndimage.find_objects(labels)
+    pad = int(END_NEAR_PX) + 1
+    for k in np.flatnonzero(cand):
+        sl = objs[k]
+        if sl is None:
+            continue
+        r0, r1 = max(sl[0].start - pad, 0), min(sl[0].stop + pad, H)
+        c0, c1 = max(sl[1].start - pad, 0), min(sl[1].stop + pad, W)
+        cl = clusters[r0:r1, c0:c1]
+        if not cl.any():
+            continue
+        m = labels[r0:r1, c0:c1] == k + 1
+        ys, xs = np.nonzero(m)
+        ue, un = -shp["ny"][k], -shp["nx"][k]  # major axis (east, north)
+        pa = xs * ue - ys * un
+        med8 = float(np.median(b8[r0:r1, c0:c1][m]))
+        for cap in (pa >= pa.max() - END_CAP_PX, pa <= pa.min() + END_CAP_PX):
+            capm = np.zeros_like(m)
+            capm[ys[cap], xs[cap]] = True
+            d = ndimage.distance_transform_edt(~capm)
+            ids = np.unique(cl[(d <= END_NEAR_PX) & (cl > 0)])
+            for i in ids:
+                if cpeak[i] >= END_CONTRAST * med8 and cpeak[i] > peak[k]:
+                    hit[k], peak[k] = True, float(cpeak[i])
+    return hit, peak
+
+
 def brightness_step(labels: np.ndarray, n: int, shp: dict, vis: np.ndarray, valid: np.ndarray,
                     water_vis_median: float, cand: np.ndarray, normal=None) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """step_rel, step_cons, obj_excess for candidate components (others 0)."""
@@ -182,6 +256,7 @@ def classify(labels: np.ndarray, n: int, bands: dict | None, water: np.ndarray,
     line = shp["n_px"] >= MIN_PX_LINE
     ship_frac = np.zeros(n)
     seam_small = np.zeros(n, bool)
+    end_ship = np.zeros(n, bool); end_peak = np.zeros(n)
     step = np.zeros(n); cons = np.zeros(n); exc = np.zeros(n)
     if bands is not None:
         b2, b3, b4, b8 = (bands[k].astype(np.float32) for k in ("B2", "B3", "B4", "B8"))
@@ -214,7 +289,12 @@ def classify(labels: np.ndarray, n: int, bands: dict | None, water: np.ndarray,
             s2, c2, e2 = brightness_step(labels, n, shp, vis, valid, wmed, small, normal=nrm)
             step = np.where(small, s2, step); cons = np.where(small, c2, cons); exc = np.where(small, e2, exc)
             seam_small = small & (s2 >= SMALL_STEP) & (c2 >= EDGE_CONS) & (e2 <= EDGE_EXCESS)
+        cand_end = line & (L_m >= END_LEN_M) & (shp["elong"] >= END_ELONG)
+        if cand_end.any():
+            clusters = end_bright_clusters(b2, b3, b4, b8, water, labels > 0)
+            end_ship, end_peak = ship_at_end(labels, n, shp, b8, clusters, cand_end)
     shp["step_rel"], shp["step_cons"], shp["obj_excess"], shp["ship_frac"] = step, cons, exc, ship_frac
+    shp["end_ship"], shp["end_ship_b8"] = end_ship, end_peak
     long_tail = (L_m >= WAKE_SHIP_LEN_M) & (shp["elong"] >= WAKE_SHIP_ELONG) & (shp["dev"] <= WAKE_SHIP_DEV)
     wake_free = line & (L_m >= WAKE_LEN_M) & (shp["thick_px"] <= WAKE_THICK_PX) & (shp["elong"] >= WAKE_ELONG) \
         & (shp["dev"] <= WAKE_DEV)
@@ -230,6 +310,8 @@ def classify(labels: np.ndarray, n: int, bands: dict | None, water: np.ndarray,
         elif seam_track[k] or seam_edge[k] or seam_small[k]:
             art[k] = "seam"
         elif wake_free[k]:
+            art[k] = "wake"
+        elif end_ship[k]:
             art[k] = "wake"
     _join_seams(art, shp)
     return art, shp
@@ -258,4 +340,5 @@ def _join_seams(art: list, shp: dict, rounds: int = 2) -> None:
             return
 
 
-__all__ = ["classify", "component_shape", "ship_blobs", "brightness_step", "RULES_TEXT"]
+__all__ = ["classify", "component_shape", "ship_blobs", "brightness_step", "end_bright_clusters", "ship_at_end",
+           "RULES_TEXT"]

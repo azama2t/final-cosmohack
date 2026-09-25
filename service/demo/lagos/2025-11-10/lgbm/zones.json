@@ -1,0 +1,12 @@
+{
+ "region": "lagos",
+ "date": "2025-11-10",
+ "model": "lgbm",
+ "threshold": 0.64,
+ "quality": {
+  "glint_or_haze": false,
+  "haze": false,
+  "note": ""
+ },
+ "zones": []
+}

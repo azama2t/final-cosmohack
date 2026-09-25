@@ -1,11 +1,14 @@
 ﻿# Macroplastic: one-command start (Windows PowerShell 5.1+).
-#   powershell -ExecutionPolicy Bypass -File run.ps1 [-Port 8000] [-DataRoot service\demo] [-NoBrowser]
-# 1) .venv (py -3.12) + requirements.txt if missing; 2) frontend build if service\static\index.html is missing;
+#   powershell -ExecutionPolicy Bypass -File run.ps1 [-Port 8000] [-DataRoot service\demo] [-NoBrowser] [-Cpu]
+# -Cpu: install requirements-cpu.txt (PyTorch CPU wheels, no CUDA download). Without -Cpu the CUDA build
+#       (requirements.txt) is installed only if nvidia-smi is found; otherwise the CPU file is used automatically.
+# 1) .venv (py -3.12) + requirements(-cpu).txt if missing; 2) frontend build if service\static\index.html is missing;
 # 3) python -m service; 4) opens the browser when /health answers.
 param(
     [int]$Port = 8000,
     [string]$DataRoot = "",
-    [switch]$NoBrowser
+    [switch]$NoBrowser,
+    [switch]$Cpu
 )
 
 $ErrorActionPreference = "Stop"
@@ -18,6 +21,13 @@ function Say([string]$msg) { Write-Host "[run] $msg" -ForegroundColor Cyan }
 function Fail([string]$msg) { Write-Host "[run] ОШИБКА: $msg" -ForegroundColor Red; exit 1 }
 
 # ---------------------------------------------------------------- 1. Python environment
+$Req = "requirements.txt"
+if ($Cpu) {
+    $Req = "requirements-cpu.txt"
+} elseif (-not (Get-Command nvidia-smi -ErrorAction SilentlyContinue)) {
+    $Req = "requirements-cpu.txt"
+    Say "nvidia-smi не найден: пакеты (если их нужно ставить) - из requirements-cpu.txt, PyTorch CPU."
+}
 if (-not (Test-Path $Py)) {
     Say "Нет .venv - создаю окружение Python 3.12 (один раз, несколько минут)..."
     $created = $false
@@ -28,16 +38,16 @@ if (-not (Test-Path $Py)) {
     if (-not $created) {
         Fail "не удалось создать .venv через 'py -3.12'. Установите Python 3.12 (python.org, с py launcher) и повторите."
     }
-    Say "Ставлю пакеты из requirements.txt ..."
+    Say "Ставлю пакеты из $Req ..."
     & $Py -m pip install --upgrade pip
-    & $Py -m pip install -r requirements.txt
-    if ($LASTEXITCODE -ne 0) { Fail "pip install -r requirements.txt завершился с ошибкой (см. вывод выше)." }
+    & $Py -m pip install -r $Req
+    if ($LASTEXITCODE -ne 0) { Fail "pip install -r $Req завершился с ошибкой (см. вывод выше)." }
 } else {
     & $Py -c "import fastapi, uvicorn" 2>$null
     if ($LASTEXITCODE -ne 0) {
-        Say ".venv есть, но нет fastapi/uvicorn - ставлю requirements.txt ..."
-        & $Py -m pip install -r requirements.txt
-        if ($LASTEXITCODE -ne 0) { Fail "pip install -r requirements.txt завершился с ошибкой." }
+        Say ".venv есть, но нет fastapi/uvicorn - ставлю $Req ..."
+        & $Py -m pip install -r $Req
+        if ($LASTEXITCODE -ne 0) { Fail "pip install -r $Req завершился с ошибкой." }
     }
 }
 Say "Python: $Py"
