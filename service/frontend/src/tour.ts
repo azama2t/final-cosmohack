@@ -75,8 +75,11 @@ export async function runTour(apiRef: MutableRefObject<TourApi>, signal: AbortSi
       await wait(turn + 300);
     }
 
+    const explicit = m.demo?.region === best.id; // L43: demo region set in the manifest, not «the most detections»
     cap(
-      hasDet
+      explicit
+        ? `${shortName(best.name)}: свежий надёжный снимок Sentinel-2. Летим к нему.`
+        : hasDet
         ? `Больше всего находок на свежем снимке — ${shortName(best.name)}. Летим к снимку Sentinel-2.`
         : `${shortName(best.name)}: летим к свежему снимку Sentinel-2.`,
     );

@@ -10,6 +10,8 @@ water >= 30 % of the water H3 cells (primary model mdd). Then reliable regions w
 date is always kept, so the demo manifest gives the same reliability as the full one. Per region the `--max-dates` most interesting dates
 (drift, reliable, both models, cloud < 30 %, more detections, newer); the default date is reliable when possible. If the set is larger than --max-mb, the least-interesting extra date of the region with the most
 dates is dropped (never below 1 date) until it fits.
+L43: if the source manifest has `demo` {region, date} (build_service_data.py --demo-region), that region is added to
+the default set and its demo date is always kept; the `demo` field is copied (dropped if the region is not in the set).
 PNGs are downscaled to <= max-px (prob.png with a 3x3 max filter first so small detections stay visible);
 rgb.png is palette-quantized to --rgb-colors colours (0 = keep truecolour) to fit 5 regions into the budget.
 """
@@ -106,6 +108,9 @@ def main(argv=None):
             if not reliable(r):
                 print(f"  unreliable: {r['id']} ({', '.join(date_reasons(src, r['id'], r['dates'][-1]))})")
         chosen = ok[:a.n_top]
+        demo_id = (man.get("demo") or {}).get("region")  # L43: the demo region of the tour / speech is always in the set
+        if demo_id and all(r["id"] != demo_id for r in chosen):
+            chosen += [r for r in ranked if r["id"] == demo_id]
         for r in ok:
             if sum(has_drift(x) for x in chosen) >= a.n_drift or len(chosen) >= a.n_regions:
                 break
@@ -149,8 +154,12 @@ def write_demo(a, src: Path, out: Path, man: dict, regs: list, n_dates: dict, in
         rid = r["id"]
         interest = interest_fn(rid)
         last = r["dates"][-1]  # L42: the latest date always stays (reliability of the region as on the site)
-        rest = [d for d in sorted(r["dates"], key=interest) if d is not last][-(n_dates[rid] - 1):]             if n_dates[rid] > 1 else []
-        dates = sorted(rest + [last], key=lambda d: d["date"])
+        demo = man.get("demo") or {}
+        must = [last] + [d for d in r["dates"] if demo.get("region") == rid and d["date"] == demo.get("date")
+                         and d is not last]  # L43: and the manifest demo date
+        rest = [d for d in sorted(r["dates"], key=interest) if all(d is not x for x in must)]
+        rest = rest[-(n_dates[rid] - len(must)):] if n_dates[rid] > len(must) else []
+        dates = sorted(rest + must, key=lambda d: d["date"])
         for d in dates:
             date = d["date"]
             rj = read_json(src / rid / date / "rgb.json")
@@ -182,6 +191,8 @@ def write_demo(a, src: Path, out: Path, man: dict, regs: list, n_dates: dict, in
                              "n_detections": row["n_detections"], "total_debris_area_m2": row["total_debris_area_m2"]}
         new_regions.append(rr)
     man = dict(man)
+    if (man.get("demo") or {}).get("region") not in {r["id"] for r in new_regions}:
+        man.pop("demo", None)  # L43: demo region not in the set (explicit --regions without it)
     man.update({"kind": "demo", "generated": datetime.now(timezone.utc).isoformat(timespec="seconds"),
                 "regions": new_regions, "demo_note": f"подмножество {a.src}: {len(new_regions)} регион(а), "
                                                      f"≤ {a.max_dates} даты, PNG ≤ {a.max_px} px"})

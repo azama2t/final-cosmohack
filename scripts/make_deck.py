@@ -12,8 +12,11 @@ Usage (from repo root):
 Numbers are never typed by hand: every figure below is a placeholder filled from final_numbers.json
 (missing -> "—"). When final_numbers.json is regenerated (new main model, test computed), rerun this script.
 Screenshots: reports/screens/final (L39 fresh set, scripts/screenshots.py --extra --l20), else docs/img; crops are
-made in memory. Demo region = best_region of reports/screens/final/result.json (same bestRegion rule as the tour),
-fallback: the same rule recomputed from service/data/manifest.json.
+made in memory. Demo region (speech, DEMO table) = manifest.json `demo` {region, date} when present (L43,
+build_service_data.py --demo-region; the tour opens the same region), else best_region of
+reports/screens/final/result.json (same bestRegion rule as the tour), fallback: the rule recomputed from
+service/data/manifest.json. Screenshot captions always name the region that is on the screenshots (result.json).
+If the demo date has no drift, the speech switches to the drift region of the screenshots for the drift step.
 Slide rules: the title states the conclusion; one big number; <= 25 words of body; captions on images; >= 18 pt body.
 """
 from __future__ import annotations
@@ -144,29 +147,50 @@ def best_region_manifest() -> tuple[str | None, str | None]:
     return best.get("id"), (best.get("id") if drift(best) else None)
 
 
+def manifest_demo() -> tuple[dict | None, dict]:
+    """L43: (manifest `demo` or None, {region id: {date: has drift}}) from service/data/manifest.json."""
+    mp = ROOT / "service" / "data" / "manifest.json"
+    if not mp.exists():
+        return None, {}
+    man = json.loads(mp.read_text(encoding="utf-8"))
+    drift = {r.get("id"): {d.get("date"): bool(d.get("drift")) for d in r.get("dates", [])}
+             for r in man.get("regions", [])}
+    dm = man.get("demo")
+    return (dm if isinstance(dm, dict) and dm.get("region") in drift else None), drift
+
+
 def demo_region(fn: dict) -> dict:
-    """Region the demo tour opens (the deck, the speech and DEMO.md talk about the same one)."""
-    best = drift_id = None
+    """Region the demo tour opens (the deck, the speech and DEMO.md talk about the same one).
+
+    best / drift: what the speaker shows live; shot / shot_drift: the region on the screenshots (result.json)."""
+    shot = shot_drift = None
     res = SHOTS / "result.json"
     if res.exists():
         try:
             r = json.loads(res.read_text(encoding="utf-8"))
-            best, drift_id = r.get("best_region"), r.get("drift_region")
+            shot, shot_drift = r.get("best_region"), r.get("drift_region")
         except (OSError, ValueError):
             pass
-    if not best:
-        best, drift_id = best_region_manifest()
+    if not shot:
+        shot, shot_drift = best_region_manifest()
+    dm, drift_of = manifest_demo()
+    best, best_date, drift_id = shot, None, shot_drift
+    if dm:
+        best, best_date = dm["region"], dm.get("date")
+        has = drift_of.get(best, {}).get(best_date) if best_date else any(drift_of.get(best, {}).values())
+        drift_id = best if has else (shot_drift or best_region_manifest()[1])
     regs = {r.get("id"): r for r in (g(fn, "service.regions", []) or [])}
 
-    def info(rid):
+    def info(rid, date=None):
         r = regs.get(rid) or {}
         full = r.get("name") or (rid or DASH)
-        date = r.get("latest_date")
+        date = date or r.get("latest_date")
         dd = f"{date[8:10]}.{date[5:7]}.{date[:4]}" if isinstance(date, str) and len(date) == 10 else DASH
         return {"id": rid, "name": full, "short": full.split(" (")[0], "date": dd,
                 "n_det": r.get("n_detections"), "index": r.get("index_permille")}
 
-    return {"best": info(best), "drift": info(drift_id or best)}
+    return {"best": info(best, best_date), "drift": info(drift_id or best), "shot": info(shot),
+            "shot_drift": info(shot_drift or shot), "explicit": bool(dm), "reason": (dm or {}).get("reason", "")}
 
 
 def numbers(fn: dict) -> dict:
@@ -270,6 +294,12 @@ def numbers(fn: dict) -> dict:
     N["demo_ndet"] = num(dr["best"]["n_det"], 0)
     N["demo_index"] = num(dr["best"]["index"], 3)
     N["drift_short"], N["drift_date"] = dr["drift"]["short"], dr["drift"]["date"]
+    N["shot_short"], N["shot_date"] = dr["shot"]["short"], dr["shot"]["date"]
+    N["shot_drift_short"], N["shot_drift_date"] = dr["shot_drift"]["short"], dr["shot_drift"]["date"]
+    N["demo_reason"] = dr["reason"]
+    # L43: the drift step is shown in another region when the demo date has no drift
+    N["drift_step"] = ("" if dr["drift"]["id"] == dr["best"]["id"]
+                       else f"[Левая панель → {N['drift_short']}, снимок {N['drift_date']}] ")
     N["demo_regions_w"] = f"{N['demo_regions']} {plural(g(fn, 'service_demo.n_regions'), 'района', 'районов', 'районов')}"
     if N["test_computed"]:
         N["test_line"] = f"F1 на test MARIDA (посчитан один раз): {N['test_f1']}."
@@ -321,7 +351,7 @@ SPEECH = [
      "уверенная находка: пятно видят две разные модели в радиусе {agr_r} метров, таких {conf_total} по всем датам. Это согласие "
      "моделей, не проверка на месте."),
     (8, "2:45–3:05",
-     "[Слои → Дрейф 0→72 ч → ▶] Дрейф на {drift_h} часа: OpenDrift, течения HYCOM, ветер GFS; сиреневое облако — "
+     "{drift_step}[Слои → Дрейф 0→72 ч → ▶] Дрейф на {drift_h} часа: OpenDrift, течения HYCOM, ветер GFS; сиреневое облако — "
      "разброс ветрового сноса. Это демонстрация, мы её не валидировали. [Alt+Tab в презентацию, набрать 9 и Enter]"),
     (9, "3:05–3:35",
      "Скорость. {chips} чипов с холодного старта — {gpu_s} секунды на GPU; на процессоре {cpu20_s} секунды на 20 потоках "
@@ -579,7 +609,7 @@ def build(fn: dict, only: int | None = None) -> Presentation:
             [("Индекс по снимку,", CORAL, True), (" не килограммы", MUTED, False)],
         ], size=22, line_spacing=1.6)
         picture(s, Inches(7.3), TOP - Inches(0.1), Inches(5.43), Inches(4.35),
-                ["05_h3_2d.png"], f"{N['demo_short']}: индекс по ячейкам H3", crop=(336, 120, 1360, 1040))
+                ["05_h3_2d.png"], f"{N['shot_short']}: индекс по ячейкам H3", crop=(336, 120, 1360, 1040))
     slides.append(s5)
 
     def s6(s, n, t):
@@ -588,14 +618,14 @@ def build(fn: dict, only: int | None = None) -> Presentation:
         picture(s, M, TOP - Inches(0.35), Inches(7.75), Inches(4.9), ["01_overview_1920.png"],
                 f"Обзор: {N['n_regions']} {plural(N['n_regions'], 'район', 'района', 'районов')}, рейтинг «где искать первым»")
         picture(s, M + Inches(7.95), TOP - Inches(0.35), CW - Inches(7.95), Inches(4.9), ["03_detection_card.png"],
-                f"Находка: {N['demo_short']}, {N['demo_date']}", crop=(336, 70, 1180, 970))
+                f"Находка: {N['shot_short']}, {N['shot_date']}", crop=(336, 70, 1180, 970))
     slides.append(s6)
 
     def s7(s, n, t):
         header(s, n, t, "Зона №1 объясняет, почему она первая; двойное кольцо — видят обе модели",
                "Зоны обследования")
         picture(s, M, TOP - Inches(0.15), Inches(5.6), Inches(4.75), ["21_zone_card.png"],
-                f"{N['demo_short']}, зона №1: «почему она первая»", crop=(336, 70, 1136, 900), left=True)
+                f"{N['shot_short']}, зона №1: «почему она первая»", crop=(336, 70, 1136, 900), left=True)
         big_number(s, Inches(5.5), TOP + Inches(0.1), Inches(7.2), N["conf_total"],
                    f"пятен видят обе модели в радиусе {N['agr_r']} м\n(на {N['conf_dates']} из {N['n_dates']} {plural(N['n_dates'], 'даты', 'дат', 'дат')})\n"
                    "Это согласие моделей, не проверка на месте", size=88)
@@ -605,7 +635,7 @@ def build(fn: dict, only: int | None = None) -> Presentation:
         header(s, n, t, f"Дрейф на {N['drift_h']} ч показывает, куда унесёт пятно — демонстрация без валидации",
                "Дрейф")
         picture(s, M, TOP - Inches(0.15), Inches(5.6), Inches(4.75), ["09_drift.png"],
-                f"{N['drift_short']}: дрейф от пятен {N['drift_date']}, T+36 ч", crop=(620, 115, 1540, 1040),
+                f"{N['shot_drift_short']}: дрейф от пятен {N['shot_drift_date']}, T+36 ч", crop=(620, 115, 1540, 1040),
                 left=True)
         big_number(s, Inches(5.5), TOP + Inches(0.1), Inches(7.2), N["drift_n"],
                    "снимков с прогнозом дрейфа\nOpenDrift + течения HYCOM + ветер GFS\n"
@@ -709,7 +739,7 @@ def speech_md(N: dict) -> str:
         "| 1:50 | Alt+Tab в браузер, обзор уже открыт (http://127.0.0.1:8000, F11) | 0:00–0:30 |",
         f"| 2:00 | Левая панель → {N['demo_short']} ({N['demo_date']}) → клик по крупному пятну | 0:30–1:10 |",
         "| 2:20 | Слои → Приоритет обследования → клик по зоне №1, блок «Почему это место первое» | 1:40–2:10 |",
-        "| 2:45 | Слои → Дрейф 0→72 ч → ▶ | 2:10–2:50 |",
+        f"| 2:45 | {N['drift_step']}Слои → Дрейф 0→72 ч → ▶ | 2:10–2:50 |",
         "| 3:05 | Alt+Tab в презентацию, набрать 9 и Enter | — |",
         "",
         "H3 3D, сравнение районов и вкладку «Проверка» в 4-минутной речи пропускаем; они есть в полном сценарии "

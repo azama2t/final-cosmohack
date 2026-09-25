@@ -74,6 +74,8 @@ export interface Manifest {
   models: Record<string, ModelInfo>;
   regions: Region[];
   sources: Source[];
+  /** optional (L43): region / date the demo tour opens, set explicitly by build_service_data.py --demo-region */
+  demo?: { region: string; date: string; reason: string };
 }
 
 export interface DetProps {

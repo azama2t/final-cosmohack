@@ -550,3 +550,79 @@ def test_confirmation_ignores_partner_artifact_pixels_l42():
     is_art = np.array([False, True])  # the partner's only object is an artefact
     assert confirmed_components(lab_a, n_a, partner)[0]
     assert not confirmed_components(lab_a, n_a, partner & ~is_art[lab_p])[0]
+
+
+def test_artifact_small_boat_l43():
+    """L43: a small detection on a bright point with a SWIR response (a dry hull) -> ship; a dim spot, a bright but
+    wet point (no SWIR excess: floating / awash material) and a bright point on the shore are not boats."""
+    shape = (80, 80)
+    water = np.ones(shape, bool)
+    m = np.zeros(shape, bool)
+    m[40:42, 40:42] = True  # 2x2 px detection
+    lab, n = _label(m)
+
+    def bands(b8, vis, b11):
+        b = _bands(shape) | {"B11": np.full(shape, 0.002, np.float32)}
+        for k in ("B2", "B3", "B4"):
+            b[k][40, 42] = vis
+        b["B8"][40, 42], b["B11"][40, 42] = b8, b11
+        return b
+    art, f = classify(lab, n, bands(0.08, 0.05, 0.03), water)  # B8 20x, vis 1.7x water, B11 excess 0.37 x B8 excess
+    assert art == ["ship"] and f["boat"][0]
+    assert classify(lab, n, bands(0.012, 0.035, 0.004), water)[0] == [None]  # dim spot (B8 3x): kept
+    assert classify(lab, n, bands(0.08, 0.05, 0.002), water)[0] == [None]  # no SWIR excess (wet material): kept
+    assert classify(lab, n, _bands(shape) | {"B11": np.full(shape, 0.002, np.float32)}, water)[0] == [None]
+    shore = water.copy()
+    shore[:, 43:] = False  # land right next to the bright point: not a boat
+    assert classify(lab, n, bands(0.08, 0.05, 0.03), shore)[0] == [None]
+    # a large object is never a "small boat"
+    mb = np.zeros(shape, bool)
+    mb[30:50, 30:40] = True
+    labb, nb = _label(mb)
+    bb = bands(0.08, 0.05, 0.03)
+    assert classify(labb, nb, bb, water)[0] == [None]
+
+
+def test_artifact_vessel_on_axis_continuation_l43():
+    """L43: the vessel may have moved on: a bright cluster on the continuation of the major axis of a straight strip
+    (+-2 px corridor, <= 20 px beyond the end) -> wake; the same cluster 6 px off the axis -> untouched."""
+    shape = (160, 160)
+    m = np.zeros(shape, bool)
+    m[60:62, 40:80] = True  # 400 m strip, east end at column 79
+    lab, n = _label(m)
+    water = np.ones(shape, bool)
+    b = _bands(shape)
+    _boat(b, 60, 62, 91, 94)  # 12 px beyond the end, on the axis (the L41 rule looks only 5 px)
+    art, f = classify(lab, n, b, water)
+    assert art == ["wake"] and f["end_ship"][0]
+    bo = _bands(shape)
+    _boat(bo, 66, 68, 91, 94)  # 12 px beyond, 5.5 px off the axis
+    assert classify(lab, n, bo, water)[0] == [None]
+    bf = _bands(shape)
+    _boat(bf, 60, 62, 104, 107)  # 25 px beyond: too far
+    assert classify(lab, n, bf, water)[0] == [None]
+
+
+def test_artifact_line_continues_in_image_l43():
+    """L43: a straight thin detection (600 m) lying on a bright line that goes on in the image beyond both ends
+    (an old ship wake / lane) -> wake when the whole line is >= 1 km; without the line beyond the ends -> untouched."""
+    shape = (300, 300)
+    m = np.zeros(shape, bool)
+    m[150:152, 120:180] = True
+    lab, n = _label(m)
+    water = np.ones(shape, bool)
+    b = _bands(shape)
+    for k in ("B2", "B3", "B4"):
+        b[k][150:152, 20:280] = 0.036  # faint line across 2.6 km
+    art, f = classify(lab, n, b, water)
+    assert art == ["wake"] and f["trace_px"][0] * 10 >= 1000
+    b0 = _bands(shape)
+    for k in ("B2", "B3", "B4"):
+        b0[k][150:152, 120:180] = 0.036  # bright only under the detection
+    art0, f0 = classify(lab, n, b0, water)
+    assert art0 == [None] and f0["trace_px"][0] * 10 < 1000
+    # a brightness step (edge of a plume) along the detection is not a line: the brighter side is not darker than it
+    be = _bands(shape)
+    for k in ("B2", "B3", "B4"):
+        be[k][:152, :] = 0.036
+    assert classify(lab, n, be, water)[1]["trace_px"][0] * 10 < 1000

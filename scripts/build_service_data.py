@@ -2,7 +2,9 @@
 
 Usage:
     python scripts/build_service_data.py --live-dir data/live --out service/data [--regions a,b] [--models mdd,lgbm]
-        [--thresholds mdd=0.3]
+        [--thresholds mdd=0.3] [--demo-region ID [--demo-date YYYY-MM-DD] [--demo-reason TEXT]]
+    python scripts/build_service_data.py --out service/data --manifest-only [--demo-region ID ...]   (L43: only the
+        manifest `demo` field; without --demo-region it is removed)
 
 Input  (per scene): <live>/<region>/<date>/{scene.json, water_mask.tif, scl.tif, rgb.png, rgb.json,
                     prob_<model>.tif, prob_<model>.json, [drift.json]}
@@ -497,6 +499,34 @@ def build_region(region: str, scenes: list[dict], out: Path, model_meta: dict) -
                       for sc in scenes]}
 
 
+DEMO_REASON_DEFAULT = "выбран вручную (--demo-region)"
+
+
+def demo_entry(regions: list[dict], rid: str, date: str = "", reason: str = "") -> dict:
+    """L43: manifest `demo` = {region, date, reason}; the region must exist, the date must be one of its dates
+    (default: the latest one)."""
+    reg = next((r for r in regions if r.get("id") == rid), None)
+    if reg is None:
+        raise SystemExit(f"--demo-region {rid}: no such region in the manifest")
+    dates = [d["date"] for d in reg.get("dates", [])]
+    if date and date not in dates:
+        raise SystemExit(f"--demo-date {date}: {rid} has dates {dates}")
+    return {"region": rid, "date": date or dates[-1], "reason": reason or DEMO_REASON_DEFAULT}
+
+
+def write_demo_only(out: Path, rid: str, date: str, reason: str) -> int:
+    """L43: rewrite only the `demo` field of an existing manifest (no scene rebuild). Without --demo-region the
+    field is removed."""
+    mp = out / "manifest.json"
+    man = read_json(mp)
+    man.pop("demo", None)
+    if rid:
+        man["demo"] = demo_entry(man.get("regions", []), rid, date, reason)
+    write_json(mp, man)
+    print(f"{mp}: demo = {man.get('demo')}")
+    return 0
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--live-dir", default="data/live")
@@ -506,8 +536,16 @@ def main(argv=None):
     ap.add_argument("--kind", default="real", choices=["real", "demo", "fixture"])
     ap.add_argument("--thresholds", default="", help="override decision thresholds, e.g. mdd=0.3,lgbm=0.5 "
                                                      "(default: threshold from prob_<model>.json)")
+    ap.add_argument("--demo-region", default="", help="L43: region the demo tour / speech open: manifest demo "
+                                                       "{region, date, reason} (without the flag the field is not written)")
+    ap.add_argument("--demo-date", default="", help="L43: date for --demo-region (default: the region's latest date)")
+    ap.add_argument("--demo-reason", default="", help="L43: why this region (shown in DEMO.md / report)")
+    ap.add_argument("--manifest-only", action="store_true",
+                    help="L43: do not rebuild scenes, only rewrite manifest.json of --out (demo field)")
     a = ap.parse_args(argv)
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    if a.manifest_only:
+        return write_demo_only(Path(a.out), a.demo_region, a.demo_date, a.demo_reason)
     for kv in filter(None, a.thresholds.split(",")):
         k, v = kv.split("=")
         THR_OVERRIDE[k.strip()] = float(v)
@@ -571,6 +609,8 @@ def main(argv=None):
                   "zone_score": ZONE_FORMULA,
                   "min_observed_frac": 0.5},
         "models": model_meta, "regions": man_regions, "sources": SOURCES}
+    if a.demo_region:
+        manifest["demo"] = demo_entry(man_regions, a.demo_region, a.demo_date, a.demo_reason)
     write_json(out / "manifest.json", manifest)
     print("\nregion | date | model | n_det | n_confirmed | area_m2 | mean_index | top zone | s")
     for row in summary_rows:

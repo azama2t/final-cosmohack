@@ -133,9 +133,12 @@ export function rankRegions(regions: Region[]): { ok: Region[]; bad: Region[] } 
  *    a region whose newest scene is flagged is not shown as «the freshest finding»;
  * 2) max n_detections on that date; tie → region with drift.json; then index;
  * 3) if no candidate — old rule (summary n_detections, then index) over all regions.
+ * L43: an explicit manifest.demo.region (build_service_data.py --demo-region) wins when that region exists.
  */
 export function bestRegion(m: Manifest): Region | null {
   if (!m.regions.length) return null;
+  const demo = m.demo?.region ? m.regions.find((r) => r.id === m.demo!.region) : undefined;
+  if (demo) return demo;
   const det = (r: Region) => r.summary?.n_detections ?? 0;
   const idx = (r: Region) => r.summary?.index_permille ?? -1;
   const drift = (r: Region) => (summaryDate(r)?.drift ? 1 : 0);

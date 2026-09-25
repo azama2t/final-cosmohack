@@ -300,6 +300,14 @@ def validate(root: Path) -> V:
         v.need(s, f"manifest.sources[{i}]", {"name": (str,), "license": (str,)})
     if not man["regions"]:
         v.err("manifest", "no regions")
+    if "demo" in man:  # L43: optional explicit demo region {region, date, reason}
+        dm = man["demo"]
+        if v.need(dm, "manifest.demo", {"region": (str,), "date": (str,), "reason": (str,)}):
+            reg = next((r for r in man["regions"] if isinstance(r, dict) and r.get("id") == dm["region"]), None)
+            if reg is None:
+                v.err("manifest.demo", f"region '{dm['region']}' not in manifest.regions")
+            elif dm["date"] not in [d.get("date") for d in reg.get("dates", []) if isinstance(d, dict)]:
+                v.err("manifest.demo", f"date {dm['date']} not among the dates of '{dm['region']}'")
     for reg in man["regions"]:
         rw = f"manifest.regions[{reg.get('id', '?') if isinstance(reg, dict) else '?'}]"
         if not v.need(reg, rw, {"id": (str,), "name": (str,), "center": (list,), "bounds": (list,), "zoom": NUM,

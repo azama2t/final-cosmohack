@@ -2,32 +2,32 @@
  {
   "date": "2025-06-26",
   "model": "lgbm",
-  "total_debris_area_m2": 30300.0,
-  "mean_index": 0.0972,
-  "n_detections": 94,
+  "total_debris_area_m2": 27600.0,
+  "mean_index": 0.089,
+  "n_detections": 83,
   "cloud_frac": 0.0002,
   "n_cells_valid": 422,
-  "n_artifacts": 13
+  "n_artifacts": 24
  },
  {
   "date": "2025-06-26",
   "model": "mdd",
-  "total_debris_area_m2": 124300.0,
-  "mean_index": 0.3956,
-  "n_detections": 15,
+  "total_debris_area_m2": 107500.0,
+  "mean_index": 0.3317,
+  "n_detections": 14,
   "cloud_frac": 0.0002,
   "n_cells_valid": 422,
-  "n_artifacts": 16
+  "n_artifacts": 17
  },
  {
   "date": "2026-07-16",
   "model": "lgbm",
-  "total_debris_area_m2": 33700.0,
-  "mean_index": 0.096,
-  "n_detections": 107,
+  "total_debris_area_m2": 32500.0,
+  "mean_index": 0.0915,
+  "n_detections": 102,
   "cloud_frac": 0.0003,
   "n_cells_valid": 423,
-  "n_artifacts": 23
+  "n_artifacts": 28
  },
  {
   "date": "2026-07-16",

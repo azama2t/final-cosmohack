@@ -64,8 +64,23 @@ L42 additions:
           (seam / wake) go only to objects that are not curved themselves (n_px < MIN_PX_LINE or dev <= GROUP_DEV):
           a curved arc continuing another model's straight seam is not a seam (Karachi 2025-11-11). Only B's
           own marks propagate (no chains). The confirmation (grid.confirm) ignores the partner's artefact pixels.
+
+L43 additions (reports/artifacts.md, section L43):
+    ship  small boat: compact object (length <= 8 px, <= 30 px) on / within 2 px of a bright point relative to the
+          local water (31 px window): B8 >= max(0.04, 8 x median B8), vis >= 1.3 x median vis and a SWIR response
+          B11 excess >= max(0.01, 0.25 x B8 excess) (a dry hull reflects SWIR; wet floating material does not); the
+          bright spot <= 40 px with >= 70 % water / detections in its 2..3 px ring (not shore). See small_boats.
+    wake  "ship at the end" also looks along the continuation of the major axis of a straight object (dev <= 0.08):
+          <= 2 px from the axis line, <= 20 px beyond the end (the vessel has moved on).
+    wake  line in the image: a straight thin object (>= 100 m, thick <= 3 px, elong >= 6, dev <= 0.08, wiggle
+          <= 0.6 px) lying on a bright line that goes on in the image beyond its ends along the major axis
+          (contrast against the brighter side >= 0.5 x the object's own and above a parallel control line, gaps
+          <= 3 px, <= 80 px per side, on the axis +-1 px at >= 75 % of positions); total >= 1 km - the same length
+          as the ship-free wake rule, measured on the image line instead of the detection. See line_trace.
 """
 from __future__ import annotations
+
+import warnings
 
 import numpy as np
 from scipy import ndimage
@@ -89,15 +104,29 @@ SMALL_STEP, SMALL_SIGMA, SMALL_MAX_PX = 0.25, 3.0, 30
 # L41: wake with a vessel at one end of the major axis
 END_LEN_M, END_ELONG, END_CAP_PX, END_NEAR_PX = 250.0, 4.0, 2.0, 5.0
 END_B8, END_REL8, END_REL_VIS, END_MAX_PX, END_CONTRAST, END_FLAT = 0.04, 8.0, 1.3, 60, 2.0, 0.6
+# L43: ... or on the continuation of the major axis of a straight object (corridor +-2 px, up to 20 px beyond the end)
+END_AXIS_PX, END_AXIS_PERP, END_AXIS_DEV = 20.0, 2.0, 0.08
 STEP_OFFSETS = (3, 4, 5, 6)
+# L43: straight line that continues in the image beyond the detection (an old ship wake / lane): total >= 1 km
+TRACE_LEN_M, TRACE_THICK_PX, TRACE_ELONG, TRACE_DEV, TRACE_EXT_PX = 100.0, 3.0, 6.0, 0.08, 80
+TRACE_ON, TRACE_BG, TRACE_CTRL, TRACE_SMOOTH, TRACE_GAP, TRACE_REL = (-1, 0, 1), (4, 5, 6), 12, 5, 3, 0.5
+TRACE_TOTAL_M, TRACE_WIGGLE, TRACE_ARGMAX, TRACE_AXIS_SHARE = 1000.0, 0.6, (-3, -2, -1, 0, 1, 2, 3), 0.75
+# L43: small boat - a small compact detection on / next to a bright point with a SWIR response (a dry hull)
+BOAT_MAX_LEN_PX, BOAT_MAX_PX, BOAT_HALF_WIN, BOAT_RING_PX = 8, 30, 15, 2
+BOAT_B8, BOAT_REL8, BOAT_REL_VIS, BOAT_SWIR, BOAT_D11 = 0.04, 8.0, 1.3, 0.25, 0.01
+BOAT_MIN_WATER_PX, BOAT_SPOT_MAX_PX, BOAT_SPOT_RING_WATER = 30, 40, 0.7
 # L42: collinear pieces of one model are one strip for the line rules; cross-model propagation of marks
 GROUP_ANGLE, GROUP_PERP_PX, GROUP_GAP_PX, GROUP_MIN_DIR_PX, GROUP_DEV = 15.0, 2.0, 5.0, 4.0, 0.08
 CROSS_NEAR_PX, CROSS_MIN_SHARE = 2, 0.3
 
 RULES_TEXT = {
-    "ship": "у яркой малой цели (судно, платформа, буй, островок; B8 ≥ 0.06 и B2,B3,B4 ≥ 0.04, ≤ 150 px) — ≥ 50 % пикселей в ≤ 3 px",
+    "ship": "у яркой малой цели (судно, платформа, буй, островок; B8 ≥ 0.06 и B2,B3,B4 ≥ 0.04, ≤ 150 px) — ≥ 50 % пикселей в ≤ 3 px; "
+            "малый объект (≤ 80 м) на яркой точке: B8 ≥ 8× и видимые ≥ 1,3× медианы воды в окне 310 м, "
+            "отклик в SWIR (B11) ≥ 0,25 отклика B8 — сухой корпус лодки (L43)",
     "wake": "прямая узкая полоса (кильватер): у яркой цели и ≥ 500 м, или ≥ 1 км без цели; "
-            "вытянутый объект ≥ 250 м с яркой точкой-судном в ≤ 5 px (50 м) от торца (L41)",
+            "вытянутый объект ≥ 250 м с яркой точкой-судном в ≤ 5 px (50 м) от торца (L41) или на продолжении оси "
+            "в ≤ 20 px (коридор ±2 px, L43); прямой тонкий объект на светлой линии, которая продолжается на снимке "
+            "за его концами, всего ≥ 1 км (L43)",
     "seam": "прямая линия по резкой границе яркости воды (шов детекторов / край мутного шлейфа) "
             "или ≥ 1,5 км вдоль трека S2",
     "grouping": "соседние куски одной модели на одной прямой (оси ≤ 15°, центр ≤ 2 px от оси соседа, зазор ≤ 5 px, "
@@ -194,8 +223,11 @@ def end_bright_clusters(b2, b3, b4, b8, water: np.ndarray, own: np.ndarray) -> n
 
 
 def ship_at_end(labels: np.ndarray, n: int, shp: dict, b8: np.ndarray, clusters: np.ndarray,
-                cand: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """L41: (end_ship bool, end_ship_b8 = peak B8 of the matched cluster) for candidate components."""
+                cand: np.ndarray, straight: np.ndarray | None = None) -> tuple[np.ndarray, np.ndarray]:
+    """L41: (end_ship bool, end_ship_b8 = peak B8 of the matched cluster) for candidate components.
+
+    L43: for straight components (`straight`, None = all) the cluster may also lie on the continuation of the major
+    axis: <= END_AXIS_PERP px from the axis line and <= END_AXIS_PX beyond the end."""
     hit = np.zeros(n, bool); peak = np.zeros(n)
     if not cand.any() or not clusters.any():
         return hit, peak
@@ -203,7 +235,7 @@ def ship_at_end(labels: np.ndarray, n: int, shp: dict, b8: np.ndarray, clusters:
     b8 = np.nan_to_num(b8)
     cpeak = ndimage.maximum(b8, clusters, index=np.arange(clusters.max() + 1))
     objs = ndimage.find_objects(labels)
-    pad = int(END_NEAR_PX) + 1
+    pad = int(max(END_NEAR_PX, END_AXIS_PX)) + 2
     for k in np.flatnonzero(cand):
         sl = objs[k]
         if sl is None:
@@ -218,15 +250,187 @@ def ship_at_end(labels: np.ndarray, n: int, shp: dict, b8: np.ndarray, clusters:
         ue, un = -shp["ny"][k], -shp["nx"][k]  # major axis (east, north)
         pa = xs * ue - ys * un
         med8 = float(np.median(b8[r0:r1, c0:c1][m]))
-        for cap in (pa >= pa.max() - END_CAP_PX, pa <= pa.min() + END_CAP_PX):
+        # L43: along the continuation of the major axis of a straight object: a corridor of +-END_AXIS_PERP px around
+        # the axis line through the centroid, up to END_AXIS_PX beyond the end (the vessel has moved on from its wake)
+        axis_ok = straight is None or bool(straight[k])
+        if axis_ok:
+            gy, gx = np.mgrid[0:cl.shape[0], 0:cl.shape[1]]
+            ga = gx * ue - gy * un
+            gp = -gx * un - gy * ue
+            pm0 = float(np.mean(-xs * un - ys * ue))
+            corr = (np.abs(gp - pm0) <= END_AXIS_PERP) & (cl > 0)
+        for side, cap in ((1, pa >= pa.max() - END_CAP_PX), (-1, pa <= pa.min() + END_CAP_PX)):
             capm = np.zeros_like(m)
             capm[ys[cap], xs[cap]] = True
             d = ndimage.distance_transform_edt(~capm)
-            ids = np.unique(cl[(d <= END_NEAR_PX) & (cl > 0)])
+            sel = (d <= END_NEAR_PX) & (cl > 0)
+            if axis_ok:
+                beyond = (ga - pa.max()) if side > 0 else (pa.min() - ga)
+                sel |= corr & (beyond > 0) & (beyond <= END_AXIS_PX)
+            ids = np.unique(cl[sel])
             for i in ids:
                 if cpeak[i] >= END_CONTRAST * med8 and cpeak[i] > peak[k]:
                     hit[k], peak[k] = True, float(cpeak[i])
     return hit, peak
+
+
+def small_boats(labels: np.ndarray, n: int, shp: dict, b8: np.ndarray, vis: np.ndarray, b11: np.ndarray,
+                water: np.ndarray, flagged: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """L43: (boat bool, boat_s11 = B11 excess / B8 excess at the peak) per component.
+
+    Candidate: length <= BOAT_MAX_LEN_PX and n_px <= BOAT_MAX_PX. Local water = observed water in the 31 px window
+    around the object, >= 2 px away from any detection (>= BOAT_MIN_WATER_PX pixels); medians of B8, vis =
+    mean(B2,B3,B4) and B11 there. Peak = pixel of the object or its 2 px ring (the hull may sit next to the detected
+    halo) with the largest B8 excess. Boat, all of:
+      B8 >= max(BOAT_B8, BOAT_REL8 x median B8)    bright point in NIR (MARIDA debris: median 3.2x, 90 % 8.3x)
+      vis >= BOAT_REL_VIS x median vis             not darker than water in the visible (grey / white)
+      B11 excess >= max(BOAT_D11, BOAT_SWIR x B8 excess)   a dry hull reflects SWIR; floating / awash material is wet
+                                                   and water absorbs SWIR (Santo Domingo 2019-01-21 debris: 0.00-0.02,
+                                                   Mumbai 2026-01-01 boats: 0.29-0.71)
+      the bright spot (window pixels over the B8 threshold, 8-connected with the peak) is compact
+      (<= BOAT_SPOT_MAX_PX) and >= 70 % of its 2..3 px ring is water or detections (not shore / a pier)."""
+    hit = np.zeros(n, bool); s11 = np.zeros(n)
+    cand = (shp["length_px"] <= BOAT_MAX_LEN_PX) & (shp["n_px"] <= BOAT_MAX_PX)
+    if n == 0 or not cand.any():
+        return hit, s11
+    H, W = labels.shape
+    objs = ndimage.find_objects(labels)
+    det = (labels > 0) | flagged
+    for k in np.flatnonzero(cand):
+        sl = objs[k]
+        if sl is None:
+            continue
+        cy, cx = (sl[0].start + sl[0].stop) // 2, (sl[1].start + sl[1].stop) // 2
+        h = BOAT_HALF_WIN
+        r0, r1, c0, c1 = max(cy - h, 0), min(cy + h + 1, H), max(cx - h, 0), min(cx + h + 1, W)
+        e8, v, e11 = (np.nan_to_num(x[r0:r1, c0:c1]) for x in (b8, vis, b11))
+        dw = det[r0:r1, c0:c1]
+        ww = water[r0:r1, c0:c1]
+        w = ww & ~ndimage.binary_dilation(dw, EIGHT, iterations=2)
+        if w.sum() < BOAT_MIN_WATER_PX:
+            continue
+        m8, mv, m11 = (float(np.median(x[w])) for x in (e8, v, e11))
+        m = labels[r0:r1, c0:c1] == k + 1
+        z = ndimage.binary_dilation(m, EIGHT, iterations=BOAT_RING_PX)
+        iy, ix = np.unravel_index(np.argmax(np.where(z, e8, -np.inf)), e8.shape)
+        d8, d11 = float(e8[iy, ix]) - m8, float(e11[iy, ix]) - m11
+        s11[k] = d11 / d8 if d8 > 1e-4 else 0.0
+        t8 = max(BOAT_B8, BOAT_REL8 * m8)
+        if e8[iy, ix] < t8 or v[iy, ix] < BOAT_REL_VIS * mv or d11 < max(BOAT_D11, BOAT_SWIR * d8):
+            continue
+        lab, _ = ndimage.label(e8 >= t8, structure=EIGHT)
+        spot = lab == lab[iy, ix]
+        if spot.sum() > BOAT_SPOT_MAX_PX:
+            continue
+        ring = ndimage.binary_dilation(spot, EIGHT, iterations=3) & ~ndimage.binary_dilation(spot, EIGHT, iterations=1)
+        if ring.sum() == 0 or (ww | dw)[ring].mean() < BOAT_SPOT_RING_WATER:
+            continue
+        hit[k] = True
+    return hit, s11
+
+
+def _profile(vis, valid, c0, r0, dc, dr, nc, nr, ts, on_offs, bg_offs, argmax_offs=None):
+    """Line contrast along t: max vis over on_offs minus the brighter of the two side medians (vis at +bg_offs and at
+    -bg_offs): a line is brighter than both sides, a brightness step is not (valid pixels only; NaN if none).
+    With argmax_offs also returns the offset (of argmax_offs) with the largest vis at each t (NaN if none valid)."""
+    H, W = vis.shape
+
+    def sample(o):
+        c = np.rint(c0 + ts * dc + o * nc).astype(int); r = np.rint(r0 + ts * dr + o * nr).astype(int)
+        ok = (c >= 0) & (c < W) & (r >= 0) & (r < H)
+        cc, rr = np.clip(c, 0, W - 1), np.clip(r, 0, H - 1)
+        ok &= valid[rr, cc]
+        return np.where(ok, vis[rr, cc], np.nan)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)
+        on = np.nanmax(np.stack([sample(o) for o in on_offs]), 0)
+        bg = np.fmax(np.nanmedian(np.stack([sample(o) for o in bg_offs]), 0),
+                     np.nanmedian(np.stack([sample(-o) for o in bg_offs]), 0))
+        if argmax_offs is None:
+            return on - bg
+        st = np.stack([sample(o) for o in argmax_offs])
+        am = np.where(np.isfinite(st).any(0), np.array(argmax_offs)[np.argmax(np.nan_to_num(st, nan=-np.inf), 0)], np.nan)
+    return on - bg, am
+
+
+def line_trace(labels: np.ndarray, n: int, shp: dict, vis: np.ndarray, water: np.ndarray, own: np.ndarray,
+               cand: np.ndarray) -> np.ndarray:
+    """L43: total length (px) of the straight bright line an object lies on: object length + how far the line goes on
+    in the image beyond both ends along the major axis (0 for non-candidates).
+
+    Only objects with wiggle <= TRACE_WIGGLE px (std of the mean perpendicular offset in 3 px bins along the axis).
+    Contrast c(t) = max vis on the axis (+-1 px) - the brighter of the side medians at +4..6 / -4..6 px, smoothed over TRACE_SMOOTH px. The line
+    continues while c(t) >= max(TRACE_REL x median c of the object itself, 95th percentile of the same statistic on
+    a parallel control line TRACE_CTRL px away, the quieter of the two sides), gaps <= TRACE_GAP px, at most TRACE_EXT_PX; it stops at land /
+    cloud (no valid water on the axis). The continuation counts only if at >= TRACE_AXIS_SHARE of its positions the
+    brightest of the offsets -3..3 px is within +-1 px of the axis (straight, not a wavy filament drifting off it).
+    Water = observed water or own detections (the line itself)."""
+    out = np.zeros(n)
+    if not cand.any():
+        return out
+    valid = water | own
+    v = np.nan_to_num(vis)
+    ker = np.ones(TRACE_SMOOTH) / TRACE_SMOOTH
+    objs = ndimage.find_objects(labels)
+    for k in np.flatnonzero(cand):
+        sl = objs[k]
+        if sl is None:
+            continue
+        ys, xs = np.nonzero(labels[sl] == k + 1)
+        ys = ys + sl[0].start; xs = xs + sl[1].start
+        ue, un = -shp["ny"][k], -shp["nx"][k]
+        dc, dr = ue, -un
+        nc, nr = shp["nx"][k], shp["ny"][k]
+        c0, r0 = xs.mean(), ys.mean()
+        pa = (xs - c0) * dc + (ys - r0) * dr
+        tmin, tmax = float(pa.min()), float(pa.max())
+        ts = np.arange(np.floor(tmin) - TRACE_EXT_PX, np.ceil(tmax) + TRACE_EXT_PX + 1)
+        # wiggle: spread of the mean perpendicular offset in 3 px bins along the axis (a wavy filament is not a wake)
+        pm = -(xs - c0) * dr + (ys - r0) * dc
+        bins = np.floor((pa - tmin) / 3).astype(int)
+        cnt = np.bincount(bins)
+        if np.std((np.bincount(bins, pm) / np.maximum(cnt, 1))[cnt > 0]) > TRACE_WIGGLE:
+            continue
+        prof, am = _profile(v, valid, c0, r0, dc, dr, nc, nr, ts, TRACE_ON, TRACE_BG, TRACE_ARGMAX)
+        inside = (ts >= tmin) & (ts <= tmax)
+        c_obj = float(np.nanmedian(prof[inside])) if np.isfinite(prof[inside]).any() else np.nan
+        if not np.isfinite(c_obj) or c_obj <= 0:
+            continue
+        ctrl = []
+        for sgn in (1, -1):
+            cc = _profile(v, valid & ~own, c0 + sgn * TRACE_CTRL * nc, r0 + sgn * TRACE_CTRL * nr, dc, dr, nc, nr, ts,
+                          TRACE_ON, TRACE_BG)
+            cs = np.convolve(np.nan_to_num(cc, nan=0.0), ker, "same")[np.isfinite(cc)]
+            if cs.size >= 20:
+                ctrl.append(float(np.percentile(cs, 95)))
+        # the quieter side: a ship / another lane / shore on one side must not hide the line
+        thr = max(TRACE_REL * c_obj, min(ctrl) if ctrl else np.inf)
+        ok_t = np.isfinite(prof)
+        sm = np.convolve(np.where(ok_t, prof, 0.0), ker, "same") / np.maximum(np.convolve(ok_t.astype(float), ker, "same"), 1e-6)
+        ext = 0.0
+        on_axis = []
+        for side in (1, -1):
+            idx = np.flatnonzero(ts > tmax) if side > 0 else np.flatnonzero(ts < tmin)[::-1]
+            gap, last, seen = 0, 0.0, []
+            for i in idx:
+                if not ok_t[i]:
+                    break
+                seen.append(i)
+                if sm[i] >= thr:
+                    gap, last = 0, abs(ts[i] - (tmax if side > 0 else tmin))
+                else:
+                    gap += 1
+                    if gap > TRACE_GAP:
+                        break
+            ext += last
+            on_axis += [i for i in seen if abs(ts[i] - (tmax if side > 0 else tmin)) <= last]
+        # the continuation must stay on the axis: the brightest of offsets -3..3 is within +-1 px at most positions
+        a = am[on_axis] if on_axis else np.array([])
+        a = a[np.isfinite(a)]
+        if ext > 0 and (a.size == 0 or np.mean(np.abs(a) <= 1) < TRACE_AXIS_SHARE):
+            ext = 0.0
+        out[k] = (tmax - tmin + 1) + ext
+    return out
 
 
 def brightness_step(labels: np.ndarray, n: int, shp: dict, vis: np.ndarray, valid: np.ndarray,
@@ -393,6 +597,7 @@ def classify(labels: np.ndarray, n: int, bands: dict | None, water: np.ndarray,
     ship_frac = np.zeros(n)
     seam_small = np.zeros(n, bool)
     end_ship = np.zeros(n, bool); end_peak = np.zeros(n)
+    boat = np.zeros(n, bool); boat_s11 = np.zeros(n); trace = np.zeros(n)
     step = np.zeros(n); cons = np.zeros(n); exc = np.zeros(n)
     if bands is not None:
         b2, b3, b4, b8 = (bands[k].astype(np.float32) for k in ("B2", "B3", "B4", "B8"))
@@ -425,12 +630,18 @@ def classify(labels: np.ndarray, n: int, bands: dict | None, water: np.ndarray,
             s2, c2, e2 = brightness_step(labels, n, shp, vis, valid, wmed, small, normal=nrm)
             step = np.where(small, s2, step); cons = np.where(small, c2, cons); exc = np.where(small, e2, exc)
             seam_small = small & (s2 >= SMALL_STEP) & (c2 >= EDGE_CONS) & (e2 <= EDGE_EXCESS)
+        cand_tr = line & (L_m >= TRACE_LEN_M) & (shp["thick_px"] <= TRACE_THICK_PX) & (shp["elong"] >= TRACE_ELONG)             & (shp["dev"] <= TRACE_DEV)
+        trace = line_trace(labels, n, shp, vis, water, fl, cand_tr)
+        if "B11" in bands:
+            boat, boat_s11 = small_boats(labels, n, shp, b8, vis, bands["B11"].astype(np.float32), water, fl)
         cand_end = line & (L_m >= END_LEN_M) & (shp["elong"] >= END_ELONG)
         if cand_end.any():
             clusters = end_bright_clusters(b2, b3, b4, b8, water, labels > 0)
-            end_ship, end_peak = ship_at_end(labels, n, shp, b8, clusters, cand_end)
+            end_ship, end_peak = ship_at_end(labels, n, shp, b8, clusters, cand_end,
+                                             straight=shp["dev"] <= END_AXIS_DEV)
     shp["step_rel"], shp["step_cons"], shp["obj_excess"], shp["ship_frac"] = step, cons, exc, ship_frac
     shp["end_ship"], shp["end_ship_b8"] = end_ship, end_peak
+    shp["boat"], shp["boat_s11"], shp["trace_px"] = boat, boat_s11, trace
     long_tail = (L_m >= WAKE_SHIP_LEN_M) & (shp["elong"] >= WAKE_SHIP_ELONG) & (shp["dev"] <= WAKE_SHIP_DEV)
     wake_free = line & (L_m >= WAKE_LEN_M) & (shp["thick_px"] <= WAKE_THICK_PX) & (shp["elong"] >= WAKE_ELONG) \
         & (shp["dev"] <= WAKE_DEV)
@@ -441,13 +652,15 @@ def classify(labels: np.ndarray, n: int, bands: dict | None, water: np.ndarray,
     for k in range(n):
         if ship_frac[k] > 0 and long_tail[k]:
             art[k] = "wake"
-        elif ship_frac[k] >= SHIP_FRAC:
+        elif ship_frac[k] >= SHIP_FRAC or boat[k]:
             art[k] = "ship"
         elif seam_track[k] or seam_edge[k] or seam_small[k]:
             art[k] = "seam"
         elif wake_free[k]:
             art[k] = "wake"
         elif end_ship[k]:
+            art[k] = "wake"
+        elif trace[k] * PX_M >= TRACE_TOTAL_M:
             art[k] = "wake"
     if group and n >= 2:
         _group_marks(labels, n, shp, bands, water, flagged, art)
@@ -478,5 +691,5 @@ def _join_seams(art: list, shp: dict, rounds: int = 2) -> None:
             return
 
 
-__all__ = ["classify", "component_shape", "ship_blobs", "brightness_step", "end_bright_clusters", "ship_at_end",
+__all__ = ["classify", "component_shape", "ship_blobs", "small_boats", "line_trace", "brightness_step", "end_bright_clusters", "ship_at_end",
            "collinear_groups", "propagate_artifacts", "RULES_TEXT"]

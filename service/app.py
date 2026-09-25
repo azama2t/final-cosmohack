@@ -6,6 +6,8 @@ Contracts: docs/CONTRACTS.md. Endpoints: see create_app().
 """
 from __future__ import annotations
 
+import os
+
 import json
 import mimetypes
 from pathlib import Path
@@ -17,7 +19,9 @@ from starlette.middleware.gzip import GZipMiddleware
 
 from . import core, pdf, place, review
 
-STATIC = core.SERVICE_DIR / "static"
+# UI build: service/static (v1) by default; MACROPLASTIC_UI=v2 -> service/static_v2 (if built)
+_UI = os.environ.get("MACROPLASTIC_UI", "v1").lower()
+STATIC = core.SERVICE_DIR / ("static_v2" if _UI == "v2" and (core.SERVICE_DIR / "static_v2" / "index.html").is_file() else "static")
 VERSION = "0.1.0"
 mimetypes.add_type("application/geo+json", ".geojson")
 mimetypes.add_type("application/javascript", ".js")
@@ -67,6 +71,18 @@ def create_app(data_root: Optional[str | Path] = None) -> FastAPI:
     @app.exception_handler(core.BadRequest)
     async def _bad(request: Request, exc: core.BadRequest):
         return JSONResponse({"detail": str(exc)}, status_code=422)
+
+    # feature routers: every module service/routes_*.py that defines `router` (fastapi.APIRouter) is included here,
+    # before the /api catch-all and the SPA fallback below
+    import importlib
+    import pkgutil
+    for _m in sorted(m.name for m in pkgutil.iter_modules([str(Path(__file__).parent)]) if m.name.startswith("routes_")):
+        try:
+            _mod = importlib.import_module(f"service.{_m}")
+            if hasattr(_mod, "router"):
+                app.include_router(_mod.router)
+        except Exception as e:  # a broken feature module must not take the whole service down
+            print(f"[service] router {_m} not loaded: {e}")
 
     def no_data_headers(st: core.Store) -> dict:
         return {} if st.has_data() else {"X-Data-Hint": "no data; see /health hint"}

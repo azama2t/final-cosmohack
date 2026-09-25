@@ -12,31 +12,31 @@
  {
   "date": "2025-01-31",
   "model": "mdd",
-  "total_debris_area_m2": 42500.0,
-  "mean_index": 0.1208,
-  "n_detections": 7,
+  "total_debris_area_m2": 42300.0,
+  "mean_index": 0.1201,
+  "n_detections": 6,
   "cloud_frac": 0.0001,
   "n_cells_valid": 527,
-  "n_artifacts": 2
+  "n_artifacts": 3
  },
  {
   "date": "2026-01-01",
   "model": "lgbm",
-  "total_debris_area_m2": 26600.0,
-  "mean_index": 0.0726,
-  "n_detections": 90,
+  "total_debris_area_m2": 26100.0,
+  "mean_index": 0.0709,
+  "n_detections": 88,
   "cloud_frac": 0.0001,
   "n_cells_valid": 526,
-  "n_artifacts": 31
+  "n_artifacts": 33
  },
  {
   "date": "2026-01-01",
   "model": "mdd",
-  "total_debris_area_m2": 18000.0,
-  "mean_index": 0.0514,
-  "n_detections": 10,
+  "total_debris_area_m2": 16700.0,
+  "mean_index": 0.0473,
+  "n_detections": 8,
   "cloud_frac": 0.0001,
   "n_cells_valid": 526,
-  "n_artifacts": 9
+  "n_artifacts": 11
  }
 ]
