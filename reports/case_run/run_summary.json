@@ -70,7 +70,7 @@
  },
  "command": "run_all.py all --offline",
  "last_subcommand": "all",
- "finished": "2026-09-25T19:41:18",
+ "finished": "2026-09-25T20:04:05",
  "offline": true,
  "force": false,
  "workdir": null,
@@ -85,12 +85,12 @@
   "shapely": "2.1.2",
   "fastapi": "0.141.1",
   "yaml": "6.0.3",
-  "git_commit": "cff6c0e1bb0b86f2dffb685249d331cba35659ce"
+  "git_commit": "6722a7c7ddaa7709cf7226f6acf90e8ecb4ce165"
  },
  "inputs": {
   "task/macroplastic_marine_samples.csv": "30ce0a65e3880b833b5dfe3bc6f528ee5f5af14a0d22f25995f4ef8af585a764",
   "configs/case_selection.yaml": "283fa0885c63e9311958db2d0987c3cf025415aa6153557213c2112199c933ba",
-  "configs/case_pairs.yaml": "d2001925b3863cbacd434e8f5f306e45f0a6bb6867371f1525b8668502ee4f5a",
+  "configs/case_pairs.yaml": "0dc8bf61caf6df93c04b20d8ce8290a862b6c3586c593d72587b7d195cacdb7e",
   "weights/lgbm/meta.json": "97db8f94afb5b46b89f45f08562519b0b6a1ee91dc0e2aa5716b5926c4a1da07"
  },
  "outputs_sha256": {
@@ -100,26 +100,26 @@
   "data/case/selection_S2_visual_total_plastic_rejected.csv": "0a91527bc96f0a30a9b37c2150bc38f04c912db63f9d1a0cb965eb8b339dba2f",
   "data/case/run/registry_samples.csv": "ad18fda9af315dbfce398601f05f11c4e212b323a14c53ad0ee98366d1279690",
   "data/case/run/registry_pairs.csv": "5b286619d45a8dccb03444639bc8a135aa6d522697c6c6a1f387b814b9e03d18",
-  "data/pairs/events.csv": "75d4c1d9767e779c6c5a9c4cac8b7456597253720219e5d86cd50521abcc819d",
-  "data/pairs/candidates.csv": "348dd3722457ece29ccd6aa88b6262eab0c742cde4bd2c5daddd7dde8c300394",
-  "data/pairs/best_per_event.csv": "450eadebb561548689973368049b3fdbd4dcb68ed49e5a0de1b2dedfb8de7f8f",
-  "data/pairs/pair_quality.csv": "7c639d859ac02c1574cb812072c9cabe1ea1d22080f99d98881b5c582166e27c",
+  "data/pairs/events.csv": "adf102a44ed29df914c936c896781bb45ee1e1fe82150a70eaba56221da699c5",
+  "data/pairs/candidates.csv": "1799265e31cbf3f58282b015feaf61244f4117f258d30c031548099d97806c01",
+  "data/pairs/best_per_event.csv": "6661b3dd12464acf38a01c428a9dc5a0cf1ae88a7efd86bffef1b90b4ebbe305",
+  "data/pairs/pair_quality.csv": "a883f746a874ea1ebba045283de16e67eaaaac71e61dfd48bb10e5b507f7d7e2",
   "reports/case_conc/predictions.csv": "1e9b3d8a2ac056edbc6fc20ac95adf5280076ca8c94f923ce80c796b5c5a6fa7",
   "reports/case_conc/metrics_by_fold.csv": "cf385c7505bcb67966d71de7f0caa83fdae0a3016bb62d884d394cb5270ebd74",
   "reports/case_conc/consistency.csv": "8ce619025128c25384b37f17ffbf9c9037fdc8419e823c0a725a3b93cf9af86d",
   "reports/case_conc/metrics.json": "77713271b4893f1462de369ba246834838d322b139d336b7c3e7925125314df4",
   "reports/case_run/detector_recomputed.json": "1caae3772b8822b04b4876e7243a9e4c4afd3c4976af8699cfce677d7cbf0b1c",
-  "out/case_export/observations.geojson": "1d9aad934e02482106e012122763ee9e9830d86fb931d5202328d6cb6a9c9cf9",
+  "out/case_export/observations.geojson": "2fe76feaf6ae201cdc7edaff14160bdef6d37cb6868e71115f7d6c8d2bb54bf7",
   "out/case_export/observations.csv": "c10a007355c1b8e0b1961af473ff8427b9ab48db806f5f243e0d3f01e20c54ca",
-  "out/case_export/pairs.geojson": "f050f282e32d2c1691331fce7b1779126595696cbd6c64c3b645ff5bf73cf4e6",
-  "out/case_export/pairs.csv": "fd2c383165668ee679d3e81368a10a5f348505328f4820c1b5f01d6f476d2c69",
-  "out/case_export/zones.geojson": "7757ba9b3310d05f70e1c30ac07e54590c0d575e5a448ce33680a6a54ad1f22c",
-  "out/case_export/zones.csv": "edb43353796d4769c09717bdd5cfd946b007d6366e1f48d4f772f8bec638883b",
+  "out/case_export/pairs.geojson": "5c07d32641b5836116968850923b951fc8d9f320825c708eb2100fe9ffd9cfa7",
+  "out/case_export/pairs.csv": "b67b2d27e0df46caa7fea797d52377036d48c71c94179064239d6a6f07e066dd",
+  "out/case_export/zones.geojson": "69bec0fdaf62bea0c8637d22c11f0b0d9da4c22050e0b616b53bb5c1d2b3bc9c",
+  "out/case_export/zones.csv": "6d00ca51cd6095fd4091e8d4831690cee2925bd38071cc1d51e701270a50bf7e",
   "out/case_export/example_pairs_black_sea_24h.csv": "58191fc37a639f79a8197a02e4deabc75bafefe3e3aca8187d11b1fda13f6cc3",
   "out/case_export/example_pairs_accepted.csv": "c98dfb6d693c97b031d7abb94751e54b4baf7972f9f493e0a2b997bffcae2dbe",
   "out/case_export/example_zones_detected.geojson": "58fd0941b152a511fe654ad736dec6fc78e45ec37dc7e9b29cab9792fe7ca0c6"
  },
- "outputs_fingerprint": "85335b7a5f8aa5de79482138e7f6e1ba76ce796afbf0c9933a5c0e27b820e182",
+ "outputs_fingerprint": "1b2dc4ca7050955e5a2ec1dc69e730f263e708671d77e748ed3240e57e46d0e4",
  "steps": {
   "1_selection": {
    "step": "1_selection",
@@ -131,7 +131,7 @@
    "step": "2_pairs",
    "ok": true,
    "note": "строк 1774, запросов мимо кэша 0, ошибок 0",
-   "seconds": 1.0
+   "seconds": 1.6
   },
   "3_quality_detector": {
    "step": "3_quality_detector",
@@ -148,13 +148,13 @@
   "total_prepare": {
    "step": "total_prepare",
    "ok": true,
-   "seconds": 1.8
+   "seconds": 2.5
   },
   "4_concentration": {
    "step": "4_concentration",
    "ok": true,
    "note": "S2_visual_total_plastic: median MAE 35.9 vs knn5 31.3; S1_trawl_total_plastic: median MAE 456.4 vs knn5 448.9",
-   "seconds": 2.4
+   "seconds": 2.3
   },
   "total_eval": {
    "step": "total_eval",
@@ -171,7 +171,7 @@
    "step": "6_export_api_v3",
    "ok": true,
    "note": "observations.geojson: 935, observations.csv: 935, pairs.geojson: 4436, pairs.csv: 4436, zones.geojson: 29, zones.csv: 29",
-   "seconds": 1.0
+   "seconds": 1.2
   },
   "total_export": {
    "step": "total_export",
@@ -181,7 +181,7 @@
   "total_all": {
    "step": "total_all",
    "ok": true,
-   "seconds": 6.2
+   "seconds": 7.1
   }
  },
  "concentration": {
@@ -387,5 +387,8 @@
     "records": 0
    }
   ]
- }
+ },
+ "fingerprint_excludes": [
+  "reports/case_run/detector_recomputed.json (зависит от наличия MARIDA)"
+ ]
 }

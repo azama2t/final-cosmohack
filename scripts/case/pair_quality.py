@@ -5,6 +5,8 @@
   .venv/Scripts/python.exe scripts/case/pair_quality.py --summary-only                      # csv + md from meta.json
 
 Input: data/pairs/best_per_event.csv (scripts/case/find_pairs.py), task/macroplastic_marine_samples.csv (geometry), configs/case_pairs.yaml.
+Geometry (L75, configs/case_pairs.yaml geometry.use): S2/S3 strip = PANGAEA track segments (src/macroplastic/case/geometry.py)
++ buffer; interrupted transects are a MultiLineString, the gap is not part of the strip. Others: CSV line or point + buffer.
 Per pair: data/pairs/quality/<event_id>/{rgb.png, quality.tif, quality.png, prob.tif, mask.png, meta.json}
 (meta.json written last -> a pair with meta.json is done; rerun skips it). Table data/pairs/pair_quality.csv and
 report reports/case_pairs/quality.md are rebuilt from all meta.json files.
@@ -58,7 +60,7 @@ def load_cfg(path: Path) -> dict:
     return yaml.safe_load(path.read_text(encoding="utf-8"))
 
 
-def event_geometry(samples: pd.DataFrame, eid: str) -> dict:
+def event_geometry(samples: pd.DataFrame, eid: str, cfg: dict | None = None) -> dict:
     s = samples[samples.event_id == eid]
     top = s[s.parent_sample_id.isna()] if s.parent_sample_id.isna().any() else s
     r = top.iloc[0]
@@ -71,17 +73,38 @@ def event_geometry(samples: pd.DataFrame, eid: str) -> dict:
         g["line"] = [(float(r.lon_start), float(r.lat_start)), (float(r.lon_end), float(r.lat_end))]
     else:
         g["line"] = None
+    g["lines"], g["geometry_status"], g["geometry_source"] = None, None, "samples_csv"
+    gc = (cfg or {}).get("geometry") or {}
+    if gc.get("use", True) and eid[:3] in ("S2:", "S3:"):
+        from macroplastic.case.geometry import event_track
+        t = event_track(eid, allow_approx=bool(gc.get("allow_approx", True)))
+        if t is not None and t["geometry"]["type"] != "Point":
+            # сегменты трека PANGAEA: полоса = сегменты + буфер, перерыв прерванной трансекты не покрывается
+            g["lines"] = [[tuple(map(float, p)) for p in seg] for seg in
+                          (t["geometry"]["coordinates"] if t["geometry"]["type"] == "MultiLineString"
+                           else [t["geometry"]["coordinates"]])]
+            g["lon"], g["lat"] = float(t["center"][0]), float(t["center"][1])
+            g["geometry_status"], g["geometry_source"] = t["geometry_status"], "pangaea_track"
+            g["n_segments"] = t["n_segments"]
     return g
 
 
 def strip_polygon(g: dict, epsg: int, cfg: dict):
     from pyproj import Transformer
-    from shapely.geometry import LineString, Point
+    from shapely.geometry import LineString, MultiLineString, Point
     tr = Transformer.from_crs("EPSG:4326", f"EPSG:{epsg}", always_xy=True)
     sc = cfg["strip"]
+    half = max((g["width_m"] or 0) / 2, sc["min_half_width_m"])
+    if g.get("lines"):  # трек PANGAEA (сегменты); перерыв между сегментами не входит в полосу
+        segs = [[tr.transform(*p) for p in seg] for seg in g["lines"]]
+        segs = [s_ for s_ in segs if LineString(s_).length >= 1.0]
+        if segs:
+            geom = LineString(segs[0]) if len(segs) == 1 else MultiLineString(segs)
+            what = "transect line" if len(segs) == 1 else f"{len(segs)} transect segments (gap not covered)"
+            return geom.buffer(half, cap_style=2), (f"{what} (PANGAEA track, {g.get('geometry_status')}) + buffer "
+                                                    f"{half:.0f} m (width {g['width_m']} m / 2, min {sc['min_half_width_m']} m)")
     pts = [tr.transform(*p) for p in g["line"]] if g["line"] else None
     if pts and LineString(pts).length >= 1.0:  # degenerate line (start == end) -> point rule
-        half = max((g["width_m"] or 0) / 2, sc["min_half_width_m"])
         return LineString(pts).buffer(half, cap_style=2), f"transect line + buffer {half:.0f} m (width {g['width_m']} m / 2, min {sc['min_half_width_m']} m)"
     x, y = tr.transform(g["lon"], g["lat"])
     return Point(x, y).buffer(sc["point_buffer_m"]), f"point (no transect geometry in samples) + buffer {sc['point_buffer_m']} m"
@@ -468,10 +491,12 @@ def main():
             if (outdir / "meta.json").exists() and not a.force:
                 continue
             t0 = time.time()
-            g = event_geometry(samples, row.event_id)
+            g = event_geometry(samples, row.event_id, cfg)
             base = dict(event_id=row.event_id, sample_ids=g["sample_ids"], field_sample_id=g["field_sample_id"],
                         field_items_km2=g["field_items_km2"], sampling_method=g["sampling_method"],
-                        transect_width_m=g["width_m"], transect_length_km=g["length_km"], has_line=g["line"] is not None,
+                        transect_width_m=g["width_m"], transect_length_km=g["length_km"],
+                        has_line=bool(g.get("lines") or g["line"]),
+                        geometry_source=g["geometry_source"], geometry_status=g["geometry_status"],
                         obs_datetime=row.obs_datetime, time_known=bool(row.time_known), dt_hours=float(row.dt_hours),
                         config=cfg)
             try:

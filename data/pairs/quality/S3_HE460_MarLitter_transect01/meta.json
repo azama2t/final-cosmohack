@@ -7,6 +7,8 @@
  "transect_width_m": 10.0,
  "transect_length_km": 15.102,
  "has_line": true,
+ "geometry_source": "pangaea_track",
+ "geometry_status": "reconstructed_approx",
  "obs_datetime": "2016-04-08 16:38:30+00:00",
  "time_known": true,
  "dt_hours": -5.97,
@@ -35,6 +37,32 @@
   "network": {
    "workers": 4,
    "retries": 4
+  },
+  "drift": {
+   "scenarios": {
+    "low": {
+     "current_ms": 0.05,
+     "windage": 0.01
+    },
+    "typical": {
+     "current_ms": 0.2,
+     "windage": 0.02
+    },
+    "high": {
+     "current_ms": 0.5,
+     "windage": 0.03
+    }
+   },
+   "accept_scenario": "typical",
+   "unknown_time_extra_h": 12,
+   "tolerance": {
+    "buffer_km": 3.0,
+    "default_width_m": 10
+   }
+  },
+  "geometry": {
+   "use": true,
+   "allow_approx": true
   }
  },
  "scene_id": "S2A_MSIL2A_20160408T104022_R008_T32UMF_20210211T022918",
@@ -46,61 +74,61 @@
  "scene_cloud_cover": 36.701466,
  "epsg": 32632,
  "bounds_utm": [
-  426060.0,
-  6007020.0,
-  433140.0,
-  6014100.0
+  413640.0,
+  6007500.0,
+  432660.0,
+  6021420.0
  ],
- "width": 708,
- "height": 708,
- "strip_rule": "point (no transect geometry in samples) + buffer 500 m",
+ "width": 1902,
+ "height": 1392,
+ "strip_rule": "transect line (PANGAEA track, reconstructed_approx) + buffer 10 m (width 10.0 m / 2, min 10 m)",
  "substitution_note": "",
  "scale_offset_note": "reflectance = DN*scale + offset per asset from STAC metadata (product-metadata BOA_ADD_OFFSET); offset check: PC: offset from product metadata; scale/offset used: {\"B1\": [0.0001, 0.0], \"B2\": [0.0001, 0.0], \"B3\": [0.0001, 0.0], \"B4\": [0.0001, 0.0], \"B5\": [0.0001, 0.0], \"B6\": [0.0001, 0.0], \"B7\": [0.0001, 0.0], \"B8\": [0.0001, 0.0], \"B8A\": [0.0001, 0.0], \"B9\": [0.0001, 0.0], \"B11\": [0.0001, 0.0], \"B12\": [0.0001, 0.0]}; no date-based -1000 DN rule; no clipping (values as computed); DN==0 -> NaN; 20/60 m bands resampled to 10 m by nearest (SCL always nearest)",
  "quality": {
-  "strip_px": 8036,
-  "strip_area_km2": 0.8036,
+  "strip_px": 5109,
+  "strip_area_km2": 0.5109,
   "coverage": 1.0,
-  "valid_water_frac": 0.2622,
-  "cloud_frac": 0.7353,
-  "scl_cloud_frac": 0.0131,
-  "spectral_cloud_frac": 0.7222,
+  "valid_water_frac": 0.1002,
+  "cloud_frac": 0.8939,
+  "scl_cloud_frac": 0.8252,
+  "spectral_cloud_frac": 0.0687,
   "land_frac": 0.0,
   "glint_frac": 0.0,
   "glint_scene": false,
   "nodata_frac": 0.0,
-  "glint_b11_median": 0.0393,
+  "glint_b11_median": 0.0225,
   "crop_valid_frac": 1.0,
-  "crop_water_frac": 0.3895
+  "crop_water_frac": 0.1571
  },
  "decision": "reject",
  "reason": "cloud",
  "detector": {
   "threshold": 0.63,
-  "n_det_crop": 49,
-  "n_det_crop_raw": 52,
-  "n_dropped_cloud_shadow": 3,
-  "det_px_crop": 76,
-  "det_frac_water_crop": 0.000389,
+  "n_det_crop": 48,
+  "n_det_crop_raw": 53,
+  "n_dropped_cloud_shadow": 5,
+  "det_px_crop": 74,
+  "det_frac_water_crop": 0.000178,
   "n_det": 0,
   "det_px_strip": 0,
   "det_area_m2": 0,
-  "prob_max": 0.2316,
-  "prob_p99_strip": 0.013,
-  "prob_p99_crop_water": 0.0182,
+  "prob_max": 0.2304,
+  "prob_p99_strip": 0.001,
+  "prob_p99_crop_water": 0.0052,
   "harmonize_offset": [
-   -0.01882000081241131,
-   -0.01671000011265278,
-   -0.02450999990105629,
-   -0.018729999661445618,
-   -0.021069999784231186,
-   -0.01809000037610531,
-   -0.017000000923871994,
-   -0.02126000076532364,
-   -0.018230000510811806,
-   -0.03200000151991844,
-   -0.040049999952316284
+   -0.02181999944150448,
+   -0.019509999081492424,
+   -0.028909999877214432,
+   -0.02652999944984913,
+   -0.029969999566674232,
+   -0.02718999981880188,
+   -0.026100000366568565,
+   -0.03125999867916107,
+   -0.0279300007969141,
+   -0.045099999755620956,
+   -0.054749999195337296
   ],
-  "runtime_s": 1.2
+  "runtime_s": 6.4
  },
  "files": [
   "rgb.png",
@@ -109,6 +137,6 @@
   "prob.tif",
   "mask.png"
  ],
- "elapsed_s": 7.6,
- "created": "2026-09-25T17:33:07"
+ "elapsed_s": 14.8,
+ "created": "2026-09-25T19:46:12"
 }

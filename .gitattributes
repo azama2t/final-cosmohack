@@ -1,3 +1,8 @@
 weights/**/model.txt -text
 *.png binary
 *.tif binary
+# данные — без преобразования концов строк (sha256 в манифестах и тестах считаются по файлам как есть)
+data/** -text
+task/** -text
+reports/case_splits/** -text
+reports/case_conc/*.csv -text

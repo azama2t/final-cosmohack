@@ -33,6 +33,8 @@ PATHS: dict[str, Path] = {
     "conc_weights_dir": REPO / "weights" / "case_conc",
     "registry_pairs": REPO / "data" / "case" / "run" / "registry_pairs.csv",
     "det_metrics": REPO / "reports" / "case_detector" / "metrics.json",
+    "transects": REPO / "data" / "case" / "geometry" / "transects.geojson",
+    "pairs_cfg": REPO / "configs" / "case_pairs.yaml",
 }
 
 # ------------------------------------------------------------------ dictionaries (contract section 2)
@@ -421,22 +423,78 @@ def bounds_polygon(b) -> Optional[dict]:
 
 
 def strip_polygon(lon, lat, line, radius_m: float) -> Optional[dict]:
-    """Observation strip in EPSG:4326: buffer (radius_m) of the transect line or of the point, built in local UTM."""
+    """Observation strip in EPSG:4326: buffer (radius_m) of the transect line or of the point, built in local UTM.
+    line = ((lon, lat), (lon, lat)) or a list of track segments [[(lon, lat), ...], ...] (flat-cap buffer per segment,
+    the gap between segments stays outside, as in scripts/case/pair_quality.py)."""
     try:
         from pyproj import Transformer
-        from shapely.geometry import LineString, Point, mapping
+        from shapely.geometry import LineString, MultiLineString, Point, mapping
         from shapely.ops import transform
         zone = int((lon + 180) // 6) + 1
         epsg = (32600 if lat >= 0 else 32700) + zone
         fwd = Transformer.from_crs("EPSG:4326", f"EPSG:{epsg}", always_xy=True).transform
         inv = Transformer.from_crs(f"EPSG:{epsg}", "EPSG:4326", always_xy=True).transform
-        g = LineString(line) if line else Point(lon, lat)
-        poly = transform(inv, transform(fwd, g).buffer(radius_m, quad_segs=8))
+        cap = 1   # round
+        if line and isinstance(line[0][0], (list, tuple)):   # segments of a track: gap is not covered
+            g = MultiLineString([list(seg) for seg in line]) if len(line) > 1 else LineString(line[0])
+            cap = 2   # flat, as pair_quality.strip_polygon
+        else:
+            g = LineString(line) if line else Point(lon, lat)
+        poly = transform(inv, transform(fwd, g).buffer(radius_m, quad_segs=8, cap_style=cap))
         m = mapping(poly)
         return {"type": m["type"], "coordinates": json.loads(json.dumps(m["coordinates"]),
                                                              parse_float=lambda s: round(float(s), 6))}
     except Exception:
         return None
+
+
+# ------------------------------------------------------------------ transect tracks (PANGAEA, L72/L75)
+def _tracks_load(p: Path) -> dict:
+    fc = _read_json(p)
+    return {f["properties"]["event_id"]: f for f in fc.get("features", []) if (f.get("properties") or {}).get("event_id")}
+
+
+def event_track(event_id: str) -> Optional[dict]:
+    """Track of an S2/S3 event restored from PANGAEA (data/case/geometry/transects.geojson, src/macroplastic/case/geometry.py):
+    geometry (LineString / MultiLineString of segments; the gap of an interrupted transect is not part of it) + properties.
+    configs/case_pairs.yaml geometry.use=false -> None; allow_approx=false -> reconstructed_approx track is not used.
+    The author's published area stays the reference for concentration (area_author_km2 is informational here)."""
+    if not event_id:
+        return None
+    gc = (_cached("pairs_cfg", PATHS["pairs_cfg"], _yaml_load) or {}).get("geometry") or {}
+    if not gc.get("use", True):
+        return None
+    f = (_cached("transects", PATHS["transects"], _tracks_load) or {}).get(event_id)
+    if not f:
+        return None
+    pr = f.get("properties") or {}
+    st = pr.get("geometry_status") or ""
+    if not f.get("geometry") or f["geometry"].get("type") == "Point" or             ("reconstructed_approx" in st and not gc.get("allow_approx", True)):
+        return None
+    return {"geometry": f["geometry"], "geometry_status": st, "segments": pr.get("n_segments"),
+            "segment_windows": pr.get("segment_windows"), "track_center": pr.get("track_center"),
+            "track_length_km": pr.get("length_km"), "area_author_km2": pr.get("area_author_km2"),
+            "geometry_source": pr.get("source")}
+
+
+def track_lines(event_id: str) -> Optional[list]:
+    """Segments of the track as [[(lon, lat), (lon, lat)], ...] or None."""
+    t = event_track(event_id)
+    if not t:
+        return None
+    g = t["geometry"]
+    segs = g["coordinates"] if g["type"] == "MultiLineString" else [g["coordinates"]]
+    return [[tuple(p) for p in seg] for seg in segs]
+
+
+def _track_props(event_id: str) -> dict:
+    t = event_track(event_id or "")
+    if not t:
+        return {"geometry_status": None, "segments": None, "track_center": None, "area_author_km2": None,
+                "geometry_source": None}
+    return {"geometry_status": t["geometry_status"], "segments": t["segments"], "track_center": t["track_center"],
+            "segment_windows": t["segment_windows"], "track_length_km": t["track_length_km"],
+            "area_author_km2": t["area_author_km2"], "geometry_source": t["geometry_source"]}
 
 
 # ------------------------------------------------------------------ observations
@@ -457,8 +515,11 @@ def _obs_feature(r: dict, linked: list[str], geometry: str = "point") -> dict:
               "lat_end": fnum(r.get("lat_end")), "lon_end": fnum(r.get("lon_end")),
               "length_km": fnum(r.get("transect_length_km")), "width_m": fnum(r.get("transect_width_m"))}
     geom = {"type": "Point", "coordinates": [lon, lat]} if lon is not None and lat is not None else None
+    trk = event_track(r.get("event_id") or "")
     ln = _line(r) if geometry == "line" else None
-    if ln:
+    if geometry == "line" and trk:   # S2/S3: track from PANGAEA (MultiLineString for interrupted transects)
+        geom = trk["geometry"]
+    elif ln:
         geom = {"type": "LineString", "coordinates": [list(ln[0]), list(ln[1])]}
     flags = [x.strip() for x in (r.get("quality_flags") or "").split(";") if x.strip()]
     is_item = r.get("record_type") == "item_observation"  # a single object, not a density
@@ -496,6 +557,7 @@ def _obs_feature(r: dict, linked: list[str], geometry: str = "point") -> dict:
         **field_poisson_ci(r),
         "model_estimate": model_estimate_for(r.get("sample_id") or ""),
         "linked_scenes": linked,
+        **_track_props(r.get("event_id") or ""),
     }
     return {"type": "Feature", "id": r.get("sample_id"), "geometry": geom, "properties": props}
 
@@ -704,7 +766,10 @@ def _pairs_build(cands, pq_rows, samples) -> list[dict]:
             lon, lat = fnum(s.get("longitude")), fnum(s.get("latitude"))
             geom = {"type": "Point", "coordinates": [lon, lat]} if lon is not None else None
             ln = _line(s)
-            if ln:
+            trk = event_track(ev)
+            if trk:
+                geom = trk["geometry"]
+            elif ln:
                 geom = {"type": "LineString", "coordinates": [list(ln[0]), list(ln[1])]}
             out.append({
                 "pair_id": pid, "sample_id": sid, "event_id": ev, "source_id": s.get("source_id"),
@@ -1044,6 +1109,8 @@ def zones_all() -> list[dict]:
             r0 = rows[0]
             lon, lat = fnum(r0.get("longitude")), fnum(r0.get("latitude"))
             line = _line(r0) if meta.get("has_line", True) else None
+            if meta.get("geometry_source") == "pangaea_track":   # strip of pair_quality.py was built from the track
+                line = track_lines(q.get("event_id", "")) or line
         radius = fnum(((meta.get("config") or {}).get("strip") or {}).get("point_buffer_m")) or 500.0
         if line:
             width = fnum(rows[0].get("transect_width_m"))
@@ -1583,6 +1650,11 @@ def wkt(g) -> str:
         return "LINESTRING (" + ", ".join(f"{x} {y}" for x, y in c) + ")"
     if t == "Polygon":
         return "POLYGON (" + ", ".join("(" + ", ".join(f"{x} {y}" for x, y in ring) + ")" for ring in c) + ")"
+    if t == "MultiLineString":
+        return "MULTILINESTRING (" + ", ".join("(" + ", ".join(f"{x} {y}" for x, y in ln) + ")" for ln in c) + ")"
+    if t == "MultiPolygon":
+        return "MULTIPOLYGON (" + ", ".join("(" + ", ".join("(" + ", ".join(f"{x} {y}" for x, y in ring) + ")"
+                                                            for ring in poly) + ")" for poly in c) + ")"
     return ""
 
 

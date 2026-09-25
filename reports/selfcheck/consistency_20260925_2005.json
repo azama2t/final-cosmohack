@@ -1,0 +1,3694 @@
+{
+ "when": "2026-09-25T20:04:06",
+ "isolation": "case_store.PATHS['queries'] -> C:\\Users\\User\\AppData\\Local\\Temp\\selfcheck_unt0yeyk\\queries.jsonl",
+ "sources_mtime": {
+  "task\\macroplastic_marine_samples.csv": "2026-09-25T16:49:06",
+  "data\\pairs\\candidates.csv": "2026-09-25T20:03:59",
+  "data\\pairs\\pair_quality.csv": "2026-09-25T20:04:00",
+  "reports\\case_conc\\metrics.json": "2026-09-25T20:04:03",
+  "reports\\case_conc\\predictions.csv": "2026-09-25T20:04:03",
+  "reports\\case_detector\\metrics.json": "2026-09-25T17:23:51",
+  "reports\\lgbm_final_test.json": "2026-09-25T16:30:18",
+  "reports\\case_conc\\dev_cv.json": "2026-09-25T19:00:28",
+  "configs\\case_conc_model.yaml": "2026-09-25T19:00:28"
+ },
+ "queries": [
+  {
+   "key": "S2_sargasso",
+   "name": "S2 Саргассово море (total_plastic — через selection)",
+   "query_id": "q_f78593db",
+   "query": {
+    "bbox": [
+     -71.0,
+     22.0,
+     -57.0,
+     33.0
+    ],
+    "date_from": null,
+    "date_to": null,
+    "statuses": [],
+    "sources": [
+     "S2_SARGASSO_MSM41"
+    ],
+    "profiles": [
+     "S2_visual_GT2"
+    ],
+    "scopes": [],
+    "layers": [],
+    "scene_id": null
+   },
+   "sha256_run": "5383ac1894a277405a4201009cdcb14b31f2f6414ad760c5e97574c99dadac27",
+   "n_obs": 330,
+   "n_zones": 0,
+   "n_scenes": 0,
+   "summary": {
+    "n_obs": 330,
+    "n_zones": 0,
+    "n_scenes": 0,
+    "by_status": {},
+    "by_concentration_status": {}
+   },
+   "n_pairs": 1320,
+   "n_pairs_accepted": 0
+  },
+  {
+   "key": "S4_black_sea",
+   "name": "Чёрное море, все пары",
+   "query_id": "q_1cc57a20",
+   "query": {
+    "bbox": null,
+    "date_from": null,
+    "date_to": null,
+    "statuses": [],
+    "sources": [
+     "S4_BLACK_SEA_DOORS3"
+    ],
+    "profiles": [],
+    "scopes": [],
+    "layers": [],
+    "scene_id": null
+   },
+   "sha256_run": "b93aebb36ebcde5c226ad21033ebd8c288bab0f22d34ba17b0e302dadb3c9549",
+   "n_obs": 33,
+   "n_zones": 24,
+   "n_scenes": 217,
+   "summary": {
+    "n_obs": 33,
+    "n_zones": 24,
+    "n_scenes": 217,
+    "by_status": {
+     "insufficient_data": 24
+    },
+    "by_concentration_status": {
+     "unavailable": 24
+    }
+   },
+   "n_pairs": 596,
+   "n_pairs_accepted": 0
+  },
+  {
+   "key": "S3_north_sea_2016",
+   "name": "Северное море, 2016",
+   "query_id": "q_66efd9b1",
+   "query": {
+    "bbox": null,
+    "date_from": "2016-01-01",
+    "date_to": "2016-12-31",
+    "statuses": [],
+    "sources": [
+     "S3_SE_NORTH_SEA"
+    ],
+    "profiles": [],
+    "scopes": [],
+    "layers": [],
+    "scene_id": null
+   },
+   "sha256_run": "8ca8393e0d68b2bbb9e16ec1b3acbeeae2965f1e7877ca5676be98f0d0a49436",
+   "n_obs": 27,
+   "n_zones": 2,
+   "n_scenes": 9,
+   "summary": {
+    "n_obs": 27,
+    "n_zones": 2,
+    "n_scenes": 9,
+    "by_status": {
+     "insufficient_data": 2
+    },
+    "by_concentration_status": {
+     "unavailable": 2
+    }
+   },
+   "n_pairs": 193,
+   "n_pairs_accepted": 0
+  },
+  {
+   "key": "S1_gpgp_trawl",
+   "name": "ГПМП, трал 5–50 см",
+   "query_id": "q_3e121b99",
+   "query": {
+    "bbox": null,
+    "date_from": null,
+    "date_to": null,
+    "statuses": [],
+    "sources": [
+     "S1_GPGP2018"
+    ],
+    "profiles": [
+     "S1_trawl_5_to_50"
+    ],
+    "scopes": [],
+    "layers": [],
+    "scene_id": null
+   },
+   "sha256_run": "ff56baab4e083703629c4633bb6aa60b35bcb7c8c6c77030ce55ccfe517bf0bb",
+   "n_obs": 83,
+   "n_zones": 0,
+   "n_scenes": 0,
+   "summary": {
+    "n_obs": 83,
+    "n_zones": 0,
+    "n_scenes": 0,
+    "by_status": {},
+    "by_concentration_status": {}
+   },
+   "n_pairs": 1400,
+   "n_pairs_accepted": 0
+  },
+  {
+   "key": "empty_bbox",
+   "name": "Пустой bbox (Южная Атлантика, наблюдений нет)",
+   "query_id": "q_5de78284",
+   "query": {
+    "bbox": [
+     -30.0,
+     -50.0,
+     -29.0,
+     -49.0
+    ],
+    "date_from": null,
+    "date_to": null,
+    "statuses": [],
+    "sources": [],
+    "profiles": [],
+    "scopes": [],
+    "layers": [],
+    "scene_id": null
+   },
+   "sha256_run": "22896bf2d62f2388c600eb72c498c3c04eea4474827dfd5ff6f55842fe31ea70",
+   "n_obs": 0,
+   "n_zones": 0,
+   "n_scenes": 0,
+   "summary": {
+    "n_obs": 0,
+    "n_zones": 0,
+    "n_scenes": 0,
+    "by_status": {},
+    "by_concentration_status": {}
+   }
+  },
+  {
+   "key": "bad_dates",
+   "name": "Некорректные даты (задом наперёд)",
+   "query": {
+    "date_from": "2016-12-31",
+    "date_to": "2016-01-01"
+   },
+   "response": {
+    "status": 400,
+    "error": {
+     "code": "BAD_DATE",
+     "message": "date_from позже date_to",
+     "details": {
+      "date_from": "2016-12-31",
+      "date_to": "2016-01-01"
+     }
+    }
+   }
+  }
+ ],
+ "metrics": {
+  "detector_main": {
+   "name": "LightGBM",
+   "split": "test",
+   "precision": 0.8244,
+   "recall": 0.9239,
+   "f1": 0.8713,
+   "iou": 0.7719,
+   "ci95_precision": [
+    0.761,
+    0.8927
+   ],
+   "ci95_recall": [
+    0.8689,
+    0.9705
+   ],
+   "ci95_f1": [
+    0.8225,
+    0.9202
+   ],
+   "ci95_iou": [
+    0.6986,
+    0.8522
+   ],
+   "tp": 352,
+   "fp": 75,
+   "fn": 29,
+   "n_scenes": 15,
+   "setting": "P(MD) >= 0.63",
+   "val_f1": 0.9226,
+   "test_f1": 0.8713,
+   "test_iou": 0.7719
+  },
+  "detector_baseline": {
+   "name": "RandomForest (код MARIDA)",
+   "split": "test",
+   "precision": 0.7068,
+   "recall": 0.8478,
+   "f1": 0.7709,
+   "iou": 0.6272,
+   "ci95_precision": [
+    0.6116,
+    0.8117
+   ],
+   "ci95_recall": [
+    0.7634,
+    0.9286
+   ],
+   "ci95_f1": [
+    0.7085,
+    0.8335
+   ],
+   "ci95_iou": [
+    0.5486,
+    0.7146
+   ],
+   "tp": 323,
+   "fp": 134,
+   "fn": 58,
+   "n_scenes": 15,
+   "setting": "argmax of 11 classes (12-15 merged into Marine Water)"
+  },
+  "concentration_profile": "S2_visual_total_plastic",
+  "concentration_baseline": {
+   "name": "median (train profile)",
+   "mae": 44.2,
+   "mae_log": 0.922,
+   "coverage": 0.8409,
+   "coverage_label": "≈84 % по CV",
+   "rmse": 57.5174,
+   "n": 44
+  },
+  "concentration_main": {
+   "name": "ridge_log",
+   "mae": 28.5069,
+   "mae_log": 0.6116,
+   "coverage": 0.8409,
+   "coverage_label": "≈84 % по CV",
+   "rmse": 41.4253,
+   "n": 44,
+   "delta_mae_vs_median": -15.6931,
+   "delta_mae_ci95": [
+    -31.5868,
+    -0.3321
+   ],
+   "delta_mae_ci95_bonferroni": [
+    -38.6561,
+    7.3028
+   ],
+   "sensitivity_k_blocks": [
+    {
+     "k_blocks": 4,
+     "delta_mae": -6.6821,
+     "ci95": [
+      -19.5359,
+      9.2959
+     ]
+    },
+    {
+     "k_blocks": 6,
+     "delta_mae": -13.6762,
+     "ci95": [
+      -26.8628,
+      -0.005
+     ]
+    }
+   ]
+  }
+ },
+ "invalid_inputs": [
+  {
+   "method": "GET",
+   "url": "/api/v3/observations?bbox=1,2,3",
+   "status": 400,
+   "code": "BAD_BBOX",
+   "message": "bbox: нужны 4 числа minLon,minLat,maxLon,maxLat",
+   "expected": "400 BAD_BBOX",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/observations?bbox=abc,1,2,3",
+   "status": 400,
+   "code": "BAD_BBOX",
+   "message": "bbox: нужны 4 числа minLon,minLat,maxLon,maxLat",
+   "expected": "400 BAD_BBOX",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/zones?bbox=10,0,5,1",
+   "status": 400,
+   "code": "BAD_BBOX",
+   "message": "bbox: minLon ≤ maxLon и minLat ≤ maxLat (переход через 180° не поддерживается)",
+   "expected": "400 BAD_BBOX",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/scenes?bbox=0,0,200,1",
+   "status": 400,
+   "code": "BAD_BBOX",
+   "message": "bbox: долгота в [-180, 180], широта в [-90, 90]",
+   "expected": "400 BAD_BBOX",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/observations?date_from=2016-12-31&date_to=2016-01-01",
+   "status": 400,
+   "code": "BAD_DATE",
+   "message": "date_from позже date_to",
+   "expected": "400 BAD_DATE",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/zones?date_from=2016-12-31&date_to=2016-01-01",
+   "status": 400,
+   "code": "BAD_DATE",
+   "message": "date_from позже date_to",
+   "expected": "400 BAD_DATE",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/pairs?date_from=2016-13-01",
+   "status": 400,
+   "code": "BAD_DATE",
+   "message": "date_from: дата в формате ГГГГ-ММ-ДД",
+   "expected": "400 BAD_DATE",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/export?layer=zones&date_from=2016-12-31&date_to=2016-01-01",
+   "status": 400,
+   "code": "BAD_DATE",
+   "message": "date_from позже date_to",
+   "expected": "400 BAD_DATE",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/zones?status=foo",
+   "status": 400,
+   "code": "BAD_PARAM",
+   "message": "status: неизвестные значения foo",
+   "expected": "400 BAD_PARAM",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/zones?detection_status=maybe",
+   "status": 400,
+   "code": "BAD_PARAM",
+   "message": "detection_status: неизвестные значения maybe",
+   "expected": "400 BAD_PARAM",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/zones?concentration_status=guess",
+   "status": 400,
+   "code": "BAD_PARAM",
+   "message": "concentration_status: неизвестные значения guess",
+   "expected": "400 BAD_PARAM",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/observations?profile=XYZ",
+   "status": 400,
+   "code": "BAD_PARAM",
+   "message": "profile: неизвестные значения XYZ",
+   "expected": "400 BAD_PARAM",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/observations?source=S9_MARS",
+   "status": 400,
+   "code": "BAD_PARAM",
+   "message": "source: неизвестные значения S9_MARS",
+   "expected": "400 BAD_PARAM",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/observations?scope=everything",
+   "status": 400,
+   "code": "BAD_PARAM",
+   "message": "scope: неизвестные значения everything",
+   "expected": "400 BAD_PARAM",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/observations?limit=0",
+   "status": 400,
+   "code": "BAD_PARAM",
+   "message": "limit: нужно целое в [1, 100000]",
+   "expected": "400 BAD_PARAM",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/pairs?status=maybe",
+   "status": 400,
+   "code": "BAD_PARAM",
+   "message": "status: допустимо accepted | rejected | all",
+   "expected": "400 BAD_PARAM",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/pairs?max_dt_hours=-1",
+   "status": 400,
+   "code": "BAD_PARAM",
+   "message": "max_dt_hours: нужно число в [0, 1000000.0]",
+   "expected": "400 BAD_PARAM",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/export?layer=foo",
+   "status": 400,
+   "code": "BAD_PARAM",
+   "message": "layer: допустимо observations | pairs | zones | detections",
+   "expected": "400 BAD_PARAM",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/export",
+   "status": 400,
+   "code": "BAD_PARAM",
+   "message": "layer: обязателен, observations | pairs | zones | detections",
+   "expected": "400 BAD_PARAM",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/export?layer=zones&format=xml",
+   "status": 400,
+   "code": "BAD_PARAM",
+   "message": "format: допустимо geojson | csv",
+   "expected": "400 BAD_PARAM",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/observations/MPL-99999",
+   "status": 404,
+   "code": "NOT_FOUND",
+   "message": "Наблюдение MPL-99999 не найдено",
+   "expected": "404 NOT_FOUND",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/zones/Z-nope",
+   "status": 404,
+   "code": "NOT_FOUND",
+   "message": "Зона Z-nope не найдена",
+   "expected": "404 NOT_FOUND",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/scenes/NOPE_SCENE",
+   "status": 404,
+   "code": "NOT_FOUND",
+   "message": "Снимок NOPE_SCENE не найден в реестре",
+   "expected": "404 NOT_FOUND",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/scenes/NOPE_SCENE/quality.png",
+   "status": 404,
+   "code": "NO_SCENE",
+   "message": "Для снимка NOPE_SCENE нет маски качества",
+   "expected": "404 NO_SCENE",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/scenes/NOPE_SCENE/rgb.png",
+   "status": 404,
+   "code": "NO_SCENE",
+   "message": "Для снимка NOPE_SCENE нет rgb.png",
+   "expected": "404 NO_SCENE",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/queries/q_nope",
+   "status": 404,
+   "code": "NOT_FOUND",
+   "message": "Сохранённый запрос q_nope не найден",
+   "expected": "404 NOT_FOUND",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/queries/q_nope/run",
+   "status": 404,
+   "code": "NOT_FOUND",
+   "message": "Сохранённый запрос q_nope не найден",
+   "expected": "404 NOT_FOUND",
+   "ok": true
+  },
+  {
+   "method": "DELETE",
+   "url": "/api/v3/queries/q_nope",
+   "status": 404,
+   "code": "NOT_FOUND",
+   "message": "Сохранённый запрос q_nope не найден",
+   "expected": "404 NOT_FOUND",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/export?layer=zones&query_id=q_nope",
+   "status": 404,
+   "code": "NOT_FOUND",
+   "message": "Сохранённый запрос q_nope не найден",
+   "expected": "404 NOT_FOUND",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/no_such_endpoint",
+   "status": 404,
+   "code": "NOT_FOUND",
+   "message": "нет такого эндпоинта: /api/v3/no_such_endpoint",
+   "expected": "404 NOT_FOUND",
+   "ok": true
+  },
+  {
+   "method": "POST",
+   "url": "/api/v3/queries not json",
+   "status": 400,
+   "code": "BAD_PARAM",
+   "message": "тело: ожидается JSON {\"name\": ..., \"query\": {...}}",
+   "expected": "400 BAD_PARAM",
+   "ok": true
+  },
+  {
+   "method": "POST",
+   "url": "/api/v3/queries {\"query\": {}}",
+   "status": 400,
+   "code": "BAD_PARAM",
+   "message": "name: непустая строка до 200 символов",
+   "expected": "400 BAD_PARAM",
+   "ok": true
+  },
+  {
+   "method": "POST",
+   "url": "/api/v3/queries {\"name\": \"x\", \"query\": {\"date_from\": \"2016-12-31\", \"date_to\": \"2016-01-01\"}}",
+   "status": 400,
+   "code": "BAD_DATE",
+   "message": "date_from позже date_to",
+   "expected": "400 BAD_DATE",
+   "ok": true
+  },
+  {
+   "method": "POST",
+   "url": "/api/v3/queries {\"name\": \"x\", \"query\": {\"bbox\": \"1,2,3,4\"}}",
+   "status": 400,
+   "code": "BAD_BBOX",
+   "message": "query.bbox: список [minLon, minLat, maxLon, maxLat] или null",
+   "expected": "400 BAD_BBOX",
+   "ok": true
+  },
+  {
+   "method": "POST",
+   "url": "/api/v3/queries {\"name\": \"x\", \"query\": {\"bbox\": [1, 2, 3]}}",
+   "status": 400,
+   "code": "BAD_BBOX",
+   "message": "bbox: нужны 4 числа minLon,minLat,maxLon,maxLat",
+   "expected": "400 BAD_BBOX",
+   "ok": true
+  },
+  {
+   "method": "POST",
+   "url": "/api/v3/queries {\"name\": \"x\", \"query\": {\"statuses\": [\"foo\"]}}",
+   "status": 400,
+   "code": "BAD_PARAM",
+   "message": "statuses: неизвестные значения foo",
+   "expected": "400 BAD_PARAM",
+   "ok": true
+  },
+  {
+   "method": "POST",
+   "url": "/api/v3/queries {\"name\": \"x\", \"query\": {\"profiles\": [\"XYZ\"]}}",
+   "status": 400,
+   "code": "BAD_PARAM",
+   "message": "profiles: неизвестные значения XYZ",
+   "expected": "400 BAD_PARAM",
+   "ok": true
+  },
+  {
+   "method": "POST",
+   "url": "/api/v3/queries {\"name\": \"x\", \"query\": {\"scope\": [\"total_plastic\"]}}",
+   "status": 422,
+   "code": "BAD_PARAM",
+   "message": "query: неизвестные поля scope",
+   "expected": "422 BAD_PARAM",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/observations?bbox=-30,-50,-29,-49",
+   "status": 200,
+   "code": null,
+   "message": "Нет наблюдений под выбранные фильтры",
+   "expected": "200 + пустой список + empty_reason",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/zones?bbox=-30,-50,-29,-49",
+   "status": 200,
+   "code": null,
+   "message": "Нет зон под выбранные фильтры",
+   "expected": "200 + пустой список + empty_reason",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/scenes?date_from=2030-01-01",
+   "status": 200,
+   "code": null,
+   "message": "Нет снимков под выбранные фильтры",
+   "expected": "200 + пустой список + empty_reason",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/pairs?sample_id=MPL-99999",
+   "status": 200,
+   "code": null,
+   "message": "Нет пар под выбранные фильтры",
+   "expected": "200 + пустой список + empty_reason",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/zones?status=research_estimate",
+   "status": 200,
+   "code": null,
+   "message": "Нет зон под выбранные фильтры",
+   "expected": "200 + пустой список + empty_reason",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/export?layer=zones&format=geojson&bbox=-30,-50,-29,-49",
+   "status": 200,
+   "code": null,
+   "message": "Нет зон под выбранные фильтры",
+   "expected": "200 + пустой список + empty_reason",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/export?layer=observations&format=csv&bbox=-30,-50,-29,-49",
+   "status": 200,
+   "code": null,
+   "message": "только заголовок CSV",
+   "expected": "200 + пустой список + empty_reason",
+   "ok": true
+  },
+  {
+   "method": "GET",
+   "url": "/api/v3/export?layer=pairs&format=csv&sample_id=MPL-99999",
+   "status": 200,
+   "code": null,
+   "message": "только заголовок CSV",
+   "expected": "200 + пустой список + empty_reason",
+   "ok": true
+  }
+ ],
+ "ui": {
+  "status": "skipped",
+  "reason": "--ui-url не задан"
+ },
+ "speed_testclient": [
+  {
+   "endpoint": "GET /meta",
+   "n": 20,
+   "cold_ms": 60.6,
+   "p50_ms": 57.1,
+   "p95_ms": 76.3,
+   "max_ms": 81.9,
+   "target_ms": 300,
+   "ok": true,
+   "status": {
+    "200": 20
+   },
+   "bytes": 6168
+  },
+  {
+   "endpoint": "GET /observations (все 935)",
+   "n": 20,
+   "cold_ms": 172.1,
+   "p50_ms": 176.0,
+   "p95_ms": 212.6,
+   "max_ms": 213.7,
+   "target_ms": 300,
+   "ok": true,
+   "status": {
+    "200": 20
+   },
+   "bytes": 1656886
+  },
+  {
+   "endpoint": "GET /observations?source=S2",
+   "n": 20,
+   "cold_ms": 59.0,
+   "p50_ms": 59.6,
+   "p95_ms": 75.1,
+   "max_ms": 75.8,
+   "target_ms": 300,
+   "ok": true,
+   "status": {
+    "200": 20
+   },
+   "bytes": 621242
+  },
+  {
+   "endpoint": "GET /observations/{id}",
+   "n": 20,
+   "cold_ms": 3.1,
+   "p50_ms": 2.4,
+   "p95_ms": 2.6,
+   "max_ms": 2.6,
+   "target_ms": 300,
+   "ok": true,
+   "status": {
+    "200": 20
+   },
+   "bytes": 5130
+  },
+  {
+   "endpoint": "GET /pairs (все)",
+   "n": 20,
+   "cold_ms": 54.2,
+   "p50_ms": 52.4,
+   "p95_ms": 59.5,
+   "max_ms": 61.5,
+   "target_ms": 300,
+   "ok": true,
+   "status": {
+    "200": 20
+   },
+   "bytes": 3801950
+  },
+  {
+   "endpoint": "GET /pairs?status=accepted",
+   "n": 20,
+   "cold_ms": 2.5,
+   "p50_ms": 2.1,
+   "p95_ms": 4.9,
+   "max_ms": 5.9,
+   "target_ms": 300,
+   "ok": true,
+   "status": {
+    "200": 20
+   },
+   "bytes": 94
+  },
+  {
+   "endpoint": "GET /scenes",
+   "n": 20,
+   "cold_ms": 78.1,
+   "p50_ms": 80.1,
+   "p95_ms": 95.1,
+   "max_ms": 106.1,
+   "target_ms": 300,
+   "ok": true,
+   "status": {
+    "200": 20
+   },
+   "bytes": 130840
+  },
+  {
+   "endpoint": "GET /scenes/{id}",
+   "n": 20,
+   "cold_ms": 136.6,
+   "p50_ms": 137.3,
+   "p95_ms": 154.7,
+   "max_ms": 158.0,
+   "target_ms": 3000,
+   "ok": true,
+   "status": {
+    "200": 20
+   },
+   "bytes": 31169
+  },
+  {
+   "endpoint": "GET /scenes/{id}/rgb.png",
+   "n": 20,
+   "cold_ms": 1.8,
+   "p50_ms": 1.6,
+   "p95_ms": 1.8,
+   "max_ms": 2.5,
+   "target_ms": 3000,
+   "ok": true,
+   "status": {
+    "404": 20
+   },
+   "bytes": 165
+  },
+  {
+   "endpoint": "GET /scenes/{id}/quality.png",
+   "n": 20,
+   "cold_ms": 220.8,
+   "p50_ms": 1.7,
+   "p95_ms": 2.5,
+   "max_ms": 2.6,
+   "target_ms": 3000,
+   "ok": true,
+   "status": {
+    "200": 20
+   },
+   "bytes": 2443
+  },
+  {
+   "endpoint": "GET /scenes/{id}/mask.png",
+   "n": 20,
+   "cold_ms": 2.8,
+   "p50_ms": 1.6,
+   "p95_ms": 2.5,
+   "max_ms": 2.6,
+   "target_ms": 3000,
+   "ok": true,
+   "status": {
+    "404": 20
+   },
+   "bytes": 166
+  },
+  {
+   "endpoint": "GET /zones",
+   "n": 20,
+   "cold_ms": 67.6,
+   "p50_ms": 61.5,
+   "p95_ms": 72.1,
+   "max_ms": 75.6,
+   "target_ms": 300,
+   "ok": true,
+   "status": {
+    "200": 20
+   },
+   "bytes": 99717
+  },
+  {
+   "endpoint": "GET /zones/{id}",
+   "n": 20,
+   "cold_ms": 62.0,
+   "p50_ms": 59.3,
+   "p95_ms": 72.3,
+   "max_ms": 76.3,
+   "target_ms": 300,
+   "ok": true,
+   "status": {
+    "200": 20
+   },
+   "bytes": 15393
+  },
+  {
+   "endpoint": "GET /metrics",
+   "n": 20,
+   "cold_ms": 2.6,
+   "p50_ms": 2.4,
+   "p95_ms": 2.4,
+   "max_ms": 2.4,
+   "target_ms": 300,
+   "ok": true,
+   "status": {
+    "200": 20
+   },
+   "bytes": 18384
+  },
+  {
+   "endpoint": "GET /export observations csv",
+   "n": 20,
+   "cold_ms": 27.1,
+   "p50_ms": 27.5,
+   "p95_ms": 32.9,
+   "max_ms": 33.6,
+   "target_ms": 300,
+   "ok": true,
+   "status": {
+    "200": 20
+   },
+   "bytes": 941913
+  },
+  {
+   "endpoint": "GET /export zones geojson",
+   "n": 20,
+   "cold_ms": 60.3,
+   "p50_ms": 59.2,
+   "p95_ms": 76.5,
+   "max_ms": 77.8,
+   "target_ms": 300,
+   "ok": true,
+   "status": {
+    "200": 20
+   },
+   "bytes": 105235
+  },
+  {
+   "endpoint": "GET /export pairs csv",
+   "n": 20,
+   "cold_ms": 50.5,
+   "p50_ms": 51.1,
+   "p95_ms": 64.2,
+   "max_ms": 67.8,
+   "target_ms": 300,
+   "ok": true,
+   "status": {
+    "200": 20
+   },
+   "bytes": 1416473
+  },
+  {
+   "endpoint": "GET /export zones csv query_id",
+   "n": 20,
+   "cold_ms": 132.8,
+   "p50_ms": 141.5,
+   "p95_ms": 161.3,
+   "max_ms": 180.3,
+   "target_ms": 300,
+   "ok": true,
+   "status": {
+    "200": 20
+   },
+   "bytes": 14996
+  },
+  {
+   "endpoint": "GET /queries",
+   "n": 20,
+   "cold_ms": 2.0,
+   "p50_ms": 1.7,
+   "p95_ms": 1.8,
+   "max_ms": 1.9,
+   "target_ms": 300,
+   "ok": true,
+   "status": {
+    "200": 20
+   },
+   "bytes": 1457
+  },
+  {
+   "endpoint": "GET /queries/{id}",
+   "n": 20,
+   "cold_ms": 2.0,
+   "p50_ms": 1.6,
+   "p95_ms": 1.8,
+   "max_ms": 1.9,
+   "target_ms": 300,
+   "ok": true,
+   "status": {
+    "200": 20
+   },
+   "bytes": 265
+  },
+  {
+   "endpoint": "GET /queries/{id}/run",
+   "n": 20,
+   "cold_ms": 157.6,
+   "p50_ms": 149.1,
+   "p95_ms": 159.0,
+   "max_ms": 173.7,
+   "target_ms": 300,
+   "ok": true,
+   "status": {
+    "200": 20
+   },
+   "bytes": 256807
+  },
+  {
+   "endpoint": "POST /queries",
+   "n": 20,
+   "cold_ms": 1.9,
+   "p50_ms": 1.4,
+   "p95_ms": 1.5,
+   "max_ms": 1.7,
+   "target_ms": 300,
+   "ok": true,
+   "status": {
+    "201": 20
+   },
+   "bytes": 242
+  },
+  {
+   "endpoint": "DELETE /queries/{id}",
+   "n": 20,
+   "cold_ms": 6.3,
+   "p50_ms": 6.1,
+   "p95_ms": 7.7,
+   "max_ms": 16.0,
+   "target_ms": 300,
+   "ok": true,
+   "status": {
+    "204": 20
+   },
+   "bytes": 0
+  },
+  {
+   "endpoint": "GET /observations?bbox=1,2,3 (400)",
+   "n": 20,
+   "cold_ms": 1.6,
+   "p50_ms": 1.4,
+   "p95_ms": 1.5,
+   "max_ms": 1.7,
+   "target_ms": 300,
+   "ok": true,
+   "status": {
+    "400": 20
+   },
+   "bytes": 126
+  }
+ ],
+ "speed_live": {
+  "base": "http://127.0.0.1:8091",
+  "startup_s": 1.1,
+  "rows": [
+   {
+    "endpoint": "GET /meta",
+    "n": 20,
+    "cold_ms": 381.0,
+    "p50_ms": 75.6,
+    "p95_ms": 96.0,
+    "max_ms": 97.2,
+    "target_ms": 300,
+    "ok": true,
+    "status": {
+     "200": 20
+    },
+    "bytes": 6168
+   },
+   {
+    "endpoint": "GET /observations (все 935)",
+    "n": 20,
+    "cold_ms": 678.1,
+    "p50_ms": 170.9,
+    "p95_ms": 203.4,
+    "max_ms": 222.9,
+    "target_ms": 300,
+    "ok": true,
+    "status": {
+     "200": 20
+    },
+    "bytes": 1656886
+   },
+   {
+    "endpoint": "GET /observations?source=S2",
+    "n": 20,
+    "cold_ms": 54.1,
+    "p50_ms": 73.8,
+    "p95_ms": 79.8,
+    "max_ms": 89.1,
+    "target_ms": 300,
+    "ok": true,
+    "status": {
+     "200": 20
+    },
+    "bytes": 621242
+   },
+   {
+    "endpoint": "GET /observations/{id}",
+    "n": 20,
+    "cold_ms": 16.4,
+    "p50_ms": 15.6,
+    "p95_ms": 17.0,
+    "max_ms": 25.5,
+    "target_ms": 300,
+    "ok": true,
+    "status": {
+     "200": 20
+    },
+    "bytes": 5130
+   },
+   {
+    "endpoint": "GET /pairs (все)",
+    "n": 20,
+    "cold_ms": 41.3,
+    "p50_ms": 46.3,
+    "p95_ms": 58.6,
+    "max_ms": 66.0,
+    "target_ms": 300,
+    "ok": true,
+    "status": {
+     "200": 20
+    },
+    "bytes": 3801950
+   },
+   {
+    "endpoint": "GET /pairs?status=accepted",
+    "n": 20,
+    "cold_ms": 2.0,
+    "p50_ms": 14.0,
+    "p95_ms": 16.3,
+    "max_ms": 16.5,
+    "target_ms": 300,
+    "ok": true,
+    "status": {
+     "200": 20
+    },
+    "bytes": 94
+   },
+   {
+    "endpoint": "GET /scenes",
+    "n": 20,
+    "cold_ms": 90.2,
+    "p50_ms": 92.9,
+    "p95_ms": 109.5,
+    "max_ms": 115.3,
+    "target_ms": 300,
+    "ok": true,
+    "status": {
+     "200": 20
+    },
+    "bytes": 130840
+   },
+   {
+    "endpoint": "GET /scenes/{id}",
+    "n": 20,
+    "cold_ms": 164.0,
+    "p50_ms": 156.9,
+    "p95_ms": 172.9,
+    "max_ms": 179.6,
+    "target_ms": 3000,
+    "ok": true,
+    "status": {
+     "200": 20
+    },
+    "bytes": 31169
+   },
+   {
+    "endpoint": "GET /scenes/{id}/rgb.png",
+    "n": 20,
+    "cold_ms": 22.5,
+    "p50_ms": 1.8,
+    "p95_ms": 15.3,
+    "max_ms": 15.8,
+    "target_ms": 3000,
+    "ok": true,
+    "status": {
+     "404": 20
+    },
+    "bytes": 165
+   },
+   {
+    "endpoint": "GET /scenes/{id}/quality.png",
+    "n": 20,
+    "cold_ms": 198.7,
+    "p50_ms": 15.3,
+    "p95_ms": 20.3,
+    "max_ms": 24.9,
+    "target_ms": 3000,
+    "ok": true,
+    "status": {
+     "200": 20
+    },
+    "bytes": 2443
+   },
+   {
+    "endpoint": "GET /scenes/{id}/mask.png",
+    "n": 20,
+    "cold_ms": 1.4,
+    "p50_ms": 12.6,
+    "p95_ms": 15.8,
+    "max_ms": 15.8,
+    "target_ms": 3000,
+    "ok": true,
+    "status": {
+     "404": 20
+    },
+    "bytes": 166
+   },
+   {
+    "endpoint": "GET /zones",
+    "n": 20,
+    "cold_ms": 58.9,
+    "p50_ms": 76.5,
+    "p95_ms": 88.7,
+    "max_ms": 98.5,
+    "target_ms": 300,
+    "ok": true,
+    "status": {
+     "200": 20
+    },
+    "bytes": 99717
+   },
+   {
+    "endpoint": "GET /zones/{id}",
+    "n": 20,
+    "cold_ms": 79.1,
+    "p50_ms": 75.9,
+    "p95_ms": 94.7,
+    "max_ms": 96.9,
+    "target_ms": 300,
+    "ok": true,
+    "status": {
+     "200": 20
+    },
+    "bytes": 15393
+   },
+   {
+    "endpoint": "GET /metrics",
+    "n": 20,
+    "cold_ms": 24.0,
+    "p50_ms": 12.7,
+    "p95_ms": 15.4,
+    "max_ms": 15.7,
+    "target_ms": 300,
+    "ok": true,
+    "status": {
+     "200": 20
+    },
+    "bytes": 18384
+   },
+   {
+    "endpoint": "GET /export observations csv",
+    "n": 20,
+    "cold_ms": 19.3,
+    "p50_ms": 30.6,
+    "p95_ms": 41.6,
+    "max_ms": 45.0,
+    "target_ms": 300,
+    "ok": true,
+    "status": {
+     "200": 20
+    },
+    "bytes": 941913
+   },
+   {
+    "endpoint": "GET /export zones geojson",
+    "n": 20,
+    "cold_ms": 72.8,
+    "p50_ms": 78.2,
+    "p95_ms": 101.5,
+    "max_ms": 101.7,
+    "target_ms": 300,
+    "ok": true,
+    "status": {
+     "200": 20
+    },
+    "bytes": 105235
+   },
+   {
+    "endpoint": "GET /export pairs csv",
+    "n": 20,
+    "cold_ms": 56.7,
+    "p50_ms": 53.5,
+    "p95_ms": 64.0,
+    "max_ms": 82.2,
+    "target_ms": 300,
+    "ok": true,
+    "status": {
+     "200": 20
+    },
+    "bytes": 1416473
+   },
+   {
+    "endpoint": "GET /export zones csv query_id",
+    "n": 20,
+    "cold_ms": 142.4,
+    "p50_ms": 165.4,
+    "p95_ms": 181.4,
+    "max_ms": 185.6,
+    "target_ms": 300,
+    "ok": true,
+    "status": {
+     "200": 20
+    },
+    "bytes": 14996
+   },
+   {
+    "endpoint": "GET /queries",
+    "n": 20,
+    "cold_ms": 15.6,
+    "p50_ms": 13.8,
+    "p95_ms": 15.9,
+    "max_ms": 16.7,
+    "target_ms": 300,
+    "ok": true,
+    "status": {
+     "200": 20
+    },
+    "bytes": 255
+   },
+   {
+    "endpoint": "GET /queries/{id}",
+    "n": 20,
+    "cold_ms": 16.1,
+    "p50_ms": 1.4,
+    "p95_ms": 15.8,
+    "max_ms": 16.0,
+    "target_ms": 300,
+    "ok": true,
+    "status": {
+     "200": 20
+    },
+    "bytes": 241
+   },
+   {
+    "endpoint": "GET /queries/{id}/run",
+    "n": 20,
+    "cold_ms": 149.5,
+    "p50_ms": 158.0,
+    "p95_ms": 179.5,
+    "max_ms": 220.2,
+    "target_ms": 300,
+    "ok": true,
+    "status": {
+     "200": 20
+    },
+    "bytes": 256783
+   },
+   {
+    "endpoint": "POST /queries",
+    "n": 20,
+    "cold_ms": 1.4,
+    "p50_ms": 15.4,
+    "p95_ms": 16.5,
+    "max_ms": 17.2,
+    "target_ms": 300,
+    "ok": true,
+    "status": {
+     "201": 20
+    },
+    "bytes": 242
+   },
+   {
+    "endpoint": "DELETE /queries/{id}",
+    "n": 20,
+    "cold_ms": 9.3,
+    "p50_ms": 20.7,
+    "p95_ms": 30.6,
+    "max_ms": 40.6,
+    "target_ms": 300,
+    "ok": true,
+    "status": {
+     "204": 20
+    },
+    "bytes": 0
+   },
+   {
+    "endpoint": "GET /observations?bbox=1,2,3 (400)",
+    "n": 20,
+    "cold_ms": 22.3,
+    "p50_ms": 15.6,
+    "p95_ms": 16.1,
+    "max_ms": 16.2,
+    "target_ms": 300,
+    "ok": true,
+    "status": {
+     "400": 20
+    },
+    "bytes": 126
+   }
+  ],
+  "run_hash": [
+   "599a05329137acec455a334c92ae5b0edb929378d8169d912a51f412d129c8e5",
+   "599a05329137acec455a334c92ae5b0edb929378d8169d912a51f412d129c8e5"
+  ],
+  "log": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\reports\\selfcheck\\live_8091.log"
+ },
+ "checks": [
+  {
+   "query": "S2_sargasso",
+   "check": "POST /queries 201",
+   "status": "ok",
+   "detail": "201",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "GET /queries/{id} = POST",
+   "status": "ok",
+   "detail": "",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "run.http_200",
+   "status": "ok",
+   "detail": "200/200",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "run.sha256_repeat",
+   "status": "ok",
+   "detail": "5383ac1894a27740 vs 5383ac1894a27740",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "summary.counts",
+   "status": "ok",
+   "detail": "n_obs=330 n_zones=0 n_scenes=0",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "summary.by_status",
+   "status": "ok",
+   "detail": "{}",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "empty.zones_reason",
+   "status": "ok",
+   "detail": "Нет зон под выбранные фильтры",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "obs.ids algo=api",
+   "status": "ok",
+   "detail": "{\"only_left\": [], \"only_right\": [], \"n_left\": 330, \"n_right\": 330}",
+   "example": null,
+   "n": 330
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "obs.sorted_by_id",
+   "status": "ok",
+   "detail": "",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "obs.numbers algo=api (conc, area)",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 330
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "obs.geometry algo=api [lon,lat] EPSG:4326",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 330
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "obs.kind/profile/scope algo=api",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 330
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "obs.list endpoint = run",
+   "status": "ok",
+   "detail": "330 vs 330",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "export.obs http/headers",
+   "status": "ok",
+   "detail": "200/200",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "export.obs ids csv=geojson=json",
+   "status": "ok",
+   "detail": "{\"only_left\": [], \"only_right\": [], \"n_left\": 330, \"n_right\": 330}",
+   "example": null,
+   "n": 330
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "export.obs geojson = json (features)",
+   "status": "ok",
+   "detail": "",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "export.obs csv numbers = json",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 330
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "selection(S2_visual_total_plastic) ids ⊆ api(scope=total_plastic)",
+   "status": "ok",
+   "detail": "{\"only_left\": [], \"only_right\": [], \"n_left\": 63, \"n_right\": 63}",
+   "example": null,
+   "n": 63
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "selection.target = api.concentration_items_km2",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 63
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "predictions.y_true (route_buf1) = api.concentration",
+   "status": "ok",
+   "detail": "n_pred=63",
+   "example": [],
+   "n": 63
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "units: selection unit = meta.units.concentration",
+   "status": "ok",
+   "detail": "items/km2",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "zones.ids algo(pair_quality)=api",
+   "status": "ok",
+   "detail": "{\"only_left\": [], \"only_right\": [], \"n_left\": 0, \"n_right\": 0}",
+   "example": null,
+   "n": 0
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "zones.numbers algo=api (area_km2, detected_area_m2)",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "zones.statuses algo=api (detection, concentration=null)",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "zones.geometry: Polygon в EPSG:4326, образец внутри полигона",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "zones.area_km2_vs_polygon",
+   "status": "ok",
+   "detail": "0/0 зон: area_km2 (растровая полоса) vs геодез. площадь полигона, макс. 0.0%",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "export.zones_query_id",
+   "status": "ok",
+   "detail": "run.zones=0, export csv=0, geojson=0; {\"only_left\": [], \"only_right\": [], \"n_left\": 0, \"n_right\": 0}",
+   "example": null,
+   "n": 0
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "export.zones csv/geojson numbers,statuses,centroid = json",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "scenes.n_zones/footprint = zones",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "zone_vs_pair.status",
+   "status": "ok",
+   "detail": "зона с вердиктом детектора на отклонённой паре/снимке",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "obs.linked_scenes_vs_zones",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "pairs.ids json=export csv=geojson",
+   "status": "ok",
+   "detail": "{\"only_left\": [], \"only_right\": [], \"n_left\": 1320, \"n_right\": 1320}",
+   "example": null,
+   "n": 1320
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "pairs.dt_hours algo(candidates)=api",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 1320
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "pairs.drift_shift_km",
+   "status": "ok",
+   "detail": "0 пар: в candidates.csv есть drift_shift_km, в API null",
+   "example": [],
+   "n": 1320
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "pairs.status algo(candidates+pair_quality)=api",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 1320
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "pairs.reject_reasons_nonempty",
+   "status": "ok",
+   "detail": "0 отклонённых пар без кода причины",
+   "example": [],
+   "n": 1320
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "export.pairs csv = json (dt, drift, status, reasons)",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 1320
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "pairs.geometry EPSG:4326",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 1320
+  },
+  {
+   "query": "S2_sargasso",
+   "check": "export.repeat same bytes",
+   "status": "ok",
+   "detail": "",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "POST /queries 201",
+   "status": "ok",
+   "detail": "201",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "GET /queries/{id} = POST",
+   "status": "ok",
+   "detail": "",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "run.http_200",
+   "status": "ok",
+   "detail": "200/200",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "run.sha256_repeat",
+   "status": "ok",
+   "detail": "b93aebb36ebcde5c vs b93aebb36ebcde5c",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "summary.counts",
+   "status": "ok",
+   "detail": "n_obs=33 n_zones=24 n_scenes=217",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "summary.by_status",
+   "status": "ok",
+   "detail": "{\"insufficient_data\": 24}",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "obs.ids algo=api",
+   "status": "ok",
+   "detail": "{\"only_left\": [], \"only_right\": [], \"n_left\": 33, \"n_right\": 33}",
+   "example": null,
+   "n": 33
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "obs.sorted_by_id",
+   "status": "ok",
+   "detail": "",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "obs.numbers algo=api (conc, area)",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 33
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "obs.geometry algo=api [lon,lat] EPSG:4326",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 33
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "obs.kind/profile/scope algo=api",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 33
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "obs.list endpoint = run",
+   "status": "ok",
+   "detail": "33 vs 33",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "export.obs http/headers",
+   "status": "ok",
+   "detail": "200/200",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "export.obs ids csv=geojson=json",
+   "status": "ok",
+   "detail": "{\"only_left\": [], \"only_right\": [], \"n_left\": 33, \"n_right\": 33}",
+   "example": null,
+   "n": 33
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "export.obs geojson = json (features)",
+   "status": "ok",
+   "detail": "",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "export.obs csv numbers = json",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 33
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "zones.ids algo(pair_quality)=api",
+   "status": "ok",
+   "detail": "{\"only_left\": [], \"only_right\": [], \"n_left\": 24, \"n_right\": 24}",
+   "example": null,
+   "n": 24
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "zones.numbers algo=api (area_km2, detected_area_m2)",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 24
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "zones.statuses algo=api (detection, concentration=null)",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 24
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "zones.geometry: Polygon в EPSG:4326, образец внутри полигона",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 24
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "zones.area_km2_vs_polygon",
+   "status": "ok",
+   "detail": "0/24 зон: area_km2 (растровая полоса) vs геодез. площадь полигона, макс. 0.0%",
+   "example": [],
+   "n": 24
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "export.zones_query_id",
+   "status": "ok",
+   "detail": "run.zones=24, export csv=24, geojson=24; {\"only_left\": [], \"only_right\": [], \"n_left\": 24, \"n_right\": 24}",
+   "example": null,
+   "n": 24
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "export.zones csv/geojson numbers,statuses,centroid = json",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 24
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "scenes.n_zones/footprint = zones",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 217
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "zone_vs_pair.status",
+   "status": "ok",
+   "detail": "зона с вердиктом детектора на отклонённой паре/снимке",
+   "example": [],
+   "n": 24
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "obs.linked_scenes_vs_zones",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 24
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "pairs.ids json=export csv=geojson",
+   "status": "ok",
+   "detail": "{\"only_left\": [], \"only_right\": [], \"n_left\": 596, \"n_right\": 596}",
+   "example": null,
+   "n": 596
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "pairs.dt_hours algo(candidates)=api",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 596
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "pairs.drift_shift_km",
+   "status": "ok",
+   "detail": "0 пар: в candidates.csv есть drift_shift_km, в API null",
+   "example": [],
+   "n": 596
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "pairs.status algo(candidates+pair_quality)=api",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 596
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "pairs.reject_reasons_nonempty",
+   "status": "ok",
+   "detail": "0 отклонённых пар без кода причины",
+   "example": [],
+   "n": 596
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "export.pairs csv = json (dt, drift, status, reasons)",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 596
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "pairs.geometry EPSG:4326",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 596
+  },
+  {
+   "query": "S4_black_sea",
+   "check": "export.repeat same bytes",
+   "status": "ok",
+   "detail": "",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "POST /queries 201",
+   "status": "ok",
+   "detail": "201",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "GET /queries/{id} = POST",
+   "status": "ok",
+   "detail": "",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "run.http_200",
+   "status": "ok",
+   "detail": "200/200",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "run.sha256_repeat",
+   "status": "ok",
+   "detail": "8ca8393e0d68b2bb vs 8ca8393e0d68b2bb",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "summary.counts",
+   "status": "ok",
+   "detail": "n_obs=27 n_zones=2 n_scenes=9",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "summary.by_status",
+   "status": "ok",
+   "detail": "{\"insufficient_data\": 2}",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "obs.ids algo=api",
+   "status": "ok",
+   "detail": "{\"only_left\": [], \"only_right\": [], \"n_left\": 27, \"n_right\": 27}",
+   "example": null,
+   "n": 27
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "obs.sorted_by_id",
+   "status": "ok",
+   "detail": "",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "obs.numbers algo=api (conc, area)",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 27
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "obs.geometry algo=api [lon,lat] EPSG:4326",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 27
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "obs.kind/profile/scope algo=api",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 27
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "obs.list endpoint = run",
+   "status": "ok",
+   "detail": "27 vs 27",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "export.obs http/headers",
+   "status": "ok",
+   "detail": "200/200",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "export.obs ids csv=geojson=json",
+   "status": "ok",
+   "detail": "{\"only_left\": [], \"only_right\": [], \"n_left\": 27, \"n_right\": 27}",
+   "example": null,
+   "n": 27
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "export.obs geojson = json (features)",
+   "status": "ok",
+   "detail": "",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "export.obs csv numbers = json",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 27
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "zones.ids algo(pair_quality)=api",
+   "status": "ok",
+   "detail": "{\"only_left\": [], \"only_right\": [], \"n_left\": 2, \"n_right\": 2}",
+   "example": null,
+   "n": 2
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "zones.numbers algo=api (area_km2, detected_area_m2)",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 2
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "zones.statuses algo=api (detection, concentration=null)",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 2
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "zones.geometry: Polygon в EPSG:4326, образец внутри полигона",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 2
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "zones.area_km2_vs_polygon",
+   "status": "ok",
+   "detail": "0/2 зон: area_km2 (растровая полоса) vs геодез. площадь полигона, макс. 0.0%",
+   "example": [],
+   "n": 2
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "export.zones_query_id",
+   "status": "ok",
+   "detail": "run.zones=2, export csv=2, geojson=2; {\"only_left\": [], \"only_right\": [], \"n_left\": 2, \"n_right\": 2}",
+   "example": null,
+   "n": 2
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "export.zones csv/geojson numbers,statuses,centroid = json",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 2
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "scenes.n_zones/footprint = zones",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 9
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "zone_vs_pair.status",
+   "status": "ok",
+   "detail": "зона с вердиктом детектора на отклонённой паре/снимке",
+   "example": [],
+   "n": 2
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "obs.linked_scenes_vs_zones",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 2
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "pairs.ids json=export csv=geojson",
+   "status": "ok",
+   "detail": "{\"only_left\": [], \"only_right\": [], \"n_left\": 193, \"n_right\": 193}",
+   "example": null,
+   "n": 193
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "pairs.dt_hours algo(candidates)=api",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 193
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "pairs.drift_shift_km",
+   "status": "ok",
+   "detail": "0 пар: в candidates.csv есть drift_shift_km, в API null",
+   "example": [],
+   "n": 193
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "pairs.status algo(candidates+pair_quality)=api",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 193
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "pairs.reject_reasons_nonempty",
+   "status": "ok",
+   "detail": "0 отклонённых пар без кода причины",
+   "example": [],
+   "n": 193
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "export.pairs csv = json (dt, drift, status, reasons)",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 193
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "pairs.geometry EPSG:4326",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 193
+  },
+  {
+   "query": "S3_north_sea_2016",
+   "check": "export.repeat same bytes",
+   "status": "ok",
+   "detail": "",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "POST /queries 201",
+   "status": "ok",
+   "detail": "201",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "GET /queries/{id} = POST",
+   "status": "ok",
+   "detail": "",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "run.http_200",
+   "status": "ok",
+   "detail": "200/200",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "run.sha256_repeat",
+   "status": "ok",
+   "detail": "ff56baab4e083703 vs ff56baab4e083703",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "summary.counts",
+   "status": "ok",
+   "detail": "n_obs=83 n_zones=0 n_scenes=0",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "summary.by_status",
+   "status": "ok",
+   "detail": "{}",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "empty.zones_reason",
+   "status": "ok",
+   "detail": "Нет зон под выбранные фильтры",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "obs.ids algo=api",
+   "status": "ok",
+   "detail": "{\"only_left\": [], \"only_right\": [], \"n_left\": 83, \"n_right\": 83}",
+   "example": null,
+   "n": 83
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "obs.sorted_by_id",
+   "status": "ok",
+   "detail": "",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "obs.numbers algo=api (conc, area)",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 83
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "obs.geometry algo=api [lon,lat] EPSG:4326",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 83
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "obs.kind/profile/scope algo=api",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 83
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "obs.list endpoint = run",
+   "status": "ok",
+   "detail": "83 vs 83",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "export.obs http/headers",
+   "status": "ok",
+   "detail": "200/200",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "export.obs ids csv=geojson=json",
+   "status": "ok",
+   "detail": "{\"only_left\": [], \"only_right\": [], \"n_left\": 83, \"n_right\": 83}",
+   "example": null,
+   "n": 83
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "export.obs geojson = json (features)",
+   "status": "ok",
+   "detail": "",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "export.obs csv numbers = json",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 83
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "selection(S1_trawl_total_plastic) ids ⊆ api(scope=total_plastic)",
+   "status": "ok",
+   "detail": "{\"only_left\": [], \"only_right\": [], \"n_left\": 83, \"n_right\": 83}",
+   "example": null,
+   "n": 83
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "selection.target = api.concentration_items_km2",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 83
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "predictions.y_true (route_buf1) = api.concentration",
+   "status": "ok",
+   "detail": "n_pred=83",
+   "example": [],
+   "n": 83
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "units: selection unit = meta.units.concentration",
+   "status": "ok",
+   "detail": "items/km2",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "zones.ids algo(pair_quality)=api",
+   "status": "ok",
+   "detail": "{\"only_left\": [], \"only_right\": [], \"n_left\": 0, \"n_right\": 0}",
+   "example": null,
+   "n": 0
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "zones.numbers algo=api (area_km2, detected_area_m2)",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "zones.statuses algo=api (detection, concentration=null)",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "zones.geometry: Polygon в EPSG:4326, образец внутри полигона",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "zones.area_km2_vs_polygon",
+   "status": "ok",
+   "detail": "0/0 зон: area_km2 (растровая полоса) vs геодез. площадь полигона, макс. 0.0%",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "export.zones_query_id",
+   "status": "ok",
+   "detail": "run.zones=0, export csv=0, geojson=0; {\"only_left\": [], \"only_right\": [], \"n_left\": 0, \"n_right\": 0}",
+   "example": null,
+   "n": 0
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "export.zones csv/geojson numbers,statuses,centroid = json",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "scenes.n_zones/footprint = zones",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "zone_vs_pair.status",
+   "status": "ok",
+   "detail": "зона с вердиктом детектора на отклонённой паре/снимке",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "obs.linked_scenes_vs_zones",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "pairs.ids json=export csv=geojson",
+   "status": "ok",
+   "detail": "{\"only_left\": [], \"only_right\": [], \"n_left\": 1400, \"n_right\": 1400}",
+   "example": null,
+   "n": 1400
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "pairs.dt_hours algo(candidates)=api",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 1400
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "pairs.drift_shift_km",
+   "status": "ok",
+   "detail": "0 пар: в candidates.csv есть drift_shift_km, в API null",
+   "example": [],
+   "n": 1400
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "pairs.status algo(candidates+pair_quality)=api",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 1400
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "pairs.reject_reasons_nonempty",
+   "status": "ok",
+   "detail": "0 отклонённых пар без кода причины",
+   "example": [],
+   "n": 1400
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "export.pairs csv = json (dt, drift, status, reasons)",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 1400
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "pairs.geometry EPSG:4326",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 1400
+  },
+  {
+   "query": "S1_gpgp_trawl",
+   "check": "export.repeat same bytes",
+   "status": "ok",
+   "detail": "",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "empty_bbox",
+   "check": "POST /queries 201",
+   "status": "ok",
+   "detail": "201",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "empty_bbox",
+   "check": "GET /queries/{id} = POST",
+   "status": "ok",
+   "detail": "",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "empty_bbox",
+   "check": "run.http_200",
+   "status": "ok",
+   "detail": "200/200",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "empty_bbox",
+   "check": "run.sha256_repeat",
+   "status": "ok",
+   "detail": "22896bf2d62f2388 vs 22896bf2d62f2388",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "empty_bbox",
+   "check": "summary.counts",
+   "status": "ok",
+   "detail": "n_obs=0 n_zones=0 n_scenes=0",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "empty_bbox",
+   "check": "summary.by_status",
+   "status": "ok",
+   "detail": "{}",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "empty_bbox",
+   "check": "empty.reason",
+   "status": "ok",
+   "detail": "Нет наблюдений под выбранные фильтры",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "empty_bbox",
+   "check": "empty.zones_reason",
+   "status": "ok",
+   "detail": "Нет зон под выбранные фильтры",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "empty_bbox",
+   "check": "obs.ids algo=api",
+   "status": "ok",
+   "detail": "{\"only_left\": [], \"only_right\": [], \"n_left\": 0, \"n_right\": 0}",
+   "example": null,
+   "n": 0
+  },
+  {
+   "query": "empty_bbox",
+   "check": "obs.sorted_by_id",
+   "status": "ok",
+   "detail": "",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "empty_bbox",
+   "check": "obs.numbers algo=api (conc, area)",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "empty_bbox",
+   "check": "obs.geometry algo=api [lon,lat] EPSG:4326",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "empty_bbox",
+   "check": "obs.kind/profile/scope algo=api",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "empty_bbox",
+   "check": "obs.list endpoint = run",
+   "status": "ok",
+   "detail": "0 vs 0",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "empty_bbox",
+   "check": "export.obs http/headers",
+   "status": "ok",
+   "detail": "200/200",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "empty_bbox",
+   "check": "export.obs ids csv=geojson=json",
+   "status": "ok",
+   "detail": "{\"only_left\": [], \"only_right\": [], \"n_left\": 0, \"n_right\": 0}",
+   "example": null,
+   "n": 0
+  },
+  {
+   "query": "empty_bbox",
+   "check": "export.obs geojson = json (features)",
+   "status": "ok",
+   "detail": "",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "empty_bbox",
+   "check": "export.obs csv numbers = json",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "empty_bbox",
+   "check": "zones.ids algo(pair_quality)=api",
+   "status": "ok",
+   "detail": "{\"only_left\": [], \"only_right\": [], \"n_left\": 0, \"n_right\": 0}",
+   "example": null,
+   "n": 0
+  },
+  {
+   "query": "empty_bbox",
+   "check": "zones.numbers algo=api (area_km2, detected_area_m2)",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "empty_bbox",
+   "check": "zones.statuses algo=api (detection, concentration=null)",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "empty_bbox",
+   "check": "zones.geometry: Polygon в EPSG:4326, образец внутри полигона",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "empty_bbox",
+   "check": "zones.area_km2_vs_polygon",
+   "status": "ok",
+   "detail": "0/0 зон: area_km2 (растровая полоса) vs геодез. площадь полигона, макс. 0.0%",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "empty_bbox",
+   "check": "export.zones_query_id",
+   "status": "ok",
+   "detail": "run.zones=0, export csv=0, geojson=0; {\"only_left\": [], \"only_right\": [], \"n_left\": 0, \"n_right\": 0}",
+   "example": null,
+   "n": 0
+  },
+  {
+   "query": "empty_bbox",
+   "check": "export.zones csv/geojson numbers,statuses,centroid = json",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "empty_bbox",
+   "check": "scenes.n_zones/footprint = zones",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "empty_bbox",
+   "check": "zone_vs_pair.status",
+   "status": "ok",
+   "detail": "зона с вердиктом детектора на отклонённой паре/снимке",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "empty_bbox",
+   "check": "obs.linked_scenes_vs_zones",
+   "status": "ok",
+   "detail": "",
+   "example": [],
+   "n": 0
+  },
+  {
+   "query": "empty_bbox",
+   "check": "export.repeat same bytes",
+   "status": "ok",
+   "detail": "",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "bad_dates",
+   "check": "POST даты задом наперёд -> 400 BAD_DATE, не сохранён",
+   "status": "ok",
+   "detail": "400 {\"error\":{\"code\":\"BAD_DATE\",\"message\":\"date_from позже date_to\",\"details\":{\"date_from\":\"2016-12-31\",\"date_to\":\"2016-01-0",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "metrics",
+   "check": "metrics.sha256_repeat",
+   "status": "ok",
+   "detail": "",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "metrics",
+   "check": "detector.main P/R/F1/IoU + CI = case_detector test lgbm",
+   "status": "ok",
+   "detail": "api f1 0.8713 vs 0.8712871287128713",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "metrics",
+   "check": "detector.baseline P/R/F1/IoU + CI = case_detector test rf_argmax",
+   "status": "ok",
+   "detail": "api f1 0.7709 vs 0.7708830548926014",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "metrics",
+   "check": "detector.fdi P/R/F1/IoU + CI = case_detector test fdi_threshold",
+   "status": "ok",
+   "detail": "api f1 0.0056 vs 0.005600756859035005",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "metrics",
+   "check": "detector.main.val_f1 = case_detector val lgbm",
+   "status": "ok",
+   "detail": "api 0.9226 vs 0.9226441631504922",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "metrics",
+   "check": "detector.main.test_f1 = lgbm_final_test = case_detector test",
+   "status": "ok",
+   "detail": "api 0.8713 vs 0.8712871287128713",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "metrics",
+   "check": "detector.main.test_iou = lgbm_final_test",
+   "status": "ok",
+   "detail": "api 0.7719",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "metrics",
+   "check": "detector.baseline = RandomForest (MARIDA) on the same test",
+   "status": "ok",
+   "detail": "api RandomForest (код MARIDA)",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "metrics",
+   "check": "concentration baseline/main MAE, coverage, CI = dev_cv.json / case_conc_model.yaml (или metrics.json main_split)",
+   "status": "ok",
+   "detail": "профилей 2",
+   "example": [],
+   "n": null
+  },
+  {
+   "query": "metrics",
+   "check": "concentration.unit = meta.units",
+   "status": "ok",
+   "detail": "items/km2",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "metrics",
+   "check": "control_example 12 шт / 0.20 км² = 60",
+   "status": "ok",
+   "detail": "{\"items\": 12, \"area_km2\": 0.2, \"expected\": 60.0, \"computed\": 60.0}",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/observations?bbox=1,2,3",
+   "status": "ok",
+   "detail": "400 BAD_BBOX: bbox: нужны 4 числа minLon,minLat,maxLon,maxLat",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/observations?bbox=abc,1,2,3",
+   "status": "ok",
+   "detail": "400 BAD_BBOX: bbox: нужны 4 числа minLon,minLat,maxLon,maxLat",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/zones?bbox=10,0,5,1",
+   "status": "ok",
+   "detail": "400 BAD_BBOX: bbox: minLon ≤ maxLon и minLat ≤ maxLat (переход через 180° не поддерживается)",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/scenes?bbox=0,0,200,1",
+   "status": "ok",
+   "detail": "400 BAD_BBOX: bbox: долгота в [-180, 180], широта в [-90, 90]",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/observations?date_from=2016-12-31&date_to=2016-01-01",
+   "status": "ok",
+   "detail": "400 BAD_DATE: date_from позже date_to",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/zones?date_from=2016-12-31&date_to=2016-01-01",
+   "status": "ok",
+   "detail": "400 BAD_DATE: date_from позже date_to",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/pairs?date_from=2016-13-01",
+   "status": "ok",
+   "detail": "400 BAD_DATE: date_from: дата в формате ГГГГ-ММ-ДД",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/export?layer=zones&date_from=2016-12-31&date_to=2016-01-01",
+   "status": "ok",
+   "detail": "400 BAD_DATE: date_from позже date_to",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/zones?status=foo",
+   "status": "ok",
+   "detail": "400 BAD_PARAM: status: неизвестные значения foo",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/zones?detection_status=maybe",
+   "status": "ok",
+   "detail": "400 BAD_PARAM: detection_status: неизвестные значения maybe",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/zones?concentration_status=guess",
+   "status": "ok",
+   "detail": "400 BAD_PARAM: concentration_status: неизвестные значения guess",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/observations?profile=XYZ",
+   "status": "ok",
+   "detail": "400 BAD_PARAM: profile: неизвестные значения XYZ",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/observations?source=S9_MARS",
+   "status": "ok",
+   "detail": "400 BAD_PARAM: source: неизвестные значения S9_MARS",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/observations?scope=everything",
+   "status": "ok",
+   "detail": "400 BAD_PARAM: scope: неизвестные значения everything",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/observations?limit=0",
+   "status": "ok",
+   "detail": "400 BAD_PARAM: limit: нужно целое в [1, 100000]",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/pairs?status=maybe",
+   "status": "ok",
+   "detail": "400 BAD_PARAM: status: допустимо accepted | rejected | all",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/pairs?max_dt_hours=-1",
+   "status": "ok",
+   "detail": "400 BAD_PARAM: max_dt_hours: нужно число в [0, 1000000.0]",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/export?layer=foo",
+   "status": "ok",
+   "detail": "400 BAD_PARAM: layer: допустимо observations | pairs | zones | detections",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/export",
+   "status": "ok",
+   "detail": "400 BAD_PARAM: layer: обязателен, observations | pairs | zones | detections",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/export?layer=zones&format=xml",
+   "status": "ok",
+   "detail": "400 BAD_PARAM: format: допустимо geojson | csv",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/observations/MPL-99999",
+   "status": "ok",
+   "detail": "404 NOT_FOUND: Наблюдение MPL-99999 не найдено",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/zones/Z-nope",
+   "status": "ok",
+   "detail": "404 NOT_FOUND: Зона Z-nope не найдена",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/scenes/NOPE_SCENE",
+   "status": "ok",
+   "detail": "404 NOT_FOUND: Снимок NOPE_SCENE не найден в реестре",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/scenes/NOPE_SCENE/quality.png",
+   "status": "ok",
+   "detail": "404 NO_SCENE: Для снимка NOPE_SCENE нет маски качества",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/scenes/NOPE_SCENE/rgb.png",
+   "status": "ok",
+   "detail": "404 NO_SCENE: Для снимка NOPE_SCENE нет rgb.png",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/queries/q_nope",
+   "status": "ok",
+   "detail": "404 NOT_FOUND: Сохранённый запрос q_nope не найден",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/queries/q_nope/run",
+   "status": "ok",
+   "detail": "404 NOT_FOUND: Сохранённый запрос q_nope не найден",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "DELETE /api/v3/queries/q_nope",
+   "status": "ok",
+   "detail": "404 NOT_FOUND: Сохранённый запрос q_nope не найден",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/export?layer=zones&query_id=q_nope",
+   "status": "ok",
+   "detail": "404 NOT_FOUND: Сохранённый запрос q_nope не найден",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "GET /api/v3/no_such_endpoint",
+   "status": "ok",
+   "detail": "404 NOT_FOUND: нет такого эндпоинта: /api/v3/no_such_endpoint",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "POST /api/v3/queries not json",
+   "status": "ok",
+   "detail": "400 BAD_PARAM: тело: ожидается JSON {\"name\": ..., \"query\": {...}}",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "POST /api/v3/queries {\"query\": {}}",
+   "status": "ok",
+   "detail": "400 BAD_PARAM: name: непустая строка до 200 символов",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "POST /api/v3/queries {\"name\": \"x\", \"query\": {\"date_from\": \"2016-12-31\", \"date_to\": \"2016-01-01\"}}",
+   "status": "ok",
+   "detail": "400 BAD_DATE: date_from позже date_to",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "POST /api/v3/queries {\"name\": \"x\", \"query\": {\"bbox\": \"1,2,3,4\"}}",
+   "status": "ok",
+   "detail": "400 BAD_BBOX: query.bbox: список [minLon, minLat, maxLon, maxLat] или null",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "POST /api/v3/queries {\"name\": \"x\", \"query\": {\"bbox\": [1, 2, 3]}}",
+   "status": "ok",
+   "detail": "400 BAD_BBOX: bbox: нужны 4 числа minLon,minLat,maxLon,maxLat",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "POST /api/v3/queries {\"name\": \"x\", \"query\": {\"statuses\": [\"foo\"]}}",
+   "status": "ok",
+   "detail": "400 BAD_PARAM: statuses: неизвестные значения foo",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "POST /api/v3/queries {\"name\": \"x\", \"query\": {\"profiles\": [\"XYZ\"]}}",
+   "status": "ok",
+   "detail": "400 BAD_PARAM: profiles: неизвестные значения XYZ",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "invalid",
+   "check": "POST /api/v3/queries {\"name\": \"x\", \"query\": {\"scope\": [\"total_plastic\"]}}",
+   "status": "ok",
+   "detail": "422 BAD_PARAM: query: неизвестные поля scope",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "empty",
+   "check": "GET /api/v3/observations?bbox=-30,-50,-29,-49",
+   "status": "ok",
+   "detail": "200: Нет наблюдений под выбранные фильтры",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "empty",
+   "check": "GET /api/v3/zones?bbox=-30,-50,-29,-49",
+   "status": "ok",
+   "detail": "200: Нет зон под выбранные фильтры",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "empty",
+   "check": "GET /api/v3/scenes?date_from=2030-01-01",
+   "status": "ok",
+   "detail": "200: Нет снимков под выбранные фильтры",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "empty",
+   "check": "GET /api/v3/pairs?sample_id=MPL-99999",
+   "status": "ok",
+   "detail": "200: Нет пар под выбранные фильтры",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "empty",
+   "check": "GET /api/v3/zones?status=research_estimate",
+   "status": "ok",
+   "detail": "200: Нет зон под выбранные фильтры",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "empty",
+   "check": "GET /api/v3/export?layer=zones&format=geojson&bbox=-30,-50,-29,-49",
+   "status": "ok",
+   "detail": "200: Нет зон под выбранные фильтры",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "empty",
+   "check": "GET /api/v3/export?layer=observations&format=csv&bbox=-30,-50,-29,-49",
+   "status": "ok",
+   "detail": "200: только заголовок CSV",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "empty",
+   "check": "GET /api/v3/export?layer=pairs&format=csv&sample_id=MPL-99999",
+   "status": "ok",
+   "detail": "200: только заголовок CSV",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "live",
+   "check": "live run sha256 repeat",
+   "status": "ok",
+   "detail": "599a05329137acec",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_testclient: GET /meta p95<300ms",
+   "status": "ok",
+   "detail": "p50 57.1 / p95 76.3 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_testclient: GET /observations (все 935) p95<300ms",
+   "status": "ok",
+   "detail": "p50 176.0 / p95 212.6 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_testclient: GET /observations?source=S2 p95<300ms",
+   "status": "ok",
+   "detail": "p50 59.6 / p95 75.1 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_testclient: GET /observations/{id} p95<300ms",
+   "status": "ok",
+   "detail": "p50 2.4 / p95 2.6 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_testclient: GET /pairs (все) p95<300ms",
+   "status": "ok",
+   "detail": "p50 52.4 / p95 59.5 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_testclient: GET /pairs?status=accepted p95<300ms",
+   "status": "ok",
+   "detail": "p50 2.1 / p95 4.9 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_testclient: GET /scenes p95<300ms",
+   "status": "ok",
+   "detail": "p50 80.1 / p95 95.1 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_testclient: GET /scenes/{id} p95<3000ms",
+   "status": "ok",
+   "detail": "p50 137.3 / p95 154.7 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_testclient: GET /scenes/{id}/rgb.png p95<3000ms",
+   "status": "ok",
+   "detail": "p50 1.6 / p95 1.8 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_testclient: GET /scenes/{id}/quality.png p95<3000ms",
+   "status": "ok",
+   "detail": "p50 1.7 / p95 2.5 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_testclient: GET /scenes/{id}/mask.png p95<3000ms",
+   "status": "ok",
+   "detail": "p50 1.6 / p95 2.5 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_testclient: GET /zones p95<300ms",
+   "status": "ok",
+   "detail": "p50 61.5 / p95 72.1 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_testclient: GET /zones/{id} p95<300ms",
+   "status": "ok",
+   "detail": "p50 59.3 / p95 72.3 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_testclient: GET /metrics p95<300ms",
+   "status": "ok",
+   "detail": "p50 2.4 / p95 2.4 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_testclient: GET /export observations csv p95<300ms",
+   "status": "ok",
+   "detail": "p50 27.5 / p95 32.9 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_testclient: GET /export zones geojson p95<300ms",
+   "status": "ok",
+   "detail": "p50 59.2 / p95 76.5 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_testclient: GET /export pairs csv p95<300ms",
+   "status": "ok",
+   "detail": "p50 51.1 / p95 64.2 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_testclient: GET /export zones csv query_id p95<300ms",
+   "status": "ok",
+   "detail": "p50 141.5 / p95 161.3 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_testclient: GET /queries p95<300ms",
+   "status": "ok",
+   "detail": "p50 1.7 / p95 1.8 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_testclient: GET /queries/{id} p95<300ms",
+   "status": "ok",
+   "detail": "p50 1.6 / p95 1.8 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_testclient: GET /queries/{id}/run p95<300ms",
+   "status": "ok",
+   "detail": "p50 149.1 / p95 159.0 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_testclient: POST /queries p95<300ms",
+   "status": "ok",
+   "detail": "p50 1.4 / p95 1.5 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_testclient: DELETE /queries/{id} p95<300ms",
+   "status": "ok",
+   "detail": "p50 6.1 / p95 7.7 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_testclient: GET /observations?bbox=1,2,3 (400) p95<300ms",
+   "status": "ok",
+   "detail": "p50 1.4 / p95 1.5 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_live: GET /meta p95<300ms",
+   "status": "ok",
+   "detail": "p50 75.6 / p95 96.0 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_live: GET /observations (все 935) p95<300ms",
+   "status": "ok",
+   "detail": "p50 170.9 / p95 203.4 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_live: GET /observations?source=S2 p95<300ms",
+   "status": "ok",
+   "detail": "p50 73.8 / p95 79.8 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_live: GET /observations/{id} p95<300ms",
+   "status": "ok",
+   "detail": "p50 15.6 / p95 17.0 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_live: GET /pairs (все) p95<300ms",
+   "status": "ok",
+   "detail": "p50 46.3 / p95 58.6 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_live: GET /pairs?status=accepted p95<300ms",
+   "status": "ok",
+   "detail": "p50 14.0 / p95 16.3 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_live: GET /scenes p95<300ms",
+   "status": "ok",
+   "detail": "p50 92.9 / p95 109.5 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_live: GET /scenes/{id} p95<3000ms",
+   "status": "ok",
+   "detail": "p50 156.9 / p95 172.9 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_live: GET /scenes/{id}/rgb.png p95<3000ms",
+   "status": "ok",
+   "detail": "p50 1.8 / p95 15.3 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_live: GET /scenes/{id}/quality.png p95<3000ms",
+   "status": "ok",
+   "detail": "p50 15.3 / p95 20.3 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_live: GET /scenes/{id}/mask.png p95<3000ms",
+   "status": "ok",
+   "detail": "p50 12.6 / p95 15.8 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_live: GET /zones p95<300ms",
+   "status": "ok",
+   "detail": "p50 76.5 / p95 88.7 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_live: GET /zones/{id} p95<300ms",
+   "status": "ok",
+   "detail": "p50 75.9 / p95 94.7 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_live: GET /metrics p95<300ms",
+   "status": "ok",
+   "detail": "p50 12.7 / p95 15.4 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_live: GET /export observations csv p95<300ms",
+   "status": "ok",
+   "detail": "p50 30.6 / p95 41.6 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_live: GET /export zones geojson p95<300ms",
+   "status": "ok",
+   "detail": "p50 78.2 / p95 101.5 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_live: GET /export pairs csv p95<300ms",
+   "status": "ok",
+   "detail": "p50 53.5 / p95 64.0 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_live: GET /export zones csv query_id p95<300ms",
+   "status": "ok",
+   "detail": "p50 165.4 / p95 181.4 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_live: GET /queries p95<300ms",
+   "status": "ok",
+   "detail": "p50 13.8 / p95 15.9 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_live: GET /queries/{id} p95<300ms",
+   "status": "ok",
+   "detail": "p50 1.4 / p95 15.8 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_live: GET /queries/{id}/run p95<300ms",
+   "status": "ok",
+   "detail": "p50 158.0 / p95 179.5 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_live: POST /queries p95<300ms",
+   "status": "ok",
+   "detail": "p50 15.4 / p95 16.5 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_live: DELETE /queries/{id} p95<300ms",
+   "status": "ok",
+   "detail": "p50 20.7 / p95 30.6 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "speed",
+   "check": "speed_live: GET /observations?bbox=1,2,3 (400) p95<300ms",
+   "status": "ok",
+   "detail": "p50 15.6 / p95 16.1 ms",
+   "example": null,
+   "n": null
+  },
+  {
+   "query": "isolation",
+   "check": "service/labels/queries.jsonl не изменён",
+   "status": "ok",
+   "detail": "sha256 e3b0c44298fc1c14",
+   "example": null,
+   "n": null
+  }
+ ],
+ "stats": {
+  "ok": 283
+ },
+ "seconds": 66.7,
+ "findings": []
+}

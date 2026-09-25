@@ -42,7 +42,7 @@
 | S3:HE419_MarLitter_transect29 | LC08_L2SP_196022_20140412_02_T1 | 23.6 | 1.00 | 0.00 | 1.00 | 0.00 | — | reject cloud | — | — | — | 17.3 |
 | S3:HE419_MarLitter_transect30 | LC08_L2SP_196022_20140412_02_T1 | 21.2 | 0.81 | 0.00 | 1.00 | 0.00 | — | reject cloud(qa_suspect:red_sr<0.03) | — | — | — | 195.1 |
 | S3:HE419_MarLitter_transect32 | LC08_L2SP_196022_20140412_02_T1 | 15.8 | 0.57 | 0.00 | 1.00 | 0.00 | — | reject insufficient_coverage | — | — | — | 19.7 |
-| S3:HE460_MarLitter_transect01 | S2A_MSIL2A_20160408T104022_R008_T32UMF_20210211T022918 | -6.0 | 1.00 | 0.26 | 0.74 | 0.00 | 0.0393 | reject cloud | 0 | 0 | 0.23 | 19.9 |
+| S3:HE460_MarLitter_transect01 | S2A_MSIL2A_20160408T104022_R008_T32UMF_20210211T022918 | -6.0 | 1.00 | 0.10 | 0.89 | 0.00 | 0.0225 | reject cloud | 0 | 0 | 0.23 | 19.9 |
 | S4:DOORS3:T12 | S2A_37TCH_20240603_0_L2A | -27.5 | 1.00 | 1.00 | 0.00 | 0.00 | 0.0143 | reject glint | 0 | 0 | 0.02 | 49.0 |
 | S4:DOORS3:T13 | S2A_37TCH_20240603_0_L2A | -27.5 | 1.00 | 1.00 | 0.00 | 0.00 | 0.0155 | reject glint | 0 | 0 | 0.01 | 263.6 |
 | S4:DOORS3:T14 | S2A_37TCG_20240603_0_L2A | -27.5 | 1.00 | 1.00 | 0.00 | 0.00 | 0.0236 | reject glint | 1 | 100 | 0.71 | 89.4 |

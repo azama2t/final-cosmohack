@@ -9,6 +9,10 @@
   Earth Search v1 sentinel-2-l2a, sentinel-2-l1c; Planetary Computer sentinel-2-l2a, landsat-c2-l2.
 Каждый ответ кэшируется в data/pairs/cache/<sha1>.json, поэтому перезапуск продолжает с места остановки.
 Отказы не выбрасываются: строка с accept=False и reject_reason (через ';').
+Геометрия трансект (по умолчанию, L75): для S2/S3 точка и время берутся из восстановленной геометрии PANGAEA
+(src/macroplastic/case/geometry.py): центр пути по сегментам и середина усилия; у прерванных T18/T22/T35/T49 перерыв
+не считается. Отключение: --no-geometry или geometry.use: false в configs/case_pairs.yaml; allow_approx: false —
+не использовать приближённо восстановленный конец S3 HE460_MarLitter_transect01 (событие остаётся точкой начала).
 
 Запуск:  .venv\\Scripts\\python.exe scripts\\case\\find_pairs.py [--window-days 5] [--accept-days 1] [--max-cloud 60]
 """
@@ -141,6 +145,9 @@ def make_rows(ev: dict, src: tuple, res, a: argparse.Namespace) -> list[dict]:
     name, url, coll, level = src
     base = {k: ev[k] for k in ("event_id", "source_id", "lat", "lon", "obs_datetime", "time_known", "time_note", "point_from")}
     base.update(endpoint=name, collection=coll, level=level)
+    if "geometry_status" in ev:   # геометрия PANGAEA подключена (apply_geometry); иначе колонки не появляются
+        gs = ev.get("geometry_status")
+        base["geometry_status"] = gs if isinstance(gs, str) and gs else None
     fam = FAMILY[coll]
     launched = [m for m in fam if ev["obs_datetime"] >= pd.Timestamp(LAUNCH[m], tz="UTC") - pd.Timedelta(days=a.window_days)]
     empty = dict(mission=None, item_id=None, scene_datetime=pd.NaT, dt_hours=np.nan, cloud_cover=np.nan, tile=None,
@@ -183,13 +190,53 @@ def make_rows(ev: dict, src: tuple, res, a: argparse.Namespace) -> list[dict]:
         if not ev["time_known"]:
             reasons.append("time_unknown(window_by_day)")
         hard = [r for r in reasons if not r.startswith("time_unknown")]
+        extra = {}
+        if "geometry_status" in ev:
+            extra["dt_hours_segment"] = dt_to_segments_h(st, ev.get("geom_segment_windows"))
         out.append(base | dict(mission=mission, item_id=it["id"], scene_datetime=st, dt_hours=round(dth, 2),
                                cloud_cover=cc, tile=tile, point_inside_footprint=inside, accept=not hard,
-                               reject_reason=";".join(reasons)))
+                               reject_reason=";".join(reasons)) | extra)
     return out
 
 
+def dt_to_segments_h(st: pd.Timestamp, windows) -> float:
+    """|dt| (ч) от сцены до ближайшего сегмента наблюдения (0 — сцена внутри сегмента). Справочно: отбор по dt_hours
+    (от середины усилия) не меняется. Нет окон сегментов (событие без геометрии PANGAEA) -> NaN."""
+    if not isinstance(windows, str) or not windows:
+        return np.nan
+    best = np.inf
+    for w0, w1 in json.loads(windows):
+        t0, t1 = pd.Timestamp(w0), pd.Timestamp(w1)
+        d = 0.0 if t0 <= st <= t1 else min(abs((st - t0).total_seconds()), abs((st - t1).total_seconds())) / 3600
+        best = min(best, d)
+    return round(best, 2)
+
+
 # ---------------------------------------------------------------- summary
+def load_geometry_cfg(path: Path) -> dict:
+    """Секция geometry конфига (нет секции -> use=True, allow_approx=True)."""
+    import yaml
+    g = (yaml.safe_load(path.read_text(encoding="utf-8")) or {}).get("geometry") or {}
+    return {"use": bool(g.get("use", True)), "allow_approx": bool(g.get("allow_approx", True))}
+
+
+def apply_geometry(ev: pd.DataFrame, allow_approx: bool = True) -> pd.DataFrame:
+    """Геометрия трансект S2/S3 по PANGAEA (src/macroplastic/case/geometry.py; L72, подключено в L75): точка события :=
+    центр пути по сегментам (половина пройденной длины), время := середина усилия (перерывы T18/T22/T35/T49 не
+    считаются); добавляет geom_window_start/end, geometry_status и geom_segment_windows (JSON). Прочие события
+    (S1, S4) — без изменений."""
+    if str(ROOT / "src") not in sys.path:
+        sys.path.insert(0, str(ROOT / "src"))
+    from macroplastic.case.geometry import event_track, events_override
+    ev = events_override(ev, allow_approx=allow_approx)
+    wins = []
+    for eid in ev.event_id:
+        t = event_track(eid, allow_approx=allow_approx) if isinstance(eid, str) and eid[:3] in ("S2:", "S3:") else None
+        wins.append(json.dumps(t["segment_windows"]) if t else None)
+    ev["geom_segment_windows"] = wins
+    return ev
+
+
 def load_drift_cfg(path: Path) -> dict:
     import yaml
     return yaml.safe_load(path.read_text(encoding="utf-8"))["drift"]
@@ -385,11 +432,16 @@ def main() -> int:
     ap.add_argument("--summary-only", action="store_true")
     ap.add_argument("--config", default=str(ROOT / "configs" / "case_pairs.yaml"), help="секция drift")
     ap.add_argument("--point-scl", type=int, default=0, help="проверить SCL в точке для N лучших пар S2 L2A (PC)")
+    ap.add_argument("--no-geometry", action="store_true",
+                    help="не применять геометрию трансект PANGAEA (data/case/geometry) к точке/времени событий S2/S3")
     a = ap.parse_args()
     a.workers = min(a.workers, 4)
     CACHE.mkdir(parents=True, exist_ok=True)
     REPORT.parent.mkdir(parents=True, exist_ok=True)
     ev = build_events(pd.read_csv(CSV))
+    gcfg = load_geometry_cfg(Path(a.config))
+    if gcfg["use"] and not a.no_geometry:
+        ev = apply_geometry(ev, allow_approx=gcfg["allow_approx"])
     if a.limit:
         ev = ev.head(a.limit)
     ev.to_csv(OUT / "events.csv", index=False)

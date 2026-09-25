@@ -511,7 +511,11 @@ def write_summary(c: Ctx, cmd: str):
         "versions": versions(),
         "inputs": {rel(p): sha256(p) for p in [c.samples] + CONFIGS + [ROOT / "weights" / "lgbm" / "meta.json"]},
         "outputs_sha256": tab,
-        "outputs_fingerprint": hashlib.sha256(json.dumps(tab, sort_keys=True).encode()).hexdigest(),
+        # отпечаток — по выходам, не зависящим от окружения: detector_recomputed.json зависит от наличия
+        # разметки MARIDA (не в git; без неё пересчёт пропускается), его sha256 остаётся в outputs_sha256
+        "outputs_fingerprint": hashlib.sha256(json.dumps(
+            {k: v for k, v in tab.items() if not k.endswith("detector_recomputed.json")}, sort_keys=True).encode()).hexdigest(),
+        "fingerprint_excludes": ["reports/case_run/detector_recomputed.json (зависит от наличия MARIDA)"],
     })
     steps = c.data.get("steps", {})
     for s in c.steps:

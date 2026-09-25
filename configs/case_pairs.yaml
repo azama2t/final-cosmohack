@@ -44,3 +44,13 @@ drift:
     buffer_km: 3.0             # буфер контекста вокруг полосы (= strip.context_m)
     default_width_m: 10        # если ширина полосы в реестре не задана (S4)
     # tolerance_km = transect_width_m / 2 / 1000 + buffer_km
+
+# Геометрия трансект S2/S3 по первоисточникам PANGAEA (src/macroplastic/case/geometry.py; data/case/geometry/transects.*).
+# use: точка события = центр пути по сегментам, время = середина усилия (find_pairs.py; отключение: --no-geometry);
+#      полоса наблюдения = сегменты + буфер, перерыв между сегментами не покрывается (pair_quality.py).
+# allow_approx: использовать приближённо восстановленный конец S3 HE460_MarLitter_transect01 (reconstructed_approx);
+#      false -> событие остаётся точкой начала (как в CSV организаторов).
+# Площадь для концентрации не меняется: эталон — опубликованная площадь автора.
+geometry:
+  use: true
+  allow_approx: true

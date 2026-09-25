@@ -152,7 +152,7 @@ def build_pairs(pq, fetch: bool) -> tuple[pd.DataFrame, dict]:
             qa, tr = src.read(1), src.transform
         with rasterio.open(d / "prob.tif") as src:
             prob = src.read(1).astype(np.float32) / 255.0
-        g = pq.event_geometry(samples, eid)
+        g = pq.event_geometry(samples, eid, m["config"])   # same strip as pair_quality.py (incl. PANGAEA track)
         poly, _ = pq.strip_polygon(g, int(m["epsg"]), m["config"])
         strip = rasterize([(poly, 1)], out_shape=qa.shape, transform=tr, all_touched=True, fill=0, dtype="uint8").astype(bool)
         fpath = CACHE / d.name / "fdi.npy"

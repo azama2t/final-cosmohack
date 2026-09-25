@@ -1137,6 +1137,31 @@ def _case_selfcheck() -> dict:
             "p95_max_ms": _r(max(p95), 0) if p95 else None}
 
 
+def _case_clean_clone() -> dict:
+    """Latest reports/selfcheck/clean_clone_*.md: a real `git clone` run by README (timings, tests, numbers)."""
+    files = sorted(glob.glob(str(ROOT / "reports" / "selfcheck" / "clean_clone_*.md")))
+    if not files:
+        return {"available": False}
+    txt = Path(files[-1]).read_text(encoding="utf-8")
+    res = {"available": True, "file": str(Path(files[-1]).relative_to(ROOT)).replace("\\", "/")}
+
+    def grab(key, pat, conv=str):
+        m = re.search(pat, txt)
+        res[key] = conv(m.group(1)) if m else None
+    grab("total_min", r"до карты на экране прошло \*\*≈\s*([\d,]+)\s*мин")
+    grab("clone_s", r"\|\s*1\s*\|[^|]*git clone[^|]*\|\s*(\d+)\s*с\s*\|")
+    grab("install_route", r"\|\s*2\s*\|[^|]*run\.ps1[^|]*\|\s*([^|(]+?)\s*\(")
+    grab("venv_gb", r"`\.venv` занимает ([\d,]+)\s*ГБ")
+    grab("route_s", r"всего ([\d.]+) с \(в README")
+    grab("map_load_s", r"загрузка ([\d,]+) с")
+    grab("case_tests_s", r"\|\s*3\s*\|[^|]*pytest[^|]*\|\s*(\d+)\s*с\s*\|")
+    grab("case_tests_passed", r"\|\s*3\s*\|[^|]*\|[^|]*\|\s*(\d+) passed", int)
+    grab("case_tests_skipped", r"\|\s*3\s*\|[^|]*\|[^|]*\|\s*\d+ passed, (\d+) skipped", int)
+    grab("full_tests_time", r"\|\s*3b\s*\|[^|]*\|\s*([^|]+?)\s*\|")
+    grab("numpy_clone", r"В клоне стоит numpy ([\d.]+)")
+    return res
+
+
 def _case_sections(c: dict) -> dict:
     """The four evidence sections of the case, each number with its source and protocol (one source of numbers)."""
     det, cc, ex = c.get("detector") or {}, c.get("conc") or {}, c.get("experiment") or {}
@@ -1269,6 +1294,7 @@ def collect_case() -> dict:
                   "export": {Path(f.get("file", "")).stem: f.get("records") for f in (rs.get("export") or {}).get("files") or []},
                   "detector_recomputed": ((rs.get("detector") or {}).get("recomputed_from_preds") or {}).get("test")}
     out["sections"] = _case_sections(out)
+    out["clean_clone"] = _case_clean_clone()
     out["splits_files"] = len(glob.glob(str(ROOT / "reports" / "case_splits" / "*.csv"))) or None
     tests = 0
     for p in glob.glob(str(ROOT / "tests" / "test_case_*.py")) + [str(ROOT / "tests" / "test_api_v3.py")]:

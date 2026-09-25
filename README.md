@@ -19,7 +19,7 @@
 | 1. Детектор на MARIDA test | LightGBM F1 0.871 [0.823–0.920], RF 0.771, FDI × NDVI 0.042; 15 сцен | официальный test MARIDA, один раз после заморозки; порог и настройки бейзлайнов — только по val; класс Marine Debris против остальных размеченных классов, неразмеченные не считаются фоном; ДИ — бутстреп по сценам | `reports/case_detector/metrics.json` |
 | 2. Полевая dev-проверка | S2 (44 события): ridge_log MAE 28.5 против медианы 44.2, ΔMAE [−31.6; −0.3]; S1 (58): knn5_log 434.0 против 527.4 | кросс-валидация внутри dev по 5 участкам маршрута с буфером 1 сут (route_buf1); протокол и правило выбора записаны до CV; ДИ разности MAE — бутстреп по дням рейса | `reports/case_conc/dev_cv.json, configs/case_conc_model.yaml` |
 | 3. Полевой отложенный test | S2 (14): ridge_log 30.0 против медианы 25.2, ΔMAE [−1.6; +12.9] — основная модель не лучше медианы; S1 (19): knn5_log 370.0 против медианы 371.1, ΔMAE [−60.7; +49.2] — разницы с медианой нет | отложенный участок маршрута (+ буфер 1 сут), состав зафиксирован до моделей (sha256 в configs/case_selection.yaml), посчитан один раз; основная модель против медианы dev на тех же событиях; ДИ — бутстреп по дням рейса test. Ограничение: ранняя разведка бейзлайнов видела все события профиля | `reports/case_conc/final_test.json, reports/case_conc/final_test_predictions.csv` |
-| 4. Эксперимент на снимках | 11 пар S2 (6 групп), весь мусор, не пластик: FDI ρ -0.75, p Холма 0.15, случайная вода сцены -0.52 — связь не установлена | пары, прошедшие маски качества; эталон — полевая плотность всего мусора (all_litter), не пластика; ранговая связь Спирмена, бутстреп по группам «район × день», поправка Холма, нулевая модель — случайная вода той же сцены | `reports/case_pairs/experiment.json` |
+| 4. Эксперимент на снимках | 11 пар S2 (6 групп), весь мусор, не пластик: FDI ρ -0.75, p Холма 0.15, случайная вода сцены -0.54 — связь не установлена | пары, прошедшие маски качества; эталон — полевая плотность всего мусора (all_litter), не пластика; ранговая связь Спирмена, бутстреп по группам «район × день», поправка Холма, нулевая модель — случайная вода той же сцены | `reports/case_pairs/experiment.json` |
 
 ## Главное
 
@@ -72,8 +72,10 @@ powershell -ExecutionPolicy Bypass -File run.ps1 -Case all -Offline
 powershell -ExecutionPolicy Bypass -File run.ps1
 ```
 
-- `run.ps1` при первом запуске создаёт `.venv` и ставит пакеты. На машине без NVIDIA берётся `requirements-cpu.txt`, ключ `-Cpu` включает этот вариант принудительно. Сервис поднимается на http://127.0.0.1:8000, документация API — http://127.0.0.1:8000/docs.
-- `-Case all -Offline` на этой машине выполняется за **6.2 с** по шагам (плюс около 1,5 с на запуск Python). Время каждого шага записано в `reports/case_run/run_summary.json`.
+- Клонировать обычным `git clone`. Концы строк у файлов данных зафиксированы в `.gitattributes` (`-text` для `data/**`, `task/**`, `reports/case_splits/**`), поэтому sha256 входов не зависят от настройки `core.autocrlf`.
+- `run.ps1` при первом запуске создаёт `.venv` и ставит пакеты — **для этого нужен интернет** (на чистом клоне ≈ 3 мин, CPU-вариант `.venv` ≈ 1,53 ГБ). На машине без NVIDIA берётся `requirements-cpu.txt`, ключ `-Cpu` включает этот вариант принудительно. Сервис поднимается на http://127.0.0.1:8000, документация API — http://127.0.0.1:8000/docs. Если порт занят — `-Port 8080`; без открытия браузера — `-NoBrowser`. Подложка карты (Esri, OSM) грузится из интернета; без сети данные кейса и API работают, но подложки не будет.
+- **Проверено на настоящем чистом клоне** ([reports/selfcheck/clean_clone_1941.md](reports/selfcheck/clean_clone_1941.md)): от `git clone` до карты на экране ≈ 7,5 мин на CPU — клон 76 с, установка пакетов и маршрут `-Case all -Offline -Cpu` 3 мин 17 с (сам маршрут 6.9 с), загрузка карты 8,1 с. Числа совпали с основным репозиторием.
+- `-Case all -Offline` на этой машине выполняется за **7.1 с** по шагам (плюс около 1,5 с на запуск Python). Время каждого шага записано в `reports/case_run/run_summary.json`.
 - **Чистый клон работает без сети.** В репозитории лежат:
   - кэш STAC `data/pairs/cache` (ответы на все 1272 запроса);
   - реестр кандидатов `data/pairs/*.csv` и вырезки масок `data/pairs/quality/`;
@@ -82,7 +84,7 @@ powershell -ExecutionPolicy Bypass -File run.ps1
 
   Поэтому `-Case all -Offline` на свежем клоне даёт тот же реестр, 29 зон и ту же выгрузку.
 - **Пересчёт с сетью**: `run.ps1 -Case all -Force` заново читает снимки и считает маски и детектор по 29 парам (≈ 4–5 мин). Поиск STAC без кэша — `scripts\case\run_all.py prepare --pairs-cache <пустая папка>` (≈ 2 мин на 1272 запроса). Вместе ≈ 7–9 мин ([docs/CASE_RUN.md](docs/CASE_RUN.md)). Если в режиме `-Offline` запроса нет в кэше, скрипт не падает: событие получает в реестре причину `error:…`.
-- **Разметка MARIDA для пересчёта метрик детектора** в git не входит (4,5 ГБ). Её нужно скачать с https://zenodo.org/records/5151941/files/MARIDA.zip (sha256 архива `e19227596018348169b11a78d033890adb97d4b4f4c069f061cfcfab21d48d08`) и распаковать в `data/MARIDA/` так, чтобы появились `data/MARIDA/patches/` и `data/MARIDA/splits/`. Без неё шаг 5 маршрута не пересчитывает TP/FP/FN из npz, а берёт сохранённые метрики `reports/case_detector/metrics.json` и записывает в сводку их sha256.
+- **Разметка MARIDA для пересчёта метрик детектора** в git не входит (4,5 ГБ). Её нужно скачать с https://zenodo.org/records/5151941/files/MARIDA.zip (sha256 архива `e19227596018348169b11a78d033890adb97d4b4f4c069f061cfcfab21d48d08`) и распаковать в `data/MARIDA/` так, чтобы появились `data/MARIDA/patches/` и `data/MARIDA/splits/`. Без неё шаг 5 маршрута не пересчитывает TP/FP/FN из npz, а берёт сохранённые метрики `reports/case_detector/metrics.json` и записывает в сводку их sha256. Строка лога «пересчёт из npz совпал: test=None, val=None» в этом случае означает «не пересчитывалось: нет data/MARIDA», а не «совпало»; в `detector_recomputed.json` тогда `recomputed: null`.
 - Шаги можно запускать по отдельности: `run.ps1 -Case prepare|eval|export`. Флаг `-Force` пересчитывает маски и детектор по всем парам, для этого нужна сеть.
 
 **Ресурсы.**
@@ -96,14 +98,15 @@ powershell -ExecutionPolicy Bypass -File run.ps1
 | Ключи | не нужны: каталоги открытые, подпись Planetary Computer анонимная |
 
 **Версии.**
-- Пакеты — `requirements.txt` (GPU) и `requirements-cpu.txt`. Точные версии, с которыми получены числа, — `requirements-lock.txt`.
+- Пакеты — `requirements.txt` (GPU) и `requirements-cpu.txt`. В них версии закреплены только у torch, torchvision и pyarrow, поэтому `run.ps1` может поставить более новые: на чистом клоне был numpy 2.5.3 вместо 2.5.2, числа совпали. Точные версии, с которыми получены числа, — `requirements-lock.txt` (он указывает на CUDA-сборку torch).
 - Прогон кейса записал в `run_summary.json`: Python 3.12.7, numpy 2.5.2, pandas 3.0.6, scikit-learn 1.9.1, LightGBM 4.7.0, rasterio 1.5.1, shapely 2.1.2, FastAPI 0.141.1.
 - Веса: детектор — `weights/lgbm/` (`model.txt`, `meta.json`), модели концентрации — `weights/case_conc/<профиль>.json` (1–5 КБ).
 - Конфиги: `configs/case_selection.yaml` (отбор, основной сплит, отложенный test), `configs/case_pairs.yaml` (пары, маски, дрейф), `configs/case_conc_model.yaml` (протокол до CV и выбранная модель).
 
 **Повторяемость.**
 - Два подряд прогона `all --offline` дают одинаковые sha256 всех 24 выходных таблиц.
-- Отпечаток текущего прогона — `85335b7a5f8aa5de…` (`outputs_fingerprint` в `run_summary.json`). Там же sha256 входного CSV и конфигов.
+- Отпечаток текущего прогона — `1b2dc4ca7050955e…` (`outputs_fingerprint` в `run_summary.json`). В него не входит `reports/case_run/detector_recomputed.json`: этот файл зависит от того, скачана ли MARIDA. Поэтому отпечаток одинаков с MARIDA и без неё. Там же sha256 входного CSV и конфигов.
+- После первого прогона `git status` покажет изменённые `reports/case_run/run_summary.json` и `detector_recomputed.json`: в них время, версии пакетов и признак наличия MARIDA. Это нормально, таблицы-результаты не меняются.
 
 ## 3. Данные и отбор
 
@@ -298,7 +301,7 @@ MAPE не используется: в реестре есть нули. Осн�
 - Фактическое покрытие на CV ниже номинала: S2 84 %, S1 74 %.
 - На карточке и в API интервал подписан фактическим покрытием («≈84 % по CV»), а не номиналом.
 
-**Справочно, до фиксации test.** На всех 63 событиях S2 и том же разбиении медиана даёт MAE 35.9, kNN — 31.7, ΔMAE -4.2 [-12.0; 3.4] — незначимо (`reports/case_conc/baseline.md`). Это разведка до заморозки test по другому протоколу (все события профиля), а не основной результат. Эти бейзлайны видели будущие test-события, поэтому отложенный test не абсолютно нетронутый — это ограничение записано в `configs/case_selection.yaml` (`final_test.decision_before_opening`) до открытия test.
+**Справочно, до фиксации test.** На всех 63 событиях S2 и том же разбиении медиана даёт MAE 35.9, kNN-5 в log-шкале (knn5_log) — 31.7, kNN-5 в линейной шкале (knn5; его печатает лог шага 4 маршрута) — 31.3; для knn5_log, ΔMAE -4.2 [-12.0; 3.4] — незначимо (`reports/case_conc/baseline.md`). Это разведка до заморозки test по другому протоколу (все события профиля), а не основной результат. Эти бейзлайны видели будущие test-события, поэтому отложенный test не абсолютно нетронутый — это ограничение записано в `configs/case_selection.yaml` (`final_test.decision_before_opening`) до открытия test.
 
 ## 6. Что проверено, где и что не доказано
 
@@ -315,7 +318,7 @@ MAPE не используется: в реестре есть нули. Осн�
 **Эксперимент на парах** (`scripts/case/pairs_experiment.py`). Признаки выбраны до запуска, пороги не подбирались.
 - Детектор в полосе: признак почти постоянен, ρ = -0.50, p Холма 0.90. Это контраст «Северное море против Чёрного», а не связь.
 - FDI в полосе: ρ Спирмена -0.75 [-1.00; -0.14], p перестановочный 0.013, после поправки Холма 0.15.
-- Та же полоса, сдвинутая в случайную воду той же сцены, даёт в среднем ρ -0.52. Значит, связь — на уровне сцены или дня, а не места наблюдения. Знак к тому же обратный ожидаемому.
+- Та же полоса, сдвинутая в случайную воду той же сцены, даёт в среднем ρ -0.54. Значит, связь — на уровне сцены или дня, а не места наблюдения. Знак к тому же обратный ожидаемому.
 - При 6 независимых группах обнаружима только связь |ρ| ≥ 0.96. Для ρ = 0,5 нужно около 33 независимых пар.
 
 **Слои и статусы на карте** (API v3.1). Три слоя с разными подписями:
@@ -339,18 +342,18 @@ MAPE не используется: в реестре есть нули. Осн�
 
 | Что | Команда | Выход | Время |
 |---|---|---|---|
-| весь маршрут | `scripts\case\run_all.py all --offline` | `reports/case_run/run_summary.json` | 6.2 с |
+| весь маршрут | `scripts\case\run_all.py all --offline` | `reports/case_run/run_summary.json` | 7.1 с |
 | отбор записей | `scripts\case\run_all.py prepare --offline` | `data/case/selection_*.csv`, `data/case/run/registry_*.csv` | 0.1 с |
 | реестр пар (поиск STAC) | `scripts\case\find_pairs.py --point-scl 6` | `data/pairs/{events,candidates,best_per_event}.csv`, `reports/case_pairs/summary.md` | ≈ 2 мин с сетью, секунды из кэша |
 | маски и детектор на парах | `scripts\case\pair_quality.py` (`--force` — заново) | `data/pairs/quality/<событие>/`, `data/pairs/pair_quality.csv`, `reports/case_pairs/quality.md` | ≈ 4–5 мин с сетью |
-| бейзлайны концентрации, 6 схем разбиения | `scripts\case\baseline_concentration.py` | `reports/case_conc/{metrics.json, predictions.csv, metrics_by_fold.csv, consistency.csv, baseline.md}` | 2.4 с |
+| бейзлайны концентрации, 6 схем разбиения | `scripts\case\baseline_concentration.py` | `reports/case_conc/{metrics.json, predictions.csv, metrics_by_fold.csv, consistency.csv, baseline.md}` | 2.3 с |
 | модели концентрации, dev CV | `scripts\case\conc_model_cv.py` | `reports/case_conc/{dev_cv.md, dev_cv.json, dev_predictions.csv}`, `weights/case_conc/*.json` | ≈ 6 с |
 | отложенный test концентрации | `scripts\case\final_test_conc.py` (**один раз**, уже посчитан; повтор скрипт отклоняет) | `reports/case_conc/final_test.json`, `final_test_predictions.csv` | секунды |
 | детектор: пересчёт из сохранённых предсказаний | `scripts\case\run_all.py eval` | `reports/case_run/detector_recomputed.json` (сверка TP/FP/FN с `metrics.json`) | 1 с |
 | детектор: полный прогон 7 моделей на val и test MARIDA | `scripts\case\detector_compare.py` (нужен MARIDA в `data/MARIDA`) | `reports/case_detector/*` | ≈ 130 с |
 | эксперимент на парах | `scripts\case\pairs_experiment.py --no-fetch` | `reports/case_pairs/experiment.{md,json}` | ≈ 3 мин с чтением FDI по сети |
-| согласованность API и экспорта | `scripts\case\consistency_check.py` | `reports/selfcheck/consistency_<дата>.md\|json` | 66 с |
-| тесты кейса | `-m pytest -q tests\test_case_concentration.py tests\test_case_conc_model.py tests\test_case_run_all.py tests\test_case_consistency.py tests\test_api_v3.py` | 112 тестов | секунды |
+| согласованность API и экспорта | `scripts\case\consistency_check.py` | `reports/selfcheck/consistency_<дата>.md\|json` | 67 с |
+| тесты кейса | `-m pytest -q tests\test_case_concentration.py tests\test_case_conc_model.py tests\test_case_run_all.py tests\test_case_consistency.py tests\test_api_v3.py` | 142 passed, 1 skipped (чистый клон) | 22 с; вся папка `tests` — 10 мин 53 с на CPU |
 
 - Предсказания детектора на MARIDA (`data/case/detector_preds/*.npz`: вероятности основной модели и RandomForest, маски 7 моделей по патчам) лежат в git. Для пересчёта TP/FP/FN из них нужна разметка MARIDA (`data/MARIDA/patches/*_cl.tif`, как скачать — раздел 2). Без разметки `run_all eval` берёт числа из `reports/case_detector/metrics.json` и записывает его sha256. Полный прогон детекторов заново делает `detector_compare.py` по MARIDA.
 - Эталон и предсказания концентрации лежат в git: `reports/case_conc/predictions.csv` (y_true, y_pred и полевой ДИ для каждой строки, схемы и модели) и `dev_predictions.csv`.
@@ -385,7 +388,7 @@ MAPE не используется: в реестре есть нули. Осн�
 | `GET /api/v3/pairs` | реестр пар «образец × сцена»: dt, дрейф, статус, коды причин |
 | `GET /api/v3/scenes[/{id}]`, `…/rgb.png`, `…/quality.png`, `…/mask.png` | снимок, маска качества (valid / cloud / land / nodata), маска детектора |
 | `GET /api/v3/zones[/{id}]` | зоны: полоса наблюдения, площадь, площадь маски, два статуса, `field_estimate` |
-| `GET /api/v3/metrics` | метрики детектора и концентрации из тех же файлов, что в этом README; контрольный пример |
+| `GET /api/v3/metrics` | метрики детектора и концентрации из тех же файлов, что в этом README; итог отложенного test — `concentration.final_test_summary` и `concentration.final_test_status`; контрольный пример |
 | `GET /api/v3/export?layer=observations\|pairs\|zones&format=geojson\|csv` | выгрузка с теми же фильтрами или по `query_id` |
 | `POST /api/v3/queries`, `GET /api/v3/queries/{id}/run`, `DELETE …` | сохранённый запрос и его повторный запуск |
 
@@ -407,10 +410,10 @@ curl -OJ "http://127.0.0.1:8000/api/v3/export?layer=zones&format=geojson&detecti
 - принятые пары — 0;
 - участки со статусом детекции «обнаружено» — 0 (при 0 подтверждённых пар их и должно быть 0; подозрительные пиксели — отдельный слой `detections`).
 
-Самопроверка `scripts/case/consistency_check.py` сравнивает по id четыре представления: алгоритм, JSON, CSV и GeoJSON. Последний прогон (`reports/selfcheck/consistency_20260925_1925.json`):
+Самопроверка `scripts/case/consistency_check.py` сравнивает по id четыре представления: алгоритм, JSON, CSV и GeoJSON. Последний прогон (`reports/selfcheck/consistency_20260925_2005.json`):
 - проверок 283: ok 283, расхождений 0 (подробности — в самом отчёте);
 - некорректные и пустые входы: 46 из 46 с верным кодом;
-- p95 ответа не выше 173 мс.
+- p95 ответа не выше 213 мс.
 
 ## 9. Структура
 

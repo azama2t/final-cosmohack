@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-25T19:41:18+03:00",
+ "generated": "2026-09-25T20:05:20+03:00",
  "note": "генерируется scripts/final_numbers.py; руками не править; null = ещё не посчитано",
  "l3_lgbm": {
   "available": true,
@@ -3380,13 +3380,13 @@
     "no_scene_in_window": 798,
     "time_unknown(window_by_day)": 720,
     "sync_unreliable_drift": 669,
-    "dt>1d": 475,
+    "dt>1d": 476,
     "mission_not_launched": 303,
     "cloud_cover>60": 227,
     "point_outside_footprint": 43,
     "mission_not_target(L7)": 20
    },
-   "reject_dt_gt_1d": 475,
+   "reject_dt_gt_1d": 476,
    "reject_cloud_cover_gt_60": 227,
    "tolerance_buffer_km": 3.0,
    "unknown_time_extra_h": 12,
@@ -5142,8 +5142,8 @@
     ],
     "p_perm": 0.013,
     "p_holm": 0.15,
-    "null_median": -0.52,
-    "null_frac_ge": 0.14
+    "null_median": -0.54,
+    "null_frac_ge": 0.15
    },
    "p_mean": {
     "n": 11,
@@ -5155,7 +5155,7 @@
     "p_perm": 0.179,
     "p_holm": 0.9,
     "null_median": -0.17,
-    "null_frac_ge": 0.23
+    "null_frac_ge": 0.24
    },
    "fdi_context": {
     "n": 11,
@@ -5171,13 +5171,13 @@
    },
    "fdi_strip_resid": {
     "n": 11,
-    "rho": -0.68,
+    "rho": -0.61,
     "ci95": [
-     -0.97,
-     0.04
+     -0.96,
+     0.16
     ],
-    "p_perm": 0.024,
-    "p_holm": 0.24,
+    "p_perm": 0.055,
+    "p_holm": 0.51,
     "null_median": null,
     "null_frac_ge": null
    },
@@ -5199,16 +5199,16 @@
   },
   "selfcheck": {
    "available": true,
-   "file": "reports/selfcheck/consistency_20260925_1925.json",
-   "when": "2026-09-25T19:23:57",
+   "file": "reports/selfcheck/consistency_20260925_2005.json",
+   "when": "2026-09-25T20:04:06",
    "checks": 283,
    "ok": 283,
    "fail": 0,
    "warn": 0,
-   "seconds": 66.0,
+   "seconds": 67.0,
    "invalid_ok": 46,
    "invalid_total": 46,
-   "p95_max_ms": 173.0
+   "p95_max_ms": 213.0
   },
   "control": {
    "n": 12,
@@ -5222,7 +5222,7 @@
   },
   "run": {
    "command": "run_all.py all --offline",
-   "finished": "2026-09-25T19:41:18",
+   "finished": "2026-09-25T20:04:05",
    "versions": {
     "python": "3.12.7",
     "platform": "Windows-10-10.0.19045-SP0",
@@ -5234,19 +5234,19 @@
     "shapely": "2.1.2",
     "fastapi": "0.141.1",
     "yaml": "6.0.3",
-    "git_commit": "cff6c0e1bb0b86f2dffb685249d331cba35659ce"
+    "git_commit": "6722a7c7ddaa7709cf7226f6acf90e8ecb4ce165"
    },
-   "outputs_fingerprint_short": "85335b7a5f8aa5de",
+   "outputs_fingerprint_short": "1b2dc4ca7050955e",
    "n_outputs": 24,
-   "total_s": 6.2,
+   "total_s": 7.1,
    "step_s": {
     "1_selection": 0.1,
-    "2_pairs": 1.0,
+    "2_pairs": 1.6,
     "3_quality_detector": 0.2,
     "3b_registry": 0.7,
-    "4_concentration": 2.4,
+    "4_concentration": 2.3,
     "5_detector_marida": 1.0,
-    "6_export_api_v3": 1.0
+    "6_export_api_v3": 1.2
    },
    "export": {
     "observations": 935,
@@ -5364,11 +5364,26 @@
     "n_groups": 6,
     "fdi_rho": -0.75,
     "fdi_p_holm": 0.15,
-    "fdi_null_median": -0.52,
+    "fdi_null_median": -0.54,
     "verdict": "связь не установлена"
    }
   },
+  "clean_clone": {
+   "available": true,
+   "file": "reports/selfcheck/clean_clone_1941.md",
+   "total_min": "7,5",
+   "clone_s": "76",
+   "install_route": "3 мин 17 с",
+   "venv_gb": "1,53",
+   "route_s": "6.9",
+   "map_load_s": "8,1",
+   "case_tests_s": "22",
+   "case_tests_passed": 142,
+   "case_tests_skipped": 1,
+   "full_tests_time": "10 мин 53 с",
+   "numpy_clone": "2.5.3"
+  },
   "splits_files": 17,
-  "n_tests": 112
+  "n_tests": 124
  }
 }
