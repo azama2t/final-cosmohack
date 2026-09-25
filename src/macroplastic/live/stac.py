@@ -83,6 +83,19 @@ REGIONS = {
                   tile="30NZM", center=(-0.14, 5.50), md_px=0, marida_dates=[]),
     "lagos": dict(region_name="Лагос (вход в лагуну, порт Апапа)", region_name_en="Lagos harbour entrance, Nigeria",
                   country="Нигерия", tile="31NEG", center=(3.40, 6.30), md_px=0, marida_dates=[]),
+    # L6d: river-plastic "hotspots" outside MARIDA (fresh 2025-2026 scenes only); centre +-12.5 km checked inside the tile
+    "mumbai": dict(region_name="Мумбаи (устье Ульхаса, крики Васаи и Малад)", region_name_en="Mumbai (Ulhas / Vasai Creek), India",
+                   country="Индия", tile="43QBB", center=(72.78, 19.20), md_px=0, marida_dates=[]),
+    "karachi": dict(region_name="Карачи (порт, устье Лиари)", region_name_en="Karachi harbour (Lyari mouth), Pakistan",
+                    country="Пакистан", tile="42RTN", center=(66.95, 24.80), md_px=0, marida_dates=[]),
+    "nile": dict(region_name="Дельта Нила (устье Розетты)", region_name_en="Nile Delta (Rosetta mouth), Egypt",
+                 country="Египет", tile="36RTV", center=(30.38, 31.485), md_px=0, marida_dates=[]),
+    "mekong": dict(region_name="Дельта Меконга (устья Тьеу и Дай)", region_name_en="Mekong Delta (Cua Tieu / Cua Dai), Vietnam",
+                   country="Вьетнам", tile="48PXS", center=(106.80, 10.15), md_px=0, marida_dates=[]),
+    "guanabara": dict(region_name="Залив Гуанабара (Рио-де-Жанейро)", region_name_en="Guanabara Bay, Rio de Janeiro",
+                      country="Бразилия", tile="23KPQ", center=(-43.15, -22.82), md_px=0, marida_dates=[]),
+    "ganges": dict(region_name="Устье Хугли (дельта Ганга, остров Сагар)", region_name_en="Hooghly mouth (Ganges Delta, Sagar Island)",
+                   country="Индия", tile="45QXD", center=(88.10, 21.58), md_px=0, marida_dates=[]),
 }
 
 # SCL classes (Sen2Cor): 0 nodata, 1 saturated/defective, 2 dark area, 3 cloud shadow, 4 vegetation,

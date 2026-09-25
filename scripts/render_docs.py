@@ -141,7 +141,7 @@ def speed_table(fn: dict) -> str:
                 f"| итоговая ({fmt(lt.get('final_n_features'), None)} признаков, {fmt(lt.get('final_n_trees'), None)} деревьев) | "
                 f"{_pm(comb.get('val_f1_mean'), comb.get('val_f1_std'), 3)} | "
                 f"{_s(lt.get('final_cold_s_300'))} | {fmt(lt.get('final_warm_chips_per_s'), 'f1').replace('.', ',')} |",
-                f"| лёгкая (кандидат, в `inference.py` не включена) | {_pm(lt.get('f1_mean'), lt.get('f1_sd'), 3)} | "
+                f"| лёгкая (отклонена: хуже переносится на новый район) | {_pm(lt.get('f1_mean'), lt.get('f1_sd'), 3)} | "
                 f"{_s(lt.get('cold_s_300'))} | {fmt(lt.get('warm_chips_per_s'), 'f1').replace('.', ',')} |"]
     if sp.get("hardware"):
         out += ["", f"Железо: {sp['hardware']}."]
@@ -221,6 +221,85 @@ def l23_channels_table(fn: dict) -> str:
                    f"{fmt(lt.get('n_features'), None)} | {_pm(lt.get('f1_mean'), lt.get('f1_sd'), 3)} ({fmt(lt.get('n_seeds'), None)} seed) | "
                    f"{DASH} |")
     return "\n".join(out)
+
+
+def _sx(x, nd=1):
+    return DASH if x is None else f"{float(x):.{nd}f}".replace(".", ",")
+
+
+def threads_table(fn: dict) -> str:
+    """Cold start by CPU threads and GPU (final model; mid-size model for reference)."""
+    st = fn.get("speed_threads") or {}
+    fin, mid, sp = st.get("final") or {}, st.get("mid") or {}, st.get("speedup_mid") or {}
+    if not fin:
+        return DASH
+    cols = [("cpu4", "CPU, 4 потока"), ("cpu8", "CPU, 8 потоков"), ("cpu20", "CPU, 20 потоков"), ("gpu", "GPU")]
+    out = ["| Модель | " + " | ".join(c[1] for c in cols) + " |", "|---|" + "---|" * len(cols),
+           "| **итоговая** (48 признаков, 400 деревьев) | " + " | ".join(f"**{_sx(fin.get(k), 2 if k == 'gpu' else 1)} с**" for k, _ in cols) + " |"]
+    if mid:
+        out.append("| средняя (20 признаков, 400 деревьев; отклонена) | " + " | ".join(f"{_sx(mid.get(k), 2 if k == 'gpu' else 1)} с" for k, _ in cols) + " |")
+    if sp:
+        out.append("| ускорение средней | " + " | ".join(f"×{_sx(sp.get(k), 2)}" for k, _ in cols) + " |")
+    return "\n".join(out)
+
+
+def rejected_table(fn: dict) -> str:
+    rj = fn.get("rejected") or {}
+    lro = rj.get("final_lro")
+    comb = ((fn.get("models") or {}).get("rows") or {}).get("combined") or {}
+    out = ["| Кандидат | Зачем | F1 MD val (3 seed) | F1 на новом районе (LRO) | Скорость | Решение |", "|---|---|---|---|---|---|",
+           f"| **итоговая LightGBM** | — | **{fmt(comb.get('val_f1_mean'), 'f3')}** | **{fmt(lro, 'f3')}** | "
+           f"{_sx((fn.get('speed_threads') or {}).get('final', {}).get('cpu8'))} с на CPU 8 потоков | принята |"]
+    lt = rj.get("light") or {}
+    if lt:
+        out.append(f"| лёгкая ({fmt(lt.get('n_features'), None)} признаков, {fmt(lt.get('n_trees'), None)} × {fmt(lt.get('num_leaves'), None)}) | "
+                   f"быстрее на CPU | {fmt(lt.get('val_f1_mean'), 'f3')} | {fmt(lt.get('lro_mean'), 'f3')} (нужно ≥ {fmt(lt.get('lro_rule'), 'f3')}) | "
+                   f"модель в ~3 раза быстрее | отклонена: хуже на новом районе |")
+    md = rj.get("mid") or {}
+    if md:
+        out.append(f"| средняя ({fmt(md.get('n_features'), None)} признаков, {fmt(md.get('n_trees'), None)} × {fmt(md.get('num_leaves'), None)}) | "
+                   f"быстрее на CPU без потери переноса | {fmt(md.get('val_f1_mean'), 'f3')} | {fmt(md.get('lro_mean'), 'f3')} | "
+                   f"×{_sx(md.get('speedup_cpu8'), 2)} на CPU 8 потоков (нужно ×{_sx(md.get('speedup_needed'), 1)}) | отклонена: почти не быстрее |")
+    z = rj.get("zfeat") or {}
+    if z:
+        rng = z.get("val_delta_range") or [None, None]
+        out.append(f"| признаки относительно воды своей сцены ({fmt(z.get('n_variants'), None)} вариантов) | лучше перенос | "
+                   f"{fmt(z.get('zs_val_mean'), 'f3')} ({z.get('zs_val_delta'):+.3f}; по вариантам {rng[0]:+.3f}…{rng[1]:+.3f}) | "
+                   f"{fmt(z.get('zs_lro_mean'), 'f3')} ({z.get('zs_lro_delta'):+.3f}) | признаки +25 % времени | отклонены: падение на val больше допуска 0,005 |"
+                   if z.get("zs_val_delta") is not None and rng[0] is not None else "| признаки относительно сцены | | | | | отклонены |")
+    return "\n".join(out)
+
+
+def _mmss(sec) -> str:
+    if sec is None:
+        return DASH
+    m, x = divmod(int(sec), 60)
+    return f"{m} мин {x:02d} с" if m else f"{x} с"
+
+
+def rehearsal_text(fn: dict) -> str:
+    r = fn.get("rehearsal") or {}
+    if not r.get("available"):
+        return DASH
+    hm = r.get("human_min") or [None, None]
+    return (f"Репетиция на «чужом» наборе: {fmt(r.get('n_scenes'), None)} сцен test-сплита MADOS, упакованных как архив "
+            f"организаторов (uint16 DN, свои маски, 147 test-чипов, спрятанная разметка). Первый валидный сабмит — через "
+            f"{fmt(r.get('first_submit_s'), None)} с машинного времени после распаковки (для человека по оценке "
+            f"{fmt(hm[0], None)}–{fmt(hm[1], None)} мин; в первой репетиции — {_mmss(r.get('first_submit_s_prev'))}). "
+            f"Private F1 «как есть» — {fmt(r.get('private_asis'), 'f3')}, после обучения на их train — "
+            f"{fmt(r.get('private_trained'), 'f3')} (сабмит на T+{fmt(r.get('trained_submit_min'), None)}). Разбор «как есть»: "
+            f"упаковка и адаптер вносят ±0,0003 F1; на размеченных пикселях без класса sea snot F1 "
+            f"{fmt(r.get('labelled_no_seasnot_f1'), 'f3')}; низкий F1 даёт метрика по всем пикселям при "
+            f"{_sx(r.get('unlabelled_pct'))} % неразмеченных (лучший порог ≈ {fmt(r.get('best_all_px_thr'), None)}, F1 "
+            f"{fmt(r.get('best_all_px_f1'), 'f3')}) и то, что у них sea snot размечен как негатив.")
+
+
+def robustness_text(fn: dict) -> str:
+    r = fn.get("robustness") or {}
+    if not r.get("available"):
+        return DASH
+    return (f"PASS {fmt(r.get('pass'), None)} из {fmt(r.get('n_checks'), None)}, WARN {fmt(r.get('warn'), None)}, "
+            f"FAIL {fmt(r.get('fail'), None)}")
 
 
 def derived(fn: dict) -> dict:
@@ -316,6 +395,8 @@ def derived(fn: dict) -> dict:
         parts.append(f"загрузка карты до {ui['load_s']:.2f} с".replace(".", ","))
     if ui.get("flyto_fps") is not None:
         parts.append(f"перелёт к району {ui['flyto_fps']:.0f} fps")
+    if ui.get("globe_fps") is not None:
+        parts.append(f"вращение глобуса {ui['globe_fps']:.0f} fps")
     if ui.get("drift_fps") is not None:
         parts.append(f"анимация дрейфа {ui['drift_fps']:.0f} fps")
     if ui.get("bundle_gzip_mb") is not None:
@@ -327,7 +408,9 @@ def derived(fn: dict) -> dict:
     return {"metrics_table": metrics_table, "models_table": models_table, "regions_table": regions_table,
             "live_table": "\n".join(lr), "l3_noise": noise_txt, "test_sentence": test_txt, "lro_text": lro_txt,
             "speed_block": speed_block, "ui_perf_text": ui_txt, "baselines_table": baselines_table(fn),
-            "l23_channels_table": l23_channels_table(fn)}
+            "l23_channels_table": l23_channels_table(fn), "threads_table": threads_table(fn),
+            "rejected_table": rejected_table(fn), "rehearsal_text": rehearsal_text(fn),
+            "robustness_text": robustness_text(fn)}
 
 
 def render(text: str, ctx: dict, missing: list) -> str:

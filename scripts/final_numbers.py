@@ -19,6 +19,11 @@ Sources (all optional; a missing source gives null, never an error):
   data/live/<region>/<date>/scene.json   live Sentinel-2 L2A scenes
   service/data/manifest.json (else service/demo/manifest.json)   regions, dates, detections on the map
   reports/ui_perf.md                     last non-empty line (UI speed measurement)
+  weights_exp/l31/speed.json | reports/l31_midsize.md       cold start by CPU threads, mid-size model (rejected)
+  weights_exp/l26/*.json | reports/l31_midsize.md           LRO of the light models (rejected)
+  reports/l33_scene_relative.json        scene-relative features (rejected)
+  reports/robustness.md                  PASS / WARN / FAIL of the robustness checks
+  reports/rehearsal2.md, reports/l35_asis_check.{md,json}   rehearsal of the first hour on an unfamiliar dataset
 
 The file is generated; do not edit it by hand.
 """
@@ -366,6 +371,153 @@ def collect_l23() -> dict:
             "chips": (d.get("speed_setup") or {}).get("chips"), "source": "reports/l23_channels_speed.json"}
 
 
+def _read(rel: str) -> str:
+    p = ROOT / rel
+    try:
+        return p.read_text(encoding="utf-8") if p.exists() else ""
+    except Exception:  # noqa: BLE001
+        return ""
+
+
+def _fl(s):
+    try:
+        return float(str(s).replace(",", "."))
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def collect_speed_threads() -> dict:
+    """Cold start of inference.py (300 chips) by CPU threads (affinity mask) and GPU, final vs mid-size model.
+    Source: weights_exp/l31/speed.json (local); fallback: the table in reports/l31_midsize.md (in git)."""
+    res = {"available": False, "chips": None, "final": None, "mid": None, "speedup_mid": None, "source": None,
+           "method": "CPU N потоков = маска affinity процесса на первые N логических CPU; холодный старт, медиана 3 запусков"}
+    d = _load_json(ROOT / "weights_exp" / "l31" / "speed.json")
+    if isinstance(d, dict) and isinstance(d.get("summary"), dict):
+        s = d["summary"]
+
+        def pick(m):
+            return {k: _r((v or {}).get("median_s"), 2) for k, v in (s.get(m) or {}).items()}
+        res.update({"available": True, "chips": d.get("chips"), "final": pick("final"), "mid": pick("k20_t400_l63"),
+                    "speedup_mid": {k: _r(v, 3) for k, v in (d.get("speedup_final_over_mid") or {}).items()},
+                    "source": "weights_exp/l31/speed.json"})
+        return res
+    txt = _read("reports/l31_midsize.md")
+    rows = {}
+    for key, pat in (("final", r"^\|\s*итоговая\s*\|(.+)$"), ("mid", r"^\|\s*k20_t400_l63\s*\|(.+)$"),
+                     ("speedup", r"^\|\s*ускорение\s*\|(.+)$")):
+        for m in re.finditer(pat, txt, re.M):
+            cells = [c.strip() for c in m.group(1).split("|") if c.strip()]
+            if len(cells) == 4 and ("с" in cells[0] or key == "speedup"):
+                vals = [_fl(re.search(r"(\d+(?:[.,]\d+)?)", c).group(1)) if re.search(r"\d", c) else None for c in cells]
+                rows[key] = dict(zip(("cpu4", "cpu8", "cpu20", "gpu"), vals))
+                break
+    if rows.get("final"):
+        res.update({"available": True, "chips": 300, "final": rows.get("final"), "mid": rows.get("mid"),
+                    "speedup_mid": rows.get("speedup"), "source": "reports/l31_midsize.md"})
+    return res
+
+
+def collect_rejected(l23: dict, audit: dict) -> dict:
+    """Candidate models that did not pass the rules: light (L23/L26), mid-size (L31), scene-relative features (L33)."""
+    final_lro = (audit.get("lro") or {}).get("mean_f1")
+    out = {"final_lro": final_lro, "light": None, "mid": None, "zfeat": None}
+    # light: val from l23, LRO from weights_exp/l26 (fallback: text of reports/l31_midsize.md)
+    lt = (l23 or {}).get("light") or {}
+    lro_light = None
+    d = _load_json(ROOT / "weights_exp" / "l26" / "light_lro_alternatives.json")
+    if isinstance(d, dict):
+        lro_light = ((d.get("summary") or {}).get("light_k20_t200_l31") or {}).get("mean")
+    if lro_light is None:
+        m = re.search(r"k20_t200_l31\s+(0\.\d+)", _read("reports/l31_midsize.md"))
+        lro_light = _fl(m.group(1)) if m else None
+    if lt or lro_light is not None:
+        out["light"] = {"name": lt.get("name") or "light_k20_t200_l31", "n_features": lt.get("n_features"),
+                        "n_trees": lt.get("n_trees"), "num_leaves": lt.get("num_leaves"),
+                        "val_f1_mean": lt.get("f1_mean"), "lro_mean": _r(lro_light, 3),
+                        "lro_rule": _r(final_lro - 0.01, 4) if final_lro is not None else None,
+                        "cold_s_300": lt.get("cold_s_300"), "final_cold_s_300": lt.get("final_cold_s_300"),
+                        "decision": "отклонена: хуже переносится на новый район"}
+    # mid-size: l31
+    sp = collect_speed_threads()
+    mid_val, mid_lro = None, None
+    txt = _read("reports/l31_midsize.md")
+    m = re.search(r"\|\s*k20_t400_l63\s*\|[^|]*\|[^|]*\|[^|]*\|\s*\*\*([\d.]+)\s*±\s*([\d.]+)\*\*[^|]*\|[^|]*\|\s*\*\*([\d.]+)\s*±", txt)
+    if m:
+        mid_val, mid_lro = _fl(m.group(1)), _fl(m.group(3))
+    if d is not None and isinstance(d, dict):
+        mid_lro = ((d.get("summary") or {}).get("light_k20_t400_l63") or {}).get("mean", mid_lro)
+    if sp.get("available") or mid_val is not None:
+        out["mid"] = {"name": "k20_t400_l63", "n_features": 20, "n_trees": 400, "num_leaves": 63,
+                      "val_f1_mean": _r(mid_val, 4), "lro_mean": _r(mid_lro, 4),
+                      "speedup_cpu8": _r((sp.get("speedup_mid") or {}).get("cpu8"), 2),
+                      "speedup_gpu": _r((sp.get("speedup_mid") or {}).get("gpu"), 2),
+                      "speedup_needed": 1.3,
+                      "decision": "отклонена: почти не быстрее на CPU"}
+    # scene-relative z-features: l33
+    z = _load_json(ROOT / "reports" / "l33_scene_relative.json")
+    if isinstance(z, dict) and isinstance(z.get("summary"), dict):
+        s = z["summary"]
+        base, zs = s.get("base") or {}, s.get("zs") or {}
+        deltas_val = [(v.get("val_mean") - base.get("val_mean")) for k, v in s.items()
+                      if k != "base" and isinstance(v, dict) and v.get("val_mean") is not None and base.get("val_mean") is not None]
+        out["zfeat"] = {"n_variants": len(deltas_val) or None,
+                        "zs_lro_delta": _r(zs.get("lro_delta_vs_base"), 3),
+                        "zs_val_delta": _r((zs.get("val_mean") or 0) - (base.get("val_mean") or 0), 3) if zs else None,
+                        "zs_lro_mean": _r(zs.get("lro_mean"), 4), "zs_val_mean": _r(zs.get("val_mean"), 4),
+                        "val_delta_range": [_r(min(deltas_val), 3), _r(max(deltas_val), 3)] if deltas_val else None,
+                        "decision": "отклонены: на знакомых районах качество падает"}
+    return out
+
+
+def collect_robustness() -> dict:
+    txt = _read("reports/robustness.md")
+    m = re.search(r"Итог:\s*(\d+)\s*провер\w*\s*—\s*PASS\s*(\d+),\s*WARN\s*(\d+),\s*FAIL\s*(\d+)", txt)
+    if not m:
+        return {"available": False}
+    return {"available": True, "n_checks": int(m.group(1)), "pass": int(m.group(2)), "warn": int(m.group(3)),
+            "fail": int(m.group(4)), "source": "reports/robustness.md"}
+
+
+def collect_rehearsal() -> dict:
+    """Dress rehearsal of the first hour on an unfamiliar dataset (27 MADOS test scenes packed like an organiser
+    archive): reports/rehearsal2.md, reports/l35_asis_check.{md,json}."""
+    t2, t35 = _read("reports/rehearsal2.md"), _read("reports/l35_asis_check.md")
+    res = {"available": bool(t2), "first_submit_s": None, "first_submit_s_prev": None, "human_min": None,
+           "private_asis": None, "private_trained": None, "private_trained_prev": None, "trained_submit_min": None,
+           "labelled_no_seasnot_f1": None, "labelled_f1_asis": None, "best_all_px_f1": None, "best_all_px_thr": None,
+           "unlabelled_pct": None, "n_test_chips": None, "n_scenes": None}
+    m = re.search(r"первого валидного сабмита:\s*(\d+)\s*с\b.*?\(L30:\s*(\d+)\s*мин\s*(\d+)\s*с\)", t2)
+    if m:
+        res["first_submit_s"] = int(m.group(1))
+        res["first_submit_s_prev"] = int(m.group(2)) * 60 + int(m.group(3))
+    m = re.search(r"человека по оценке\s*(\d+)[–-](\d+)\s*мин", t2)
+    if m:
+        res["human_min"] = [int(m.group(1)), int(m.group(2))]
+    m = re.search(r"Как есть / после обучения:\s*([\d.]+)\s*→\s*([\d.]+)\*\*\s*\(L30:\s*([\d.]+)\s*→\s*([\d.]+)\)", t2)
+    if m:
+        res["private_asis"], res["private_trained"] = _fl(m.group(1)), _fl(m.group(2))
+        res["private_trained_prev"] = _fl(m.group(4))
+    m = re.search(r"\*\*(\d+):(\d+)\*\*\s*\|\s*`predict_org", t2)
+    if m:
+        res["trained_submit_min"] = f"{m.group(1)}:{m.group(2)}"
+    m = re.search(r"Это\s*(\d+)\s*сцен", t2)
+    res["n_scenes"] = int(m.group(1)) if m else None
+    m = re.search(r"без пикселей sea snot:\*\*[^=]*=[^=]*=\s*\*\*([\d.]+)\*\*", t35, re.I)
+    if m:
+        res["labelled_no_seasnot_f1"] = _fl(m.group(1))
+    m = re.search(r"Не размечено\s*([\d.]+)\s*%", t35)
+    res["unlabelled_pct"] = _fl(m.group(1)) if m else None
+    j = _load_json(ROOT / "reports" / "l35_asis_check.json")
+    if isinstance(j, dict):
+        res["n_test_chips"] = j.get("n_chips")
+        b = ((j.get("best") or {}).get("chain") or {}).get("all")
+        if isinstance(b, list) and len(b) == 2:
+            res["best_all_px_thr"], res["best_all_px_f1"] = b[0], _r((b[1] or {}).get("f1"), 3)
+        lab = (((j.get("metrics") or {}).get("chain") or {}).get("lab") or {}).get(str(j.get("threshold_meta")))
+        res["labelled_f1_asis"] = _r((lab or {}).get("f1"), 3)
+    return res
+
+
 def collect_test_status(l3: dict) -> dict:
     done = bool(l3.get("test"))
     return {"computed": done,
@@ -533,25 +685,33 @@ def _count_zones(root, region, date, model):
 
 
 def collect_ui_perf() -> dict:
+    """reports/ui_perf.md: the last measurement = the last non-empty line; numbers missing there are looked up
+    in the line before it (a table row followed by its prose summary)."""
     p = ROOT / "reports" / "ui_perf.md"
     if not p.exists():
         return {"available": False, "last_line": None}
     lines = [ln.strip() for ln in p.read_text(encoding="utf-8").splitlines() if ln.strip()]
     last = lines[-1] if lines else None
     res = {"available": True, "last_line": last, "load_s": None, "flyto_fps": None, "drift_fps": None,
-           "bundle_gzip_mb": None, "console_errors": None}
-    if last:
-        num = r"(\d+(?:[.,]\d+)?)"
-        for key, pat in (("load_s", rf"load\s+{num}(?:\s*[–-]\s*{num})?\s*с"),
-                         ("flyto_fps", rf"flyTo\s+{num}(?:\s*[–-]\s*{num})?\s*fps"),
-                         ("drift_fps", rf"дрейф\s+{num}\s*fps"),
-                         ("bundle_gzip_mb", rf"gzip\s+{num}\s*МБ")):
-            m = re.search(pat, last)
+           "globe_fps": None, "tour_s": None, "bundle_gzip_mb": None, "console_errors": None}
+    num = r"(\d+(?:[.,]\d+)?)"
+    pats = (("load_s", rf"load\s+{num}(?:\s*[–-]\s*{num})?\s*с"),
+            ("flyto_fps", rf"(?:flyTo|облёт)\s+{num}(?:\s*[–-]\s*{num})?\s*fps"),
+            ("drift_fps", rf"дрейф\s+{num}\s*fps"),
+            ("globe_fps", rf"вращение\s+{num}\s*fps"),
+            ("tour_s", rf"тур\s+{num}\s*с"),
+            ("bundle_gzip_mb", rf"gzip\s+{num}\s*МБ"))
+    for ln in reversed(lines[-2:]):
+        for key, pat in pats:
+            if res[key] is not None:
+                continue
+            m = re.search(pat, ln, re.I)
             if m:
                 vals = [float(g.replace(",", ".")) for g in m.groups() if g]
                 res[key] = vals[-1] if key == "load_s" else vals[0]  # worst load, lowest fps
-        m = re.search(r"Ошибок консоли\s+(\d+)", last)
-        res["console_errors"] = int(m.group(1)) if m else None
+        if res["console_errors"] is None:
+            m = re.search(r"ошибок\s+консоли\s+(\d+)", ln, re.I)
+            res["console_errors"] = int(m.group(1)) if m else None
     return res
 
 
@@ -600,6 +760,10 @@ def main(argv=None) -> int:
     fn["test"] = collect_test_status(fn["l3_lgbm"])
     fn["baselines"] = collect_baselines()
     fn["l23"] = collect_l23()
+    fn["speed_threads"] = collect_speed_threads()
+    fn["rejected"] = collect_rejected(fn["l23"], fn["metric_audit"])
+    fn["robustness"] = collect_robustness()
+    fn["rehearsal"] = collect_rehearsal()
     out = Path(a.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
@@ -632,6 +796,14 @@ def main(argv=None) -> int:
         print(f"  l23: subsets={len(fn['l23']['subsets'] or [])} light F1={lt.get('f1_mean')} cold={lt.get('cold_s_300')}s "
               f"(final {lt.get('final_cold_s_300')}s)")
         print(f"  speed: {fn['speed']['summary']}")
+        st = fn["speed_threads"]
+        print(f"  speed by threads ({st.get('source')}): final={st.get('final')} mid={st.get('mid')}")
+        rj = fn["rejected"]
+        print(f"  rejected: light={rj.get('light')} | mid={rj.get('mid')} | zfeat={rj.get('zfeat')}")
+        print(f"  robustness: {fn['robustness']} | rehearsal: {fn['rehearsal']}")
+        u = fn["ui_perf"]
+        print(f"  ui: load={u.get('load_s')} flyto={u.get('flyto_fps')} globe={u.get('globe_fps')} "
+              f"tour={u.get('tour_s')} gzip={u.get('bundle_gzip_mb')} err={u.get('console_errors')}")
         missing = [k for k, v in fn["artifacts"].items() if v is False]
         if missing:
             print(f"  not yet present: {', '.join(missing)}")

@@ -2,7 +2,7 @@ r"""Build the pitch materials from reports/final_numbers.json (the only source o
 
   reports/deck.pptx        10 slides, 16:9, dark theme of the UI, coral accent; speaker notes = speech of the slide
   docs/SPEECH.md           4-minute speech word for word, timing per slide, numbers to memorise, hard questions
-  reports/qa.md            30 jury questions with short honest answers
+  reports/qa.md            31 jury questions with short honest answers
   reports/deck_preview/    PNG per slide (with --preview, LibreOffice)
 
 Usage (from repo root):
@@ -75,6 +75,18 @@ def num(v, nd=3):
     if nd == 0:
         return f"{int(round(x)):,}".replace(",", "\u00a0")
     return f"{x:.{nd}f}".replace(".", ",")
+
+
+def plural(n, one, few, many):
+    try:
+        n = abs(int(n))
+    except (TypeError, ValueError):
+        return many
+    if n % 10 == 1 and n % 100 != 11:
+        return one
+    if 2 <= n % 10 <= 4 and not 12 <= n % 100 <= 14:
+        return few
+    return many
 
 
 def pct(v):
@@ -159,7 +171,24 @@ def numbers(fn: dict) -> dict:
         "warm_cpu": num(g(fn, "speed.raw.warm.cpu.e2e_chips_per_s"), 1),
         "cpu_name": cpu_name, "gpu_name": gpu_name,
         "ui_load": num(g(fn, "ui_perf.load_s"), 1),
+        # speed by CPU threads (affinity), final model
+        "gpu_s": num(g(fn, "speed_threads.final.gpu"), 1), "cpu20_s": num(g(fn, "speed_threads.final.cpu20"), 1),
+        "cpu8_s": num(g(fn, "speed_threads.final.cpu8"), 1), "cpu4_s": num(g(fn, "speed_threads.final.cpu4"), 1),
+        "mid_speedup8": num(g(fn, "rejected.mid.speedup_cpu8"), 2),
+        "light_lro": num(g(fn, "rejected.light.lro_mean")), "light_f1": num(g(fn, "rejected.light.val_f1_mean")),
+        "z_lro": num(g(fn, "rejected.zfeat.zs_lro_delta")), "z_val": num(g(fn, "rejected.zfeat.zs_val_delta")),
+        # confirmed detections over all dates of the service
+        "conf_total": num(g(fn, "service.n_confirmed_total"), 0),
+        "conf_dates": num(g(fn, "service.n_dates_with_confirmed"), 0),
+        # robustness, rehearsal
+        "rob_pass": num(g(fn, "robustness.pass"), 0), "rob_n": num(g(fn, "robustness.n_checks"), 0),
+        "rob_fail": num(g(fn, "robustness.fail"), 0),
+        "reh_first_s": num(g(fn, "rehearsal.first_submit_s"), 0),
+        "reh_asis": num(g(fn, "rehearsal.private_asis")), "reh_trained": num(g(fn, "rehearsal.private_trained")),
+        "reh_lab": num(g(fn, "rehearsal.labelled_no_seasnot_f1")),
+        "reh_human": "–".join(str(x) for x in (g(fn, "rehearsal.human_min", []) or [])) or DASH,
     }
+    N["demo_regions_w"] = f"{N['demo_regions']} {plural(g(fn, 'service_demo.n_regions'), 'района', 'районов', 'районов')}"
     if N["test_computed"]:
         N["test_line"] = f"F1 на test MARIDA (посчитан один раз): {N['test_f1']}."
         N["test_speech"] = f"Test MARIDA мы открыли один раз, на финальной модели: F1 {N['test_f1']}."
@@ -206,16 +235,16 @@ SPEECH = [
     (7, "2:20–2:45",
      "[Слои → Приоритет обследования → клик по зоне №1] Зоны — ответ на вопрос «куда плыть». Каждая объясняет, почему "
      "она первая: пиксели с признаками, умноженные на уверенность и на повторяемость по датам. Двойное кольцо — "
-     "уверенная находка: объект видят две разные модели в радиусе {agr_r} метров, таких {conf_obj}. Это согласие "
+     "уверенная находка: пятно видят две разные модели в радиусе {agr_r} метров, таких {conf_total} по всем датам. Это согласие "
      "моделей, не проверка на месте."),
     (8, "2:45–3:05",
      "[Слои → Дрейф 0→72 ч → ▶] Дрейф на {drift_h} часа: OpenDrift, течения HYCOM, ветер GFS; сиреневое облако — "
      "разброс ветрового сноса. Это демонстрация, мы её не валидировали. [Alt+Tab в презентацию, набрать 9 и Enter]"),
     (9, "3:05–3:35",
-     "Скорость. {chips} чипов с холодного старта — {cuda_s} секунды на GPU и {cpu_s} на CPU, результат бит в бит тот же, "
-     "что до ускорения. Ваш датасет подключаем тремя командами: разбор архива с отчётом о сомнениях, конвертация, "
-     "обучение. Бустинг обучается за {train_s} секунды. Если каналов меньше, например только RGB, — переобучаем на "
-     "доступных, потери мы заранее измерили."),
+     "Скорость. {chips} чипов с холодного старта — {gpu_s} секунды на GPU; на процессоре {cpu20_s} секунды на 20 потоках "
+     "и {cpu8_s} на 8 — это честное ограничение: ускорения без потери качества на новом районе мы не нашли. "
+     "Ваш датасет подключаем тремя командами. На репетиции с незнакомым архивом первый сабмит ушёл через "
+     "{reh_first_s} секунд после распаковки, а обучение на их train подняло скрытый F1 с {reh_asis} до {reh_trained}."),
     (10, "3:35–4:00",
      "Итог. Модель находит {rec_pct} мусора на новых снимках и держит F1 {lro} на невиданном регионе. Карта говорит, "
      "куда плыть, и объясняет почему. Дальше — разметка на L2A, больше дат на район и результаты обследований "
@@ -484,8 +513,8 @@ def build(fn: dict, only: int | None = None) -> Presentation:
                "Зоны обследования")
         picture(s, M, TOP - Inches(0.15), Inches(5.6), Inches(4.75), ["21_zone_card.png"],
                 "Зона №1: «почему это место первое»", crop=(336, 70, 1136, 900), left=True)
-        big_number(s, Inches(5.5), TOP + Inches(0.1), Inches(7.2), N["conf_obj"],
-                   f"объектов видят обе модели в радиусе {N['agr_r']} м\n({N['conf_scenes']} из {N['agr_scenes']} снимков)\n"
+        big_number(s, Inches(5.5), TOP + Inches(0.1), Inches(7.2), N["conf_total"],
+                   f"пятен видят обе модели в радиусе {N['agr_r']} м\n(на {N['conf_dates']} из {N['n_dates']} дат)\n"
                    "Это согласие моделей, не проверка на месте", size=88)
     slides.append(s7)
 
@@ -500,10 +529,11 @@ def build(fn: dict, only: int | None = None) -> Presentation:
     slides.append(s8)
 
     def s9(s, n, t):
-        header(s, n, t, f"{N['chips']} чипов с холодного старта — {N['cuda_s']} с; новый датасет — 3 команды",
+        header(s, n, t, f"{N['chips']} чипов — {N['gpu_s']} с на GPU; первый сабмит на чужих данных — {N['reh_first_s']} с",
                "Скорость и готовность")
-        big_number(s, M, TOP + Inches(0.2), Inches(4.2), f"{N['cuda_s']} с",
-                   f"GPU {N['gpu_name']}\nCPU: {N['cpu_s']} с ({N['cpu_name']})\nвыход бит в бит")
+        big_number(s, M, TOP + Inches(0.2), Inches(4.2), f"{N['gpu_s']} с",
+                   f"GPU {N['gpu_name']}, холодный старт\nCPU: {N['cpu20_s']} с / 20 потоков,\n"
+                   f"{N['cpu8_s']} с / 8, {N['cpu4_s']} с / 4")
         x0 = Inches(5.2)
         text(s, x0, TOP, Inches(7.5), Inches(0.45), "Данные организаторов → модель", size=20, bold=True, color=MUTED)
         cmds = [("1", "ingest.py архив.zip", "отчёт «Сомнения»"),
@@ -518,6 +548,9 @@ def build(fn: dict, only: int | None = None) -> Presentation:
                  anchor=MSO_ANCHOR.MIDDLE)
             text(s, x0 + Inches(5.1), yy, Inches(2.3), Inches(0.8), d, size=18, color=MUTED,
                  anchor=MSO_ANCHOR.MIDDLE)
+        text(s, x0, TOP + Inches(3.5), Inches(7.5), Inches(0.8),
+             f"Репетиция: скрытый F1 {N['reh_asis']} «как есть» → {N['reh_trained']} после обучения на их train",
+             size=18, color=MUTED)
     slides.append(s9)
 
     def s10(s, n, t):
@@ -528,7 +561,7 @@ def build(fn: dict, only: int | None = None) -> Presentation:
         text(s, M + half + Inches(0.4), TOP, half, Inches(0.45), "Дальше", size=20, bold=True, color=MUTED)
         left = [(N["lro"], "F1 на новом районе"),
                 (f"{N['n_regions']}", "районов на живой карте"),
-                (f"{N['cuda_s']} с", f"на {N['chips']} чипов")]
+                (f"{N['gpu_s']} с", f"{N['chips']} чипов на GPU; CPU 8 потоков — {N['cpu8_s']} с")]
         right = ["Разметка на снимках L2A",
                  "Больше дат на район",
                  "Итоги обследований → в обучение"]
@@ -611,10 +644,11 @@ def speech_md(N: dict) -> str:
         f"| {N['rec_pct']} / {N['prec_pct']} | полнота / точность на val | `l3_lgbm.val.recall_md`, `precision_md` |",
         f"| {N['ci_lo']}–{N['ci_hi']} | 95 % интервал F1 по сценам val | `metric_audit.scene_bootstrap_ci95` |",
         f"| {N['lro']} | F1 на районе, убранном из обучения (среднее по {N['lro_n']}) | `metric_audit.lro.mean_f1` |",
-        f"| {N['cuda_s']} с / {N['cpu_s']} с | {N['chips']} чипов с холодного старта, GPU / CPU | `speed.raw.cold_s` |",
+        f"| {N['gpu_s']} / {N['cpu20_s']} / {N['cpu8_s']} / {N['cpu4_s']} с | {N['chips']} чипов с холодного старта: GPU / CPU 20 / 8 / 4 потока | `speed_threads.final` |",
+        f"| {N['reh_first_s']} с; {N['reh_asis']} → {N['reh_trained']} | репетиция: первый сабмит; скрытый F1 «как есть» → после обучения | `rehearsal` |",
         f"| {N['n_regions']} / {N['n_dates']} | районов / дат на карте | `service.n_regions`, `n_dates` |",
-        f"| {N['conf_obj']} | объектов, которые видят обе модели в радиусе {N['agr_r']} м | "
-        "`agreement.confirmed_objects` |",
+        f"| {N['conf_total']} | пятен, которые видят обе модели в радиусе {N['agr_r']} м (все даты) | "
+        "`service.n_confirmed_total` |",
         "",
         f"Про test: {N['test_line']}",
         "",
@@ -709,7 +743,7 @@ def qa_items(N: dict) -> list:
      f"F1 val {N['live_f1']}) — второй слой и подтверждение."),
     ("Две модели согласны — значит, это мусор?",
      f"Нет. Согласие — не проверка на месте: обе модели могут ошибаться одинаково, например на фронте мутной воды. "
-     f"Уверенных объектов {N['conf_obj']} в {N['conf_scenes']} из {N['agr_scenes']} снимков; по пикселям модели "
+     f"Уверенных пятен {N['conf_total']} на {N['conf_dates']} из {N['n_dates']} дат; по пикселям модели "
      f"согласуются слабо (медианный ρ Спирмена {N['spearman']}). Согласие только поднимает находку в очереди на проверку."),
     ("Какие ложные срабатывания главные?",
      "Природная органика (водоросли, Sargassum), суда и их следы, пена и прибой, мутные речные шлейфы, кромки облаков, "
@@ -726,7 +760,7 @@ def qa_items(N: dict) -> list:
     ("Что будет на облачном снимке?",
      "Облака и тени исключаются маской, такие ячейки серые «нет данных». Облачность видна в KPI и в observed_frac; "
      "для района лучше взять другую дату — календарь показывает, какие даты надёжны."),
-    ("Что такое «проверка человеком» и почему дообучение не принято?",
+    ("Что такое «проверка человеком» и когда дообучение меняет модель?",
      "Во вкладке «Проверка» оператор помечает находки клавишами 1–6, кнопка «Дообучить» переобучает LightGBM с его "
      "метками и сравнивает F1 на val MARIDA до и после. Правило то же: прирост ≥ 0,01. Пока прирост меньше — "
      "решение «не принято», веса не подменяются: метки на L2A немного меняют val на ACOLITE."),
@@ -741,13 +775,14 @@ def qa_items(N: dict) -> list:
      "Поэтому у берега дрейф показывает только направление, а не траекторию."),
     # --- скорость и данные организаторов
     ("Насколько это быстро?",
-     f"{N['chips']} чипов 256×256 с холодного старта: {N['cuda_s']} с на GPU {N['gpu_name']}, {N['cpu_s']} с на CPU "
-     f"({N['cpu_name']}); до ускорения было {N['base_cuda_s']} с. Выход бит в бит тот же (тест эквивалентности). "
-     f"Карта грузится за {N['ui_load']} с."),
+     f"{N['chips']} чипов 256×256 с холодного старта: {N['gpu_s']} с на GPU {N['gpu_name']}, {N['cpu20_s']} с на CPU "
+     f"({N['cpu_name']}, 20 потоков); до ускорения на GPU было {N['base_cuda_s']} с. Выход бит в бит тот же "
+     f"(тест эквивалентности). Карта грузится за {N['ui_load']} с."),
     ("А на чужом железе без NVIDIA?",
-     "CPU-путь работает без CUDA и выбирается автоматически. Время почти пропорционально числу ядер: на ноутбуке с "
-     "4–8 потоками будет в разы дольше, таблица по потокам — docs/CRITERIA.md и reports/speed.md. Если время "
-     "критично, есть облегчённая модель с меньшим числом деревьев без потери F1 на val (reports/l23_channels_speed.md)."),
+     f"CPU-путь работает без CUDA и выбирается автоматически. Время почти пропорционально числу потоков: "
+     f"{N['cpu8_s']} с на 8 потоках и {N['cpu4_s']} с на 4 — это наше честное ограничение. Лёгкая модель в ~3 раза быстрее "
+     f"при том же F1 на val ({N['light_f1']}), но на новом районе хуже ({N['light_lro']} против {N['lro']}), поэтому не "
+     f"принята; средняя почти не быстрее (×{N['mid_speedup8']} на 8 потоках): время уходит на предсказание леса."),
     ("Что если у вас будут только RGB-каналы?",
      "Модель переобучается на доступных каналах за секунды. Без B1 потерь нет, 10 м + SWIR — почти без потерь, "
      "RGB+NIR — заметно хуже, только RGB — хуже всего: без ИК нет FDI и контраста пятна в B8. Оценки по val и "
@@ -757,6 +792,12 @@ def qa_items(N: dict) -> list:
      "то же с --convert (каналы, масштаб, классы → наш формат), train_lgbm_ingest.py (обучение, порог по вашему val). "
      "Проверено тестами на трёх искусственных наборах разных форматов; пересечения с MARIDA/MADOS проверяет provenance_check.py."),
     # --- лицензии и воспроизводимость
+    ("Что показала репетиция на незнакомом датасете?",
+     f"Архив, упакованный как у организаторов: первый валидный сабмит через {N['reh_first_s']} с машинного времени после "
+     f"распаковки (человеку {N['reh_human']} мин). Скрытый F1 «как есть» {N['reh_asis']}, после обучения на их train — "
+     f"{N['reh_trained']}. Разобрали, почему «как есть» низкий: инструменты не искажают данные, на размеченных пикселях без "
+     f"класса sea snot F1 {N['reh_lab']}; всё съедают метрика по неразмеченным пикселям и другое определение негатива. "
+     "Вывод: порог подбираем под их метрику, их «прочее» добавляем в негативы."),
     ("Какие лицензии у данных и моделей?",
      "MARIDA и MADOS — CC BY 4.0; marinedebrisdetector — MIT; снимки Sentinel-2 — открытая лицензия Copernicus "
      "(«Contains modified Copernicus Sentinel data»); подложки CARTO/Esri и OpenStreetMap — с атрибуцией на карте. "
@@ -765,7 +806,7 @@ def qa_items(N: dict) -> list:
      "powershell -ExecutionPolicy Bypass -File run.ps1: создаёт окружение, поднимает сервис и открывает карту. "
      "Инференс: python inference.py --data-dir <папка> --output <папка>. Числа README, отчёта и этой деки "
      "генерируются скриптами из reports/final_numbers.json; seed фиксированы, веса LightGBM лежат в репозитории. "
-     f"В чистом клоне — демо-набор на {N['demo_regions']} района; полный слой карты подключается через -DataRoot."),
+     f"В чистом клоне — демо-набор из {N['demo_regions_w']}; полный слой карты подключается через -DataRoot."),
 ]
 
 
