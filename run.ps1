@@ -1,5 +1,6 @@
 ﻿# Macroplastic: one-command start (Windows PowerShell 5.1+).
 #   powershell -ExecutionPolicy Bypass -File run.ps1 [-Port 8000] [-DataRoot service\demo] [-NoBrowser] [-Cpu]
+# Case pipeline (L65): run.ps1 -Case prepare|eval|export|all [-Offline] [-Force]  -> scripts\case\run_all.py (no service start).
 # -Cpu: install requirements-cpu.txt (PyTorch CPU wheels, no CUDA download). Without -Cpu the CUDA build
 #       (requirements.txt) is installed only if nvidia-smi is found; otherwise the CPU file is used automatically.
 # 1) .venv (py -3.12) + requirements(-cpu).txt if missing; 2) frontend build if service\static\index.html is missing;
@@ -8,7 +9,10 @@ param(
     [int]$Port = 8000,
     [string]$DataRoot = "",
     [switch]$NoBrowser,
-    [switch]$Cpu
+    [switch]$Cpu,
+    [ValidateSet("prepare", "eval", "export", "all")][string]$Case = "",
+    [switch]$Offline,
+    [switch]$Force
 )
 
 $ErrorActionPreference = "Stop"
@@ -51,6 +55,17 @@ if (-not (Test-Path $Py)) {
     }
 }
 Say "Python: $Py"
+
+# ---------------------------------------------------------------- 1b. Case pipeline (only with -Case)
+if ($Case) {
+    $env:CUDA_VISIBLE_DEVICES = ""
+    $caseArgs = @((Join-Path $Root "scripts\case\run_all.py"), $Case)
+    if ($Offline) { $caseArgs += "--offline" }
+    if ($Force) { $caseArgs += "--force" }
+    Say "Кейс: run_all.py $Case $(if ($Offline) {'--offline'}) $(if ($Force) {'--force'})"
+    & $Py @caseArgs
+    exit $LASTEXITCODE
+}
 
 # ---------------------------------------------------------------- 2. Frontend build
 $IndexHtml = Join-Path $Root "service\static\index.html"

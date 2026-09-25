@@ -76,16 +76,16 @@ drift_shift_km = (скорость течения + windage × ветер) × |d
 
 | event_id | источник | lat, lon | наблюдение UTC | время известно | миссия / уровень | item_id | dt, ч | облачн., % | тайл | сдвиг typ, км | допуск, км | accept с дрейфом |
 |---|---|---|---|---|---|---|---:|---:|---|---:|---:|---|
-| S3:HE460_MarLitter_transect01 | S3_SE_NORTH_SEA | 54.238, 7.920 | 2016-04-08 16:38 | да | S2A / L2A (planetary-computer) | S2A_MSIL2A_20160408T104022_R008_T32UMF_20210211T022918 | -6.0 | 36.7 | 32UMF | 4.3 | 3.0 | нет |
+| S4:DOORS3:T33 | S4_BLACK_SEA_DOORS3 | 43.356, 29.215 | 2024-06-18 12:00 | нет | L9 / L2SP (planetary-computer) | LC09_L2SP_180030_20240618_02_T1 | -3.3 | 0.0 | 180/030 | 11.0 | 3.0 | нет |
 | S4:DOORS3:T1 | S4_BLACK_SEA_DOORS3 | 43.609, 29.623 | 2024-06-02 12:00 | нет | S2A / L2A (earth-search) | S2A_35TQJ_20240602_0_L2A | -3.0 | 0.0 | 35TQJ | 10.8 | 3.0 | нет |
 | S4:DOORS3:T2 | S4_BLACK_SEA_DOORS3 | 43.551, 29.831 | 2024-06-02 12:00 | нет | S2A / L2A (earth-search) | S2A_35TQJ_20240602_0_L2A | -3.0 | 0.0 | 35TQJ | 10.8 | 3.0 | нет |
-| S4:DOORS3:T33 | S4_BLACK_SEA_DOORS3 | 43.356, 29.215 | 2024-06-18 12:00 | нет | L9 / L2SP (planetary-computer) | LC09_L2SP_180030_20240618_02_T1 | -3.3 | 0.0 | 180/030 | 11.0 | 3.0 | нет |
+| S3:HE460_MarLitter_transect01 | S3_SE_NORTH_SEA | 54.238, 7.920 | 2016-04-08 16:38 | да | S2A / L2A (planetary-computer) | S2A_MSIL2A_20160408T104022_R008_T32UMF_20210211T022918 | -6.0 | 36.7 | 32UMF | 4.3 | 3.0 | нет |
 | S4:DOORS3:T30 | S4_BLACK_SEA_DOORS3 | 42.519, 31.509 | 2024-06-17 12:00 | нет | S2B / L1C (earth-search) | S2B_36TUN_20240617_0_L1C | -3.0 | 1.7 | 36TUN | 10.8 | 3.0 | нет |
 | S4:DOORS3:T31 | S4_BLACK_SEA_DOORS3 | 42.492, 31.264 | 2024-06-17 12:00 | нет | S2B / L1C (earth-search) | S2B_36TUN_20240617_0_L1C | -3.0 | 1.7 | 36TUN | 10.8 | 3.0 | нет |
 | S4:DOORS3:T32 | S4_BLACK_SEA_DOORS3 | 42.465, 30.957 | 2024-06-17 12:00 | нет | S2B / L1C (earth-search) | S2B_36TUN_20240617_0_L1C | -3.0 | 1.7 | 36TUN | 10.8 | 3.0 | нет |
 | S3:HE460_MarLitter_transect01 | S3_SE_NORTH_SEA | 54.238, 7.920 | 2016-04-08 16:38 | да | L8 / L2SP (planetary-computer) | LC08_L2SP_197022_20160408_02_T1 | -6.2 | 42.5 | 197/022 | 4.5 | 3.0 | нет |
 | S4:DOORS3:T1 | S4_BLACK_SEA_DOORS3 | 43.609, 29.623 | 2024-06-02 12:00 | нет | L9 / L2SP (planetary-computer) | LC09_L2SP_180030_20240602_02_T1 | -3.3 | 5.3 | 180/030 | 11.0 | 3.0 | нет |
-| S4:DOORS3:T18 | S4_BLACK_SEA_DOORS3 | 41.802, 41.069 | 2024-06-05 12:00 | нет | S2B / L2A (earth-search) | S2B_37TFG_20240605_0_L2A | -3.7 | 1.4 | 37TFG | 11.3 | 3.0 | нет |
+| S4:DOORS3:T2 | S4_BLACK_SEA_DOORS3 | 43.551, 29.831 | 2024-06-02 12:00 | нет | L9 / L2SP (planetary-computer) | LC09_L2SP_180030_20240602_02_T1 | -3.3 | 5.3 | 180/030 | 11.0 | 3.0 | нет |
 
 ## Оговорки
 

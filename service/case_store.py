@@ -27,6 +27,10 @@ PATHS: dict[str, Path] = {
     "lgbm_test": REPO / "reports" / "lgbm_final_test.json",
     "final_numbers": REPO / "reports" / "final_numbers.json",
     "queries": REPO / "service" / "labels" / "queries.jsonl",
+    "conc_model_cfg": REPO / "configs" / "case_conc_model.yaml",
+    "dev_cv": REPO / "reports" / "case_conc" / "dev_cv.json",
+    "final_test": REPO / "reports" / "case_conc" / "final_test.json",
+    "conc_weights_dir": REPO / "weights" / "case_conc",
 }
 
 # ------------------------------------------------------------------ dictionaries (contract section 2)
@@ -660,7 +664,6 @@ def pairs_empty_reason(n: int) -> Optional[str]:
 
 
 # ------------------------------------------------------------------ field model predictions (field_estimate)
-KNN_MODELS = ("knn5", "knn5_log")
 CASE_SELECTION_YAML = REPO / "configs" / "case_selection.yaml"
 
 
@@ -668,73 +671,178 @@ def predictions_raw() -> list[dict]:
     return _cached("predictions", PATHS["conc_metrics"].parent / "predictions.csv", _read_csv) or []
 
 
-def main_split(profile: str) -> Optional[str]:
-    """Main (honest) split of the concentration models (L60b): metrics.json[profile].main_split, else built from
-    configs/case_selection.yaml main_split (route + buffer_days -> 'route_buf1'). Never the leaky 'event' split."""
-    cm = _cached("conc_metrics", PATHS["conc_metrics"], _read_json) or {}
-    ms = (cm.get(profile) or {}).get("main_split") if isinstance(cm.get(profile), dict) else None
-    if isinstance(ms, str) and ms:
-        return ms
-    def _yaml(p):
-        import yaml
-        return yaml.safe_load(p.read_text(encoding="utf-8"))
-    cfg = (_cached("case_selection", CASE_SELECTION_YAML, _yaml) or {}).get("main_split") or {}
-    if not cfg.get("method"):
+# ------------------------------------------------------------------ field concentration model (L68)
+# Source of truth (read only): configs/case_conc_model.yaml (selected model per profile, interval quantiles),
+# weights/case_conc/<profile>.json (fitted model), reports/case_conc/dev_cv.json (dev CV vs median baseline,
+# route segments + 1 day buffer), reports/case_conc/final_test.json (held-out test, computed once at acceptance).
+DOMAIN_MARGIN_DEG = 1.0
+
+
+def _yaml_load(p: Path):
+    import yaml
+    return yaml.safe_load(p.read_text(encoding="utf-8"))
+
+
+def conc_model_cfg() -> dict:
+    return _cached("conc_model_cfg", PATHS["conc_model_cfg"], _yaml_load) or {}
+
+
+def dev_cv() -> dict:
+    return _cached("dev_cv", PATHS["dev_cv"], _read_json) or {}
+
+
+def selected_models() -> dict:
+    sel = conc_model_cfg().get("selected") or {}
+    return {k: v for k, v in sorted(sel.items()) if isinstance(v, dict) and v.get("model")}
+
+
+def conc_weights(profile: str) -> Optional[dict]:
+    """weights/case_conc/<profile>.json (= selected.<profile>.weights in the yaml; dir is in PATHS for tests)."""
+    return _cached(f"cw:{profile}", PATHS["conc_weights_dir"] / f"{profile}.json", _read_json)
+
+
+def coverage_label(cov) -> Optional[str]:
+    c = fnum(cov)
+    return None if c is None else f"≈{round(c * 100)} % по CV"
+
+
+def profile_domain(profile: str) -> Optional[list[float]]:
+    """Area of applicability: bbox of the profile's field records (source_id + measurement_profile of
+    configs/case_selection.yaml) + DOMAIN_MARGIN_DEG. Outside it the field model is not applied."""
+    cfg = (_cached("case_selection", CASE_SELECTION_YAML, _yaml_load) or {}).get("profiles", {}).get(profile) or {}
+    srcs, profs = set(cfg.get("source_id") or []), set(cfg.get("measurement_profile") or [])
+    pts = [(fnum(r.get("longitude")), fnum(r.get("latitude"))) for r in samples_raw()[1]
+           if (not srcs or r.get("source_id") in srcs) and (not profs or r.get("measurement_profile") in profs)]
+    pts = [(x, y) for x, y in pts if x is not None and y is not None]
+    if not pts:
         return None
-    bd = fnum(cfg.get("buffer_days"))
-    return f"{cfg['method']}_buf{int(bd) if bd and float(bd).is_integer() else bd}" if bd else str(cfg["method"])
+    m = DOMAIN_MARGIN_DEG
+    return [min(p[0] for p in pts) - m, min(p[1] for p in pts) - m, max(p[0] for p in pts) + m,
+            max(p[1] for p in pts) + m]
 
 
-def field_model_choice(profile: str) -> dict:
-    """Which field model is the main one for a profile on the main split.
+def _predict_log1p(w: dict, lon: float, lat: float, when: str) -> Optional[float]:
+    import numpy as np
+    import pandas as pd
+    mdl = w.get("model") or {}
+    name = mdl.get("name") or ""
+    if name.startswith("knn"):
+        pts = mdl.get("points") or {}
+        la, lo_, t, ly = (np.asarray(pts.get(k) or [], float) for k in ("lat", "lon", "t_days", "log1p_c"))
+        if not len(ly):
+            return None
+        from src.macroplastic.case import splits as P
+        tq = P.times_days(pd.DataFrame({"date_utc": [when[:10]], "datetime_start_iso": [when]}))[0]
+        d = P.haversine_km(lat, lon, la, lo_)
+        excl = float((mdl.get("params") or {}).get("exclude_days", 1.0))
+        d = np.where(np.abs(t - tq) <= excl, np.inf, d)
+        k = int((mdl.get("params") or {}).get("k", 5))
+        ok = np.isfinite(d)
+        order = np.argsort(np.where(ok, d, np.inf), kind="stable")[:min(k, int(ok.sum()))]
+        return float(ly[order].mean()) if len(order) else float(ly.mean())
+    if "coef" in mdl and name.endswith("_log"):
+        from src.macroplastic.case.conc_models import base_features
+        Xb = base_features(pd.DataFrame({"latitude": [lat], "longitude": [lon], "date_utc": [when[:10]],
+                                         "datetime_start_iso": [when]}))
+        feats = mdl.get("features") or []
+        if mdl.get("cats") or any(f not in Xb.columns for f in feats):
+            return None  # categorical/weather features are not available for a map point
+        x = Xb[feats].astype(float).fillna(mdl.get("fill") or {}).to_numpy()[0]
+        z = (x - np.asarray(mdl["scaler_mean"], float)) / np.asarray(mdl["scaler_scale"], float)
+        return float(z @ np.asarray(mdl["coef"], float) + float(mdl["intercept"]))
+    return None  # other model families: not supported for point prediction -> no estimate
 
-    kNN is used only if EVERY kNN variant beats the train median significantly (95 % bootstrap CI of ΔMAE
-    entirely < 0 in metrics.json bootstrap_mae_diff_vs_median) — L60b: a win that depends on the variant is not a
-    result. Otherwise the train-profile median ("median_train")."""
-    split = main_split(profile)
-    cm = _cached("conc_metrics", PATHS["conc_metrics"], _read_json) or {}
-    boot = ((cm.get(profile) or {}) if isinstance(cm.get(profile), dict) else {}).get(
-        "bootstrap_mae_diff_vs_median") or {}
-    cis = {m: boot.get(f"{split}:{m}") for m in KNN_MODELS}
-    sig = bool(split) and all(isinstance(c, list) and len(c) == 3 and fnum(c[2]) is not None and c[2] < 0
-                              for c in cis.values())
-    if sig:
-        rows = {(r.get("split"), r.get("model")): r for r in (cm.get(profile) or {}).get("overall", [])}
-        best = min(KNN_MODELS, key=lambda m: fnum((rows.get((split, m)) or {}).get("mae")) or math.inf)
-        return {"split": split, "model": best, "name": best, "knn_significant": True,
-                "delta_mae_ci95": {m: cis[m] for m in KNN_MODELS}}
-    return {"split": split, "model": "median", "name": "median_train", "knn_significant": False,
-            "delta_mae_ci95": {m: cis[m] for m in KNN_MODELS}}
 
+def field_estimate_at(lon, lat, when) -> Optional[dict]:
+    """Prediction of the MAIN field model (L68) for a point, if it lies in a profile's area of applicability.
 
-def field_estimate(sample_ids: list[str]) -> Optional[dict]:
-    """Out-of-fold prediction of the main field model on the MAIN split for a linked sample.
-
-    Not a satellite estimate. None when no linked sample is in reports/case_conc/predictions.csv
-    (predictions exist only for S1/S2 profiles; pair_quality zones are S3/S4) or the main split is unknown."""
-    if not sample_ids:
+    Not a satellite estimate; None outside every profile's area / without model files."""
+    import math as _m
+    if lon is None or lat is None or not when:
         return None
-    wanted = set(sample_ids)
-    choices: dict[str, dict] = {}
-    for r in predictions_raw():
-        if r.get("sample_id") not in wanted:
+    for profile, sel in selected_models().items():
+        dom = profile_domain(profile)
+        if not dom or not in_bbox(lon, lat, dom):
             continue
-        prof = r.get("profile") or ""
-        ch = choices.get(prof) or choices.setdefault(prof, field_model_choice(prof))
-        if not ch["split"] or r.get("split") != ch["split"] or r.get("model") != ch["model"]:
+        w = conc_weights(profile)
+        if not w:
             continue
-        srow = sample_row(r["sample_id"]) or {}
-        is_median = ch["name"] == "median_train"
-        return {"value": _r(r.get("y_pred"), 3), "lo": None, "hi": None, "interval": None,
-                "unit": "items/km2", "measurement_profile": srow.get("measurement_profile") or None,
-                "profile_config": prof, "model": ch["name"], "split": ch["split"],
-                "knn_significant": ch["knn_significant"], "delta_mae_ci95_vs_median": ch["delta_mae_ci95"],
-                "sample_id": r["sample_id"],
-                "label": ("оценка по полевым данным, не по снимку: медиана обучающих участков маршрута "
-                          "(kNN не значимо лучше медианы)" if is_median else
-                          "оценка по полевым данным, не по снимку: kNN по соседним участкам маршрута"),
-                "interval_note": "интервал прогноза не считался", "basis": "field_model"}
+        ly = _predict_log1p(w, lon, lat, when)
+        if ly is None or not _m.isfinite(ly):
+            continue
+        q = (sel.get("interval") or {})
+        q_lo, q_hi = fnum(q.get("q_lo")), fnum(q.get("q_hi"))
+        val = _m.expm1(ly)
+        lo = hi = None
+        if q_lo is not None and q_hi is not None:
+            lo, hi = min(max(_m.expm1(ly + min(q_lo, 0.0)), 0.0), val), max(_m.expm1(ly + max(q_hi, 0.0)), val)
+        cov = (sel.get("dev_cv") or {}).get("coverage90")
+        cfg = (_cached("case_selection", CASE_SELECTION_YAML, _yaml_load) or {}).get("profiles", {}).get(profile) or {}
+        return {"value": round(val, 2), "lo": None if lo is None else round(lo, 2),
+                "hi": None if hi is None else round(hi, 2),
+                "interval": coverage_label(cov) if lo is not None else None,
+                "interval_nominal": q.get("level"), "interval_coverage_cv": fnum(cov),
+                "unit": "items/km2", "measurement_profile": (cfg.get("measurement_profile") or [None])[0],
+                "profile_config": profile, "model": sel.get("model"), "basis": "field_model",
+                "label": "оценка по полевым данным, не по снимку",
+                "applicability": "точка в области полевых данных профиля", "domain_bbox": [round(v, 4) for v in dom]}
     return None
+
+
+def conc_metrics_block() -> dict:
+    """/metrics.concentration from dev_cv.json + case_conc_model.yaml (+ final_test.json if it exists)."""
+    dcv = dev_cv().get("profiles") or {}
+    sel = selected_models()
+    profiles = {}
+    for prof in sorted(set(dcv) | set(sel)):
+        p = dcv.get(prof) or {}
+        table = {r.get("model"): r for r in p.get("table") or []}
+        main_name = (sel.get(prof) or {}).get("model") or p.get("primary")
+        base, main = table.get("median"), table.get(main_name)
+
+        def row(r, name):
+            if not r:
+                return None
+            return {"name": name, "mae": _r(r.get("mae")), "mae_log": _r(r.get("log1p_mae")),
+                    "coverage": _r(r.get("coverage90")), "coverage_label": coverage_label(r.get("coverage90")),
+                    "rmse": _r(r.get("rmse")), "n": r.get("n")}
+        b, m = row(base, "median (train profile)"), row(main, main_name)
+        strength = None
+        if m and main_name != "median":
+            lo_, hi_ = fnum(main.get("d_mae_lo")), fnum(main.get("d_mae_hi"))
+            m["delta_mae_vs_median"] = _r(main.get("d_mae"))
+            m["delta_mae_ci95"] = [_r(lo_), _r(hi_)]
+            m["delta_mae_ci95_bonferroni"] = [_r(main.get("d_mae_bonf_lo")), _r(main.get("d_mae_bonf_hi"))]
+            sens = [s for s in p.get("sensitivity_k_blocks") or [] if s.get("model") == main_name]
+            unstable = any((fnum(s.get("d_mae_hi")) or 0) >= 0 for s in sens)
+            sig = hi_ is not None and hi_ < 0
+            bonf = fnum(main.get("d_mae_bonf_hi"))
+            if not sig:
+                strength = "не лучше медианы"
+            elif unstable:
+                strength = "слабый выигрыш / зависит от разбиения"
+            else:
+                strength = "выигрыш на dev CV, устойчив к числу участков"
+            if sig and bonf is not None and bonf >= 0:
+                strength += "; с поправкой Бонферрони не значим"
+            m["sensitivity_k_blocks"] = [{"k_blocks": s.get("k_blocks"), "delta_mae": _r(s.get("d_mae")),
+                                          "ci95": [_r(s.get("d_mae_lo")), _r(s.get("d_mae_hi"))]} for s in sens]
+        profiles[prof] = {"n_dev": p.get("n_dev"), "dev_cruise_days": p.get("dev_cruise_days"),
+                          "baseline": b, "main": m, "strength": strength, "why": p.get("why"),
+                          "interval_nominal": ((sel.get(prof) or {}).get("interval") or {}).get("level")}
+    ft = _cached("final_test", PATHS["final_test"], _read_json)
+    default = "S2_visual_total_plastic" if "S2_visual_total_plastic" in profiles else \
+        (sorted(profiles)[0] if profiles else None)
+    dp = profiles.get(default) or {}
+    cvp = ((conc_model_cfg().get("protocol") or {}).get("cv") or {})
+    return {"baseline": dp.get("baseline"), "main": dp.get("main"), "strength": dp.get("strength"),
+            "unit": "items/km2", "profile": default, "profiles": profiles,
+            "split": {"type": "dev CV: участки маршрута + буфер", "method": cvp.get("method"),
+                      "k_blocks": cvp.get("k_blocks"), "buffer_days": cvp.get("buffer_days")} if cvp else None,
+            "final_test": ft if isinstance(ft, dict) else None,
+            "final_test_status": "посчитан" if isinstance(ft, dict) else "будет посчитан один раз в приёмке",
+            "note": "полевая модель концентрации (координаты/время → шт./км²), не спутниковая; "
+                    "coverage — фактическое покрытие 90 %-интервала на dev CV"}
 
 
 # ------------------------------------------------------------------ zones + scenes (from pair_quality)
@@ -789,7 +897,7 @@ def zones_all() -> list[dict]:
             "detector": {"prob_mean": None, "prob_max": _r(prob_max), "n_pixels": det.get("det_px_strip"),
                          "n_objects": None if n_det is None else int(n_det),
                          "threshold": det.get("threshold")},
-            "field_estimate": field_estimate(sids),
+            "field_estimate": field_estimate_at(lon, lat, iso_dt(q.get("scene_datetime"))),
             "concentration": None,
             "quality": {"valid_fraction": _r(q.get("valid_water_frac")), "cloud_fraction": _r(q.get("cloud_frac")),
                         "glint_fraction": None, "land_fraction": _r(q.get("land_frac")),
@@ -1018,42 +1126,8 @@ def metrics() -> dict:
                  "test_f1": _r(tmd.get("f1_md")), "test_iou": _r(tmd.get("iou_md")),
                  "test_ci95_f1": tmd.get("ci95"), "threshold": tmd.get("threshold")} if (val or tmd) else None,
     }
-    cm = _cached("conc_metrics", PATHS["conc_metrics"], _read_json) or {}
-    conc_profiles = {}
-    for prof, d in sorted(cm.items()):
-        if not isinstance(d, dict) or "overall" not in d:
-            continue
-        rows = {(r.get("split"), r.get("model")): r for r in d["overall"]}
-
-        ch = field_model_choice(prof)
-        split = ch["split"]
-
-        def pick(model, name=None):
-            r = rows.get((split, model))
-            if not r:
-                return None
-            return {"name": name or model, "mae": _r(r.get("mae")), "mae_log": _r(r.get("log1p_mae")),
-                    "coverage": None, "n": r.get("n"), "split": split}
-        best_knn = min(KNN_MODELS, key=lambda m: fnum((rows.get((split, m)) or {}).get("mae")) or math.inf)
-        challenger = pick(best_knn)
-        if challenger:
-            ci = ch["delta_mae_ci95"].get(best_knn)
-            challenger["delta_mae_vs_median_ci95"] = ci
-            challenger["significant"] = bool(isinstance(ci, list) and len(ci) == 3 and ci[2] < 0)
-        conc_profiles[prof] = {"rows": d.get("rows"), "events": d.get("events"), "main_split": split,
-                               "baseline": pick("median", "median by profile (train)"), "main": challenger,
-                               "selected_for_field_estimate": ch["name"], "knn_significant_all_variants":
-                                   ch["knn_significant"],
-                               "by_split": {f"{s}:{m}": {"mae": _r(r.get("mae")), "mae_log": _r(r.get("log1p_mae"))}
-                                            for (s, m), r in sorted(rows.items())}}
-    default = "S2_visual_total_plastic" if "S2_visual_total_plastic" in conc_profiles else \
-        (sorted(conc_profiles)[0] if conc_profiles else None)
-    dp = conc_profiles.get(default) or {}
-    concentration = {"baseline": dp.get("baseline"), "main": dp.get("main"), "unit": "items/km2",
-                     "profile": default, "profiles": conc_profiles,
-                     "note": "полевая концентрация по координатам/времени, основной сплит — участки маршрута + "
-                             "буфер 1 сут (configs/case_selection.yaml main_split, L60b); kNN считается лучше медианы "
-                             "только если все варианты значимы; coverage = null: интервалы предсказаний не считались"}
+    concentration = conc_metrics_block()
+    dp = (concentration.get("profiles") or {}).get(concentration.get("profile")) or {}
     try:
         from src.macroplastic.case.concentration import concentration as conc_fn
         ce = conc_fn(12, 0.20)
@@ -1064,12 +1138,11 @@ def metrics() -> dict:
         "split": {"type": "grouped", "group_by": ["event_id", "scene_id"], "n_train": None, "n_val": None, "n_test": None,
                   "detector": {"n_val_scenes": (test.get("val_md") or {}).get("n_scenes"),
                                "n_test_scenes": tmd.get("n_scenes")},
-                  "concentration": {"type": "участки маршрута (5 блоков) + буфер 1 сут", "name": dp.get("main_split"),
-                                    "n": dp.get("rows")}},
+                  "concentration": {**(concentration.get("split") or {}), "n_dev": dp.get("n_dev")}},
         "detector": detector,
         "concentration": concentration,
         "control_example": {"items": 12, "area_km2": 0.20, "expected": 60.0, "computed": computed},
-        "empty_reason": None if (fn or test or cm) else "Метрики ещё не посчитаны",
+        "empty_reason": None if (fn or test or concentration.get("profiles")) else "Метрики ещё не посчитаны",
     }
 
 

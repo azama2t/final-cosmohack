@@ -4,6 +4,7 @@
 --extra-index-url https://download.pytorch.org/whl/cpu
 numpy
 pandas
+pyarrow==25.0.1
 rasterio
 lightgbm
 scikit-learn

@@ -1,0 +1,391 @@
+{
+ "selection": {
+  "csv_rows": 935,
+  "events": 318,
+  "default_profile": "S2_visual_total_plastic",
+  "profiles": {
+   "S2_visual_total_plastic": {
+    "accepted_rows": 63,
+    "accepted_events": 63,
+    "rejected_rows": 872,
+    "reasons": {
+     "S1_aerial_GT50 total_plastic: одно опубликованное число на 16 строк, не профиль": 16,
+     "all_litter: общий мусор всех материалов, НЕ пластик (S3/S4)": 74,
+     "fisheries_litter_category: категория общего мусора, не суммарный пластик": 41,
+     "item_observation: объектная строка (отдельный предмет), не плотность шт./км²": 337,
+     "plastic_category: категория пластика, не суммарный пластик (категории не суммируются: пусто ≠ 0)": 321,
+     "source_id_not_in_profile": 83
+    }
+   },
+   "S1_trawl_total_plastic": {
+    "accepted_rows": 83,
+    "accepted_events": 83,
+    "rejected_rows": 852,
+    "reasons": {
+     "S1_aerial_GT50 total_plastic: одно опубликованное число на 16 строк, не профиль": 16,
+     "all_litter: общий мусор всех материалов, НЕ пластик (S3/S4)": 74,
+     "fisheries_litter_category: категория общего мусора, не суммарный пластик": 41,
+     "item_observation: объектная строка (отдельный предмет), не плотность шт./км²": 337,
+     "plastic_category: категория пластика, не суммарный пластик (категории не суммируются: пусто ≠ 0)": 321,
+     "source_id_not_in_profile": 63
+    }
+   }
+  }
+ },
+ "pairs_search": {
+  "cache_misses_network_calls": 0,
+  "error_rows": 0,
+  "offline": true
+ },
+ "pairs": {
+  "events": 318,
+  "candidate_rows": 1774,
+  "candidate_rows_with_scene": 673,
+  "rows_accept_meta": 105,
+  "rows_accept_drift": 0,
+  "events_accept_meta": 29,
+  "events_accept_drift": 0,
+  "quality_decisions": {
+   "accept": 12,
+   "reject": 17
+  },
+  "quality_reject_reasons": {
+   "cloud": 2,
+   "cloud(qa_suspect:red_sr<0.03)": 4,
+   "glint": 10,
+   "insufficient_coverage": 1
+  },
+  "pairs_with_detections": 4,
+  "registry_status": {
+   "reject": 318
+  },
+  "registry_stage": {
+   "drift": 29,
+   "metadata": 289
+  },
+  "registry_status_without_drift": {
+   "accept": 12,
+   "reject": 306
+  }
+ },
+ "command": "run_all.py all --offline",
+ "last_subcommand": "all",
+ "finished": "2026-09-25T18:16:18",
+ "offline": true,
+ "force": false,
+ "workdir": null,
+ "versions": {
+  "python": "3.12.7",
+  "platform": "Windows-10-10.0.19045-SP0",
+  "numpy": "2.5.2",
+  "pandas": "3.0.6",
+  "sklearn": "1.9.1",
+  "lightgbm": "4.7.0",
+  "rasterio": "1.5.1",
+  "shapely": "2.1.2",
+  "fastapi": "0.141.1",
+  "yaml": "6.0.3",
+  "git_commit": "82db2ff3331092d9fe1a9f1e3b83fe423c37baab"
+ },
+ "inputs": {
+  "task/macroplastic_marine_samples.csv": "30ce0a65e3880b833b5dfe3bc6f528ee5f5af14a0d22f25995f4ef8af585a764",
+  "configs/case_selection.yaml": "2a6989800c3a55bbdbea45f57b4a12f40d72b573133b963e02fec74a428d41f9",
+  "configs/case_pairs.yaml": "c390c5e685dc07064de45e99ee05bbff947f466574764e56bca0d9deb4a65603",
+  "weights/lgbm/meta.json": "97db8f94afb5b46b89f45f08562519b0b6a1ee91dc0e2aa5716b5926c4a1da07"
+ },
+ "outputs_sha256": {
+  "data/case/selection_S1_trawl_total_plastic.csv": "ce05f5c5e32814aa90c9caa6e281c733ba3a050a7da16c51bb3ee8a80098f1e8",
+  "data/case/selection_S1_trawl_total_plastic_rejected.csv": "44c08c425de1d9d1a23d97ce7103ba4c3faf98ad7233f0c62bc088136531d2d3",
+  "data/case/selection_S2_visual_total_plastic.csv": "681891ba9128a553bc96c449cc449ebc877bfd1863739b5657707e80fb3f387e",
+  "data/case/selection_S2_visual_total_plastic_rejected.csv": "0a91527bc96f0a30a9b37c2150bc38f04c912db63f9d1a0cb965eb8b339dba2f",
+  "data/case/run/registry_samples.csv": "ad18fda9af315dbfce398601f05f11c4e212b323a14c53ad0ee98366d1279690",
+  "data/case/run/registry_pairs.csv": "5b286619d45a8dccb03444639bc8a135aa6d522697c6c6a1f387b814b9e03d18",
+  "data/pairs/events.csv": "75d4c1d9767e779c6c5a9c4cac8b7456597253720219e5d86cd50521abcc819d",
+  "data/pairs/candidates.csv": "348dd3722457ece29ccd6aa88b6262eab0c742cde4bd2c5daddd7dde8c300394",
+  "data/pairs/best_per_event.csv": "450eadebb561548689973368049b3fdbd4dcb68ed49e5a0de1b2dedfb8de7f8f",
+  "data/pairs/pair_quality.csv": "7c639d859ac02c1574cb812072c9cabe1ea1d22080f99d98881b5c582166e27c",
+  "reports/case_conc/predictions.csv": "1e9b3d8a2ac056edbc6fc20ac95adf5280076ca8c94f923ce80c796b5c5a6fa7",
+  "reports/case_conc/metrics_by_fold.csv": "cf385c7505bcb67966d71de7f0caa83fdae0a3016bb62d884d394cb5270ebd74",
+  "reports/case_conc/consistency.csv": "8ce619025128c25384b37f17ffbf9c9037fdc8419e823c0a725a3b93cf9af86d",
+  "reports/case_conc/metrics.json": "77713271b4893f1462de369ba246834838d322b139d336b7c3e7925125314df4",
+  "reports/case_run/detector_recomputed.json": "1caae3772b8822b04b4876e7243a9e4c4afd3c4976af8699cfce677d7cbf0b1c",
+  "out/case_export/observations.geojson": "1c1455c0cd1f7fcc9cc598817db054c19eeef13284921bc0690428f15220eaf7",
+  "out/case_export/observations.csv": "85bd0315208a07b7c1a3b72a237fe2eb2cc09ea809a378ac216b327886068c73",
+  "out/case_export/pairs.geojson": "9c997a1bc5617953c02bacf91a5212f766594f28e4dda5980ce907dc508bb831",
+  "out/case_export/pairs.csv": "5dfd253bfcc8cfbc8bbab51989652810f217e2f8a151ec3efd7ac91172293df3",
+  "out/case_export/zones.geojson": "00f42739c4ad808972bdb21f78cc52f29d1a0bda6e2af867e392e16d75508823",
+  "out/case_export/zones.csv": "7b85b125425b74827ca3660dd7ef424884963210bb257bdce98f28a29034ebb0",
+  "out/case_export/example_pairs_black_sea_24h.csv": "2748be9c4da7245b9833de4ef949889b963de1b131ac6637b95d65fa5c3aaf1d",
+  "out/case_export/example_pairs_accepted.csv": "9776f8d1f0119f07ca0b19e528cd73dd04958d5697f0a1208f1e657ab8d53a66",
+  "out/case_export/example_zones_detected.geojson": "231e1b995542df037b1b45701183c4bfc1df6087391b96149a7331c97c555f40"
+ },
+ "outputs_fingerprint": "a84d9bb7f91312987415acccc3a97c927f8bd0b4ec19d94718d35111935b5742",
+ "steps": {
+  "1_selection": {
+   "step": "1_selection",
+   "ok": true,
+   "note": "S2_visual_total_plastic: 63 принято / 872 отказ, S1_trawl_total_plastic: 83 принято / 852 отказ",
+   "seconds": 0.1
+  },
+  "2_pairs": {
+   "step": "2_pairs",
+   "ok": true,
+   "note": "строк 1774, запросов мимо кэша 0, ошибок 0",
+   "seconds": 0.9
+  },
+  "3_quality_detector": {
+   "step": "3_quality_detector",
+   "ok": true,
+   "note": "только готовые meta.json; пар с результатом 29",
+   "seconds": 0.1
+  },
+  "3b_registry": {
+   "step": "3b_registry",
+   "ok": true,
+   "note": "событий 318: {'reject': 318}, без учёта дрейфа {'accept': 12, 'reject': 306}",
+   "seconds": 0.7
+  },
+  "total_prepare": {
+   "step": "total_prepare",
+   "ok": true,
+   "seconds": 1.8
+  },
+  "4_concentration": {
+   "step": "4_concentration",
+   "ok": true,
+   "note": "S2_visual_total_plastic: median MAE 35.9 vs knn5 31.3; S1_trawl_total_plastic: median MAE 456.4 vs knn5 448.9",
+   "seconds": 2.4
+  },
+  "total_eval": {
+   "step": "total_eval",
+   "ok": true,
+   "seconds": 3.9
+  },
+  "5_detector_marida": {
+   "step": "5_detector_marida",
+   "ok": true,
+   "note": "test F1 lgbm 0.8713; пересчёт из npz совпал: test=True, val=True",
+   "seconds": 1.0
+  },
+  "6_export_api_v3": {
+   "step": "6_export_api_v3",
+   "ok": true,
+   "note": "observations.geojson: 935, observations.csv: 935, pairs.geojson: 4436, pairs.csv: 4436, zones.geojson: 29, zones.csv: 29",
+   "seconds": 0.8
+  },
+  "total_export": {
+   "step": "total_export",
+   "ok": true,
+   "seconds": 0.8
+  },
+  "total_all": {
+   "step": "total_all",
+   "ok": true,
+   "seconds": 6.0
+  }
+ },
+ "concentration": {
+  "S2_visual_total_plastic": {
+   "rows": 63,
+   "events": 63,
+   "main_split": "route_buf1",
+   "median_mae": 35.90081974533095,
+   "median_rmse": 49.1214309489282,
+   "median_log1p_mae": 0.7667962908581364,
+   "knn5_mae": 31.322939326027402,
+   "knn5_rmse": 41.07980088068564,
+   "knn5_log1p_mae": 0.6375665337768712,
+   "knn5_log_mae": 31.670415545967643,
+   "knn5_log_rmse": 41.49977461675674,
+   "knn5_log_log1p_mae": 0.6681265017502914,
+   "delta_mae_knn5_vs_median_ci95": [
+    -4.577880419303547,
+    -13.897825950525002,
+    4.72056913112708
+   ]
+  },
+  "S1_trawl_total_plastic": {
+   "rows": 83,
+   "events": 83,
+   "main_split": "route_buf1",
+   "median_mae": 456.3792604578313,
+   "median_rmse": 572.4120035905761,
+   "median_log1p_mae": 0.7806200405537045,
+   "knn5_mae": 448.85821598795184,
+   "knn5_rmse": 538.6551356506234,
+   "knn5_log1p_mae": 0.7444994146101985,
+   "knn5_log_mae": 388.05675922242807,
+   "knn5_log_rmse": 500.09773233064794,
+   "knn5_log_log1p_mae": 0.6792829129216796,
+   "delta_mae_knn5_vs_median_ci95": [
+    -7.5210444698794845,
+    -97.24755126535518,
+    83.63793730614358
+   ]
+  },
+  "consistency_N_over_A": {
+   "rows": 467,
+   "match": 467
+  }
+ },
+ "detector": {
+  "source": "reports/case_detector/metrics.json",
+  "metrics_json_sha256": "9b7ab6eef7869d7950d4b8de4447b7269b67892527256dde31ffc647bbad7d41",
+  "recomputed_from_preds": {
+   "test": true,
+   "val": true
+  },
+  "test": {
+   "lgbm": {
+    "f1_md": 0.8712871287128713,
+    "precision_md": 0.8243559718969555,
+    "recall_md": 0.9238845144356955,
+    "iou_md": 0.7719298245614035,
+    "ci95_f1": [
+     0.8225,
+     0.9202
+    ],
+    "tp": 352,
+    "fp": 75,
+    "fn": 29
+   },
+   "rf_argmax": {
+    "f1_md": 0.7708830548926014,
+    "precision_md": 0.7067833698030634,
+    "recall_md": 0.847769028871391,
+    "iou_md": 0.6271844660194175,
+    "ci95_f1": [
+     0.7085,
+     0.8335
+    ],
+    "tp": 323,
+    "fp": 134,
+    "fn": 58
+   },
+   "rf_prob": {
+    "f1_md": 0.7781731909845789,
+    "precision_md": 0.70995670995671,
+    "recall_md": 0.8608923884514436,
+    "iou_md": 0.6368932038834951,
+    "ci95_f1": [
+     0.7103,
+     0.8432
+    ],
+    "tp": 328,
+    "fp": 134,
+    "fn": 53
+   },
+   "fdi_ndvi_box": {
+    "f1_md": 0.04236963190184049,
+    "precision_md": 0.02198786190428813,
+    "recall_md": 0.5800524934383202,
+    "iou_md": 0.021643325825090588,
+    "ci95_f1": [
+     0.0168,
+     0.3122
+    ],
+    "tp": 221,
+    "fp": 9830,
+    "fn": 160
+   },
+   "fdi_interval": {
+    "f1_md": 0.02541258945523587,
+    "precision_md": 0.013069931645759784,
+    "recall_md": 0.4566929133858268,
+    "iou_md": 0.012869822485207101,
+    "ci95_f1": [
+     0.0115,
+     0.0925
+    ],
+    "tp": 174,
+    "fp": 13139,
+    "fn": 207
+   },
+   "fdi_threshold": {
+    "f1_md": 0.005600756859035005,
+    "precision_md": 0.0028084770463930047,
+    "recall_md": 0.9711286089238845,
+    "iou_md": 0.002808242571439414,
+    "ci95_f1": [
+     0.0029,
+     0.0123
+    ],
+    "tp": 370,
+    "fp": 131374,
+    "fn": 11
+   },
+   "ndvi_threshold": {
+    "f1_md": 0.02367758186397985,
+    "precision_md": 0.012435507342241038,
+    "recall_md": 0.24671916010498687,
+    "iou_md": 0.011980627071119042,
+    "ci95_f1": [
+     0.007,
+     0.0782
+    ],
+    "tp": 94,
+    "fp": 7465,
+    "fn": 287
+   }
+  },
+  "val_f1": {
+   "lgbm": 0.9226441631504922,
+   "rf_argmax": 0.8646580583452893,
+   "rf_prob": 0.8596070915189267,
+   "fdi_ndvi_box": 0.41515229076017407,
+   "fdi_interval": 0.3231441048034934,
+   "fdi_threshold": 0.020454645000219,
+   "ndvi_threshold": 0.1678976760943974
+  }
+ },
+ "export": {
+  "dir": "out/case_export",
+  "files": [
+   {
+    "file": "observations.geojson",
+    "request": "GET /api/v3/export?layer=observations&format=geojson",
+    "records": 935
+   },
+   {
+    "file": "observations.csv",
+    "request": "GET /api/v3/export?layer=observations&format=csv",
+    "records": 935
+   },
+   {
+    "file": "pairs.geojson",
+    "request": "GET /api/v3/export?layer=pairs&format=geojson",
+    "records": 4436
+   },
+   {
+    "file": "pairs.csv",
+    "request": "GET /api/v3/export?layer=pairs&format=csv",
+    "records": 4436
+   },
+   {
+    "file": "zones.geojson",
+    "request": "GET /api/v3/export?layer=zones&format=geojson",
+    "records": 29
+   },
+   {
+    "file": "zones.csv",
+    "request": "GET /api/v3/export?layer=zones&format=csv",
+    "records": 29
+   },
+   {
+    "file": "example_pairs_black_sea_24h.csv",
+    "request": "GET /api/v3/export?layer=pairs&format=csv&source=S4_BLACK_SEA_DOORS3&max_dt_hours=24",
+    "records": 117
+   },
+   {
+    "file": "example_pairs_accepted.csv",
+    "request": "GET /api/v3/export?layer=pairs&format=csv&status=accepted",
+    "records": 0
+   },
+   {
+    "file": "example_zones_detected.geojson",
+    "request": "GET /api/v3/export?layer=zones&format=geojson&detection_status=detected",
+    "records": 1
+   }
+  ]
+ }
+}

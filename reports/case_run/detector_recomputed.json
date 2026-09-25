@@ -1,0 +1,168 @@
+{
+ "metrics_json": "reports/case_detector/metrics.json",
+ "metrics_json_sha256": "9b7ab6eef7869d7950d4b8de4447b7269b67892527256dde31ffc647bbad7d41",
+ "preds_sha256": {
+  "test_preds.npz": "36396ae38461d3801d1cb98181550d4883fd1f6622d575eed2929f6b873ddb32",
+  "val_preds.npz": "fb133eae91cf37fa749d73ce33cfeab998ca963616ac87fac0df519d34f28121"
+ },
+ "splits": {
+  "test": {
+   "recomputed": true,
+   "n_patches": 359,
+   "all_match_metrics_json": true,
+   "match": {
+    "lgbm": true,
+    "rf_argmax": true,
+    "rf_prob": true,
+    "fdi_ndvi_box": true,
+    "fdi_interval": true,
+    "fdi_threshold": true,
+    "ndvi_threshold": true
+   },
+   "models": {
+    "lgbm": {
+     "tp": 352,
+     "fp": 75,
+     "fn": 29,
+     "precision_md": 0.8243559718969555,
+     "recall_md": 0.9238845144356955,
+     "f1_md": 0.8712871287128713,
+     "iou_md": 0.7719298245614035
+    },
+    "rf_argmax": {
+     "tp": 323,
+     "fp": 134,
+     "fn": 58,
+     "precision_md": 0.7067833698030634,
+     "recall_md": 0.847769028871391,
+     "f1_md": 0.7708830548926014,
+     "iou_md": 0.6271844660194175
+    },
+    "rf_prob": {
+     "tp": 328,
+     "fp": 134,
+     "fn": 53,
+     "precision_md": 0.70995670995671,
+     "recall_md": 0.8608923884514436,
+     "f1_md": 0.7781731909845789,
+     "iou_md": 0.6368932038834951
+    },
+    "fdi_ndvi_box": {
+     "tp": 221,
+     "fp": 9830,
+     "fn": 160,
+     "precision_md": 0.02198786190428813,
+     "recall_md": 0.5800524934383202,
+     "f1_md": 0.04236963190184049,
+     "iou_md": 0.021643325825090588
+    },
+    "fdi_interval": {
+     "tp": 174,
+     "fp": 13139,
+     "fn": 207,
+     "precision_md": 0.013069931645759784,
+     "recall_md": 0.4566929133858268,
+     "f1_md": 0.02541258945523587,
+     "iou_md": 0.012869822485207101
+    },
+    "fdi_threshold": {
+     "tp": 370,
+     "fp": 131374,
+     "fn": 11,
+     "precision_md": 0.0028084770463930047,
+     "recall_md": 0.9711286089238845,
+     "f1_md": 0.005600756859035005,
+     "iou_md": 0.002808242571439414
+    },
+    "ndvi_threshold": {
+     "tp": 94,
+     "fp": 7465,
+     "fn": 287,
+     "precision_md": 0.012435507342241038,
+     "recall_md": 0.24671916010498687,
+     "f1_md": 0.02367758186397985,
+     "iou_md": 0.011980627071119042
+    }
+   }
+  },
+  "val": {
+   "recomputed": true,
+   "n_patches": 328,
+   "all_match_metrics_json": true,
+   "match": {
+    "lgbm": true,
+    "rf_argmax": true,
+    "rf_prob": true,
+    "fdi_ndvi_box": true,
+    "fdi_interval": true,
+    "fdi_threshold": true,
+    "ndvi_threshold": true
+   },
+   "models": {
+    "lgbm": {
+     "tp": 984,
+     "fp": 74,
+     "fn": 91,
+     "precision_md": 0.9300567107750473,
+     "recall_md": 0.9153488372093024,
+     "f1_md": 0.9226441631504922,
+     "iou_md": 0.856396866840731
+    },
+    "rf_argmax": {
+     "tp": 904,
+     "fp": 112,
+     "fn": 171,
+     "precision_md": 0.889763779527559,
+     "recall_md": 0.8409302325581396,
+     "f1_md": 0.8646580583452893,
+     "iou_md": 0.7615838247683235
+    },
+    "rf_prob": {
+     "tp": 897,
+     "fp": 115,
+     "fn": 178,
+     "precision_md": 0.8863636363636364,
+     "recall_md": 0.8344186046511628,
+     "f1_md": 0.8596070915189267,
+     "iou_md": 0.753781512605042
+    },
+    "fdi_ndvi_box": {
+     "tp": 811,
+     "fp": 2021,
+     "fn": 264,
+     "precision_md": 0.2863700564971751,
+     "recall_md": 0.7544186046511628,
+     "f1_md": 0.41515229076017407,
+     "iou_md": 0.26195090439276486
+    },
+    "fdi_interval": {
+     "tp": 518,
+     "fp": 1613,
+     "fn": 557,
+     "precision_md": 0.24307836696386673,
+     "recall_md": 0.48186046511627906,
+     "f1_md": 0.3231441048034934,
+     "iou_md": 0.19270833333333334
+    },
+    "fdi_threshold": {
+     "tp": 934,
+     "fp": 89315,
+     "fn": 141,
+     "precision_md": 0.01034914514288247,
+     "recall_md": 0.8688372093023256,
+     "f1_md": 0.020454645000219,
+     "iou_md": 0.010333001438212192
+    },
+    "ndvi_threshold": {
+     "tp": 466,
+     "fp": 4010,
+     "fn": 609,
+     "precision_md": 0.10411081322609472,
+     "recall_md": 0.43348837209302327,
+     "f1_md": 0.1678976760943974,
+     "iou_md": 0.09164208456243854
+    }
+   }
+  }
+ }
+}

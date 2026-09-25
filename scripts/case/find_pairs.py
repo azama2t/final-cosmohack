@@ -327,7 +327,7 @@ def summarize(cand: pd.DataFrame, ev: pd.DataFrame, a: argparse.Namespace) -> st
         acc["score"] = (acc.dt_hours.abs() / 24 + acc.cloud_cover / 100 + (~acc.time_known) * 0.5).round(1)
         acc["lvl_rank"] = acc.level.map({"L2A": 0, "L2SP": 0, "L1C": 1})
         acc["sdate"] = acc.scene_datetime.dt.date
-        acc = acc.sort_values(["score", "lvl_rank"]).drop_duplicates(["event_id", "mission", "sdate"])
+        acc = acc.sort_values(["score", "lvl_rank", "item_id"], kind="mergesort").drop_duplicates(["event_id", "mission", "sdate"])
         acc.drop(columns=["lvl_rank", "sdate"]).drop_duplicates("event_id").to_csv(OUT / "best_per_event.csv", index=False)
         acc = acc.head(10)
         L += ["## 10 лучших пар по метаданным (accept_meta; минимум |dt|/сут + облачность/100 + 0.5 за неизвестное время; дубли ES/PC одной сцены свёрнуты, приоритет L2A)", "",
@@ -355,7 +355,7 @@ def point_scl(n: int) -> str:
     c = pd.read_parquet(OUT / "candidates.parquet")
     acc = c[c.accept_meta & (c.endpoint == "planetary-computer") & (c.level == "L2A")].copy()
     acc["score"] = acc.dt_hours.abs() / 24 + acc.cloud_cover / 100 + (~acc.time_known) * 0.5
-    acc = acc.sort_values("score").drop_duplicates("event_id").head(n)
+    acc = acc.sort_values(["score", "item_id"], kind="mergesort").drop_duplicates("event_id").head(n)
     names = {0: "nodata", 1: "defect", 2: "dark", 3: "cl_shadow", 4: "veg", 5: "bare", 6: "water", 7: "unclass",
              8: "cloud_med", 9: "cloud_high", 10: "cirrus", 11: "snow"}
     L = ["## Облачность в точке по SCL (окно 5×5 пикселей 20 м, примеры)", "",
@@ -404,7 +404,7 @@ def main() -> int:
             done += 1
             if done % 50 == 0:
                 print(f"{done}/{len(jobs)} {time.time() - t0:.0f}s", flush=True)
-    cand = pd.DataFrame(rows).sort_values(["source_id", "event_id", "collection", "endpoint", "dt_hours"]).reset_index(drop=True)
+    cand = pd.DataFrame(rows).sort_values(["source_id", "event_id", "collection", "endpoint", "dt_hours", "item_id"], kind="mergesort").reset_index(drop=True)
     cand["point_inside_footprint"] = cand.point_inside_footprint.astype("boolean")
     a.drift_cfg = load_drift_cfg(Path(a.config))
     cand = add_drift(cand, ev, a.drift_cfg)
