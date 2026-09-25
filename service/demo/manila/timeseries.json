@@ -1,23 +1,5 @@
 [
  {
-  "date": "2019-05-13",
-  "model": "lgbm",
-  "total_debris_area_m2": 30900.0,
-  "mean_index": 0.0571,
-  "n_detections": 100,
-  "cloud_frac": 0.0208,
-  "n_cells_valid": 768
- },
- {
-  "date": "2019-05-13",
-  "model": "mdd",
-  "total_debris_area_m2": 596000.0,
-  "mean_index": 1.0528,
-  "n_detections": 52,
-  "cloud_frac": 0.0208,
-  "n_cells_valid": 768
- },
- {
   "date": "2025-01-06",
   "model": "lgbm",
   "total_debris_area_m2": 26400.0,
@@ -34,5 +16,23 @@
   "n_detections": 17,
   "cloud_frac": 0.0026,
   "n_cells_valid": 838
+ },
+ {
+  "date": "2025-12-27",
+  "model": "lgbm",
+  "total_debris_area_m2": 28400.0,
+  "mean_index": 0.0428,
+  "n_detections": 107,
+  "cloud_frac": 0.0038,
+  "n_cells_valid": 835
+ },
+ {
+  "date": "2025-12-27",
+  "model": "mdd",
+  "total_debris_area_m2": 35800.0,
+  "mean_index": 0.0611,
+  "n_detections": 28,
+  "cloud_frac": 0.0038,
+  "n_cells_valid": 835
  }
 ]

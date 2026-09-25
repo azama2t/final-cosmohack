@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generated": "2026-09-25T03:45:20+00:00",
+ "generated": "2026-09-25T04:08:45+00:00",
  "kind": "demo",
  "index": {
   "name": "доля наблюдаемой воды с признаками мусора",
@@ -42,14 +42,14 @@
     15.914048
    ],
    "zoom": 11,
-   "default_date": "2026-05-30",
+   "default_date": "2025-12-28",
    "summary": {
-    "latest_date": "2026-05-30",
+    "latest_date": "2025-12-28",
     "model": "mdd",
     "haze": false,
-    "index_permille": 0.0251,
-    "n_detections": 7,
-    "total_debris_area_m2": 12800.0
+    "index_permille": 0.0729,
+    "n_detections": 31,
+    "total_debris_area_m2": 37700.0
    },
    "dates": [
     {
@@ -81,31 +81,31 @@
      }
     },
     {
-     "date": "2026-05-30",
-     "scene_id": "S2B_MSIL2A_20260530T160859_R140_T16PCC_20260530T212833",
+     "date": "2025-12-28",
+     "scene_id": "S2A_MSIL2A_20251228T161721_R140_T16PCC_20251228T202011",
      "source": "planetary-computer",
-     "cloud_frac": 0.0175,
+     "cloud_frac": 0.0601,
      "bounds": [
       -88.337553,
       15.686044,
       -88.102668,
       15.914048
      ],
-     "rgb": "honduras/2026-05-30/rgb.png",
-     "thumb": "honduras/2026-05-30/thumb.jpg",
+     "rgb": "honduras/2025-12-28/rgb.png",
+     "thumb": "honduras/2025-12-28/thumb.jpg",
      "models": [
       "lgbm",
       "mdd"
      ],
-     "drift": "honduras/2026-05-30/drift.json",
+     "drift": "honduras/2025-12-28/drift.json",
      "quality": {
       "glint_or_haze": false,
       "haze": false,
       "note": ""
      },
      "n_confirmed": {
-      "lgbm": 1,
-      "mdd": 1
+      "lgbm": 17,
+      "mdd": 17
      }
     }
    ]
@@ -127,16 +127,44 @@
     -29.620825
    ],
    "zoom": 10,
-   "default_date": "2026-07-03",
+   "default_date": "2026-05-04",
    "summary": {
-    "latest_date": "2026-07-03",
+    "latest_date": "2026-05-04",
     "model": "mdd",
     "haze": false,
-    "index_permille": 0.0,
-    "n_detections": 0,
-    "total_debris_area_m2": 0.0
+    "index_permille": 0.0006,
+    "n_detections": 1,
+    "total_debris_area_m2": 200.0
    },
    "dates": [
+    {
+     "date": "2025-09-26",
+     "scene_id": "S2A_MSIL2A_20250926T074031_R092_T36JUN_20250926T110619",
+     "source": "planetary-computer",
+     "cloud_frac": 0.001,
+     "bounds": [
+      30.958242,
+      -29.945,
+      31.221421,
+      -29.714976
+     ],
+     "rgb": "durban/2025-09-26/rgb.png",
+     "thumb": "durban/2025-09-26/thumb.jpg",
+     "models": [
+      "lgbm",
+      "mdd"
+     ],
+     "drift": "durban/2025-09-26/drift.json",
+     "quality": {
+      "glint_or_haze": false,
+      "haze": false,
+      "note": ""
+     },
+     "n_confirmed": {
+      "lgbm": 0,
+      "mdd": 0
+     }
+    },
     {
      "date": "2026-05-04",
      "scene_id": "S2A_MSIL2A_20260504T074021_R092_T36JUN_20260504T132359",
@@ -163,119 +191,6 @@
      "n_confirmed": {
       "lgbm": 0,
       "mdd": 0
-     }
-    },
-    {
-     "date": "2026-07-03",
-     "scene_id": "S2A_MSIL2A_20260703T074031_R092_T36JUN_20260703T130209",
-     "source": "planetary-computer",
-     "cloud_frac": 0.0002,
-     "bounds": [
-      30.958242,
-      -29.945,
-      31.221421,
-      -29.714976
-     ],
-     "rgb": "durban/2026-07-03/rgb.png",
-     "thumb": "durban/2026-07-03/thumb.jpg",
-     "models": [
-      "lgbm",
-      "mdd"
-     ],
-     "drift": null,
-     "quality": {
-      "glint_or_haze": false,
-      "haze": false,
-      "note": ""
-     },
-     "n_confirmed": {
-      "lgbm": 0,
-      "mdd": 0
-     }
-    }
-   ]
-  },
-  {
-   "id": "scotland",
-   "name": "Шотландия (Ферт-оф-Форт)",
-   "name_en": "Firth of Forth, Scotland",
-   "country": "Великобритания",
-   "tile": "30VWH",
-   "center": [
-    -2.459415,
-    56.17999
-   ],
-   "bounds": [
-    -2.663014,
-    56.06646,
-    -2.255817,
-    56.29352
-   ],
-   "zoom": 11,
-   "default_date": "2026-07-19",
-   "summary": {
-    "latest_date": "2026-07-19",
-    "model": "mdd",
-    "haze": false,
-    "index_permille": 0.002,
-    "n_detections": 2,
-    "total_debris_area_m2": 800.0
-   },
-   "dates": [
-    {
-     "date": "2018-03-26",
-     "scene_id": "S2B_30VWH_20180326_0_L2A",
-     "source": "earth-search",
-     "cloud_frac": 0.0043,
-     "bounds": [
-      -2.663014,
-      56.06646,
-      -2.255817,
-      56.29352
-     ],
-     "rgb": "scotland/2018-03-26/rgb.png",
-     "thumb": "scotland/2018-03-26/thumb.jpg",
-     "models": [
-      "lgbm",
-      "mdd"
-     ],
-     "drift": null,
-     "quality": {
-      "glint_or_haze": false,
-      "haze": false,
-      "note": ""
-     },
-     "n_confirmed": {
-      "lgbm": 1,
-      "mdd": 1
-     }
-    },
-    {
-     "date": "2026-07-19",
-     "scene_id": "S2A_MSIL2A_20260719T112131_R037_T30VWH_20260719T194158",
-     "source": "planetary-computer",
-     "cloud_frac": 0.0,
-     "bounds": [
-      -2.663014,
-      56.06646,
-      -2.255817,
-      56.29352
-     ],
-     "rgb": "scotland/2026-07-19/rgb.png",
-     "thumb": "scotland/2026-07-19/thumb.jpg",
-     "models": [
-      "lgbm",
-      "mdd"
-     ],
-     "drift": "scotland/2026-07-19/drift.json",
-     "quality": {
-      "glint_or_haze": false,
-      "haze": false,
-      "note": ""
-     },
-     "n_confirmed": {
-      "lgbm": 1,
-      "mdd": 1
      }
     }
    ]
@@ -308,34 +223,6 @@
    },
    "dates": [
     {
-     "date": "2019-05-13",
-     "scene_id": "S2A_51PTS_20190513_0_L2A",
-     "source": "earth-search",
-     "cloud_frac": 0.0208,
-     "bounds": [
-      120.702351,
-      14.485386,
-      120.937304,
-      14.714259
-     ],
-     "rgb": "manila/2019-05-13/rgb.png",
-     "thumb": "manila/2019-05-13/thumb.jpg",
-     "models": [
-      "lgbm",
-      "mdd"
-     ],
-     "drift": null,
-     "quality": {
-      "glint_or_haze": false,
-      "haze": true,
-      "note": "дымка/блик — находки могут быть завышены (медиана B8 воды 0.0114)"
-     },
-     "n_confirmed": {
-      "lgbm": 9,
-      "mdd": 12
-     }
-    },
-    {
      "date": "2025-01-06",
      "scene_id": "S2B_MSIL2A_20250106T022009_R003_T51PTS_20250106T041630",
      "source": "planetary-computer",
@@ -362,6 +249,119 @@
       "lgbm": 2,
       "mdd": 1
      }
+    },
+    {
+     "date": "2025-12-27",
+     "scene_id": "S2C_MSIL2A_20251227T022121_R003_T51PTS_20251227T053810",
+     "source": "planetary-computer",
+     "cloud_frac": 0.0038,
+     "bounds": [
+      120.702351,
+      14.485386,
+      120.937304,
+      14.714259
+     ],
+     "rgb": "manila/2025-12-27/rgb.png",
+     "thumb": "manila/2025-12-27/thumb.jpg",
+     "models": [
+      "lgbm",
+      "mdd"
+     ],
+     "drift": "manila/2025-12-27/drift.json",
+     "quality": {
+      "glint_or_haze": false,
+      "haze": true,
+      "note": "дымка/блик — находки могут быть завышены (медиана B8 воды 0.0088)"
+     },
+     "n_confirmed": {
+      "lgbm": 4,
+      "mdd": 5
+     }
+    }
+   ]
+  },
+  {
+   "id": "bali",
+   "name": "Бали (пролив Бадунг)",
+   "name_en": "Bali (Badung Strait), Indonesia",
+   "country": "Индонезия",
+   "tile": "50LLR",
+   "center": [
+    115.350028,
+    -8.829906
+   ],
+   "bounds": [
+    115.235529,
+    -8.943511,
+    115.464527,
+    -8.716301
+   ],
+   "zoom": 11,
+   "default_date": "2026-07-05",
+   "summary": {
+    "latest_date": "2026-07-05",
+    "model": "mdd",
+    "haze": false,
+    "index_permille": 0.0003,
+    "n_detections": 1,
+    "total_debris_area_m2": 200.0
+   },
+   "dates": [
+    {
+     "date": "2025-07-20",
+     "scene_id": "S2C_MSIL2A_20250720T021631_R003_T50LLR_20250720T061715",
+     "source": "planetary-computer",
+     "cloud_frac": 0.0337,
+     "bounds": [
+      115.235529,
+      -8.943511,
+      115.464527,
+      -8.716301
+     ],
+     "rgb": "bali/2025-07-20/rgb.png",
+     "thumb": "bali/2025-07-20/thumb.jpg",
+     "models": [
+      "lgbm",
+      "mdd"
+     ],
+     "drift": "bali/2025-07-20/drift.json",
+     "quality": {
+      "glint_or_haze": false,
+      "haze": false,
+      "note": ""
+     },
+     "n_confirmed": {
+      "lgbm": 1,
+      "mdd": 1
+     }
+    },
+    {
+     "date": "2026-07-05",
+     "scene_id": "S2C_MSIL2A_20260705T021531_R003_T50LLR_20260705T062607",
+     "source": "planetary-computer",
+     "cloud_frac": 0.0418,
+     "bounds": [
+      115.235529,
+      -8.943511,
+      115.464527,
+      -8.716301
+     ],
+     "rgb": "bali/2026-07-05/rgb.png",
+     "thumb": "bali/2026-07-05/thumb.jpg",
+     "models": [
+      "lgbm",
+      "mdd"
+     ],
+     "drift": "bali/2026-07-05/drift.json",
+     "quality": {
+      "glint_or_haze": false,
+      "haze": false,
+      "note": ""
+     },
+     "n_confirmed": {
+      "lgbm": 0,
+      "mdd": 0
+     }
     }
    ]
   },
@@ -382,70 +382,42 @@
     18.513476
    ],
    "zoom": 11,
-   "default_date": "2025-12-30",
+   "default_date": "2025-10-18",
    "summary": {
-    "latest_date": "2025-12-30",
+    "latest_date": "2025-10-18",
     "model": "mdd",
     "haze": false,
-    "index_permille": 0.0004,
-    "n_detections": 1,
-    "total_debris_area_m2": 200.0
+    "index_permille": 0.075,
+    "n_detections": 11,
+    "total_debris_area_m2": 32300.0
    },
    "dates": [
     {
-     "date": "2019-01-21",
-     "scene_id": "S2A_19QDA_20190121_0_L2A",
-     "source": "earth-search",
-     "cloud_frac": 0.0463,
-     "bounds": [
-      -69.939213,
-      18.286191,
-      -69.70075,
-      18.513476
-     ],
-     "rgb": "santo_domingo/2019-01-21/rgb.png",
-     "thumb": "santo_domingo/2019-01-21/thumb.jpg",
-     "models": [
-      "lgbm",
-      "mdd"
-     ],
-     "drift": null,
-     "quality": {
-      "glint_or_haze": false,
-      "haze": false,
-      "note": ""
-     },
-     "n_confirmed": {
-      "lgbm": 16,
-      "mdd": 25
-     }
-    },
-    {
-     "date": "2025-12-30",
-     "scene_id": "S2B_MSIL2A_20251230T151719_R125_T19QDA_20251230T203016",
+     "date": "2025-10-18",
+     "scene_id": "S2A_MSIL2A_20251018T151731_R125_T19QDA_20251018T175307",
      "source": "planetary-computer",
-     "cloud_frac": 0.0,
+     "cloud_frac": 0.1879,
      "bounds": [
       -69.939213,
       18.286191,
       -69.70075,
       18.513476
      ],
-     "rgb": "santo_domingo/2025-12-30/rgb.png",
-     "thumb": "santo_domingo/2025-12-30/thumb.jpg",
+     "rgb": "santo_domingo/2025-10-18/rgb.png",
+     "thumb": "santo_domingo/2025-10-18/thumb.jpg",
      "models": [
       "lgbm",
       "mdd"
      ],
-     "drift": "santo_domingo/2025-12-30/drift.json",
+     "drift": "santo_domingo/2025-10-18/drift.json",
      "quality": {
       "glint_or_haze": false,
       "haze": false,
       "note": ""
      },
      "n_confirmed": {
-      "lgbm": 0,
-      "mdd": 0
+      "lgbm": 1,
+      "mdd": 1
      }
     }
    ]

@@ -1,0 +1,38 @@
+[
+ {
+  "date": "2025-07-20",
+  "model": "lgbm",
+  "total_debris_area_m2": 19800.0,
+  "mean_index": 0.0413,
+  "n_detections": 30,
+  "cloud_frac": 0.0337,
+  "n_cells_valid": 932
+ },
+ {
+  "date": "2025-07-20",
+  "model": "mdd",
+  "total_debris_area_m2": 2600.0,
+  "mean_index": 0.0045,
+  "n_detections": 1,
+  "cloud_frac": 0.0337,
+  "n_cells_valid": 932
+ },
+ {
+  "date": "2026-07-05",
+  "model": "lgbm",
+  "total_debris_area_m2": 9300.0,
+  "mean_index": 0.0163,
+  "n_detections": 43,
+  "cloud_frac": 0.0418,
+  "n_cells_valid": 916
+ },
+ {
+  "date": "2026-07-05",
+  "model": "mdd",
+  "total_debris_area_m2": 200.0,
+  "mean_index": 0.0003,
+  "n_detections": 1,
+  "cloud_frac": 0.0418,
+  "n_cells_valid": 916
+ }
+]

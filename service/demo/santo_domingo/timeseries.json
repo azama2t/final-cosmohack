@@ -1,38 +1,20 @@
 [
  {
-  "date": "2019-01-21",
+  "date": "2025-10-18",
   "model": "lgbm",
-  "total_debris_area_m2": 120100.0,
-  "mean_index": 0.2554,
-  "n_detections": 519,
-  "cloud_frac": 0.0463,
-  "n_cells_valid": 873
+  "total_debris_area_m2": 15600.0,
+  "mean_index": 0.0359,
+  "n_detections": 72,
+  "cloud_frac": 0.1879,
+  "n_cells_valid": 785
  },
  {
-  "date": "2019-01-21",
+  "date": "2025-10-18",
   "model": "mdd",
-  "total_debris_area_m2": 29800.0,
-  "mean_index": 0.0624,
-  "n_detections": 54,
-  "cloud_frac": 0.0463,
-  "n_cells_valid": 873
- },
- {
-  "date": "2025-12-30",
-  "model": "lgbm",
-  "total_debris_area_m2": 2900.0,
-  "mean_index": 0.0061,
-  "n_detections": 12,
-  "cloud_frac": 0.0,
-  "n_cells_valid": 879
- },
- {
-  "date": "2025-12-30",
-  "model": "mdd",
-  "total_debris_area_m2": 200.0,
-  "mean_index": 0.0004,
-  "n_detections": 1,
-  "cloud_frac": 0.0,
-  "n_cells_valid": 879
+  "total_debris_area_m2": 32300.0,
+  "mean_index": 0.075,
+  "n_detections": 11,
+  "cloud_frac": 0.1879,
+  "n_cells_valid": 785
  }
 ]
