@@ -1,0 +1,95 @@
+{
+ "model": "weights/lgbm (read-only)",
+ "threshold": 0.63,
+ "sets": {
+  "vessels_fi": {
+   "ship_box_all": {
+    "n": 94033,
+    "fp": 859,
+    "fp_rate": 0.0091,
+    "prob_p99": 0.5568
+   },
+   "ship_hull (B8_dmed15>0.01)": {
+    "n": 12631,
+    "fp": 858,
+    "fp_rate": 0.0679,
+    "prob_p99": 0.99
+   },
+   "water_ring": {
+    "n": 517423,
+    "fp": 22,
+    "fp_rate": 0.0,
+    "prob_p99": 0.0
+   }
+  },
+  "clouds_cmc": {
+   "cloud": {
+    "n": 420000,
+    "fp": 4,
+    "fp_rate": 0.0,
+    "prob_p99": 0.0001
+   },
+   "cloud_edge": {
+    "n": 94968,
+    "fp": 1,
+    "fp_rate": 0.0,
+    "prob_p99": 0.0001
+   },
+   "cloud_interior": {
+    "n": 325032,
+    "fp": 3,
+    "fp_rate": 0.0,
+    "prob_p99": 0.0001
+   },
+   "shadow": {
+    "n": 128000,
+    "fp": 0,
+    "fp_rate": 0.0,
+    "prob_p99": 0.0
+   },
+   "shadow_edge": {
+    "n": 65362,
+    "fp": 0,
+    "fp_rate": 0.0,
+    "prob_p99": 0.0
+   },
+   "shadow_interior": {
+    "n": 62638,
+    "fp": 0,
+    "fp_rate": 0.0,
+    "prob_p99": 0.0
+   },
+   "clear_water": {
+    "n": 224000,
+    "fp": 35,
+    "fp_rate": 0.0002,
+    "prob_p99": 0.0007
+   },
+   "clear_water_edge": {
+    "n": 48649,
+    "fp": 3,
+    "fp_rate": 0.0001,
+    "prob_p99": 0.0001
+   },
+   "clear_water_interior": {
+    "n": 175351,
+    "fp": 32,
+    "fp_rate": 0.0002,
+    "prob_p99": 0.001
+   }
+  }
+ },
+ "box_level": {
+  "vessels_fi": {
+   "boxes": 2094,
+   "flagged": 543,
+   "frac": 0.2593
+  }
+ },
+ "scene_level": {
+  "clouds_cmc": {
+   "scenes": 28,
+   "scenes_with_any_fp": 7
+  }
+ }
+}
