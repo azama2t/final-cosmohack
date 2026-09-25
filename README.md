@@ -73,7 +73,7 @@ powershell -ExecutionPolicy Bypass -File run.ps1
 ```
 
 - `run.ps1` при первом запуске создаёт `.venv` и ставит пакеты. На машине без NVIDIA берётся `requirements-cpu.txt`, ключ `-Cpu` включает этот вариант принудительно. Сервис поднимается на http://127.0.0.1:8000, документация API — http://127.0.0.1:8000/docs.
-- `-Case all -Offline` на этой машине выполняется за **6.0 с** по шагам (плюс около 1,5 с на запуск Python). Время каждого шага записано в `reports/case_run/run_summary.json`.
+- `-Case all -Offline` на этой машине выполняется за **6.2 с** по шагам (плюс около 1,5 с на запуск Python). Время каждого шага записано в `reports/case_run/run_summary.json`.
 - **Чистый клон работает без сети.** В репозитории лежат:
   - кэш STAC `data/pairs/cache` (ответы на все 1272 запроса);
   - реестр кандидатов `data/pairs/*.csv` и вырезки масок `data/pairs/quality/`;
@@ -339,17 +339,17 @@ MAPE не используется: в реестре есть нули. Осн�
 
 | Что | Команда | Выход | Время |
 |---|---|---|---|
-| весь маршрут | `scripts\case\run_all.py all --offline` | `reports/case_run/run_summary.json` | 6.0 с |
+| весь маршрут | `scripts\case\run_all.py all --offline` | `reports/case_run/run_summary.json` | 6.2 с |
 | отбор записей | `scripts\case\run_all.py prepare --offline` | `data/case/selection_*.csv`, `data/case/run/registry_*.csv` | 0.1 с |
 | реестр пар (поиск STAC) | `scripts\case\find_pairs.py --point-scl 6` | `data/pairs/{events,candidates,best_per_event}.csv`, `reports/case_pairs/summary.md` | ≈ 2 мин с сетью, секунды из кэша |
 | маски и детектор на парах | `scripts\case\pair_quality.py` (`--force` — заново) | `data/pairs/quality/<событие>/`, `data/pairs/pair_quality.csv`, `reports/case_pairs/quality.md` | ≈ 4–5 мин с сетью |
-| бейзлайны концентрации, 6 схем разбиения | `scripts\case\baseline_concentration.py` | `reports/case_conc/{metrics.json, predictions.csv, metrics_by_fold.csv, consistency.csv, baseline.md}` | 2.3 с |
+| бейзлайны концентрации, 6 схем разбиения | `scripts\case\baseline_concentration.py` | `reports/case_conc/{metrics.json, predictions.csv, metrics_by_fold.csv, consistency.csv, baseline.md}` | 2.4 с |
 | модели концентрации, dev CV | `scripts\case\conc_model_cv.py` | `reports/case_conc/{dev_cv.md, dev_cv.json, dev_predictions.csv}`, `weights/case_conc/*.json` | ≈ 6 с |
 | отложенный test концентрации | `scripts\case\final_test_conc.py` (**один раз**, уже посчитан; повтор скрипт отклоняет) | `reports/case_conc/final_test.json`, `final_test_predictions.csv` | секунды |
 | детектор: пересчёт из сохранённых предсказаний | `scripts\case\run_all.py eval` | `reports/case_run/detector_recomputed.json` (сверка TP/FP/FN с `metrics.json`) | 1 с |
 | детектор: полный прогон 7 моделей на val и test MARIDA | `scripts\case\detector_compare.py` (нужен MARIDA в `data/MARIDA`) | `reports/case_detector/*` | ≈ 130 с |
 | эксперимент на парах | `scripts\case\pairs_experiment.py --no-fetch` | `reports/case_pairs/experiment.{md,json}` | ≈ 3 мин с чтением FDI по сети |
-| согласованность API и экспорта | `scripts\case\consistency_check.py` | `reports/selfcheck/consistency_<дата>.md\|json` | 68 с |
+| согласованность API и экспорта | `scripts\case\consistency_check.py` | `reports/selfcheck/consistency_<дата>.md\|json` | 66 с |
 | тесты кейса | `-m pytest -q tests\test_case_concentration.py tests\test_case_conc_model.py tests\test_case_run_all.py tests\test_case_consistency.py tests\test_api_v3.py` | 112 тестов | секунды |
 
 - Предсказания детектора на MARIDA (`data/case/detector_preds/*.npz`: вероятности основной модели и RandomForest, маски 7 моделей по патчам) лежат в git. Для пересчёта TP/FP/FN из них нужна разметка MARIDA (`data/MARIDA/patches/*_cl.tif`, как скачать — раздел 2). Без разметки `run_all eval` берёт числа из `reports/case_detector/metrics.json` и записывает его sha256. Полный прогон детекторов заново делает `detector_compare.py` по MARIDA.
@@ -407,10 +407,10 @@ curl -OJ "http://127.0.0.1:8000/api/v3/export?layer=zones&format=geojson&detecti
 - принятые пары — 0;
 - участки со статусом детекции «обнаружено» — 0 (при 0 подтверждённых пар их и должно быть 0; подозрительные пиксели — отдельный слой `detections`).
 
-Самопроверка `scripts/case/consistency_check.py` сравнивает по id четыре представления: алгоритм, JSON, CSV и GeoJSON. Последний прогон (`reports/selfcheck/consistency_20260925_1902.json`):
+Самопроверка `scripts/case/consistency_check.py` сравнивает по id четыре представления: алгоритм, JSON, CSV и GeoJSON. Последний прогон (`reports/selfcheck/consistency_20260925_1925.json`):
 - проверок 283: ok 283, расхождений 0 (подробности — в самом отчёте);
 - некорректные и пустые входы: 46 из 46 с верным кодом;
-- p95 ответа не выше 180 мс.
+- p95 ответа не выше 173 мс.
 
 ## 9. Структура
 

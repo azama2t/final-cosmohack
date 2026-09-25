@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-25T19:23:31+03:00",
+ "generated": "2026-09-25T19:41:18+03:00",
  "note": "генерируется scripts/final_numbers.py; руками не править; null = ещё не посчитано",
  "l3_lgbm": {
   "available": true,
@@ -5199,16 +5199,16 @@
   },
   "selfcheck": {
    "available": true,
-   "file": "reports/selfcheck/consistency_20260925_1902.json",
-   "when": "2026-09-25T19:01:48",
+   "file": "reports/selfcheck/consistency_20260925_1925.json",
+   "when": "2026-09-25T19:23:57",
    "checks": 283,
    "ok": 283,
    "fail": 0,
    "warn": 0,
-   "seconds": 68.0,
+   "seconds": 66.0,
    "invalid_ok": 46,
    "invalid_total": 46,
-   "p95_max_ms": 180.0
+   "p95_max_ms": 173.0
   },
   "control": {
    "n": 12,
@@ -5221,8 +5221,8 @@
    "abs_error": 15.0
   },
   "run": {
-   "command": "run_all.py export --offline",
-   "finished": "2026-09-25T19:23:14",
+   "command": "run_all.py all --offline",
+   "finished": "2026-09-25T19:41:18",
    "versions": {
     "python": "3.12.7",
     "platform": "Windows-10-10.0.19045-SP0",
@@ -5234,17 +5234,17 @@
     "shapely": "2.1.2",
     "fastapi": "0.141.1",
     "yaml": "6.0.3",
-    "git_commit": "93cf856bc4512b232937d40feaa0a3790fda7d4b"
+    "git_commit": "cff6c0e1bb0b86f2dffb685249d331cba35659ce"
    },
    "outputs_fingerprint_short": "85335b7a5f8aa5de",
    "n_outputs": 24,
-   "total_s": 6.0,
+   "total_s": 6.2,
    "step_s": {
     "1_selection": 0.1,
-    "2_pairs": 0.9,
+    "2_pairs": 1.0,
     "3_quality_detector": 0.2,
-    "3b_registry": 0.6,
-    "4_concentration": 2.3,
+    "3b_registry": 0.7,
+    "4_concentration": 2.4,
     "5_detector_marida": 1.0,
     "6_export_api_v3": 1.0
    },

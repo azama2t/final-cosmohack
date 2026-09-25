@@ -559,7 +559,10 @@ def model_estimate_for(sample_id: str) -> Optional[dict]:
             "fold": int(fold) if fold not in (None, "") and str(fold).lstrip("-").isdigit() else fold,
             "interval_coverage_cv": fnum(((selected_models().get(r.get("profile")) or {}).get("dev_cv") or {})
                                          .get("coverage90")),
-            "note": "прогноз по CV вне обучающего участка"}
+            "note": "прогноз по CV вне обучающего участка",
+            "status": ("исследовательская модель, на test не лучше медианы"
+                       if (final_test_decision(r.get("profile") or "") or {}).get("main_better_significant") is False
+                       else "исследовательская модель")}
 
 
 def linked_scenes_by_sample() -> dict[str, list[str]]:
@@ -865,6 +868,29 @@ def _predict_log1p(w: dict, lon: float, lat: float, when: str) -> Optional[float
     return None  # other model families: not supported for point prediction -> no estimate
 
 
+def final_test_result() -> Optional[dict]:
+    ft = _cached("final_test", PATHS["final_test"], _read_json)
+    return ft if isinstance(ft, dict) else None
+
+
+def final_test_decision(profile: str) -> Optional[dict]:
+    """Rule written before opening the test (configs/case_selection.yaml final_test.decision_before_opening):
+    if the main model is not significantly better than the median on the held-out test -> the map uses the median
+    of the training profile. None if the test has not been computed."""
+    ft = final_test_result()
+    pr = ((ft or {}).get("profiles") or {}).get(profile)
+    if not isinstance(pr, dict):
+        return None
+    better = bool(pr.get("main_better_significant"))
+    return {"main_better_significant": better, "use": pr.get("main_model") if better else "median_train",
+            "main_model": pr.get("main_model"), "baseline_q": ((pr.get("baseline_metrics") or {}).get("q_lo"),
+                                                               (pr.get("baseline_metrics") or {}).get("q_hi"))}
+
+
+FIELD_MEDIAN_LABEL = ("оценка по полевым данным, не по снимку: медиана профиля; модели по координатам/сезону "
+                      "на отложенном test не лучше медианы")
+
+
 def field_estimate_at(lon, lat, when) -> Optional[dict]:
     """Prediction of the MAIN field model (conc_model_cv.py) for a point, if it lies in a profile's area of applicability.
 
@@ -876,27 +902,41 @@ def field_estimate_at(lon, lat, when) -> Optional[dict]:
         dom = profile_domain(profile)
         if not dom or not in_bbox(lon, lat, dom):
             continue
-        w = conc_weights(profile)
-        if not w:
-            continue
-        ly = _predict_log1p(w, lon, lat, when)
-        if ly is None or not _m.isfinite(ly):
-            continue
-        q = (sel.get("interval") or {})
-        q_lo, q_hi = fnum(q.get("q_lo")), fnum(q.get("q_hi"))
+        dec = final_test_decision(profile)
+        if dec and not dec["main_better_significant"]:
+            # held-out test: the model is not better than the median -> median of the training (dev) profile
+            dp = (dev_cv().get("profiles") or {}).get(profile) or {}
+            med = fnum((dp.get("dev_target") or {}).get("median"))
+            if med is None:
+                continue
+            ly = _m.log1p(med)
+            q_lo, q_hi = (fnum(x) for x in dec["baseline_q"])
+            cov = ({r.get("model"): r for r in dp.get("table") or []}.get("median") or {}).get("coverage90")
+            model_name, label = "median_train", FIELD_MEDIAN_LABEL
+        else:
+            w = conc_weights(profile)
+            if not w:
+                continue
+            ly = _predict_log1p(w, lon, lat, when)
+            if ly is None or not _m.isfinite(ly):
+                continue
+            q = (sel.get("interval") or {})
+            q_lo, q_hi = fnum(q.get("q_lo")), fnum(q.get("q_hi"))
+            cov = (sel.get("dev_cv") or {}).get("coverage90")
+            model_name, label = sel.get("model"), "оценка по полевым данным, не по снимку"
         val = _m.expm1(ly)
         lo = hi = None
         if q_lo is not None and q_hi is not None:
             lo, hi = min(max(_m.expm1(ly + min(q_lo, 0.0)), 0.0), val), max(_m.expm1(ly + max(q_hi, 0.0)), val)
-        cov = (sel.get("dev_cv") or {}).get("coverage90")
+        q = (sel.get("interval") or {})
         cfg = (_cached("case_selection", CASE_SELECTION_YAML, _yaml_load) or {}).get("profiles", {}).get(profile) or {}
         return {"value": round(val, 2), "lo": None if lo is None else round(lo, 2),
                 "hi": None if hi is None else round(hi, 2),
                 "interval": coverage_label(cov) if lo is not None else None,
                 "interval_nominal": q.get("level"), "interval_coverage_cv": fnum(cov),
                 "unit": "items/km2", "measurement_profile": (cfg.get("measurement_profile") or [None])[0],
-                "profile_config": profile, "model": sel.get("model"), "basis": "field_model",
-                "label": "оценка по полевым данным, не по снимку",
+                "profile_config": profile, "model": model_name, "basis": "field_model",
+                "label": label, "final_test_decision": (dec or {}).get("use"),
                 "applicability": "точка в области полевых данных профиля", "domain_bbox": [round(v, 4) for v in dom]}
     return None
 
@@ -942,7 +982,30 @@ def conc_metrics_block() -> dict:
         profiles[prof] = {"n_dev": p.get("n_dev"), "dev_cruise_days": p.get("dev_cruise_days"),
                           "baseline": b, "main": m, "strength": strength, "why": p.get("why"),
                           "interval_nominal": ((sel.get(prof) or {}).get("interval") or {}).get("level")}
-    ft = _cached("final_test", PATHS["final_test"], _read_json)
+    ft = final_test_result()
+    ft_summary = {}
+    for prof, pr in sorted(((ft or {}).get("profiles") or {}).items()):
+        if not isinstance(pr, dict):
+            continue
+        mm, bm, mv = pr.get("main") or {}, pr.get("baseline_metrics") or {}, pr.get("main_vs_baseline") or {}
+
+        def trow(r, name):
+            return {"name": name, "n": r.get("n"), "mae": _r(r.get("mae")), "rmse": _r(r.get("rmse")),
+                    "mae_log": _r(r.get("log1p_mae")), "coverage": _r(r.get("coverage90")),
+                    "coverage_label": (f"≈{round(fnum(r.get('coverage90')) * 100)} % на test"
+                                       if fnum(r.get("coverage90")) is not None else None)}
+        better = bool(pr.get("main_better_significant"))
+        ft_summary[prof] = {
+            "n_test": pr.get("n_test"), "test_cruise_days": pr.get("test_cruise_days"),
+            "main": trow(mm, pr.get("main_model")), "baseline": trow(bm, "median (train profile)"),
+            "delta_mae": _r(mv.get("d_mae")), "delta_mae_ci95": [_r(x) for x in (mv.get("ci95") or [None, None])],
+            "delta_mae_log": _r(mv.get("d_log1p_mae")),
+            "delta_mae_log_ci95": [_r(x) for x in (mv.get("ci95_log") or [None, None])],
+            "main_better_significant": better,
+            "decision": (f"{pr.get('main_model')} значимо лучше медианы — на карте прогноз модели" if better else
+                         "основная модель на test не лучше медианы — на карте медиана обучающего профиля")}
+        if prof in profiles:
+            profiles[prof]["final_test"] = ft_summary[prof]
     default = "S2_visual_total_plastic" if "S2_visual_total_plastic" in profiles else \
         (sorted(profiles)[0] if profiles else None)
     dp = profiles.get(default) or {}
@@ -951,8 +1014,11 @@ def conc_metrics_block() -> dict:
             "unit": "items/km2", "profile": default, "profiles": profiles,
             "split": {"type": "dev CV: участки маршрута + буфер", "method": cvp.get("method"),
                       "k_blocks": cvp.get("k_blocks"), "buffer_days": cvp.get("buffer_days")} if cvp else None,
-            "final_test": ft if isinstance(ft, dict) else None,
-            "final_test_status": "посчитан" if isinstance(ft, dict) else "будет посчитан один раз в приёмке",
+            "final_test": ft,
+            "final_test_summary": ft_summary or None,
+            "final_test_status": (f"посчитан один раз {str(ft.get('when') or '')[8:10]}.{str(ft.get('when') or '')[5:7]}"
+                                  if ft and ft.get("when") else ("посчитан один раз" if ft else
+                                                                 "будет посчитан один раз в приёмке")),
             "note": "полевая модель концентрации (координаты/время → шт./км²), не спутниковая; "
                     "coverage — фактическое покрытие 90 %-интервала на dev CV"}
 
@@ -1024,12 +1090,25 @@ def zones_all() -> list[dict]:
                         "field_scope_label": scope_label(frow.get("target_scope") or "")},
             "event_id": q.get("event_id"), "quality_dir": d,
         }})
+    labels = {r["id"]: r["label"] for r in REJECT_REASONS}
     for f in feats:
         pr = f["properties"]
         pr["quality"]["flags"] = sorted(set(pr["quality"]["flags"]) | set(pr.pop("_flags", [])))
-        if pr.get("pair_status") == "rejected" and pr["detection_status"] != "insufficient_data":
-            pr["status_reason"] += "; пара с полем отклонена (" + ", ".join(pr["pair_reject_reasons"]) + \
-                "): снимок не синхронен измерению"
+        pr["layer_kind"] = "candidate_strip"
+        pr["layer_label"] = "Снимок-кандидат: полоса обследования"
+        verdict = pr["detection_status"]
+        pr["detector_verdict"] = verdict  # raw result of the detector on the strip (pair_quality)
+        det = pr.get("detector") or {}
+        pr["suspicious_pixels"] = ({"n_objects": det.get("n_objects"), "area_m2": pr.get("detected_area_m2"),
+                                    "prob_max": det.get("prob_max"),
+                                    "note": "подозрительные пиксели на снимке-кандидате, без полевого подтверждения"}
+                                   if det.get("n_objects") is not None else None)
+        pr["detection_reason"] = None
+        if pr.get("pair_status") != "accepted":
+            why = ", ".join(labels.get(c, c) for c in pr.get("pair_reject_reasons") or []) or "пары нет в реестре"
+            pr["detection_reason"] = f"связь снимка с полевым измерением не подтверждена: {why}"
+            pr["detection_status"] = pr["status"] = "insufficient_data"
+            pr["status_reason"] = pr["detection_reason"] + "; " + pr["status_reason"]
     feats.sort(key=lambda f: f["id"])
     return feats
 
@@ -1136,7 +1215,8 @@ def _geom_bounds(g) -> Optional[list[float]]:
 
 def zones_fc(feats: list[dict]) -> dict:
     lg = _cached("lgbm_meta", PATHS["lgbm_meta"], _read_json) or {}
-    fc = {"type": "FeatureCollection", "kind": "model_estimate", "count": len(feats), "empty_reason": None,
+    fc = {"type": "FeatureCollection", "kind": "model_estimate", "layer_kind": "candidate_strip",
+          "label": "Проверенные снимки-кандидаты (полосы обследования)", "count": len(feats), "empty_reason": None,
           "model": {"detector": "lgbm" if lg else None, "concentration": None,
                     "trained_at": lg.get("trained_at") or lg.get("created") or None,
                     "concentration_note": "калибровки спутник → шт./км² нет; концентрация в зонах не выдаётся"},
@@ -1246,6 +1326,17 @@ def scenes_empty_reason(n: int) -> Optional[str]:
 
 
 # ------------------------------------------------------------------ meta
+def map_summary() -> dict:
+    zones = zones_all()
+    confirmed = {(p["event_id"], p["scene_id"]) for p in pairs_all() if p["status"] == "accepted" and p["scene_id"]}
+    plastic = {z["properties"]["scene_id"] for z in zones if z["properties"].get("pair_status") == "accepted"
+               and z["properties"]["support"].get("field_target_scope") in PLASTIC_SCOPES}
+    n, c, pl = len(zones), len(confirmed), len(plastic)
+    return {"n_strips": n, "n_confirmed_pairs": c, "plastic_scenes": pl,
+            "text": (f"{n} обследованных участков со снимками-кандидатами; {c} подтверждённых пар; "
+                     + ("для пластика снимков нет" if pl == 0 else f"снимков для пластика: {pl}"))}
+
+
 def meta() -> dict:
     _, rows = samples_raw()
     dates = sorted(r["date_utc"] for r in rows if r.get("date_utc"))
@@ -1271,6 +1362,13 @@ def meta() -> dict:
         "reject_reasons": REJECT_REASONS,
         "quality_classes": QUALITY_CLASSES,
         "data_status": {"observations": len(rows), "pairs": len(pairs_all()), "pair_quality": len(pair_quality_raw())},
+        "summary": map_summary(),
+        "detector": {"model": "LightGBM (пиксельная, MARIDA + MADOS)", "class": "MARIDA Marine Debris",
+                     "note": "класс MARIDA Marine Debris = любой плавающий мусор, не только пластик"},
+        "layers": [
+            {"id": "observations", "kind": "measurement", "label": "Полевые измерения (настоящие шт./км²)"},
+            {"id": "zones", "kind": "candidate_strip", "label": "Проверенные снимки-кандидаты (полосы обследования)"},
+            {"id": "detections", "kind": "detection", "label": "Подозрительные пиксели детектора"}],
     }
 
 
@@ -1447,7 +1545,9 @@ ZONE_COLS = ["zone_id", "scene_id", "mission", "datetime", "status", "area_km2",
              "concentration_items_km2", "conc_lo", "conc_hi", "interval", "unit", "measurement_profile", "size_class",
              "target_scope", "prob_mean", "valid_fraction", "cloud_fraction", "flags", "n_linked_samples",
              "linked_sample_ids", "centroid_lon", "centroid_lat", "kind"]
-ZONE_COLS_31 = ZONE_COLS + ["detection_status", "concentration_status", "field_estimate_items_km2"]  # 3.1: appended
+ZONE_COLS_31 = ZONE_COLS + ["detection_status", "concentration_status", "field_estimate_items_km2",  # 3.1
+                             "layer_kind", "detector_verdict", "detection_reason", "suspicious_n_objects",  # 3.2
+                             "suspicious_area_m2", "pair_status", "pair_reject_reasons", "strip_area_raster_km2"]
 PAIR_COLS = ["pair_id", "sample_id", "event_id", "source_id", "scene_id", "mission", "scene_datetime", "obs_datetime",
              "dt_hours", "distance_km", "drift_shift_km", "geometry", "cloud_pct_local", "valid_fraction_local",
              "status", "reject_reasons", "split", "scene_cloud_pct", "catalog", "time_known", "registry_note",
@@ -1511,7 +1611,10 @@ def zones_csv(feats: list[dict]) -> str:
                     c.get("target_scope"), p["detector"].get("prob_mean"), p["quality"]["valid_fraction"],
                     p["quality"]["cloud_fraction"], p["quality"]["flags"], p["support"]["n_linked_samples"],
                     p["support"]["linked_sample_ids"], cen[0], cen[1], "model_estimate",
-                    p["detection_status"], p["concentration_status"], (p.get("field_estimate") or {}).get("value")])
+                    p["detection_status"], p["concentration_status"], (p.get("field_estimate") or {}).get("value"),
+                    p.get("layer_kind"), p.get("detector_verdict"), p.get("detection_reason"),
+                    (p.get("suspicious_pixels") or {}).get("n_objects"), (p.get("suspicious_pixels") or {}).get("area_m2"),
+                    p.get("pair_status"), p.get("pair_reject_reasons") or [], p.get("strip_area_raster_km2")])
     return _csv(ZONE_COLS_31, out)
 
 
@@ -1609,7 +1712,7 @@ def zone_detections(zone: dict) -> list[dict]:
                 in_strip = None
         did = f"D-{d}-{i:04d}"
         feats.append({"type": "Feature", "id": did, "geometry": x["geometry"], "properties": {
-            "kind": "detection", "det_id": did, "zone_id": zone["id"], "scene_id": p.get("scene_id"),
+            "kind": "detection", "label": "Подозрительные пиксели детектора", "det_id": did, "zone_id": zone["id"], "scene_id": p.get("scene_id"),
             "datetime": p.get("datetime"), "n_pixels": x["n_pixels"], "area_m2": x["area_m2"],
             "prob_max": x["prob_max"], "prob_mean": x["prob_mean"], "threshold": x["threshold"],
             "in_strip": in_strip,
@@ -1619,7 +1722,9 @@ def zone_detections(zone: dict) -> list[dict]:
 
 def detections_fc(zones: list[dict]) -> dict:
     feats = [f for z in zones for f in zone_detections(z)]
-    fc = {"type": "FeatureCollection", "kind": "detection", "count": len(feats), "empty_reason": None,
+    fc = {"type": "FeatureCollection", "kind": "detection", "label": "Подозрительные пиксели детектора",
+          "note": "контуры пикселей детектора (класс MARIDA Marine Debris = любой плавающий мусор), не полосы и не "
+                  "зоны скопления; без полевого подтверждения", "count": len(feats), "empty_reason": None,
           "features": feats}
     if not feats:
         fc["empty_reason"] = "Детектор не нашёл объектов на снимках выбранных зон" if zones else \

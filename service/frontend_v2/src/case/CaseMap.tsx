@@ -13,6 +13,9 @@ import { SEQ } from '../lib/style';
 export const CONC_BREAKS = [1, 10, 30, 100, 300, 1000];
 export const CONC_COLORS = SEQ.slice(1).map((c) => `rgb(${c[0]},${c[1]},${c[2]})`);
 export const ACCENT = '#ffc53d';
+/** survey strip colours: confirmed scene↔field link / not confirmed */
+export const STRIP_OK = '#e7e8ea';
+export const STRIP_NO = '#9aa0a8';
 /** world view: the Atlantic side of the globe (Sargasso, North Sea, Black Sea; the Pacific source via «Акватория») */
 export const WORLD_CENTER: [number, number] = [-42, 30];
 /** globe radius ≈ 45 % of the map height */
@@ -51,6 +54,8 @@ export interface CaseMapProps {
   onCamera: (c: { lon: number; lat: number; zoom: number }) => void;
   /** the map can take data (style loaded; tiles may still be loading) */
   onReady: () => void;
+  /** suspicious detector pixels of the selected strip (/zones/{id}.detections) */
+  detections: FC<any> | null;
 }
 
 function syncStyle(b: Basemap, proj: Projection): any | null {
@@ -126,7 +131,7 @@ function zoneFeatures(fc: FC<ZoneProps> | null) {
   const pts: any[] = [];
   for (const f of fc?.features ?? []) {
     if (!f.geometry) continue;
-    const props = { id: f.id, ds: f.properties.detection_status };
+    const props = { id: f.id, ds: f.properties.detection_status, ps: f.properties.pair_status === 'accepted' ? 'accepted' : 'rejected' };
     polys.push({ type: 'Feature', geometry: f.geometry, properties: props });
     const c = geomCenter(f.geometry);
     if (c) pts.push({ type: 'Feature', geometry: { type: 'Point', coordinates: c }, properties: props });
@@ -205,6 +210,7 @@ export default function CaseMap(p: CaseMapProps) {
     src('c-zone-pts', z.pts);
     const fp = cur.scenes.filter((s) => s.footprint).map((s) => ({ type: 'Feature', geometry: s.footprint, properties: { id: s.scene_id } }));
     src('c-scene-fp', { type: 'FeatureCollection', features: fp });
+    src('c-det', cur.detections ?? EMPTY);
     const hl = cur.pairHl;
     src('c-pair', hl?.geom ? { type: 'FeatureCollection', features: [{ type: 'Feature', geometry: hl.geom, properties: {} }] } : EMPTY);
     src(
@@ -215,10 +221,12 @@ export default function CaseMap(p: CaseMapProps) {
     const add = (l: any) => {
       if (!map.getLayer(l.id)) map.addLayer(l);
     };
-    const statusCol = statusMatch(meta);
+    // strips = survey strips of candidate scenes: coloured by the PAIR status (confirmed link vs not), never as «debris»
+    const statusCol: any = ['match', ['get', 'ps'], 'accepted', STRIP_OK, STRIP_NO];
+    void statusMatch;
     add({ id: 'c-scene-fp', type: 'line', source: 'c-scene-fp', paint: { 'line-color': '#e7e8ea', 'line-opacity': 0.45, 'line-width': 1 } });
     add({ id: 'c-obs-lines', type: 'line', source: 'c-obs-lines', paint: { 'line-color': '#e7e8ea', 'line-width': 1.4, 'line-opacity': 0.75 } });
-    add({ id: 'c-zones-fill', type: 'fill', source: 'c-zones', paint: { 'fill-color': statusCol, 'fill-opacity': 0.3 } });
+    add({ id: 'c-zones-fill', type: 'fill', source: 'c-zones', paint: { 'fill-color': statusCol, 'fill-opacity': 0.18 } });
     add({
       id: 'c-zones-line',
       type: 'line',
@@ -274,6 +282,9 @@ export default function CaseMap(p: CaseMapProps) {
       filter: ['==', ['get', 'id'], ''],
       paint: { 'circle-radius': 11, 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 2 },
     });
+    // suspicious detector pixels: object contours (signal colour), inside the strip solid, outside faint
+    add({ id: 'c-det-fill', type: 'fill', source: 'c-det', paint: { 'fill-color': ACCENT, 'fill-opacity': ['case', ['==', ['get', 'in_strip'], true], 0.55, 0.12] } });
+    add({ id: 'c-det-line', type: 'line', source: 'c-det', paint: { 'line-color': ACCENT, 'line-width': 1.2, 'line-opacity': ['case', ['==', ['get', 'in_strip'], true], 1, 0.45] } });
     add({ id: 'c-pair-scene', type: 'line', source: 'c-pair-scene', paint: { 'line-color': ACCENT, 'line-width': 2 } });
     add({ id: 'c-pair', type: 'line', source: 'c-pair', filter: ['==', ['geometry-type'], 'LineString'], paint: { 'line-color': ACCENT, 'line-width': 3 } });
     add({
@@ -483,7 +494,7 @@ export default function CaseMap(p: CaseMapProps) {
   }, [p.projection]);
 
   // ---- data ----
-  useEffect(sync, [p.obs, p.zones, p.scenes, p.layers, p.selected, p.pairHl, p.meta]);
+  useEffect(sync, [p.obs, p.zones, p.scenes, p.layers, p.selected, p.pairHl, p.meta, p.detections]);
 
   // ---- scenes with a quality mask but no RGB preview: say so (the translucent mask alone is not a picture) ----
   const noPrevMarkers = useRef<maplibregl.Marker[]>([]);
@@ -529,7 +540,7 @@ export default function CaseMap(p: CaseMapProps) {
     if (!at) return;
     const d = document.createElement('div');
     d.className = `c-sel-tag ${s.kind}`;
-    d.textContent = s.kind === 'obs' ? 'измерение' : 'оценка модели';
+    d.textContent = s.kind === 'obs' ? 'измерение' : 'полоса обследования';
     d.setAttribute('data-testid', 'sel-tag');
     selMarker.current = new maplibregl.Marker({ element: d, anchor: 'left', offset: [14, 0] }).setLngLat(at).addTo(map);
   }, [p.selected, p.obs, p.zones]);

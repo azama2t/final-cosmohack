@@ -189,7 +189,9 @@ def test_export_zones_csv_columns(client):
     assert r.status_code == 200
     header = r.content.decode("utf-8-sig").splitlines()[0].split(",")
     assert header[:len(cs.ZONE_COLS)] == cs.ZONE_COLS  # contract order, 3.1 columns appended
-    assert header[len(cs.ZONE_COLS):] == ["detection_status", "concentration_status", "field_estimate_items_km2"]
+    assert header[len(cs.ZONE_COLS):] == cs.ZONE_COLS_31[len(cs.ZONE_COLS):]
+    assert header[len(cs.ZONE_COLS):len(cs.ZONE_COLS) + 3] == ["detection_status", "concentration_status",
+                                                                "field_estimate_items_km2"]
 
 
 def test_zones_no_invented_concentration(client):
@@ -368,7 +370,7 @@ def test_metrics_final_test_present(client, tmp_path, monkeypatch):
     ft.write_text(json.dumps({"S2_visual_total_plastic": {"mae": 1.0}}), encoding="utf-8")
     monkeypatch.setitem(cs.PATHS, "final_test", ft)
     c = client.get("/api/v3/metrics").json()["concentration"]
-    assert c["final_test"] == {"S2_visual_total_plastic": {"mae": 1.0}} and c["final_test_status"] == "посчитан"
+    assert c["final_test"] == {"S2_visual_total_plastic": {"mae": 1.0}} and c["final_test_status"].startswith("посчитан один раз")
 
 
 def test_metrics_no_l68_files(empty_client):
@@ -377,7 +379,8 @@ def test_metrics_no_l68_files(empty_client):
 
 
 @pytest.mark.skipif(not (HAS_CONC_MODEL and HAS_SAMPLES), reason="нет файлов модели L68 или CSV")
-def test_field_estimate_in_and_out_of_domain():
+def test_field_estimate_in_and_out_of_domain(tmp_path, monkeypatch):
+    monkeypatch.setitem(cs.PATHS, "final_test", tmp_path / "none.json")  # model branch (before the test decision)
     s2 = cs.field_estimate_at(-69.83, 30.07, "2015-04-02T12:00:00Z")      # Sargasso, S2 profile area
     assert s2["model"] == cs.selected_models()["S2_visual_total_plastic"]["model"]
     assert s2["unit"] == "items/km2" and s2["basis"] == "field_model"
@@ -397,6 +400,7 @@ def test_field_estimate_in_and_out_of_domain():
 def test_field_estimate_matches_weights_ridge(tmp_path, monkeypatch):
     """Ridge prediction = expm1(z·coef + b) from the weights JSON; interval from yaml q_lo/q_hi."""
     import math
+    monkeypatch.setitem(cs.PATHS, "final_test", tmp_path / "none.json")
     w = cs.conc_weights("S2_visual_total_plastic")
     if (w.get("model") or {}).get("name") != "ridge_log":
         pytest.skip("S2 main model is not ridge_log")
@@ -609,7 +613,8 @@ def test_pairs_time_uncertainty(client):
 
 @pytest.mark.skipif(not (cs.PATHS["pairs_dir"] / "quality").is_dir(), reason="нет data/pairs/quality")
 def test_zone_detections_and_export(client):
-    zones = client.get("/api/v3/zones", params={"detection_status": "detected"}).json()["features"]
+    zones = [z for z in client.get("/api/v3/zones").json()["features"]
+             if (z["properties"].get("suspicious_pixels") or {}).get("n_objects")]
     if not zones:
         pytest.skip("нет зон с детекциями")
     z = client.get(f"/api/v3/zones/{zones[0]['id']}").json()
@@ -621,11 +626,85 @@ def test_zone_detections_and_export(client):
         assert p["prob_max"] <= 1.0 and p["prob_max"] >= p["threshold"] and p["area_m2"] > 0
         assert p["zone_id"] == zones[0]["id"] and isinstance(p["in_strip"], bool)
     assert any(f["properties"]["in_strip"] for f in det["features"])
-    ex = client.get("/api/v3/export", params={"layer": "detections", "format": "geojson",
-                                              "detection_status": "detected"}).json()
-    assert [f["id"] for f in ex["features"]] == [f["id"] for zz in zones
+    assert det["label"] == "Подозрительные пиксели детектора"
+    src = {"source": "S3_SE_NORTH_SEA"}
+    zs = client.get("/api/v3/zones", params=src).json()["features"]
+    ex = client.get("/api/v3/export", params={"layer": "detections", "format": "geojson", **src}).json()
+    assert [f["id"] for f in ex["features"]] == [f["id"] for zz in zs
                                                   for f in client.get(f"/api/v3/zones/{zz['id']}").json()["detections"]["features"]]
     rows = list(csv.DictReader(io.StringIO(client.get("/api/v3/export", params={
-        "layer": "detections", "format": "csv", "detection_status": "detected"}).content.decode("utf-8-sig"))))
+        "layer": "detections", "format": "csv", **src}).content.decode("utf-8-sig"))))
     assert [r["det_id"] for r in rows] == [f["id"] for f in ex["features"]]
     assert list(rows[0].keys()) == cs.DET_COLS
+
+
+# ------------------------------------------------------------------ 3.2 (INBOX §9): candidate strips, final test
+def test_candidate_strips_semantics(client):
+    fc = client.get("/api/v3/zones").json()
+    assert fc["layer_kind"] == "candidate_strip"
+    for f in fc["features"]:
+        p = f["properties"]
+        assert p["layer_kind"] == "candidate_strip" and p["layer_label"] == "Снимок-кандидат: полоса обследования"
+        assert p["concentration"] is None
+        if p["detection_status"] == "detected":  # only on a confirmed (synchronous) pair
+            assert p["pair_status"] == "accepted"
+        if p["pair_status"] != "accepted":
+            assert p["detection_status"] == p["status"] == "insufficient_data"
+            assert p["detection_reason"].startswith("связь снимка с полевым измерением не подтверждена")
+        sp = p["suspicious_pixels"]
+        if sp is not None:
+            assert sp["note"] == "подозрительные пиксели на снимке-кандидате, без полевого подтверждения"
+        assert p["detector_verdict"] in ("detected", "not_detected", "insufficient_data")
+    rows = list(csv.DictReader(io.StringIO(client.get("/api/v3/export", params={"layer": "zones", "format": "csv"})
+                                           .content.decode("utf-8-sig"))))
+    by = {f["id"]: f["properties"] for f in fc["features"]}
+    for r in rows:
+        assert r["layer_kind"] == "candidate_strip" and r["detector_verdict"] == by[r["zone_id"]]["detector_verdict"]
+
+
+def test_meta_summary_and_detector_note(client):
+    m = client.get("/api/v3/meta").json()
+    s = m["summary"]
+    zones = client.get("/api/v3/zones").json()["features"]
+    assert s["n_strips"] == len(zones)
+    assert s["n_confirmed_pairs"] == len({(p["event_id"], p["scene_id"]) for p in
+                                          client.get("/api/v3/pairs?status=accepted").json()["pairs"]})
+    assert s["text"].startswith(f"{s['n_strips']} обследованных участков со снимками-кандидатами; "
+                                f"{s['n_confirmed_pairs']} подтверждённых пар")
+    assert "не только пластик" in m["detector"]["note"]
+    assert [x["id"] for x in m["layers"]] == ["observations", "zones", "detections"]
+
+
+def _fake_final_test(tmp_path, better):
+    ft = tmp_path / "final_test.json"
+    ft.write_text(json.dumps({"when": "2026-09-25T19:15:01", "profiles": {"S2_visual_total_plastic": {
+        "n_test": 14, "main_model": "ridge_log", "main": {"n": 14, "mae": 30.0, "rmse": 41.5, "log1p_mae": 0.85,
+                                                          "coverage90": 0.71},
+        "baseline_metrics": {"n": 14, "mae": 25.2, "rmse": 32.3, "log1p_mae": 0.6, "coverage90": 0.93,
+                             "q_lo": -1.3393, "q_hi": 1.5345},
+        "main_vs_baseline": {"d_mae": 4.8, "ci95": [-1.6, 12.9]}, "main_better_significant": better}}}),
+        encoding="utf-8")
+    return ft
+
+
+@pytest.mark.skipif(not (HAS_CONC_MODEL and HAS_SAMPLES), reason="нет файлов модели L68 или CSV")
+def test_final_test_decides_field_estimate(client, tmp_path, monkeypatch):
+    import math
+    monkeypatch.setitem(cs.PATHS, "final_test", _fake_final_test(tmp_path, False))
+    fe = cs.field_estimate_at(-69.83, 30.07, "2015-04-02T12:00:00Z")
+    med = cs.dev_cv()["profiles"]["S2_visual_total_plastic"]["dev_target"]["median"]
+    assert fe["model"] == "median_train" and fe["value"] == round(med, 2)
+    assert fe["label"] == cs.FIELD_MEDIAN_LABEL and "не лучше медианы" in fe["label"]
+    assert fe["lo"] == round(math.expm1(math.log1p(med) - 1.3393), 2)
+    c = client.get("/api/v3/metrics").json()["concentration"]
+    assert c["final_test_status"] == "посчитан один раз 25.09"
+    t = c["final_test_summary"]["S2_visual_total_plastic"]
+    assert t["main_better_significant"] is False and t["delta_mae_ci95"] == [-1.6, 12.9]
+    assert t["main"]["mae"] == 30.0 and t["baseline"]["mae"] == 25.2 and "медиана" in t["decision"]
+    me = cs.model_estimate_for(next(iter(cs._dev_predictions())))
+    if me and me["profile_config"] == "S2_visual_total_plastic":
+        assert me["status"] == "исследовательская модель, на test не лучше медианы"
+    monkeypatch.setitem(cs.PATHS, "final_test", _fake_final_test(tmp_path, True))
+    import os
+    os.utime(cs.PATHS["final_test"], ns=(1, 3_000_000_000_000_000_000))
+    assert cs.field_estimate_at(-69.83, 30.07, "2015-04-02T12:00:00Z")["model"] == "ridge_log"

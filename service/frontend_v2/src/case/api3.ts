@@ -199,6 +199,10 @@ export interface ZoneProps {
   pair_drift_shift_km?: number | null;
   pair_tolerance_km?: number | null;
   strip_area_raster_km2?: number | null;
+  // L62h
+  layer_kind?: string | null;
+  detection_reason?: string | null;
+  suspicious_pixels?: { n_objects?: number | null; area_m2?: number | null; prob_max?: number | null; [k: string]: any } | null;
 }
 
 export interface ZoneDetail extends Feat<ZoneProps> {
@@ -206,6 +210,17 @@ export interface ZoneDetail extends Feat<ZoneProps> {
   prob_crop_url: string | null;
   linked_observations: FC<ObsProps> | null;
   explain: string[];
+  detections?: FC<DetProps> | null;
+}
+
+export interface DetProps {
+  kind: 'detection';
+  det_id: string;
+  zone_id: string;
+  n_pixels: number | null;
+  area_m2: number | null;
+  prob_max: number | null;
+  in_strip: boolean | null;
 }
 
 export interface Pair {

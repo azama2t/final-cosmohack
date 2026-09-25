@@ -3,7 +3,7 @@
 // field_estimate separately («оценка по полевым данным, не по снимку»); zone area separately from concentration.
 import { useEffect, useState, type ReactNode } from 'react';
 import Info from '../components/Info';
-import { get, apiUrl, API_BASE, ApiErr, type Feat, type Meta, type ObsProps, type Pair, type Scene, type ZoneDetail, type ZoneProps } from './api3';
+import { get, API_BASE, ApiErr, type Feat, type Meta, type ObsProps, type Pair, type Scene, type ZoneDetail, type ZoneProps } from './api3';
 import { plural, color, dateRu, dateTimeRu, driftTitle, driftTxt, dtTitle, dtTxt, eventRu, flagRu, label, missionShort, num, pairDecision, pairReasons, pct, poissonCI, profileRu, reasonRu, scopeRu, sourceShort, unitRu, zoneFlagRu } from './fmt';
 
 function useFetch<T>(fn: (() => Promise<T>) | null, deps: unknown[]): { data: T | null; err: string | null; loading: boolean } {
@@ -125,12 +125,14 @@ export function ZoneCard({
   scenes,
   activePair,
   detector,
+  detail,
   onClose,
   onObs,
   onPair,
 }: {
   meta: Meta;
   detector: string | null;
+  detail: ZoneDetail | null;
   zone: Feat<ZoneProps>;
   scenes: Scene[];
   activePair: string | null;
@@ -139,7 +141,6 @@ export function ZoneCard({
   onPair: (p: Pair) => void;
 }) {
   const p = zone.properties;
-  const det = useFetch<ZoneDetail>(() => get<ZoneDetail>(`/api/v3/zones/${encodeURIComponent(zone.id)}`), [zone.id]);
   const pairs = useFetch<{ pairs: Pair[] }>(p.scene_id ? () => get(`/api/v3/pairs`, { scene_id: p.scene_id }) : null, [p.scene_id]);
   const linked = new Set(p.support?.linked_sample_ids ?? []);
   const zp = (pairs.data?.pairs ?? []).filter((x) => linked.has(x.sample_id));
@@ -147,39 +148,44 @@ export function ZoneCard({
   const fieldId = p.support?.field_sample_id ?? null;
   const zpShown = fieldId ? zp.filter((x) => x.sample_id === fieldId) : zp;
   const scene = scenes.find((s) => s.scene_id === p.scene_id) ?? null;
-  const d = det.data;
+  const d = detail;
+  const link = pairLink(meta, p);
+  const sp = suspicious(p, d);
   const conc = p.concentration;
   const fe = p.field_estimate;
-  const detC = color(meta.detection_statuses, p.detection_status);
-  const concC = color(meta.concentration_statuses, p.concentration_status);
 
   return (
     <div className="right-inner" data-testid="zone-card">
-      <Head kind="zone" kicker="Оценка модели · зона проверки снимком" title={eventRu(p.event_id ?? zone.id)} sub={`${p.mission ?? '—'} · ${dateTimeRu(p.datetime)}`} onClose={onClose} />
+      <Head kind="zone" kicker="Снимок-кандидат · полоса обследования" title={eventRu(p.event_id ?? zone.id)} sub={`${p.mission ?? '—'} · ${dateTimeRu(p.datetime)}`} onClose={onClose} />
       <div className="rp-body">
-        <div className="sec">
-          <div className="c-status-row">
-            <Chip c={detC} testid="zone-det-status">
-              {label(meta.detection_statuses, p.detection_status)}
-            </Chip>
-            <Chip c={concC} hollow testid="zone-conc-status">
-              {label(meta.concentration_statuses, p.concentration_status)}
-            </Chip>
+        <div className="sec" data-testid="zone-link">
+          <div className={`c-link-t ${link.ok ? 'ok' : ''}`} data-testid="zone-link-title">
+            {link.title}
           </div>
-          {p.status_reason && (
-            <div className="c-line c-with-i">
-              <span>{reasonRu(p.status_reason)}</span>
-              <Info label="Полный текст" align="right">
-                {p.status_reason}
-              </Info>
+          {link.why && (
+            <div className="c-line c-with-i" data-testid="zone-link-why">
+              <span>{link.why}</span>
+              {p.status_reason && (
+                <Info label="Полный текст" align="right">
+                  {p.status_reason}
+                </Info>
+              )}
             </div>
           )}
-          {p.pair_sync === 'unsynchronized' && (
-            <div className="c-line" data-testid="zone-pair-sync">
-              пара с полем несинхронна
-              {p.pair_drift_shift_km !== null && p.pair_drift_shift_km !== undefined ? `: дрейф ${num(p.pair_drift_shift_km, 1)} км > допуск ${num(p.pair_tolerance_km ?? null, 1)} км` : ''}
+          <div className="c-sp" data-testid="zone-suspicious">
+            <span className="c-kind px" aria-hidden />
+            <span>{sp}</span>
+          </div>
+          {link.ok && (
+            <div className="c-status-row">
+              <Chip c={color(meta.detection_statuses, p.detection_status)} testid="zone-det-status">
+                {label(meta.detection_statuses, p.detection_status)}
+              </Chip>
             </div>
           )}
+          <span hidden data-testid="zone-conc-status">
+            {label(meta.concentration_statuses, p.concentration_status)}
+          </span>
         </div>
 
         <div className="sec" data-testid="zone-conc">
@@ -215,7 +221,7 @@ export function ZoneCard({
           <div className="sec-h">
             <h3>Оценка по полевым данным, не по снимку</h3>
             <Info label="Что это" align="right">
-              Прогноз полевой модели для района и профиля. Это не измерение и не результат снимка.
+              Оценка по полевым данным для района и профиля (по итогам отложенного test — медиана профиля). Не измерение и не результат снимка.
             </Info>
           </div>
           {fe && fe.value !== null ? (
@@ -229,24 +235,24 @@ export function ZoneCard({
               </div>
             </>
           ) : (
-            <div className="c-line">нет прогноза для профиля этой зоны</div>
+            <div className="c-line">нет оценки для профиля этой полосы</div>
           )}
         </div>
 
         <div className="sec">
           <dl className="rows">
             <dt>
-              Площадь зоны{' '}
+              Площадь полосы{' '}
               <Info label="Площадь">
-                {p.area_basis ?? 'Площадь полигона зоны.'}
+                {p.area_basis ?? 'Площадь полигона полосы обследования.'}
                 {p.strip_area_raster_km2 !== null && p.strip_area_raster_km2 !== undefined ? ` Растровая площадь полосы: ${num(p.strip_area_raster_km2, 2)} км².` : ''} Это не
-                концентрация.
+                концентрация и не площадь пятна.
               </Info>
             </dt>
             <dd data-testid="zone-area">
               {num(p.area_km2, 2)} км²
             </dd>
-            <dt>Площадь пикселей детектора</dt>
+            <dt>Подозрительные пиксели, площадь</dt>
             <dd>{p.detected_area_m2 === null ? '—' : `${num(p.detected_area_m2, 0)} м²`}</dd>
             <dt>Вероятность детектора, ср. / макс.</dt>
             <dd>
@@ -352,27 +358,6 @@ function firstLine(s: string | null | undefined): string | null {
 }
 
 // ------------------------------------------------------------------ observation
-let licP: Promise<Map<string, Record<string, string>>> | null = null;
-/** source licence etc.: not in the observation JSON (API v3.1) → read once from the API's CSV export (same data) */
-function licences(): Promise<Map<string, Record<string, string>>> {
-  if (!licP)
-    licP = fetch(apiUrl('/api/v3/export', { layer: 'observations', format: 'csv' }))
-      .then((r) => (r.ok ? r.text() : ''))
-      .then((t) => {
-        const rows = parseCsv(t.replace(/^﻿/, ''));
-        const h = rows[0] ?? [];
-        const m = new Map<string, Record<string, string>>();
-        for (const r of rows.slice(1)) {
-          const o: Record<string, string> = {};
-          h.forEach((k, i) => (o[k] = r[i] ?? ''));
-          if (o.sample_id) m.set(o.sample_id, o);
-        }
-        return m;
-      })
-      .catch(() => new Map());
-  return licP;
-}
-
 export function parseCsv(t: string): string[][] {
   const out: string[][] = [];
   let row: string[] = [];
@@ -424,14 +409,6 @@ export function ObsCard({
   onPair: (p: Pair) => void;
 }) {
   const r = useFetch<Feat<ObsProps> & { pairs: Pair[] }>(() => get(`/api/v3/observations/${encodeURIComponent(id)}`), [id]);
-  const [lic, setLic] = useState<Record<string, string> | null>(null);
-  useEffect(() => {
-    let alive = true;
-    licences().then((m) => alive && setLic(m.get(id) ?? null));
-    return () => {
-      alive = false;
-    };
-  }, [id]);
   if (r.err)
     return (
       <div className="right-inner" data-testid="obs-card">
@@ -473,7 +450,7 @@ export function ObsCard({
               </div>
               {v === 0 && <div className="c-line">измеренный ноль{p.zero_scope ? ' — только для указанной категории' : ''}</div>}
               <div className="c-line" data-testid="obs-interval">
-                {obsInterval(p, lic)}
+                {obsInterval(p)}
               </div>
             </>
           )}
@@ -545,7 +522,7 @@ export function ObsCard({
 
         <div className="sec c-src" data-testid="obs-source">
           <div className="note">
-            Источник: {p.source_short || lic?.source_short || sourceShort(meta, p.source_id)}
+            Источник: {p.source_short || sourceShort(meta, p.source_id)}
             {p.source_doi && (
               <>
                 {' · '}
@@ -556,8 +533,7 @@ export function ObsCard({
             )}
           </div>
           <div className="note" data-testid="obs-license">
-            Лицензия: {p.source_license || lic?.source_license || '—'}
-            {lic?.sampling_method ? ` · ${lic.sampling_method}` : ''}
+            Лицензия: {p.source_license || '—'}
           </div>
         </div>
       </div>
@@ -566,11 +542,9 @@ export function ObsCard({
 }
 
 /** 95 % interval of a field density: from the API (ci95_lo/hi), else exact Poisson from N (numerator) and the area */
-function obsInterval(p: ObsProps, lic: Record<string, string> | null): string {
-  const nApi = p.density_numerator_items ?? null;
-  const nCsv = lic?.density_numerator_items ? Number(lic.density_numerator_items) : null;
-  const n = nApi ?? (nCsv !== null && Number.isFinite(nCsv) ? nCsv : null);
-  const nTxt = n !== null ? `, Пуассон по N=${num(n, 0)}` : '';
+function obsInterval(p: ObsProps): string {
+  const n = p.density_numerator_items ?? p.items_count ?? null;
+  const nTxt = n !== null ? `, Пуассон по N=${num(n, 0)}` : ', Пуассон';
   if (p.ci95_lo !== null && p.ci95_lo !== undefined && p.ci95_hi !== null && p.ci95_hi !== undefined)
     return `95 % интервал [${num(p.ci95_lo)}; ${num(p.ci95_hi)}] шт./км²${nTxt}`;
   if (n !== null && p.sampled_area_km2) {
@@ -607,4 +581,37 @@ function ModelEstimate({ meta, p }: { meta: Meta; p: ObsProps }) {
       </div>
     </div>
   );
+}
+
+/** is the scene ↔ field link confirmed? (L62h: detection_reason; fallback: pair_status / pair_reject_reasons) */
+function pairLink(meta: Meta, p: ZoneProps): { ok: boolean; title: string; why: string | null } {
+  const ok = p.pair_status === 'accepted';
+  if (ok) return { ok, title: 'Связь снимка с полевым измерением подтверждена', why: reasonRu(p.status_reason) };
+  const parts: string[] = [];
+  for (const r of p.pair_reject_reasons ?? []) {
+    if (r === 'DRIFT_TOO_LARGE')
+      parts.push(
+        p.pair_drift_shift_km !== null && p.pair_drift_shift_km !== undefined
+          ? `дрейф ${num(p.pair_drift_shift_km, 1)} км > допуск ${num(p.pair_tolerance_km ?? null, 1)} км`
+          : 'дрейф больше допуска',
+      );
+    else if (r === 'TIME_UNKNOWN') parts.push('время наблюдения неизвестно, ±12 ч');
+    else if (r === 'CLOUD') parts.push('облака');
+    else if (r === 'GLINT') parts.push('блик');
+    else parts.push(label(meta.reject_reasons, r).toLowerCase());
+  }
+  const why = parts.length ? parts.join(' · ') : reasonRu(p.detection_reason ?? p.status_reason);
+  return { ok, title: 'Связь снимка с полевым измерением не подтверждена', why };
+}
+
+/** «подозрительные пиксели …»: never «обнаружено» unless the pair is confirmed */
+function suspicious(p: ZoneProps, d: ZoneDetail | null): string {
+  const s = p.suspicious_pixels;
+  const n = s?.n_objects ?? p.detector?.n_objects ?? null;
+  const a = s?.area_m2 ?? p.detected_area_m2 ?? null;
+  const tail = p.pair_status === 'accepted' ? '' : ', без полевого подтверждения';
+  if (n === null && a === null) return `детектор: ${reasonRu(p.status_reason) ?? 'нет результата'}`;
+  if (!n && !a) return 'подозрительных пикселей в полосе нет';
+  const nOut = d?.detections?.features?.filter((f) => f.properties.in_strip === false).length ?? 0;
+  return `подозрительные пиксели на снимке-кандидате${tail}: ${plural(n ?? 0, 'объект', 'объекта', 'объектов')}, ${num(a ?? null, 0)} м²${nOut ? ` (ещё ${nOut} вне полосы)` : ''}`;
 }

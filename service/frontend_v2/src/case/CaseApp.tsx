@@ -5,12 +5,12 @@ import Info from '../components/Info';
 import type { Basemap, Projection } from '../types';
 import { loadPrefs, savePrefs } from '../lib/prefs';
 import { ctl } from '../map/controller';
-import { apiUrl, ApiErr, get, MOCK, send, type FC, type Feat, type Meta, type ObsProps, type Pair, type SavedQuery, type Scene, type ZoneProps } from './api3';
-import CaseMap, { CONC_BREAKS, CONC_COLORS, flyToBox, geomBounds, WORLD_CENTER, worldZoom, type HoverInfo, type Pick } from './CaseMap';
-import { Chip, ObsCard, ZoneCard } from './Cards';
+import { apiUrl, ApiErr, get, MOCK, send, type FC, type Feat, type Meta, type ObsProps, type Pair, type SavedQuery, type Scene, type ZoneDetail, type ZoneProps } from './api3';
+import CaseMap, { ACCENT, CONC_BREAKS, CONC_COLORS, STRIP_NO, STRIP_OK, flyToBox, geomBounds, WORLD_CENTER, worldZoom, type HoverInfo, type Pick } from './CaseMap';
+import { ObsCard, ZoneCard } from './Cards';
 import PairsDrawer from './PairsDrawer';
 import MetricsPanel from './MetricsPanel';
-import { color, dateRu, eventRu, label, missionShort, num, profileRu, scopeRu, sourceShort } from './fmt';
+import { plural, color, dateRu, eventRu, label, missionShort, num, profileRu, scopeRu, sourceShort } from './fmt';
 import {
   DEFAULT_QUERY,
   dateError,
@@ -162,6 +162,8 @@ export default function CaseApp() {
     ready && drawer ? (s) => get('/api/v3/pairs', pP, s) : null,
     ready && drawer ? 'p' + fkey + pairStatus : '',
   );
+  const selZoneId = sel?.kind === 'zone' ? sel.id : null;
+  const zoneDetail = useLoad<ZoneDetail>(selZoneId ? (sg) => get(`/api/v3/zones/${encodeURIComponent(selZoneId)}`, {}, sg) : null, selZoneId ? 'zd' + selZoneId : '');
   const metrics = useLoad<any>(meta && leftTab === 'metrics' ? (s) => get('/api/v3/metrics', {}, s) : null, meta && leftTab === 'metrics' ? 'm' : '');
 
   const sceneList = scenes.data?.scenes ?? [];
@@ -527,9 +529,14 @@ export default function CaseApp() {
           </label>
           </div>
           <div className="c-f">
-            <span>Обнаружение (зоны)</span>
+            <span>
+              Статус полосы
+              <Info label="Статус полосы">
+                Полоса обследования — участок снимка-кандидата вокруг полевой трансекты. «Обнаружено» возможно только при подтверждённой паре снимок ↔ поле.
+              </Info>
+            </span>
             <div className="c-chips">
-              {meta.detection_statuses.map((s) => (
+              {[...meta.detection_statuses].sort((a, b) => DET_FILTER_ORDER.indexOf(a.id) - DET_FILTER_ORDER.indexOf(b.id)).map((s) => (
                 <button
                   key={s.id}
                   className={`c-fchip ${q.det.includes(s.id) ? 'on' : ''}`}
@@ -538,13 +545,13 @@ export default function CaseApp() {
                   data-testid={`f-det-${s.id}`}
                 >
                   <i style={{ background: color(meta.detection_statuses, s.id) }} />
-                  {s.label}
+                  {DET_FILTER_RU[s.id] ?? s.label}
                 </button>
               ))}
             </div>
           </div>
           <div className="c-f">
-            <span>Концентрация (зоны)</span>
+            <span>Концентрация по снимку</span>
             <div className="c-chips">
               {meta.concentration_statuses.map((s) => (
                 <button
@@ -565,7 +572,7 @@ export default function CaseApp() {
               <b>{num(obs.data?.count ?? null, 0)}</b> наблюдений
             </span>
             <span>
-              <b>{num(zones.data?.count ?? null, 0)}</b> зон
+              <b>{num(zones.data?.count ?? null, 0)}</b> полос
             </span>
             <span>
               <b>{num(scenes.data?.count ?? null, 0)}</b> снимков
@@ -580,7 +587,7 @@ export default function CaseApp() {
 
         <div className="tabs">
           <button className={`tab ${leftTab === 'zones' ? 'on' : ''}`} onClick={() => setLeftTab('zones')} data-testid="tab-zones">
-            Участки
+            Полосы
           </button>
           <button className={`tab ${leftTab === 'obs' ? 'on' : ''}`} onClick={() => setLeftTab('obs')} data-testid="tab-obs">
             Измерения
@@ -601,14 +608,22 @@ export default function CaseApp() {
                 const p = f.properties;
                 return (
                   <button key={f.id} className={`c-zi ${sel?.kind === 'zone' && sel.id === f.id ? 'on' : ''}`} onClick={() => openZone(f.id)} data-testid="zone-item">
-                    <i className="c-zi-dot" style={{ borderColor: color(meta.detection_statuses, p.detection_status) }} />
+                    <i className="c-zi-dot" style={{ borderColor: p.pair_status === 'accepted' ? STRIP_OK : STRIP_NO }} />
                     <span className="c-zi-main">
                       <span className="c-zi-t">{eventRu(p.event_id ?? f.id)}</span>
                       <span className="c-zi-s">
-                        {label(meta.detection_statuses, p.detection_status)} · {missionShort(p.mission)} {dateRu(p.datetime)}
+                        {p.pair_status === 'accepted' ? 'связь подтверждена' : 'связь не подтверждена'} · {missionShort(p.mission)} {dateRu(p.datetime)}
                       </span>
                     </span>
-                    <span className="c-zi-v">{num(p.area_km2, 2)} км²</span>
+                    <span className="c-zi-v">
+                      {(p.suspicious_pixels?.n_objects ?? p.detector?.n_objects ?? 0) > 0 ? (
+                        <span className="c-px-n" title="подозрительные пиксели детектора в полосе">
+                          <i style={{ background: ACCENT }} />
+                          {p.suspicious_pixels?.n_objects ?? p.detector?.n_objects}
+                        </span>
+                      ) : null}
+                      {num(p.area_km2, 2)} км²
+                    </span>
                   </button>
                 );
               })}
@@ -642,6 +657,7 @@ export default function CaseApp() {
           }}
           onHover={setHover}
           onReady={() => setMapReady(true)}
+          detections={zoneDetail.data?.detections ?? null}
           onCamera={(c) => {
             cam.current = c;
             writeCaseUrl({
@@ -739,7 +755,7 @@ export default function CaseApp() {
               {(
                 [
                   ['obs', 'Полевые наблюдения'],
-                  ['zones', 'Зоны (оценка модели)'],
+                  ['zones', 'Снимки-кандидаты: полосы обследования'],
                   ['scenes', `Снимки (${num(sceneList.filter((s) => s.preview_url && s.bounds).length, 0)} вырезок)`],
                   ['quality', 'Маска качества'],
                 ] as [keyof CaseQuery['layers'], string][]
@@ -797,7 +813,7 @@ export default function CaseApp() {
           )}
         </div>
 
-        <CaseLegend meta={meta} layers={q.layers} hasQuality={hasQuality && q.layers.quality} nScenes={nScenesImg} />
+        <CaseLegend meta={meta} layers={q.layers} hasQuality={hasQuality && q.layers.quality} nScenes={nScenesImg} zones={zones.data} hasDet={!!zoneDetail.data?.detections?.features?.length} />
 
         {layerErr && (
           <div className="c-banner" role="alert" data-testid="layer-error">
@@ -868,6 +884,7 @@ export default function CaseApp() {
             scenes={sceneList}
             activePair={activePair}
             detector={zones.data?.model?.detector ?? null}
+            detail={zoneDetail.data}
             onClose={closeCard}
             onObs={(id) => openObs(id)}
             onPair={(p) => showPair(p, false)}
@@ -961,8 +978,8 @@ function HoverTip({ meta, h, obs, zones }: { meta: Meta; h: HoverInfo; obs: FC<O
     const f = zones?.features.find((x) => x.id === h.id);
     if (!f) return null;
     const p = f.properties;
-    t = `Оценка модели · ${label(meta.detection_statuses, p.detection_status)}`;
-    s = `${label(meta.concentration_statuses, p.concentration_status)} · площадь зоны ${num(p.area_km2, 2)} км²`;
+    t = `Снимок-кандидат · полоса обследования`;
+    s = `${p.pair_status === 'accepted' ? 'связь с полем подтверждена' : 'связь с полем не подтверждена'} · ${label(meta.concentration_statuses, p.concentration_status).toLowerCase()}`;
   }
   return (
     <div className="tip" style={{ left: Math.min(h.x + 14, 9999), top: h.y + 14 }} data-testid="hover-tip">
@@ -972,7 +989,39 @@ function HoverTip({ meta, h, obs, zones }: { meta: Meta; h: HoverInfo; obs: FC<O
   );
 }
 
-function CaseLegend({ meta, layers, hasQuality, nScenes }: { meta: Meta; layers: CaseQuery['layers']; hasQuality: boolean; nScenes: number }) {
+const DET_FILTER_ORDER = ['insufficient_data', 'not_detected', 'detected'];
+const DET_FILTER_RU: Record<string, string> = {
+  insufficient_data: 'связь не подтверждена',
+  not_detected: 'пикселей не найдено',
+  detected: 'обнаружено (пара подтверждена)',
+};
+
+/** one line for the whole view: /meta.summary.text, else counted from the zones of the current filter */
+function summaryText(meta: Meta, zones: FC<ZoneProps> | null): string | null {
+  const t = (meta as any).summary?.text;
+  if (typeof t === 'string' && t) return t;
+  if (!zones) return null;
+  const n = zones.features.length;
+  const ok = zones.features.filter((f) => f.properties.pair_status === 'accepted').length;
+  const plastic = zones.features.some((f) => ['total_plastic', 'plastic_category'].includes(f.properties.support?.field_target_scope ?? ''));
+  return `${plural(n, 'обследованный участок', 'обследованных участка', 'обследованных участков')} со снимками-кандидатами; ${plural(ok, 'подтверждённая пара', 'подтверждённые пары', 'подтверждённых пар')}${plastic ? '' : '; для пластика снимков нет'}`;
+}
+
+function CaseLegend({
+  meta,
+  layers,
+  hasQuality,
+  nScenes,
+  zones,
+  hasDet,
+}: {
+  meta: Meta;
+  layers: CaseQuery['layers'];
+  hasQuality: boolean;
+  nScenes: number;
+  zones: FC<ZoneProps> | null;
+  hasDet: boolean;
+}) {
   const [open, setOpen] = useState(() => window.innerHeight >= 860);
   const qc = meta.quality_classes.filter((c) => c.present !== false && c.id !== 'valid');
   const absent = meta.quality_classes.filter((c) => c.present === false);
@@ -981,8 +1030,8 @@ function CaseLegend({ meta, layers, hasQuality, nScenes }: { meta: Meta; layers:
       <div className="c-lg-head">
         <span className="lg-title">Легенда</span>
         <Info label="Как читать" testid="legend-info">
-          Сплошной символ — измерение (поле). Пунктир — оценка модели (зона проверки снимком). Цвет точки — концентрация, шт./км²: сравнима только внутри одного
-          размерного профиля.
+          Сплошной символ — полевое измерение. Пунктир — полоса обследования на снимке-кандидате (не контур пятна). Жёлтые контуры — подозрительные пиксели детектора
+          выбранной полосы. Цвет точки — концентрация, шт./км²: сравнима только внутри одного размерного профиля.
           {absent.length ? ` ${absent.map((c) => `${c.label}: ${c.note ?? 'в маске не выделяется'}`).join('. ')}.` : ''}
         </Info>
         <button className="icon-btn c-lg-min" onClick={() => setOpen((v) => !v)} aria-label={open ? 'Свернуть легенду' : 'Развернуть легенду'} data-testid="legend-toggle">
@@ -991,11 +1040,16 @@ function CaseLegend({ meta, layers, hasQuality, nScenes }: { meta: Meta; layers:
       </div>
       {open && (
         <>
+          {summaryText(meta, zones) && (
+            <div className="c-lg-summary" data-testid="legend-summary">
+              {summaryText(meta, zones)}
+            </div>
+          )}
           {layers.obs && (
             <>
               <div className="lg-row">
                 <span className="c-sw-dot" />
-                Измерение, шт./км²
+                Полевые измерения, шт./км²
               </div>
               <div className="c-ramp" aria-hidden>
                 {CONC_COLORS.map((c) => (
@@ -1018,17 +1072,22 @@ function CaseLegend({ meta, layers, hasQuality, nScenes }: { meta: Meta; layers:
           )}
           {layers.zones && (
             <>
-              <div className="lg-row c-lg-sep">
-                <span className="c-sw-zone" />
-                Зона · оценка модели
-              </div>
+              <div className="lg-row c-lg-sep">Снимки-кандидаты: полосы обследования</div>
               <div className="c-lg-status">
-                {meta.detection_statuses.map((s) => (
-                  <Chip key={s.id} c={color(meta.detection_statuses, s.id)}>
-                    {s.label}
-                  </Chip>
-                ))}
+                <span className="c-chip">
+                  <i className="c-sw-strip" style={{ borderColor: STRIP_NO }} />
+                  связь не подтверждена
+                </span>
+                <span className="c-chip">
+                  <i className="c-sw-strip" style={{ borderColor: STRIP_OK }} />
+                  подтверждена
+                </span>
               </div>
+              <div className="lg-row c-lg-sep2">
+                <span className="c-sw-px" />
+                Подозрительные пиксели детектора{hasDet ? '' : ' (у выбранной полосы)'}
+              </div>
+              <div className="c-lg-note">класс MARIDA Marine Debris = любой плавающий мусор, не только пластик</div>
             </>
           )}
           {hasQuality && (

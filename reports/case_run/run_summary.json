@@ -68,9 +68,9 @@
    "reject": 306
   }
  },
- "command": "run_all.py export --offline",
- "last_subcommand": "export",
- "finished": "2026-09-25T19:25:06",
+ "command": "run_all.py all --offline",
+ "last_subcommand": "all",
+ "finished": "2026-09-25T19:41:18",
  "offline": true,
  "force": false,
  "workdir": null,
@@ -85,7 +85,7 @@
   "shapely": "2.1.2",
   "fastapi": "0.141.1",
   "yaml": "6.0.3",
-  "git_commit": "93cf856bc4512b232937d40feaa0a3790fda7d4b"
+  "git_commit": "cff6c0e1bb0b86f2dffb685249d331cba35659ce"
  },
  "inputs": {
   "task/macroplastic_marine_samples.csv": "30ce0a65e3880b833b5dfe3bc6f528ee5f5af14a0d22f25995f4ef8af585a764",
@@ -131,7 +131,7 @@
    "step": "2_pairs",
    "ok": true,
    "note": "строк 1774, запросов мимо кэша 0, ошибок 0",
-   "seconds": 0.9
+   "seconds": 1.0
   },
   "3_quality_detector": {
    "step": "3_quality_detector",
@@ -143,7 +143,7 @@
    "step": "3b_registry",
    "ok": true,
    "note": "событий 318: {'reject': 318}, без учёта дрейфа {'accept': 12, 'reject': 306}",
-   "seconds": 0.6
+   "seconds": 0.7
   },
   "total_prepare": {
    "step": "total_prepare",
@@ -154,7 +154,7 @@
    "step": "4_concentration",
    "ok": true,
    "note": "S2_visual_total_plastic: median MAE 35.9 vs knn5 31.3; S1_trawl_total_plastic: median MAE 456.4 vs knn5 448.9",
-   "seconds": 2.3
+   "seconds": 2.4
   },
   "total_eval": {
    "step": "total_eval",
@@ -171,7 +171,7 @@
    "step": "6_export_api_v3",
    "ok": true,
    "note": "observations.geojson: 935, observations.csv: 935, pairs.geojson: 4436, pairs.csv: 4436, zones.geojson: 29, zones.csv: 29",
-   "seconds": 1.1
+   "seconds": 1.0
   },
   "total_export": {
    "step": "total_export",
@@ -181,7 +181,7 @@
   "total_all": {
    "step": "total_all",
    "ok": true,
-   "seconds": 6.0
+   "seconds": 6.2
   }
  },
  "concentration": {

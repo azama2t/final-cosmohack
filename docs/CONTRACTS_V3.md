@@ -408,3 +408,78 @@ CSV пар — все поля раздела 5 (geometry → WKT).
   наш не трогаем, наш — service/frontend_v2). Коммиты только в свою папку, push в main, без force.
 - Контракт в репо: docs/CONTRACTS_V3.md (этот текст). Если нужно поле — пиши, добавим (не переименуем).
 - Проверка бэка: GET /health → {"ok": true}; GET /api/v3/meta.
+
+====================================================================
+3.2 (ДОБАВЛЕНИЯ, 25.09 19:30) — только новые поля, старые не переименованы
+====================================================================
+Смысл слоёв (INBOX §9):
+  observations — «Полевые измерения» (настоящие шт./км²);
+  zones        — «Проверенные снимки-кандидаты»: полосы обследования на снимке вокруг полевого измерения.
+                 Это НЕ зоны скопления мусора;
+  detections   — «Подозрительные пиксели детектора»: контуры найденных пикселей, не полосы.
+Класс MARIDA Marine Debris = любой плавающий мусор, не только пластик.
+
+GET /api/v3/meta — новые поля:
+  "summary":  { "n_strips": 29, "n_confirmed_pairs": 0, "plastic_scenes": 0,
+                "text": "29 обследованных участков со снимками-кандидатами; 0 подтверждённых пар; для пластика снимков нет" }
+  "detector": { "model": "...", "class": "MARIDA Marine Debris",
+                "note": "класс MARIDA Marine Debris = любой плавающий мусор, не только пластик" }
+  "layers":   [ {id, kind, label} × 3 ]   // подписи слоёв для легенды
+  "reject_reasons": + DRIFT_TOO_LARGE «Дрейф за разрыв времени больше допуска (несинхронно)»,
+                    + TIME_UNKNOWN «Время наблюдения неизвестно (окно по суткам)»,
+                    + MISSION_NOT_TARGET, PROCESSING_ERROR
+  "quality_classes[]": + "codes" (коды quality.tif), "present" (встречается ли класс в масках), "note"
+
+GET /api/v3/observations — новые properties:
+  "source_short", "source_license"
+  "n_items", "ci95_lo", "ci95_hi", "ci95_method", "ci95_reason"
+      // эталон C = N/A и его 95 % ДИ Пуассона; null + ci95_reason, если N или A нет
+  "model_estimate": { value, lo, hi, unit, model, profile_config, fold, interval_coverage_cv,
+                      note: "прогноз по CV вне обучающего участка",
+                      status: "исследовательская модель, на test не лучше медианы" } | null
+  "linked_scenes_unsynced": [scene_id]    // снимки, на которых образец проверен, но пара отклонена
+  "target_scope_label", "is_plastic_scope"
+
+GET /api/v3/pairs — новые поля пары:
+  "tolerance_km", "drift_scenarios_km": {low, typical, high}, "dt_drift_hours",
+  "status_without_drift", "dt_uncertainty_h" (12, если time_known=false), "time_note"
+  ("drift_shift_km" теперь заполнен из реестра)
+
+GET /api/v3/zones — новые поля FeatureCollection: "layer_kind": "candidate_strip", "label".
+Новые properties зоны (старые "status" и "detection_status" остаются):
+  "layer_kind": "candidate_strip", "layer_label": "Снимок-кандидат: полоса обследования"
+  "detection_status": "detected" | "not_detected" — ТОЛЬКО при принятой (синхронной) паре.
+                      Если пара отклонена → "insufficient_data" + "detection_reason":
+                      «связь снимка с полевым измерением не подтверждена: <причина>»
+  "detector_verdict": результат детектора по полосе как есть (detected | not_detected | insufficient_data)
+  "suspicious_pixels": { n_objects, area_m2, prob_max,
+                         note: "подозрительные пиксели на снимке-кандидате, без полевого подтверждения" } | null
+  "pair_status", "pair_reject_reasons", "pair_sync" (synchronous | unsynchronized), "pair_drift_shift_km",
+  "pair_tolerance_km", "pair_time_known", "pair_dt_uncertainty_h",
+  "registry": {status, stage, status_without_drift}
+  "area_km2" = геодезическая площадь полигона geometry; "strip_area_raster_km2" — площадь полосы по пикселям
+  "field_estimate.model" = "median_train", если основная модель на отложенном test не лучше медианы
+      (подпись "label": «оценка по полевым данным, не по снимку: медиана профиля; модели по координатам/сезону
+      на отложенном test не лучше медианы»)
+  "concentration" = null всегда (переноса «снимок → шт./км²» нет), "concentration_status" = "unavailable"
+Фильтры /zones: + source, scope, detection_status, concentration_status.
+GET /api/v3/zones/{id}: + "detections" (FeatureCollection слоя detections).
+
+Слой detections: GET /api/v3/export?layer=detections&format=geojson|csv (те же фильтры, что у зон, или query_id).
+  Feature.properties: kind="detection", label, det_id, zone_id, scene_id, datetime, n_pixels, area_m2,
+                      prob_max, prob_mean, threshold, in_strip
+  CSV: det_id,zone_id,scene_id,datetime,n_pixels,area_m2,prob_max,prob_mean,in_strip,threshold,centroid_lon,centroid_lat,kind
+
+CSV зон: после колонок раздела 9 дописаны detection_status, concentration_status, field_estimate_items_km2,
+  layer_kind, detector_verdict, detection_reason, suspicious_n_objects, suspicious_area_m2, pair_status,
+  pair_reject_reasons, strip_area_raster_km2.
+CSV пар: дописаны tolerance_km, dt_drift_hours, status_without_drift, dt_uncertainty_h.
+
+GET /api/v3/metrics:
+  detector: { main, baseline, fdi, rows[] } — на одном test MARIDA: precision, recall, f1, iou, ci95_* для каждой строки;
+            main = LightGBM, baseline = RandomForest (код MARIDA), fdi = FDI-порог.
+  concentration: + "final_test" (файл как есть), "final_test_summary"[profile] = { n_test, main{mae,rmse,mae_log,
+            coverage}, baseline{…}, delta_mae, delta_mae_ci95, main_better_significant, decision },
+            "final_test_status": «посчитан один раз 25.09» | «будет посчитан один раз в приёмке».
+Сохранённый запрос: + "scopes": [target_scope]. Неизвестные поля в query или в теле → 422 BAD_PARAM,
+  details.unknown и details.allowed.

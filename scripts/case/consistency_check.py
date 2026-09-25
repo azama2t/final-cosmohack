@@ -403,8 +403,12 @@ def check_query(c, ck: Checker, spec: dict, src: dict, qrec: dict) -> dict:
                 api_v = p.get(fld, p["area_km2"] if fld == "strip_area_raster_km2" else None)
                 if not near(api_v, e[efld] if e[efld] is None else round(e[efld], 4 if efld == "area_km2" else 1), tol):
                     badz.append({"id": z["id"], "field": fld, "api": api_v, "pair_quality": e[efld]})
-            if p["status"] != e["status"] or p["detection_status"] != e["status"]:
-                badst.append({"id": z["id"], "api": p["status"], "expected": e["status"]})
+            # 3.2 (INBOX §9): the detector verdict on the strip = pair_quality; the zone detection_status equals it
+            # only on a confirmed (synchronous) pair, otherwise insufficient_data with a detection_reason
+            exp_st = e["status"] if p.get("pair_status") == "accepted" else "insufficient_data"
+            if p.get("detector_verdict", p["status"]) != e["status"] or p["status"] != exp_st                     or p["detection_status"] != exp_st                     or (exp_st != e["status"] and not str(p.get("detection_reason") or "").startswith("связь снимка")):
+                badst.append({"id": z["id"], "api": p["status"], "expected": exp_st,
+                              "detector_verdict": p.get("detector_verdict"), "pair_quality": e["status"]})
         if p["concentration"] is not None or p["concentration_status"] not in ("unavailable", "research_estimate",
                                                                                "measured_nearby"):
             badst.append({"id": z["id"], "concentration": p["concentration"], "cs": p["concentration_status"]})

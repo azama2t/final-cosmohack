@@ -3,7 +3,7 @@ import Info from '../components/Info';
 import { num, signed } from './fmt';
 
 const f3 = (v: any) => (typeof v === 'number' ? num(v, 3) : '—');
-const f1 = (v: any) => (typeof v === 'number' ? num(v, 1) : '—');
+const f1 = (v: any) => (typeof v === 'number' ? v.toLocaleString('ru-RU', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '—');
 const pctTxt = (v: any) => (typeof v === 'number' ? `${num(v <= 1 ? v * 100 : v, 0)} %` : '—');
 const ci = (a: any) => (Array.isArray(a) && a.length >= 2 ? `[${num(a[a.length - 2], 3)}–${num(a[a.length - 1], 3)}]` : '');
 
@@ -42,13 +42,13 @@ export default function MetricsPanel({ m, err }: { m: any | null; err: string | 
   for (const [k, keys, ciKey, plain] of DET_ROWS) {
     // a model evaluated on test only may give plain keys (f1, precision …) with split = test
     const vals = models.map((x) => pick(x, ...keys) ?? (x.split === 'test' ? pick(x, plain) : null));
-    if (vals.some((v) => v !== null)) rows.push({ k, vals, ci: ci(models[0]?.[ciKey]) });
+    if (vals.some((v) => v !== null)) rows.push({ k, vals, ci: ci(models[0]?.[ciKey] ?? models[0]?.['ci95_' + plain]) });
   }
   for (const [k, key] of [
     ['F1, val', 'f1'],
     ['IoU, val', 'iou'],
   ] as [string, string][]) {
-    const vals = models.map((x) => (x.split === 'test' ? null : pick(x, key)));
+    const vals = models.map((x) => pick(x, 'val_' + key) ?? (x.split === 'test' ? null : pick(x, key)));
     if (vals.some((v) => v !== null)) rows.push({ k, vals, ci: '' });
   }
   const ce = m.control_example;
@@ -73,8 +73,8 @@ export default function MetricsPanel({ m, err }: { m: any | null; err: string | 
             <tr>
               <th />
               {models.map((x) => (
-                <th key={x.name} className="r">
-                  {x.name}
+                <th key={x.name} className="r" title={x.name + (x.setting ? ` · ${x.setting}` : '')}>
+                  {x.name.split(/[ (]/)[0]}
                 </th>
               ))}
             </tr>
@@ -95,6 +95,8 @@ export default function MetricsPanel({ m, err }: { m: any | null; err: string | 
         </table>
       </div>
 
+      <FinalTest ft={c.final_test} status={c.final_test_status} />
+
       {profiles.map(([pid, pr]) => {
         const b = pr.baseline ?? {};
         const mm = pr.main ?? {};
@@ -104,7 +106,7 @@ export default function MetricsPanel({ m, err }: { m: any | null; err: string | 
         return (
           <div className="sec" key={pid} data-testid="metrics-conc">
             <div className="sec-h">
-              <h3>Концентрация · {pid.replace(/_/g, ' ')}</h3>
+              <h3>Концентрация, dev CV · {pid.replace(/_/g, ' ')}</h3>
               <Info label="Сплит" align="right">
                 Сплит: {pr.main_split ?? mm.split ?? '—'} (кросс-валидация по участкам маршрута), n = {num(mm.n ?? b.n ?? null, 0)}. {typeof c.note === 'string' ? c.note : ''}
               </Info>
@@ -169,5 +171,82 @@ export default function MetricsPanel({ m, err }: { m: any | null; err: string | 
         </div>
       )}
     </div>
+  );
+}
+
+/** the held-out concentration test (evaluated once after the freeze): main model vs the profile median */
+function FinalTest({ ft, status }: { ft: any; status: any }) {
+  if (!ft || !ft.profiles) return null;
+  return (
+    <>
+      {Object.entries(ft.profiles as Record<string, any>).map(([pid, pr]) => {
+        const mm = pr.main ?? {};
+        const b = pr.baseline_metrics ?? {};
+        const mv = pr.main_vs_baseline ?? {};
+        const worse = typeof mm.mae === 'number' && typeof b.mae === 'number' && mm.mae >= b.mae;
+        const verdict = worse ? 'модель не лучше медианы' : pr.main_better_significant ? 'модель лучше медианы' : 'разница с медианой незначима';
+        return (
+          <div className="sec" key={pid} data-testid="metrics-final-test">
+            <div className="sec-h">
+              <h3>Отложенный test · {pid.replace(/_/g, ' ')}</h3>
+              <Info label="Протокол" align="right">
+                {typeof ft.note === 'string' ? ft.note : ''} {typeof status === 'string' ? `Статус: ${status}.` : ''} n test = {num(pr.n_test ?? mm.n ?? null, 0)}, n dev ={' '}
+                {num(pr.n_dev ?? null, 0)}. {typeof pr.note === 'string' ? pr.note : ''}
+              </Info>
+            </div>
+            <table className="c-mtable">
+              <thead>
+                <tr>
+                  <th />
+                  <th className="r">{pr.main_model ?? 'модель'}</th>
+                  <th className="r">{pr.baseline ?? 'медиана'}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>MAE, шт./км²</td>
+                  <td className="r">
+                    <b>{f1(mm.mae)}</b>
+                  </td>
+                  <td className="r">
+                    <b>{f1(b.mae)}</b>
+                  </td>
+                </tr>
+                {(typeof mm.rmse === 'number' || typeof b.rmse === 'number') && (
+                  <tr>
+                    <td>RMSE, шт./км²</td>
+                    <td className="r">{f1(mm.rmse)}</td>
+                    <td className="r">{f1(b.rmse)}</td>
+                  </tr>
+                )}
+                {(typeof mm.log1p_mae === 'number' || typeof b.log1p_mae === 'number') && (
+                  <tr>
+                    <td>Лог-ошибка (log1p)</td>
+                    <td className="r">{f3(mm.log1p_mae)}</td>
+                    <td className="r">{f3(b.log1p_mae)}</td>
+                  </tr>
+                )}
+                {(typeof mm.coverage90 === 'number' || typeof b.coverage90 === 'number') && (
+                  <tr>
+                    <td>Покрытие 90 % интервала</td>
+                    <td className="r">{pctTxt(mm.coverage90)}</td>
+                    <td className="r">{pctTxt(b.coverage90)}</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+            <div className="c-line" data-testid="final-test-verdict">
+              <b>{verdict}</b>
+              {typeof mv.d_mae === 'number' && Array.isArray(mv.ci95) ? ` · Δ MAE ${signed(mv.d_mae, 1)} [${signed(mv.ci95[0], 1)}; ${signed(mv.ci95[1], 1)}]` : ''}
+            </div>
+          </div>
+        );
+      })}
+      {!Object.values(ft.profiles as Record<string, any>).some((pr) => pr.main_better_significant) && (
+        <div className="sec">
+          <div className="c-line">Поэтому оценка по полю на карте — медиана профиля («по полевым данным, не по снимку»).</div>
+        </div>
+      )}
+    </>
   );
 }
