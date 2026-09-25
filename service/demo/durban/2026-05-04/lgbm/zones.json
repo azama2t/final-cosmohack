@@ -1,0 +1,88 @@
+{
+ "region": "durban",
+ "date": "2026-05-04",
+ "model": "lgbm",
+ "threshold": 0.64,
+ "quality": {
+  "glint_or_haze": false,
+  "haze": false,
+  "note": ""
+ },
+ "zones": [
+  {
+   "rank": 1,
+   "h3": "88bc1b6611fffff",
+   "index": 21.4625,
+   "area_m2": 11300.0,
+   "reason": "113 пикс. с признаками мусора (~11300 м²); 11 пятен; повторяется на 3 из 5 дат; ср. уверенность 0.88",
+   "lon": 31.01369,
+   "lat": -29.870452,
+   "repeat_dates": 3,
+   "mean_prob": 0.8839,
+   "flagged_water_px": 113,
+   "observed_frac": 0.6739,
+   "n_detections": 11,
+   "score": 199.761
+  },
+  {
+   "rank": 2,
+   "h3": "88bc1b6615fffff",
+   "index": 14.7087,
+   "area_m2": 7800.0,
+   "reason": "78 пикс. с признаками мусора (~7800 м²); 10 пятен; повторяется на 3 из 5 дат; ср. уверенность 0.93",
+   "lon": 31.021576,
+   "lat": -29.865192,
+   "repeat_dates": 3,
+   "mean_prob": 0.9269,
+   "flagged_water_px": 78,
+   "observed_frac": 0.6787,
+   "n_detections": 10,
+   "score": 144.596
+  },
+  {
+   "rank": 3,
+   "h3": "88bc1b2925fffff",
+   "index": 2.2948,
+   "area_m2": 1300.0,
+   "reason": "13 пикс. с признаками мусора (~1300 м²); 1 пятно; повторяется на 4 из 5 дат; ср. уверенность 0.91",
+   "lon": 31.007271,
+   "lat": -29.883972,
+   "repeat_dates": 4,
+   "mean_prob": 0.9107,
+   "flagged_water_px": 13,
+   "observed_frac": 0.7253,
+   "n_detections": 1,
+   "score": 29.598
+  },
+  {
+   "rank": 4,
+   "h3": "88bc1b661dfffff",
+   "index": 2.0502,
+   "area_m2": 1600.0,
+   "reason": "16 пикс. с признаками мусора (~1600 м²); 3 пятна; повторяется на 3 из 5 дат; ср. уверенность 0.85",
+   "lon": 31.023043,
+   "lat": -29.873453,
+   "repeat_dates": 3,
+   "mean_prob": 0.8517,
+   "flagged_water_px": 16,
+   "observed_frac": 0.999,
+   "n_detections": 3,
+   "score": 27.254
+  },
+  {
+   "rank": 5,
+   "h3": "88bc1b6199fffff",
+   "index": 0.256,
+   "area_m2": 200.0,
+   "reason": "2 пикс. с признаками мусора (~200 м²); 1 пятно; только на этой дате; ср. уверенность 0.87",
+   "lon": 31.18066,
+   "lat": -29.768111,
+   "repeat_dates": 1,
+   "mean_prob": 0.8745,
+   "flagged_water_px": 2,
+   "observed_frac": 0.9987,
+   "n_detections": 1,
+   "score": 1.749
+  }
+ ]
+}

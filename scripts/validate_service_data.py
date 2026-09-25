@@ -315,6 +315,8 @@ def validate(root: Path) -> V:
             v.png(dm["rgb"], size=size)
             if dm["drift"]:
                 check_drift(v, dm["drift"])
+            if "quality" in dm:  # optional (CONTRACTS additions): {"glint_or_haze", "haze", "note"}
+                v.need(dm["quality"], f"{dw}.quality", {"glint_or_haze": (bool,), "haze": (bool,), "note": (str,)})
             if dm.get("thumb"):  # optional (CONTRACTS additions 03:35): jpg, 256 px long side, <= 30 KB
                 tp = v.root / dm["thumb"]
                 if not tp.exists():

@@ -72,3 +72,8 @@
 | `reports/l13_mados.{md,json}`, `reports/experiments_l13.md` | итог MARIDA+MADOS (принято) | отчёт |
 | `weights/lgbm/` | **итоговая модель: LightGBM на MARIDA train + MADOS** (без сцен val MARIDA), порог 0.63; прежняя (только MARIDA) — `weights_exp/lgbm/l3_final_backup/` | inference.py |
 | `scripts/relabel_live_regions.py` | обновляет region_name (рус.), region_name_en, country, marida_dates в существующих scene.json из `stac.REGIONS` | после правки списка регионов |
+| `src/macroplastic/grid/` | prob → пятна (vectorize), индекс H3 res 8 (h3index), зоны «приоритет обследования» (zones), таймсерии | build_service_data |
+| `scripts/build_service_data.py` | `data/live` → `service/data` по CONTRACTS (rgb/prob png, detections, h3, zones, timeseries, manifest, drift); `--thresholds`, `--regions` | вручную после новых сцен |
+| `scripts/make_demo.py` | `service/data` → `service/demo` (≤ 20 МБ, 2 района с дрейфом) | перед коммитом демо |
+| `scripts/validate_service_data.py` | проверка любого корня данных по CONTRACTS (exit 1 при ошибках) | QA |
+| `scripts/make_live_fixture.py`, `tests/test_grid.py` | синтетические сцены для разработки; тесты сетки | pytest |

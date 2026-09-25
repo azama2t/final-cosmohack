@@ -2,7 +2,8 @@
 
 Usage: python scripts/make_demo.py [--src service/data] [--out service/demo] [--regions a,b] [--max-dates 2]
                                    [--max-px 1024] [--max-mb 20]
-Default regions: up to 2 regions with the most (date, model) pairs, then the least cloudy; latest `--max-dates` dates of each.
+Default regions: up to 2 (with drift first, then most (date, model) pairs, then least cloudy); per region the
+`--max-dates` most interesting dates (drift, both models, cloud < 30 %, more detections, newer).
 PNGs are downscaled to <= max-px (prob.png with a 3x3 max filter first so small detections stay visible).
 """
 from __future__ import annotations
@@ -60,14 +61,24 @@ def main(argv=None):
         def cloud(r):
             v = [d["cloud_frac"] for d in r["dates"] if d.get("cloud_frac") is not None]
             return sum(v) / len(v) if v else 1.0
-        regs = sorted(regs, key=lambda r: (-sum(len(d["models"]) for d in r["dates"]), cloud(r)))[:2]
+        def ndet(r):
+            return sum(x["n_detections"] for x in read_json(src / r["id"] / "timeseries.json"))
+        regs = sorted(regs, key=lambda r: (-any(d.get("drift") for d in r["dates"]), -(ndet(r) > 0),
+                                           -sum(len(d["models"]) for d in r["dates"]), cloud(r)))[:2]
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True)
     new_regions = []
     for r in regs:
         rid = r["id"]
-        dates = sorted(r["dates"], key=lambda d: d["date"])[-a.max_dates:]
+        ts_all = read_json(src / rid / "timeseries.json")
+
+        def interest(d):  # drift first, then both models, then clear sky, then more detections, then newer
+            ndet = sum(x["n_detections"] for x in ts_all if x["date"] == d["date"])
+            haze = bool((d.get("quality") or {}).get("haze"))
+            return (bool(d.get("drift")), not haze, len(d["models"]), (d.get("cloud_frac") or 0) < 0.3, ndet > 0,
+                    ndet, d["date"])
+        dates = sorted(sorted(r["dates"], key=interest)[-a.max_dates:], key=lambda d: d["date"])
         for d in dates:
             date = d["date"]
             rj = read_json(src / rid / date / "rgb.json")
@@ -86,13 +97,16 @@ def main(argv=None):
         keep = {d["date"] for d in dates}
         ts = [row for row in read_json(src / rid / "timeseries.json") if row["date"] in keep]
         write_json(out / rid / "timeseries.json", ts)
-        latest = dates[-1]
-        prim = "mdd" if "mdd" in latest["models"] else latest["models"][0]
-        row = next((x for x in ts if x["date"] == latest["date"] and x["model"] == prim), None)
         rr = dict(r)
         rr["dates"] = dates
+        clear = [d for d in dates if not (d.get("quality") or {}).get("haze")]
+        latest = (clear or dates)[-1]
+        prim = "mdd" if "mdd" in latest["models"] else latest["models"][0]
+        row = next((x for x in ts if x["date"] == latest["date"] and x["model"] == prim), None)
+        rr["default_date"] = latest["date"]
         if row:
-            rr["summary"] = {"latest_date": latest["date"], "model": prim, "index_permille": row["mean_index"],
+            rr["summary"] = {"latest_date": latest["date"], "model": prim,
+                             "haze": bool((latest.get("quality") or {}).get("haze")), "index_permille": row["mean_index"],
                              "n_detections": row["n_detections"], "total_debris_area_m2": row["total_debris_area_m2"]}
         new_regions.append(rr)
     man = dict(man)

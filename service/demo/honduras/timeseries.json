@@ -18,21 +18,21 @@
   "n_cells_valid": 710
  },
  {
-  "date": "2025-02-19",
+  "date": "2026-05-30",
   "model": "lgbm",
-  "total_debris_area_m2": 5500.0,
-  "mean_index": 0.0107,
-  "n_detections": 13,
-  "cloud_frac": 0.0023,
-  "n_cells_valid": 711
+  "total_debris_area_m2": 7300.0,
+  "mean_index": 0.0138,
+  "n_detections": 24,
+  "cloud_frac": 0.0175,
+  "n_cells_valid": 709
  },
  {
-  "date": "2025-02-19",
+  "date": "2026-05-30",
   "model": "mdd",
-  "total_debris_area_m2": 300.0,
-  "mean_index": 0.0006,
-  "n_detections": 1,
-  "cloud_frac": 0.0023,
-  "n_cells_valid": 711
+  "total_debris_area_m2": 104300.0,
+  "mean_index": 0.2032,
+  "n_detections": 9,
+  "cloud_frac": 0.0175,
+  "n_cells_valid": 709
  }
 ]

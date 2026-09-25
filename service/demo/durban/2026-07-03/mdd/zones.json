@@ -1,0 +1,12 @@
+{
+ "region": "durban",
+ "date": "2026-07-03",
+ "model": "mdd",
+ "threshold": 0.5,
+ "quality": {
+  "glint_or_haze": false,
+  "haze": false,
+  "note": ""
+ },
+ "zones": []
+}

@@ -52,10 +52,12 @@ MODEL_INFO = {
 }
 COUNTRY = {"honduras": "Гондурас", "haiti": "Гаити", "durban": "ЮАР", "manila": "Филиппины",
            "santo_domingo": "Доминиканская Республика", "danang": "Вьетнам", "da_nang": "Вьетнам",
-           "bali": "Индонезия", "scotland": "Великобритания"}
+           "bali": "Индонезия", "scotland": "Великобритания", "jakarta": "Индонезия", "accra": "Гана",
+           "lagos": "Нигерия", "tiber": "Италия"}
 NAME_RU = {"honduras": "Гондурасский залив", "haiti": "Гаити", "durban": "Дурбан", "manila": "Манильский залив",
            "santo_domingo": "Санто-Доминго", "danang": "Дананг", "da_nang": "Дананг", "bali": "Бали",
-           "scotland": "Шотландия"}
+           "scotland": "Шотландия", "jakarta": "Джакартский залив", "accra": "Аккра", "lagos": "Лагос",
+           "tiber": "Устье Тибра"}
 SOURCES = [
     {"name": "Copernicus Sentinel-2 L2A (содержит модифицированные данные Copernicus Sentinel)",
      "url": "https://dataspace.copernicus.eu", "license": "Copernicus open licence (free, full and open)"},
@@ -217,6 +219,10 @@ def process_scene(region: str, date: str, sdir: Path, models: list[str], out: Pa
     shape = water.shape
     edge = edge_zone(sdir, shape, EDGE_PX)
     water &= ~edge  # edge band is not observed: no detections there, not counted in observed_water_px
+    if (sdir / "scl.tif").exists():  # ships/platforms: hole-filling in water_mask turns their SCL 4/5 pixels into water
+        scl, *_ = read_band(sdir / "scl.tif")
+        if scl.shape == shape:
+            water &= ~np.isin(scl, (4, 5))
     rgba, bounds, d_transform = rgb_display(sdir, s_transform, s_crs, shape)
     H, W = rgba.shape[:2]
     odir = out / region / date
@@ -279,8 +285,28 @@ def zoom_for(bounds):
     return int(min(14, max(7, round(11 + math.log2(0.23 / max(ext, 1e-6))))))
 
 
+HAZE_B8 = 0.006  # median water B8 reflectance above this -> haze / glint (orchestrator 04:48)
+HAZE_NOTE = "дымка/блик — находки могут быть завышены"
+
+
+def scene_quality(sj: dict) -> dict:
+    b8 = sj.get("water_b8_median")
+    goh = bool(sj.get("glint_or_haze", False))
+    haze = goh or (b8 is not None and float(b8) > HAZE_B8)
+    note = ""
+    if haze:
+        note = HAZE_NOTE + (f" (медиана B8 воды {float(b8):.4f})" if b8 is not None else "")
+    return {"glint_or_haze": goh, "haze": bool(haze), "note": note}
+
+
+def _cyr(text) -> bool:
+    return any("а" <= ch.lower() <= "я" or ch in "ёЁ" for ch in str(text or ""))
+
+
 def build_region(region: str, scenes: list[dict], out: Path, model_meta: dict) -> dict:
     ts = []
+    for sc in scenes:
+        sc["quality"] = scene_quality(sc["scene"])
     by_model: dict[str, list[dict]] = {}
     for sc in scenes:
         for m, r in sc["models"].items():
@@ -293,9 +319,13 @@ def build_region(region: str, scenes: list[dict], out: Path, model_meta: dict) -
                     repeat[s["h3"]] = repeat.get(s["h3"], 0) + 1
         for sc, r in lst:
             zones = rank_zones(r["stats"], repeat, n_dates=len(lst))
+            if sc["quality"]["haze"]:
+                for z in zones:
+                    z["reason"] += "; " + HAZE_NOTE
             r["zones"] = zones
             write_json(out / region / sc["date"] / m / "zones.json",
-                       {"region": region, "date": sc["date"], "model": m, "threshold": r["threshold"], "zones": zones})
+                       {"region": region, "date": sc["date"], "model": m, "threshold": r["threshold"],
+                        "quality": sc["quality"], "zones": zones})
             ts.append(r["ts"])
             mm = model_meta.setdefault(m, dict(MODEL_INFO.get(m, {"name": m})))
             mm.setdefault("threshold", r["threshold"])
@@ -304,24 +334,29 @@ def build_region(region: str, scenes: list[dict], out: Path, model_meta: dict) -
             if abs(mm["threshold"] - r["threshold"]) > 1e-9:
                 mm["threshold_note"] = "порог различается по сценам; точный порог — в h3.geojson/zones.json даты"
     write_json(out / region / "timeseries.json", sort_rows(ts))
-    latest = scenes[-1]
-    sj = latest["scene"]
+    clear = [sc for sc in scenes if not sc["quality"]["haze"]]
+    latest = (clear or scenes)[-1]  # default / summary date: latest date without haze, if any
+    sj = scenes[-1]["scene"]
     all_b = np.array([sc["bounds"] for sc in scenes])
     bounds = [float(all_b[:, 0].min()), float(all_b[:, 1].min()), float(all_b[:, 2].max()), float(all_b[:, 3].max())]
     prim = "mdd" if "mdd" in latest["models"] else next(iter(latest["models"]), None)
     lt = latest["models"][prim]["ts"] if prim else {"mean_index": None, "n_detections": 0, "total_debris_area_m2": 0.0}
-    return {"id": region, "name": NAME_RU.get(region) or sj.get("region_name") or region.replace("_", " ").title(),
-            "name_en": sj.get("region_name", ""),
-            "country": sj.get("country") or COUNTRY.get(region, ""), "tile": sj.get("tile", ""),
+    rn = sj.get("region_name", "")
+    return {"id": region,
+            "name": rn if _cyr(rn) else (NAME_RU.get(region) or rn or region.replace("_", " ").title()),
+            "name_en": sj.get("region_name_en") or ("" if _cyr(rn) else rn),
+            "country": COUNTRY.get(region) or sj.get("country", ""),
+            "tile": sj.get("tile", ""),
             "center": [round((bounds[0] + bounds[2]) / 2, 6), round((bounds[1] + bounds[3]) / 2, 6)],
             "bounds": [round(v, 6) for v in bounds], "zoom": zoom_for(bounds),
-            "summary": {"latest_date": latest["date"], "model": prim, "index_permille": lt["mean_index"],
+            "default_date": latest["date"],
+            "summary": {"latest_date": latest["date"], "model": prim, "haze": latest["quality"]["haze"], "index_permille": lt["mean_index"],
                         "n_detections": lt["n_detections"], "total_debris_area_m2": lt["total_debris_area_m2"]},
             "dates": [{"date": sc["date"], "scene_id": sc["scene"].get("scene_id", ""),
                        "source": sc["scene"].get("source", "earth-search sentinel-2-l2a"),
                        "cloud_frac": None if sc["cloud"] is None else round(sc["cloud"], 4), "bounds": sc["bounds"],
                        "rgb": f"{region}/{sc['date']}/rgb.png", "thumb": f"{region}/{sc['date']}/thumb.jpg",
-                       "models": sorted(sc["models"]), "drift": sc["drift"]}
+                       "models": sorted(sc["models"]), "drift": sc["drift"], "quality": sc["quality"]}
                       for sc in scenes]}
 
 

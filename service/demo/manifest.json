@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generated": "2026-09-25T00:33:37+00:00",
+ "generated": "2026-09-25T01:59:24+00:00",
  "kind": "demo",
  "index": {
   "name": "доля наблюдаемой воды с признаками мусора",
@@ -27,7 +27,7 @@
  "regions": [
   {
    "id": "honduras",
-   "name": "Гондурасский залив",
+   "name": "Гондурасский залив (Омоа – Пуэрто-Кортес – устье Мотагуа)",
    "name_en": "Gulf of Honduras (Omoa / Puerto Cortes / Motagua mouth)",
    "country": "Гондурас",
    "tile": "16PCC",
@@ -42,12 +42,14 @@
     15.914048
    ],
    "zoom": 11,
+   "default_date": "2026-05-30",
    "summary": {
-    "latest_date": "2025-02-19",
+    "latest_date": "2026-05-30",
     "model": "mdd",
-    "index_permille": 0.0006,
-    "n_detections": 1,
-    "total_debris_area_m2": 300.0
+    "haze": false,
+    "index_permille": 0.2032,
+    "n_detections": 9,
+    "total_debris_area_m2": 104300.0
    },
    "dates": [
     {
@@ -67,91 +69,113 @@
       "lgbm",
       "mdd"
      ],
-     "drift": null
+     "drift": null,
+     "quality": {
+      "glint_or_haze": false,
+      "haze": false,
+      "note": ""
+     }
     },
     {
-     "date": "2025-02-19",
-     "scene_id": "S2C_MSIL2A_20250219T161341_R140_T16PCC_20250219T193154",
+     "date": "2026-05-30",
+     "scene_id": "S2B_MSIL2A_20260530T160859_R140_T16PCC_20260530T212833",
      "source": "planetary-computer",
-     "cloud_frac": 0.0023,
+     "cloud_frac": 0.0175,
      "bounds": [
       -88.337553,
       15.686044,
       -88.102668,
       15.914048
      ],
-     "rgb": "honduras/2025-02-19/rgb.png",
-     "thumb": "honduras/2025-02-19/thumb.jpg",
+     "rgb": "honduras/2026-05-30/rgb.png",
+     "thumb": "honduras/2026-05-30/thumb.jpg",
      "models": [
       "lgbm",
       "mdd"
      ],
-     "drift": null
+     "drift": "honduras/2026-05-30/drift.json",
+     "quality": {
+      "glint_or_haze": false,
+      "haze": false,
+      "note": ""
+     }
     }
    ]
   },
   {
-   "id": "haiti",
-   "name": "Гаити",
-   "name_en": "Port-au-Prince Bay, Haiti",
-   "country": "Гаити",
-   "tile": "18QYF",
+   "id": "durban",
+   "name": "Дурбан",
+   "name_en": "Durban, South Africa",
+   "country": "ЮАР",
+   "tile": "36JUN",
    "center": [
-    -72.550029,
-    18.719918
+    31.175059,
+    -29.782913
    ],
    "bounds": [
-    -72.670518,
-    18.605076,
-    -72.42954,
-    18.834759
+    30.958242,
+    -29.945,
+    31.391876,
+    -29.620825
    ],
-   "zoom": 11,
+   "zoom": 10,
+   "default_date": "2026-07-03",
    "summary": {
-    "latest_date": "2025-01-27",
+    "latest_date": "2026-07-03",
     "model": "mdd",
+    "haze": false,
     "index_permille": 0.0,
     "n_detections": 0,
     "total_debris_area_m2": 0.0
    },
    "dates": [
     {
-     "date": "2021-01-03",
-     "scene_id": "S2A_18QYF_20210103_0_L2A",
-     "source": "earth-search",
-     "cloud_frac": 0.0003,
+     "date": "2026-05-04",
+     "scene_id": "S2A_MSIL2A_20260504T074021_R092_T36JUN_20260504T132359",
+     "source": "planetary-computer",
+     "cloud_frac": 0.0001,
      "bounds": [
-      -72.670518,
-      18.605076,
-      -72.42954,
-      18.834759
+      30.958242,
+      -29.945,
+      31.221421,
+      -29.714976
      ],
-     "rgb": "haiti/2021-01-03/rgb.png",
-     "thumb": "haiti/2021-01-03/thumb.jpg",
+     "rgb": "durban/2026-05-04/rgb.png",
+     "thumb": "durban/2026-05-04/thumb.jpg",
      "models": [
       "lgbm",
       "mdd"
      ],
-     "drift": null
+     "drift": "durban/2026-05-04/drift.json",
+     "quality": {
+      "glint_or_haze": false,
+      "haze": false,
+      "note": ""
+     }
     },
     {
-     "date": "2025-01-27",
-     "scene_id": "S2B_MSIL2A_20250127T152659_R025_T18QYF_20250127T202440",
+     "date": "2026-07-03",
+     "scene_id": "S2A_MSIL2A_20260703T074031_R092_T36JUN_20260703T130209",
      "source": "planetary-computer",
-     "cloud_frac": 0.0005,
+     "cloud_frac": 0.0002,
      "bounds": [
-      -72.670518,
-      18.605076,
-      -72.42954,
-      18.834759
+      30.958242,
+      -29.945,
+      31.221421,
+      -29.714976
      ],
-     "rgb": "haiti/2025-01-27/rgb.png",
-     "thumb": "haiti/2025-01-27/thumb.jpg",
+     "rgb": "durban/2026-07-03/rgb.png",
+     "thumb": "durban/2026-07-03/thumb.jpg",
      "models": [
       "lgbm",
       "mdd"
      ],
-     "drift": null
+     "drift": null,
+     "quality": {
+      "glint_or_haze": false,
+      "haze": false,
+      "note": ""
+     }
     }
    ]
   }
