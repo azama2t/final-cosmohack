@@ -992,6 +992,9 @@ def run_all(n_speed: int = 20, live: bool = True, port: int = 8091, data_root: s
         (od / f"consistency_{stamp}.json").write_text(json.dumps(res, ensure_ascii=False, indent=1, default=str),
                                                      encoding="utf-8")
         (od / f"consistency_{stamp}.md").write_text(to_md(res), encoding="utf-8")
+        # стабильная копия последнего прогона (в git хранится только она)
+        for ext in ("json", "md"):
+            (od / f"consistency_latest.{ext}").write_bytes((od / f"consistency_{stamp}.{ext}").read_bytes())
         res["out"] = [str(od / f"consistency_{stamp}.json"), str(od / f"consistency_{stamp}.md")]
     return res
 

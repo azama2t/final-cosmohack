@@ -50,3 +50,4 @@ __pycache__/
 /data/case/detector_preds/*.joblib
 /reports/selfcheck/jury_*
 /reports/selfcheck/*.log
+/reports/selfcheck/consistency_2*
