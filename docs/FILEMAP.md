@@ -56,3 +56,10 @@
 | `tests/test_tools.py` | 7 тестов инструментов | pytest |
 | `docs/TOOLS.md` | план первых 60 минут и команды всех инструментов | команда |
 | `reports/tools/` | прогоны инструментов на MARIDA и на пожарном датасете прошлого хакатона | отчёт |
+| `src/macroplastic/live/stac.py` | STAC-поиск (Earth Search / Planetary Computer), scale/offset с проверкой по данным, вырезки 25 км в UTM, water_mask, метрики блика; пишет `data/live/<region>/<date>/` | fetch_live |
+| `src/macroplastic/live/mdd.py` | marinedebrisdetector без lightning (класс UNet из клона `data_cache/marinedebrisdetector`), тайловый fp32-инференс → `prob_mdd.tif/json` | run_mdd |
+| `scripts/fetch_live.py` | выбор и загрузка живой сцены L2A для региона (облачность вырезки, ранжирование по блику, политика источника) | вручную |
+| `scripts/run_mdd.py` | MDD по папкам сцен (через gpu_queue) | вручную |
+| `scripts/run_lgbm_live.py` | наша модель (`weights/lgbm_live`, гармонизация water_median) по папкам сцен, CPU | вручную |
+| `scripts/list_live.py`, `scripts/diagnose_live.py`, `scripts/rebuild_live_masks.py` | таблица сцен; где сидят срабатывания (берег/мутность/SCL/блик); пересчёт масок воды | диагностика |
+| `tests/test_live_harmonize.py` | сетевой тест гармонизации масштаба/смещения S2 L2A до/после 2022 | pytest |
