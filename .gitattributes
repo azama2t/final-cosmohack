@@ -1,0 +1,3 @@
+weights/**/model.txt -text
+*.png binary
+*.tif binary
