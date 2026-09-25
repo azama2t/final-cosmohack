@@ -802,7 +802,7 @@ def render_crop(st: core.Store, rid: str, date: Optional[str], lon: float, lat: 
     dr.rectangle([x0 - 6, y0 - 22, x0 + px_len + 60, y0 + 8], fill=(11, 22, 34, 170))
     dr.rectangle([x0, y0 - 3, x0 + px_len, y0 + 2], fill=(255, 255, 255, 255))
     dr.text((x0 + px_len + 6, y0 - 9), txt, font=f, fill=(255, 255, 255, 255))
-    dr.text((x0, y0 - 20), f"{date} · {label}", font=font(11), fill=(223, 232, 241, 255))
+    dr.text((x0, y0 - 20), f"{'дата неизвестна' if str(date).startswith('1900-01-01') else date} · {label}", font=font(11), fill=(223, 232, 241, 255))
     buf = io.BytesIO()
     im.save(buf, "PNG", optimize=False)
     return buf.getvalue()

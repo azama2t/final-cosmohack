@@ -150,10 +150,11 @@ def queue(st: core.Store, rid: str, model: Optional[str] = None, limit: int = 50
                     codes.append("disagreement")
                     prio += 2
                 mp = p.get("max_prob")
-                if not art and mp is not None and abs(float(mp) - thr) <= NEAR_THR:
-                    reasons.append(f"около порога: max P {float(mp):.2f} при пороге {thr:.2f}")
+                near = min(NEAR_THR, (1.0 - thr) / 3.0)  # high thresholds (0.99+) would put every finding "near"
+                if not art and mp is not None and near > 0 and abs(float(mp) - thr) <= near:
+                    reasons.append(f"около порога: max P {float(mp):.3g} при пороге {thr:.3g}")
                     codes.append("near_threshold")
-                    prio += 1 + (NEAR_THR - abs(float(mp) - thr)) / NEAR_THR
+                    prio += 1 + (near - abs(float(mp) - thr)) / near
                 if not codes:
                     continue
                 lon, lat = place.det_lonlat(f)
