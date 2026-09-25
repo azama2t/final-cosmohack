@@ -82,17 +82,64 @@ REJECT_REASONS = [
     {"id": "MISSION_NOT_TARGET", "label": "Миссия не целевая (Landsat-7)"},
     {"id": "PROCESSING_ERROR", "label": "Ошибка обработки снимка"},
 ]
-# colours actually used in data/pairs/quality/<event>/quality.png (scripts/case/pair_quality.py, Q_COL): opaque RGB,
-# strip outline magenta. They differ from the contract's suggested RGBA palette -> front must take them from here.
+# Quality mask legend (contract 3.1). /api/v3/scenes/{id}/quality.png is rendered from quality.tif of
+# scripts/case/pair_quality.py with exactly these RGBA colours (codes: 0 nodata, 1 water, 2 land, 3 SCL cloud/shadow/
+# cirrus, 4 spectral cloud, 5 other = water-edge buffer/dark/defect). The mask has no per-pixel shadow and glint classes:
+# SCL shadow is merged into code 3, glint is a strip-level check (B11 median), so "present": false for them.
 QUALITY_CLASSES = [
-    {"id": "nodata", "label": "Нет данных", "color": "#000000", "code": 0},
-    {"id": "water", "label": "Пригодная вода", "color": "#285ac8", "code": 1},
-    {"id": "land", "label": "Суша", "color": "#967846", "code": 2},
-    {"id": "cloud", "label": "Облако/тень/перистые (SCL)", "color": "#f0f0f0", "code": 3},
-    {"id": "spectral_cloud", "label": "Облако (спектральная маска)", "color": "#ffaa00", "code": 4},
-    {"id": "other", "label": "Прочее (край воды, тёмные/дефект)", "color": "#787878", "code": 5},
-    {"id": "strip_outline", "label": "Контур полосы наблюдения", "color": "#ff00ff", "code": None},
+    {"id": "valid", "label": "Пригодная вода", "color": "#00000000", "codes": [1], "present": True},
+    {"id": "cloud", "label": "Облако (вкл. тень и перистые по SCL)", "color": "#ffffff99", "codes": [3, 4],
+     "present": True},
+    {"id": "shadow", "label": "Тень облака", "color": "#74c0fc99", "codes": [], "present": False,
+     "note": "отдельно не выделяется: тень входит в класс «Облако»"},
+    {"id": "glint", "label": "Блики", "color": "#ffd43b99", "codes": [], "present": False,
+     "note": "блики оцениваются по полосе целиком (медиана B11), не по пикселям"},
+    {"id": "land", "label": "Суша", "color": "#495057cc", "codes": [2], "present": True},
+    {"id": "nodata", "label": "Нет данных / непригодно", "color": "#00000066", "codes": [0, 5], "present": True},
 ]
+DETECTION_STATUSES = STATUSES[:3]
+CONCENTRATION_STATUSES = [
+    {"id": "measured_nearby", "label": "Есть полевое измерение рядом", "color": "#1c7ed6"},
+    {"id": "research_estimate", "label": "Исследовательская оценка", "color": "#7048e8"},
+    {"id": "unavailable", "label": "Концентрация недоступна", "color": "#adb5bd"},
+]
+DETECTION_STATUS_IDS = [s["id"] for s in DETECTION_STATUSES]
+CONCENTRATION_STATUS_IDS = [s["id"] for s in CONCENTRATION_STATUSES]
+PLASTIC_SCOPES = {"total_plastic", "plastic_category"}
+
+
+def scope_label(scope: str) -> Optional[str]:
+    for sc in SCOPES:
+        if sc["id"] == scope:
+            return sc["label"]
+    return None
+
+
+def _rgba(hex8: str) -> tuple:
+    h = hex8.lstrip("#")
+    return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4, 6))
+
+
+def render_quality_png(tif: Path) -> bytes:
+    """quality.tif (codes 0..5) -> RGBA PNG in the QUALITY_CLASSES palette."""
+    def load(path):
+        import numpy as np
+        import rasterio
+        from PIL import Image
+        with rasterio.open(path) as ds:
+            a = ds.read(1)
+        lut = np.zeros((256, 4), dtype=np.uint8)
+        lut[:] = _rgba("#00000066")  # unknown code = nodata
+        for qc in QUALITY_CLASSES:
+            for c in qc["codes"]:
+                lut[c] = _rgba(qc["color"])
+        img = Image.fromarray(lut[a.astype(np.uint8)], "RGBA")
+        buf = io.BytesIO()
+        img.save(buf, "PNG", optimize=True)
+        return buf.getvalue()
+    return _cached(f"qpng:{tif}", tif, load)
+
+
 QUERY_LAYERS = ["scene", "quality", "observations", "zones", "pairs"]
 
 _CAND_REASON = {
@@ -405,6 +452,7 @@ def _obs_feature(r: dict, linked: list[str], geometry: str = "point") -> dict:
     if ln:
         geom = {"type": "LineString", "coordinates": [list(ln[0]), list(ln[1])]}
     flags = [x.strip() for x in (r.get("quality_flags") or "").split(";") if x.strip()]
+    is_item = r.get("record_type") == "item_observation"  # a single object, not a density
     missions = [x.strip() for x in (r.get("missions_calendar_eligible") or "").split(";") if x.strip()]
     props = {
         "kind": "measurement",
@@ -420,8 +468,10 @@ def _obs_feature(r: dict, linked: list[str], geometry: str = "point") -> dict:
         "target_scope": r.get("target_scope") or None,
         "measurement_profile": r.get("measurement_profile") or None,
         "size_class": r.get("size_class") or None,
-        "concentration_items_km2": fnum(r.get("concentration_items_km2")),
-        "concentration_g_km2": fnum(r.get("concentration_g_km2")),
+        "target_scope_label": scope_label(r.get("target_scope") or ""),
+        "is_plastic_scope": (r.get("target_scope") or "") in PLASTIC_SCOPES,
+        "concentration_items_km2": None if is_item else fnum(r.get("concentration_items_km2")),
+        "concentration_g_km2": None if is_item else fnum(r.get("concentration_g_km2")),
         "sampled_area_km2": fnum(r.get("sampled_area_km2")),
         "transect": tr,
         "position_role": r.get("position_role") or None,
@@ -609,6 +659,33 @@ def pairs_empty_reason(n: int) -> Optional[str]:
     return "Нет пар под выбранные фильтры"
 
 
+# ------------------------------------------------------------------ field model predictions (field_estimate)
+FIELD_MODEL = ("event", "knn5")  # split, model — the same "main" row as /metrics
+
+
+def predictions_raw() -> list[dict]:
+    return _cached("predictions", PATHS["conc_metrics"].parent / "predictions.csv", _read_csv) or []
+
+
+def field_estimate(sample_ids: list[str]) -> Optional[dict]:
+    """Out-of-fold prediction of the field model (coordinates/time -> items/km2) for a linked sample.
+
+    Not a satellite estimate. None when no linked sample is in reports/case_conc/predictions.csv
+    (currently predictions exist only for S1/S2 profiles; pair_quality zones are S3/S4)."""
+    if not sample_ids:
+        return None
+    split, model = FIELD_MODEL
+    for r in predictions_raw():
+        if r.get("split") == split and r.get("model") == model and r.get("sample_id") in sample_ids:
+            srow = sample_row(r["sample_id"]) or {}
+            return {"value": _r(r.get("y_pred"), 3), "lo": None, "hi": None, "interval": None,
+                    "unit": "items/km2", "measurement_profile": srow.get("measurement_profile") or None,
+                    "profile_config": r.get("profile"), "model": f"field_{model}_{split}_oof",
+                    "sample_id": r["sample_id"], "label": "оценка по полевым данным, не по снимку",
+                    "basis": "field_model"}
+    return None
+
+
 # ------------------------------------------------------------------ zones + scenes (from pair_quality)
 _ZONE_REASON_RU = {"cloud": "облачность в полосе наблюдения", "glint": "солнечные блики",
                    "insufficient_coverage": "снимок не покрывает полосу", "land": "суша в полосе"}
@@ -635,6 +712,9 @@ def zones_all() -> list[dict]:
             width = fnum(rows[0].get("transect_width_m"))
             radius = max(width / 2.0 if width else 10.0, 10.0)
         geom = strip_polygon(lon, lat, line, radius) if lon is not None and lat is not None else None
+        # the field density row behind field_items_km2: meta.field_sample_id (L61), else first transect_density row
+        frow = sample_row(meta.get("field_sample_id") or "") or next(
+            (r for r in rows if r.get("record_type") == "transect_density"), None) or {}
         decision = q.get("decision") or ""
         n_det = fnum(q.get("n_det"))
         if decision == "accept" and n_det is not None and n_det > 0:
@@ -649,36 +729,54 @@ def zones_all() -> list[dict]:
         feats.append({"type": "Feature", "id": f"Z-{d}", "geometry": geom, "properties": {
             "kind": "model_estimate", "zone_id": f"Z-{d}", "scene_id": scene_id,
             "mission": mission_of(scene_id or ""), "datetime": iso_dt(q.get("scene_datetime")),
-            "status": status, "status_reason": reason,
-            "concentration_status": "concentration_unavailable",
-            "concentration_reason": "нет проверенной калибровки «снимок → шт./км²»; концентрация — только полевая",
+            "status": status, "detection_status": status, "status_reason": reason,
+            "concentration_status": "unavailable",
+            "concentration_reason": "нет проверенного переноса «снимок → шт./км²»; спутниковая концентрация не выдаётся",
             "area_km2": _r(q.get("strip_area_km2")),
             "area_basis": "полоса наблюдения (буфер трансекты/точки), по которой проверен снимок",
             "detected_area_m2": _r(q.get("det_area_m2"), 1),
             "detector": {"prob_mean": None, "prob_max": _r(prob_max), "n_pixels": det.get("det_px_strip"),
                          "n_objects": None if n_det is None else int(n_det),
                          "threshold": det.get("threshold")},
+            "field_estimate": field_estimate(sids),
             "concentration": None,
             "quality": {"valid_fraction": _r(q.get("valid_water_frac")), "cloud_fraction": _r(q.get("cloud_frac")),
                         "glint_fraction": None, "land_fraction": _r(q.get("land_frac")),
                         "coverage": _r(q.get("coverage")), "glint_b11_median": _r(q.get("glint_b11_median")),
                         "flags": []},
             "support": {"n_linked_samples": len(sids), "linked_sample_ids": sids, "nearest_measurement_km": 0.0,
-                        "field_items_km2": fnum(q.get("field_items_km2"))},
+                        "field_items_km2": fnum(q.get("field_items_km2")),
+                        "field_sample_id": frow.get("sample_id") or None,
+                        "field_target_scope": frow.get("target_scope") or None,
+                        "field_scope_label": scope_label(frow.get("target_scope") or "")},
             "event_id": q.get("event_id"), "quality_dir": d,
         }})
     feats.sort(key=lambda f: f["id"])
     return feats
 
 
+def zone_status_tags(p: dict) -> set:
+    """Old 5-value `status` filter (3.0) -> matches detection_status or concentration_status (3.1)."""
+    tags = {p["detection_status"]}
+    if p["concentration_status"] == "unavailable":
+        tags.add("concentration_unavailable")
+    elif p["concentration_status"] == "research_estimate":
+        tags.add("research_estimate")
+    return tags
+
+
 def filter_zones(bbox=None, date_from=None, date_to=None, scene_id=None, statuses=None, profiles=None,
-                 min_area_km2=None) -> list[dict]:
+                 min_area_km2=None, detection_statuses=None, concentration_statuses=None) -> list[dict]:
     out = []
     for f in zones_all():
         p = f["properties"]
         if scene_id and p["scene_id"] != scene_id:
             continue
-        if statuses and p["status"] not in statuses and p["concentration_status"] not in statuses:
+        if statuses and not (set(statuses) & zone_status_tags(p)):
+            continue
+        if detection_statuses and p["detection_status"] not in detection_statuses:
+            continue
+        if concentration_statuses and p["concentration_status"] not in concentration_statuses:
             continue
         if min_area_km2 is not None and (p["area_km2"] is None or p["area_km2"] < min_area_km2):
             continue
@@ -778,7 +876,7 @@ def scenes_all() -> list[dict]:
                 valid = z["properties"]["quality"]["valid_fraction"]
                 break
         has_rgb = quality_file(sid, "rgb.png") is not None
-        has_q = quality_file(sid, "quality.png") is not None
+        has_q = quality_file(sid, "quality.tif") is not None  # PNG is rendered from the tif (meta.quality_classes)
         has_m = quality_file(sid, "mask.png") is not None
         base = f"/api/v3/scenes/{sid}"
         reasons = sorted(s["_reasons"]) if not s["_acc"] else []
@@ -836,7 +934,10 @@ def meta() -> dict:
         "generated_at": now_iso(),
         "units": {"concentration": "items/km2", "mass": "g/km2", "area": "km2", "distance": "km", "time_shift": "hours"},
         "date_range": {"min": dates[0] if dates else None, "max": dates[-1] if dates else None},
-        "scene_date_range": {"min": sdates[0] if sdates else None, "max": sdates[-1] if sdates else None},
+        "scene_date_range": {"min": sdates[0], "max": sdates[-1]} if sdates else None,
+        "scene_date_range_basis": "даты снимков-кандидатов реестра пар (принятых и отклонённых)",
+        "detection_statuses": DETECTION_STATUSES,
+        "concentration_statuses": CONCENTRATION_STATUSES,
         "statuses": STATUSES,
         "sources": [{"id": i, "label": lab, "n": counts.get(i, 0)} for i, lab in SOURCES],
         "measurement_profiles": PROFILES,
@@ -1003,6 +1104,7 @@ ZONE_COLS = ["zone_id", "scene_id", "mission", "datetime", "status", "area_km2",
              "concentration_items_km2", "conc_lo", "conc_hi", "interval", "unit", "measurement_profile", "size_class",
              "target_scope", "prob_mean", "valid_fraction", "cloud_fraction", "flags", "n_linked_samples",
              "linked_sample_ids", "centroid_lon", "centroid_lat", "kind"]
+ZONE_COLS_31 = ZONE_COLS + ["detection_status", "concentration_status", "field_estimate_items_km2"]  # 3.1: appended
 PAIR_COLS = ["pair_id", "sample_id", "event_id", "source_id", "scene_id", "mission", "scene_datetime", "obs_datetime",
              "dt_hours", "distance_km", "drift_shift_km", "geometry", "cloud_pct_local", "valid_fraction_local",
              "status", "reject_reasons", "split", "scene_cloud_pct", "catalog", "time_known", "registry_note",
@@ -1065,5 +1167,6 @@ def zones_csv(feats: list[dict]) -> str:
                     c.get("unit") or "items/km2", c.get("measurement_profile"), c.get("size_class"),
                     c.get("target_scope"), p["detector"].get("prob_mean"), p["quality"]["valid_fraction"],
                     p["quality"]["cloud_fraction"], p["quality"]["flags"], p["support"]["n_linked_samples"],
-                    p["support"]["linked_sample_ids"], cen[0], cen[1], "model_estimate"])
-    return _csv(ZONE_COLS, out)
+                    p["support"]["linked_sample_ids"], cen[0], cen[1], "model_estimate",
+                    p["detection_status"], p["concentration_status"], (p.get("field_estimate") or {}).get("value")])
+    return _csv(ZONE_COLS_31, out)

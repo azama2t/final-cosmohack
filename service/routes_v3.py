@@ -85,7 +85,11 @@ def _zone_filters(q: dict) -> dict:
     return {"bbox": cs.parse_bbox(q.get("bbox")), "date_from": a, "date_to": b, "scene_id": q.get("scene_id") or None,
             "statuses": cs.parse_list(q.get("status"), "status", cs.STATUS_IDS),
             "profiles": cs.parse_list(q.get("profile"), "profile", cs.PROFILE_IDS),
-            "min_area_km2": cs.parse_float(q.get("min_area_km2"), "min_area_km2", 0, 1e9)}
+            "min_area_km2": cs.parse_float(q.get("min_area_km2"), "min_area_km2", 0, 1e9),
+            "detection_statuses": cs.parse_list(q.get("detection_status"), "detection_status",
+                                                cs.DETECTION_STATUS_IDS),
+            "concentration_statuses": cs.parse_list(q.get("concentration_status"), "concentration_status",
+                                                    cs.CONCENTRATION_STATUS_IDS)}
 
 
 def _scene_filters(q: dict) -> dict:
@@ -172,10 +176,16 @@ def scene_rgb(scene_id: str):
     return _scene_png(scene_id, "rgb.png")
 
 
-@router.get("/scenes/{scene_id}/quality.png", summary="Маска качества (цвета — meta.quality_classes)")
+@router.get("/scenes/{scene_id}/quality.png", summary="Маска качества RGBA (цвета = meta.quality_classes)")
 @api
 def scene_quality(scene_id: str):
-    return _scene_png(scene_id, "quality.png")
+    tif = cs.quality_file(scene_id, "quality.tif")
+    if tif is None:
+        raise ApiError(404, "NO_SCENE", f"Для снимка {scene_id} нет маски качества", {"scene_id": scene_id})
+    body = cs.render_quality_png(tif)
+    if body is None:
+        raise ApiError(404, "NO_SCENE", f"Маску качества снимка {scene_id} не удалось прочитать", {"scene_id": scene_id})
+    return Response(body, media_type="image/png", headers={**CORS, "Cache-Control": "public, max-age=3600"})
 
 
 @router.get("/scenes/{scene_id}/mask.png", summary="Маска детектора")
@@ -202,8 +212,10 @@ def zone(zone_id: str):
             out["prob_crop_url"] = f"/api/v3/scenes/{sid}/mask.png" if sid and cs.quality_file(sid, "mask.png") else None
             rows = [r for r in (cs.sample_row(s) for s in p["support"]["linked_sample_ids"]) if r]
             out["linked_observations"] = cs.observations_fc(rows)
-            out["explain"] = [p["status_reason"][:80], "Концентрация по снимку не оценивается: нет калибровки",
+            out["explain"] = [p["status_reason"][:80], "Концентрация по снимку не оценивается: перенос не подтверждён",
                               "Площадь — полоса наблюдения, не пятно мусора"]
+            if p["support"].get("field_target_scope") and p["support"]["field_target_scope"] not in cs.PLASTIC_SCOPES:
+                out["explain"].append("Полевое измерение — весь мусор, не только пластик")
             return _ok(out)
     raise ApiError(404, "NOT_FOUND", f"Зона {zone_id} не найдена", {"zone_id": zone_id})
 
@@ -321,12 +333,16 @@ def query_run(query_id: str):
         linked = {p["scene_id"] for p in cs.pairs_all() if p["sample_id"] in ids and p["scene_id"]}
         sc = [s for s in sc if s["scene_id"] in linked]
     by_status: dict[str, int] = {}
+    by_conc: dict[str, int] = {}
     for f in zf:
         by_status[f["properties"]["status"]] = by_status.get(f["properties"]["status"], 0) + 1
+        cst = f["properties"]["concentration_status"]
+        by_conc[cst] = by_conc.get(cst, 0) + 1
     return _ok({"query_id": query_id, "name": rec.get("name"), "ran_at": cs.now_iso(), "query": qr,
                 "observations": cs.observations_fc(obs_rows), "zones": cs.zones_fc(zf), "scenes": sc,
                 "summary": {"n_obs": len(obs_rows), "n_zones": len(zf), "n_scenes": len(sc),
-                            "by_status": dict(sorted(by_status.items()))}})
+                            "by_status": dict(sorted(by_status.items())),
+                            "by_concentration_status": dict(sorted(by_conc.items()))}})
 
 
 @router.delete("/queries/{query_id}", status_code=204, summary="Удалить сохранённый запрос")

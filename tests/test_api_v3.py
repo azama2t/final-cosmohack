@@ -188,7 +188,8 @@ def test_export_zones_csv_columns(client):
     r = client.get("/api/v3/export", params={"layer": "zones", "format": "csv"})
     assert r.status_code == 200
     header = r.content.decode("utf-8-sig").splitlines()[0].split(",")
-    assert header == cs.ZONE_COLS
+    assert header[:len(cs.ZONE_COLS)] == cs.ZONE_COLS  # contract order, 3.1 columns appended
+    assert header[len(cs.ZONE_COLS):] == ["detection_status", "concentration_status", "field_estimate_items_km2"]
 
 
 def test_zones_no_invented_concentration(client):
@@ -197,8 +198,12 @@ def test_zones_no_invented_concentration(client):
     for f in fc["features"]:
         p = f["properties"]
         assert p["kind"] == "model_estimate"
-        assert p["concentration"] is None and p["concentration_status"] == "concentration_unavailable"
-        assert p["status"] in cs.STATUS_IDS
+        assert p["concentration"] is None and p["concentration_status"] == "unavailable"
+        assert p["status"] == p["detection_status"] in ("detected", "not_detected", "insufficient_data")
+        if p["support"].get("field_target_scope") == "all_litter":  # team rule: all_litter is never "plastic"
+            assert "не только пластик" in p["support"]["field_scope_label"]
+        fe = p["field_estimate"]
+        assert fe is None or (fe["unit"] == "items/km2" and fe["label"] == "оценка по полевым данным, не по снимку")
 
 
 # ------------------------------------------------------------------ saved queries
@@ -262,3 +267,126 @@ def test_metrics_shape(client):
     assert set(m) >= {"split", "detector", "concentration", "control_example"}
     assert m["concentration"]["unit"] == "items/km2"
     assert m["control_example"]["computed"] == 60.0
+
+
+# ------------------------------------------------------------------ contract 3.1
+CAND_HEADER = ("event_id,source_id,lat,lon,obs_datetime,time_known,time_note,point_from,endpoint,collection,level,"
+               "mission,item_id,scene_datetime,dt_hours,cloud_cover,tile,point_inside_footprint,accept,reject_reason\n")
+
+
+def test_meta_31(client):
+    m = client.get("/api/v3/meta").json()
+    assert [q["id"] for q in m["quality_classes"]] == ["valid", "cloud", "shadow", "glint", "land", "nodata"]
+    for q in m["quality_classes"]:
+        assert q["label"] and len(q["color"]) == 9 and q["color"].startswith("#")
+    assert [s["id"] for s in m["detection_statuses"]] == ["detected", "not_detected", "insufficient_data"]
+    assert [s["id"] for s in m["concentration_statuses"]] == ["measured_nearby", "research_estimate", "unavailable"]
+    for s in m["detection_statuses"] + m["concentration_statuses"]:
+        assert s["label"] and s["color"].startswith("#")
+    sdr = m["scene_date_range"]
+    if cs.candidates_raw() and HAS_SAMPLES:
+        assert sdr["min"] <= sdr["max"] and len(sdr["min"]) == 10
+    else:
+        assert sdr is None
+
+
+def test_meta_31_no_scenes(empty_client):
+    m = empty_client.get("/api/v3/meta").json()
+    assert m["scene_date_range"] is None
+    assert len(m["quality_classes"]) == 6 and len(m["concentration_statuses"]) == 3
+
+
+@pytest.mark.skipif(not HAS_SAMPLES, reason="нет task/macroplastic_marine_samples.csv")
+def test_scene_date_range_from_registry(tmp_path, monkeypatch, client):
+    d = tmp_path / "pairs"
+    d.mkdir()
+    ev = "S3:HE419_MarLitter_transect01,S3_SE_NORTH_SEA,54.08,7.66,2014-04-03 15:19:30+00:00,True,,,"
+    (d / "candidates.csv").write_text(
+        CAND_HEADER
+        + ev + "earth-search,sentinel-2-l2a,L2A,S2A,S2A_X_20140405,2014-04-05 10:00:00+00:00,42.7,5,,True,False,dt>1d\n"
+        + ev + "planetary-computer,landsat-c2-l2,L2SP,L8,LC08_X_20140402,2014-04-02 10:00:00+00:00,-29.3,5,,True,True,\n",
+        encoding="utf-8")
+    monkeypatch.setitem(cs.PATHS, "pairs_dir", d)
+    m = client.get("/api/v3/meta").json()
+    assert m["scene_date_range"] == {"min": "2014-04-02", "max": "2014-04-05"}
+    pr = client.get("/api/v3/pairs").json()["pairs"]
+    assert {p["status"] for p in pr} == {"accepted", "rejected"}
+    assert all(p["reject_reasons"] == ["DT_TOO_LARGE"] for p in pr if p["status"] == "rejected")
+    z = client.get("/api/v3/zones").json()
+    assert z["count"] == 0 and z["empty_reason"]
+
+
+def test_zone_status_filters(client):
+    for st in ("detected", "not_detected", "insufficient_data"):
+        fc = client.get("/api/v3/zones", params={"detection_status": st}).json()
+        assert all(f["properties"]["detection_status"] == st for f in fc["features"])
+    allz = client.get("/api/v3/zones").json()["count"]
+    un = client.get("/api/v3/zones", params={"concentration_status": "unavailable"}).json()["count"]
+    old = client.get("/api/v3/zones", params={"status": "concentration_unavailable"}).json()["count"]
+    assert un == old == allz
+    assert client.get("/api/v3/zones", params={"concentration_status": "research_estimate"}).json()["count"] == 0
+    _err(client.get("/api/v3/zones?detection_status=research_estimate"), 400, "BAD_PARAM")
+    _err(client.get("/api/v3/zones?concentration_status=concentration_unavailable"), 400, "BAD_PARAM")
+
+
+@pytest.mark.skipif(not HAS_SAMPLES, reason="нет task/macroplastic_marine_samples.csv")
+def test_field_estimate_lookup(tmp_path, monkeypatch):
+    conc = tmp_path / "case_conc"
+    conc.mkdir()
+    (conc / "predictions.csv").write_text(
+        "profile,split,fold,sample_id,event_id,group,latitude,longitude,y_true,field_lower,field_upper,model,y_pred\n"
+        "S2_visual_total_plastic,event,0,MPL-0200,e,g,30,-69,15.5,1.8,56.1,median,38.8\n"
+        "S2_visual_total_plastic,event,0,MPL-0200,e,g,30,-69,15.5,1.8,56.1,knn5,21.25\n", encoding="utf-8")
+    monkeypatch.setitem(cs.PATHS, "conc_metrics", conc / "metrics.json")
+    fe = cs.field_estimate(["MPL-0200"])
+    assert fe["value"] == 21.25 and fe["unit"] == "items/km2" and fe["basis"] == "field_model"
+    assert fe["measurement_profile"] == "S2_visual_GT2"
+    assert fe["label"] == "оценка по полевым данным, не по снимку"
+    assert fe["lo"] is None and fe["hi"] is None  # no prediction interval computed -> no invented bounds
+    assert cs.field_estimate(["MPL-0001"]) is None and cs.field_estimate([]) is None
+
+
+@pytest.mark.skipif(not HAS_SAMPLES, reason="нет task/macroplastic_marine_samples.csv")
+def test_all_litter_not_called_plastic_and_items_not_density(client):
+    m = client.get("/api/v3/meta").json()
+    lab = {s["id"]: s["label"] for s in m["target_scopes"]}
+    assert "не только пластик" in lab["all_litter"]
+    fc = client.get("/api/v3/observations", params={"scope": "all_litter"}).json()
+    assert fc["count"] > 0
+    for f in fc["features"]:
+        p = f["properties"]
+        assert p["is_plastic_scope"] is False and "не только пластик" in p["target_scope_label"]
+    items = client.get("/api/v3/observations", params={"record_type": "item_observation"}).json()
+    assert items["count"] > 0
+    assert all(f["properties"]["concentration_items_km2"] is None and f["properties"]["concentration_g_km2"] is None
+               for f in items["features"])
+
+
+def test_quality_png_rgba_palette(tmp_path, monkeypatch, client):
+    np = pytest.importorskip("numpy")
+    rasterio = pytest.importorskip("rasterio")
+    from PIL import Image
+    d = tmp_path / "pairs"
+    q = d / "quality" / "S4_T"
+    q.mkdir(parents=True)
+    a = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.uint8)
+    with rasterio.open(q / "quality.tif", "w", driver="GTiff", width=3, height=2, count=1, dtype="uint8") as ds:
+        ds.write(a, 1)
+    (d / "pair_quality.csv").write_text("event_id,sample_ids,scene_id,dir,decision,reason\nS4:T,,SCN_1,S4_T,reject,cloud\n",
+                                        encoding="utf-8")
+    monkeypatch.setitem(cs.PATHS, "pairs_dir", d)
+    r = client.get("/api/v3/scenes/SCN_1/quality.png")
+    assert r.status_code == 200 and r.headers["content-type"] == "image/png"
+    img = Image.open(io.BytesIO(r.content))
+    assert img.mode == "RGBA"
+    colors = {c["id"]: c["color"] for c in client.get("/api/v3/meta").json()["quality_classes"]}
+
+    def hx(px):
+        return "#" + "".join(f"{v:02x}" for v in px)
+    assert hx(img.getpixel((1, 0))) == colors["valid"]
+    assert hx(img.getpixel((2, 0))) == colors["land"]
+    assert hx(img.getpixel((0, 1))) == hx(img.getpixel((1, 1))) == colors["cloud"]
+    assert hx(img.getpixel((0, 0))) == hx(img.getpixel((2, 1))) == colors["nodata"]
+    sc = client.get("/api/v3/scenes/SCN_1").json()
+    assert sc["quality_url"] == "/api/v3/scenes/SCN_1/quality.png"
+    _err(client.get("/api/v3/scenes/SCN_2/quality.png"), 404, "NO_SCENE")
