@@ -579,6 +579,11 @@ def test_metrics_detector_same_test_rows(client):
         for k in ("precision", "recall", "f1", "iou"):
             assert r[k] is not None and len(r[f"ci95_{k}"]) == 2
     assert d["main"]["f1"] > d["baseline"]["f1"] > d["fdi"]["f1"]
+    box = d["fdi_ndvi"]
+    ref = json.loads(cs.PATHS["det_metrics"].read_text(encoding="utf-8"))["test"]["fdi_ndvi_box"]
+    assert "NDVI" in box["name"] and box["split"] == "test" and box in d["rows"]
+    assert box["f1"] == round(ref["f1_md"], 4) and box["ci95_f1"] == ref["ci95_f1"]
+    assert box["precision"] is not None and box["recall"] is not None and box["iou"] is not None
 
 
 # ------------------------------------------------------------------ L62g (jury-1)

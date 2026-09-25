@@ -1637,10 +1637,14 @@ def detector_metrics_block(test: dict, val: dict, tmd: dict, fdi_val: dict) -> d
         if fdi:
             fdi["setting"] = (st.get("fdi_threshold") or {}).get("setting")
             fdi["note"] = "порог подобран на val"
-        rows = [x for x in (main, base, fdi) if x]
+        box = _det_row("Окно FDI×NDVI", dt_.get("fdi_ndvi_box") or {}, "test")
+        if box:
+            box["setting"] = (st.get("fdi_ndvi_box") or {}).get("setting")
+            box["note"] = "4 порога (окно FDI и NDVI, идея Biermann 2020) подобраны на val"
+        rows = [x for x in (main, base, box, fdi) if x]
         return {"split": f"MARIDA test ({(dt_['lgbm'].get('n_scenes'))} сцен), один прогон после заморозки; "
                          "ДИ — бутстреп по сценам", "metric": det.get("metric"),
-                "main": main, "baseline": base, "fdi": fdi, "rows": rows}
+                "main": main, "baseline": base, "fdi": fdi, "fdi_ndvi": box, "rows": rows}
     return {  # fallback when reports/case_detector/metrics.json is absent
         "split": "MARIDA val (сплит по сценам); test — один прогон после заморозки",
         "baseline": {"name": "FDI threshold", "f1": _r(fdi_val.get("f1_md")), "iou": _r(fdi_val.get("iou_md")),
@@ -1648,7 +1652,7 @@ def detector_metrics_block(test: dict, val: dict, tmd: dict, fdi_val: dict) -> d
         "main": {"name": "LightGBM", "f1": _r(val.get("f1_md")), "iou": _r(val.get("iou_md")), "split": "val",
                  "test_f1": _r(tmd.get("f1_md")), "test_iou": _r(tmd.get("iou_md")),
                  "test_ci95_f1": tmd.get("ci95"), "threshold": tmd.get("threshold")} if (val or tmd) else None,
-        "fdi": None, "rows": []}
+        "fdi": None, "fdi_ndvi": None, "rows": []}
 
 
 def metrics() -> dict:

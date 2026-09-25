@@ -586,7 +586,8 @@ def check_metrics(c, ck: Checker, src: dict) -> dict:
     dv = (det.get("val") or {})
     dtest = (det.get("test") or {})
     for lab, blk, key in (("main", main, "lgbm"), ("baseline", base, "rf_argmax"),
-                          ("fdi", (m.get("detector") or {}).get("fdi") or {}, "fdi_threshold")):
+                          ("fdi", (m.get("detector") or {}).get("fdi") or {}, "fdi_threshold"),
+                          ("fdi_ndvi", (m.get("detector") or {}).get("fdi_ndvi") or {}, "fdi_ndvi_box")):
         ref = dtest.get(key) or {}
         okk = all(near(blk.get(a), round(ref[b], 4), 1e-4) for a, b in (("precision", "precision_md"),
                   ("recall", "recall_md"), ("f1", "f1_md"), ("iou", "iou_md")) if ref.get(b) is not None) \
