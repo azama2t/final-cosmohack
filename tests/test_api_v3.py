@@ -203,7 +203,7 @@ def test_zones_no_invented_concentration(client):
         if p["support"].get("field_target_scope") == "all_litter":  # team rule: all_litter is never "plastic"
             assert "не только пластик" in p["support"]["field_scope_label"]
         fe = p["field_estimate"]
-        assert fe is None or (fe["unit"] == "items/km2" and fe["label"] == "оценка по полевым данным, не по снимку")
+        assert fe is None or (fe["unit"] == "items/km2" and fe["label"].startswith("оценка по полевым данным, не по снимку"))
 
 
 # ------------------------------------------------------------------ saved queries
@@ -329,21 +329,69 @@ def test_zone_status_filters(client):
     _err(client.get("/api/v3/zones?concentration_status=concentration_unavailable"), 400, "BAD_PARAM")
 
 
-@pytest.mark.skipif(not HAS_SAMPLES, reason="нет task/macroplastic_marine_samples.csv")
-def test_field_estimate_lookup(tmp_path, monkeypatch):
+PRED_HEADER = "profile,split,fold,sample_id,event_id,group,latitude,longitude,y_true,field_lower,field_upper,model,y_pred\n"
+
+
+def _preds(conc, rows):
+    conc.mkdir(exist_ok=True)
+    (conc / "predictions.csv").write_text(PRED_HEADER + "".join(
+        f"S2_visual_total_plastic,{sp},0,MPL-0200,e,g,30,-69,15.5,1.8,56.1,{m},{v}\n" for sp, m, v in rows),
+        encoding="utf-8")
+
+
+def test_field_estimate_main_split_median(tmp_path, monkeypatch):
+    """L62c: never the leaky 'event' split; kNN not significant on route_buf1 -> median_train."""
     conc = tmp_path / "case_conc"
-    conc.mkdir()
-    (conc / "predictions.csv").write_text(
-        "profile,split,fold,sample_id,event_id,group,latitude,longitude,y_true,field_lower,field_upper,model,y_pred\n"
-        "S2_visual_total_plastic,event,0,MPL-0200,e,g,30,-69,15.5,1.8,56.1,median,38.8\n"
-        "S2_visual_total_plastic,event,0,MPL-0200,e,g,30,-69,15.5,1.8,56.1,knn5,21.25\n", encoding="utf-8")
+    _preds(conc, [("event", "knn5", 21.25), ("event", "median", 38.8),
+                  ("route_buf1", "median", 36.5), ("route_buf1", "knn5", 25.0), ("route_buf1", "knn5_log", 24.0)])
+    (conc / "metrics.json").write_text(json.dumps({"S2_visual_total_plastic": {
+        "main_split": "route_buf1", "overall": [],
+        "bootstrap_mae_diff_vs_median": {"event:knn5": [-9, -18, -1], "event:knn5_log": [-9, -18, -1],
+                                         "route_buf1:knn5": [-4.6, -13.9, 4.7],
+                                         "route_buf1:knn5_log": [-4.2, -12.0, 3.4]}}}), encoding="utf-8")
     monkeypatch.setitem(cs.PATHS, "conc_metrics", conc / "metrics.json")
     fe = cs.field_estimate(["MPL-0200"])
-    assert fe["value"] == 21.25 and fe["unit"] == "items/km2" and fe["basis"] == "field_model"
-    assert fe["measurement_profile"] == "S2_visual_GT2"
-    assert fe["label"] == "оценка по полевым данным, не по снимку"
+    assert fe["value"] == 36.5 and fe["model"] == "median_train" and fe["split"] == "route_buf1"
+    assert fe["knn_significant"] is False
+    assert fe["unit"] == "items/km2" and fe["basis"] == "field_model"
+    assert fe["label"].startswith("оценка по полевым данным, не по снимку") and "медиана" in fe["label"]
     assert fe["lo"] is None and fe["hi"] is None  # no prediction interval computed -> no invented bounds
+    if HAS_SAMPLES:
+        assert fe["measurement_profile"] == "S2_visual_GT2"
     assert cs.field_estimate(["MPL-0001"]) is None and cs.field_estimate([]) is None
+
+
+def test_field_estimate_knn_only_if_all_variants_significant(tmp_path, monkeypatch):
+    conc = tmp_path / "case_conc"
+    _preds(conc, [("route_buf1", "median", 36.5), ("route_buf1", "knn5", 25.0), ("route_buf1", "knn5_log", 24.0)])
+    boot = {"route_buf1:knn5": [-7.5, -97.2, 83.6], "route_buf1:knn5_log": [-68.3, -138.8, -1.0]}  # S1-like
+    overall = [{"split": "route_buf1", "model": "knn5", "mae": 30.0}, {"split": "route_buf1", "model": "knn5_log",
+                                                                       "mae": 29.0}]
+    mpath = conc / "metrics.json"
+    mpath.write_text(json.dumps({"S2_visual_total_plastic": {"main_split": "route_buf1", "overall": overall,
+                                                             "bootstrap_mae_diff_vs_median": boot}}), encoding="utf-8")
+    monkeypatch.setitem(cs.PATHS, "conc_metrics", mpath)
+    assert cs.field_estimate(["MPL-0200"])["model"] == "median_train"  # one variant not significant -> median
+    boot["route_buf1:knn5"] = [-10.0, -20.0, -2.0]
+    mpath.write_text(json.dumps({"S2_visual_total_plastic": {"main_split": "route_buf1", "overall": overall,
+                                                             "bootstrap_mae_diff_vs_median": boot}}), encoding="utf-8")
+    import os
+    os.utime(mpath, ns=(1, 2_000_000_000_000_000_000))  # force cache refresh
+    fe = cs.field_estimate(["MPL-0200"])
+    assert fe["model"] == "knn5_log" and fe["value"] == 24.0 and fe["knn_significant"] is True
+
+
+def test_main_split_from_config_when_metrics_missing(tmp_path, monkeypatch):
+    monkeypatch.setitem(cs.PATHS, "conc_metrics", tmp_path / "none" / "metrics.json")
+    assert cs.main_split("S2_visual_total_plastic") == "route_buf1"
+
+
+def test_metrics_use_main_split(client):
+    m = client.get("/api/v3/metrics").json()
+    c = m["concentration"]
+    if c["profile"]:
+        assert c["baseline"]["split"] == c["main"]["split"] == "route_buf1"
+        assert "significant" in c["main"] and "delta_mae_vs_median_ci95" in c["main"]
 
 
 @pytest.mark.skipif(not HAS_SAMPLES, reason="нет task/macroplastic_marine_samples.csv")

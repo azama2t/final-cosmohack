@@ -660,29 +660,80 @@ def pairs_empty_reason(n: int) -> Optional[str]:
 
 
 # ------------------------------------------------------------------ field model predictions (field_estimate)
-FIELD_MODEL = ("event", "knn5")  # split, model — the same "main" row as /metrics
+KNN_MODELS = ("knn5", "knn5_log")
+CASE_SELECTION_YAML = REPO / "configs" / "case_selection.yaml"
 
 
 def predictions_raw() -> list[dict]:
     return _cached("predictions", PATHS["conc_metrics"].parent / "predictions.csv", _read_csv) or []
 
 
+def main_split(profile: str) -> Optional[str]:
+    """Main (honest) split of the concentration models (L60b): metrics.json[profile].main_split, else built from
+    configs/case_selection.yaml main_split (route + buffer_days -> 'route_buf1'). Never the leaky 'event' split."""
+    cm = _cached("conc_metrics", PATHS["conc_metrics"], _read_json) or {}
+    ms = (cm.get(profile) or {}).get("main_split") if isinstance(cm.get(profile), dict) else None
+    if isinstance(ms, str) and ms:
+        return ms
+    def _yaml(p):
+        import yaml
+        return yaml.safe_load(p.read_text(encoding="utf-8"))
+    cfg = (_cached("case_selection", CASE_SELECTION_YAML, _yaml) or {}).get("main_split") or {}
+    if not cfg.get("method"):
+        return None
+    bd = fnum(cfg.get("buffer_days"))
+    return f"{cfg['method']}_buf{int(bd) if bd and float(bd).is_integer() else bd}" if bd else str(cfg["method"])
+
+
+def field_model_choice(profile: str) -> dict:
+    """Which field model is the main one for a profile on the main split.
+
+    kNN is used only if EVERY kNN variant beats the train median significantly (95 % bootstrap CI of ΔMAE
+    entirely < 0 in metrics.json bootstrap_mae_diff_vs_median) — L60b: a win that depends on the variant is not a
+    result. Otherwise the train-profile median ("median_train")."""
+    split = main_split(profile)
+    cm = _cached("conc_metrics", PATHS["conc_metrics"], _read_json) or {}
+    boot = ((cm.get(profile) or {}) if isinstance(cm.get(profile), dict) else {}).get(
+        "bootstrap_mae_diff_vs_median") or {}
+    cis = {m: boot.get(f"{split}:{m}") for m in KNN_MODELS}
+    sig = bool(split) and all(isinstance(c, list) and len(c) == 3 and fnum(c[2]) is not None and c[2] < 0
+                              for c in cis.values())
+    if sig:
+        rows = {(r.get("split"), r.get("model")): r for r in (cm.get(profile) or {}).get("overall", [])}
+        best = min(KNN_MODELS, key=lambda m: fnum((rows.get((split, m)) or {}).get("mae")) or math.inf)
+        return {"split": split, "model": best, "name": best, "knn_significant": True,
+                "delta_mae_ci95": {m: cis[m] for m in KNN_MODELS}}
+    return {"split": split, "model": "median", "name": "median_train", "knn_significant": False,
+            "delta_mae_ci95": {m: cis[m] for m in KNN_MODELS}}
+
+
 def field_estimate(sample_ids: list[str]) -> Optional[dict]:
-    """Out-of-fold prediction of the field model (coordinates/time -> items/km2) for a linked sample.
+    """Out-of-fold prediction of the main field model on the MAIN split for a linked sample.
 
     Not a satellite estimate. None when no linked sample is in reports/case_conc/predictions.csv
-    (currently predictions exist only for S1/S2 profiles; pair_quality zones are S3/S4)."""
+    (predictions exist only for S1/S2 profiles; pair_quality zones are S3/S4) or the main split is unknown."""
     if not sample_ids:
         return None
-    split, model = FIELD_MODEL
+    wanted = set(sample_ids)
+    choices: dict[str, dict] = {}
     for r in predictions_raw():
-        if r.get("split") == split and r.get("model") == model and r.get("sample_id") in sample_ids:
-            srow = sample_row(r["sample_id"]) or {}
-            return {"value": _r(r.get("y_pred"), 3), "lo": None, "hi": None, "interval": None,
-                    "unit": "items/km2", "measurement_profile": srow.get("measurement_profile") or None,
-                    "profile_config": r.get("profile"), "model": f"field_{model}_{split}_oof",
-                    "sample_id": r["sample_id"], "label": "оценка по полевым данным, не по снимку",
-                    "basis": "field_model"}
+        if r.get("sample_id") not in wanted:
+            continue
+        prof = r.get("profile") or ""
+        ch = choices.get(prof) or choices.setdefault(prof, field_model_choice(prof))
+        if not ch["split"] or r.get("split") != ch["split"] or r.get("model") != ch["model"]:
+            continue
+        srow = sample_row(r["sample_id"]) or {}
+        is_median = ch["name"] == "median_train"
+        return {"value": _r(r.get("y_pred"), 3), "lo": None, "hi": None, "interval": None,
+                "unit": "items/km2", "measurement_profile": srow.get("measurement_profile") or None,
+                "profile_config": prof, "model": ch["name"], "split": ch["split"],
+                "knn_significant": ch["knn_significant"], "delta_mae_ci95_vs_median": ch["delta_mae_ci95"],
+                "sample_id": r["sample_id"],
+                "label": ("оценка по полевым данным, не по снимку: медиана обучающих участков маршрута "
+                          "(kNN не значимо лучше медианы)" if is_median else
+                          "оценка по полевым данным, не по снимку: kNN по соседним участкам маршрута"),
+                "interval_note": "интервал прогноза не считался", "basis": "field_model"}
     return None
 
 
@@ -974,14 +1025,25 @@ def metrics() -> dict:
             continue
         rows = {(r.get("split"), r.get("model")): r for r in d["overall"]}
 
-        def pick(model, split="event"):
+        ch = field_model_choice(prof)
+        split = ch["split"]
+
+        def pick(model, name=None):
             r = rows.get((split, model))
             if not r:
                 return None
-            return {"name": model, "mae": _r(r.get("mae")), "mae_log": _r(r.get("log1p_mae")), "coverage": None,
-                    "n": r.get("n"), "split": split}
-        conc_profiles[prof] = {"rows": d.get("rows"), "events": d.get("events"),
-                               "baseline": pick("median"), "main": pick("knn5"),
+            return {"name": name or model, "mae": _r(r.get("mae")), "mae_log": _r(r.get("log1p_mae")),
+                    "coverage": None, "n": r.get("n"), "split": split}
+        best_knn = min(KNN_MODELS, key=lambda m: fnum((rows.get((split, m)) or {}).get("mae")) or math.inf)
+        challenger = pick(best_knn)
+        if challenger:
+            ci = ch["delta_mae_ci95"].get(best_knn)
+            challenger["delta_mae_vs_median_ci95"] = ci
+            challenger["significant"] = bool(isinstance(ci, list) and len(ci) == 3 and ci[2] < 0)
+        conc_profiles[prof] = {"rows": d.get("rows"), "events": d.get("events"), "main_split": split,
+                               "baseline": pick("median", "median by profile (train)"), "main": challenger,
+                               "selected_for_field_estimate": ch["name"], "knn_significant_all_variants":
+                                   ch["knn_significant"],
                                "by_split": {f"{s}:{m}": {"mae": _r(r.get("mae")), "mae_log": _r(r.get("log1p_mae"))}
                                             for (s, m), r in sorted(rows.items())}}
     default = "S2_visual_total_plastic" if "S2_visual_total_plastic" in conc_profiles else \
@@ -989,8 +1051,9 @@ def metrics() -> dict:
     dp = conc_profiles.get(default) or {}
     concentration = {"baseline": dp.get("baseline"), "main": dp.get("main"), "unit": "items/km2",
                      "profile": default, "profiles": conc_profiles,
-                     "note": "полевая концентрация по координатам/времени (kNN), сгруппированная CV по событиям; "
-                             "coverage = null: интервалы предсказаний не считались"}
+                     "note": "полевая концентрация по координатам/времени, основной сплит — участки маршрута + "
+                             "буфер 1 сут (configs/case_selection.yaml main_split, L60b); kNN считается лучше медианы "
+                             "только если все варианты значимы; coverage = null: интервалы предсказаний не считались"}
     try:
         from src.macroplastic.case.concentration import concentration as conc_fn
         ce = conc_fn(12, 0.20)
@@ -1001,7 +1064,8 @@ def metrics() -> dict:
         "split": {"type": "grouped", "group_by": ["event_id", "scene_id"], "n_train": None, "n_val": None, "n_test": None,
                   "detector": {"n_val_scenes": (test.get("val_md") or {}).get("n_scenes"),
                                "n_test_scenes": tmd.get("n_scenes")},
-                  "concentration": {"type": "grouped 5-fold CV по событиям", "n": dp.get("rows")}},
+                  "concentration": {"type": "участки маршрута (5 блоков) + буфер 1 сут", "name": dp.get("main_split"),
+                                    "n": dp.get("rows")}},
         "detector": detector,
         "concentration": concentration,
         "control_example": {"items": 12, "area_km2": 0.20, "expected": 60.0, "computed": computed},
