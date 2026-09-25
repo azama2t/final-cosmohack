@@ -110,3 +110,4 @@
 | `scripts/experiments/l33_*.py`, `reports/l33_scene_relative.{md,json}` | признаки относительно воды сцены и крупные окна (отклонено) | отчёт |
 | `reports/l35_asis_check.md` | разбор «как есть» на чужом датасете: метрика по частичной разметке, схема классов, порог | завтра |
 | `src/macroplastic/grid/artifacts.py`, `reports/artifacts.md`, `reports/figures/artifacts_*.png` | фильтр линейных артефактов (seam/wake/ship) с числами до/после | build_service_data |
+| `scripts/final_test.py` | однократная оценка на test MARIDA после заморозки (порог из val, CI по сценам) → `reports/lgbm_final_test.json`; повторный запуск запрещён самим скриптом | приёмка |
