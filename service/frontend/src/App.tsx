@@ -48,7 +48,11 @@ export default function App() {
   const [date, setDate] = useState<string | null>(null);
   const [model, setModel] = useState<string>(url.model ?? 'mdd');
   const [layers, setLayers] = useState<Layers>(url.layers ?? DEFAULT_LAYERS);
-  const [basemap, setBasemap] = useState<Basemap>(url.basemap ?? 'dark');
+  // L44: no network at start → offline basemap «Без» (Sentinel-2 crops + Natural Earth coastline) right away;
+  // online the default stays «Тёмная» (CARTO), and a failed CARTO/Esri load still falls back to «Без» with a toast
+  const [basemap, setBasemap] = useState<Basemap>(
+    url.basemap ?? (typeof navigator !== 'undefined' && navigator.onLine === false ? 'none' : 'dark'),
+  );
   // L27: «Карта | Глобус»; default — globe on hardware WebGL (fps ≥ 50 measured), flat map on software GL
   const [projection, setProjection] = useState<Projection>(() => url.projection ?? defaultProjection());
   const projUser = useRef(!!url.projection);
@@ -206,6 +210,17 @@ export default function App() {
     setToast(t);
     setTimeout(() => setToast((x) => (x === t ? null : x)), 2600);
   }, []);
+
+  // L44: network lost while the app is open → switch the online basemaps (CARTO / Esri) to the offline one
+  useEffect(() => {
+    const off = () =>
+      setBasemap((cur) => {
+        if (cur !== 'none') showToast('Нет сети — офлайн-подложка: снимки Sentinel-2 и береговая линия');
+        return 'none';
+      });
+    window.addEventListener('offline', off);
+    return () => window.removeEventListener('offline', off);
+  }, [showToast]);
 
   const selectRegion = useCallback(
     (id: string | null) => {

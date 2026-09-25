@@ -1,0 +1,745 @@
+{
+ "regions": {
+  "accra": {
+   "objects": {
+    "aquaculture": 0,
+    "beach": 13,
+    "port": 6,
+    "marina": 1,
+    "protected_area": 2,
+    "river_mouth": 5,
+    "outfall": 0,
+    "wastewater_plant": 9
+   },
+   "drift_objects": {
+    "2025-10-21": {
+     "n": 4,
+     "aquaculture": 0,
+     "beach": 2,
+     "protected_area": 1,
+     "marina": 0,
+     "port": 1
+    }
+   },
+   "repeats": {
+    "n": 0,
+    "n_3dates": 0,
+    "both_models": 0,
+    "lgbm_only": 0,
+    "mdd_only": 0
+   }
+  },
+  "bali": {
+   "objects": {
+    "aquaculture": 1,
+    "beach": 66,
+    "port": 2,
+    "marina": 4,
+    "protected_area": 2,
+    "river_mouth": 12,
+    "outfall": 0,
+    "wastewater_plant": 1
+   },
+   "drift_objects": {
+    "2025-05-11": {
+     "n": 2,
+     "aquaculture": 0,
+     "beach": 2,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 0
+    },
+    "2025-07-20": {
+     "n": 0,
+     "aquaculture": 0,
+     "beach": 0,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 0
+    },
+    "2026-04-28": {
+     "n": 8,
+     "aquaculture": 1,
+     "beach": 7,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 0
+    },
+    "2026-07-05": {
+     "n": 0,
+     "aquaculture": 0,
+     "beach": 0,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 0
+    }
+   },
+   "repeats": {
+    "n": 13,
+    "n_3dates": 1,
+    "both_models": 4,
+    "lgbm_only": 9,
+    "mdd_only": 0
+   }
+  },
+  "danang": {
+   "objects": {
+    "aquaculture": 103,
+    "beach": 29,
+    "port": 0,
+    "marina": 0,
+    "protected_area": 2,
+    "river_mouth": 6,
+    "outfall": 1,
+    "wastewater_plant": 1
+   },
+   "drift_objects": {
+    "2025-09-15": {
+     "n": 4,
+     "aquaculture": 0,
+     "beach": 3,
+     "protected_area": 1,
+     "marina": 0,
+     "port": 0
+    }
+   },
+   "repeats": {
+    "n": 0,
+    "n_3dates": 0,
+    "both_models": 0,
+    "lgbm_only": 0,
+    "mdd_only": 0
+   }
+  },
+  "durban": {
+   "objects": {
+    "aquaculture": 2,
+    "beach": 20,
+    "port": 1,
+    "marina": 2,
+    "protected_area": 21,
+    "river_mouth": 19,
+    "outfall": 16,
+    "wastewater_plant": 41
+   },
+   "drift_objects": {
+    "2025-07-28": {
+     "n": 1,
+     "aquaculture": 0,
+     "beach": 0,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 1
+    },
+    "2025-09-26": {
+     "n": 0,
+     "aquaculture": 0,
+     "beach": 0,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 0
+    },
+    "2026-05-04": {
+     "n": 0,
+     "aquaculture": 0,
+     "beach": 0,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 0
+    }
+   },
+   "repeats": {
+    "n": 5,
+    "n_3dates": 3,
+    "both_models": 0,
+    "lgbm_only": 5,
+    "mdd_only": 0
+   }
+  },
+  "ganges": {
+   "objects": {
+    "aquaculture": 0,
+    "beach": 0,
+    "port": 0,
+    "marina": 0,
+    "protected_area": 9,
+    "river_mouth": 15,
+    "outfall": 0,
+    "wastewater_plant": 0
+   },
+   "drift_objects": {
+    "2025-11-19": {
+     "n": 0,
+     "aquaculture": 0,
+     "beach": 0,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 0
+    },
+    "2026-01-13": {
+     "n": 0,
+     "aquaculture": 0,
+     "beach": 0,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 0
+    },
+    "2026-02-12": {
+     "n": 0,
+     "aquaculture": 0,
+     "beach": 0,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 0
+    }
+   },
+   "repeats": {
+    "n": 0,
+    "n_3dates": 0,
+    "both_models": 0,
+    "lgbm_only": 0,
+    "mdd_only": 0
+   }
+  },
+  "guanabara": {
+   "objects": {
+    "aquaculture": 4,
+    "beach": 110,
+    "port": 5,
+    "marina": 23,
+    "protected_area": 98,
+    "river_mouth": 54,
+    "outfall": 10,
+    "wastewater_plant": 65
+   },
+   "drift_objects": {
+    "2025-06-26": {
+     "n": 38,
+     "aquaculture": 2,
+     "beach": 22,
+     "protected_area": 7,
+     "marina": 3,
+     "port": 4
+    },
+    "2025-09-04": {
+     "n": 40,
+     "aquaculture": 2,
+     "beach": 22,
+     "protected_area": 7,
+     "marina": 4,
+     "port": 5
+    },
+    "2026-07-16": {
+     "n": 38,
+     "aquaculture": 2,
+     "beach": 22,
+     "protected_area": 8,
+     "marina": 4,
+     "port": 2
+    }
+   },
+   "repeats": {
+    "n": 20,
+    "n_3dates": 0,
+    "both_models": 1,
+    "lgbm_only": 18,
+    "mdd_only": 1
+   }
+  },
+  "haiti": {
+   "objects": {
+    "aquaculture": 0,
+    "beach": 10,
+    "port": 1,
+    "marina": 4,
+    "protected_area": 0,
+    "river_mouth": 36,
+    "outfall": 0,
+    "wastewater_plant": 1
+   },
+   "repeats": {
+    "n": 0,
+    "n_3dates": 0,
+    "both_models": 0,
+    "lgbm_only": 0,
+    "mdd_only": 0
+   }
+  },
+  "honduras": {
+   "objects": {
+    "aquaculture": 0,
+    "beach": 10,
+    "port": 0,
+    "marina": 0,
+    "protected_area": 14,
+    "river_mouth": 13,
+    "outfall": 0,
+    "wastewater_plant": 0
+   },
+   "drift_objects": {
+    "2025-01-30": {
+     "n": 1,
+     "aquaculture": 0,
+     "beach": 0,
+     "protected_area": 1,
+     "marina": 0,
+     "port": 0
+    },
+    "2025-02-19": {
+     "n": 1,
+     "aquaculture": 0,
+     "beach": 0,
+     "protected_area": 1,
+     "marina": 0,
+     "port": 0
+    },
+    "2025-12-28": {
+     "n": 2,
+     "aquaculture": 0,
+     "beach": 1,
+     "protected_area": 1,
+     "marina": 0,
+     "port": 0
+    },
+    "2026-02-14": {
+     "n": 1,
+     "aquaculture": 0,
+     "beach": 0,
+     "protected_area": 1,
+     "marina": 0,
+     "port": 0
+    },
+    "2026-04-10": {
+     "n": 3,
+     "aquaculture": 0,
+     "beach": 1,
+     "protected_area": 2,
+     "marina": 0,
+     "port": 0
+    },
+    "2026-05-30": {
+     "n": 3,
+     "aquaculture": 0,
+     "beach": 1,
+     "protected_area": 2,
+     "marina": 0,
+     "port": 0
+    }
+   },
+   "repeats": {
+    "n": 29,
+    "n_3dates": 1,
+    "both_models": 10,
+    "lgbm_only": 19,
+    "mdd_only": 0
+   }
+  },
+  "jakarta": {
+   "objects": {
+    "aquaculture": 0,
+    "beach": 16,
+    "port": 3,
+    "marina": 0,
+    "protected_area": 3,
+    "river_mouth": 13,
+    "outfall": 0,
+    "wastewater_plant": 0
+   },
+   "repeats": {
+    "n": 0,
+    "n_3dates": 0,
+    "both_models": 0,
+    "lgbm_only": 0,
+    "mdd_only": 0
+   }
+  },
+  "karachi": {
+   "objects": {
+    "aquaculture": 1,
+    "beach": 19,
+    "port": 10,
+    "marina": 7,
+    "protected_area": 6,
+    "river_mouth": 10,
+    "outfall": 0,
+    "wastewater_plant": 16
+   },
+   "drift_objects": {
+    "2025-11-11": {
+     "n": 1,
+     "aquaculture": 0,
+     "beach": 0,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 1
+    },
+    "2026-01-15": {
+     "n": 17,
+     "aquaculture": 0,
+     "beach": 9,
+     "protected_area": 0,
+     "marina": 1,
+     "port": 7
+    },
+    "2026-02-14": {
+     "n": 7,
+     "aquaculture": 0,
+     "beach": 2,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 5
+    }
+   },
+   "repeats": {
+    "n": 0,
+    "n_3dates": 0,
+    "both_models": 0,
+    "lgbm_only": 0,
+    "mdd_only": 0
+   }
+  },
+  "lagos": {
+   "objects": {
+    "aquaculture": 0,
+    "beach": 5,
+    "port": 2,
+    "marina": 5,
+    "protected_area": 1,
+    "river_mouth": 5,
+    "outfall": 0,
+    "wastewater_plant": 1
+   },
+   "drift_objects": {
+    "2025-11-10": {
+     "n": 1,
+     "aquaculture": 0,
+     "beach": 1,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 0
+    }
+   },
+   "repeats": {
+    "n": 0,
+    "n_3dates": 0,
+    "both_models": 0,
+    "lgbm_only": 0,
+    "mdd_only": 0
+   }
+  },
+  "manila": {
+   "objects": {
+    "aquaculture": 891,
+    "beach": 12,
+    "port": 11,
+    "marina": 5,
+    "protected_area": 13,
+    "river_mouth": 51,
+    "outfall": 0,
+    "wastewater_plant": 20
+   },
+   "drift_objects": {
+    "2025-01-06": {
+     "n": 0,
+     "aquaculture": 0,
+     "beach": 0,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 0
+    },
+    "2025-06-15": {
+     "n": 1,
+     "aquaculture": 0,
+     "beach": 0,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 1
+    },
+    "2025-11-07": {
+     "n": 9,
+     "aquaculture": 4,
+     "beach": 0,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 5
+    },
+    "2025-12-27": {
+     "n": 10,
+     "aquaculture": 2,
+     "beach": 6,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 2
+    },
+    "2026-04-01": {
+     "n": 1,
+     "aquaculture": 1,
+     "beach": 0,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 0
+    }
+   },
+   "repeats": {
+    "n": 0,
+    "n_3dates": 0,
+    "both_models": 0,
+    "lgbm_only": 0,
+    "mdd_only": 0
+   }
+  },
+  "mekong": {
+   "objects": {
+    "aquaculture": 0,
+    "beach": 0,
+    "port": 0,
+    "marina": 1,
+    "protected_area": 1,
+    "river_mouth": 17,
+    "outfall": 0,
+    "wastewater_plant": 0
+   },
+   "drift_objects": {
+    "2026-03-02": {
+     "n": 0,
+     "aquaculture": 0,
+     "beach": 0,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 0
+    }
+   },
+   "repeats": {
+    "n": 0,
+    "n_3dates": 0,
+    "both_models": 0,
+    "lgbm_only": 0,
+    "mdd_only": 0
+   }
+  },
+  "mumbai": {
+   "objects": {
+    "aquaculture": 29,
+    "beach": 19,
+    "port": 1,
+    "marina": 1,
+    "protected_area": 11,
+    "river_mouth": 8,
+    "outfall": 0,
+    "wastewater_plant": 24
+   },
+   "drift_objects": {
+    "2025-01-31": {
+     "n": 0,
+     "aquaculture": 0,
+     "beach": 0,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 0
+    },
+    "2025-12-17": {
+     "n": 0,
+     "aquaculture": 0,
+     "beach": 0,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 0
+    },
+    "2026-01-01": {
+     "n": 1,
+     "aquaculture": 0,
+     "beach": 1,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 0
+    }
+   },
+   "repeats": {
+    "n": 0,
+    "n_3dates": 0,
+    "both_models": 0,
+    "lgbm_only": 0,
+    "mdd_only": 0
+   }
+  },
+  "nile": {
+   "objects": {
+    "aquaculture": 1,
+    "beach": 0,
+    "port": 1,
+    "marina": 0,
+    "protected_area": 1,
+    "river_mouth": 6,
+    "outfall": 0,
+    "wastewater_plant": 4
+   },
+   "drift_objects": {
+    "2025-11-11": {
+     "n": 0,
+     "aquaculture": 0,
+     "beach": 0,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 0
+    },
+    "2026-01-05": {
+     "n": 1,
+     "aquaculture": 1,
+     "beach": 0,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 0
+    },
+    "2026-03-16": {
+     "n": 2,
+     "aquaculture": 1,
+     "beach": 0,
+     "protected_area": 1,
+     "marina": 0,
+     "port": 0
+    }
+   },
+   "repeats": {
+    "n": 6,
+    "n_3dates": 0,
+    "both_models": 2,
+    "lgbm_only": 4,
+    "mdd_only": 0
+   }
+  },
+  "santo_domingo": {
+   "objects": {
+    "aquaculture": 0,
+    "beach": 8,
+    "port": 1,
+    "marina": 5,
+    "protected_area": 10,
+    "river_mouth": 2,
+    "outfall": 0,
+    "wastewater_plant": 7
+   },
+   "drift_objects": {
+    "2025-02-23": {
+     "n": 1,
+     "aquaculture": 0,
+     "beach": 0,
+     "protected_area": 1,
+     "marina": 0,
+     "port": 0
+    },
+    "2025-03-05": {
+     "n": 1,
+     "aquaculture": 0,
+     "beach": 0,
+     "protected_area": 1,
+     "marina": 0,
+     "port": 0
+    },
+    "2025-10-18": {
+     "n": 0,
+     "aquaculture": 0,
+     "beach": 0,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 0
+    },
+    "2025-12-30": {
+     "n": 0,
+     "aquaculture": 0,
+     "beach": 0,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 0
+    },
+    "2026-02-18": {
+     "n": 0,
+     "aquaculture": 0,
+     "beach": 0,
+     "protected_area": 0,
+     "marina": 0,
+     "port": 0
+    }
+   },
+   "repeats": {
+    "n": 35,
+    "n_3dates": 1,
+    "both_models": 11,
+    "lgbm_only": 24,
+    "mdd_only": 0
+   }
+  },
+  "scotland": {
+   "objects": {
+    "aquaculture": 0,
+    "beach": 64,
+    "port": 5,
+    "marina": 3,
+    "protected_area": 11,
+    "river_mouth": 5,
+    "outfall": 25,
+    "wastewater_plant": 10
+   },
+   "drift_objects": {
+    "2026-07-19": {
+     "n": 6,
+     "aquaculture": 0,
+     "beach": 3,
+     "protected_area": 2,
+     "marina": 0,
+     "port": 1
+    }
+   },
+   "repeats": {
+    "n": 0,
+    "n_3dates": 0,
+    "both_models": 0,
+    "lgbm_only": 0,
+    "mdd_only": 0
+   }
+  },
+  "tiber": {
+   "objects": {
+    "aquaculture": 0,
+    "beach": 65,
+    "port": 1,
+    "marina": 13,
+    "protected_area": 24,
+    "river_mouth": 18,
+    "outfall": 20,
+    "wastewater_plant": 20
+   },
+   "drift_objects": {
+    "2025-11-05": {
+     "n": 33,
+     "aquaculture": 0,
+     "beach": 29,
+     "protected_area": 3,
+     "marina": 1,
+     "port": 0
+    }
+   },
+   "repeats": {
+    "n": 0,
+    "n_3dates": 0,
+    "both_models": 0,
+    "lgbm_only": 0,
+    "mdd_only": 0
+   }
+  }
+ },
+ "context_bytes": 1193693,
+ "objects_total": {
+  "aquaculture": 1032,
+  "beach": 466,
+  "port": 50,
+  "marina": 74,
+  "protected_area": 229,
+  "river_mouth": 295,
+  "outfall": 72,
+  "wastewater_plant": 220
+ },
+ "n_repeat_cells": 108,
+ "n_drift_scenes": 44,
+ "n_drift_scenes_touching": 29,
+ "n_drift_objects": 238
+}
