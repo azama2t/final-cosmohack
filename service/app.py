@@ -19,8 +19,8 @@ from starlette.middleware.gzip import GZipMiddleware
 
 from . import core, pdf, place, review
 
-# UI build: service/static (v1) by default; MACROPLASTIC_UI=v2 -> service/static_v2 (if built)
-_UI = os.environ.get("MACROPLASTIC_UI", "v1").lower()
+# UI build: service/static_v2 (v2) by default if built; MACROPLASTIC_UI=v1 -> service/static (rollback)
+_UI = os.environ.get("MACROPLASTIC_UI", "v2").lower()
 STATIC = core.SERVICE_DIR / ("static_v2" if _UI == "v2" and (core.SERVICE_DIR / "static_v2" / "index.html").is_file() else "static")
 VERSION = "0.1.0"
 mimetypes.add_type("application/geo+json", ".geojson")

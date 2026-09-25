@@ -111,3 +111,8 @@
 | `reports/l35_asis_check.md` | разбор «как есть» на чужом датасете: метрика по частичной разметке, схема классов, порог | завтра |
 | `src/macroplastic/grid/artifacts.py`, `reports/artifacts.md`, `reports/figures/artifacts_*.png` | фильтр линейных артефактов (seam/wake/ship) с числами до/после | build_service_data |
 | `scripts/final_test.py` | однократная оценка на test MARIDA после заморозки (порог из val, CI по сценам) → `reports/lgbm_final_test.json`; повторный запуск запрещён самим скриптом | приёмка |
+| `service/frontend_v2/`, `service/static_v2/` | интерфейс v2 (по умолчанию): один список районов, панель контекста сдвигает карту, крупные действия, карточка доказательств, лента с датой снимка; откат — `MACROPLASTIC_UI=v1` | FastAPI |
+| `scripts/screenshots_v2.py`, `scripts/contrast_check.py` | смоук-сценарий v2 (кадры, fps, `--offline`); проверка контраста WCAG | ревью |
+| `scripts/tools/org_to_map.py`, `tests/test_org_to_map.py` | данные организаторов (георефер. чипы + предсказания) → мозаика сцен → корень данных карты (kind organizer) | хакатон |
+| `service/routes_incidents.py`, `service/routes_drift_check.py`, `service/routes_context.py` | API: инциденты/лента; проверка прогноза дрейфа (эксперимент) и поля течений/ветра; объекты OSM и пересечение с демо-дрейфом | фронт |
+| `HACK-START.md` | первые 60 минут после выдачи кейса | команда |
