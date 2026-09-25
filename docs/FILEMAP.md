@@ -39,3 +39,12 @@
 | `weights/lgbm/` | итоговая модель по val MARIDA (бинарная + оконные признаки), порог 0.37 | inference.py |
 | `weights/lgbm_live/` | вариант с L2A-аугментацией для живых сцен L2A (с гармонизацией по медиане воды) | run_lgbm_live |
 | `reports/l3_lgbm.md`, `reports/experiments_l3.md` | отчёт по модели и журнал гипотез | отчёт |
+| `service/frontend/` | SPA карты (Vite+React+TS, MapLibre+deck.gl, ECharts): `npm run dev` / `npm run build` → `service/static/` | пользователь |
+| `service/frontend/vite.config.ts` | dev-плагин: `/data/*` из `DATA_ROOT` или `service/demo_fixtures`; `/api`, `/health` → :8000 | npm run dev |
+| `service/frontend/src/App.tsx` | состояние, загрузка сцены, URL, демо-тур, хуки `window.__mapReady/__fps/__app` | — |
+| `service/frontend/src/map/` | MapView (карта, подложки, маркеры), layers.ts (deck-слои, lazy), controller.ts (flyTo, часы дрейфа) | App |
+| `service/frontend/src/components/` | панели, легенда, карточка находки, плеер дрейфа, сравнение, выгрузка, график | App |
+| `service/frontend/src/lib/` | загрузка /data и API, метрики сравнения, палитра/формат, состояние в URL | App |
+| `service/static/` | собранный фронт (не править руками; в git для чистого клона) | FastAPI |
+| `scripts/screenshots.py` | Playwright: 10 кадров UI, load/fps/ошибки консоли → `reports/ui_perf.md`, `--video` — демо-тур; `--gl gpu` для реального fps | ревью UI |
+| `reports/ui_perf.md` | журнал замеров UI | отчёт |

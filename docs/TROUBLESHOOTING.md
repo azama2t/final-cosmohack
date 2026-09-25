@@ -13,3 +13,7 @@
 | LibreOffice → PNG | конвертирует только первый слайд | ограничение `--convert-to png` | один pptx на слайд | — |
 | Локальная медиана окна 15 | тайл 2500² считался 36 с | median_filter на полном разрешении | медиана на прореженной сетке → 6 с | тяжёлые оконные статистики — на сетке с шагом |
 | ProcessPool + LightGBM | модель грузится на каждый патч | нет initializer | загрузка один раз в initializer | — |
+| Карта чёрная | контейнер высотой 0 | CSS maplibre `.maplibregl-map{position:relative}` перебивал `.map{position:absolute}` | селектор `.map.maplibregl-map{position:absolute;inset:0}` | не позиционировать контейнер карты одним классом |
+| Маркеры зон не видны | под canvas deck | z-index контролов 2 | `.maplibregl-marker{z-index:3}` | — |
+| Playwright кликает мимо пятна | сдвиг на высоту шапки | `map.project()` даёт координаты контейнера | прибавлять `getBoundingClientRect()` | — |
+| fps в headless ≈ 10 | swiftshader — программный рендер | нет GPU в headless по умолчанию | замер fps с `--gl gpu` (56–60 fps) | не судить о fps по swiftshader |

@@ -31,3 +31,5 @@ __pycache__/
 /test-results/
 /playwright-report/
 /service/demo_fixtures/
+/reports/screens/
+/reports/deck_preview/
