@@ -53,3 +53,4 @@ __pycache__/
 /reports/selfcheck/consistency_2*
 /docs/prev-hack/
 reports/extra_data/registry_cozar2024.csv
+/service/static_v3/assets/*.map
