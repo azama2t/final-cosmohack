@@ -1,0 +1,977 @@
+r"""Материалы защиты кейса из reports/final_numbers.json (единственный источник чисел).
+
+Пишет:
+  reports/case_deck.pptx     12 слайдов 16:9, заметки докладчика = текст речи слайда
+  docs/SPEECH.md             речь на 4 минуты по слайдам, тайминг
+  docs/DEMO.md               сценарий демо на карте кейса (2 мин) и план Б без сети
+  docs/QA.md                 30 вопросов жюри с ответами и ссылками на доказательства
+  reports/case_deck_img/     4 скриншота карты (уменьшенные копии из reports/screens/case_v2/iter8/)
+
+Запуск из корня:
+    .venv\Scripts\python.exe scripts\make_deck_case.py            # всё
+    .venv\Scripts\python.exe scripts\make_deck_case.py --check    # только проверить, что все числа нашлись
+
+Числа руками не пишутся: каждое берётся по пути из final_numbers.json (блок case). Дополнительные источники,
+которых нет в final_numbers.json, читаются из файлов-первоисточников:
+  reports/case_pairfinder/evidence_numbers.json   (подбор снимка под наблюдение)
+  data/case/geometry/transects.csv                (геометрия трансект PANGAEA)
+  data/pairs/pair_quality.csv                     (срабатывания детектора в полосах пар)
+Если хоть одно значение не найдено, скрипт завершается с кодом 1 и печатает список путей (пустых значений 0).
+"""
+from __future__ import annotations
+
+import argparse
+import csv
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+FN = ROOT / "reports" / "final_numbers.json"
+PF = ROOT / "reports" / "case_pairfinder" / "evidence_numbers.json"
+GEOM = ROOT / "data" / "case" / "geometry" / "transects.csv"
+PQ = ROOT / "data" / "pairs" / "pair_quality.csv"
+SHOTS = ROOT / "reports" / "screens" / "case_v2" / "iter8"
+IMG_DIR = ROOT / "reports" / "case_deck_img"
+OUT_PPTX = ROOT / "reports" / "case_deck.pptx"
+OUT_SPEECH = ROOT / "docs" / "SPEECH.md"
+OUT_DEMO = ROOT / "docs" / "DEMO.md"
+OUT_QA = ROOT / "docs" / "QA.md"
+
+# скриншот-источник -> имя в reports/case_deck_img, обрезка (x0, y0, x1, y1) или None
+IMAGES = {
+    "overview": ("19_overview_1366.png", "01_overview.jpg", None),
+    "zone": ("03_zone_detected.png", "02_zone_suspicious_pixels.jpg", (340, 0, 1920, 1080)),
+    "obs": ("05_obs_card.png", "03_observation_card.jpg", None),
+    "pairfinder": ("25_pairfinder_s2.png", "04_pairfinder_transect.jpg", (760, 0, 1920, 1080)),
+}
+
+MISSING: list[str] = []
+
+
+# ----------------------------------------------------------------------------------------------- numbers
+class Src:
+    """Доступ к числам по точечному пути; ненайденное запоминается в MISSING."""
+
+    def __init__(self, data: dict, name: str):
+        self.d = data
+        self.name = name
+
+    def __call__(self, path: str):
+        cur = self.d
+        for part in path.split("."):
+            if isinstance(cur, list):
+                try:
+                    cur = cur[int(part)]
+                    continue
+                except (ValueError, IndexError):
+                    cur = None
+                    break
+            if not isinstance(cur, dict) or part not in cur:
+                cur = None
+                break
+            cur = cur[part]
+        if cur is None:
+            MISSING.append(f"{self.name}:{path}")
+            return None
+        return cur
+
+
+def num(x, d: int = 1) -> str:
+    """Число с точкой и настоящим минусом; None -> «—» (и уже записано в MISSING)."""
+    if x is None:
+        return "—"
+    if isinstance(x, bool):
+        return str(x)
+    if isinstance(x, int) and d == 0:
+        s = str(x)
+    elif isinstance(x, (int, float)):
+        s = f"{float(x):.{d}f}"
+    else:
+        return str(x)
+    return s.replace("-", "−")
+
+
+def sgn(x, d: int = 1) -> str:
+    if x is None:
+        return "—"
+    s = num(x, d)
+    return s if s.startswith("−") else "+" + s
+
+
+def ci(pair, d: int = 1, signed: bool = False) -> str:
+    if not pair or pair[0] is None or pair[1] is None:
+        MISSING.append("ci")
+        return "[—]"
+    f = sgn if signed else num
+    return f"[{f(pair[0], d)}; {f(pair[1], d)}]"
+
+
+def pl(n, one: str, few: str, many: str) -> str:
+    """Число со словом в нужной форме: 1 событие, 3 события, 63 события, 11 событий."""
+    if n is None:
+        return "— " + many
+    m = int(n)
+    w = one if m % 10 == 1 and m % 100 != 11 else few if 2 <= m % 10 <= 4 and not 12 <= m % 100 <= 14 else many
+    return f"{m} {w}"
+
+
+EV = ("событие", "события", "событий")
+SEG = ("сегмент", "сегмента", "сегментов")
+TAB = ("выходная таблица", "выходные таблицы", "выходных таблиц")
+PX = ("пиксель", "пикселя", "пикселей")
+
+
+def rng(a, b, d: int = 1) -> str:
+    return f"{num(a, d)}–{num(b, d)}"
+
+
+def pct(x) -> str:
+    return num(x * 100 if x is not None and x <= 1.0 else x, 0) + " %"
+
+
+def load() -> dict:
+    """Все числа, которые идут в деку, речь, демо и вопросы."""
+    N = Src(json.loads(FN.read_text(encoding="utf-8")), "final_numbers")
+    P = Src(json.loads(PF.read_text(encoding="utf-8")) if PF.exists() else {}, "pairfinder_evidence")
+    c = "case."
+    k: dict = {}
+    # --- данные и отбор
+    k["rows"] = N(c + "csv.rows"); k["fields"] = N(c + "csv.fields"); k["events"] = N(c + "csv.events")
+    for s in ("S1_GPGP2018", "S2_SARGASSO_MSM41", "S3_SE_NORTH_SEA", "S4_BLACK_SEA_DOORS3"):
+        k["ev_" + s[:2]] = N(c + f"csv.events_by_source.{s}")
+    k["scope_all_litter"] = N(c + "csv.rows_by_scope.all_litter")
+    k["scope_total_plastic"] = N(c + "csv.rows_by_scope.total_plastic")
+    sel = c + "selection.S2."
+    for key in ("accepted_rows", "rejected_rows", "rej_item_observation", "rej_plastic_category", "rej_all_litter",
+                "rej_fisheries", "rej_aerial", "rej_other_source"):
+        k["s2_" + key] = N(sel + key)
+    k["s1_accepted_rows"] = N(c + "selection.S1.accepted_rows")
+    t = c + "conc.S2.target."
+    for key in ("n_events", "n_days", "date_min", "date_max", "c_median", "c_min", "c_max", "n_min", "n_max",
+                "n_median", "a_min", "a_max", "n_zero"):
+        k["t_" + key] = N(t + key)
+    k["s1_c_median"] = N(c + "conc.S1.target.c_median")
+    k["s1_n_events"] = N(c + "conc.S1.target.n_events")
+    # --- пары
+    p = c + "pairs."
+    for key in ("events", "candidate_rows", "candidate_rows_with_scene", "events_accept_meta", "rows_accept_meta",
+                "quality_accept", "quality_reject", "reject_glint", "reject_cloud", "reject_cloud_qa_suspect",
+                "reject_coverage", "events_accept_drift", "max_dt_h_typical", "tolerance_buffer_km",
+                "unknown_time_extra_h", "stage_metadata", "stage_drift", "accept_without_drift", "events_time_unknown"):
+        k["p_" + key] = N(p + key)
+    for sc in ("low", "typical", "high"):
+        k[f"drift_{sc}_ms"] = N(p + f"drift.{sc}.current_ms")
+        k[f"drift_{sc}_km"] = N(p + f"drift.{sc}.shift_median_km")
+        k[f"drift_{sc}_buf3"] = N(p + f"drift.{sc}.events_buf3")
+    k["glint_b11"] = N(p + "decision.glint_b11")
+    for s in ("S1_GPGP2018", "S2_SARGASSO_MSM41", "S3_SE_NORTH_SEA", "S4_BLACK_SEA_DOORS3"):
+        k["any1_" + s[:2]] = N(p + f"by_source.{s}.any_1")
+        k["any5_" + s[:2]] = N(p + f"by_source.{s}.any_5")
+        k["l1c60_" + s[:2]] = N(p + f"by_source.{s}.l_1_cloud60")
+    # --- детектор
+    dt = c + "detector."
+    for m in ("lgbm", "rf_argmax", "fdi_ndvi_box", "fdi_threshold"):
+        k[f"d_{m}_f1"] = N(dt + f"test.{m}.f1")
+        k[f"d_{m}_p"] = N(dt + f"test.{m}.precision")
+        k[f"d_{m}_r"] = N(dt + f"test.{m}.recall")
+    k["d_lgbm_ci"] = N(dt + "test.lgbm.ci95_f1")
+    k["d_lgbm_val_f1"] = N(dt + "val.lgbm.f1")
+    k["d_fdi_ndvi_val_f1"] = N(dt + "val.fdi_ndvi_box.f1")
+    k["d_n_scenes"] = N(dt + "test_n_scenes"); k["d_n_patches"] = N(dt + "test_n_patches"); k["d_md_px"] = N(dt + "test_md_px")
+    k["d_delta"] = N(dt + "paired_vs_rf.delta_f1"); k["d_delta_ci"] = N(dt + "paired_vs_rf.ci95")
+    k["d_better"] = N(dt + "paired_vs_rf.scenes_better"); k["d_worse"] = N(dt + "paired_vs_rf.scenes_worse")
+    k["d_fp_total"] = N(dt + "fp_total"); k["d_fp_ship"] = N(dt + "fp_by_class.Ship.fp")
+    k["d_fp_org"] = N(dt + "fp_by_class.Natural Organic Material.fp")
+    k["d_fp_org_rate"] = N(dt + "fp_by_class.Natural Organic Material.rate_pct")
+    k["d_fp_ship_org_pct"] = N(dt + "fp_ship_organic_pct")
+    k["d_hard_bg_px"] = N(dt + "fp_hard_bg_px"); k["d_hard_bg_fp"] = N(dt + "fp_hard_bg")
+    k["d_sarg_px"] = N(dt + "sargassum_px"); k["d_fdi_sarg_pct"] = N(dt + "fdi_ndvi_box_sargassum_pct")
+    k["d_fn"] = N(dt + "test.lgbm.fn"); k["d_fn_top3"] = N(dt + "fn_top3")
+    k["d_unlab_pct"] = N(dt + "test.lgbm.unlabelled_rate_pct")
+    k["thr"] = N("l3_lgbm.threshold"); k["n_feat"] = N("l3_lgbm.n_features")
+    # --- концентрация
+    k["ctl_n"] = N(c + "control.n"); k["ctl_a"] = N(c + "control.area_km2"); k["ctl_v"] = N(c + "control.value")
+    k["ctl_lo"] = N(c + "control.lower"); k["ctl_hi"] = N(c + "control.upper")
+    k["ctl_model"] = N(c + "control.model_example"); k["ctl_err"] = N(c + "control.abs_error")
+    k["cons_rows"] = N(c + "conc.consistency.rows"); k["cons_match"] = N(c + "conc.consistency.match")
+    k["k_blocks"] = N(c + "conc.main_split.k_blocks"); k["buf_days"] = N(c + "conc.main_split.buffer_days")
+    k["n_cand"] = N(c + "conc.protocol.n_candidates")
+    k["frozen"] = N(c + "conc.final_test_frozen_text")
+    for pr in ("S2", "S1"):
+        b = c + f"conc.{pr}."
+        k[f"{pr}_primary"] = N(b + "primary"); k[f"{pr}_n_dev"] = N(b + "n_dev"); k[f"{pr}_dev_days"] = N(b + "dev_days")
+        k[f"{pr}_dev_main"] = N(b + "main.mae"); k[f"{pr}_dev_med"] = N(b + "median.mae")
+        k[f"{pr}_dev_ci"] = N(b + "main.d_mae_ci95"); k[f"{pr}_dev_bonf"] = N(b + "main.d_mae_ci95_bonf")
+        k[f"{pr}_dev_cov"] = N(b + "main.coverage90_pct")
+        k[f"{pr}_test_days"] = N(b + "final_test.test_days")
+        k[f"{pr}_min_dt"] = N(b + "final_test.min_dt_days"); k[f"{pr}_min_km"] = N(b + "final_test.min_dist_km")
+        f = c + f"sections.field_test.{pr}."
+        for key in ("n_test", "main_model", "main_mae", "median_mae", "d_mae", "d_mae_ci95", "main_coverage90_pct",
+                    "median_coverage90_pct", "verdict", "field_estimate_model", "test_cruise_days"):
+            k[f"{pr}_t_{key}"] = N(f + key)
+    k["S2_k4"] = N(c + "conc.S2.sensitivity.k4.d_mae"); k["S2_k4_ci"] = N(c + "conc.S2.sensitivity.k4.ci95")
+    k["S2_knn_dev"] = N(c + "conc.S2.knn5_log.mae")
+    # схемы разбиения (утечка через соседей того же дня)
+    for sch in N(c + "conc.S2.schemes") or []:
+        k[f"S2_sch_{sch['split']}"] = sch
+    for sch in N(c + "conc.S1.schemes") or []:
+        k[f"S1_sch_{sch['split']}"] = sch
+    for need in ("S2_sch_st", "S2_sch_route_buf1", "S1_sch_event", "S1_sch_route_buf1"):
+        if need not in k:
+            MISSING.append("final_numbers:" + need)
+            k[need] = {}
+    k["ft_when"] = N(c + "sections.field_test.when")
+    k["ft_decision"] = N(c + "sections.field_test.decision_recorded_at")
+    k["ft_rule"] = N(c + "sections.field_test.rule")
+    k["ft_limitation"] = N(c + "sections.field_test.limitation")
+    k["ft_not_before"] = N(c + "conc.final_test_not_before")
+    # --- эксперимент
+    e = c + "experiment."
+    for key in ("n_pairs", "n_accept", "n_accept_s2", "n_groups", "n_black_sea_accept_zero_det", "field_min",
+                "field_max", "n_needed_rho05", "n_needed_rho03", "n_s2_pairs", "n_landsat_pairs"):
+        k["e_" + key] = N(e + key)
+    k["e_fdi_rho"] = N(e + "fdi.rho"); k["e_fdi_ci"] = N(e + "fdi.ci95"); k["e_fdi_pperm"] = N(e + "fdi.p_perm")
+    k["e_fdi_holm"] = N(e + "fdi.p_holm"); k["e_fdi_null"] = N(e + "fdi.null_median")
+    k["e_ctx_rho"] = N(e + "fdi_context.rho"); k["e_res_rho"] = N(e + "fdi_strip_resid.rho")
+    k["e_res_holm"] = N(e + "fdi_strip_resid.p_holm")
+    k["e_pm_rho"] = N(e + "p_mean.rho"); k["e_pm_holm"] = N(e + "p_mean.p_holm")
+    k["e_pow6"] = N(e + "power_min_rho.6"); k["e_pow11"] = N(e + "power_min_rho.11")
+    # --- сервис и воспроизводимость
+    k["zones"] = N(c + "run.export.zones"); k["exp_obs"] = N(c + "run.export.observations")
+    k["exp_pairs"] = N(c + "run.export.pairs"); k["exp_bs24"] = N(c + "run.export.example_pairs_black_sea_24h")
+    k["exp_detected"] = N(c + "run.export.example_zones_detected")
+    k["sc_checks"] = N(c + "selfcheck.checks"); k["sc_ok"] = N(c + "selfcheck.ok"); k["sc_fail"] = N(c + "selfcheck.fail")
+    k["sc_inv_ok"] = N(c + "selfcheck.invalid_ok"); k["sc_inv_total"] = N(c + "selfcheck.invalid_total")
+    k["sc_p95"] = N(c + "selfcheck.p95_max_ms"); k["sc_file"] = N(c + "selfcheck.file")
+    k["run_s"] = N(c + "run.total_s"); k["n_outputs"] = N(c + "run.n_outputs")
+    k["fingerprint"] = N(c + "run.outputs_fingerprint_short")
+    k["cc_total"] = N(c + "clean_clone.total_min"); k["cc_clone_s"] = N(c + "clean_clone.clone_s")
+    k["cc_install"] = N(c + "clean_clone.install_route"); k["cc_map_s"] = N(c + "clean_clone.map_load_s")
+    k["cc_tests"] = N(c + "clean_clone.case_tests_passed"); k["cc_skipped"] = N(c + "clean_clone.case_tests_skipped")
+    k["cc_tests_s"] = N(c + "clean_clone.case_tests_s"); k["cc_full"] = N(c + "clean_clone.full_tests_time")
+    k["cc_file"] = N(c + "clean_clone.file")
+    k["n_test_funcs"] = N(c + "n_tests")
+    # --- подбор снимка (первоисточник evidence.md)
+    k["pf_window_h"] = P("max_abs_dt_h_typical_3km"); k["pf_naive"] = P("naive_pm1d_meta_accept")
+    k["pf_naive_drift"] = P("naive_pm1d_with_drift"); k["pf_cond"] = P("pairfinder_conditional_date_only")
+    k["pf_cond_ok"] = P("conditional_with_l61_quality.accept"); k["pf_sync_known"] = P("pairfinder_synchronous_time_known")
+    k["pf_fc_n"] = P("forecast_hindcast.predictions_checked"); k["pf_fc_hit"] = P("forecast_hindcast.hit_within_5min")
+    k["pf_shift_le4"] = P("time_known_shift_le_4h")
+    # --- геометрия PANGAEA
+    if GEOM.exists():
+        with GEOM.open(encoding="utf-8") as fh:
+            rows = list(csv.DictReader(fh))
+        ev = {r["event_id"] for r in rows}
+        k["g_events"] = len(ev); k["g_segments"] = len(rows)
+        k["g_multi"] = len({r["event_id"] for r in rows if int(float(r["n_segments"] or 1)) > 1})
+    else:
+        MISSING.append("geometry:transects.csv")
+        k["g_events"] = k["g_segments"] = k["g_multi"] = None
+    # --- детектор в полосах пар
+    if PQ.exists():
+        with PQ.open(encoding="utf-8") as fh:
+            q = list(csv.DictReader(fh))
+        det = [r for r in q if (r.get("n_det") or "0") not in ("", "0", "0.0")]
+        k["pq_glint_det"] = sorted(r["event_id"].split(":")[-1] for r in det if r["reason"] == "glint")
+        k["pq_accept_det"] = [r["event_id"] for r in det if r["decision"] == "accept"]
+        k["pq_accept_det_n"] = sum(int(float(r["n_det"])) for r in det if r["decision"] == "accept")
+    else:
+        MISSING.append("pair_quality.csv")
+        k["pq_glint_det"], k["pq_accept_det"], k["pq_accept_det_n"] = [], [], None
+    # --- коммиты решения и открытия test
+    k["git"] = {}
+    for h in ("eb35414", "93cf856"):
+        try:
+            out = subprocess.run(["git", "log", "-1", "--format=%ci|%s", h], cwd=ROOT, capture_output=True,
+                                 text=True, encoding="utf-8", timeout=20)
+            ts, subj = out.stdout.strip().split("|", 1)
+            k["git"][h] = (ts[:16], subj)
+        except Exception:  # noqa: BLE001 — без git просто без времени коммита
+            MISSING.append(f"git:{h}")
+            k["git"][h] = ("—", "—")
+    return k
+
+
+# ----------------------------------------------------------------------------------------------- content
+def slides(k: dict) -> list[dict]:
+    """12 слайдов: заголовок = вывод; тело; справа картинка / число / диаграмма / таблица; речь и тайминг."""
+    t2, t1 = "S2", "S1"
+    S = []
+    S.append(dict(
+        time=("0:00", "0:20"), section="Кейс «Макропластик»",
+        title="Плавающий мусор: детектор по снимку и шт./км² по полю — что доказано, а что нет",
+        bullets=[
+            f"Детектор по Sentinel-2 проверен на test MARIDA: F1 {num(k['d_lgbm_f1'], 3)} против RandomForest {num(k['d_rf_argmax_f1'], 3)}",
+            f"Концентрация шт./км² — по полевым данным: C = N/A с интервалом Пуассона; на отложенном test модель не лучше медианы, поэтому на карте медиана",
+            f"Снимок ↔ поле: {num(k['p_events'], 0)} событий → {num(k['p_events_accept_drift'], 0)} синхронных пар; перенос «снимок → шт./км²» не заявляем",
+        ],
+        big=(num(k["p_events_accept_drift"], 0), "подтверждённых пар «снимок ↔ полевое измерение» — и мы это показываем, а не прячем"),
+        source="reports/final_numbers.json → case.sections (4 раздела с источником и протоколом)",
+        speech=(f"Мы решали кейс как два алгоритма, проверенных по отдельности. Детектор по снимку — F1 {num(k['d_lgbm_f1'], 3)} "
+                f"на test MARIDA. Концентрация — по полевым данным. Синхронных пар «снимок — поле» {num(k['p_events_accept_drift'], 0)}, "
+                f"поэтому переноса на снимок мы не заявляем, и карта это прямо говорит."),
+    ))
+    S.append(dict(
+        time=("0:20", "0:40"), section="Задача и пользователь",
+        title="Пользователь — специалист по мониторингу: акватория и дата → проверка зон → сравнение с полем → выгрузка",
+        bullets=[
+            "Выбирает акваторию и дату, видит полевые измерения, снимки-кандидаты и маску качества",
+            "Смотрит, где детектор нашёл подозрительные пиксели, и почему пара «снимок ↔ поле» принята или отклонена",
+            "Сравнивает с полевым измерением (шт./км² с интервалом), сохраняет запрос, выгружает GeoJSON/CSV",
+            "Измерение, оценка по полевым данным и площадь маски — разные поля везде: в API, карточке, легенде, выгрузке",
+        ],
+        image="overview",
+        caption=f"Карта кейса: {num(k['exp_obs'], 0)} наблюдений, {num(k['zones'], 0)} полос обследования со снимками-кандидатами",
+        source="README.md §1, §8; docs/CONTRACTS_V3.md",
+        speech=("Пользователь — специалист по мониторингу. Он выбирает акваторию и дату, проверяет находки детектора, "
+                "сравнивает с полем и выгружает результат. Измерение, оценка и площадь маски у нас везде — разные поля."),
+    ))
+    S.append(dict(
+        time=("0:40", "1:00"), section="Целевая величина",
+        title="Целевая величина — суммарный плавающий пластик > 2 см, шт./км², визуальная полоса 10 м (S2, Саргассово море)",
+        bullets=[
+            f"{pl(k['t_n_events'], *EV)} за {num(k['t_n_days'], 0)} дней ({k['t_date_min']} – {k['t_date_max']}); у всех есть N и A → C = N/A проверяема",
+            f"N {num(k['t_n_min'], 0)}–{num(k['t_n_max'], 0)} предметов, A {num(k['t_a_min'], 3)}–{num(k['t_a_max'], 3)} км²: масштаб контрольного примера {num(k['ctl_n'], 0)} / {num(k['ctl_a'], 2)} км²",
+            f"Второй профиль — трал S1, 5–50 см, {pl(k['s1_n_events'], *EV)}: только полевая проверка, со S2 не смешиваем",
+            f"all_litter (S3, S4) — весь мусор всех материалов, не пластик: только в эксперименте на снимках",
+            "Детектор: класс Marine Debris MARIDA = любой плавающий мусор; пластик отдельно он не выделяет",
+        ],
+        big=(num(k["t_c_median"], 1), f"шт./км² — медиана C профиля S2 (диапазон {rng(k['t_c_min'], k['t_c_max'])})"),
+        source="configs/case_selection.yaml; README.md §1; reports/report.md §1",
+        speech=(f"Целевая величина — суммарный плавающий пластик больше двух сантиметров, штук на квадратный километр, "
+                f"визуальная полоса с судна. Это {pl(k['t_n_events'], *EV)} Саргассова моря, у каждого есть N и A. "
+                f"Весь мусор Северного и Чёрного морей — не пластик, он только для эксперимента."),
+    ))
+    S.append(dict(
+        time=("1:00", "1:20"), section="Данные и отбор",
+        title=f"Из {num(k['rows'], 0)} строк реестра в профиль S2 входят {num(k['s2_accepted_rows'], 0)}: у каждого отказа записана причина",
+        bullets=[
+            f"Реестр: {num(k['rows'], 0)} строк, {num(k['fields'], 0)} полей, {num(k['events'], 0)} событий из 4 источников (S1 {num(k['ev_S1'], 0)}, S2 {num(k['ev_S2'], 0)}, S3 {num(k['ev_S3'], 0)}, S4 {num(k['ev_S4'], 0)})",
+            f"Принято: S2 — {num(k['s2_accepted_rows'], 0)}, S1 — {num(k['s1_accepted_rows'], 0)}; категории не суммируем (пусто ≠ 0)",
+            "Поля-утечки (concentration_*, items_count, reported_* …) не бывают признаками: тесты портят их и проверяют, что прогноз не меняется",
+        ],
+        table=[["Причина отказа (профиль S2)", "Строк"],
+               ["объектная строка — предмет, а не плотность", num(k["s2_rej_item_observation"], 0)],
+               ["категория пластика, не суммарный пластик", num(k["s2_rej_plastic_category"], 0)],
+               ["суммарный пластик другого профиля (трал S1)", num(k["s2_rej_other_source"], 0)],
+               ["all_litter — весь мусор, не пластик", num(k["s2_rej_all_litter"], 0)],
+               ["категория промыслового мусора", num(k["s2_rej_fisheries"], 0)],
+               ["аэросъёмка S1 > 50 см", num(k["s2_rej_aerial"], 0)],
+               ["итого отказов", num(k["s2_rejected_rows"], 0)]],
+        source="src/macroplastic/case/selection.py; reports/case_splits/selection_*[_rejected].csv",
+        speech=(f"Из {num(k['rows'], 0)} строк в основной профиль попадают {num(k['s2_accepted_rows'], 0)}. У каждого отказа есть причина: "
+                f"объектные строки, категории, весь мусор. Поля-утечки в признаки не попадают, это проверяют тесты."),
+    ))
+    S.append(dict(
+        time=("1:20", "1:45"), section="Реестр пар и окно синхронизации",
+        title=f"{num(k['p_events'], 0)} событий → {num(k['p_events_accept_meta'], 0)} по метаданным → {num(k['p_quality_accept'], 0)} по маскам → {num(k['p_events_accept_drift'], 0)} синхронных с учётом дрейфа",
+        bullets=[
+            f"Для пластика снимков нет: S1 и S2 — открытый океан 2015 г., Sentinel-2A снимает с конца июня 2015 (S1 — 0 сцен в ±5 сут, S2 — {num(k['any5_S2'], 0)})",
+            f"Дрейф: при типичных {num(k['drift_typical_ms'], 1)} м/с вода смещается на {num(k['drift_typical_km'], 1)} км (медиана) — допуск 3 км держит только |dt| ≤ {num(k['p_max_dt_h_typical'], 1)} ч",
+            f"Маски в полосе: блик {num(k['p_reject_glint'], 0)}, облака {num(k['p_reject_cloud'], 0)} (у {num(k['p_reject_cloud_qa_suspect'], 0)} флаг QA Landsat сомнителен), покрытие {num(k['p_reject_coverage'], 0)}",
+            f"Реестр: строка на каждое из {num(k['p_events'], 0)} событий, этап отказа и все причины",
+        ],
+        bars=dict(title="События, у которых остаётся пара", items=[
+            ("все события", k["p_events"], False),
+            ("|dt| ≤ 1 сут, облачность ≤ 60 %", k["p_events_accept_meta"], False),
+            ("маски качества в полосе", k["p_quality_accept"], False),
+            (f"дрейф ≤ допуска ({num(k['drift_typical_ms'], 1)} м/с)", k["p_events_accept_drift"], True)]),
+        source="reports/case_pairs/summary.md, quality.md; data/case/run/registry_pairs.csv",
+        speech=(f"Реестр пар — главный фильтр. Из {num(k['p_events'], 0)} событий по метаданным проходят {num(k['p_events_accept_meta'], 0)}, "
+                f"маски в полосе — {num(k['p_quality_accept'], 0)}. Но вода за сутки уходит на десятки километров: пара синхронна, "
+                f"только если между снимком и наблюдением не больше {num(k['p_max_dt_h_typical'], 1)} часа. Таких ноль. "
+                f"Для пластика снимков нет вообще."),
+    ))
+    S.append(dict(
+        time=("1:45", "2:10"), section="Детектор",
+        title=f"Детектор: F1 {num(k['d_lgbm_f1'], 3)} на test MARIDA — лучше RandomForest на {num(k['d_delta'], 3)} и не путает саргассум",
+        bullets=[
+            f"Пиксельный LightGBM, {num(k['n_feat'], 0)} признаков, порог {num(k['thr'], 2)} выбран на val; test ({num(k['d_n_scenes'], 0)} сцен) посчитан один раз",
+            f"ΔF1 к RF {num(k['d_delta'], 3)} {ci(k['d_delta_ci'], 3)} (парный бутстреп по сценам), лучше в {num(k['d_better'], 0)} сценах, хуже в {num(k['d_worse'], 0)}",
+            f"Ложные: {num(k['d_fp_total'], 0)}, из них суда {num(k['d_fp_ship'], 0)} и органика {num(k['d_fp_org'], 0)}; на саргассуме и мутной воде — {num(k['d_hard_bg_fp'], 0)} (FDI × NDVI помечает {num(k['d_fdi_sarg_pct'], 0)} % саргассума)",
+            f"На реальных парах: в полосах {num(k['e_n_black_sea_accept_zero_det'], 0)} чистых черноморских пар 0 пикселей; срабатывания — на бликовых сценах ({', '.join(k['pq_glint_det'])}) и на одной паре Северного моря на уровне фона",
+        ],
+        bars=dict(title=f"F1 Marine Debris, test MARIDA ({num(k['d_n_scenes'], 0)} сцен)", maxv=1.0, fmt=3, items=[
+            ("LightGBM (основной)", k["d_lgbm_f1"], True),
+            ("RandomForest, протокол MARIDA", k["d_rf_argmax_f1"], False),
+            ("окно FDI × NDVI", k["d_fdi_ndvi_box_f1"], False)]),
+        source="reports/case_detector/compare.md, metrics.json; reports/case_pairs/quality.md",
+        speech=(f"Детектор — пиксельный LightGBM. На test MARIDA F1 {num(k['d_lgbm_f1'], 3)}, RandomForest — {num(k['d_rf_argmax_f1'], 3)}, "
+                f"индексы FDI — {num(k['d_fdi_ndvi_box_f1'], 3)}. На саргассуме и мутной воде ложных нет, ошибается на судах и "
+                f"органике. На реальных парах он почти ничего не видит: на пиксель 10 метров приходится меньше одного "
+                f"предмета, а редкие срабатывания — на блике."),
+    ))
+    S.append(dict(
+        time=("2:10", "2:45"), section="Концентрация",
+        title=f"C = N/A сошлась с опубликованной у {num(k['cons_match'], 0)} из {num(k['cons_rows'], 0)} строк; на отложенном test модель не лучше медианы — на карте медиана",
+        bullets=[
+            f"Контроль: {num(k['ctl_n'], 0)} / {num(k['ctl_a'], 2)} км² = {num(k['ctl_v'], 1)} шт./км², 95 % ДИ Пуассона {rng(k['ctl_lo'], k['ctl_hi'])}; C = N/A совпала с опубликованной у {num(k['cons_match'], 0)} из {num(k['cons_rows'], 0)} строк",
+            f"Сплит: {num(k['k_blocks'], 0)} участков маршрута + буфер {num(k['buf_days'], 0)} сут; протокол и правило выбора записаны до CV",
+            f"Dev CV S2: {k['S2_primary']} {num(k['S2_dev_main'], 1)} против медианы {num(k['S2_dev_med'], 1)}, ΔMAE {ci(k['S2_dev_ci'])} — слабый выигрыш (с Бонферрони {ci(k['S2_dev_bonf'])})",
+            f"Отложенный test ({k['ft_when']}, один раз): S2 {num(k['S2_t_main_mae'], 1)} против {num(k['S2_t_median_mae'], 1)} ({k['S2_t_verdict']}); S1 {num(k['S1_t_main_mae'], 1)} против {num(k['S1_t_median_mae'], 1)} ({k['S1_t_verdict']})",
+        ],
+        bars=dict(title=f"S2, отложенный test ({pl(k['S2_t_n_test'], *EV)}): MAE, шт./км²", fmt=1, items=[
+            (f"{k['S2_t_main_model']} (основная)", k["S2_t_main_mae"], False),
+            ("медиана dev (на карте)", k["S2_t_median_mae"], True)],
+            note=f"ΔMAE {sgn(k['S2_t_d_mae'])} {ci(k['S2_t_d_mae_ci95'], 1, True)} — ДИ содержит 0"),
+        source="reports/case_conc/dev_cv.json, final_test.json; configs/case_selection.yaml: final_test",
+        speech=(f"Концентрация: C равно N на A, интервал Пуассона, контрольный пример — {num(k['ctl_v'], 1)}. Модели сравниваем с "
+                f"медианой на участках маршрута. На dev ridge выигрывает слабо, а на отложенном test, посчитанном один раз, — "
+                f"{num(k['S2_t_main_mae'], 1)} против {num(k['S2_t_median_mae'], 1)} у медианы. Правило записано до открытия "
+                f"test, поэтому на карте — медиана. Модель не спасаем."),
+    ))
+    S.append(dict(
+        time=("2:45", "3:05"), section="Эксперимент «снимок vs all_litter»",
+        title="Связь признаков снимка с полевой плотностью всего мусора не установлена: данных на это мало",
+        bullets=[
+            f"{num(k['e_n_accept_s2'], 0)} пар S2 прошли маски, независимых групп «район × день» — {num(k['e_n_groups'], 0)}; эталон — весь мусор, не пластик",
+            f"FDI в полосе: ρ {num(k['e_fdi_rho'], 2)} {ci(k['e_fdi_ci'], 2)}, p Холма {num(k['e_fdi_holm'], 2)}; та же полоса в случайной воде сцены — {num(k['e_fdi_null'], 2)}",
+            "Значит, связь на уровне сцены или дня, а не места; знак к тому же обратный ожидаемому",
+            f"Мощность: при {num(k['e_n_groups'], 0)} группах видна только |ρ| ≥ {num(k['e_pow6'], 2)}; для ρ = 0.5 нужно ≈ {num(k['e_n_needed_rho05'], 0)} независимых пар",
+        ],
+        big=(num(k["e_n_needed_rho05"], 0), f"независимых синхронных пар нужно, чтобы увидеть ρ = 0.5 (есть {num(k['e_n_groups'], 0)} групп)"),
+        source="reports/case_pairs/experiment.md, experiment.json",
+        speech=(f"Связь снимка с полем мы всё же проверили. На {num(k['e_n_accept_s2'], 0)} парах FDI даёт ρ {num(k['e_fdi_rho'], 2)}, "
+                f"но после поправки Холма p {num(k['e_fdi_holm'], 2)}, а случайная вода той же сцены даёт почти то же. "
+                f"Вывод — данных мало: нужно около {num(k['e_n_needed_rho05'], 0)} независимых пар."),
+    ))
+    S.append(dict(
+        time=("3:05", "3:25"), section="Карта",
+        title=f"Карта говорит то же, что отчёт: {num(k['zones'], 0)} полос-кандидатов, 0 подтверждённых пар, концентрация по снимку недоступна",
+        bullets=[
+            "Три слоя: полевые измерения (шт./км² с интервалом Пуассона) · снимки-кандидаты (полосы обследования) · подозрительные пиксели детектора",
+            "Два статуса полосы: детекция («связь не подтверждена» + причина) и концентрация («недоступна»)",
+            f"Реестр пар, выгрузка GeoJSON/CSV, сохранённые запросы; самопроверка API ↔ выгрузка: {num(k['sc_ok'], 0)} из {num(k['sc_checks'], 0)}, ошибочные входы {num(k['sc_inv_ok'], 0)}/{num(k['sc_inv_total'], 0)}, p95 ≤ {num(k['sc_p95'], 0)} мс",
+        ],
+        image="zone",
+        caption="Северное море, HE460 трансекта 03: пиксели есть, но связь с полем не подтверждена (дрейф > допуска)",
+        source=f"service/routes_v3.py; {k['sc_file']}",
+        speech=("Карта повторяет отчёт: три слоя и два статуса полосы. Здесь детектор нашёл пиксели, но пара отклонена "
+                "по дрейфу, поэтому это «подозрительные пиксели без полевого подтверждения», а не «обнаружено». "
+                "Выгрузка сверена с API самопроверкой."),
+    ))
+    S.append(dict(
+        time=("3:25", "3:40"), section="Дополнительные функции",
+        title="«Подобрать снимок»: из правила дрейфа — инструмент планирования полевых работ под пролёт",
+        bullets=[
+            f"Окно синхронизации |dt| ≤ {num(k['pf_window_h'], 2)} ч; наивное окно ±1 сут даёт {num(k['pf_naive'], 0)} «пар», синхронных {num(k['pf_naive_drift'], 0)}",
+            f"Чёрное море без времени трансект: {num(k['pf_cond'], 0)} событий получают окно UTC, у {num(k['pf_cond_ok'], 0)} полоса чистая по маскам",
+            f"Прогноз пролётов на архиве совпал с реальной съёмкой в {num(k['pf_fc_hit'], 0)} из {num(k['pf_fc_n'], 0)} случаев (±5 мин)",
+            f"Геометрия трансект по PANGAEA: {pl(k['g_events'], *EV)} S2/S3, {pl(k['g_segments'], *SEG)}; {num(k['g_multi'], 0)} прерванные трансекты — двумя сегментами",
+        ],
+        image="pairfinder",
+        caption="Саргассово море, T18: прерванная трансекта (2 сегмента) и «Подбор снимка» — сцен в окне нет",
+        source="docs/EXTRA_FEATURES.md; reports/case_pairfinder/evidence.md; reports/case_geometry/summary.md",
+        speech=(f"Из правила дрейфа мы сделали инструмент «Подобрать снимок»: он говорит, когда выходить на трансекту. "
+                f"Для Чёрного моря это окна UTC у {pl(k['pf_cond'], *EV)}. Геометрию трансект восстановили по PANGAEA."),
+    ))
+    S.append(dict(
+        time=("3:40", "3:52"), section="Ограничения и развитие",
+        title="Ограничения названы на карте и в отчёте; развитие — синхронные пары и больше рейсов",
+        bullets=[
+            "Перенос «снимок → шт./км²» не доказан: синхронных пар нет, для пластика снимков нет",
+            f"Мало независимых данных: S2 — один рейс, {num(k['t_n_days'], 0)} дней; интервалы недопокрывают ({num(k['S2_dev_cov'], 0)} % и {num(k['S1_dev_cov'], 0)} % вместо 90 %)",
+            "Test не абсолютно нетронутый: ранняя разведка бейзлайнов видела все события профиля (записано до открытия)",
+            "Детектор на L2A пар по разметке не измерен; порог блика не калибровался на этих сценах",
+            f"Дальше: трансекты под пролёт с записанным временем (≈ {num(k['e_n_needed_rho05'], 0)} пар), больше рейсов и сезонов, ERA5 для дрейфа, разметка скоплений на L2A",
+        ],
+        source="reports/report.md §8–9; README.md «Ограничения»",
+        speech=("Ограничения называем сами: перенос на снимок не доказан, данных мало, интервалы недопокрывают. "
+                "Развитие — трансекты под пролёт с записанным временем и больше рейсов."),
+    ))
+    S.append(dict(
+        time=("3:52", "4:00"), section="Воспроизводимость",
+        title=f"Одна команда, {num(k['run_s'], 1)} с без сети; чистый клон до карты — {k['cc_total']} мин, числа совпали",
+        bullets=[
+            "Одна команда: run.ps1 -Case all -Offline (CSV → отбор → пары → маски → детектор → метрики → выгрузка)",
+            f"{pl(k['n_outputs'], *TAB)} с одинаковыми sha256 при повторе; отпечаток {k['fingerprint']}…",
+            f"Чистый клон: клон {k['cc_clone_s']} с, установка и маршрут {k['cc_install']}, карта {k['cc_map_s']} с",
+            f"Тесты кейса: {num(k['cc_tests'], 0)} passed, {num(k['cc_skipped'], 0)} skipped за {k['cc_tests_s']} с; все числа — из final_numbers.json",
+        ],
+        big=(f"{k['cc_total']} мин", "от git clone до карты на экране, CPU"),
+        source=f"{k['cc_file']}; reports/case_run/run_summary.json",
+        speech=(f"Всё воспроизводится одной командой без сети; чистый клон до карты — {k['cc_total']} минуты, числа совпали. "
+                f"Спасибо, готовы к вопросам."),
+    ))
+    return S
+
+
+# ----------------------------------------------------------------------------------------------- images
+def prepare_images() -> dict:
+    """Уменьшенные копии скриншотов в reports/case_deck_img (в git — только они)."""
+    from PIL import Image
+
+    IMG_DIR.mkdir(parents=True, exist_ok=True)
+    out = {}
+    for key, (src, dst, box) in IMAGES.items():
+        s, d = SHOTS / src, IMG_DIR / dst
+        if s.exists():
+            im = Image.open(s).convert("RGB")
+            if box and im.width >= box[2]:
+                im = im.crop(box)
+            if im.width > 1600:
+                im = im.resize((1600, round(im.height * 1600 / im.width)), Image.LANCZOS)
+            im.save(d, "JPEG", quality=85, optimize=True)
+        if d.exists():
+            out[key] = d
+        else:
+            MISSING.append(f"image:{src}")
+    return out
+
+
+# ----------------------------------------------------------------------------------------------- pptx
+BG = (0x10, 0x12, 0x16)
+INK = (0xEE, 0xEF, 0xF1)
+MUTED = (0x9A, 0xA1, 0xAC)
+ACCENT = (0xD9, 0x91, 0x2E)
+BASE = (0x5B, 0x63, 0x70)
+PANEL = (0x1B, 0x1E, 0x24)
+
+
+def build_pptx(S: list[dict], imgs: dict, out: Path, start: int = 1) -> None:
+    from pptx import Presentation
+    from pptx.dml.color import RGBColor
+    from pptx.enum.shapes import MSO_SHAPE
+    from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
+    from pptx.util import Emu, Inches, Pt
+
+    rgb = lambda c: RGBColor(*c)  # noqa: E731
+    prs = Presentation()
+    prs.slide_width, prs.slide_height = Inches(13.333), Inches(7.5)
+    blank = prs.slide_layouts[6]
+
+    def text(slide, x, y, w, h, paras, size=16, color=INK, bold=False, anchor=MSO_ANCHOR.TOP, align=PP_ALIGN.LEFT,
+             bullet=False, space=6):
+        tb = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h))
+        tf = tb.text_frame
+        tf.word_wrap = True
+        tf.vertical_anchor = anchor
+        tf.margin_left = tf.margin_right = Inches(0.02)
+        tf.margin_top = tf.margin_bottom = Inches(0.02)
+        for i, ptxt in enumerate(paras if isinstance(paras, list) else [paras]):
+            para = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
+            para.alignment = align
+            para.space_after = Pt(space)
+            r = para.add_run()
+            r.text = ("• " if bullet else "") + ptxt
+            r.font.size = Pt(size)
+            r.font.bold = bold
+            r.font.color.rgb = rgb(color)
+            r.font.name = "Segoe UI"
+        return tb
+
+    def rect(slide, x, y, w, h, color):
+        sh = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(x), Inches(y), Inches(w), Inches(h))
+        sh.fill.solid()
+        sh.fill.fore_color.rgb = rgb(color)
+        sh.line.fill.background()
+        sh.shadow.inherit = False
+        return sh
+
+    def bars(slide, x, y, w, spec):
+        text(slide, x, y, w, 0.4, spec["title"], size=14, color=MUTED)
+        items = spec["items"]
+        vmax = spec.get("maxv") or max(v for _, v, _ in items if v is not None) or 1
+        fmt = spec.get("fmt", 0)
+        label_w, val_w = w * 0.42, 0.9
+        bar_w = w - label_w - val_w
+        yy = y + 0.5
+        for lab, v, hi in items:
+            text(slide, x, yy, label_w - 0.1, 0.42, lab, size=13, color=INK, anchor=MSO_ANCHOR.MIDDLE)
+            v0 = v or 0
+            bw = max(bar_w * v0 / vmax, 0.04)
+            rect(slide, x + label_w, yy + 0.07, bw, 0.3, ACCENT if hi else BASE)
+            text(slide, x + label_w + bw + 0.08, yy, val_w, 0.42, num(v, fmt), size=14, bold=True,
+                 color=INK, anchor=MSO_ANCHOR.MIDDLE)
+            yy += 0.55
+        if spec.get("note"):
+            text(slide, x, yy + 0.05, w, 0.4, spec["note"], size=13, color=MUTED)
+
+    def table(slide, x, y, w, rows):
+        n, m = len(rows), len(rows[0])
+        shp = slide.shapes.add_table(n, m, Inches(x), Inches(y), Inches(w), Inches(0.36 * n))
+        tbl = shp.table
+        tbl.columns[0].width = Inches(w * 0.78)
+        tbl.columns[1].width = Inches(w * 0.22)
+        for i, row in enumerate(rows):
+            for j, val in enumerate(row):
+                cell = tbl.cell(i, j)
+                cell.fill.solid()
+                cell.fill.fore_color.rgb = rgb(PANEL if i else BASE)
+                cell.margin_left = cell.margin_right = Inches(0.08)
+                cell.margin_top = cell.margin_bottom = Inches(0.03)
+                tf = cell.text_frame
+                tf.paragraphs[0].text = ""
+                r = tf.paragraphs[0].add_run()
+                r.text = str(val)
+                r.font.size = Pt(13)
+                r.font.name = "Segoe UI"
+                r.font.bold = (i == 0 or i == n - 1)
+                r.font.color.rgb = rgb(INK)
+                if j == 1:
+                    tf.paragraphs[0].alignment = PP_ALIGN.RIGHT
+
+    for i, s in enumerate(S, start):
+        sl = prs.slides.add_slide(blank)
+        sl.background.fill.solid()
+        sl.background.fill.fore_color.rgb = rgb(BG)
+        text(sl, 0.5, 0.22, 9, 0.3, f"{i:02d} · {s['section']}", size=12, color=ACCENT, bold=True)
+        text(sl, 0.5, 0.5, 12.3, 1.05, s["title"], size=26 if len(s["title"]) < 95 else 23, bold=True,
+             anchor=MSO_ANCHOR.TOP)
+        right = any(key in s for key in ("image", "big", "bars", "table"))
+        body_w = 6.1 if right else 12.3
+        fsize = 16 if sum(len(b) for b in s["bullets"]) < 520 else 15
+        text(sl, 0.5, 1.75, body_w, 5.0, s["bullets"], size=fsize, bullet=True, space=10)
+        rx, rw = 7.0, 5.85
+        if "image" in s and s["image"] in imgs:
+            from PIL import Image
+            p = imgs[s["image"]]
+            with Image.open(p) as im:
+                ar = im.height / im.width
+            h = min(rw * ar, 4.4)
+            wimg = h / ar
+            sl.shapes.add_picture(str(p), Inches(rx + (rw - wimg) / 2), Inches(1.8), Inches(wimg), Inches(h))
+            text(sl, rx, 1.85 + h, rw, 0.6, s.get("caption", ""), size=12, color=MUTED)
+        elif "bars" in s:
+            bars(sl, rx, 1.85, rw, s["bars"])
+        elif "table" in s:
+            table(sl, rx, 1.85, rw, s["table"])
+        if "big" in s:
+            by = 1.85 if "image" not in s and "bars" not in s and "table" not in s else 5.0
+            if "bars" in s:
+                by = 4.9
+            rect(sl, rx, by, rw, 1.7, PANEL)
+            text(sl, rx + 0.3, by + 0.1, rw - 0.6, 0.9, s["big"][0], size=48, bold=True, color=ACCENT)
+            text(sl, rx + 0.3, by + 1.0, rw - 0.6, 0.65, s["big"][1], size=13, color=INK)
+        text(sl, 0.5, 6.95, 11.5, 0.35, "Источник: " + s["source"], size=10, color=MUTED)
+        text(sl, 12.2, 6.95, 0.7, 0.35, f"{s['time'][0]}", size=10, color=MUTED, align=PP_ALIGN.RIGHT)
+        sl.notes_slide.notes_text_frame.text = f"[{s['time'][0]}–{s['time'][1]}] " + s["speech"]
+    prs.save(out)
+
+
+# ----------------------------------------------------------------------------------------------- SPEECH.md
+def speech_md(S: list[dict], k: dict) -> str:
+    L = ["# Речь на защите кейса (4 минуты)", "",
+         "Генерируется `scripts/make_deck_case.py` из `reports/final_numbers.json`; руками не править. Тот же текст — "
+         "в заметках докладчика `reports/case_deck.pptx`. Демо на карте — отдельно, `docs/DEMO.md` (2 мин); вопросы — `docs/QA.md`.",
+         "",
+         f"Темп ≈ 130 слов в минуту, всего ≈ {pl(sum(len(s['speech'].split()) for s in S), 'слово', 'слова', 'слов')}. Если отстаём больше чем на 15 с — слайды 10 и 11 сокращаем до заголовка.", "",
+         "| Слайд | Время | О чём |", "|---|---|---|"]
+    for i, s in enumerate(S, 1):
+        L.append(f"| {i} | {s['time'][0]}–{s['time'][1]} | {s['section']} |")
+    L.append("")
+    for i, s in enumerate(S, 1):
+        words = len(s["speech"].split())
+        L += [f"## {i}. {s['section']} ({s['time'][0]}–{s['time'][1]}, ≈ {pl(words, 'слово', 'слова', 'слов')})", "",
+              f"**На слайде:** {s['title']}", "", s["speech"], ""]
+    L += ["## Числа наизусть", "",
+          f"- F1 детектора на test MARIDA — **{num(k['d_lgbm_f1'], 3)}** {ci(k['d_lgbm_ci'], 3)}, RandomForest {num(k['d_rf_argmax_f1'], 3)}, FDI × NDVI {num(k['d_fdi_ndvi_box_f1'], 3)}.",
+          f"- Пары: {num(k['p_events'], 0)} → {num(k['p_events_accept_meta'], 0)} → {num(k['p_quality_accept'], 0)} → **{num(k['p_events_accept_drift'], 0)}**; окно синхронизации ≈ {num(k['p_max_dt_h_typical'], 1)} ч.",
+          f"- Контроль: {num(k['ctl_n'], 0)} / {num(k['ctl_a'], 2)} км² = **{num(k['ctl_v'], 1)}** шт./км² [{rng(k['ctl_lo'], k['ctl_hi'])}].",
+          f"- Отложенный test S2: {num(k['S2_t_main_mae'], 1)} против медианы **{num(k['S2_t_median_mae'], 1)}**; S1: {num(k['S1_t_main_mae'], 1)} против {num(k['S1_t_median_mae'], 1)}.",
+          f"- Эксперимент: {num(k['e_n_accept_s2'], 0)} пар, {num(k['e_n_groups'], 0)} групп; нужно ≈ {num(k['e_n_needed_rho05'], 0)} пар для ρ = 0.5.",
+          "",
+          "## Формулировки, которых избегаем", "",
+          "- all_litter (Северное и Чёрное моря) — «весь плавающий мусор», никогда «пластик».",
+          "- Детектор находит «вероятное скопление плавающего мусора», а не «пластик».",
+          "- На несинхронной паре — «подозрительные пиксели, связь с полем не подтверждена», а не «обнаружено».",
+          "- Оценка по полевым данным — «медиана профиля, не по снимку».", ""]
+    return "\n".join(L)
+
+
+# ----------------------------------------------------------------------------------------------- DEMO.md
+def demo_md(k: dict) -> str:
+    return f"""# Демо на карте кейса: сценарий на 2 минуты и план Б
+
+Генерируется `scripts/make_deck_case.py` из `reports/final_numbers.json`; руками не править.
+
+**Подготовка (до выхода):** `powershell -ExecutionPolicy Bypass -File run.ps1 -Case all -Offline`, затем
+`powershell -ExecutionPolicy Bypass -File run.ps1` → http://127.0.0.1:8000 (режим «Кейс» открывается по умолчанию).
+Окно 1920×1080, браузер на весь экран. Проверить: слева «{num(k['exp_obs'], 0)} наблюдений · {num(k['zones'], 0)} полос»,
+в легенде — «{num(k['zones'], 0)} обследованных участков со снимками-кандидатами; 0 подтверждённых пар; для пластика снимков нет».
+
+## Сценарий (2:00)
+
+| Время | Действие | Что говорим | Что видно |
+|---|---|---|---|
+| 0:00–0:15 | «Акватория» → **Саргассово море, MSM41**; даты не трогаем | «Основной профиль — суммарный пластик > 2 см, визуальная полоса 10 м, {pl(k['t_n_events'], *EV)}.» | точки измерений на трансектах |
+| 0:15–0:35 | Клик по измерению с плотностью (вкладка «Измерения» → запись «весь пластик») | «Это **измерение**: C = N/A, рядом 95 % интервал Пуассона. Если ниже есть блок «Оценка модели по полевым данным» — это исследовательский прогноз кросс-валидации без своего участка маршрута, не измерение. Итоговая оценка по полю — **медиана профиля**: на отложенном test модель не лучше медианы ({num(k['S2_t_main_mae'], 1)} против {num(k['S2_t_median_mae'], 1)}).» | карточка: значение, интервал Пуассона, профиль, источник |
+| 0:35–0:55 | «Акватория» → **Юго-восток Северного моря** → полоса **HE460 · трансекта 03** | «Это полоса обследования на снимке-кандидате. Статус — **связь не подтверждена**, причина — дрейф больше допуска 3 км. Концентрация по снимку недоступна.» | карточка полосы, два статуса |
+| 0:55–1:10 | Показать жёлтые контуры в полосе и строку «подозрительные пиксели» | «Детектор нашёл пиксели, но это подозрительные пиксели без полевого подтверждения, а не «обнаружено». Класс детектора — любой плавающий мусор, не пластик.» | слой «Подозрительные пиксели детектора» |
+| 1:10–1:25 | «Реестр пар» → фильтр «Отклонённые» | «У каждого из {num(k['p_events'], 0)} событий — статус и все причины: сцены нет, облака, блик, дрейф. Принятых — {num(k['p_events_accept_drift'], 0)}.» | таблица: Δt, дрейф/допуск, причина |
+| 1:25–1:40 | Карточка измерения → **«Подобрать снимок»** | «Окно синхронизации ≈ {num(k['p_max_dt_h_typical'], 1)} ч при 0,2 м/с. Функция отвечает, какой снимок годится и когда выходить на трансекту.» | окно синхронизации, кандидаты, решение |
+| 1:40–1:50 | Вкладка **«Метрики»** | «F1 детектора {num(k['d_lgbm_f1'], 3)} на test MARIDA; отложенный test концентрации — модель против медианы.» | таблицы детектора и test |
+| 1:50–2:00 | **«Выгрузка»** → GeoJSON; **«Запросы»** → сохранить, затем запустить сохранённый | «Выгрузка — те же поля и статусы, что на карте; сохранённый запрос перезапускается одной кнопкой.» | скачанный файл, список запросов |
+
+Если жюри просит показать Чёрное море: «Акватория» → **Чёрное море, DOORS** → полоса **T1**: пара отклонена по дрейфу
+(время трансект в данных не записано, окно — по суткам), пикселей в полосе нет, полевое значение — весь мусор, не пластик.
+
+## План Б
+
+1. **Нет интернета.** Данные кейса и API работают без сети, пропадает только подложка (Esri/OSM). Говорим: «подложка из
+   интернета, данные локальные» и продолжаем по тому же сценарию.
+2. **Сервис не стартует.** `.venv\\Scripts\\python.exe -m service --port 8000`; порт занят — `run.ps1 -Port 8080`.
+3. **Карта не грузится совсем.** Показываем скриншоты `reports/case_deck_img/` (обзор, полоса с подозрительными
+   пикселями, карточка измерения, «Подобрать снимок») и слайды 9–10 `reports/case_deck.pptx` тем же текстом.
+4. **Нужны числа без интерфейса.** `http://127.0.0.1:8000/api/v3/metrics` и `/api/v3/meta` (итог в легенде) или
+   `reports/final_numbers.json`, блок `case.sections`.
+5. **Потерялись в интерфейсе.** «сбросить» под счётчиками слева, «Акватория» → «Все».
+"""
+
+
+# ----------------------------------------------------------------------------------------------- QA.md
+def qa_items(k: dict) -> list[tuple[str, str, str]]:
+    ft2 = k
+    g1, g2 = k["git"]["eb35414"], k["git"]["93cf856"]
+    st, rb = k["S2_sch_st"], k["S2_sch_route_buf1"]
+    s1e, s1r = k["S1_sch_event"], k["S1_sch_route_buf1"]
+    Q = [
+        # --- главное
+        ("Почему вы не выдаёте концентрацию шт./км² по снимку?",
+         f"Потому что перенос не доказан. Синхронных пар «снимок ↔ полевое измерение» при типичном дрейфе — "
+         f"{num(k['p_events_accept_drift'], 0)} из {num(k['p_events'], 0)} событий; для профилей пластика сцен нет вообще; на "
+         f"{num(k['e_n_accept_s2'], 0)} парах со всем мусором связь признаков снимка с плотностью не установлена. Выдать число "
+         f"значило бы выдать калибровку, которой нет. Поэтому у всех {num(k['zones'], 0)} полос статус «концентрация недоступна», "
+         f"поле `concentration` у зоны всегда `null`.",
+         "README.md «Главное», §6; reports/case_pairs/summary.md; reports/case_pairs/experiment.md"),
+        ("Модель концентрации не лучше медианы — зачем тогда модель и что это значит?",
+         f"Это результат, а не провал процедуры. На dev CV S2 {k['S2_primary']} выигрывала слабо ({num(k['S2_dev_main'], 1)} против "
+         f"{num(k['S2_dev_med'], 1)}, с Бонферрони ДИ {ci(k['S2_dev_bonf'])} уже содержит 0). На отложенном test — "
+         f"{num(k['S2_t_main_mae'], 1)} против {num(k['S2_t_median_mae'], 1)}, ΔMAE {sgn(k['S2_t_d_mae'])} {ci(k['S2_t_d_mae_ci95'], 1, True)}; "
+         f"у S1 {num(k['S1_t_main_mae'], 1)} против {num(k['S1_t_median_mae'], 1)}. Значит, внутри одного рейса координаты и сезон не "
+         f"объясняют плотность лучше константы. По правилу, записанному до test, на карте — медиана профиля, подписанная "
+         f"«оценка по полевым данным, не по снимку». Модель остаётся в отчёте как проверенная и отвергнутая.",
+         "reports/case_conc/final_test.json; README.md §5; configs/case_selection.yaml: final_test.decision_before_opening"),
+        ("Почему all_litter, если задача про пластик?",
+         "all_litter — не целевая величина. Целевая — суммарный пластик S2. all_litter (весь плавающий мусор Северного и "
+         "Чёрного морей) используется только в исследовательском эксперименте, потому что лишь у этих событий есть сцены "
+         "в окне. Везде — в API, карточке, легенде, выгрузке — он подписан «весь мусор, не только пластик»; долю пластика "
+         "из публикации на отдельное наблюдение не переносим.",
+         "README.md §1 «Что не является целью»; reports/report.md §1"),
+        ("Почему синхронных пар ноль, если по метаданным их 29?",
+         f"±1 сут — это совпадение даты, а не места. Вода за |dt| смещается: при типичных {num(k['drift_typical_ms'], 1)} м/с "
+         f"медиана сдвига {num(k['drift_typical_km'], 1)} км при допуске «полуширина полосы + {num(k['p_tolerance_buffer_km'], 1)} км». "
+         f"Синхронна пара с |dt| ≤ {num(k['p_max_dt_h_typical'], 1)} ч, таких нет. У всех событий S4 время трансекты не записано "
+         f"(+{num(k['p_unknown_time_extra_h'], 0)} ч к |dt|). Даже при низком течении {num(k['drift_low_ms'], 2)} м/с из {num(k['p_events_accept_meta'], 0)} проходят только "
+         f"{num(k['drift_low_buf3'], 0)} событий; без учёта дрейфа приняли бы {num(k['p_accept_without_drift'], 0)}.",
+         "reports/case_pairs/summary.md «Допуск по дрейфу»; configs/case_pairs.yaml"),
+        ("Почему для пластика нет снимков?",
+         f"S1 (Тихий океан) и S2 (Саргассово море) — открытый океан 2015 г. Sentinel-2 открытый океан почти не снимает, а "
+         f"Sentinel-2A начал съёмку в конце июня 2015, экспедиция MSM41 шла в апреле. По источникам: у S1 сцен в ±5 сут "
+         f"{num(k['any5_S1'], 0)}, у S2 — {num(k['any5_S2'], 0)} (Landsat в ±1 сут; с облачностью сцены ≤ 60 % — {num(k['l1c60_S2'], 0)}).",
+         "README.md §3; reports/case_pairs/summary.md"),
+        # --- детектор
+        ("Детектор ищет пластик или любой мусор?",
+         f"Любой плавающий мусор: положительный класс — Marine Debris разметки MARIDA (пластик, дерево, ткань, часто вперемешку "
+         f"с органикой). Поэтому маска подписана «вероятное скопление плавающего мусора». Отдельный класс «пластик» по снимку "
+         f"10 м без спектральной разметки полимеров мы не заявляем.",
+         "reports/case_detector/compare.md «Выборка, эталон, классы»"),
+        ("Насколько детектор лучше простых индексов?",
+         f"На одном и том же test MARIDA ({num(k['d_n_scenes'], 0)} сцен, {pl(k['d_md_px'], *PX)} мусора): LightGBM F1 "
+         f"{num(k['d_lgbm_f1'], 3)} {ci(k['d_lgbm_ci'], 3)}, RandomForest по протоколу статьи {num(k['d_rf_argmax_f1'], 3)}, окно FDI × NDVI "
+         f"{num(k['d_fdi_ndvi_box_f1'], 3)}. Разница с RF {num(k['d_delta'], 3)} {ci(k['d_delta_ci'], 3)} по парному бутстрепу сцен. Пороги "
+         f"индексов с val на test не переносятся: FDI × NDVI падает с {num(k['d_fdi_ndvi_val_f1'], 3)} до {num(k['d_fdi_ndvi_box_f1'], 3)}.",
+         "reports/case_detector/compare.md; reports/case_detector/metrics.json"),
+        ("Где детектор ошибается?",
+         f"Из {num(k['d_fp_total'], 0)} ложных срабатываний {num(k['d_fp_ship_org_pct'], 0)} % — суда ({num(k['d_fp_ship'], 0)}) и природная "
+         f"органика ({num(k['d_fp_org'], 0)}, {num(k['d_fp_org_rate'], 1)} % пикселей класса). На саргассуме, мутной воде и воде со "
+         f"взвесью ({num(k['d_hard_bg_px'], 0)} пикселей) — {num(k['d_hard_bg_fp'], 0)}. Пропуски: {num(k['d_fn_top3'], 0)} из "
+         f"{num(k['d_fn'], 0)} в трёх сценах, где полосы мусора размечены отдельными точками. Вырезки — в examples/.",
+         "reports/case_detector/compare.md «Ложные срабатывания по классам», examples/"),
+        ("Что детектор показал на реальных сценах пар?",
+         f"В полосах {num(k['e_n_black_sea_accept_zero_det'], 0)} принятых черноморских пар — 0 пикселей выше порога, хотя полевая "
+         f"плотность всего мусора там {num(k['e_field_min'], 0)}–{num(k['e_field_max'], 0)} шт./км². Это ожидаемо: гораздо меньше "
+         f"одного предмета на пиксель 10 м. Срабатывания есть на бликовых сценах ({', '.join(k['pq_glint_det'])}) — это ложные, "
+         f"такие пары отклоняет маска качества, — и на одной чистой паре Северного моря, где число пикселей в полосе на уровне фона сцены.",
+         "reports/case_pairs/quality.md «Что видит детектор на 10 м»"),
+        ("Детектор проверен на L2A? Ведь MARIDA — ACOLITE.",
+         "Нет, на L2A пар качество по разметке не измерено — это ограничение, оно записано. На вырезках L2A детектор работает "
+         "через гармонизацию по медиане воды. Для развития нужна разметка скоплений на L2A.",
+         "README.md «Ограничения»; reports/report.md §8"),
+        # --- утечки и test
+        ("Как вы исключили утечки при проверке концентрации?",
+         f"Основной сплит — {num(k['k_blocks'], 0)} непрерывных участков маршрута, из train убраны записи ближе {num(k['buf_days'], 0)} сут к "
+         f"test-участку; нет общих событий, дней рейса и соседних дней. Поля-утечки (concentration_*, items_count, reported_* …) "
+         f"запрещены как признаки, тесты портят их и проверяют, что прогноз ни одной модели не меняется. Составы всех фолдов — в "
+         f"reports/case_splits/.",
+         "src/macroplastic/case/splits.py; tests/test_case_concentration.py, tests/test_case_conc_model.py"),
+        ("Почему сплит по маршруту, а не случайный?",
+         f"Слабые схемы завышают качество через соседей того же дня. Пример S2: на «связных компонентах» kNN даёт "
+         f"{num(st.get('knn5_log_mae'), 1)} против медианы {num(st.get('median_mae'), 1)} (ΔMAE {num(st.get('d'), 1)} {ci(st.get('ci95'))}), "
+         f"соседей в пределах суток {num(st.get('neighbors_1d_pct'), 0)} %; на участках маршрута с буфером — {num(rb.get('knn5_log_mae'), 1)} "
+         f"против {num(rb.get('median_mae'), 1)}, {ci(rb.get('ci95'))} — незначимо. У S1 сплит по событиям даёт ΔMAE {num(s1e.get('d'), 1)} при {num(s1e.get('neighbors_1d_pct'), 0)} % "
+         f"соседей того же дня, маршрут с буфером — {num(s1r.get('d'), 1)} {ci(s1r.get('ci95'))}. Мы нашли это до моделей и сменили основную схему.",
+         "reports/case_conc/metrics.json, baseline.md; reports/report.md §4.2, §7"),
+        ("Чем доказать, что отложенный test открыт один раз и после решения?",
+         f"Состав test зафиксирован {k['frozen']} (sha256 в configs/case_selection.yaml). Решение — какие модели основные и что "
+         f"делать, если они не лучше медианы, — закоммичено в `eb35414` ({g1[0]}). Test посчитан {k['ft_when']} и закоммичен в "
+         f"`93cf856` ({g2[0]}). Скрипт final_test_conc.py отказывается считать повторно (есть final_test.json) и раньше срока — "
+         f"это проверяют тесты test_final_test_script_refuses_*. Результат не в нашу пользу и не подогнан: модель проиграла медиане.",
+         "git show eb35414; git show 93cf856; reports/case_conc/final_test.json; tests/test_case_conc_model.py"),
+        ("Test действительно нетронутый?",
+         f"Не абсолютно, и мы это записали до открытия: {k['ft_limitation']}. Модели и гиперпараметры выбирались только на dev.",
+         "configs/case_selection.yaml: final_test.decision_before_opening.limitation"),
+        ("Почему в test так мало событий?",
+         f"S2 — один рейс: {pl(k['t_n_events'], *EV)}. Test — целый участок маршрута ({pl(k['S2_t_n_test'], *EV)}, "
+         f"{num(k['S2_t_test_cruise_days'], 0)} дней рейса, {k['S2_test_days']}), отделённый буфером: минимум {num(k['S2_min_dt'], 2)} сут и "
+         f"{num(k['S2_min_km'], 0)} км до dev. Меньше, но независимо. Поэтому ДИ широкие, и мы это пишем.",
+         "README.md §5 «Отложенный test»"),
+        # --- концентрация
+        ("Как проверена формула C = N/A?",
+         f"Контрольный пример постановки: {num(k['ctl_n'], 0)} / {num(k['ctl_a'], 2)} км² = {num(k['ctl_v'], 1)} шт./км², 95 % ДИ "
+         f"Пуассона {rng(k['ctl_lo'], k['ctl_hi'])}; модель с прогнозом {num(k['ctl_model'], 0)} даёт ошибку {num(k['ctl_err'], 1)}. "
+         f"На реестре C = N/A совпала с опубликованной (допуск 2 %) у {num(k['cons_match'], 0)} из {num(k['cons_rows'], 0)} строк. "
+         f"Агрегация — ΣN/ΣA, N = 0 даёт «не обнаружено» с верхней границей.",
+         "src/macroplastic/case/concentration.py; tests/test_case_concentration.py"),
+        ("Почему MAE, а не MAPE?",
+         "В реестре есть нули, MAPE на них не определена. Основная — MAE, дополнительно RMSE, медиана абсолютной ошибки и "
+         "MAE в log1p.", "README.md §5"),
+        ("Интервалы прогноза честные?",
+         f"Они недопокрывают: фактическое покрытие 90 %-интервала на CV — {num(k['S2_dev_cov'], 0)} % (S2) и {num(k['S1_dev_cov'], 0)} % (S1). "
+         f"Поэтому в карточке интервал подписан фактическим покрытием, а не номиналом. На test у медианы S2 покрытие "
+         f"{num(k['S2_t_median_coverage90_pct'], 0)} %.",
+         "README.md §5 «Интервалы прогноза»"),
+        ("Почему основной профиль S2, а не S1, где событий больше?",
+         f"У S1 ({pl(k['s1_n_events'], *EV)}) C — опубликованная оценка без числителя N, так что C = N/A и интервал Пуассона не "
+         f"пересчитать; другой метод (трал) и размерный класс 5–50 см. У S2 все {pl(k['t_n_events'], *EV)} имеют N и A, один "
+         f"метод и один размерный класс; поверхностный визуальный учёт ближе к тому, что в принципе видно со спутника.",
+         "reports/report.md §1"),
+        # --- эксперимент
+        ("FDI дал ρ = −0.75 и p = 0.013 — почему вы не называете это связью?",
+         f"Три причины. После поправки Холма p = {num(k['e_fdi_holm'], 2)}. Та же полоса, перенесённая в случайную воду той же сцены, "
+         f"даёт медиану ρ {num(k['e_fdi_null'], 2)}, то есть связь — на уровне сцены или дня, а не места. Знак обратный: мусор должен "
+         f"поднимать FDI. Остаток, специфичный для полосы, — ρ {num(k['e_res_rho'], 2)}, p Холма {num(k['e_res_holm'], 2)}.",
+         "reports/case_pairs/experiment.md «Вывод»"),
+        ("Сколько данных нужно, чтобы проверить перенос?",
+         f"При {num(k['e_n_groups'], 0)} независимых группах обнаружима только |ρ| ≥ {num(k['e_pow6'], 2)}. Для ρ = 0.5 нужно ≈ "
+         f"{num(k['e_n_needed_rho05'], 0)} независимых синхронных пар, для ρ = 0.3 — ≈ {num(k['e_n_needed_rho03'], 0)}. Плюс известное "
+         f"время наблюдения и пары для профиля пластика.",
+         "reports/case_pairs/experiment.md «Мощность»"),
+        # --- сервис
+        ("Что значит статус «связь не подтверждена»?",
+         "Пара «снимок ↔ измерение» отклонена (дрейф, время неизвестно, маски). Тогда детекция получает «недостаточно данных» с "
+         "этой причиной, а сырые пиксели детектора остаются отдельным слоем «подозрительные пиксели без полевого подтверждения». "
+         f"«Обнаружено» возможно только на подтверждённой паре — таких сейчас {num(k['exp_detected'], 0)}.",
+         "README.md §6 «Слои и статусы на карте»; docs/CONTRACTS_V3.md"),
+        ("Совпадает ли то, что на карте, с выгрузкой?",
+         f"Самопроверка сравнивает по id алгоритм, JSON, CSV и GeoJSON: {num(k['sc_ok'], 0)} из {num(k['sc_checks'], 0)} проверок ок, "
+         f"расхождений {num(k['sc_fail'], 0)}; некорректные и пустые входы — {num(k['sc_inv_ok'], 0)} из {num(k['sc_inv_total'], 0)} с верным "
+         f"кодом; p95 ответа ≤ {num(k['sc_p95'], 0)} мс. Сохранённый запрос при повторе даёт тот же результат.",
+         f"scripts/case/consistency_check.py; {k['sc_file']}"),
+        ("Как эксперт повторит расчёт без правки кода?",
+         f"`run.ps1 -Case all -Offline` — {num(k['run_s'], 1)} с, {pl(k['n_outputs'], *TAB)} с одинаковыми sha256 при повторе. "
+         f"Чистый клон до карты — {k['cc_total']} мин на CPU, числа совпали. Кэш STAC, маски, реестры и предсказания детектора — в git. "
+         f"Каждая метрика пересчитывается отдельной командой (README §7).",
+         f"{k['cc_file']}; reports/case_run/run_summary.json; README.md §2, §7"),
+        ("Какие тесты есть?",
+         f"Тесты кейса на чистом клоне: {num(k['cc_tests'], 0)} passed, {num(k['cc_skipped'], 0)} skipped за {k['cc_tests_s']} с "
+         f"({num(k['n_test_funcs'], 0)} тестовых функций, часть параметризована). Проверяют формулу и контрольные примеры, "
+         f"непересечение фолдов и test, утечки, однократность test, API и согласованность выгрузки. Вся папка tests — {k['cc_full']}.",
+         "tests/test_case_*.py, tests/test_api_v3.py; README.md §7"),
+        # --- доп
+        ("Что даёт «Подобрать снимок»?",
+         f"Применяет правило дрейфа к новому наблюдению: окно |dt| ≤ {num(k['pf_window_h'], 2)} ч, решение о синхронности с причиной, "
+         f"маска качества в полосе. На реестре: наивное окно даёт {num(k['pf_naive'], 0)} «пар» и {num(k['pf_naive_drift'], 0)} синхронных; "
+         f"для {num(k['pf_cond'], 0)} событий Чёрного моря функция выдаёт окно UTC, у {num(k['pf_cond_ok'], 0)} полоса чистая. Прогноз "
+         f"пролётов на архиве совпал в {num(k['pf_fc_hit'], 0)} из {num(k['pf_fc_n'], 0)} случаев. Скорость дрейфа — сценарная, это ограничение.",
+         "docs/EXTRA_FEATURES.md §1; reports/case_pairfinder/evidence.md"),
+        ("Зачем восстанавливать геометрию трансект?",
+         f"В реестре у трансекты — точка. Для полосы на снимке нужна линия. По первоисточникам PANGAEA восстановлено "
+         f"{pl(k['g_events'], *EV)} S2/S3 ({pl(k['g_segments'], *SEG)}), {num(k['g_multi'], 0)} прерванные трансекты S2 — "
+         f"двумя сегментами. Эталоном площади для C остаётся площадь автора.",
+         "reports/case_geometry/summary.md"),
+        # --- ограничения и развитие
+        ("Можно ли перенести решение на другие акватории?",
+         f"Детектор — да, с оговорками (проверен на {num(k['d_n_scenes'], 0)} сценах test MARIDA разных районов, на L2A по разметке не измерен). Оценка "
+         "концентрации по полевым данным — нет: она выдаётся только в области применимости профиля (bbox полевых записей ± 1°), "
+         "вне её карта пишет, что оценки нет. Снимок → шт./км² — не доказано нигде.",
+         "reports/report.md §8; README.md §6"),
+        ("Что вы сделаете дальше в первую очередь?",
+         f"Синхронные пары: трансекты под пролёт Sentinel-2 с записанным временем — ≈ {num(k['e_n_needed_rho05'], 0)} независимых пар "
+         f"для ρ = 0.5; наблюдения пластика в прибрежных водах, которые снимает Sentinel-2. Затем больше рейсов и сезонов для "
+         f"полевой модели, ERA5 для дрейфа вместо констант, разметка скоплений на L2A.",
+         "reports/report.md §9"),
+        ("Какая главная ошибка по ходу работы и что вы с ней сделали?",
+         "Выигрыш kNN на схеме связных компонент оказался утечкой через соседей того же дня рейса — основную схему заменили "
+         "до моделей. Ещё: спектральный тест облаков срабатывал на блике (добавлено правило блика), выбор лучшей из равных "
+         "сцен зависел от порядка выдачи STAC (сделан детерминированным).",
+         "reports/report.md §7 «Ошибки, найденные по ходу»"),
+    ]
+    return Q
+
+
+def qa_md(k: dict) -> str:
+    Q = qa_items(k)
+    L = ["# Вопросы жюри и ответы", "",
+         "Генерируется `scripts/make_deck_case.py` из `reports/final_numbers.json`; руками не править. У каждого ответа — "
+         "где доказательство. Отвечаем коротко: сначала вывод, потом одно число, потом ссылка.", ""]
+    for i, (q, a, ref) in enumerate(Q, 1):
+        L += [f"## {i}. {q}", "", a, "", f"*Доказательство:* {ref}", ""]
+    return "\n".join(L)
+
+
+def preview(S: list[dict], imgs: dict) -> int:
+    """PNG по слайдам: каждый слайд — отдельный pptx, LibreOffice конвертирует первый слайд в PNG."""
+    import shutil
+
+    so = shutil.which("soffice") or next((str(p) for p in (Path(r"C:\Program Files\LibreOffice\program\soffice.exe"),
+                                                         Path(r"C:\Program Files (x86)\LibreOffice\program\soffice.exe"))
+                                          if p.exists()), None)
+    if not so:
+        print("[deck_case] LibreOffice не найден: превью пропущено")
+        return 0
+    out = ROOT / "reports" / "case_deck_preview"
+    work = out / "_work"
+    work.mkdir(parents=True, exist_ok=True)
+    made = 0
+    for i in range(1, len(S) + 1):
+        f = work / f"slide_{i:02d}.pptx"
+        build_pptx(S[i - 1:i], imgs, f, start=i)
+        cmd = [so, f"-env:UserInstallation=file:///{(work / 'lo_profile').as_posix()}", "--headless",
+               "--convert-to", "png", "--outdir", str(out), str(f)]
+        try:
+            subprocess.run(cmd, check=True, capture_output=True, timeout=180)
+            made += (out / f"slide_{i:02d}.png").exists()
+        except Exception as e:  # noqa: BLE001
+            print(f"[deck_case] превью слайда {i}: {e}")
+    shutil.rmtree(work, ignore_errors=True)
+    print(f"[deck_case] превью: {made}/{len(S)} PNG -> {out.relative_to(ROOT)}")
+    return made
+
+
+# ----------------------------------------------------------------------------------------------- main
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description="case_deck.pptx + SPEECH.md + DEMO.md + QA.md из final_numbers.json")
+    ap.add_argument("--check", action="store_true", help="только проверить, что все значения нашлись")
+    ap.add_argument("--out", default=str(OUT_PPTX))
+    ap.add_argument("--preview", action="store_true",
+                    help="PNG каждого слайда через LibreOffice -> reports/case_deck_preview/ (не для git)")
+    a = ap.parse_args(argv)
+    sys.stdout.reconfigure(encoding="utf-8")
+    k = load()
+    S = slides(k)
+    texts = {OUT_SPEECH: speech_md(S, k), OUT_DEMO: demo_md(k), OUT_QA: qa_md(k)}
+    if not a.check:
+        imgs = prepare_images()
+    if MISSING:
+        print(f"[deck_case] не найдено значений: {len(MISSING)}")
+        for m in MISSING:
+            print("   ", m)
+        return 1
+    if a.check:
+        print(f"[deck_case] все значения найдены; слайдов {len(S)}, вопросов {len(qa_items(k))}")
+        return 0
+    build_pptx(S, imgs, Path(a.out))
+    for p, t in texts.items():
+        p.write_text(t, encoding="utf-8")
+    if a.preview:
+        preview(S, imgs)
+    print(f"[deck_case] {Path(a.out).relative_to(ROOT)}: {len(S)} слайдов; docs/SPEECH.md, docs/DEMO.md, "
+          f"docs/QA.md ({len(qa_items(k))} вопросов); картинок {len(imgs)} в {IMG_DIR.relative_to(ROOT)}; пустых значений 0")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,3 +1,5 @@
+# АРХИВ подготовительного этапа: генератор прежней деки (‰, живые снимки). Не запускать отсюда — пути рассчитаны на scripts/.
+# Материалы кейса генерирует scripts/make_deck_case.py.
 r"""Build the pitch materials from reports/final_numbers.json (the only source of numbers):
 
   reports/deck.pptx        10 slides, 16:9, dark theme of the UI, coral accent; speaker notes = speech of the slide

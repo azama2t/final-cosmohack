@@ -562,7 +562,7 @@ def test_observation_model_estimate_from_dev_predictions(client):
     main = {k: v["model"] for k, v in cs.selected_models().items()}
     r = next(x for x in rows if x["profile"] == "S2_visual_total_plastic" and x["model"] == main[x["profile"]])
     me = client.get(f"/api/v3/observations/{r['sample_id']}").json()["properties"]["model_estimate"]
-    assert me["model"] == main["S2_visual_total_plastic"] and me["note"] == "прогноз по CV вне обучающего участка"
+    assert me["model"] == main["S2_visual_total_plastic"] and "прогноз по CV вне обучающего участка" in me["note"]
     assert abs(me["value"] - float(r["y_pred"])) < 1e-3 and abs(me["lo"] - float(r["lo"])) < 1e-3
     assert me["fold"] == int(r["fold"])
     s4 = client.get("/api/v3/observations", params={"source": "S4_BLACK_SEA_DOORS3"}).json()["features"]
@@ -708,3 +708,58 @@ def test_final_test_decides_field_estimate(client, tmp_path, monkeypatch):
     import os
     os.utime(cs.PATHS["final_test"], ns=(1, 3_000_000_000_000_000_000))
     assert cs.field_estimate_at(-69.83, 30.07, "2015-04-02T12:00:00Z")["model"] == "ridge_log"
+
+
+# ------------------------------------------------------------------ 3.3 (jury-2: median on the map)
+HAS_FINAL = cs.PATHS["final_test"].is_file()
+
+
+@pytest.mark.skipif(not (HAS_CONC_MODEL and HAS_SAMPLES and HAS_FINAL), reason="нет модели L68 / final_test / CSV")
+def test_every_profile_observation_has_median_field_estimate(client):
+    members = cs.profile_members()
+    assert set(members.values()) >= {"S2_visual_total_plastic", "S1_trawl_total_plastic"}
+    fc = client.get("/api/v3/observations").json()
+    by = {f["id"]: f["properties"] for f in fc["features"]}
+    ft = json.loads(cs.PATHS["final_test"].read_text(encoding="utf-8"))["profiles"]
+    test_ids = {r["sample_id"] for r in csv.DictReader(open(cs.PATHS["final_test"].parent / "final_test_predictions.csv",
+                                                              encoding="utf-8-sig"))}
+    for sid, prof in members.items():
+        fe = by[sid]["field_estimate"]
+        med = cs.dev_cv()["profiles"][prof]["dev_target"]["median"]
+        assert fe["model"] == "median_train" and fe["value"] == round(med, 2) and fe["unit"] == "items/km2"
+        assert fe["note"].startswith("оценка по полевым данным, не по снимку")
+        assert fe["lo"] <= fe["value"] <= fe["hi"]
+        assert fe["interval_coverage_test"] == ft[prof]["baseline_metrics"]["coverage90"]
+        re_ = by[sid]["research_estimate"]
+        assert by[sid]["model_estimate"] == re_
+        if re_ is not None:
+            assert "на отложенном test не лучше медианы" in re_["note"]
+    assert test_ids and all(by[s]["field_estimate"] is not None for s in test_ids if s in by)  # test events too
+    for sid, p in by.items():
+        if sid not in members:
+            assert p["field_estimate"] is None
+
+
+@pytest.mark.skipif(not (HAS_CONC_MODEL and HAS_SAMPLES and HAS_FINAL), reason="нет модели L68 / final_test / CSV")
+def test_export_obs_estimate_columns(client):
+    params = {"source": "S2_SARGASSO_MSM41", "scope": "total_plastic"}
+    fc = client.get("/api/v3/observations", params=params).json()
+    rows = list(csv.DictReader(io.StringIO(client.get("/api/v3/export", params={
+        **params, "layer": "observations", "format": "csv"}).content.decode("utf-8-sig"))))
+    by = {f["id"]: f["properties"] for f in fc["features"]}
+    assert list(rows[0].keys())[-len(cs.OBS_EST_COLS):] == cs.OBS_EST_COLS
+    for r in rows:
+        fe, re_ = by[r["sample_id"]]["field_estimate"], by[r["sample_id"]]["research_estimate"]
+        assert float(r["field_estimate_items_km2"]) == fe["value"] and r["field_estimate_model"] == "median_train"
+        assert (r["research_estimate_items_km2"] == "") == (re_ is None)
+    gj = client.get("/api/v3/export", params={**params, "layer": "observations", "format": "geojson"}).json()
+    assert all("field_estimate" in f["properties"] and "research_estimate" in f["properties"] for f in gj["features"])
+
+
+@pytest.mark.skipif(not (HAS_CONC_MODEL and HAS_FINAL), reason="нет модели L68 / final_test")
+def test_metrics_median_interval_coverage(client):
+    c = client.get("/api/v3/metrics").json()["concentration"]
+    for prof, pr in c["profiles"].items():
+        mf = pr["map_field_estimate"]
+        assert mf["model"] == "median_train" and "на отложенном test" in mf["interval"]
+        assert mf["interval_coverage_test"] == pr["final_test"]["baseline"]["coverage"] or             abs(mf["interval_coverage_test"] - pr["final_test"]["baseline"]["coverage"]) < 1e-4

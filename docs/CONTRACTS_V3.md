@@ -483,3 +483,18 @@ GET /api/v3/metrics:
             "final_test_status": «посчитан один раз 25.09» | «будет посчитан один раз в приёмке».
 Сохранённый запрос: + "scopes": [target_scope]. Неизвестные поля в query или в теле → 422 BAD_PARAM,
   details.unknown и details.allowed.
+
+3.3 (ДОБАВЛЕНИЯ, 25.09 20:40) — «медиана на карте»
+GET /api/v3/observations, properties:
+  "field_estimate": { value, lo, hi, unit:"items/km2", measurement_profile, profile_config, model:"median_train",
+                      interval, interval_nominal: 0.9, interval_coverage_test, interval_coverage_cv, n_test,
+                      basis:"field_model",
+                      note:"оценка по полевым данным, не по снимку; модели по координатам/сезону на отложенном test не лучше медианы" }
+      // у КАЖДОЙ записи профилей S2_visual_total_plastic / S1_trawl_total_plastic (dev, test, буфер); у остальных null
+  "research_estimate": { …как model_estimate…, note:"исследовательская модель, на отложенном test не лучше медианы; …" } | null
+  "model_estimate": алиас research_estimate (оставлен для совместимости)
+CSV наблюдений: + field_estimate_items_km2, field_estimate_lo, field_estimate_hi, field_estimate_model,
+  field_estimate_coverage_test, research_estimate_items_km2, research_estimate_lo, research_estimate_hi,
+  research_estimate_model, research_estimate_fold (в конце).
+GET /api/v3/metrics: concentration.profiles[p].map_field_estimate =
+  { model, value, lo, hi, interval, interval_coverage_test, interval_coverage_cv, n_test, note }.

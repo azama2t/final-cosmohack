@@ -96,7 +96,7 @@ final_test:
   rule: "дни рейса по порядку → k_blocks непрерывных участков с ~равным числом событий (splits.route_block_groups); test = участок sha256('<seed>|<profile>') mod k_blocks; буфер = дни рейса в пределах buffer_days кал. суток от test-дней (не test и не dev); sha256 = sha256 отсортированных строк 'sample_id,event_id'"
   not_before: "2026-09-25T19:15"   # перенесено решением команды 25.09 ~19:05: test открывается сегодня, один раз
   decision_before_opening:          # записано и закоммичено ДО запуска scripts/case/final_test_conc.py
-    recorded_at: "2026-09-25T19:12"
+    recorded_at: "2026-09-25T19:05"   # время коммита eb35414 (решение закоммичено до открытия test в 19:15)
     S2_visual_total_plastic: {main: ridge_log, main_status: "исследовательская модель", baseline: median}
     S1_trawl_total_plastic: {main: knn5_log, main_status: "исследовательская модель", baseline: median}
     rule: "после результата модель не подбирается; если основная на test не лучше медианы (ДИ разности MAE содержит 0) — на карте field_estimate = медиана обучающего профиля, так и пишется"

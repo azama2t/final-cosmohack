@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-25T20:43:10+03:00",
+ "generated": "2026-09-25T20:53:30+03:00",
  "note": "генерируется scripts/final_numbers.py; руками не править; null = ещё не посчитано",
  "l3_lgbm": {
   "available": true,
@@ -5221,8 +5221,8 @@
    "abs_error": 15.0
   },
   "run": {
-   "command": "run_all.py export --offline",
-   "finished": "2026-09-25T20:33:57",
+   "command": "run_all.py all --offline",
+   "finished": "2026-09-25T20:53:29",
    "versions": {
     "python": "3.12.7",
     "platform": "Windows-10-10.0.19045-SP0",
@@ -5234,19 +5234,19 @@
     "shapely": "2.1.2",
     "fastapi": "0.141.1",
     "yaml": "6.0.3",
-    "git_commit": "00935ed30dbb50e5d5e499ef1ae7a2daadef8aa9"
+    "git_commit": "4c3a6dd13f3b56d919da1df884bedb83b0f40233"
    },
    "outputs_fingerprint_short": "95dc41db12d029dc",
    "n_outputs": 24,
-   "total_s": 7.1,
+   "total_s": 9.9,
    "step_s": {
     "1_selection": 0.1,
-    "2_pairs": 1.6,
+    "2_pairs": 2.0,
     "3_quality_detector": 0.2,
-    "3b_registry": 0.7,
-    "4_concentration": 2.3,
-    "5_detector_marida": 1.0,
-    "6_export_api_v3": 1.2
+    "3b_registry": 1.0,
+    "4_concentration": 3.4,
+    "5_detector_marida": 1.1,
+    "6_export_api_v3": 2.2
    },
    "export": {
     "observations": 935,
@@ -5309,7 +5309,7 @@
     "protocol": "отложенный участок маршрута (+ буфер 1 сут), состав зафиксирован до моделей (sha256 в configs/case_selection.yaml), посчитан один раз; основная модель против медианы dev на тех же событиях; ДИ — бутстреп по дням рейса test",
     "computed": true,
     "when": "25.09.2026 19:15",
-    "decision_recorded_at": "25.09.2026 19:12",
+    "decision_recorded_at": "25.09.2026 19:05",
     "rule": "после результата модель не подбирается; если основная на test не лучше медианы (ДИ разности MAE содержит 0) — на карте field_estimate = медиана обучающего профиля, так и пишется",
     "limitation": "ранняя разведка бейзлайнов (baseline_concentration.py, run_all шаг 4: median/mean/kNN) видела все события профиля, включая будущий test; test не абсолютно нетронутый — указывается как ограничение",
     "S2": {

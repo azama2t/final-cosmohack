@@ -29,10 +29,10 @@
 | `reports/report.md.tmpl` → `reports/report.md` | шаблон отчёта: кейс, затем часть «Подготовка» | render_docs |
 | `run.ps1` | запуск одной командой: venv, сборка фронта, сервис, браузер (`-Port -DataRoot -NoBrowser`), UTF-8 с BOM | пользователь |
 | `TOMORROW.md` | первые 60 минут хакатона: команды и развилки | команда |
-| `reports/qa.md` | вопросы жюри с ответами | защита |
-| `scripts/final_numbers.py` | артефакты → `reports/final_numbers.json` (единственный источник чисел; блок `case` — числа кейса из `reports/case_*`, `configs/case_*`, `run_summary.json`) | render_docs, make_deck |
+| `docs/QA.md` | 30 вопросов жюри по кейсу с ответами и ссылками на доказательства (генерирует `scripts/make_deck_case.py`) | защита |
+| `scripts/final_numbers.py` | артефакты → `reports/final_numbers.json` (единственный источник чисел; блок `case` — числа кейса из `reports/case_*`, `configs/case_*`, `run_summary.json`) | render_docs, make_deck_case |
 | `scripts/render_docs.py` | `*.tmpl` + final_numbers → README.md, report.md, docs/PREP.md; пустые значения печатает списком | вручную |
-| `scripts/make_deck.py` | `reports/deck.pptx` (10 слайдов), `--preview` → PNG через LibreOffice | вручную |
+| `scripts/make_deck_case.py` | `reports/case_deck.pptx` (12 слайдов кейса), `docs/SPEECH.md`, `docs/DEMO.md`, `docs/QA.md`, скриншоты `reports/case_deck_img/`; `--check` — все числа найдены, `--preview` → PNG через LibreOffice | вручную |
 | `src/macroplastic/features/pixel.py` | пиксельные признаки: каналы, индексы, оконные mean/std 3/7/15, контраст с локальной медианой; блочный режим для больших тайлов | train_lgbm, lgbm_predict |
 | `src/macroplastic/models/lgbm_predict.py` | LGBMPredictor / load_predictor (реестр 'lgbm'): P(MD) по тайлу любого размера, опция harmonize="water_median" для L2A | inference, живые сцены |
 | `scripts/train_lgbm.py`, `configs/lgbm.yaml` | обучение LightGBM (кэш признаков, выборка, порог по val, meta.json), эксперименты через `--set` | вручную |
@@ -91,17 +91,18 @@
 | `scripts/measure_speed.py`, `reports/speed.{md,json}`, `tests/test_speed_equivalence.py` | замер холодного старта inference.py на 300 чипах (CPU/GPU, по этапам); проверка, что ускорение не меняет результат | отчёт / pytest |
 | `scripts/tools/adapter.py`, `scripts/tools/ingest.py` | обёртки для запуска адаптера и загрузчика из корня без PYTHONPATH | хакатон |
 | `docs/img/` | кадры интерфейса для README | README |
-| `reports/final_numbers.json`, `reports/deck.pptx` | единый источник чисел; дека (генерируются скриптами) | README, отчёт, выступление |
+| `reports/final_numbers.json`, `reports/case_deck.pptx` | единый источник чисел; дека кейса (генерируются скриптами) | README, отчёт, выступление |
 | `service/frontend/src/components/{ZoneCard,PlaceCard,ObsCalendar,ReviewView}.tsx`, `src/lib/{api,priority,crop}.ts` | карточка зоны с формулой приоритета, карточка места + PDF, календарь реальных наблюдений, вкладка «Проверка» (клавиши 1–6, дообучение); доступность API — по `/openapi.json` | фронт |
 | `tests/test_robustness.py`, `scripts/robustness_report.py`, `reports/robustness.md` | устойчивость инференса: пустые/NaN чипы, облака, блик, шум, размеры, dtype, каналы, битые файлы, пути | pytest / отчёт |
 | `scripts/offline_check.py`, `reports/offline_check.md` | проверка карты без интернета (4 режима подложки) | перед показом |
-| `docs/DEMO.md` | сценарий демо на 4 минуты и план Б (нет интернета / сервис не стартует / видео) | выступление |
+| `docs/DEMO.md` | сценарий демо на карте кейса (2 мин) и план Б без сети | выступление |
 | `scripts/experiments/l23_*.py`, `reports/l23_channels_speed.{md,json}` | модели на подмножествах каналов (RGB, RGB+NIR, 10+20 м) и лёгкая быстрая модель | отчёт / завтра |
 | `docs/CRITERIA.md` | самопроверка по рубрике: критерий → максимум → доказательство → самооценка → дыры | приёмка |
 | `scripts/baselines.py`, `reports/baselines.json` | бейзлайны на val: пороги индексов, RandomForest как в статье MARIDA | отчёт |
 | `reports/experiments.md` | сводная таблица всех экспериментов (бейзлайны → итоговая модель → отклонённые) | отчёт, защита |
-| `docs/SPEECH.md` | речь на 4 минуты с таймингом, цифры наизусть, ответы на неприятные вопросы (генерируется `scripts/make_deck.py` из final_numbers) | выступление |
-| `reports/qa.md` | 30 вопросов жюри с ответами (генерируется `scripts/make_deck.py`) | выступление |
+| `docs/SPEECH.md` | речь на 4 минуты по слайдам кейса с таймингом, числа наизусть (генерирует `scripts/make_deck_case.py`) | выступление |
+| `docs/prep/` | архив подготовительного этапа: прежние дека, речь, демо, вопросы и их генератор `make_deck.py` (индекс ‰ по живым снимкам) | история |
+
 | `src/macroplastic/grid/cloudmask.py`, `reports/cloud_edge.md`, `reports/figures/cloud_edge_*.png` | защита от облаков и теней, пропущенных SCL: спектральная маска (B2 ≥ 0.06 и B11 ≥ 0.03), буфер 5 px, проверка тени по NIR | build_service_data |
 | `reports/l31_midsize.md` | средняя модель под CPU (не принята): F1, LRO, скорость по потокам | отчёт |
 | `scripts/tools/predict_org.py` | предсказание на test организаторов с той же предобработкой, что обучение (адаптер) → маски в их формате + zip | первый сабмит |

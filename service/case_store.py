@@ -555,7 +555,9 @@ def _obs_feature(r: dict, linked: list[str], geometry: str = "point") -> dict:
         "source_short": r.get("source_short") or None,
         "source_license": r.get("source_license") or None,
         **field_poisson_ci(r),
-        "model_estimate": model_estimate_for(r.get("sample_id") or ""),
+        "field_estimate": obs_field_estimate(r.get("sample_id") or ""),
+        "research_estimate": model_estimate_for(r.get("sample_id") or ""),
+        "model_estimate": model_estimate_for(r.get("sample_id") or ""),  # 3.1f alias of research_estimate
         "linked_scenes": linked,
         **_track_props(r.get("event_id") or ""),
     }
@@ -611,6 +613,87 @@ def _dev_predictions() -> dict:
     return idx
 
 
+def profile_members() -> dict[str, str]:
+    """sample_id -> concentration profile (S2_visual_total_plastic / S1_trawl_total_plastic), all accepted records
+    of the profile incl. held-out test and buffer (src/macroplastic/case/selection.select). Cached by CSV mtime."""
+    key = ("members", str(PATHS["samples"]), id(samples_raw()[1]), str(CASE_SELECTION_YAML))
+    with _lock:
+        hit = _cache.get("profile_members")
+        if hit and hit[0] == key:
+            return hit[1]
+    out: dict[str, str] = {}
+    try:
+        import pandas as pd
+        from src.macroplastic.case import selection as S
+        fields, rows = samples_raw()
+        if rows:
+            df = pd.read_csv(PATHS["samples"])
+            cfg = S.load_config(CASE_SELECTION_YAML)
+            for prof in sorted(selected_models() or cfg.get("profiles") or {}):
+                if prof not in (cfg.get("profiles") or {}):
+                    continue
+                acc, _ = S.select(df, cfg, prof)
+                for sid in acc["sample_id"].astype(str):
+                    out.setdefault(sid, prof)
+    except Exception as e:  # selection unavailable -> no field estimate
+        print(f"[case_store] profile_members: {e}")
+        out = {}
+    with _lock:
+        _cache["profile_members"] = (key, out)
+    return out
+
+
+FIELD_EST_NOTE = "оценка по полевым данным, не по снимку; модели по координатам/сезону на отложенном test не лучше медианы"
+
+
+def profile_median_estimate(profile: str) -> Optional[dict]:
+    key = (profile, id(dev_cv()), id(final_test_result()), id(_cached("case_selection", CASE_SELECTION_YAML, _yaml_load)))
+    with _lock:
+        hit = _cache.get(f"pme:{profile}")
+    if hit and hit[0] == key:
+        return dict(hit[1]) if hit[1] else None
+    val = _profile_median_estimate(profile)
+    with _lock:
+        _cache[f"pme:{profile}"] = (key, val)
+    return dict(val) if val else None
+
+
+def _profile_median_estimate(profile: str) -> Optional[dict]:
+    """The map value for a profile: median of the training (dev) profile with the median's interval
+    (q_lo/q_hi of the baseline in final_test.json) and its actual coverage on the held-out test and on dev CV."""
+    import math as _m
+    dp = (dev_cv().get("profiles") or {}).get(profile) or {}
+    med = fnum((dp.get("dev_target") or {}).get("median"))
+    if med is None:
+        return None
+    ft = (((final_test_result() or {}).get("profiles") or {}).get(profile) or {})
+    bm = ft.get("baseline_metrics") or {}
+    q_lo, q_hi = fnum(bm.get("q_lo")), fnum(bm.get("q_hi"))
+    lo = hi = None
+    if q_lo is not None and q_hi is not None:
+        ly = _m.log1p(med)
+        lo, hi = min(max(_m.expm1(ly + min(q_lo, 0.0)), 0.0), med), max(_m.expm1(ly + max(q_hi, 0.0)), med)
+    cov_cv = fnum(({r.get("model"): r for r in dp.get("table") or []}.get("median") or {}).get("coverage90"))
+    cov_test = fnum(bm.get("coverage90"))
+    cfg = (_cached("case_selection", CASE_SELECTION_YAML, _yaml_load) or {}).get("profiles", {}).get(profile) or {}
+    lab = []
+    if cov_test is not None:
+        lab.append(f"≈{round(cov_test * 100)} % на отложенном test")
+    if cov_cv is not None:
+        lab.append(f"≈{round(cov_cv * 100)} % по CV")
+    return {"value": round(med, 2), "lo": None if lo is None else round(lo, 2), "hi": None if hi is None else round(hi, 2),
+            "interval": "; ".join(lab) or None, "interval_nominal": 0.9,
+            "interval_coverage_test": cov_test, "interval_coverage_cv": cov_cv,
+            "n_test": ft.get("n_test"), "unit": "items/km2",
+            "measurement_profile": (cfg.get("measurement_profile") or [None])[0], "profile_config": profile,
+            "model": "median_train", "basis": "field_model", "note": FIELD_EST_NOTE}
+
+
+def obs_field_estimate(sample_id: str) -> Optional[dict]:
+    prof = profile_members().get(sample_id)
+    return profile_median_estimate(prof) if prof else None
+
+
 def model_estimate_for(sample_id: str) -> Optional[dict]:
     r = _dev_predictions().get(sample_id)
     if not r:
@@ -621,7 +704,10 @@ def model_estimate_for(sample_id: str) -> Optional[dict]:
             "fold": int(fold) if fold not in (None, "") and str(fold).lstrip("-").isdigit() else fold,
             "interval_coverage_cv": fnum(((selected_models().get(r.get("profile")) or {}).get("dev_cv") or {})
                                          .get("coverage90")),
-            "note": "прогноз по CV вне обучающего участка",
+            "note": ("исследовательская модель, на отложенном test не лучше медианы; прогноз по CV вне "
+                     "обучающего участка"
+                     if (final_test_decision(r.get("profile") or "") or {}).get("main_better_significant") is False
+                     else "прогноз по CV вне обучающего участка"),
             "status": ("исследовательская модель, на test не лучше медианы"
                        if (final_test_decision(r.get("profile") or "") or {}).get("main_better_significant") is False
                        else "исследовательская модель")}
@@ -1071,6 +1157,11 @@ def conc_metrics_block() -> dict:
                          "основная модель на test не лучше медианы — на карте медиана обучающего профиля")}
         if prof in profiles:
             profiles[prof]["final_test"] = ft_summary[prof]
+            pm = profile_median_estimate(prof)
+            if pm:
+                profiles[prof]["map_field_estimate"] = {k: pm[k] for k in (
+                    "model", "value", "lo", "hi", "interval", "interval_coverage_test", "interval_coverage_cv",
+                    "n_test", "note")}
     default = "S2_visual_total_plastic" if "S2_visual_total_plastic" in profiles else \
         (sorted(profiles)[0] if profiles else None)
     dp = profiles.get(default) or {}
@@ -1093,7 +1184,34 @@ _ZONE_REASON_RU = {"cloud": "облачность в полосе наблюде
                    "insufficient_coverage": "снимок не покрывает полосу", "land": "суша в полосе"}
 
 
+def _inputs_key() -> tuple:
+    """Identity of every cached input of zones/estimates; cached objects change identity when a file changes."""
+    import copy as _c  # noqa: F401
+    metas = tuple(id(quality_meta(q.get("dir") or safe_event(q.get("event_id", "")))) for q in pair_quality_raw())
+    return (id(pair_quality_raw()), id(candidates_raw()), id(samples_raw()[1]), metas, id(registry_pairs_raw()),
+            id(conc_model_cfg()), id(dev_cv()), id(final_test_result()), str(PATHS["conc_weights_dir"]),
+            str(PATHS["pairs_dir"]))
+
+
+def registry_pairs_raw():
+    return _cached("registry_pairs", PATHS["registry_pairs"], _read_csv)
+
+
 def zones_all() -> list[dict]:
+    """Memoised by the identity of all inputs (files are re-read by mtime in _cached). Callers get deep copies."""
+    import copy
+    key = _inputs_key()
+    with _lock:
+        hit = _cache.get("zones_all")
+    if hit and hit[0] == key:
+        return copy.deepcopy(hit[1])
+    val = _zones_all_build()
+    with _lock:
+        _cache["zones_all"] = (key, val)
+    return copy.deepcopy(val)
+
+
+def _zones_all_build() -> list[dict]:
     feats = []
     for q in pair_quality_raw():
         d = q.get("dir") or safe_event(q.get("event_id", ""))
@@ -1661,9 +1779,19 @@ def wkt(g) -> str:
 def observations_csv(rows: list[dict]) -> str:
     fields, _ = samples_raw()
     linked = linked_scenes_by_sample() if rows else {}
-    cols = list(fields) + ["kind", "linked_scenes"]
+    cols = list(fields) + ["kind", "linked_scenes"] + OBS_EST_COLS
+
+    def est(sid):
+        fe, re_ = obs_field_estimate(sid) or {}, model_estimate_for(sid) or {}
+        return [fe.get("value"), fe.get("lo"), fe.get("hi"), fe.get("model"), fe.get("interval_coverage_test"),
+                re_.get("value"), re_.get("lo"), re_.get("hi"), re_.get("model"), re_.get("fold")]
     return _csv(cols, [[r.get(k, "") for k in fields] + ["measurement", linked.get(r.get("sample_id"), [])]
-                       for r in rows])
+                       + est(r.get("sample_id") or "") for r in rows])
+
+
+OBS_EST_COLS = ["field_estimate_items_km2", "field_estimate_lo", "field_estimate_hi", "field_estimate_model",
+                "field_estimate_coverage_test", "research_estimate_items_km2", "research_estimate_lo",
+                "research_estimate_hi", "research_estimate_model", "research_estimate_fold"]
 
 
 def pairs_csv(pairs: list[dict]) -> str:

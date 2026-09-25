@@ -4,7 +4,7 @@
 
 Система находит на снимке Sentinel-2 пиксели воды с признаками плавающего мусора и считает по сетке H3 показатель «доля наблюдаемой воды с признаками мусора» (‰). По нему выделяет зоны «приоритет обследования», сравнивает районы и даты на интерактивной карте и строит демонстрационный прогноз дрейфа найденных пятен на 72 ч. Это индекс по снимку, а не концентрация пластика в шт./км²: он показывает, куда направить обследование в первую очередь.
 
-Полный отчёт — [reports/report.md](../reports/report.md), журнал экспериментов — [reports/experiments.md](../reports/experiments.md), презентация — `reports/deck.pptx`.
+Полный отчёт — [reports/report.md](../reports/report.md), журнал экспериментов — [reports/experiments.md](../reports/experiments.md), презентация этого этапа — [docs/prep/deck.pptx](prep/deck.pptx) (речь — [prep/SPEECH.md](prep/SPEECH.md), демо — [prep/DEMO.md](prep/DEMO.md), вопросы — [prep/qa.md](prep/qa.md)). Материалы защиты кейса — [reports/case_deck.pptx](../reports/case_deck.pptx), [SPEECH.md](SPEECH.md), [DEMO.md](DEMO.md), [QA.md](QA.md).
 
 ![Обзор: {{service.n_regions|pl:район/района/районов}}, индекс по последнему снимку](img/overview.jpg)
 
@@ -122,7 +122,7 @@ powershell -ExecutionPolicy Bypass -File run.ps1
 .venv\Scripts\python.exe scripts\run_mdd.py --all; .venv\Scripts\python.exe scripts\run_lgbm_live.py --all
 .venv\Scripts\python.exe scripts\build_service_data.py --live-dir data\live --out service\data
 .venv\Scripts\python.exe scripts\validate_service_data.py service\data
-.venv\Scripts\python.exe scripts\final_numbers.py; .venv\Scripts\python.exe scripts\render_docs.py; .venv\Scripts\python.exe scripts\make_deck.py
+.venv\Scripts\python.exe scripts\final_numbers.py; .venv\Scripts\python.exe scripts\render_docs.py; .venv\Scripts\python.exe scripts\make_deck_case.py
 .venv\Scripts\python.exe -m pytest -q
 ```
 
@@ -147,7 +147,7 @@ powershell -ExecutionPolicy Bypass -File run.ps1
 | `l35_asis_check.md` | почему на репетиции модель «как есть» (без обучения на данных организаторов) дала низкий F1 |
 | `speed.md`, `ui_perf.md` | скорость `inference.py` по потокам и скорость интерфейса |
 | `model_agreement.md`, `artifacts.md`, `cloud_edge.md` | согласие двух моделей, фильтр швов, кильватеров, судов и маленьких лодок (метка общая для двух моделей), фильтр облаков и краёв |
-| `robustness.md`, `rehearsal.md`, `rehearsal2.md`, `offline_check.md`, `qa.md` | проверки устойчивости, репетиции с незнакомым датасетом, работа без сети, ответы на вопросы |
+| `robustness.md`, `rehearsal.md`, `rehearsal2.md`, `offline_check.md` | проверки устойчивости, репетиции с незнакомым датасетом, работа без сети (ответы на вопросы этого этапа — `docs/prep/qa.md`) |
 | `drift.md`, `marida_regions.md`, `sources.md` | дрейф, районы MARIDA, источники и лицензии |
 | `tools/marida_*`, `tools/org_*` | отчёты инструментов первого часа (`docs/TOOLS.md`) на MARIDA и на датасете репетиции |
 | `tools/fire_*` | те же инструменты на незнакомом датасете прошлого хакатона (пожары: гари и активный огонь). Это проверка, что инструменты работают на чужих данных; к мусору эти файлы не относятся |
