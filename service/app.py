@@ -21,7 +21,8 @@ from . import core, pdf, place, review
 
 # UI build: service/static_v2 (v2) by default if built; MACROPLASTIC_UI=v1 -> service/static (rollback)
 _UI = os.environ.get("MACROPLASTIC_UI", "v2").lower()
-STATIC = core.SERVICE_DIR / ("static_v2" if _UI == "v2" and (core.SERVICE_DIR / "static_v2" / "index.html").is_file() else "static")
+_UI_DIR = {"v2": "static_v2", "v3": "static_v3"}.get(_UI)  # v3: service/frontend_v3 (L94), only by explicit env
+STATIC = core.SERVICE_DIR / (_UI_DIR if _UI_DIR and (core.SERVICE_DIR / _UI_DIR / "index.html").is_file() else "static")
 VERSION = "0.1.0"
 mimetypes.add_type("application/geo+json", ".geojson")
 mimetypes.add_type("application/javascript", ".js")
