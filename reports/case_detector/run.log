@@ -1,0 +1,20 @@
+[val] rules {'fdi_threshold': {'FDI': [0.08186080300062895, 'le']}, 'ndvi_threshold': {'NDVI': [0.021608103433623817, 'ge']}, 'fdi_interval': {'FDI': [0.03026974081993103, 0.05918977633118644]}, 'fdi_ndvi_box': {'FDI': [0.02340291580185294, 0.11202409490942955], 'NDVI': [-0.06544110924005508, inf]}} {'fdi_threshold': 0.020454645000219, 'ndvi_threshold': 0.1678976760943974, 'fdi_interval': 0.3231, 'fdi_ndvi_box': 0.4152}
+[val] rf thr 0.36 val F1 {'rf_prob': 0.8596070915189267, 'rf_argmax': 0.8647} fit Nones
+[val] 328 patches 58s
+  lgbm            P 0.9301 R 0.9153 F1 0.9226 IoU 0.8564 CI [0.877, 0.9701] unlab 0.00025
+  rf_argmax       P 0.8898 R 0.8409 F1 0.8647 IoU 0.7616 CI [0.772, 0.9487] unlab 0.00070
+  rf_prob         P 0.8864 R 0.8344 F1 0.8596 IoU 0.7538 CI [0.7626, 0.9467] unlab 0.00059
+  fdi_ndvi_box    P 0.2864 R 0.7544 F1 0.4152 IoU 0.2620 CI [0.148, 0.693] unlab 0.01485
+  fdi_interval    P 0.2431 R 0.4819 F1 0.3231 IoU 0.1927 CI [0.1508, 0.4937] unlab 0.01464
+  fdi_threshold   P 0.0103 R 0.8688 F1 0.0205 IoU 0.0103 CI [0.0065, 0.044] unlab 0.95342
+  ndvi_threshold  P 0.1041 R 0.4335 F1 0.1679 IoU 0.0916 CI [0.0546, 0.3401] unlab 0.06538
+[test] 359 patches 67s
+  lgbm            P 0.8244 R 0.9239 F1 0.8713 IoU 0.7719 CI [0.8225, 0.9202] unlab 0.00013
+  rf_argmax       P 0.7068 R 0.8478 F1 0.7709 IoU 0.6272 CI [0.7085, 0.8335] unlab 0.00066
+  rf_prob         P 0.7100 R 0.8609 F1 0.7782 IoU 0.6369 CI [0.7103, 0.8432] unlab 0.00057
+  fdi_ndvi_box    P 0.0220 R 0.5801 F1 0.0424 IoU 0.0216 CI [0.0168, 0.3122] unlab 0.01774
+  fdi_interval    P 0.0131 R 0.4567 F1 0.0254 IoU 0.0129 CI [0.0115, 0.0925] unlab 0.01838
+  fdi_threshold   P 0.0028 R 0.9711 F1 0.0056 IoU 0.0028 CI [0.0029, 0.0123] unlab 0.94943
+  ndvi_threshold  P 0.0124 R 0.2467 F1 0.0237 IoU 0.0120 CI [0.007, 0.0782] unlab 0.06458
+[check] identical to reports/lgbm_final_test.json: True
+[done] 130s -> C:\Users\User\Documents\GitHub\final-cosmohack\reports\case_detector
