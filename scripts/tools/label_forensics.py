@@ -42,7 +42,7 @@ _HERE = Path(__file__).resolve().parent
 _REPO = _HERE.parents[1]
 sys.path.insert(0, str(_HERE))
 sys.path.insert(0, str(_REPO / "src"))
-from inspect_dataset import name_template  # noqa: E402
+from inspect_dataset import _IMG_SUFFIX_RE, _MASK_SUFFIX_RE, name_template, stem_key  # noqa: E402
 
 try:
     from macroplastic.organizer_adapter.adapter import canon_band  # noqa: E402
@@ -105,7 +105,16 @@ def _read(path: str | Path) -> tuple[np.ndarray, list, float | None]:
 def build_pairs(a) -> list[dict]:
     """-> [{id, images: [paths per source], mask, group}]"""
     rows = []
-    if a.pairs_csv:
+    if getattr(a, "manifest", None):
+        # ingest manifest.csv (converted/<name>/manifest.csv): RAW organiser files (src_image/src_mask) + scene group
+        with open(a.manifest, newline="", encoding="utf-8") as f:
+            for r in csv.DictReader(f):
+                img = (r.get("src_image") or r["image"]).split(";")[0]
+                msk = r.get("src_mask") or r.get("mask")
+                if not msk:
+                    continue
+                rows.append({"id": r["id"], "images": [img], "mask": msk, "group": r.get("group") or None})
+    elif a.pairs_csv:
         with open(a.pairs_csv, newline="", encoding="utf-8") as f:
             for r in csv.DictReader(f):
                 if a.filter and not re.search(a.filter, r.get("mask", "") + r.get("mask_group", "")):
@@ -116,14 +125,24 @@ def build_pairs(a) -> list[dict]:
     else:
         excl = re.compile(a.exclude_regex) if a.exclude_regex else None
         srcs = []
+        n_coll = 0
         for spec in a.images:
             d = {}
             for p in _expand(spec):
                 if excl and excl.search(str(p).replace("\\", "/")):
                     continue
-                d[_sid(p, a.id_regex)] = p
+                k = _sid(p, a.id_regex)
+                n_coll += k in d
+                d[k] = p
             srcs.append(d)
-        masks = {_sid(p, a.id_regex): p for p in _expand(a.masks)}
+        masks = {}
+        for p in _expand(a.masks):
+            k = _sid(p, a.id_regex, mask=True)
+            n_coll += k in masks
+            masks[k] = p
+        if n_coll:
+            print(f"[forensics] ВНИМАНИЕ: {n_coll} файлов с одинаковым id (--id-regex {a.id_regex!r}) — пары "
+                  "потеряны/перепутаны; задайте --id-regex, который включает префикс сцены, или --manifest")
         for sid, mp in sorted(masks.items()):
             if all(sid in s for s in srcs):
                 rows.append({"id": sid, "images": [str(s[sid]) for s in srcs], "mask": str(mp), "group": None})
@@ -165,12 +184,15 @@ def build_pairs(a) -> list[dict]:
     return rows
 
 
-def _sid(p: Path, id_regex: str | None) -> str:
+def _sid(p: Path, id_regex: str | None, mask: bool = False) -> str:
+    """Pair key. Default = file stem without the mask/image suffix word, scene prefix KEPT
+    ('r05_001_mask' -> 'r05_001'). The old default (numeric id of the name template, '001') collided across
+    scenes: L30 rehearsal silently kept 30 of 207 pairs."""
     if id_regex:
         m = re.search(id_regex, str(p).replace("\\", "/"))
         if m:
             return m.group(1) if m.groups() else m.group(0)
-    return name_template(p.stem)[1] or p.stem
+    return stem_key(p.stem, _MASK_SUFFIX_RE if mask else _IMG_SUFFIX_RE)
 
 
 # --------------------------------------------------------------------------- features
@@ -254,6 +276,10 @@ def process_file(r: dict, a, band_names_cli, rng_seed: int) -> dict | None:
         arr = arr.astype(np.float32)
         if nod is not None and np.isfinite(nod):
             arr[arr == nod] = np.nan
+        if getattr(a, "nodata_zero", False):
+            arr[:, (arr == 0).all(0)] = np.nan
+        if getattr(a, "scale", None) not in (None, 1.0) or getattr(a, "offset", None):
+            arr = arr * np.float32(a.scale or 1.0) + np.float32(a.offset or 0.0)
         if band_names_cli:
             bn = band_names_cli[k] if isinstance(band_names_cli[0], list) else band_names_cli
         else:
@@ -751,6 +777,12 @@ def main(argv=None) -> int:
     ap.add_argument("--images", action="append", help="dir or glob (repeat for several co-registered sources, e.g. pre/post)")
     ap.add_argument("--masks", help="dir or glob of masks")
     ap.add_argument("--pairs-csv", help="csv with columns id,image[,image_2...],mask[,group] (inspect_dataset pairs_guess.csv)")
+    ap.add_argument("--manifest", help="ingest manifest.csv (data/ingest/<name>/converted/<name>/manifest.csv): ALL "
+                                       "pairs, raw organiser files, scene groups -- recommended")
+    ap.add_argument("--scale", type=float, default=None, help="multiply image values (e.g. 0.0001 for DN) -> "
+                                                               "thresholds in reflectance")
+    ap.add_argument("--offset", type=float, default=None, help="add after --scale (e.g. -0.1)")
+    ap.add_argument("--nodata-zero", action="store_true", help="pixels with all bands == 0 -> nodata")
     ap.add_argument("--filter", help="regex on mask path / mask_group to select rows of --pairs-csv")
     ap.add_argument("--exclude-regex", help="skip image files matching this regex")
     ap.add_argument("--id-regex", help="regex (group 1) = sample id shared by image and mask; default: name template")
@@ -789,17 +821,41 @@ def main(argv=None) -> int:
                 setattr(a, k, v)
     a.meta_id_col = a.meta_id_col or "chip_id"
     a.meta_group_col = a.meta_group_col or "fire_event_id"
-    if not (a.pairs_csv or (a.images and a.masks)):
-        ap.error("give --preset, or --pairs-csv, or --images + --masks")
+    if not (a.manifest or a.pairs_csv or (a.images and a.masks)):
+        ap.error("give --preset, or --manifest, or --pairs-csv, or --images + --masks")
+    if a.manifest:  # take band order / scale / offset from the ingest adapter.yaml next to the manifest
+        ap_yaml = Path(a.manifest).resolve().parents[2] / "adapter.yaml"
+        if ap_yaml.is_file():
+            import yaml
+
+            acfg = yaml.safe_load(ap_yaml.read_text(encoding="utf-8")) or {}
+            src = (acfg.get("bands") or {}).get("source")
+            if not a.band_names and isinstance(src, list):
+                a.band_names = ",".join(map(str, src))
+            rad = acfg.get("radiometry") or {}
+            if a.scale is None and isinstance(rad.get("scale"), (int, float)):
+                a.scale = float(rad["scale"])
+            if a.offset is None and isinstance(rad.get("offset"), (int, float)):
+                a.offset = float(rad["offset"])
+            if 0 in ((acfg.get("nodata") or {}).get("values") or []):
+                a.nodata_zero = True
+            print(f"[forensics] из {ap_yaml}: каналы {a.band_names}, scale {a.scale}, offset {a.offset}")
     band_names = a.band_names.split(",") if a.band_names else None
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     t0 = time.time()
     pairs = build_pairs(a)
+    n_all = len(pairs)
     if len(pairs) > a.max_files:
         rng = np.random.default_rng(0)
         pairs = [pairs[i] for i in sorted(rng.choice(len(pairs), a.max_files, replace=False))]
-    print(f"[forensics] {len(pairs)} image-mask pairs, {len(set(p['group'] for p in pairs))} groups")
+        print(f"[forensics] ВЫБОРКА: {len(pairs)} из {n_all} пар (--max-files {a.max_files}); все пары: "
+              f"--max-files {n_all}")
+    n_grp = len(set(p['group'] for p in pairs))
+    print(f"[forensics] {len(pairs)} image-mask pairs (всего найдено {n_all}), {n_grp} groups")
+    if n_grp == len(pairs) and len(pairs) > 20:
+        print("[forensics] ВНИМАНИЕ: группа = файл (сцены не найдены): соседние кропы одной сцены попадут в разные "
+              "фолды -> оптимистичные CV; задайте --group-regex или --manifest")
     if not pairs:
         return 2
     with cf.ThreadPoolExecutor(a.threads) as ex:

@@ -237,7 +237,10 @@ export default function ReviewView({ manifest, initialRegion, onToast, onShowOnM
             <div className="rv-imgs">
               <figure>
                 {imgOk.rgb ? (
-                  <img src={`${it.crop_rgb}&px=720`} alt="RGB-вырезка" onError={() => setImgOk((s) => ({ ...s, rgb: false }))} data-testid="review-rgb" />
+                  <span className="rv-imgwrap">
+                    <img src={`${it.crop_rgb}&px=720`} alt="RGB-вырезка" onError={() => setImgOk((s) => ({ ...s, rgb: false }))} data-testid="review-rgb" />
+                    <CropLegend url={it.crop_rgb} date={it.date} kind="RGB" />
+                  </span>
                 ) : (
                   <div className="rv-noimg">вырезка недоступна</div>
                 )}
@@ -245,7 +248,10 @@ export default function ReviewView({ manifest, initialRegion, onToast, onShowOnM
               </figure>
               <figure>
                 {it.crop_false_color && imgOk.fc ? (
-                  <img src={`${it.crop_false_color}&px=720`} alt="Ложный цвет" onError={() => setImgOk((s) => ({ ...s, fc: false }))} data-testid="review-false" />
+                  <span className="rv-imgwrap">
+                    <img src={`${it.crop_false_color}&px=720`} alt="Ложный цвет" onError={() => setImgOk((s) => ({ ...s, fc: false }))} data-testid="review-false" />
+                    <CropLegend url={it.crop_false_color} date={it.date} kind="B8/B4/B3" />
+                  </span>
                 ) : (
                   <div className="rv-noimg">нет каналов B8 для этой сцены — только RGB</div>
                 )}
@@ -369,5 +375,31 @@ export default function ReviewView({ manifest, initialRegion, onToast, onShowOnM
         </div>
       </aside>
     </div>
+  );
+}
+
+/**
+ * L34: readable legend over a crop (date · bands · scale bar). The PNG from /api/crop has its own 11–13 px legend
+ * that shrinks to ~6 px when the 720 px image is shown at ~340 px — this strip covers it with ≥ 12 px text.
+ * Scale bar: same «nice» length as the backend (size_m / 4), drawn as a share of the crop width.
+ */
+function CropLegend({ url, date, kind }: { url: string; date: string; kind: string }) {
+  let size = 1000;
+  try {
+    size = Number(new URL(url, location.href).searchParams.get('size_m')) || 1000;
+  } catch {
+    /* keep default */
+  }
+  const L = [20, 50, 100, 200, 250, 500, 1000, 2000, 2500, 5000, 10000].find((v) => v >= (size / 4) * 0.7) ?? 10000;
+  return (
+    <span className="rv-legend" data-testid="review-crop-legend">
+      <span className="rv-leg-t">
+        {fmtDate(date)} · <b>{kind}</b>
+      </span>
+      <span className="rv-leg-scale">
+        <i style={{ width: `${((L / size) * 100).toFixed(2)}cqw` }} />
+        <span>{L < 1000 ? `${L} м` : `${L / 1000} км`}</span>
+      </span>
+    </span>
   );
 }

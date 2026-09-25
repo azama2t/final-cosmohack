@@ -190,6 +190,14 @@ def run(args) -> dict:
             res["external_errors"] = sorted(set(con.external))[:20]
             res["console_warnings"] = con.warnings[:20]
             return res
+        if args.only_l34:  # quick iteration on the L34 frames only
+            ctx.close()
+            shoot_l34(browser, base, out, res, con, best["id"], regions)
+            browser.close()
+            res["console_errors"] = con.errors
+            res["external_errors"] = sorted(set(con.external))[:20]
+            res["console_warnings"] = con.warnings[:20]
+            return res
         if args.only_l20:  # quick iteration on the L20 frames only
             ctx.close()
             shoot_l20(browser, base, out, res, con, best["id"], regions, args)
@@ -435,8 +443,12 @@ def run(args) -> dict:
             ctx4.close()
 
         # L20: zone card, place card, calendar, review tab ----------------------------
-        if args.l20 or args.only_l20:
+        if args.l20 or args.only_l20 or args.extra:
             shoot_l20(browser, base, out, res, con, best["id"], regions, args)
+
+        # L34: reliability groups, 8-date timeline / calendar / chart, card scrolling at 1366, review legends
+        if args.extra:
+            shoot_l34(browser, base, out, res, con, best["id"], regions)
 
         # L27: globe, route, offline coastline, compare opened by a link from the overview ------
         if args.extra:
@@ -455,6 +467,9 @@ def run(args) -> dict:
             p3.wait_for_function("window.__mapReady === true", timeout=30000)
             p3.wait_for_function("window.__tourRunning === true", timeout=15000)
             t_tour = time.time()
+            p3.wait_for_timeout(2500)
+            shot(p3, out, "37_tour_first_frame", res["shots"])
+            res["tour_first_projection"] = p3.evaluate("window.__app && window.__app.projection")
             p3.wait_for_function("window.__tourRunning === false", timeout=120000, polling=500)
             res["tour_s"] = round(time.time() - t_tour, 1)
             p3.wait_for_timeout(800)
@@ -666,6 +681,85 @@ def shoot_l20(browser, base: str, out: Path, res: dict, con: "Console", best_id:
     ctx.close()
 
 
+def shoot_l34(browser, base: str, out: Path, res: dict, con: "Console", best_id: str, regions: list):
+    """L34 frames: 35 ranking groups (overview + left list), 36 region with the most dates (timeline, calendar, chart),
+    38 zone/place cards scrolled to the bottom, 39 review crop legend. Checks go to res['l34']."""
+    info = res.setdefault("l34", {})
+    many = max(regions, key=lambda r: (len(r["dates"]), (r.get("summary") or {}).get("n_detections") or 0))
+    overlap_js = """(sel) => { const b = [...document.querySelectorAll(sel)].map(e => e.getBoundingClientRect()).filter(r => r.width);
+        let n = 0; for (let i = 0; i < b.length; i++) for (let j = i + 1; j < b.length; j++)
+          if (b[i].left < b[j].right - 1 && b[j].left < b[i].right - 1 && b[i].top < b[j].bottom - 1 && b[j].top < b[i].bottom - 1) n++;
+        return {n: b.length, overlaps: n}; }"""
+    scr_js = """(sel) => { const e = document.querySelector(sel); if (!e) return null; const r = e.getBoundingClientRect();
+        const before = e.scrollTop; e.scrollTop = e.scrollHeight; const after = e.scrollTop;
+        const x = [...e.querySelectorAll('*')].filter(c => { const q = c.getBoundingClientRect(); return q.width && (q.right > r.right + 1 || q.left < r.left - 1); }).length;
+        return {top: Math.round(r.top), bottom: Math.round(r.bottom), vh: innerHeight, scroll_h: e.scrollHeight, client_h: e.clientHeight,
+                scrolled: after - before, reached_end: Math.abs(e.scrollHeight - e.clientHeight - after) <= 2, h_overflow_children: x}; }"""
+    for vw, vh, sfx in ((1920, 1080, ""), (1366, 768, "_1366")):
+        ctx = browser.new_context(viewport={"width": vw, "height": vh}, device_scale_factor=1)
+        page = ctx.new_page()
+        con.attach(page)
+        # 35 overview: reliable ranking + «ненадёжные снимки» group; muted markers with a yellow ring
+        page.goto(base + "/", wait_until="load")
+        page.wait_for_function("window.__mapReady === true", timeout=30000)
+        wait_idle(page, 1500)
+        info[f"rank{sfx}"] = page.evaluate("""(() => ({
+            ok: [...document.querySelectorAll("[data-testid='rank-reliable'] .rank-row")].map(e => e.dataset.testid.replace('rank-row-', '')),
+            bad: [...document.querySelectorAll("[data-testid='rank-unreliable'] .rank-row")].map(e => e.dataset.testid.replace('rank-row-', '')),
+            markers_unreliable: [...document.querySelectorAll('.region-marker.unreliable')].map(e => e.dataset.testid.replace('region-marker-', '')),
+            list_head: !!document.querySelector("[data-testid='region-group-unreliable']"),
+        }))()""")
+        page.evaluate("document.querySelector(\"[data-testid='rank-unreliable']\")?.scrollIntoView({block: 'end'})")
+        page.evaluate("document.querySelector(\"[data-testid='region-group-unreliable']\")?.scrollIntoView({block: 'center'})")
+        page.mouse.move(vw // 2, 20)
+        page.wait_for_timeout(400)
+        shot(page, out, f"35_rank_groups{sfx}", res["shots"])
+
+        # 36 region with the most dates: timeline labels, calendar, index chart
+        _goto_scene(page, base + f"/?r={many['id']}", res)
+        wait_idle(page, 800)
+        info[f"many_region{sfx}"] = many["id"]
+        info[f"timeline{sfx}"] = page.evaluate(overlap_js, "[data-testid='timeline'] .tl-label")
+        info[f"timeline_dots{sfx}"] = page.locator("[data-testid='timeline'] .tl-dot").count()
+        info[f"calendar_dots{sfx}"] = page.locator("[data-testid='obs-calendar'] button.cal-dot").count()
+        shot(page, out, f"36_region_8dates{sfx}", res["shots"])
+        page.evaluate("document.querySelector(\"[data-testid='ts-chart']\")?.scrollIntoView({block: 'center'})")
+        page.wait_for_timeout(1500)
+        info[f"ts_chart{sfx}"] = page.locator("[data-testid='ts-chart'] canvas").count()
+        shot(page, out, f"36b_chart_8dates{sfx}", res["shots"])
+
+        # 38 zone and place cards: fully reachable by scrolling (1366 is the tight case)
+        _goto_scene(page, base + f"/?r={best_id}", res)
+        wait_idle(page, 600)
+        if page.locator("[data-testid='zone-row-1']").count():
+            page.locator("[data-testid='zone-row-1']").first.click()
+            page.wait_for_selector("[data-testid='zone-card']", timeout=8000)
+            _img_ready(page, ["zone-crop-img"])
+            page.wait_for_timeout(500)
+            info[f"zone_card{sfx}"] = page.evaluate(scr_js, "[data-testid='zone-card']")
+            page.wait_for_timeout(300)
+            shot(page, out, f"38_zone_card_bottom{sfx}", res["shots"])
+            click(page, "zone-open-place")
+            page.wait_for_selector("[data-testid='place-table']", timeout=20000)
+            page.wait_for_timeout(600)
+            info[f"place_card{sfx}"] = page.evaluate(scr_js, "[data-testid='place-card']")
+            page.wait_for_timeout(300)
+            shot(page, out, f"38b_place_card_bottom{sfx}", res["shots"])
+
+        # 39 review: legend strip over the crops (font >= 12 px)
+        if page.locator("[data-testid='tab-review']").count():
+            click(page, "tab-review")
+            try:
+                page.wait_for_selector("[data-testid='review-card']", timeout=20000)
+                _img_ready(page, ["review-rgb", "review-false"], 30000)
+            except Exception:
+                pass
+            page.wait_for_timeout(600)
+            info[f"review_legend{sfx}"] = page.evaluate("""(() => [...document.querySelectorAll("[data-testid='review-crop-legend']")].map(e => ({
+                font_px: parseFloat(getComputedStyle(e).fontSize), h: Math.round(e.getBoundingClientRect().height), text: e.innerText.replace(/\\s+/g, ' ')})))()""")
+            shot(page, out, f"39_review_legend{sfx}", res["shots"])
+        ctx.close()
+
 def _goto_scene(page: Page, url: str, res: dict, tries: int = 2):
     """L27: open a region URL and wait for the scene; one retry (reload) if it did not come up."""
     for i in range(tries):
@@ -827,6 +921,7 @@ def main():
     ap.add_argument("--l20", action="store_true",
                     help="also shoot L20 frames 21-25 (zone card, place card, calendar, review tab)")
     ap.add_argument("--only-l20", action="store_true", help="only the L20 frames (fast iteration)")
+    ap.add_argument("--only-l34", action="store_true", help="only the L34 frames 35-39 (ranking groups, 8 dates, 1366 cards, review legend)")
     ap.add_argument("--only-l27", action="store_true", help="only the L27 frames 30-33 (globe, route, offline, compare link)")
     ap.add_argument("--review-write", action="store_true",
                     help="L20: allow POST labels / «ложное?» / retrain (writes the backend labels file!) "

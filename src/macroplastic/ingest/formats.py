@@ -144,6 +144,11 @@ def inventory(inspect_summary: dict, inspect_dir: Path) -> dict:
     return {"files": files, "groups": gmeta}
 
 
+def gm_count_str(gm: dict) -> str:
+    """Most common band count of a group as the string used in files.csv."""
+    return next(iter(gm.get("count") or {"": 0}), "")
+
+
 def _parent(rel: str) -> str:
     return rel.rpartition("/")[0]
 
@@ -308,6 +313,128 @@ def find_chip_csv(inspect_summary: dict, inv: dict, data_root: Path) -> list[dic
     return out
 
 
+# --------------------------------------------------------------------------- organiser docs (README) and hints
+DOC_NAME_RE = re.compile(r"(readme|description|info|about|classes|labels?|legend|task|metric|dataset|notes?)", re.I)
+DEBRIS_RE = re.compile(r"(marine[ _-]?debris|debris|plastic|litter|trash|garbage|waste|macroplastic|"
+                       r"мусор|пластик|отход)", re.I)
+BAND_TOK_RE = re.compile(r"\bB(?:0?[1-9]|1[0-2])A?\b", re.I)
+
+
+def find_docs(data_root: Path, max_docs: int = 8, max_lines: int = 60) -> list[dict]:
+    """README* / *.md / *.txt (and names of *.pdf/*.doc*) in the dataset -> [{rel, text, n_lines}].
+
+    Plain file lists (every line = a file name / id) are skipped; README-like names first."""
+    out = []
+    for p in sorted(Path(data_root).rglob("*")):
+        if not p.is_file() or p.name.startswith("."):
+            continue
+        ext = p.suffix.lower()
+        rel = str(p.relative_to(data_root)).replace("\\", "/")
+        if ext in (".pdf", ".doc", ".docx", ".rtf", ".html", ".htm"):
+            out.append({"rel": rel, "text": f"[{ext} — открыть руками]", "n_lines": 0, "prio": 0})
+            continue
+        if ext not in (".txt", ".md", ".rst", "") and not p.name.lower().startswith("readme"):
+            continue
+        if p.stat().st_size > 200_000:
+            continue
+        try:
+            lines = p.read_text(encoding="utf-8", errors="replace").splitlines()
+        except Exception:
+            continue
+        nonempty = [ln for ln in lines if ln.strip()]
+        if not nonempty:
+            continue
+        listy = sum(bool(re.fullmatch(r"[\w./\\\-]+", ln.strip())) and " " not in ln.strip() for ln in nonempty)
+        if listy >= 0.9 * len(nonempty) and not p.name.lower().startswith("readme"):
+            continue  # split list / file list, not documentation
+        prio = 2 if p.name.lower().startswith("readme") else 1 if DOC_NAME_RE.search(p.stem) else 0.5
+        out.append({"rel": rel, "text": "\n".join(lines[:max_lines]), "n_lines": len(lines), "prio": prio})
+    out.sort(key=lambda d: (-d["prio"], d["rel"]))
+    return out[:max_docs]
+
+
+def parse_hints(docs: list[dict], n_bands: int | None = None) -> dict:
+    """Machine-readable hints from organiser docs: target class value, class legend, band order, scale, metric."""
+    h: dict = {"classes": {}, "target": None, "target_line": None, "bands": None, "bands_line": None,
+               "scale": None, "metric_line": None, "zero_line": None}
+    for d in docs:
+        for ln in d["text"].splitlines():
+            s = ln.strip()
+            if not s:
+                continue
+            # class legend: "3 - marine debris", "3: debris", "debris = 3", "debris (3)"
+            for m in re.finditer(r"(?<![\w.])(\d{1,3})\s*(?:[-–—:=]|->|→)\s*([A-Za-zА-Яа-яЁё][^,;.\n()]{1,40})", s):
+                h["classes"].setdefault(int(m.group(1)), m.group(2).strip())
+            for m in re.finditer(r"([A-Za-zА-Яа-яЁё][A-Za-zА-Яа-яЁё _-]{1,40}?)\s*(?:=|:|\(|->|→)\s*(\d{1,3})\b\)?", s):
+                h["classes"].setdefault(int(m.group(2)), m.group(1).strip())
+            for m in re.finditer(r"(?<![\w.])(\d{1,3})\s*\(([A-Za-zА-Яа-яЁё][^()]{1,40})\)", s):
+                h["classes"].setdefault(int(m.group(1)), m.group(2).strip())
+            toks = BAND_TOK_RE.findall(s)
+            if len(toks) >= 3 and h["bands"] is None and (n_bands is None or len(toks) == n_bands):
+                from macroplastic.organizer_adapter import canon_band
+
+                h["bands"], h["bands_line"] = [canon_band(t) for t in toks], s
+            if h["scale"] is None and re.search(r"(x|×|\*|/)\s*10\s?000|10\s?000\s*(x|×)|scale[^0-9]*1e-?4|0\.0001", s,
+                                                re.I):
+                h["scale"] = 1e-4
+            if h["metric_line"] is None and re.search(r"\b(metric|f1|iou|dice|score|метрик)", s, re.I):
+                h["metric_line"] = s
+            if h["zero_line"] is None and re.search(r"(?<![\w.])0\s*(?:[-–—:=]|->|→)", s):
+                h["zero_line"] = s
+    deb = sorted(v for v, name in h["classes"].items() if DEBRIS_RE.search(name))
+    if len(deb) == 1:
+        h["target"] = deb[0]
+        h["target_line"] = f"{deb[0]} = {h['classes'][deb[0]]}"
+    elif len(deb) > 1:
+        h["target_candidates"] = deb
+    return h
+
+
+def mask_values_all(mask_paths: list[str], max_files: int = 20000, threads: int = 8) -> dict:
+    """Class values over ALL masks (stratified sample by scene group if more than max_files).
+
+    -> {values: {v: px}, files_with: {v: n}, n_checked, n_total, per_group_target?}"""
+    import concurrent.futures as cf
+
+    ins = load_inspect()
+    paths = list(mask_paths)
+    n_total = len(paths)
+    if n_total > max_files:  # stratified by scene group: every group keeps its share (at least 1 file)
+        by = collections.defaultdict(list)
+        for p in paths:
+            by[scene_group(Path(p).stem)].append(p)
+        rng = np.random.default_rng(0)
+        frac = max_files / n_total
+        paths = []
+        for g, ps in sorted(by.items()):
+            k = max(1, int(round(frac * len(ps))))
+            paths += [ps[i] for i in sorted(rng.choice(len(ps), min(k, len(ps)), replace=False))]
+
+    def _count(p):
+        try:
+            a = ins.read_array(Path(p), full=True)[0]
+        except Exception:
+            return None
+        if a.dtype.kind == "f":
+            a = np.where(np.isfinite(a), a, -1)
+        u, c = np.unique(np.rint(a).astype(np.int64), return_counts=True)
+        return dict(zip(u.tolist(), c.tolist()))
+
+    with cf.ThreadPoolExecutor(threads) as ex:
+        counts = list(ex.map(_count, paths))
+    px, files = collections.Counter(), collections.Counter()
+    n_bad = 0
+    for c in counts:
+        if c is None:
+            n_bad += 1
+            continue
+        px.update(c)
+        files.update(c.keys())
+    return {"values": {int(k): int(v) for k, v in sorted(px.items())},
+            "files_with": {int(k): int(v) for k, v in sorted(files.items())},
+            "n_checked": len(paths) - n_bad, "n_total": n_total, "n_unreadable": n_bad}
+
+
 # --------------------------------------------------------------------------- band / radiometry / classes guesses
 def guess_bands(gm: dict, doubts: list) -> dict:
     descs = gm.get("descriptions")
@@ -387,19 +514,56 @@ def guess_radiometry(gm: dict, band_names: list[str], doubts: list) -> dict:
     return r
 
 
-def guess_classes(mask_gm: dict | None, doubts: list) -> dict:
-    if not mask_gm or not mask_gm.get("class_balance"):
+UNLAB = 99  # our code for "organiser 0 / background": train_lgbm_ingest --zero-as negative|ignore decides
+
+
+def guess_classes(mask_gm: dict | None, doubts: list, all_values: dict | None = None, ov: dict | None = None,
+                  hints: dict | None = None) -> dict:
+    """Organiser mask values -> our scheme.  Priority: CLI (--target-class/--ignore-values) > README > guess.
+
+    all_values: mask_values_all() over ALL paired masks (never one name group only)."""
+    ov = ov or {}
+    hints = hints or {}
+    if all_values and all_values.get("values"):
+        vals = dict(all_values["values"])
+    elif mask_gm and mask_gm.get("class_balance"):
+        vals = {int(r["value"]): int(r["pixels"]) for r in mask_gm["class_balance"]}
+    else:
         return {"map": {}, "default": 0, "ignore_values": [0], "values": []}
-    cb = mask_gm["class_balance"]
-    vals = {int(r["value"]): int(r["pixels"]) for r in cb}
-    file_nod = [float(k) for k in mask_gm.get("nodata", {}) if k not in ("None", "nan")]
-    ignore = sorted({int(v) for v in file_nod if np.isfinite(v)} | ({255} if 255 in vals and max(
-        [v for v in vals if v != 255] or [0]) < 100 else set()) | ({-1} if -1 in vals else set()))
+    file_nod = [float(k) for k in (mask_gm or {}).get("nodata", {}) if k not in ("None", "nan")]
+    if ov.get("ignore_values") is not None:
+        ignore = sorted(int(v) for v in ov["ignore_values"])
+    else:
+        ignore = sorted({int(v) for v in file_nod if np.isfinite(v)} | ({255} if 255 in vals and max(
+            [v for v in vals if v != 255] or [0]) < 100 else set()) | ({-1} if -1 in vals else set()))
     real = {v: n for v, n in vals.items() if v not in ignore}
     tot = sum(real.values()) or 1
     shares = ", ".join(f"{v}: {n / tot:.2%}" for v, n in sorted(real.items()))
     ks = sorted(real)
-    if set(ks) <= set(range(16)) and len(ks) >= 6 and 0 in ks:
+    chk = (f" (проверено масок: {all_values['n_checked']} из {all_values['n_total']})" if all_values else
+           " (значения из одной группы имён — НЕ по всем маскам)")
+    target, why = None, None
+    if ov.get("target_class") is not None:
+        target, why = int(ov["target_class"]), "--target-class"
+    elif hints.get("target") is not None:
+        target, why = int(hints["target"]), f"README: «{hints.get('target_line')}»"
+    if target is not None:
+        if target not in vals:
+            doubts.append(doubt("целевой класс", f"целевой класс {target} ({why}) НЕ встречается в масках: значения "
+                                                 f"{sorted(vals)}{chk}.", "проверить --target-class / README",
+                                "classes.map", "blocker"))
+        others = [k for k in ks if k not in (target, 0)]
+        mp = {**({0: UNLAB} if 0 in ks and target != 0 else {}), target: 1, **{k: 7 for k in others}}
+        doubts.append(doubt("целевой класс", f"цель = {target} ({why}); остальные ненулевые {others} -> фон (7); "
+                                             f"0 -> {UNLAB} («фон/не размечено»: при обучении --zero-as negative "
+                                             f"считает его отрицательным, --zero-as ignore — игнорирует). Доли: "
+                                             f"{shares}{chk}.", where="classes.map", level="info"))
+        return {"map": mp, "default": 0, "ignore_values": ignore, "values": ks, "target": target, "why": why}
+    if hints.get("target_candidates"):
+        doubts.append(doubt("целевой класс", f"в README несколько классов похожи на мусор: "
+                                             f"{hints['target_candidates']} — выбрать --target-class.",
+                            where="classes.map", level="blocker"))
+    if set(ks) <= set(range(16)) and 0 in ks and (len(ks) >= 6 or ({1, 7} <= set(ks) and len(ks) >= 4)):
         doubts.append(doubt("схема классов", f"значения маски {ks} (доли: {shares}) похожи на схему MARIDA "
                                              "(0 = не размечено, 1 = Marine Debris, 7 = вода ...) — принято как есть.",
                             "если это другая схема с ~такими же номерами — задать classes.map явно", "classes.map",
@@ -407,24 +571,28 @@ def guess_classes(mask_gm: dict | None, doubts: list) -> dict:
         return {"map": {}, "default": "keep", "ignore_values": sorted(set(ignore) | {0}), "values": ks,
                 "target": 1, "why": "MARIDA-like"}
     if ks == [0, 1]:
-        doubts.append(doubt("класс 0", f"маска бинарная {{0, 1}} (доли: {shares}). Принято: 1 = мусор (наш 1), "
-                                       "0 = фон (наш 7 «вода/не мусор»).",
-                            "если 0 = «не размечено», поставить map {1: 1} и ignore_values [0] — иначе модель будет "
-                            "учиться на неразмеченных пикселях как на отрицательных", "classes.map"))
-        return {"map": {0: 7, 1: 1}, "default": 0, "ignore_values": ignore, "values": ks, "target": 1}
+        doubts.append(doubt("класс 0", f"маска бинарная {{0, 1}} (доли: {shares}{chk}). Принято: 1 = мусор (наш 1), "
+                                       f"0 = фон/не размечено (наш {UNLAB}).",
+                            "обучение: --zero-as negative (0 = отрицательный; если метрика по ВСЕМ пикселям) или "
+                            "--zero-as ignore (0 = не размечено); проверить оба через --cv", "classes.map"))
+        return {"map": {0: UNLAB, 1: 1}, "default": 0, "ignore_values": ignore, "values": ks, "target": 1}
     if 0 in ks:
         pos = [k for k in ks if k != 0]
-        doubts.append(doubt("целевой класс", f"маска многоклассовая {ks} (доли: {shares}). Какой класс = «мусор», "
-                                             f"не указано. Принято: 0 = фон (наш 7), ВСЕ ненулевые {pos} -> "
-                                             "цель (наш 1).",
-                            "если цель — один класс: map {k: 1, остальные: 7}; для многоклассовой задачи — "
-                            "map в схему MARIDA и task: multiclass", "classes.map", "high"))
-        return {"map": {0: 7, **{k: 1 for k in pos}}, "default": 0, "ignore_values": ignore, "values": ks}
+        rare = min(pos, key=lambda k: real[k]) if pos else None
+        lvl = "blocker" if len(pos) > 1 else "high"
+        doubts.append(doubt("целевой класс", f"маска многоклассовая {ks} (доли: {shares}{chk}). Какой класс = «мусор», "
+                                             f"НЕ указано (ни --target-class, ни README). Догадка: самый редкий "
+                                             f"ненулевой {rare} -> цель (наш 1), остальные -> 7, 0 -> {UNLAB}.",
+                            "перезапустить ingest с --target-class <значение> (или поправить classes.map и удалить "
+                            "ingest_blockers в adapter.yaml)", "classes.map", lvl))
+        mp = {0: UNLAB, **{k: (1 if k == rare else 7) for k in pos}}
+        return {"map": mp, "default": 0, "ignore_values": ignore, "values": ks, "target": rare, "why": "guess"}
     rare = min(real, key=real.get) if real else None
-    doubts.append(doubt("целевой класс", f"значения маски {ks} без 0 (доли: {shares}). Принято: самый редкий "
+    doubts.append(doubt("целевой класс", f"значения маски {ks} без 0 (доли: {shares}{chk}). Принято: самый редкий "
                                          f"{rare} -> цель (наш 1), остальные -> фон (наш 7).",
-                        where="classes.map", level="high"))
-    return {"map": {k: (1 if k == rare else 7) for k in ks}, "default": 0, "ignore_values": ignore, "values": ks}
+                        "--target-class <значение>", "classes.map", "blocker" if len(ks) > 2 else "high"))
+    return {"map": {k: (1 if k == rare else 7) for k in ks}, "default": 0, "ignore_values": ignore, "values": ks,
+            "target": rare, "why": "guess"}
 
 
 # --------------------------------------------------------------------------- detection
@@ -498,8 +666,14 @@ def _flow_key(k) -> str:
     return str(k) if isinstance(k, int) else _q(k)
 
 
-def build_config(det: dict, cand: dict, data_root: Path, name: str, doubts: list) -> tuple[str, dict]:
-    """-> (YAML text with 'проверь это' comments, info dict)."""
+def build_config(det: dict, cand: dict, data_root: Path, name: str, doubts: list, ov: dict | None = None,
+                 hints: dict | None = None) -> tuple[str, dict]:
+    """-> (YAML text with 'проверь это' comments, info dict).
+
+    ov (CLI overrides, highest priority): target_class, ignore_values, channels (list), scale, offset, test_glob.
+    hints: parse_hints() of the organiser README (second priority)."""
+    ov = ov or {}
+    hints = hints or {}
     inv = det["inv"]
     fmt = cand["format"]
     info = {"format": fmt}
@@ -610,9 +784,34 @@ def build_config(det: dict, cand: dict, data_root: Path, name: str, doubts: list
                                     if ig_name.rpartition("/")[0] not in ("", ".") else "**/") + \
                 re.sub(r"\{(n|date|tile)\}", "*", ig_name.rpartition("/")[2])
             layout["exclude_regex"] = None
-    # --- bands, radiometry, nodata, resolution, classes
-    bands = guess_bands(gm, doubts)
+    # --- bands, radiometry, nodata, resolution, classes   (priority: CLI > README > guess)
+    cnt0 = max((int(k) for k in gm["count"] if k not in ("None",)), default=0)
+    if ov.get("channels"):
+        ch = [canon_or_alias(c) for c in ov["channels"]]
+        if cnt0 and len(ch) != cnt0:
+            doubts.append(doubt("порядок каналов", f"--channels даёт {len(ch)} имён, а в файлах {cnt0} каналов.",
+                                where="bands.source", level="blocker"))
+        bands = {"source": ch, "rename": {}, "names": ch, "output": [b for b in S2_CANON if b in ch and b != "B10"],
+                 "by": "cli"}
+    elif hints.get("bands") and (not cnt0 or len(hints["bands"]) == cnt0):
+        ch = list(hints["bands"])
+        doubts.append(doubt("порядок каналов", f"порядок каналов взят из README: «{hints['bands_line'][:160]}» -> {ch}.",
+                            where="bands.source", level="info"))
+        bands = {"source": ch, "rename": {}, "names": ch, "output": [b for b in S2_CANON if b in ch and b != "B10"],
+                 "by": "readme"}
+    else:
+        bands = guess_bands(gm, doubts)
     rad = guess_radiometry(gm, bands["names"], doubts)
+    if ov.get("scale") is not None or ov.get("offset") is not None:
+        if ov.get("scale") is not None:
+            rad["scale"] = float(ov["scale"])
+        if ov.get("offset") is not None:
+            rad["offset"] = float(ov["offset"])
+        rad["why"] = f"задано в командной строке: scale {rad['scale']}, offset {rad['offset']}"
+        doubts[:] = [d for d in doubts if d["topic"] not in ("масштаб", "масштаб DN", "смещение L2A")]
+    elif hints.get("scale") and abs(rad["scale"] - hints["scale"]) > 1e-12:
+        doubts.append(doubt("масштаб", f"README намекает на scale {hints['scale']}, автоугадывание дало "
+                                       f"{rad['scale']} — проверить.", where="radiometry.scale", level="high"))
     miss = [b for b in MODEL_BANDS if b not in bands["output"]]
     if miss and bands["by"] != "unknown":
         doubts.append(doubt("нет каналов модели", f"в данных нет {miss} из 11 каналов нашей модели: при обучении "
@@ -638,7 +837,37 @@ def build_config(det: dict, cand: dict, data_root: Path, name: str, doubts: list
     if not nod_file and not rad["nodata"]:
         doubts.append(doubt("nodata", "в файлах снимков nodata не задан; NaN считаются пропусками.",
                             where="nodata.values", level="info"))
-    classes = guess_classes(mask_gm, doubts) if msk_rels else {"map": {}, "default": 0, "ignore_values": []}
+    all_vals = None
+    if msk_rels:
+        all_vals = mask_values_all([str(Path(data_root) / r) for r in msk_rels], max_files=ov.get("max_masks", 20000))
+        info["mask_values"] = all_vals
+        if all_vals["n_checked"] < all_vals["n_total"]:
+            doubts.append(doubt("значения масок", f"значения классов посчитаны по стратифицированной выборке: "
+                                                  f"проверено {all_vals['n_checked']} из {all_vals['n_total']} масок.",
+                                where="--max-masks", level="check"))
+    classes = (guess_classes(mask_gm, doubts, all_vals, ov, hints) if msk_rels else
+               {"map": {}, "default": 0, "ignore_values": []})
+    # images without masks (test part): glob for --convert (test is converted separately, require_mask false)
+    test_glob = ov.get("test_glob")
+    if not test_glob and fmt in ("suffix", "dirs", "ids") and msk_rels:
+        all_img = [r for r, v in inv["files"].items() if not v["mask_like"] and Path(r).suffix.lower() == ext
+                   and inv["files"][r].get("count") == gm_count_str(gm)]
+        unp = [r for r in all_img if r not in img_set]
+        if unp:
+            ttops = {r.split("/")[0] for r in unp if "/" in r}
+            if len(ttops) == 1 and not any(r.startswith(next(iter(ttops)) + "/") for r in img_rels):
+                test_glob = f"{next(iter(ttops))}/**/*{ext}"
+            else:
+                sp = [r for r in unp if re.search(SPLIT_DIR["test"], "/" + r)]
+                if sp and len(sp) == len(unp):
+                    test_glob = "**/test/**/*" + ext
+            info["n_unpaired_images"] = len(unp)
+            if test_glob:
+                doubts.append(doubt("test", f"{len(unp)} снимков без масок (похоже на test): layout.test_glob = "
+                                            f"{test_glob} — `--convert` сконвертирует их отдельно в converted_test/, "
+                                            "predict_org.py предскажет их напрямую.", where="layout.test_glob",
+                                    level="info"))
+    info["test_glob"] = test_glob
     if mask_gm:
         mres = next(iter(mask_gm.get("res") or {}), None)
         msz, isz = next(iter(mask_gm.get("size_hw") or {}), None), next(iter(gm.get("size_hw") or {}), None)
@@ -702,10 +931,13 @@ def build_config(det: dict, cand: dict, data_root: Path, name: str, doubts: list
     L.append(f"  split_regex: {_flow(splits)}" + ("   # official split from folder names" if splits else
                                                    "   # no official split found -> group split at training"))
     L.append(f"  require_mask: {'true' if msk_rels else 'false'}")
+    L.append(f"  test_glob: {_q(test_glob) if test_glob else 'null'}   # images WITHOUT masks (test): --convert -> "
+             "converted_test/, predict_org.py --images")
     L.append("bands:")
     src = bands["source"]
     L.append(f"  source: {_q(src) if isinstance(src, str) else _flow(src)}"
-             + ("" if bands["by"] == "descriptions" else "   # ПРОВЕРЬ ЭТО: догадка по числу каналов"))
+             + {"descriptions": "", "cli": "   # из --channels", "readme": "   # из README организаторов"}.get(
+                 bands["by"], "   # ПРОВЕРЬ ЭТО: догадка по числу каналов"))
     L.append(f"  rename: {_flow(bands['rename'])}")
     L.append(f"  output: {_flow(bands['output'])}")
     L.append("  missing: nan                  # absent bands -> NaN (training fills them from neighbours)")
@@ -722,7 +954,8 @@ def build_config(det: dict, cand: dict, data_root: Path, name: str, doubts: list
     L.append("classes:")
     L.append("  mask_band: 1")
     L.append(f"  map: {_flow(classes['map'])}   # ПРОВЕРЬ ЭТО: organiser value -> ours (1 = Marine Debris, 7 = water/"
-             "other, 0 = ignore); values seen: " + str(classes.get("values", [])))
+             f"other, {UNLAB} = organiser 0 / background (train --zero-as), 0 = ignore); values seen: "
+             + str(classes.get("values", [])) + (f"; target from {classes['why']}" if classes.get("why") else ""))
     L.append(f"  default: {_flow(classes['default'])}")
     L.append(f"  ignore_values: {_flow(classes['ignore_values'])}")
     L.append("output:")
@@ -735,8 +968,46 @@ def build_config(det: dict, cand: dict, data_root: Path, name: str, doubts: list
 
 
 # --------------------------------------------------------------------------- convert
-def convert(config_path: Path, out_dir: Path, limit: int | None = None, workers: int = 8) -> Path:
-    """Adapter conversion + chip-level masks + group column. -> manifest.csv path."""
+def test_cfg(cfg: dict, images: str | None = None) -> dict:
+    """Adapter config for images WITHOUT masks (organiser test): same bands/radiometry/nodata, no masks.
+
+    images: folder or glob (absolute, or relative to cfg root); default layout.test_glob."""
+    import copy
+
+    c = copy.deepcopy(cfg)
+    L = c["layout"]
+    g = images or L.get("test_glob")
+    if not g:
+        raise SystemExit("layout.test_glob не задан: укажите --test-glob 'test/**/*.tif' (или predict_org.py --images)")
+    gp = Path(g)
+    if gp.is_absolute() or gp.exists():
+        if gp.is_dir():
+            ext = L.get("image_glob", "*.tif").rsplit(".", 1)[-1] if "." in L.get("image_glob", "") else "tif"
+            c["root"], L["image_glob"] = gp.resolve(), f"**/*.{ext}"
+        else:
+            c["root"], L["image_glob"] = gp.parent.resolve(), gp.name
+    else:
+        L["image_glob"] = g
+    for k in ("mask_from_image", "mask_glob", "mask_id_regex", "split_lists"):
+        L.pop(k, None)
+    L["require_mask"] = False  # exclude_regex is kept (e.g. MARIDA _cl/_conf next to the images)
+    L["split_regex"] = {"test": ".*"}
+    c["name"] = f"{cfg.get('name', 'org')}_test"
+    return c
+
+
+def check_blockers(config_path: Path) -> list[str]:
+    import yaml
+
+    raw = yaml.safe_load(Path(config_path).read_text(encoding="utf-8")) or {}
+    return [str(b) for b in (raw.get("ingest_blockers") or [])]
+
+
+def convert(config_path: Path, out_dir: Path, limit: int | None = None, workers: int = 8,
+            split: str | None = None) -> Path:
+    """Adapter conversion + chip-level masks + group column. -> manifest.csv path.
+
+    split='test': images without masks via layout.test_glob (see test_cfg), no group/chip post-processing."""
     import yaml
     import rasterio
 
@@ -744,7 +1015,11 @@ def convert(config_path: Path, out_dir: Path, limit: int | None = None, workers:
 
     raw = yaml.safe_load(Path(config_path).read_text(encoding="utf-8"))
     cfg = load_config(config_path)
+    if split == "test":
+        cfg = test_cfg(cfg)
     man = ad_convert(cfg, out_dir, limit=limit, verbose=True, workers=workers)
+    if split == "test":
+        return Path(man)
     rows = list(csv.DictReader(open(man, encoding="utf-8")))
     chip = raw.get("chip_labels")
     if chip:

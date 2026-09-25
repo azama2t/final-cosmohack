@@ -175,6 +175,24 @@ pre{background:#f0efec;padding:8px;overflow:auto;font-size:12px}code{background:
     if u.get("skipped"):
         P.append("<div class='d blocker'>Вложенные архивы НЕ распакованы: " + e(json.dumps(u["skipped"],
                                                                                          ensure_ascii=False)) + "</div>")
+    if s.get("docs"):
+        P.append("<h2>Документация организаторов (README и т.п.) — ПРОЧИТАТЬ ПЕРВЫМ</h2>")
+        for d in s["docs"]:
+            P.append(f"<h3>{e(d['rel'])} <span class='muted'>({d['n_lines']} строк, показаны первые 60)</span></h3>"
+                     f"<pre>{e(d['text'])}</pre>")
+        h = s.get("hints") or {}
+        P.append("<p><b>Извлечено из текста:</b> классы " + e(json.dumps(h.get("classes", {}), ensure_ascii=False))
+                 + f"; целевой класс: <b>{e(str(h.get('target')))}</b>; каналы: {e(str(h.get('bands')))}; "
+                 f"масштаб: {e(str(h.get('scale')))}; метрика: {e(str(h.get('metric_line')))}</p>")
+    else:
+        P.append("<div class='d high'>README/описания в архиве нет.</div>")
+    if s.get("overrides"):
+        P.append("<p><b>Флаги командной строки (приоритет над README и угадыванием):</b> "
+                 + e(json.dumps(s["overrides"], ensure_ascii=False)) + "</p>")
+    mv = (s.get("config_info") or {}).get("mask_values")
+    if mv:
+        P.append(f"<p><b>Значения масок по всем маскам:</b> проверено {mv['n_checked']} из {mv['n_total']}; пиксели "
+                 + e(json.dumps(mv["values"])) + "; файлов со значением " + e(json.dumps(mv["files_with"])) + "</p>")
     P.append("<h2>Итог</h2>")
     if best:
         P.append(f"<div class='ok'><b>Вероятный формат: {e(best['format'])}</b> (оценка {best['score']}) — "
@@ -240,7 +258,7 @@ pre{background:#f0efec;padding:8px;overflow:auto;font-size:12px}code{background:
 
 def build(data_root: Path, out: Path, name: str, source: str, unpack: dict, force_format: str | None = None,
           sample_per_group: int = 40, max_files: int = 20000, config_path: Path | None = None,
-          next_command: str = "") -> dict:
+          next_command: str = "", overrides: dict | None = None) -> dict:
     """Run inspect -> detect -> auto config -> previews -> report. Returns summary dict (also JSON on disk)."""
     t0 = time.time()
     rep = out / "report"
@@ -249,6 +267,14 @@ def build(data_root: Path, out: Path, name: str, source: str, unpack: dict, forc
     ins = ins_mod.run(data_root, rep / "inspect", max_files=max_files, sample_per_group=sample_per_group)
     det = formats.detect(ins, rep / "inspect", data_root)
     doubts: list = []
+    ov = {k: v for k, v in (overrides or {}).items() if v is not None}
+    docs = formats.find_docs(data_root)
+    img_counts = [int(k) for g in ins["groups"] if not g.get("mask_like") for k in g["count"] if k not in ("None",)]
+    hints = formats.parse_hints(docs, max(img_counts) if img_counts else None)
+    if not docs:
+        doubts.append(formats.doubt("README", "в архиве нет README/*.txt/*.md с описанием — каналы, классы и метрику "
+                                              "взять из ТЗ/чата организаторов и задать флагами --channels, "
+                                              "--target-class, --scale.", level="high"))
     cands = det["candidates"]
     if force_format:
         forced = [c for c in cands if c["format"] == force_format]
@@ -276,7 +302,7 @@ def build(data_root: Path, out: Path, name: str, source: str, unpack: dict, forc
                                         where="layout", level="check"))
     splits_note = None
     try:
-        cfg_text, info = formats.build_config(det, best, data_root, name, doubts)
+        cfg_text, info = formats.build_config(det, best, data_root, name, doubts, ov, hints)
     except Exception as e:  # never lose the report because of a config problem
         cfg_text, info = f"# config generation failed: {type(e).__name__}: {e}\n", {"error": str(e)}
         doubts.append(formats.doubt("автоконфиг", f"не удалось построить конфиг: {e}", level="blocker"))
@@ -296,8 +322,13 @@ def build(data_root: Path, out: Path, name: str, source: str, unpack: dict, forc
             perr = f"{type(e).__name__}: {e}"
             doubts.append(formats.doubt("конфиг не читается", f"адаптер не смог прочитать образцы с автоконфигом: "
                                                                f"{perr}", where="adapter.yaml", level="blocker"))
+    blockers = [f"{d['topic']}: {d['text']}" for d in doubts if d["level"] == "blocker"]
+    if blockers and "error" not in info:
+        cfg_text += ("# --convert откажется работать, пока этот список не пуст: исправьте конфиг (или перезапустите\n"
+                     "# ingest с --target-class/--channels/--scale) и удалите строки ниже.\n"
+                     "ingest_blockers:\n" + "".join(f"  - {formats._q(b[:300])}\n" for b in blockers))
     summary = {
-        "name": name, "source": source, "generated": time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "name": name, "docs": docs, "hints": hints, "overrides": ov, "source": source, "generated": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "unpack": unpack, "data_root": str(data_root), "config_path": str(cfg_path), "config_text": cfg_text,
         "config_info": info, "candidates": [{k: v for k, v in c.items() if k not in ("pairs",)} | {
             "n_pairs": len(c.get("pairs", []))} for c in cands],

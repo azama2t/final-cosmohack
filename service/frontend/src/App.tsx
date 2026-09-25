@@ -391,6 +391,12 @@ export default function App() {
     showZone,
     closeZone: () => setZonePopup(null),
     waitIdle,
+    ensureGlobe: () => {
+      if (ctl.projection !== 'globe' && defaultProjection() === 'globe') {
+        ctl.projection = 'globe';
+        setProjection('globe');
+      }
+    },
   };
   const tourApiRef = useRef(tourApi);
   tourApiRef.current = tourApi;

@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import type { Basemap, LayerKey, Layers, Manifest, Projection, Region } from '../types';
-import { dataUrl, isFlagged, regionHaze, shortName, summaryDate } from '../lib/data';
+import { dataUrl, isFlagged, rankRegions, regionHaze, regionReliability, shortName, summaryDate } from '../lib/data';
 import { fmtThr, fmtDate, fmtDateShort, fmtNum, fmtPermille, modelLabel } from '../lib/style';
 
 interface Props {
@@ -41,16 +41,19 @@ const LAYER_DEFS: { key: LayerKey; label: string; hint: string; testid: string }
 export default function LeftPanel(p: Props) {
   const [q, setQ] = useState('');
   const [sort, setSort] = useState<'index' | 'name'>('index');
-  const regions = useMemo(() => {
+  // L34: «по индексу» — reliable regions first (by index), then those whose latest scene has haze/glint
+  const { regions, nBad } = useMemo(() => {
     const s = q.trim().toLowerCase();
-    const list = [...p.manifest.regions].sort((a, b) =>
-      sort === 'name'
-        ? shortName(a.name).localeCompare(shortName(b.name), 'ru')
-        : (b.summary?.index_permille ?? -1) - (a.summary?.index_permille ?? -1),
-    );
-    if (!s) return list;
-    return list.filter((r) => `${r.name} ${r.country ?? ''} ${r.id} ${r.tile ?? ''}`.toLowerCase().includes(s));
+    const match = (r: Region) => !s || `${r.name} ${r.country ?? ''} ${r.id} ${r.tile ?? ''}`.toLowerCase().includes(s);
+    if (sort === 'name') {
+      const list = [...p.manifest.regions].sort((a, b) => shortName(a.name).localeCompare(shortName(b.name), 'ru')).filter(match);
+      return { regions: list, nBad: 0 };
+    }
+    const { ok, bad } = rankRegions(p.manifest.regions);
+    const b = bad.filter(match);
+    return { regions: [...ok.filter(match), ...b], nBad: b.length };
   }, [q, sort, p.manifest.regions]);
+  const firstBad = regions.length - nBad;
 
   return (
     <aside className={`panel panel-left glass ${p.collapsed ? 'collapsed' : ''}`} data-testid="left-panel">
@@ -86,15 +89,26 @@ export default function LeftPanel(p: Props) {
               data-testid="region-search"
             />
             <div className="region-list">
-              {regions.map((r) => {
+              {regions.map((r, i) => {
                 const shown = summaryDate(r);
                 const active = r.id === p.region?.id;
-                const hazeHint = regionHaze(r);
+                const bad = nBad > 0 && i >= firstBad;
+                const hazeHint = bad ? regionReliability(r).why : regionHaze(r);
                 const n = r.summary?.n_detections ?? 0;
                 return (
+                  <Fragment key={r.id}>
+                  {bad && i === firstBad && (
+                    <div
+                      className="region-group-head"
+                      data-testid="region-group-unreliable"
+                      title="Последний снимок района с флагом дымки/блика или облачностью > 50 %: модель может принять их за мусор, индекс завышен. Такие районы стоят ниже надёжных, наведите на район — причина."
+                    >
+                      <span className="q-dot" /> ненадёжные снимки (дымка/блик)
+                      <small>последний снимок с дымкой или бликом — индекс может быть завышен</small>
+                    </div>
+                  )}
                   <button
-                    key={r.id}
-                    className={`region-item ${active ? 'active' : ''}`}
+                    className={`region-item ${active ? 'active' : ''} ${bad ? 'unreliable' : ''}`}
                     onClick={() => p.onRegion(r.id)}
                     data-testid={`region-item-${r.id}`}
                     title={`${r.name}${r.country ? ' · ' + r.country : ''}${hazeHint ? ' — ' + hazeHint : ''}`}
@@ -111,7 +125,7 @@ export default function LeftPanel(p: Props) {
                       <span className="ri-name">{shortName(r.name)}</span>
                       <span className="ri-row2">
                         <span className="ri-sub">
-                          <i className="dot-accent" /> {fmtNum(n)} {plural(n, 'пятно', 'пятна', 'пятен')}
+                          <i className="dot-accent" /> {fmtNum(n)}<span className="ri-word"> {plural(n, 'пятно', 'пятна', 'пятен')}</span>
                           {shown && <span className="ri-date"> · {fmtDateShort(shown.date)}</span>}
                         </span>
                         <span className="ri-index">
@@ -121,6 +135,7 @@ export default function LeftPanel(p: Props) {
                       </span>
                     </span>
                   </button>
+                  </Fragment>
                 );
               })}
               {!regions.length && <div className="muted small pad">Ничего не найдено</div>}
@@ -294,26 +309,41 @@ function Timeline({
   value: string | null;
   onChange: (d: string) => void;
 }) {
-  const t = dates.map((d) => Date.parse(d));
-  const min = Math.min(...t),
-    max = Math.max(...t);
-  const pos = (i: number) => (dates.length === 1 ? 50 : 6 + ((t[i] - min) / (max - min || 1)) * 88);
+  // L34: ordinal spacing — dates of real scenes cluster in time (2019, 2020, then six in 2025–26), a time axis glued
+  // them into one blob. Equal steps keep every dot clickable; the year is shown above the first dot of each year.
+  const n = dates.length;
+  const pos = (i: number) => (n === 1 ? 50 : 6 + (i / (n - 1)) * 88);
   const cur = value ? dates.indexOf(value) : -1;
-  // labels: selected date always; others only if they do not collide (≥ 24 % apart)
+  // date labels: selected always; first/last and others only if ≥ 30 % apart from shown ones (a label is ~55 px)
   const showLabel: boolean[] = [];
-  let lastPos = -1e9;
-  const order = dates.map((_, i) => i).sort((a, b) => (a === cur ? -1 : b === cur ? 1 : a - b));
   const shownPos: number[] = [];
+  const order = dates
+    .map((_, i) => i)
+    .sort((a, b) => (a === cur ? -1 : b === cur ? 1 : a === 0 || a === n - 1 ? -1 : b === 0 || b === n - 1 ? 1 : a - b));
   for (const i of order) {
-    const ok = i === cur || shownPos.every((p) => Math.abs(p - pos(i)) >= 24);
+    const ok = i === cur || shownPos.every((q) => Math.abs(q - pos(i)) >= 30);
     showLabel[i] = ok;
     if (ok) shownPos.push(pos(i));
   }
-  void lastPos;
+  // year ticks above the track: first dot of each year, if ≥ 14 % from the previous tick
+  const years: { i: number; y: string }[] = [];
+  dates.forEach((d, i) => {
+    const y = d.slice(0, 4);
+    if (i === 0 || y !== dates[i - 1].slice(0, 4)) {
+      const prev = years[years.length - 1];
+      if (!prev || pos(i) - pos(prev.i) >= 14) years.push({ i, y });
+    }
+  });
   return (
-    <div className="timeline" data-testid="timeline">
+    <div className={`timeline ${n > 2 ? 'with-years' : ''}`} data-testid="timeline">
       <div className="tl-track" />
       {cur >= 0 && <div className="tl-fill" style={{ width: `${pos(cur)}%` }} />}
+      {n > 2 &&
+        years.map(({ i, y }) => (
+          <span key={y} className="tl-year" style={{ left: `${pos(i)}%` }}>
+            {y}
+          </span>
+        ))}
       {dates.map((d, i) => (
         <button
           key={d}
@@ -323,9 +353,7 @@ function Timeline({
           data-testid={`date-dot-${d}`}
           title={flagged[i] ? `${fmtDate(d)} · дымка/блик — находки могут быть завышены` : fmtDate(d)}
         >
-          {showLabel[i] && (
-            <span className="tl-label">{fmtDateShort(d)}</span>
-          )}
+          {showLabel[i] && <span className="tl-label">{fmtDateShort(d)}</span>}
         </button>
       ))}
     </div>

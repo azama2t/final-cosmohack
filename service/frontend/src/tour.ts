@@ -1,7 +1,7 @@
 import type { MutableRefObject } from 'react';
 import type { DateEntry, DetProps, Feature, FC, LayerKey, Layers, Manifest, Region, Zone, ZonesFile } from './types';
 import { bestRegion, shortName, summaryDate } from './lib/data';
-import { anim } from './map/controller';
+import { anim, turnGlobeTo } from './map/controller';
 import { verdictZone } from './lib/priority';
 
 export interface TourApi {
@@ -23,6 +23,8 @@ export interface TourApi {
   showZone: (z: Zone) => void;
   closeZone: () => void;
   waitIdle: (ms?: number) => Promise<void>;
+  /** L34: first frame on the globe (hardware WebGL only) */
+  ensureGlobe: () => void;
 }
 
 class Aborted extends Error {}
@@ -59,9 +61,19 @@ export async function runTour(apiRef: MutableRefObject<TourApi>, signal: AbortSi
     api().closeCompare();
     api().closeDetection();
     api().setLayers({ rgb: true, detections: true, prob: false, h3: false, h3_3d: false, zones: false, drift: false });
-    cap('Все районы наблюдения. Число у метки — индекс: доля наблюдаемой воды с признаками мусора, ‰.');
+    api().ensureGlobe();
+    await wait(120);
+    cap('Все районы наблюдения. Число у метки — индекс: доля наблюдаемой воды с признаками мусора, ‰. Приглушённые точки с жёлтым кольцом — последний снимок с дымкой или бликом.');
     api().selectRegion(null);
     await wait(5000);
+
+    // L34: the chosen region is on the far side of the globe → turn the globe to it first, then fly in
+    const turn = turnGlobeTo(best.center[0], best.center[1]);
+    if (turn) {
+      cap(`Поворачиваем глобус к району ${shortName(best.name)}.`);
+      step--; // the turn belongs to the fly-in step
+      await wait(turn + 300);
+    }
 
     cap(
       hasDet

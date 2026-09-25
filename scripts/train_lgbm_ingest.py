@@ -13,6 +13,17 @@ Missing model bands (e.g. no B1/B8 in L2A 20 m stacks) are filled from the neare
 (recorded in meta.json as band_fill) -- a crutch, reported, not hidden.
 Chip-level datasets (manifest chip_level=1): additionally chip metrics (score = p95 of pixel probability).
 Output: weights_exp/lgbm_ingest/<name>_s<seed>/{model.txt, meta.json}; never touches weights/lgbm*.
+
+L32 (organiser metric):
+  --zero-as negative|ignore|both   organiser 0 / background (our 99 after ingest) as negative (default) or ignored;
+                                   'both' = CV both and keep the better one.
+  --cv K       group K-fold by scene (manifest 'group'), out-of-fold probabilities pooled over ALL valid pixels of
+               the organiser train = their metric "F1 of the debris class over all pixels" (99 counted as negative;
+               --metric-zero ignore to drop it); threshold = best OOF threshold (grid up to 0.999); the final model is
+               then trained on ALL train chips with that threshold (meta.json 'threshold').
+  --baseline DIR   (repeatable) evaluate an existing model (e.g. weights\lgbm = "our model as-is") on the SAME
+                   chips with the same metric -> the fork "as-is vs trained on their train" in one table.
+  --init-model DIR fine-tune: continue boosting from DIR/model.txt (+ num_boost_round trees).
 """
 from __future__ import annotations
 
@@ -31,10 +42,28 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "scripts"))
-os.environ.setdefault("CUDA_VISIBLE_DEVICES", "")
+if not os.environ.get("CUDA_VISIBLE_DEVICES"):  # PowerShell 5.1: $env:X="" deletes the variable
+    os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 import train_lgbm as TL  # noqa: E402
+import warnings as _w
+_w.filterwarnings("ignore", message=".*(geotransform|NotGeoreferenced).*")  # rasterio on PNG/plain TIFF: noise in PowerShell
 from macroplastic.features.pixel import BANDS11, compute_features, feature_names  # noqa: E402
+
+UNLAB = 99   # ingest: organiser 0 / background
+NEG0 = 14    # training code for "organiser 0 as negative" (capped separately from water 7, merged to 7 in labels)
+# up to 0.999: on organiser data with 0 = negative the best OOF threshold of L30/L32 sat at the old grid edge
+GRID = np.round(np.concatenate([np.arange(0.02, 0.98, 0.01), np.arange(0.98, 0.995, 0.005),
+                                np.arange(0.995, 0.9991, 0.001)]), 3)
+
+
+def zero_map(m: np.ndarray, zero_as: str) -> np.ndarray:
+    if not (m == UNLAB).any():
+        return m
+    m = m.copy()
+    m[m == UNLAB] = NEG0 if zero_as == "negative" else 0
+    return m
+
 
 WL = {"B1": 443, "B2": 492, "B3": 560, "B4": 665, "B5": 704, "B6": 740, "B7": 783, "B8": 833, "B8A": 865,
       "B9": 945, "B10": 1374, "B11": 1614, "B12": 2202}
@@ -91,7 +120,7 @@ def extract(rows, base, fill, max_px, seed):
     for i, r in enumerate(rows):
         a, names = load_chip(_abs(r["image"], base), fill)
         with rasterio.open(_abs(r["mask"], base)) as ds:
-            m = ds.read(1)
+            m = zero_map(ds.read(1), ZERO_AS[0])
         f = compute_features(a, names, "win")
         idx = np.flatnonzero(m.ravel() > 0)
         if len(idx) > max_px:
@@ -106,6 +135,162 @@ def extract(rows, base, fill, max_px, seed):
     if not Xs:
         return np.zeros((0, len(feature_names("win"))), np.float32), np.zeros(0, np.uint8), np.zeros(0, np.int32)
     return np.concatenate(Xs).astype(np.float32), np.concatenate(ys).astype(np.uint8), np.concatenate(pid)
+
+
+ZERO_AS = ["negative"]
+
+
+def _groups(rows, group_regex=None):
+    out = []
+    for r in rows:
+        g = r.get("group") or r["id"]
+        if group_regex:
+            m = re.search(group_regex, r["id"])
+            g = (m.group(1) if m.groups() else m.group(0)) if m else r["id"]
+        out.append(g)
+    return out
+
+
+def _counts_at(hist_pos, hist_neg):
+    """Cumulative (from the top) counts -> tp, fp, fn per GRID threshold (probabilities binned at 1e-3)."""
+    cp = np.cumsum(hist_pos[::-1])[::-1]
+    cn = np.cumsum(hist_neg[::-1])[::-1]
+    idx = np.clip(np.round(GRID * 1000).astype(int), 0, 1000)
+    tp, fp = cp[idx], cn[idx]
+    fn = hist_pos.sum() - tp
+    return tp, fp, fn
+
+
+def _f1(tp, fp, fn):
+    return np.where(tp > 0, 2 * tp / np.maximum(1, 2 * tp + fp + fn), 0.0)
+
+
+def run_cv(a, rows, man, fill, cfg):
+    """Group K-fold OOF on the organiser metric (+ baselines).  -> (result dict, pass-1 training data)."""
+    import lightgbm as lgb
+    import rasterio
+
+    groups = _groups(rows, a.group_regex)
+    ug = sorted(set(groups))
+    rng = np.random.default_rng(a.seed)
+    # pass 1: training pixels per chip (all target + up to --neg-per-chip others) + per-chip target presence
+    Xs, Ys, cid = [], [], []
+    has_pos = {}
+    for i, r in enumerate(rows):
+        a_, names = load_chip(_abs(r["image"], man.parent), fill)
+        with rasterio.open(_abs(r["mask"], man.parent)) as ds:
+            m0 = ds.read(1)
+        f = compute_features(a_, names, "win").reshape(len(feature_names("win")), -1)
+        mr = m0.ravel()
+        valid = ~np.isnan(a_).any(0).ravel()
+        pos = np.flatnonzero((mr == 1) & valid)
+        oth = np.flatnonzero((mr > 1) & valid)
+        if len(oth) > a.neg_per_chip:
+            oth = rng.choice(oth, a.neg_per_chip, replace=False)
+        idx = np.sort(np.concatenate([pos, oth]))
+        Xs.append(f[:, idx].T.astype(np.float32))
+        Ys.append(mr[idx].astype(np.uint8))
+        cid.append(np.full(len(idx), i, np.int32))
+        has_pos[groups[i]] = has_pos.get(groups[i], False) or bool(len(pos))
+    X = np.concatenate(Xs)
+    Y = np.concatenate(Ys)
+    C = np.concatenate(cid)
+    del Xs, Ys
+    posg = [g for g in ug if has_pos[g]]
+    negg = [g for g in ug if not has_pos[g]]
+    rng.shuffle(posg)
+    rng.shuffle(negg)
+    K = max(2, min(a.cv, len(ug)))
+    fold_of = {g: i % K for i, g in enumerate(posg)} | {g: (i + len(posg)) % K for i, g in enumerate(negg)}
+    chip_fold = np.array([fold_of[g] for g in groups])
+    modes = ["negative", "ignore"] if a.zero_as == "both" else [a.zero_as]
+    all_names = feature_names("win")
+    fidx = [all_names.index(n) for n in feature_names(cfg["features"])]
+    models = {}
+    for mode in modes:
+        for k in range(K):
+            tr = chip_fold[C] != k
+            y = zero_map(Y[tr], mode)
+            sel = TL.sample_train(y, cfg, a.seed)
+            models[(mode, k)] = fit(X[tr][sel], y[sel], cfg, a.seed, fidx, a.init_model)
+            print(f"[ingest-train] cv {mode} fold {k}: {int(tr.sum())} px pool, {len(sel)} sampled, "
+                  f"target {int((y[sel] == 1).sum())}", flush=True)
+    base = {}
+    for bdir in a.baseline or []:
+        bm = json.loads((Path(bdir) / "meta.json").read_text(encoding="utf-8"))
+        bb = lgb.Booster(model_file=str(Path(bdir) / "model.txt"))
+        base[str(bdir)] = (bb, [all_names.index(n) for n in bm["features"]], bm)
+    # pass 2: OOF probabilities on ALL valid pixels, histogrammed (memory-free), per fold too
+    keys = [f"train:{m}" for m in modes] + [f"baseline:{b}" for b in base]
+    H = {k: {"pos": np.zeros((K, 1001)), "neg": np.zeros((K, 1001))} for k in keys}
+    zero_neg = a.metric_zero == "negative"
+    n_pos = n_valid = 0
+    for i, r in enumerate(rows):
+        a_, names = load_chip(_abs(r["image"], man.parent), fill)
+        with rasterio.open(_abs(r["mask"], man.parent)) as ds:
+            m0 = ds.read(1).ravel()
+        valid = ~np.isnan(a_).any(0).ravel()
+        lab = valid & ((m0 > 0) & (m0 != UNLAB) | ((m0 == UNLAB) & zero_neg))
+        if not lab.any():
+            continue
+        F = compute_features(a_, names, "win").reshape(len(all_names), -1).T[lab]
+        yp = m0[lab] == 1
+        n_pos += int(yp.sum())
+        n_valid += int(lab.sum())
+        k = chip_fold[i]
+        for key in keys:
+            if key.startswith("train:"):
+                p = TL.prob_md(models[(key[6:], k)], F[:, fidx], cfg["task"], [0, 1])
+            else:
+                bb, bf, bm = base[key[9:]]
+                p = TL.prob_md(bb, F[:, bf], bm["task"], list(bm["classes"]))
+            b = np.clip((np.nan_to_num(p) * 1000).astype(int), 0, 1000)
+            H[key]["pos"][k] += np.bincount(b[yp], minlength=1001)
+            H[key]["neg"][k] += np.bincount(b[~yp], minlength=1001)
+    res = {"K": K, "folds": {g: int(f) for g, f in fold_of.items()}, "n_eval_px": n_valid, "n_target_px": n_pos,
+           "metric": f"F1 of target over ALL valid pixels of the organiser train (OOF), organiser 0 "
+                     f"{'= negative' if zero_neg else 'ignored'}", "variants": {}}
+    for key in keys:
+        hp, hn = H[key]["pos"].sum(0), H[key]["neg"].sum(0)
+        tp, fp, fn = _counts_at(hp, hn)
+        f1 = _f1(tp, fp, fn)
+        j = int(np.argmax(f1))
+        thr = float(GRID[j])
+        folds = []
+        for k in range(K):
+            t2, f2, n2 = _counts_at(H[key]["pos"][k], H[key]["neg"][k])
+            folds.append(round(float(_f1(t2, f2, n2)[j]), 4) if H[key]["pos"][k].sum() else None)
+        d = {"f1": round(float(f1[j]), 4), "threshold": thr, "tp": int(tp[j]), "fp": int(fp[j]), "fn": int(fn[j]),
+             "precision": round(float(tp[j] / max(1, tp[j] + fp[j])), 4),
+             "recall": round(float(tp[j] / max(1, tp[j] + fn[j])), 4),
+             "iou": round(float(tp[j] / max(1, tp[j] + fp[j] + fn[j])), 4), "fold_f1": folds,
+             "fold_std": round(float(np.std([x for x in folds if x is not None])), 4) if any(
+                 x is not None for x in folds) else None}
+        if key.startswith("baseline:"):
+            bthr = float(base[key[9:]][2].get("threshold") or 0.5)
+            jj = int(np.argmin(np.abs(GRID - bthr)))
+            d["f1_at_own_threshold"] = round(float(f1[jj]), 4)
+            d["own_threshold"] = bthr
+        res["variants"][key] = d
+    return res, (X, Y, fidx)
+
+
+def fit(X, y, cfg, seed, fidx, init_model=None):
+    if not init_model:
+        b, _ = TL.train_model(X, y, np.ones(len(y), np.uint8), cfg, seed, fidx)
+        return b
+    import lightgbm as lgb
+
+    ym = TL.merge(y, cfg.get("merge_water", True))
+    label = (ym == 1).astype(np.float32)
+    w = np.where(label > 0, float(cfg["pos_weight"]), 1.0).astype(np.float32)
+    prm = dict(cfg["lgbm"])
+    n = int(prm.pop("num_boost_round"))
+    prm.update(objective="binary", seed=seed, verbose=-1, deterministic=True, force_row_wise=True,
+               num_threads=TL.n_threads())
+    names = feature_names("win")
+    ds = lgb.Dataset(X[:, fidx], label=label, weight=w, feature_name=[names[i] for i in fidx], free_raw_data=False)
+    return lgb.train(prm, ds, num_boost_round=n, init_model=str(Path(init_model) / "model.txt"))
 
 
 def split_rows(rows, val_frac, seed, group_regex=None):
@@ -170,6 +355,17 @@ def main(argv=None):
     ap.add_argument("--group-regex", default=None, help="regex on sample id; group 1 = split group")
     ap.add_argument("--max-px-per-chip", type=int, default=20000)
     ap.add_argument("--out", default=None, help="default weights_exp/lgbm_ingest/<name>_s<seed>")
+    ap.add_argument("--zero-as", choices=["negative", "ignore", "both"], default="negative",
+                    help="organiser 0 / background (99 after ingest): negative (default; metric over ALL pixels), "
+                         "ignore (0 = unlabelled), both (needs --cv: keep the better by OOF F1)")
+    ap.add_argument("--metric-zero", choices=["negative", "ignore"], default="negative",
+                    help="--cv metric: organiser 0 pixels count as negatives (their metric over all pixels) or not")
+    ap.add_argument("--cv", type=int, default=0, help="group K-fold OOF on the organiser metric (0 = one split)")
+    ap.add_argument("--baseline", action="append", default=None,
+                    help="existing model dir evaluated on the same chips (e.g. weights\\lgbm = as-is)")
+    ap.add_argument("--init-model", default=None, help="fine-tune from this model dir (continue boosting)")
+    ap.add_argument("--neg-per-chip", type=int, default=4000, help="--cv: non-target training px per chip")
+    ap.add_argument("--cv-only", action="store_true", help="--cv: do not train/save the final model")
     a = ap.parse_args(argv)
     for st in (sys.stdout, sys.stderr):
         try:
@@ -193,6 +389,11 @@ def main(argv=None):
     fill = band_fill(names0)
     if fill:
         print(f"[ingest-train] missing model bands filled from nearest wavelength: {fill}")
+    if a.zero_as == "both" and not a.cv:
+        raise SystemExit("--zero-as both needs --cv K")
+    if a.cv:
+        return main_cv(a, rows, man, name, cfg, fill, t0)
+    ZERO_AS[0] = a.zero_as
     tr, va, how = split_rows(rows, a.val_frac, a.seed, a.group_regex)
     print(f"[ingest-train] {len(rows)} samples: train {len(tr)}, val {len(va)} -- {how}")
     Xtr, ytr, _ = extract(tr, man.parent, fill, a.max_px_per_chip, a.seed)
@@ -236,14 +437,52 @@ def main(argv=None):
             "val_ids": [r["id"] for r in va], "n_train_px": int(len(sel)), "n_train_target_px": int((ytr[sel] == 1).sum()),
             "val": res, "threshold": res.get("threshold"), "config": cfg,
             "seconds": {"features": round(t_feat, 1), "train": round(t_train, 1), "total": round(time.time() - t0, 1)},
-            "note": "val metrics: pooled over labelled val pixels (ignore=0), threshold chosen on the same val "
-                    "(optimistic); small datasets -> high variance"}
+            "zero_as": a.zero_as,
+            "note": "val metrics: pooled over labelled val pixels (ignore=0; organiser 0 counted per --zero-as), "
+                    "threshold chosen on the same val (optimistic); small datasets -> high variance"}
     (out / "meta.json").write_text(json.dumps(meta, indent=1, ensure_ascii=False, default=str), encoding="utf-8")
     msg = (f"[ingest-train] {name}: val F1={res.get('f1')} IoU={res.get('iou')} AUC={res.get('auc') and round(res['auc'], 4)}"
            f" thr={res.get('threshold')} (val px {res.get('n_val_px')}, target {res.get('n_val_target_px')})")
     if "chip" in res:
         msg += f" | chip F1={res['chip']['f1']} AUC={res['chip']['auc'] and round(res['chip']['auc'], 4)}"
     print(msg + f" | {meta['seconds']['total']}s -> {out}")
+    return meta
+
+
+def main_cv(a, rows, man, name, cfg, fill, t0):
+    res, (X, Y, fidx) = run_cv(a, rows, man, fill, cfg)
+    tv = {k: v for k, v in res["variants"].items() if k.startswith("train:")}
+    best_key = max(tv, key=lambda k: tv[k]["f1"])
+    mode = best_key[6:]
+    print(f"[ingest-train] CV ({res['K']} folds by scene, {res['n_eval_px']} px, target {res['n_target_px']}; "
+          f"{res['metric']}):")
+    for k, v in res["variants"].items():
+        extra = (f"  | at its own thr {v['own_threshold']}: F1 {v['f1_at_own_threshold']}"
+                 if "own_threshold" in v else "")
+        print(f"   {k:<40s} F1 {v['f1']:.4f} (thr {v['threshold']}, P {v['precision']}, R {v['recall']}) "
+              f"folds {v['fold_f1']} std {v['fold_std']}{extra}")
+    out = Path(a.out) if a.out else ROOT / "weights_exp" / "lgbm_ingest" / f"{name}_s{a.seed}"
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "cv.json").write_text(json.dumps(res, indent=1, ensure_ascii=False), encoding="utf-8")
+    if a.cv_only:
+        print(f"[ingest-train] --cv-only: {out / 'cv.json'} ({time.time() - t0:.0f}s)")
+        return {"cv": res}
+    y = zero_map(Y, mode)
+    sel = TL.sample_train(y, cfg, a.seed)
+    booster = fit(X[sel], y[sel], cfg, a.seed, fidx, a.init_model)
+    booster.save_model(str(out / "model.txt"))
+    thr = tv[best_key]["threshold"]
+    meta = {"model": "lgbm", "dataset": name, "manifest": str(man), "task": cfg["task"],
+            "feature_level": cfg["features"], "features": feature_names(cfg["features"]), "channels": BANDS11,
+            "band_fill": fill, "classes": [0, 1], "md_class": 1, "zero_as": mode, "init_model": a.init_model,
+            "split": f"final model on ALL {len(rows)} train chips; threshold = best OOF threshold of group "
+                     f"{res['K']}-fold CV", "threshold": thr, "cv": res, "val": tv[best_key],
+            "n_train_px": int(len(sel)), "n_train_target_px": int((y[sel] == 1).sum()), "config": cfg,
+            "seconds": {"total": round(time.time() - t0, 1)},
+            "note": "OOF threshold on pooled organiser-train pixels: optimistic; fold spread in cv.fold_f1"}
+    (out / "meta.json").write_text(json.dumps(meta, indent=1, ensure_ascii=False, default=str), encoding="utf-8")
+    print(f"[ingest-train] final: zero-as {mode}, thr {thr}, CV F1 {tv[best_key]['f1']} -> {out} "
+          f"({meta['seconds']['total']}s)")
     return meta
 
 

@@ -48,6 +48,12 @@ _DATE_RES = [
 ]
 _TILE_RE = re.compile(r"^T?\d{2}[C-X][A-Z]{2}$")
 _NUM_RE = re.compile(r"^\d+$")
+# short "letters + 1-2 digits" tokens are scene/region prefixes (r05, scene3, reg12) and must NOT split a
+# dataset into one group per scene (L30 rehearsal: r01_{n} .. r16_{n} -> 16 groups, class values of 1 group
+# only, pairs mixed between scenes). Sensor / band / product tokens stay literal (they DO define a group).
+_SCENE_TOK_RE = re.compile(r"^([A-Za-z]{1,8})(\d{1,2})$")
+_KEEP_LITERAL_RE = re.compile(r"^(S[123]|L[1-9]|LC0?\d|LT0?\d|LE0?\d|MSI|OLI|B\d{1,2}A?|band\d{1,2}|b\d{1,2}a?|"
+                              r"v\d{1,2}|rgb\d?|x\d|h\d{1,2}|w\d{1,2}|p\d{1,2})$", re.I)
 
 
 def _tok_kind(tok: str) -> str | None:
@@ -75,9 +81,13 @@ def name_template(stem: str) -> tuple[str, str]:
         else:
             # mixed token like 'I1-I5' / 'B02' stays literal; embedded long digit runs -> {n}
             m = re.fullmatch(r"([A-Za-z]*)(\d{3,})", t)
+            m2 = _SCENE_TOK_RE.fullmatch(t) if not m and not _KEEP_LITERAL_RE.match(t) else None
             if m:
                 tpl.append(m.group(1) + "{n}")
                 ids.append(m.group(2))
+            elif m2:
+                tpl.append(m2.group(1) + "{n}")
+                ids.append(t)  # keep the letters: 'r05' stays distinguishable in the sample id
             else:
                 tpl.append(t)
     return "".join(tpl), "_".join(ids)
@@ -341,6 +351,66 @@ def is_mask_like(hdr: dict, arr: np.ndarray | None, name: str) -> tuple[bool, st
     return False, f"{len(u)}+ unique values"
 
 
+_MASK_SUFFIX_RE = re.compile(r"([_\-.]?(mask|masks|label|labels|lbl|gt|cl|seg|segmentation|annotation|annot|"
+                             r"target|class|classes|y))$", re.I)
+_IMG_SUFFIX_RE = re.compile(r"([_\-.]?(img|image|images|s2|sentinel2|data|x|rgb|input))$", re.I)
+
+
+def stem_key(stem: str, rx: re.Pattern) -> str:
+    """Name key without the mask/image suffix word ('r05_001_mask' -> 'r05_001'); scene prefix is KEPT."""
+    s = stem
+    for _ in range(2):
+        s2 = rx.sub("", s)
+        if s2 == s or not s2:
+            break
+        s = s2
+    return s.lower()
+
+
+def pair_within(img_hs: list[dict], mask_hs: list[dict], ig: str, mg: str) -> list[tuple]:
+    """Image <-> mask pairs that never cross scenes.
+
+    1) full name key (stem without mask/image suffix; scene prefix kept) + the closest folder;
+    2) only for masks left over: shared sample id, but ONLY if the id is unique on both sides
+       (ids like '001' repeated in every scene are never used -- L30: 8 of 111 pairs were r04 <-> r12)."""
+    def parent(h):
+        return str(Path(h["rel"]).parent).replace("\\", "/")
+
+    def sim(a, b):
+        pa, pb = parent(a).split("/"), parent(b).split("/")
+        n = 0
+        for x, y in zip(pa, pb):
+            if x != y:
+                break
+            n += 1
+        return n
+
+    by_key = collections.defaultdict(list)
+    for h in img_hs:
+        by_key[stem_key(Path(h["rel"]).stem, _IMG_SUFFIX_RE)].append(h)
+        by_key[Path(h["rel"]).stem.lower()].append(h)
+    out, used, left = [], set(), []
+    for m in mask_hs:
+        k = stem_key(Path(m["rel"]).stem, _MASK_SUFFIX_RE)
+        cands = {id(h): h for h in by_key.get(k, []) + by_key.get(Path(m["rel"]).stem.lower(), [])}
+        cands = sorted(cands.values(), key=lambda h: -sim(h, m))
+        if cands and cands[0]["path"] not in used and (len(cands) == 1 or sim(cands[1], m) < sim(cands[0], m)):
+            used.add(cands[0]["path"])
+            out.append((k, cands[0]["path"], m["path"], ig, mg))
+        else:
+            left.append(m)
+    if left:
+        cnt_i = collections.Counter(h["sample_id"] for h in img_hs)
+        cnt_m = collections.Counter(h["sample_id"] for h in mask_hs)
+        by_id = {h["sample_id"]: h for h in img_hs if cnt_i[h["sample_id"]] == 1}
+        for m in left:
+            h = by_id.get(m["sample_id"])
+            if h is not None and cnt_m[m["sample_id"]] == 1 and h["path"] not in used:
+                used.add(h["path"])
+                out.append((m["sample_id"], h["path"], m["path"], ig, mg))
+    return out
+
+
 def _pick(items: list, k: int, rng: random.Random) -> list:
     if len(items) <= k:
         return list(items)
@@ -537,10 +607,7 @@ def run(data_dir: Path, out: Path, max_files: int = 20000, sample_per_group: int
                                  -max((int(k) for k in gmeta[m]["count"] if k not in ("None",)), default=0), m))
         fam_rows.append({"members": members, "images": imgs, "masks": masks})
         if masks and imgs:
-            by_id_img = {h["sample_id"]: h["path"] for h in groups[imgs[0]]}
-            for h in groups[masks[0]]:
-                if h["sample_id"] in by_id_img:
-                    pairs_guess.append((h["sample_id"], by_id_img[h["sample_id"]], h["path"], imgs[0], masks[0]))
+            pairs_guess += pair_within(groups[imgs[0]], groups[masks[0]], imgs[0], masks[0])
 
     # ---- tables
     table_info = [inspect_table(p) for p in tables[:200]]
@@ -567,8 +634,12 @@ def run(data_dir: Path, out: Path, max_files: int = 20000, sample_per_group: int
             w.writerow([h.get(c) for c in cols])
     with open(out / "pairs_guess.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["id", "image", "mask", "image_group", "mask_group"])
-        w.writerows(pairs_guess)
+        w.writerow(["id", "image", "mask", "image_group", "mask_group", "group"])
+        # group = scene prefix (id without trailing numbers) -> label_forensics splits folds by scene
+        grp = [re.sub(r"([_\-]\d+)+$", "", str(p[0])) or str(p[0]) for p in pairs_guess]
+        if len(set(grp)) < 2:
+            grp = [str(p[0]) for p in pairs_guess]
+        w.writerows([list(p) + [g] for p, g in zip(pairs_guess, grp)])
     write_html(summary, out / "index.html")
     summary["seconds"] = round(time.time() - t0, 1)
     return summary

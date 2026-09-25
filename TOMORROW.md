@@ -4,25 +4,44 @@
 
 Правила часа: не подгонять ничего под test организаторов; сначала проверяем формат сабмита, потом качество. Каждое принятое решение — одна строка в `docs/DECISIONS.md`.
 
-Обозначения: `$D` — папка их данных (например `data\organizer_raw`), `$O` — наш конвертированный набор (`data\organizer`). Команды запускаются из корня репозитория в PowerShell.
+Одна дорожка: **ingest → (флаги по README) → convert → сабмит «как есть» → CV-развилка → сабмит «обучено на их train»**. Проверено повторной репетицией L32 (`reports\rehearsal2.md`).
 
 ```powershell
-$D = "data\organizer_raw"; $O = "data\organizer"; $env:CUDA_VISIBLE_DEVICES = ""
+cd C:\Users\User\Documents\GitHub\final-cosmohack
+$env:PYTHONPATH = "src"
+$env:CUDA_VISIBLE_DEVICES = "-1"   # именно "-1": в PowerShell 5.1 "" УДАЛЯЕТ переменную, и lgbm уходит на GPU
+$PY  = ".venv\Scripts\python.exe"
+$ZIP = "D:\org\dataset.zip"        # <- архив или папка организаторов
+$I   = "data\ingest\org"           # <- наша рабочая папка для этого датасета
 ```
 
-> `{{команда}}` — заготовка: скрипта на момент написания ещё не было. Перед стартом сверить с `--help` и заменить.
+GPU в первый час не нужен: всё ниже работает на CPU (`predict_org.py` по умолчанию `--device cpu`, у `inference.py` писать `--device cpu`).
 
 ---
 
-## 0–10 мин. Чтение ТЗ и правил
+## 0–10 мин. ТЗ, правила и README организаторов
+
+```powershell
+& $PY scripts\tools\ingest.py $ZIP --out $I       # ~5-25 с: распаковка, отчёт, автоконфиг; README печатается в консоль
+start $I\report\index.html                        # сверху: текст README, значения масок по ВСЕМ маскам, блокеры
+```
 
 Выписать в `docs/DECISIONS.md` (раздел «Задача организаторов»):
 
-- [ ] **Метрика**: точное название и формула. Считается по пикселям, объектам, патчам или ячейкам? Какой класс? Micro или macro? Есть ли порог?
-- [ ] **Формат сабмита**: файл (GeoTIFF, PNG, CSV, GeoJSON, JSON), имена, CRS, разрешение, dtype, кодировка классов, вероятность или маска, куда и как грузить, лимит попыток.
-- [ ] **Данные**: сенсор (S2 L1C / L2A / другое), каналы и их порядок, масштаб (DN или отражение, offset), разрешение, размер патчей, классы, есть ли val, есть ли метаданные (дата, тайл).
-- [ ] **Баллы**: доля метрики, демо, презентации, кода; дедлайны промежуточных проверок.
-- [ ] **Запреты**: внешние данные (MARIDA, MADOS), предобученные веса (marinedebrisdetector), ручная разметка, интернет на проверке, ограничение по железу и времени инференса.
+- [ ] **Метрика**: точное название и формула. По пикселям, объектам, патчам или ячейкам? Какой класс? Micro или macro? **Все пиксели или только размеченные** (от этого зависит `--zero-as`, см. 30–45)?
+- [ ] **Формат сабмита**: файл (PNG, GeoTIFF, CSV, GeoJSON), имена, dtype, **код класса мусора**, фон, zip или папка, лимит попыток.
+- [ ] **Данные**: каналы и их порядок, масштаб (DN ×1e-4? offset −1000?), классы масок и какой из них мусор, есть ли val.
+- [ ] **Баллы, дедлайны, запреты** (внешние данные MARIDA/MADOS, предобученные веса, железо и время инференса).
+
+Консоль ingest печатает: `из README: целевой класс=… каналы=… scale=…` и `значения масок (проверено N из M): {…}`.
+**Если что-то из этого не найдено или неверно — перезапустить с флагами** (флаг > README > угадывание):
+
+```powershell
+& $PY scripts\tools\ingest.py $ZIP --out $I --target-class 3 --channels B8,B4,B3,B2,B11,B12,B5,B6,B7,B8A,B1 --scale 0.0001 --offset 0
+# ещё: --ignore-values 255   --test-glob "test/**/*.tif"   --format dirs
+```
+
+Блокеры (`[blocker]` в консоли, `ingest_blockers:` в `adapter.yaml`): целевой класс не назван при нескольких ненулевых классах, число каналов не совпадает, масштаб не определён. **`--convert` откажется работать (код 3), пока блокер не снят** флагом или правкой `adapter.yaml` (удалить строки `ingest_blockers`).
 
 Вопросы организаторам (задать сразу, одним сообщением):
 
@@ -37,117 +56,111 @@ $D = "data\organizer_raw"; $O = "data\organizer"; $env:CUDA_VISIBLE_DEVICES = ""
 9. Оценивается ли веб-сервис отдельно? Какие сценарии будут смотреть (сравнение участков, зоны обследования, прогноз)?
 10. Сколько сабмитов в день и какой лидерборд: публичный или приватный?
 
-## 10–20 мин. Что в данных: `inspect_dataset.py`
+## 10–15 мин. Проверка отчёта и конвертация (train + test)
+
+В `$I\report\index.html` проверить сверху вниз:
+- **README** прочитан; «Извлечено из текста»: целевой класс, каналы, масштаб совпадают с ТЗ.
+- **Значения масок по всем маскам**: «проверено N из M» (N = M или стратифицированная выборка), целевой класс в них есть.
+- **Сомнения**: блокеров 0; «важно» прочитаны. `classes.map` в `adapter.yaml`: цель → 1, прочие ненулевые → 7, их 0 → 99 (решение «0 = негатив или игнор» принимается при обучении, конвертировать заново не нужно).
+- **Превью**: RGB естественный (иначе неверный порядок каналов), медиана B8 на фоне ≈ 0.00–0.03.
 
 ```powershell
-.venv\Scripts\python.exe scripts\tools\inspect_dataset.py --data-dir $D --out reports\tools\org_inspect
-start reports\tools\org_inspect\index.html
+& $PY scripts\tools\ingest.py $ZIP --out $I --convert      # train -> $I\converted\<name>\, test (layout.test_glob) -> $I\converted_test\
 ```
 
-Смотрим: число файлов и пар «снимок—маска» (`pairs_guess.csv`), каналы и dtype, nodata, CRS, разрешение, диапазон значений (отражение 0..1 или DN 0..10000, есть ли offset 1000), классы маски и баланс, долю нулей и NaN. Записать выводы: порядок каналов, масштаб, разрешение, коды классов, где лежат сплиты.
+## 15–20 мин. Первый сабмит: наша модель «как есть»
 
-## 20–30 мин. Выводима ли разметка из спектра: `label_forensics.py`
+`predict_org.py` берёт test прямо из архива (`layout.test_glob` конфига) и делает **ту же предобработку, что и для train** (адаптер). Выход — маски в формате организаторов с их именами.
 
 ```powershell
-{{команда: .venv\Scripts\python.exe scripts\tools\label_forensics.py --pairs reports\tools\org_inspect\pairs_guess.csv --out reports\tools\org_forensics}}   # заготовка, сверить с --help
+& $PY scripts\tools\predict_org.py --config $I\adapter.yaml --weights weights\lgbm --out out\sub_asis --format png --value-debris 3 --value-bg 0 --zip
+# --images <папка test>  если test лежит отдельно от архива;  --format tif  -> GeoTIFF с их геопривязкой;  --prob  -> вероятности
 ```
 
-Решение по архитектуре:
-- **Дерево глубины 3–5 или пороги индексов (FDI, NDVI, FAI) дают высокое качество** → разметка почти спектральная. Берём пиксельный LightGBM (наш путь), быстро и надёжно.
-- **Спектр объясняет слабо, маски — крупные полигоны или объекты** → важен контекст. Нужна сегментация (UNet) или пиксельный LightGBM с оконными признаками (`features: win` в `configs/lgbm.yaml`) и постобработка.
-- **Классы, которые путаются между собой** (пена, водоросли, суда), записать как hard negatives для обучения.
+Проверить: «N масок, X px мусора в K файлах». **0 px во всех файлах = ошибка каналов/масштаба/порога** (скрипт предупредит). Нехватка каналов модели — понятная ошибка (код 2). Загрузить `out\sub_asis.zip` → записать в `docs/TIMELINE.md`.
 
-## 30–40 мин. Подключение: `organizer_adapter`
+## 20–25 мин. Форензика разметки и провенанс (параллельно с обучением)
 
 ```powershell
-copy configs\adapter_example.yaml configs\adapter_organizer.yaml
-# править по отчёту inspect: root, layout.image_glob / mask_glob / id_regex, bands.source / rename / output,
-# radiometry.scale / offset (DN*1e-4; L2A baseline >= 04.00 без гармонизации -> offset -0.1), resolution.target, классы
-.venv\Scripts\python.exe scripts\tools\adapter.py --config configs\adapter_organizer.yaml --out $O --dry-run
-.venv\Scripts\python.exe scripts\tools\adapter.py --config configs\adapter_organizer.yaml --out $O --limit 20
-.venv\Scripts\python.exe scripts\tools\adapter.py --config configs\adapter_organizer.yaml --out $O
+# все пары из манифеста ingest (сырые файлы организаторов, группы = сцены); пороги в отражении
+& $PY scripts\tools\label_forensics.py --manifest (Get-ChildItem $I\converted\*\manifest.csv).FullName --scale 0.0001 --nodata-zero --out reports\tools\org_forensics
+# пересечения с НАШИМ train: только списки train+val MARIDA (test MARIDA не читать!)
+& $PY scripts\tools\provenance_check.py --ours data\MARIDA\splits\train_X.txt data\MARIDA\splits\val_X.txt --list-root data\MARIDA\patches --theirs $I\unpacked --within --out reports\tools\org_provenance
 ```
 
-(`scripts\tools\adapter.py` — обёртка над `macroplastic.organizer_adapter`, запускается из корня без `PYTHONPATH`.)
+Форензика: дерево-3 или один порог дают F1 ≥ 0.9 → разметка — правило; F1 ≪ 0.5 («выводима слабо») → пиксельно много не выжать, важны порог и контекст. Провенанс: общие сцены с MARIDA → оценка «как есть» на их данных завышена.
 
-Проверка после `--dry-run`: чистая вода в B8 должна быть около 0.00–0.03, маска содержит ожидаемые коды классов, форма (C,H,W) правильная. Недостающие каналы: `bands.missing: nan` (деревья с этим справляются).
+## 25–45 мин. Развилка «как есть vs обучение на их train» и «0 = негатив или игнор»
 
-## 40–55 мин. Происхождение данных и переобучение
-
-**Пересечения с нашими обучающими данными** (если их train совпадает с MARIDA или MADOS по тайлу и дате, наша val-оценка на их данных завышена, и такие сцены нужно держать в одном сплите):
+Одна команда: групповой K-fold по сценам, OOF-вероятности на **всех** пикселях их train (их метрика), оба режима нуля и наша модель как есть на тех же пикселях:
 
 ```powershell
-{{команда: .venv\Scripts\python.exe scripts\tools\provenance_check.py --ours data\MARIDA --theirs $D --out reports\tools\org_provenance}}   # заготовка, сверить с --help
+& $PY scripts\train_lgbm_ingest.py --data-root $I --cv 4 --zero-as both --baseline weights\lgbm --out weights_exp\lgbm_ingest\org_cv
+# метрика только по размеченным пикселям (если так сказано в ТЗ):  добавить --metric-zero ignore
 ```
 
-Дополнительно сверить с таблицей сцен MARIDA `reports\marida_scenes.csv` (тайл и дата).
+Выход: таблица `train:negative | train:ignore | baseline:weights\lgbm` с F1, порогом, P/R, F1 по фолдам и std; финальная модель (лучший режим нуля, **обучена на всём их train**, порог = лучший OOF) → `weights_exp\lgbm_ingest\org_cv\{model.txt, meta.json, cv.json}`.
 
-**Переобучение LightGBM на их данных** (выбор только по их val или по групповому сплиту по сценам, test не трогаем):
+**Критерий выбора:**
+1. Есть их val (официальный сплит) → предсказать val обеими моделями и мерить `score.py` (ниже) — это главный критерий.
+2. Нет val → CV выше. **По умолчанию берём «обучено на их train»**: оно учит их соглашение разметки (в репетиции L30/L32 «как есть» выигрывало на CV и проигрывало на private в 2 раза). «Как есть» выбираем, только если его F1 выше на `max(0.01, 2×std)`, где std — бóльшая из двух std по фолдам. Фолд без пикселей мусора печатается как `None` (мало сцен с мусором → CV фактически по 2–3 сценам, шум огромный).
+3. `--zero-as`: при метрике «по всем пикселям» — `negative` (L30: 0.247 против 0.190 на private), при метрике «только по размеченным» — сравнить оба по CV с `--metric-zero ignore`.
+
+Дообучение нашей модели вместо обучения с нуля: `--init-model weights\lgbm --set lgbm.num_boost_round=100` (L30: хуже обучения с нуля).
+
+## 45–55 мин. Сабмит лучшей модели и локальная метрика
 
 ```powershell
-{{команда: .venv\Scripts\python.exe scripts\train_lgbm.py --config configs\lgbm.yaml --set data_root=$O --exp org_bin_min --seed 0}}   # заготовка: сейчас train_lgbm.py читает только MARIDA, нужен флаг источника данных
-.venv\Scripts\python.exe scripts\train_lgbm.py --config configs\lgbm.yaml --exp org_bin_min --seed 1   # и seed 2: шум
+& $PY scripts\tools\predict_org.py --config $I\adapter.yaml --weights weights_exp\lgbm_ingest\org_cv --out out\sub_trained --format png --value-debris 3 --value-bg 0 --zip
+# как есть, но с порогом из CV (строка baseline, поле thr):
+& $PY scripts\tools\predict_org.py --config $I\adapter.yaml --weights weights\lgbm --threshold 0.998 --out out\sub_asis_cv --value-debris 3 --zip
 ```
 
-Базовые варианты для сравнения на их val: (а) наша модель на MARIDA как есть; (б) LightGBM только на их данных; (в) MARIDA + их данные, если внешние данные разрешены. Принимаем вариант, только если прирост больше `max(0.01, 2×std шума)`.
-
-## 55–60 мин. Метрика и первый сабмит
+Локальная метрика на их val (или на своей отложенной части train), те же правила, что у организатора:
 
 ```powershell
-.venv\Scripts\python.exe inference.py --data-dir <их test> --output out\sub_v1 --model lgbm --profile
-{{команда: конвертер out\sub_v1 -> формат сабмита организаторов (пишется по их примеру)}}
+& $PY scripts\tools\predict_org.py --config $I\adapter.yaml --images <папка val images> --weights weights_exp\lgbm_ingest\org_cv --out out\val_trained --value-debris 3
+& $PY scripts\tools\score.py --pred out\val_trained --gt <папка val masks> --target 3                    # 0 = негатив (все пиксели)
+& $PY scripts\tools\score.py --pred out\val_trained --gt <папка val masks> --target 3 --zero-as ignore   # только размеченные
 ```
 
-- [ ] Посчитать их метрику нашей реализацией на их val (`src/macroplastic/metrics.py`: F1/IoU по классу, mIoU, ignore=0) и сверить с примером или бейзлайном организаторов, если он есть.
-- [ ] Проверить сабмит: число файлов, имена, размер, CRS, dtype, коды классов. Отправить.
-- [ ] Записать в `docs/TIMELINE.md`: время, версия, метрика val, метрика лидерборда.
+`score.py`: F1/IoU/P/R класса по пулу пикселей всех файлов, F1/IoU по каждому классу, macro-F1 и mIoU, `--ignore 255`, худшие файлы по FN/FP, пропущенные и лишние файлы, несовпадение размеров (= проверка формата сабмита).
+
+## 55–60 мин. Проверка и отправка
+
+- [ ] Число файлов = числу test-снимков, имена = их имена, размер и dtype как у их масок, код мусора = из ТЗ (`predict_org` печатает итог и пишет `out\<имя>_report.json`).
+- [ ] Отправить zip, записать в `docs/TIMELINE.md`: время, модель (`--weights`), порог, CV/val-метрика, метрика лидерборда.
 
 ---
 
 ## Развилки после первого часа
 
 **Если метрика...**
-- **F1 или IoU по классу мусора (пиксельная)**: подбираем порог по F1 на val (`threshold_grid`), убираем компоненты < 2 px, добавляем hard negatives (пена, Sargassum, суда, следы, облака).
+- **F1 или IoU по классу мусора (пиксельная)**: порог по OOF (`--cv`), `--zero-as` по правилу выше, hard negatives (пена, Sargassum, суда, следы, облака).
 - **mIoU по всем классам**: мультикласс `task: multiclass` в `configs/lgbm.yaml` со схемой классов организаторов, веса классов `class_weight_power`.
 - **Объектная (детекция: mAP или F1 по объектам)**: пиксели → компоненты (`src/macroplastic/grid/vectorize.py`), бокс или полигон и уверенность = max/mean prob; порог по объектной F1.
 - **Регрессия «концентрации» по ячейке или патчу (RMSE/MAE/R²)**: наш показатель `share_permille` по H3 или по патчу как признак, дальше регрессор на их целевой переменной. Физических единиц сами не придумываем.
 - **Ранжирование зон (precision@k)**: сортируем `zones.json` по `flagged_water_px` × уверенность × повторяемость; k берём из правил.
 
 **Если формат...**
-- **GeoTIFF-маска на их сетке**: `inference.py` уже пишет `<name>_mask.tif` и `<name>_prob.tif` на сетке входа; проверить dtype и коды классов.
-- **PNG или NPY без геопривязки**: те же массивы, сохранить в нужном формате и порядке имён.
-- **CSV (id, класс или вероятность на патч)**: агрегат по патчу (max или доля пикселей ≥ порога), порог по val.
+- **PNG/GeoTIFF-маска с кодом класса**: `predict_org.py --format png|tif --value-debris <код> --value-bg <код>`.
+- **Вероятности**: `predict_org.py --prob` (uint8 = P×255).
+- **CSV (id, класс или вероятность на патч)**: агрегат по патчу (max или доля пикселей ≥ порога) из `--prob`, порог по val.
 - **GeoJSON или полигоны**: `detections.geojson` из `scripts/build_service_data.py` (площадь в UTM, mean/max prob).
 - **Веб-сервис как основной результат**: их сцены → `data\live\<region>\<date>` → `scripts\build_service_data.py` → карта.
 
 **Если данные...**
-- **L2A (Sen2Cor), как живые сцены**: сдвиг домена от MARIDA (ACOLITE rhorc) есть. Сравнить на их val вариант (а) с (б) и взять лучший по правилу принятия. marinedebrisdetector (обучен на L2A) — кандидат, если внешние модели разрешены.
-- **Другое разрешение или меньше каналов**: `resolution.target`, `bands.missing: nan`; индексы, которым не хватает каналов, выпадают. Переобучить.
+- **L2A (Sen2Cor), как живые сцены**: сдвиг домена от MARIDA (ACOLITE rhorc) есть; развилка 25–45 решает.
+- **Другое разрешение или меньше каналов**: `resolution.target`, `bands.missing: nan`; `train_lgbm_ingest` заполняет недостающие каналы соседними (meta `band_fill`), `predict_org` использует тот же `band_fill`. Модель «как есть» без каналов — ошибка (или `--fill-missing`, костыль).
 - **Внешние данные запрещены**: только их train; наши веса MARIDA — только для сравнения, в сабмит не идут.
 
 ---
 
-## Как подать датасет (L18: ingest → convert → train)
+## Справка: что делает ingest (L18 + L32)
 
-Архив (zip / tar / tar.gz; 7z — только если стоит 7-Zip или py7zr) или папка организаторов. PowerShell из корня:
-
-```powershell
-$env:PYTHONPATH = "src"; $env:CUDA_VISIBLE_DEVICES = ""
-.venv\Scripts\python.exe scripts\tools\ingest.py D:\org\train.zip --out data\ingest\org
-start data\ingest\org\report\index.html      # прочитать «Сомнения», поправить data\ingest\org\adapter.yaml (строки «ПРОВЕРЬ ЭТО»)
-.venv\Scripts\python.exe scripts\tools\ingest.py D:\org\train.zip --out data\ingest\org --convert
-.venv\Scripts\python.exe scripts\train_lgbm_ingest.py --data-root data\ingest\org
-```
-
-Что смотреть в `report\index.html` (сверху вниз):
-- **Итог**: какой формат распознан (`suffix` — маска рядом с суффиксом `_mask/_label/_cl/_gt`; `dirs` — `images/` + `masks/`;
-  `chip_csv` — CSV «чип → класс»; `ids` — пары только по числовому id). Если кандидаты близки, выбрать нужный: `--format dirs`.
-- **Сомнения**: БЛОКЕР и «важно» сначала — порядок каналов без имён, масштаб DN ×1e-4 и смещение L2A −0.1, что значит 0 в маске
-  (фон или «не размечено»), какой класс целевой, нет официального сплита. Для каждого указан ключ YAML, который править.
-- **Превью**: RGB и маска после маппинга (красный = цель 1, синий = фон 7). Если RGB странный — неверный порядок каналов;
-  если маска вся синяя/красная — неверный `classes.map`.
-- **Значения после конвертации**: медиана B8 на фоне-воде должна быть ≈ 0.00–0.03.
-- Правленый вручную `adapter.yaml` повторный запуск не перезапишет (свежий автоконфиг ляжет в `adapter.auto.yaml`).
-
-Обучение: сплит официальный, если в папках есть train/val, иначе групповой по сцене из имени (`--group-regex` для своего правила).
-Модель и метрики val: `weights_exp\lgbm_ingest\<name>_s0\{model.txt, meta.json}`; `weights\lgbm` не трогается.
+- Форматы: `suffix` (маска рядом с суффиксом `_mask/_label/_cl/_gt`), `dirs` (`images/` + `masks/`), `chip_csv` (CSV «чип → класс»), `ids` (пары по числовому id). Если кандидаты близки — `--format dirs`.
+- Имена вида `r05_001` (префикс сцены + номер) — одна группа, пары по полному имени внутри сцены (L30: раньше 16 групп и перепутанные пары).
+- Значения классов — по всем маскам (выше 20000 — стратифицированная выборка по сценам, «проверено N из M», `--max-masks`).
+- `adapter.yaml`, правленый вручную, повторный запуск не перезапишет (свежий автоконфиг ляжет в `adapter.auto.yaml`).
+- Обучение без `--cv`: сплит официальный (train/val в папках) или групповой по сцене; с `--cv K` — K-fold по сценам и финальная модель на всём train.
+- Модели и метрики: `weights_exp\lgbm_ingest\<name>\{model.txt, meta.json, cv.json}`; `weights\lgbm` не трогается.

@@ -7,7 +7,7 @@ import { buildLayers, type LayerCtx } from './layers';
 import { anim, ctl, darkStyle, fitOverview, offlineStyle, satelliteStyle, withProjection } from './controller';
 import { fmtKm } from '../lib/route';
 import { fmtPermille } from '../lib/style';
-import { shortName } from '../lib/data';
+import { rankRegions, regionReliability, shortName } from '../lib/data';
 
 export interface MapViewProps extends Omit<LayerCtx, 'hour' | 'zoom' | 'spread'> {
   basemap: Basemap;
@@ -166,13 +166,16 @@ export default function MapView(p: MapViewProps) {
     regionMarkers.current.forEach((m) => m.remove());
     regionMarkers.current = [];
     if (p.activeRegion) return;
-    const ranked = [...p.regions].sort((a, b) => (b.summary?.index_permille ?? -1) - (a.summary?.index_permille ?? -1));
+    // L34: reliable regions first (by index, drawn on top); regions whose latest scene has haze/glint — muted, yellow ring
+    const { ok, bad } = rankRegions(p.regions);
+    const ranked = [...ok, ...bad];
     for (const r of ranked) {
       const d = document.createElement('button');
-      d.className = 'region-marker';
+      const unrel = bad.includes(r);
+      d.className = `region-marker ${unrel ? 'unreliable' : ''}`;
       d.setAttribute('data-testid', `region-marker-${r.id}`);
       const idx = r.summary?.index_permille;
-      d.title = `${r.name} — ${fmtPermille(idx)} ‰`;
+      d.title = `${r.name} — ${fmtPermille(idx)} ‰${unrel ? ` · ненадёжный снимок: ${regionReliability(r).why}` : ''}`;
       d.innerHTML = `<span class="rm-dot"></span><span class="rm-name">${esc(shortName(r.name))}</span><span class="rm-val">${fmtPermille(
         idx,
       )} ‰</span>`;

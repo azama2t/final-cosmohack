@@ -264,3 +264,27 @@ export function fitOverview(bounds: Bounds[], duration = 2000, focus: [number, n
   if (duration) map.flyTo({ ...opts, duration, essential: true });
   else map.jumpTo(opts);
 }
+
+/**
+ * L34 (tour): on the globe, if a point is on the far side or near the limb (> 55° from the view centre),
+ * smoothly turn the globe to it at the current zoom before a flyTo. Returns the turn duration in ms (0 = no turn).
+ */
+export function turnGlobeTo(lon: number, lat: number, duration = 2600): number {
+  const map = ctl.map;
+  if (!map || ctl.projection !== 'globe') return 0;
+  const c = map.getCenter();
+  const t = Math.PI / 180;
+  const cosd = Math.sin(lat * t) * Math.sin(c.lat * t) + Math.cos(lat * t) * Math.cos(c.lat * t) * Math.cos((lon - c.lng) * t);
+  const d = Math.acos(Math.max(-1, Math.min(1, cosd))) / t;
+  const occluded = !!(map as any).transform?.isLocationOccluded?.({ lng: lon, lat });
+  if (!occluded && d <= 55) return 0;
+  const pad = mapPadding();
+  map.easeTo({
+    center: [lon, Math.max(-30, Math.min(30, lat))],
+    zoom: map.getZoom(),
+    offset: [(pad.left - pad.right) / 2, 0],
+    duration,
+    essential: true,
+  });
+  return duration;
+}

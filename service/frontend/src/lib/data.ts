@@ -95,6 +95,38 @@ export function regionHaze(r: Region): string {
   return '';
 }
 
+/** L34: a date is unreliable for ranking — haze/glint flag or cloud > 50 % (same thresholds as the calendar). */
+export const isUnreliableDate = (d: DateEntry | null | undefined) => !d || isFlagged(d) || (d.cloud_frac ?? 0) > 0.5;
+
+const dShort = (iso: string) => {
+  const [y, m, d] = iso.split('-');
+  return `${d}.${m}.${y?.slice(2)}`;
+};
+
+/**
+ * L34: ranking reliability of a region. Reliable — its latest available scene has no haze/glint flag and ≤ 50 % clouds.
+ * Otherwise the region goes to the «ненадёжные снимки» group; `why` says why (and which date the index is from).
+ */
+export function regionReliability(r: Region): { ok: boolean; why: string } {
+  const last = r.dates[r.dates.length - 1];
+  if (!isUnreliableDate(last)) return { ok: true, why: '' };
+  const what = last && isFlagged(last) ? 'дымка/блик' : 'облачность > 50 %';
+  const anyOk = r.dates.find((d) => !isUnreliableDate(d));
+  const shown = summaryDate(r);
+  if (!anyOk) return { ok: false, why: `надёжных снимков нет: ${what} на последнем (${dShort(last.date)}) — находки могут быть завышены` };
+  return {
+    ok: false,
+    why: `последний снимок ${dShort(last.date)} — ${what}; индекс по надёжному снимку ${shown ? dShort(shown.date) : '—'}, он старше`,
+  };
+}
+
+/** L34: regions split into reliable (by index, desc) and unreliable (by index, desc). */
+export function rankRegions(regions: Region[]): { ok: Region[]; bad: Region[] } {
+  const byIdx = (a: Region, b: Region) => (b.summary?.index_permille ?? -1) - (a.summary?.index_permille ?? -1);
+  const s = [...regions].sort(byIdx);
+  return { ok: s.filter((r) => regionReliability(r).ok), bad: s.filter((r) => !regionReliability(r).ok) };
+}
+
 /**
  * Region for the demo tour and screenshots.
  * 1) candidates: regions whose freshest scene has no haze/glint flag (the summary date is then that scene);
@@ -110,9 +142,12 @@ export function bestRegion(m: Manifest): Region | null {
   const clean = m.regions.filter((r) => {
     const last = r.dates[r.dates.length - 1];
     const d = summaryDate(r);
-    return !!d && !isFlagged(d) && !r.summary?.haze && d === last && det(r) > 0;
+    return !!d && !isUnreliableDate(d) && !r.summary?.haze && d === last && det(r) > 0;
   });
-  if (clean.length) return [...clean].sort((a, b) => det(b) - det(a) || drift(b) - drift(a) || idx(b) - idx(a))[0];
+  // L34: among fresh reliable candidates prefer those with a drift forecast (the tour has a drift step)
+  const withDrift = clean.filter((r) => drift(r));
+  const pool = withDrift.length ? withDrift : clean;
+  if (pool.length) return [...pool].sort((a, b) => det(b) - det(a) || drift(b) - drift(a) || idx(b) - idx(a))[0];
   return [...m.regions].sort((a, b) => det(b) - det(a) || idx(b) - idx(a))[0];
 }
 

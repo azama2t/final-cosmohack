@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import type { DateEntry, DetProps, FC, H3Props, Manifest, Region, SceneRef, TsRow, Zone, ZonesFile } from '../types';
 import { fmtThr, fmtArea, fmtDate, fmtNum, fmtPct, fmtPermille, modelLabel } from '../lib/style';
 import ExportBox from './ExportBox';
-import { isFlagged, regionHaze, shortName } from '../lib/data';
+import { isFlagged, rankRegions, regionHaze, regionReliability, shortName } from '../lib/data';
 import ComparePanel from './ComparePanel';
 import ObsCalendar from './ObsCalendar';
 import { verdict } from '../lib/priority';
@@ -67,51 +67,70 @@ export default function RightPanel(p: Props) {
 }
 
 function Overview({ manifest, onRegion, onCompare }: { manifest: Manifest; onRegion: (id: string) => void; onCompare: () => void }) {
-  const list = [...manifest.regions].sort((a, b) => (b.summary?.index_permille ?? -1) - (a.summary?.index_permille ?? -1));
-  const max = Math.max(...list.map((r) => r.summary?.index_permille ?? 0), 1e-9);
+  const list = manifest.regions;
+  // L34: regions whose latest scene has haze/glint (or > 50 % clouds) are ranked separately, below the reliable ones
+  const { ok, bad } = rankRegions(list);
+  const max = Math.max(...ok.map((r) => r.summary?.index_permille ?? 0), 1e-9);
   const totalDet = list.reduce((a, r) => a + (r.summary?.n_detections ?? 0), 0);
   const totalArea = list.reduce((a, r) => a + (r.summary?.total_debris_area_m2 ?? 0), 0);
   const [av, au] = fmtArea(totalArea);
+  const row = (r: Region, i: number, unreliable: boolean) => {
+    const v = r.summary?.index_permille ?? 0;
+    const why = unreliable ? regionReliability(r).why : regionHaze(r);
+    return (
+      <button
+        key={r.id}
+        className={`rank-row ${unreliable ? 'unreliable' : ''}`}
+        onClick={() => onRegion(r.id)}
+        data-testid={`rank-row-${r.id}`}
+        title={`${r.name}${why ? ' — ' + why : ''}`}
+      >
+        <span className="rank-n">{unreliable ? <span className="q-dot" /> : i + 1}</span>
+        <span className="rank-body">
+          <span className="rank-name">
+            <span className="rank-name-t">{shortName(r.name)}</span>
+            {!unreliable && regionHaze(r) && (
+              <span className="ri-haze" title={regionHaze(r)}>
+                дымка
+              </span>
+            )}
+          </span>
+          {unreliable ? (
+            <span className="rank-why">{why}</span>
+          ) : (
+            <span className="rank-bar">
+              <span style={{ width: `${Math.max(4, (v / max) * 100)}%` }} />
+            </span>
+          )}
+        </span>
+        <span className="rank-val">
+          {fmtPermille(r.summary?.index_permille)} <small>‰</small>
+        </span>
+      </button>
+    );
+  };
   return (
     <>
       <section className="section">
         <div className="eyebrow">Где искать в первую очередь</div>
         <h2 className="big-title">Районы по индексу</h2>
         <p className="muted small lead">
-          Индекс — {manifest.index.name} на последнем снимке района. Чем выше, тем больше воды с признаками мусора.
+          Индекс — {manifest.index.name} на последнем надёжном снимке района. Чем выше, тем больше воды с признаками мусора.
         </p>
-        <div className="rank-list">
-          {list.map((r, i) => {
-            const v = r.summary?.index_permille ?? 0;
-            return (
-              <button
-                key={r.id}
-                className="rank-row"
-                onClick={() => onRegion(r.id)}
-                data-testid={`rank-row-${r.id}`}
-                title={`${r.name}${regionHaze(r) ? ' — ' + regionHaze(r) : ''}`}
-              >
-                <span className="rank-n">{i + 1}</span>
-                <span className="rank-body">
-                  <span className="rank-name">
-                    <span className="rank-name-t">{shortName(r.name)}</span>
-                    {regionHaze(r) && (
-                      <span className="ri-haze" title={regionHaze(r)}>
-                        дымка
-                      </span>
-                    )}
-                  </span>
-                  <span className="rank-bar">
-                    <span style={{ width: `${Math.max(4, (v / max) * 100)}%` }} />
-                  </span>
-                </span>
-                <span className="rank-val">
-                  {fmtPermille(r.summary?.index_permille)} <small>‰</small>
-                </span>
-              </button>
-            );
-          })}
+        <div className="rank-list" data-testid="rank-reliable">
+          {ok.map((r, i) => row(r, i, false))}
         </div>
+        {bad.length > 0 && (
+          <div className="rank-group-bad" data-testid="rank-unreliable">
+            <div className="rank-group-head" title="Последний снимок района с флагом дымки/блика или облачностью > 50 %: индекс по нему может быть завышен, поэтому район не участвует в общем рейтинге.">
+              <span className="q-dot" /> ненадёжные снимки (дымка/блик) <span className="muted">· {bad.length}</span>
+            </div>
+            <p className="rank-group-hint">
+              Последний снимок с дымкой или бликом: модель может принять их за мусор, индекс завышен. Показан для справки, в рейтинге не участвует.
+            </p>
+            <div className="rank-list">{bad.map((r, i) => row(r, i, true))}</div>
+          </div>
+        )}
       </section>
       <section className="section kpi-grid two">
         <Kpi label="Пятен всего" value={fmtNum(totalDet)} hint="на последних снимках" accent />

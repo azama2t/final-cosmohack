@@ -17,8 +17,11 @@ import sys
 import time
 from pathlib import Path
 
-os.environ.setdefault("CUDA_VISIBLE_DEVICES", "")
+if not os.environ.get("CUDA_VISIBLE_DEVICES"):  # PowerShell 5.1: $env:X="" deletes the variable -> use "-1"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 REPO = Path(__file__).resolve().parents[3]
+import warnings as _w
+_w.filterwarnings("ignore", message=".*(geotransform|NotGeoreferenced).*")  # rasterio on PNG/plain TIFF: noise in PowerShell
 
 
 def _name_from(src: Path) -> str:
@@ -52,6 +55,17 @@ def main(argv=None) -> int:
     ap.add_argument("--max-files", type=int, default=20000)
     ap.add_argument("--max-unpacked-gb", type=float, default=60.0)
     ap.add_argument("--max-members", type=int, default=200000)
+    g = ap.add_argument_group("overrides (priority: flag > organiser README > automatic guess)")
+    g.add_argument("--target-class", type=int, default=None, help="organiser mask value = marine debris")
+    g.add_argument("--ignore-values", default=None, help="comma mask values to ignore (e.g. 255 or -1); '' = none")
+    g.add_argument("--channels", default=None, help="band names in FILE order, e.g. B8,B4,B3,B2,B11,B12,B5,B6,B7,B8A,B1")
+    g.add_argument("--scale", type=float, default=None, help="reflectance = DN * scale + offset (e.g. 0.0001)")
+    g.add_argument("--offset", type=float, default=None, help="e.g. -0.1 for L2A baseline >= 04.00 raw DN")
+    g.add_argument("--test-glob", default=None, help="glob (relative to data root) of test images without masks")
+    g.add_argument("--max-masks", type=int, default=20000, help="masks read for class values (stratified above)")
+    ap.add_argument("--split", choices=["train", "test", "all"], default="all",
+                    help="--convert: train (with masks), test (layout.test_glob, no masks) or all (default)")
+    ap.add_argument("--force", action="store_true", help="--convert even if adapter.yaml still lists ingest_blockers")
     a = ap.parse_args(argv)
     for st in (sys.stdout, sys.stderr):
         try:
@@ -81,8 +95,13 @@ def main(argv=None) -> int:
 
         py = r".venv\Scripts\python.exe"
         nxt = f"{py} -m macroplastic.ingest {src} --out {out} --convert"
+        ov = {"target_class": a.target_class, "channels": a.channels.split(",") if a.channels else None,
+              "scale": a.scale, "offset": a.offset, "test_glob": a.test_glob, "max_masks": a.max_masks,
+              "ignore_values": ([int(v) for v in a.ignore_values.split(",") if v.strip()]
+                                if a.ignore_values is not None else None)}
         s = build(up.root, out, name, str(src), up.as_dict(), force_format=a.force_format,
-                  sample_per_group=a.sample_per_group, max_files=a.max_files, config_path=cfg_path, next_command=nxt)
+                  sample_per_group=a.sample_per_group, max_files=a.max_files, config_path=cfg_path, next_command=nxt,
+                  overrides=ov)
         text = s["config_text"]
         edited = cfg_path.is_file() and stamp.is_file() and \
             hashlib.sha1(cfg_path.read_bytes()).hexdigest() != stamp.read_text().strip()
@@ -100,11 +119,46 @@ def main(argv=None) -> int:
         for d in s["doubts"]:
             if d["level"] in ("blocker", "high"):
                 print(f"   [{d['level']}] {d['topic']}: {d['text'][:160]}")
+        for d in s.get("docs", [])[:3]:
+            print(f"[ingest] --- {d['rel']} ({d['n_lines']} строк) ---")
+            for ln in d["text"].splitlines()[:25]:
+                print("   | " + ln)
+        h = s.get("hints") or {}
+        print(f"[ingest] из README: целевой класс={h.get('target')} каналы={h.get('bands')} scale={h.get('scale')}")
+        mv = (s.get("config_info") or {}).get("mask_values")
+        if mv:
+            print(f"[ingest] значения масок (проверено {mv['n_checked']} из {mv['n_total']}): {mv['values']}")
         print(f"[ingest] config: {cfg_path}   ({time.time() - t0:.1f}s)")
+        if nb:
+            print(f"[ingest] БЛОКЕРОВ: {nb} — --convert не запустится, пока они не сняты (см. ingest_blockers в "
+                  f"{cfg_path})")
     if a.convert:
-        from .formats import convert
+        from .formats import check_blockers, convert
 
+        bl = check_blockers(cfg_path)
+        if bl and not a.force:
+            print(f"[ingest] ОТКАЗ --convert: в {cfg_path} есть ingest_blockers:", file=sys.stderr)
+            for b in bl:
+                print("   - " + b, file=sys.stderr)
+            print("   исправьте конфиг/флаги (--target-class, --channels, --scale) или добавьте --force", file=sys.stderr)
+            return 3
         t1 = time.time()
+        import yaml
+
+        has_test = bool(((yaml.safe_load(cfg_path.read_text(encoding="utf-8")) or {}).get("layout") or {})
+                        .get("test_glob"))
+        if a.split in ("test", "all") and has_test:
+            tman = convert(cfg_path, out / "converted_test", limit=a.limit, workers=a.workers, split="test")
+            import csv as _csv
+
+            nt = sum(1 for _ in _csv.DictReader(open(tman, encoding="utf-8")))
+            print(f"[ingest] test (без масок): {nt} снимков -> {tman}")
+        elif a.split == "test":
+            print("[ingest] layout.test_glob пуст: задайте --test-glob или используйте predict_org.py --images",
+                  file=sys.stderr)
+            return 2
+        if a.split == "test":
+            return 0
         man = convert(cfg_path, out / "converted", limit=a.limit, workers=a.workers)
         import csv
 
