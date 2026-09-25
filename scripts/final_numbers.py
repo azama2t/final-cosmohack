@@ -1121,7 +1121,9 @@ def _case_experiment() -> dict:
 
 
 def _case_selfcheck() -> dict:
-    files = sorted(glob.glob(str(ROOT / "reports" / "selfcheck" / "consistency_*.json")))
+    latest = ROOT / "reports" / "selfcheck" / "consistency_latest.json"  # stable copy in git; dated files are ignored
+    files = [str(latest)] if latest.is_file() else sorted(
+        glob.glob(str(ROOT / "reports" / "selfcheck" / "consistency_2*.json")))
     if not files:
         return {"available": False}
     d = _load_json(Path(files[-1])) or {}
@@ -1317,6 +1319,54 @@ def collect_artifacts() -> dict:
     }
 
 
+# Sections whose sources are local (not in git: data/live, service/data, weights_exp). On a clean clone they are
+# missing; then the section is taken from the previous reports/final_numbers.json (committed) and marked
+# source_missing: true instead of being overwritten with empty values or with the demo set.
+LOCAL_SOURCES = {
+    "live": ("data/live/*/*/scene.json",),
+    "drift": ("data/live/*/*/drift.json",),
+    "service": ("service/data/manifest.json",),
+    "incidents": ("service/data/manifest.json",),
+    "speed_threads": ("weights_exp/l31/speed.json",),
+    "rejected": ("weights_exp/l26/light_lro_alternatives.json",),
+}
+
+
+def _previous_numbers(out: Path) -> dict | None:
+    prev = _load_json(out)
+    if isinstance(prev, dict):
+        return prev
+    try:  # no file on disk: the committed version
+        import subprocess
+        rel = str(out.resolve().relative_to(ROOT)).replace("\\", "/")
+        r = subprocess.run(["git", "show", f"HEAD:{rel}"], cwd=ROOT, capture_output=True, timeout=30)
+        return json.loads(r.stdout.decode("utf-8")) if r.returncode == 0 else None
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _keep_sections_without_source(fn: dict, out: Path) -> list:
+    missing = {k: pats for k, pats in LOCAL_SOURCES.items()
+               if not any(glob.glob(str(ROOT / p)) for p in pats)}
+    if not missing:
+        return []
+    prev = _previous_numbers(out) or {}
+    kept = []
+    for key, pats in missing.items():
+        old = prev.get(key)
+        if isinstance(old, dict) and old:
+            old = dict(old)
+            old["source_missing"] = True
+            old["source_missing_note"] = (f"исходник не найден ({', '.join(pats)}; не в git) — раздел взят из прежнего "
+                                          f"reports/final_numbers.json без пересчёта")
+            fn[key] = old
+            kept.append(key)
+    if kept:
+        print(f"[final_numbers] no local sources for {', '.join(kept)}: sections kept from the previous final_numbers.json "
+              f"(source_missing: true)")
+    return kept
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Собрать reports/final_numbers.json из артефактов")
     ap.add_argument("--out", default=str(ROOT / "reports" / "final_numbers.json"))
@@ -1357,6 +1407,7 @@ def main(argv=None) -> int:
     fn["incidents"] = collect_incidents()
     fn["case"] = collect_case()
     out = Path(a.out)
+    _keep_sections_without_source(fn, out)
     out.parent.mkdir(parents=True, exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
         json.dump(fn, f, ensure_ascii=False, indent=1)

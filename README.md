@@ -12,6 +12,8 @@
 
 Все числа ниже подставляются из `reports/final_numbers.json`. Этот файл собирает `scripts/final_numbers.py` из отчётов и конфигов, путь к каждому источнику указан рядом с числом. Подробный отчёт — [reports/report.md](reports/report.md), порядок запуска и время — [docs/CASE_RUN.md](docs/CASE_RUN.md), контракт API — [docs/CONTRACTS_V3.md](docs/CONTRACTS_V3.md), разбор постановки — [docs/CASE_ANALYSIS.md](docs/CASE_ANALYSIS.md), подготовительный этап — [docs/PREP.md](docs/PREP.md), дополнительные функции (в том числе подбор снимка под наблюдение, `/api/v3/pairfinder`) — [docs/EXTRA_FEATURES.md](docs/EXTRA_FEATURES.md), геометрия трансект по первоисточникам PANGAEA — [reports/case_geometry/summary.md](reports/case_geometry/summary.md).
 
+Материалы защиты кейса: презентация [reports/case_deck.pptx](reports/case_deck.pptx), речь на 4 минуты [docs/SPEECH.md](docs/SPEECH.md), сценарий демо [docs/DEMO.md](docs/DEMO.md), вопросы жюри с ответами [docs/QA.md](docs/QA.md). Все четыре генерирует `scripts/make_deck_case.py` из того же `reports/final_numbers.json`. Материалы подготовительного этапа (прежняя презентация, речь, демо и вопросы про индекс ‰ по живым снимкам) — в [docs/prep/](docs/prep/).
+
 Числа разбиты на четыре раздела, у каждого свой источник и протокол (в `final_numbers.json` — поля `source` и `protocol` блока `case.sections`):
 
 | Раздел | Главные числа | Протокол | Источник |
@@ -105,7 +107,7 @@ powershell -ExecutionPolicy Bypass -File run.ps1
 
 **Повторяемость.**
 - Два подряд прогона `all --offline` дают одинаковые sha256 всех 24 выходных таблиц.
-- Отпечаток текущего прогона — `1b2dc4ca7050955e…` (`outputs_fingerprint` в `run_summary.json`). В него не входит `reports/case_run/detector_recomputed.json`: этот файл зависит от того, скачана ли MARIDA. Поэтому отпечаток одинаков с MARIDA и без неё. Там же sha256 входного CSV и конфигов.
+- Отпечаток текущего прогона — `95dc41db12d029dc…` (`outputs_fingerprint` в `run_summary.json`). В него не входит `reports/case_run/detector_recomputed.json`: этот файл зависит от того, скачана ли MARIDA. Поэтому отпечаток одинаков с MARIDA и без неё. Там же sha256 входного CSV и конфигов.
 - После первого прогона `git status` покажет изменённые `reports/case_run/run_summary.json` и `detector_recomputed.json`: в них время, версии пакетов и признак наличия MARIDA. Это нормально, таблицы-результаты не меняются.
 
 ## 3. Данные и отбор
@@ -350,9 +352,10 @@ MAPE не используется: в реестре есть нули. Осн�
 | модели концентрации, dev CV | `scripts\case\conc_model_cv.py` | `reports/case_conc/{dev_cv.md, dev_cv.json, dev_predictions.csv}`, `weights/case_conc/*.json` | ≈ 6 с |
 | отложенный test концентрации | `scripts\case\final_test_conc.py` (**один раз**, уже посчитан; повтор скрипт отклоняет) | `reports/case_conc/final_test.json`, `final_test_predictions.csv` | секунды |
 | детектор: пересчёт из сохранённых предсказаний | `scripts\case\run_all.py eval` | `reports/case_run/detector_recomputed.json` (сверка TP/FP/FN с `metrics.json`) | 1 с |
-| детектор: полный прогон 7 моделей на val и test MARIDA | `scripts\case\detector_compare.py` (нужен MARIDA в `data/MARIDA`) | `reports/case_detector/*` | ≈ 130 с |
+| детектор: кэш признаков MARIDA train и val (нужен перед полным прогоном) | `-c "import sys; sys.path[:0]=['scripts','src']; import train_lgbm as T; T.load_split('val'); T.load_split('train')"` — та же функция `load_split`, что в `scripts\train_lgbm.py`; нужен MARIDA в `data/MARIDA` | `out/l3_cache/{val,train}_win.npz` (test не читается) | ≈ 8 с (замер: val 328 патчей 2,9 с, train 694 патча 4,3 с; результат побайтно равен кэшу, на котором получены числа) |
+| детектор: полный прогон 7 моделей на val и test MARIDA | `scripts\case\detector_compare.py` (нужны MARIDA и кэш из предыдущей строки; RandomForest переобучается из train-кэша, если нет `data/case/detector_preds/rf_seed5.joblib`) | `reports/case_detector/*` | ≈ 130 с |
 | эксперимент на парах | `scripts\case\pairs_experiment.py --no-fetch` | `reports/case_pairs/experiment.{md,json}` | ≈ 3 мин с чтением FDI по сети |
-| согласованность API и экспорта | `scripts\case\consistency_check.py` | `reports/selfcheck/consistency_<дата>.md\|json` | 67 с |
+| согласованность API и экспорта | `scripts\case\consistency_check.py` | `reports/selfcheck/consistency_latest.md\|json` (в git; копии с датой не коммитятся) | 42 с |
 | тесты кейса | `-m pytest -q tests\test_case_concentration.py tests\test_case_conc_model.py tests\test_case_run_all.py tests\test_case_consistency.py tests\test_api_v3.py` | 142 passed, 1 skipped (чистый клон) | 22 с; вся папка `tests` — 10 мин 53 с на CPU |
 
 - Предсказания детектора на MARIDA (`data/case/detector_preds/*.npz`: вероятности основной модели и RandomForest, маски 7 моделей по патчам) лежат в git. Для пересчёта TP/FP/FN из них нужна разметка MARIDA (`data/MARIDA/patches/*_cl.tif`, как скачать — раздел 2). Без разметки `run_all eval` берёт числа из `reports/case_detector/metrics.json` и записывает его sha256. Полный прогон детекторов заново делает `detector_compare.py` по MARIDA.
@@ -410,10 +413,10 @@ curl -OJ "http://127.0.0.1:8000/api/v3/export?layer=zones&format=geojson&detecti
 - принятые пары — 0;
 - участки со статусом детекции «обнаружено» — 0 (при 0 подтверждённых пар их и должно быть 0; подозрительные пиксели — отдельный слой `detections`).
 
-Самопроверка `scripts/case/consistency_check.py` сравнивает по id четыре представления: алгоритм, JSON, CSV и GeoJSON. Последний прогон (`reports/selfcheck/consistency_20260925_2005.json`):
+Самопроверка `scripts/case/consistency_check.py` сравнивает по id четыре представления: алгоритм, JSON, CSV и GeoJSON. Последний прогон (`reports/selfcheck/consistency_latest.json`):
 - проверок 283: ok 283, расхождений 0 (подробности — в самом отчёте);
 - некорректные и пустые входы: 46 из 46 с верным кодом;
-- p95 ответа не выше 213 мс.
+- p95 ответа не выше 264 мс.
 
 ## 9. Структура
 

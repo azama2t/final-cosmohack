@@ -12,6 +12,8 @@
 
 Все числа ниже подставляются из `reports/final_numbers.json`. Этот файл собирает `scripts/final_numbers.py` из отчётов и конфигов, путь к каждому источнику указан рядом с числом. Подробный отчёт — [reports/report.md](reports/report.md), порядок запуска и время — [docs/CASE_RUN.md](docs/CASE_RUN.md), контракт API — [docs/CONTRACTS_V3.md](docs/CONTRACTS_V3.md), разбор постановки — [docs/CASE_ANALYSIS.md](docs/CASE_ANALYSIS.md), подготовительный этап — [docs/PREP.md](docs/PREP.md), дополнительные функции (в том числе подбор снимка под наблюдение, `/api/v3/pairfinder`) — [docs/EXTRA_FEATURES.md](docs/EXTRA_FEATURES.md), геометрия трансект по первоисточникам PANGAEA — [reports/case_geometry/summary.md](reports/case_geometry/summary.md).
 
+Материалы защиты кейса: презентация [reports/case_deck.pptx](reports/case_deck.pptx), речь на 4 минуты [docs/SPEECH.md](docs/SPEECH.md), сценарий демо [docs/DEMO.md](docs/DEMO.md), вопросы жюри с ответами [docs/QA.md](docs/QA.md). Все четыре генерирует `scripts/make_deck_case.py` из того же `reports/final_numbers.json`. Материалы подготовительного этапа (прежняя презентация, речь, демо и вопросы про индекс ‰ по живым снимкам) — в [docs/prep/](docs/prep/).
+
 Числа разбиты на четыре раздела, у каждого свой источник и протокол (в `final_numbers.json` — поля `source` и `protocol` блока `case.sections`):
 
 {{derived.case_sections_table}}
@@ -289,9 +291,10 @@ MAPE не используется: в реестре есть нули. Осн�
 | модели концентрации, dev CV | `scripts\case\conc_model_cv.py` | `reports/case_conc/{dev_cv.md, dev_cv.json, dev_predictions.csv}`, `weights/case_conc/*.json` | ≈ 6 с |
 | отложенный test концентрации | `scripts\case\final_test_conc.py` (**один раз**, уже посчитан; повтор скрипт отклоняет) | `reports/case_conc/final_test.json`, `final_test_predictions.csv` | секунды |
 | детектор: пересчёт из сохранённых предсказаний | `scripts\case\run_all.py eval` | `reports/case_run/detector_recomputed.json` (сверка TP/FP/FN с `metrics.json`) | {{case.run.step_s.5_detector_marida}} с |
-| детектор: полный прогон 7 моделей на val и test MARIDA | `scripts\case\detector_compare.py` (нужен MARIDA в `data/MARIDA`) | `reports/case_detector/*` | ≈ {{case.detector.seconds|int}} с |
+| детектор: кэш признаков MARIDA train и val (нужен перед полным прогоном) | `-c "import sys; sys.path[:0]=['scripts','src']; import train_lgbm as T; T.load_split('val'); T.load_split('train')"` — та же функция `load_split`, что в `scripts\train_lgbm.py`; нужен MARIDA в `data/MARIDA` | `out/l3_cache/{val,train}_win.npz` (test не читается) | ≈ 8 с (замер: val 328 патчей 2,9 с, train 694 патча 4,3 с; результат побайтно равен кэшу, на котором получены числа) |
+| детектор: полный прогон 7 моделей на val и test MARIDA | `scripts\case\detector_compare.py` (нужны MARIDA и кэш из предыдущей строки; RandomForest переобучается из train-кэша, если нет `data/case/detector_preds/rf_seed5.joblib`) | `reports/case_detector/*` | ≈ {{case.detector.seconds|int}} с |
 | эксперимент на парах | `scripts\case\pairs_experiment.py --no-fetch` | `reports/case_pairs/experiment.{md,json}` | ≈ 3 мин с чтением FDI по сети |
-| согласованность API и экспорта | `scripts\case\consistency_check.py` | `reports/selfcheck/consistency_<дата>.md\|json` | {{case.selfcheck.seconds|int}} с |
+| согласованность API и экспорта | `scripts\case\consistency_check.py` | `reports/selfcheck/consistency_latest.md\|json` (в git; копии с датой не коммитятся) | {{case.selfcheck.seconds|int}} с |
 | тесты кейса | `-m pytest -q tests\test_case_concentration.py tests\test_case_conc_model.py tests\test_case_run_all.py tests\test_case_consistency.py tests\test_api_v3.py` | {{case.clean_clone.case_tests_passed}} passed, {{case.clean_clone.case_tests_skipped}} skipped (чистый клон) | {{case.clean_clone.case_tests_s}} с; вся папка `tests` — {{case.clean_clone.full_tests_time}} на CPU |
 
 - Предсказания детектора на MARIDA (`data/case/detector_preds/*.npz`: вероятности основной модели и RandomForest, маски 7 моделей по патчам) лежат в git. Для пересчёта TP/FP/FN из них нужна разметка MARIDA (`data/MARIDA/patches/*_cl.tif`, как скачать — раздел 2). Без разметки `run_all eval` берёт числа из `reports/case_detector/metrics.json` и записывает его sha256. Полный прогон детекторов заново делает `detector_compare.py` по MARIDA.

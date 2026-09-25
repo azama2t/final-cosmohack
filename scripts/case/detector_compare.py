@@ -368,6 +368,14 @@ def main():
     EX.mkdir(parents=True, exist_ok=True)
     meta = json.loads((MODEL_DIR / "meta.json").read_text(encoding="utf-8"))
     lgbm_thr = float(meta["threshold"])
+    # кэш признаков val/train (как при обучении; test не читается) — собрать, если его нет (чистый клон)
+    cache = ROOT / "out" / "l3_cache"
+    need = ["val"] + ([] if (PRED_DIR / "rf_seed5.joblib").exists() else ["train"])
+    missing = [s for s in need if not (cache / f"{s}_win.npz").is_file()]
+    if missing:
+        import train_lgbm as T  # scripts/ уже в sys.path (там лежит baselines)
+        for s in missing:
+            T.load_split(s)
     rules, rules_val_f1 = tune_rules()
     print("[val] rules", rules, rules_val_f1, flush=True)
     rf_path, rf_thr, rf_val_f1, rf_fit_s = train_rf()
