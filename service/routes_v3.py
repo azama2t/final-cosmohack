@@ -24,12 +24,23 @@ CORS = {"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET
         "Access-Control-Allow-Headers": "Content-Type", "Access-Control-Expose-Headers": "Content-Disposition"}
 
 
+JSON_UTF8 = "application/json; charset=utf-8"
+GEOJSON_UTF8 = "application/geo+json; charset=utf-8"
+CSV_UTF8 = "text/csv; charset=utf-8"
+
+
+class JSONUtf8(JSONResponse):
+    """JSON with an explicit charset: Windows PowerShell 5.1 (Invoke-RestMethod/WebRequest) otherwise decodes the
+    body as ISO-8859-1 and shows Cyrillic as mojibake (reports/selfcheck/clean_clone_0003.md)."""
+    media_type = JSON_UTF8
+
+
 def _ok(obj, status: int = 200) -> JSONResponse:
-    return JSONResponse(obj, status_code=status, headers=CORS)
+    return JSONUtf8(obj, status_code=status, headers=CORS)
 
 
 def _err(e: ApiError) -> JSONResponse:
-    return JSONResponse({"error": {"code": e.code, "message": e.message, "details": e.details}},
+    return JSONUtf8({"error": {"code": e.code, "message": e.message, "details": e.details}},
                         status_code=e.status, headers=CORS)
 
 
@@ -394,8 +405,8 @@ def export(request: Request):
     name = f"{layer}_{stamp}.{fmt}"
     headers = {**CORS, "Content-Disposition": f'attachment; filename="{name}"'}
     if fmt == "csv":
-        return Response(("﻿" + body).encode("utf-8"), media_type="text/csv; charset=utf-8", headers=headers)
-    return Response(json.dumps(obj, ensure_ascii=False).encode("utf-8"), media_type="application/geo+json",
+        return Response(("﻿" + body).encode("utf-8"), media_type=CSV_UTF8, headers=headers)
+    return Response(json.dumps(obj, ensure_ascii=False).encode("utf-8"), media_type=GEOJSON_UTF8,
                     headers=headers)
 
 

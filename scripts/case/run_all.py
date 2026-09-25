@@ -435,8 +435,12 @@ def step_detector(c: Ctx, rec: dict):
                  for m in DET_MODELS},
         "val_f1": {m: saved["val"][m]["f1_md"] for m in DET_MODELS if m in saved.get("val", {})},
     }
-    rec["note"] = (f"test F1 lgbm {test['lgbm']['f1_md']:.4f}; пересчёт из npz совпал: "
-                   + ", ".join(f"{s}={v.get('all_match_metrics_json')}" for s, v in res["splits"].items()))
+    def _state(v):  # без разметки MARIDA пересчёт пропускается — это не «совпал»
+        if not v.get("recomputed"):
+            return "не пересчитан (нет data/MARIDA)"
+        return "совпал" if v.get("all_match_metrics_json") else "НЕ совпал"
+    rec["note"] = (f"test F1 lgbm {test['lgbm']['f1_md']:.4f}; пересчёт из npz: "
+                   + ", ".join(f"{s} — {_state(v)}" for s, v in res["splits"].items()))
 
 
 # ------------------------------------------------------------------------------------------ export

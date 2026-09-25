@@ -70,7 +70,7 @@
  },
  "command": "run_all.py all --offline",
  "last_subcommand": "all",
- "finished": "2026-09-25T23:53:57",
+ "finished": "2026-09-26T00:18:27",
  "offline": true,
  "force": false,
  "workdir": null,
@@ -85,7 +85,7 @@
   "shapely": "2.1.2",
   "fastapi": "0.141.1",
   "yaml": "6.0.3",
-  "git_commit": "40d6bac658acd2f82ec4524c45efa0e7979696d0"
+  "git_commit": "71c050037dd98912b2a2c075d7a75981c5676129"
  },
  "inputs": {
   "task/macroplastic_marine_samples.csv": "30ce0a65e3880b833b5dfe3bc6f528ee5f5af14a0d22f25995f4ef8af585a764",
@@ -159,19 +159,19 @@
   "total_eval": {
    "step": "total_eval",
    "ok": true,
-   "seconds": 3.9
+   "seconds": 4.0
   },
   "5_detector_marida": {
    "step": "5_detector_marida",
    "ok": true,
-   "note": "test F1 lgbm 0.8713; пересчёт из npz совпал: test=True, val=True",
+   "note": "test F1 lgbm 0.8713; пересчёт из npz: test — совпал, val — совпал",
    "seconds": 1.0
   },
   "6_export_api_v3": {
    "step": "6_export_api_v3",
    "ok": true,
    "note": "observations.geojson: 935, observations.csv: 935, pairs.geojson: 4436, pairs.csv: 4436, zones.geojson: 29, zones.csv: 29",
-   "seconds": 1.0
+   "seconds": 0.9
   },
   "total_export": {
    "step": "total_export",

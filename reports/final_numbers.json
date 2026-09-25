@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-25T23:54:19+03:00",
+ "generated": "2026-09-26T00:18:49+03:00",
  "note": "генерируется scripts/final_numbers.py; руками не править; null = ещё не посчитано",
  "l3_lgbm": {
   "available": true,
@@ -5200,15 +5200,15 @@
   "selfcheck": {
    "available": true,
    "file": "reports/selfcheck/consistency_latest.json",
-   "when": "2026-09-25T23:45:36",
+   "when": "2026-09-26T00:14:25",
    "checks": 284,
    "ok": 284,
    "fail": 0,
    "warn": 0,
-   "seconds": 26.0,
+   "seconds": 27.0,
    "invalid_ok": 46,
    "invalid_total": 46,
-   "p95_max_ms": 81.0
+   "p95_max_ms": 104.0
   },
   "control": {
    "n": 12,
@@ -5222,7 +5222,7 @@
   },
   "run": {
    "command": "run_all.py all --offline",
-   "finished": "2026-09-25T23:53:57",
+   "finished": "2026-09-26T00:18:27",
    "versions": {
     "python": "3.12.7",
     "platform": "Windows-10-10.0.19045-SP0",
@@ -5234,7 +5234,7 @@
     "shapely": "2.1.2",
     "fastapi": "0.141.1",
     "yaml": "6.0.3",
-    "git_commit": "40d6bac658acd2f82ec4524c45efa0e7979696d0"
+    "git_commit": "71c050037dd98912b2a2c075d7a75981c5676129"
    },
    "outputs_fingerprint_short": "fccf808a8817d7c4",
    "n_outputs": 24,
@@ -5246,7 +5246,7 @@
     "3b_registry": 0.7,
     "4_concentration": 2.4,
     "5_detector_marida": 1.0,
-    "6_export_api_v3": 1.0
+    "6_export_api_v3": 0.9
    },
    "export": {
     "observations": 935,
@@ -5501,14 +5501,14 @@
   "tests": {
    "available": true,
    "source": "reports/case_run/case_tests.json",
-   "passed": 225,
+   "passed": 232,
    "skipped": 2,
    "failed": 0,
-   "seconds": 18.4,
-   "when": "25.09.2026 23:54",
+   "seconds": 18.5,
+   "when": "26.09.2026 00:18",
    "command": "python -m pytest -q tests/test_case_conc_model.py tests/test_case_concentration.py tests/test_case_consistency.py tests/test_case_docs_numbers.py tests/test_case_geometry.py tests/test_case_geometry_integration.py tests/test_case_pairfinder.py tests/test_case_run_all.py tests/test_api_v3.py"
   },
-  "n_test_funcs": 143,
-  "n_tests": 225
+  "n_test_funcs": 145,
+  "n_tests": 232
  }
 }

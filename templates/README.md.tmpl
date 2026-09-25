@@ -237,7 +237,7 @@ MAPE не используется: в реестре есть нули. Осн�
 Основная — **{{case.conc.S2.primary}}**. Она прошла правило, но выигрыш слабый:
 - с поправкой Бонферрони на {{case.conc.protocol.n_candidates}} кандидатов ДИ [{{case.conc.S2.main.d_mae_ci95_bonf.0|f1}}; {{case.conc.S2.main.d_mae_ci95_bonf.1|f1}}] проходит через 0;
 - при 4 участках вместо 5 ΔMAE {{case.conc.S2.sensitivity.k4.d_mae|f1}} [{{case.conc.S2.sensitivity.k4.ci95.0|f1}}; {{case.conc.S2.sensitivity.k4.ci95.1|f1}}] — тоже незначимо;
-- kNN почти равна ей по MAE ({{case.conc.S2.knn5_log.mae|f1}}).
+- kNN-5 в log-шкале (knn5_log) почти равна ей по MAE ({{case.conc.S2.knn5_log.mae|f1}}).
 
 На отложенном test выигрыш не подтвердился: S2 {{case.sections.field_test.S2.main_model}} {{case.sections.field_test.S2.main_mae|f1}} против медианы {{case.sections.field_test.S2.median_mae|f1}} шт./км², ΔMAE {{case.sections.field_test.S2.d_mae|f1}} [{{case.sections.field_test.S2.d_mae_ci95.0|f1}}; {{case.sections.field_test.S2.d_mae_ci95.1|f1}}].
 
@@ -348,21 +348,27 @@ MAPE не используется: в реестре есть нули. Осн�
 
 Ошибки приходят в едином формате `{"error":{"code","message","details"}}` (400 BAD_BBOX / BAD_DATE / BAD_PARAM, 404). Пустой результат — 200 с `empty_reason`.
 
-Сохранённый запрос и выгрузка:
+Сохранённый запрос → повторный запуск → выгрузка. Оба варианта проверены запуском против отдельного экземпляра сервиса.
 
-```powershell
-curl -X POST -H "Content-Type: application/json" -d '{\"name\":\"Чёрное море\",\"query\":{\"sources\":[\"S4_BLACK_SEA_DOORS3\"]}}' http://127.0.0.1:8000/api/v3/queries
-curl "http://127.0.0.1:8000/api/v3/queries/<id>/run"          # повтор даёт тот же результат (без поля ran_at)
-curl -OJ "http://127.0.0.1:8000/api/v3/export?layer=zones&format=geojson&detection_status=detected"
+bash (Linux, macOS, Git Bash; `curl`). Тело запроса передаётся файлом в UTF-8:
+
+```bash
+printf '%s' '{"name":"Чёрное море","query":{"sources":["S4_BLACK_SEA_DOORS3"]}}' > query.json
+curl -s -X POST -H "Content-Type: application/json; charset=utf-8" --data-binary @query.json http://127.0.0.1:8000/api/v3/queries
+# в ответе поле query_id, например q_655fd291
+curl -s "http://127.0.0.1:8000/api/v3/queries/<query_id>/run"     # повтор даёт тот же результат (кроме поля ran_at)
+curl -s -o zones_black_sea.geojson "http://127.0.0.1:8000/api/v3/export?layer=zones&format=geojson&query_id=<query_id>"   # -o перезаписывает файл
 ```
 
-То же в Windows PowerShell 5.1 (там `curl` — псевдоним `Invoke-WebRequest` с другими ключами):
+Windows PowerShell 5.1 (там `curl` — псевдоним `Invoke-WebRequest` с другими ключами). Тело кодируется в UTF-8 явно. Если сохраняете пример в `.ps1`, сохраните файл в UTF-8 с BOM, иначе PowerShell 5.1 прочитает кириллицу неверно.
 
 ```powershell
-$q = Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/api/v3/queries -ContentType 'application/json; charset=utf-8' `
-      -Body ([Text.Encoding]::UTF8.GetBytes('{"name":"Чёрное море","query":{"sources":["S4_BLACK_SEA_DOORS3"]}}'))
-Invoke-RestMethod "http://127.0.0.1:8000/api/v3/queries/$($q.id)/run"
-Invoke-WebRequest "http://127.0.0.1:8000/api/v3/export?layer=zones&format=geojson" -OutFile zones.geojson
+$base = 'http://127.0.0.1:8000'
+$body = [Text.Encoding]::UTF8.GetBytes('{"name":"Чёрное море","query":{"sources":["S4_BLACK_SEA_DOORS3"]}}')
+$q = Invoke-RestMethod -Method Post -Uri "$base/api/v3/queries" -ContentType 'application/json; charset=utf-8' -Body $body
+$r = Invoke-RestMethod "$base/api/v3/queries/$($q.query_id)/run"
+$r.summary        # n_obs, n_zones, n_scenes, статусы
+Invoke-WebRequest "$base/api/v3/export?layer=zones&format=geojson&query_id=$($q.query_id)" -OutFile zones_black_sea.geojson -UseBasicParsing
 ```
 
 Маршрут кейса сохраняет готовые выгрузки в `out/case_export/`, список запросов — в `requests.json`:

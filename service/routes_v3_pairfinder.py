@@ -23,6 +23,10 @@ from fastapi import APIRouter, Request
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import JSONResponse, Response
 
+
+class JSONResponse(JSONResponse):  # noqa: F811 — тот же ответ с явным charset (Windows PowerShell 5.1)
+    media_type = "application/json; charset=utf-8"
+
 _SRC = str(Path(__file__).resolve().parents[1] / "src")
 if _SRC not in sys.path:
     sys.path.insert(0, _SRC)

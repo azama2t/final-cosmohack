@@ -905,3 +905,23 @@ def test_pairs_scenes_zones_paging(client):
 def test_export_empty_query_id_400(client):
     _err(client.get("/api/v3/export", params={"layer": "zones", "query_id": ""}), 400, "BAD_PARAM")
     _err(client.get("/api/v3/export?layer=observations&query_id=%20"), 400, "BAD_PARAM")
+
+
+# ------------------------------------------------------------------ L62p: explicit charset (PowerShell 5.1)
+@pytest.mark.parametrize("url,ctype", [
+    ("/api/v3/meta", "application/json; charset=utf-8"),
+    ("/api/v3/observations?limit=1", "application/json; charset=utf-8"),
+    ("/api/v3/meta?x=1", "application/json; charset=utf-8"),          # error body
+    ("/api/v3/no_such", "application/json; charset=utf-8"),            # 404 catch-all
+    ("/api/v3/export?layer=zones&format=csv", "text/csv; charset=utf-8"),
+    ("/api/v3/export?layer=zones&format=geojson", "application/geo+json; charset=utf-8"),
+])
+def test_content_type_has_utf8_charset(client, url, ctype):
+    r = client.get(url)
+    assert r.headers["content-type"].lower().replace(" ", "") == ctype.replace(" ", "")
+
+
+def test_post_query_content_type(client):
+    r = client.post("/api/v3/queries", json={"name": "Чёрное море", "query": {}})
+    assert r.status_code == 201 and r.headers["content-type"] == "application/json; charset=utf-8"
+    assert r.content.decode("utf-8").find("Чёрное море") > 0

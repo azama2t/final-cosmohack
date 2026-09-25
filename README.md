@@ -290,7 +290,7 @@ MAPE не используется: в реестре есть нули. Осн�
 Основная — **ridge_log**. Она прошла правило, но выигрыш слабый:
 - с поправкой Бонферрони на 8 кандидатов ДИ [-38.7; 7.3] проходит через 0;
 - при 4 участках вместо 5 ΔMAE -6.7 [-19.5; 9.3] — тоже незначимо;
-- kNN почти равна ей по MAE (28.8).
+- kNN-5 в log-шкале (knn5_log) почти равна ей по MAE (28.8).
 
 На отложенном test выигрыш не подтвердился: S2 ridge_log 30.0 против медианы 25.2 шт./км², ΔMAE 4.8 [-1.6; 12.9].
 
@@ -368,8 +368,8 @@ MAPE не используется: в реестре есть нули. Осн�
 | детектор: кэш признаков MARIDA train и val (нужен перед полным прогоном) | `-c "import sys; sys.path[:0]=['scripts','src']; import train_lgbm as T; T.load_split('val'); T.load_split('train')"` — та же функция `load_split`, что в `scripts\train_lgbm.py`; нужен MARIDA в `data/MARIDA` | `out/l3_cache/{val,train}_win.npz` (test не читается) | ≈ 8 с (замер: val 328 патчей 2,9 с, train 694 патча 4,3 с; результат побайтно равен кэшу, на котором получены числа) |
 | детектор: полный прогон 7 моделей на val и test MARIDA | `scripts\case\detector_compare.py` (нужны MARIDA и кэш из предыдущей строки; RandomForest переобучается из train-кэша, если нет `data/case/detector_preds/rf_seed5.joblib`) | `reports/case_detector/*` | ≈ 130 с |
 | эксперимент на парах | `scripts\case\pairs_experiment.py --no-fetch` | `reports/case_pairs/experiment.{md,json}` | ≈ 3 мин с чтением FDI по сети |
-| согласованность API и экспорта | `scripts\case\consistency_check.py` | `reports/selfcheck/consistency_latest.md\|json` (в git; копии с датой не коммитятся) | 26 с |
-| тесты кейса | `-m pytest -q tests\test_case_*.py tests\test_api_v3.py` | 225 passed, 2 skipped, 0 failed (прогон 25.09.2026 23:54, `reports/case_run/case_tests.json`) | 18 с; вся папка `tests` — 10 мин 53 с на CPU |
+| согласованность API и экспорта | `scripts\case\consistency_check.py` | `reports/selfcheck/consistency_latest.md\|json` (в git; копии с датой не коммитятся) | 27 с |
+| тесты кейса | `-m pytest -q tests\test_case_*.py tests\test_api_v3.py` | 232 passed, 2 skipped, 0 failed (прогон 26.09.2026 00:18, `reports/case_run/case_tests.json`) | 18 с; вся папка `tests` — 10 мин 53 с на CPU |
 | **все документы** (README, отчёт, PREP, дека, речь, демо, вопросы) | `scripts\case\build_docs.py` — маршрут → тесты → `final_numbers.py` → `render_docs.py` → `make_deck_case.py` → сверка чисел (`tests/test_case_docs_numbers.py`) | `README.md`, `reports/report.md`, `docs/PREP.md`, `reports/case_deck.pptx`, `docs/{SPEECH,DEMO,QA}.md` | ≈ 1–2 мин |
 
 - Предсказания детектора на MARIDA (`data/case/detector_preds/*.npz`: вероятности основной модели и RandomForest, маски 7 моделей по патчам) лежат в git. Для пересчёта TP/FP/FN из них нужна разметка MARIDA (`data/MARIDA/patches/*_cl.tif`, как скачать — раздел 2). Без разметки `run_all eval` берёт числа из `reports/case_detector/metrics.json` и записывает его sha256. Полный прогон детекторов заново делает `detector_compare.py` по MARIDA.
@@ -411,21 +411,27 @@ MAPE не используется: в реестре есть нули. Осн�
 
 Ошибки приходят в едином формате `{"error":{"code","message","details"}}` (400 BAD_BBOX / BAD_DATE / BAD_PARAM, 404). Пустой результат — 200 с `empty_reason`.
 
-Сохранённый запрос и выгрузка:
+Сохранённый запрос → повторный запуск → выгрузка. Оба варианта проверены запуском против отдельного экземпляра сервиса.
 
-```powershell
-curl -X POST -H "Content-Type: application/json" -d '{\"name\":\"Чёрное море\",\"query\":{\"sources\":[\"S4_BLACK_SEA_DOORS3\"]}}' http://127.0.0.1:8000/api/v3/queries
-curl "http://127.0.0.1:8000/api/v3/queries/<id>/run"          # повтор даёт тот же результат (без поля ran_at)
-curl -OJ "http://127.0.0.1:8000/api/v3/export?layer=zones&format=geojson&detection_status=detected"
+bash (Linux, macOS, Git Bash; `curl`). Тело запроса передаётся файлом в UTF-8:
+
+```bash
+printf '%s' '{"name":"Чёрное море","query":{"sources":["S4_BLACK_SEA_DOORS3"]}}' > query.json
+curl -s -X POST -H "Content-Type: application/json; charset=utf-8" --data-binary @query.json http://127.0.0.1:8000/api/v3/queries
+# в ответе поле query_id, например q_655fd291
+curl -s "http://127.0.0.1:8000/api/v3/queries/<query_id>/run"     # повтор даёт тот же результат (кроме поля ran_at)
+curl -s -o zones_black_sea.geojson "http://127.0.0.1:8000/api/v3/export?layer=zones&format=geojson&query_id=<query_id>"   # -o перезаписывает файл
 ```
 
-То же в Windows PowerShell 5.1 (там `curl` — псевдоним `Invoke-WebRequest` с другими ключами):
+Windows PowerShell 5.1 (там `curl` — псевдоним `Invoke-WebRequest` с другими ключами). Тело кодируется в UTF-8 явно. Если сохраняете пример в `.ps1`, сохраните файл в UTF-8 с BOM, иначе PowerShell 5.1 прочитает кириллицу неверно.
 
 ```powershell
-$q = Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/api/v3/queries -ContentType 'application/json; charset=utf-8' `
-      -Body ([Text.Encoding]::UTF8.GetBytes('{"name":"Чёрное море","query":{"sources":["S4_BLACK_SEA_DOORS3"]}}'))
-Invoke-RestMethod "http://127.0.0.1:8000/api/v3/queries/$($q.id)/run"
-Invoke-WebRequest "http://127.0.0.1:8000/api/v3/export?layer=zones&format=geojson" -OutFile zones.geojson
+$base = 'http://127.0.0.1:8000'
+$body = [Text.Encoding]::UTF8.GetBytes('{"name":"Чёрное море","query":{"sources":["S4_BLACK_SEA_DOORS3"]}}')
+$q = Invoke-RestMethod -Method Post -Uri "$base/api/v3/queries" -ContentType 'application/json; charset=utf-8' -Body $body
+$r = Invoke-RestMethod "$base/api/v3/queries/$($q.query_id)/run"
+$r.summary        # n_obs, n_zones, n_scenes, статусы
+Invoke-WebRequest "$base/api/v3/export?layer=zones&format=geojson&query_id=$($q.query_id)" -OutFile zones_black_sea.geojson -UseBasicParsing
 ```
 
 Маршрут кейса сохраняет готовые выгрузки в `out/case_export/`, список запросов — в `requests.json`:
@@ -439,7 +445,7 @@ Invoke-WebRequest "http://127.0.0.1:8000/api/v3/export?layer=zones&format=geojso
 Самопроверка `scripts/case/consistency_check.py` сравнивает по id четыре представления: алгоритм, JSON, CSV и GeoJSON. Последний прогон (`reports/selfcheck/consistency_latest.json`):
 - проверок 284: ok 284, расхождений 0 (подробности — в самом отчёте);
 - некорректные и пустые входы: 46 из 46 с верным кодом;
-- p95 ответа не выше 81 мс.
+- p95 ответа не выше 104 мс.
 
 ## 9. Структура
 
