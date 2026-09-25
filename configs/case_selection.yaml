@@ -1,0 +1,61 @@
+# Отбор совместимых полевых записей для концентрации шт./км² (src/macroplastic/case/selection.py).
+# Список в фильтре = допустимые значения; null = не фильтровать.
+# Каждая строка CSV получает либо «принята», либо первую причину отказа (data/case/selection_<profile>_rejected.csv).
+#
+# Почему по умолчанию S2_visual_total_plastic (согласовано с docs/CASE_ANALYSIS.md, L58):
+#  - это «суммарный пластик» одного метода и размерного класса: судовая визуальная полоса 10 м,
+#    предметы > 2 см, plastic (all polymers); одна строка = одно событие (63 события, 63 строки);
+#  - у всех 63 строк есть N (density_numerator_items) и A (sampled_area_km2) → формулу C = N/A
+#    можно проверить на данных (133/133 строки S2 совпадают) и дать пуассоновский интервал;
+#  - поверхностное визуальное наблюдение ближе всего к тому, что видно со спутника
+#    (плавающий макромусор на поверхности), в отличие от трала;
+#  - нулей нет, но код готов к нулям (статус «не обнаружено», log1p-метрика).
+# Больше всего событий с concentration_items_km2 у S1_trawl_5_to_50 (83), но там N нет
+# (опубликованная оценка «midpoint estimate, not forced to raw count/area») и другой размерный
+# класс (5–50 см, трал) — оставлен альтернативным профилем, профили не смешиваются.
+# Категории S1 GT5 (N/H/F) не суммируем в «суммарный пластик»: отсутствие строки категории ≠ 0.
+
+default_profile: S2_visual_total_plastic
+
+target_column: concentration_items_km2
+
+profiles:
+  S2_visual_total_plastic:
+    description: "Саргассово море, MSM41, судовая визуальная полоса 10 м, суммарный плавающий пластик > 2 см, шт./км²"
+    source_id: [S2_SARGASSO_MSM41]
+    record_type: [transect_density]
+    target_scope: [total_plastic]
+    measurement_profile: [S2_visual_GT2]
+    size_class: [">2 cm (macro)"]
+    material: ["plastic (all polymers)"]
+    # флаги-исключения: строка с любым из них отбрасывается
+    exclude_quality_flags:
+      - all_litter_not_plastic
+      - numerator_area_unavailable
+      - source_not_revalidated_in_repair
+    # информационные флаги: строку оставляем, флаг попадает в отчёт
+    note_quality_flags:
+      - author_area_replaces_endpoint_distance   # площадь автора, а не расстояние между концами — это и есть A
+      - companion_count_differs_sum_float_items  # счёт компаньон-таблицы отличается; берём опубликованный N
+      - interrupted_transect_summary_area        # прерванная трансекта: суммарная площадь
+      - summary_area_rounded_differs_from_segment_sum
+    require_target: true
+
+  S1_trawl_total_plastic:
+    description: "Большое мусорное пятно (GPGP), мега-трал 6 м × 1,5 м, суммарный пластик 5–50 см, опубликованная оценка (N нет)"
+    source_id: [S1_GPGP2018]
+    record_type: [transect_density]
+    target_scope: [total_plastic]
+    measurement_profile: [S1_trawl_5_to_50]
+    size_class: ["5-50 cm (macroplastic)"]
+    material: ["plastic"]
+    exclude_quality_flags:
+      - all_litter_not_plastic
+      - numerator_area_unavailable
+    note_quality_flags: []
+    require_target: true
+
+# Сверка C = N/A с опубликованной concentration_items_km2
+consistency:
+  rel_tol: 0.02     # 2 %: округление площади/концентрации в источнике
+  abs_tol: 0.05     # шт./км²
