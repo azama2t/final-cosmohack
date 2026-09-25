@@ -71,3 +71,28 @@ export function plural(n: number, one: string, few: string, many: string) {
   if (b === 1) return one;
   return many;
 }
+
+/** «>2 cm (macro)» → «> 2 см (макро)» (size classes come from the organisers' CSV as is) */
+export function sizeRu(s: string | null | undefined): string {
+  if (!s) return '—';
+  return s
+    .replace(/([<>≥≤])\s*(\d)/g, '$1 $2')
+    .replace(/(\d)\s*cm\b/g, '$1 см')
+    .replace(/(\d)\s*mm\b/g, '$1 мм')
+    .replace(/\bmacro\b/g, 'макро')
+    .replace(/\bmicro\b/g, 'микро')
+    .replace(/\bmeso\b/g, 'мезо');
+}
+/** «дд.мм.гггг» (or ISO) → «YYYY-MM-DD»; null for an empty or invalid entry */
+export function parseRuDate(s: string): string | null | undefined {
+  const t = s.trim();
+  if (!t) return null;
+  let m = /^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})$/.exec(t);
+  let y: number, mo: number, d: number;
+  if (m) [d, mo, y] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  else if ((m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(t))) [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  else return undefined;
+  const dt = new Date(Date.UTC(y, mo - 1, d));
+  if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== d) return undefined;
+  return dt.toISOString().slice(0, 10);
+}

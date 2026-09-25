@@ -103,6 +103,17 @@ def run(url: str, out: Path, w: int, h: int, log: dict) -> None:
                     tabs.nth(i).click()
                     pg.wait_for_timeout(2500)
             pg.screenshot(path=str(out / f"{tag}_11_scene_studio.png"))
+            # the region scene of 19.07.2026 has the current-mode detector (L95): its «Детекция» view
+            chip = pg.locator(".tl-d", has_text="19.07")
+            if chip.count():
+                chip.first.click()
+                pg.wait_for_timeout(1500)
+                tabs = pg.locator("[data-testid=views] button")
+                for i in range(tabs.count()):
+                    if tabs.nth(i).inner_text() == "Детекция":
+                        tabs.nth(i).click()
+                        pg.wait_for_timeout(2500)
+                pg.screenshot(path=str(out / f"{tag}_11b_scene_detection.png"))
         pg.click("[data-testid=left-toggle]")
         pg.wait_for_timeout(500)
         pg.screenshot(path=str(out / f"{tag}_09_collapsed.png"))

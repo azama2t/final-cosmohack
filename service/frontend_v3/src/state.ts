@@ -32,7 +32,7 @@ export interface UiPrefs {
 const K_SITES = 'mp3.sites';
 const K_UI = 'mp3.ui';
 
-export const DEFAULT_FILTERS: Filters = { from: null, to: null, sources: null, obs: true, zones: true, scenes: true };
+export const DEFAULT_FILTERS: Filters = { from: null, to: null, sources: null, obs: true, zones: true, scenes: true, oil: false };
 
 function read<T>(k: string, dflt: T): T {
   try {

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { apiUrl, fromScene, get, studioScenes, VIEW_LABEL, VIEW_ORDER, type Feat, type Meta, type ObsProps, type Pair, type Scene, type StudioScene, type ViewKind, type ZoneDetail, type ZoneProps, type OilProps } from './api';
 import type { MapCtl } from './map';
-import { bboxHit, dayKey, fmtDate, fmtNum, fmtPct, fmtTime, plural } from './geo';
+import { bboxHit, dayKey, fmtDate, fmtNum, fmtPct, fmtTime, plural, sizeRu } from './geo';
 import { STATUS_LABEL, type Site, type WorkStatus } from './state';
 import { Icon } from './icons';
 
@@ -43,8 +43,8 @@ export default function Studio(p: {
   obsById: Map<string, Feat<ObsProps>>;
   zoneById: Map<string, Feat<ZoneProps>>;
   scenes: Scene[];
-  /** experimental oil spills (null = layer off / API absent) */
-  oil: Feat<OilProps>[] | null;
+  /** the experimental oil API is there (contract 3.9) */
+  oilOn: boolean;
   ctl: MapCtl;
   hasBack: boolean;
   onBack: () => void;
@@ -248,12 +248,44 @@ export default function Studio(p: {
     return { n, inStrip, qr, loaded: Object.keys(details).length, zones: zones.length };
   }, [details, zones]);
   const curZone = cur?.zones[0]?.properties ?? null;
+  /** field rows: every density on its own; single items (no density) grouped per date and size class */
+  const obsRows = useMemo(() => {
+    const rows: { key: string; label: string; first: Feat<ObsProps> }[] = [];
+    const groups = new Map<string, Feat<ObsProps>[]>();
+    for (const o of obs) {
+      const v = o.properties.concentration_items_km2;
+      if (v === null || v === undefined) {
+        const k = `${dayKey(o.properties.date_utc)}|${o.properties.size_class ?? ''}`;
+        const g = groups.get(k);
+        if (g) g.push(o);
+        else {
+          groups.set(k, [o]);
+          rows.push({ key: 'g' + k, label: '', first: o });
+        }
+      } else rows.push({ key: o.id, label: `${fmtNum(v)} шт./км²`, first: o });
+    }
+    for (const r of rows)
+      if (r.key.startsWith('g')) {
+        const n = groups.get(r.key.slice(1))!.length;
+        r.label = `${n} ${plural(n, 'предмет', 'предмета', 'предметов')}`; // «без плотности» — в подсказке и легенде
+      }
+    return rows;
+  }, [obs]);
+  const [oilList, setOilList] = useState<Feat<OilProps>[] | null>(null);
+  useEffect(() => {
+    if (!p.oilOn) return;
+    const ac = new AbortController();
+    get<{ features: Feat<OilProps>[] }>('/api/v3/oil/spills', { bbox: site.bbox.map((x) => x.toFixed(4)).join(','), limit: 1000 }, ac.signal)
+      .then((j) => setOilList(j.features ?? []))
+      .catch(() => {});
+    return () => ac.abort();
+  }, [p.oilOn, site.bbox]);
   const siteOil = useMemo(() => {
     let n = 0,
       km2 = 0,
       curN = 0;
     const [w, s, e, nn] = site.bbox;
-    for (const f of p.oil ?? []) {
+    for (const f of oilList ?? []) {
       const q = f.properties as any;
       const lon = q.lon,
         lat = q.lat;
@@ -263,7 +295,7 @@ export default function Studio(p: {
       if (cur && (f.properties.scene_id === cur.id || f.properties.scene_key === cur.studioId)) curN++;
     }
     return { n, km2, curN };
-  }, [p.oil, site.bbox, cur]);
+  }, [oilList, site.bbox, cur]);
   /** detector objects of the strips on THIS scene (zones/{id}.detections) */
   const sceneDet = useMemo(() => {
     if (!cur || !cur.zones.length) return null;
@@ -463,39 +495,41 @@ export default function Studio(p: {
             <div className="small" title={hint} data-testid="det-line">
               Детектор: {objs !== null ? `${objs} ${plural(objs, 'объект', 'объекта', 'объектов')}` : px !== null ? '' : `${det.n} ${plural(det.n, 'объект', 'объекта', 'объектов')}`}
               {px !== null && (objs !== null ? ` (${fmtNum(px, 0)} пикс.)` : `${fmtNum(px, 0)} пикс. выше порога`)}
+              {d?.strip && typeof d.strip.objects === 'number' && ` · в полосе ${d.strip.objects}`}
             </div>
           );
         })()}
       </Block>
 
       <Block title={`Полевые измерения рядом · ${obs.length}`}>
-        {obs.slice(0, allObs ? obs.length : 6).map((o) => (
+        {obsRows.slice(0, allObs ? obsRows.length : 6).map((r) => (
           <div
-            key={o.id}
+            key={r.key}
             className="obs-r click"
-            title="Показать на карте"
+            title={r.key.startsWith('g') ? 'Отдельные предметы, без плотности · показать на карте' : 'Показать на карте'}
             onClick={() => {
+              const o = r.first;
               const c = o.properties.track_center ?? (o.geometry?.type === 'Point' ? o.geometry.coordinates : null);
               if (!c) return;
               ctl.setSelection({ kind: 'obs', id: o.id });
               ctl.map.flyTo({ center: c as [number, number], zoom: Math.max(ctl.map.getZoom(), 11), duration: 900, essential: true });
             }}
           >
-            <span>{o.properties.concentration_items_km2 === null ? 'объект' : `${fmtNum(o.properties.concentration_items_km2)} шт./км²`}</span>
+            <span>{r.label}</span>
             <span className="muted">
-              {fmtDate(o.properties.date_utc)} · {o.properties.size_class ?? '—'}
+              {fmtDate(r.first.properties.date_utc)} · {sizeRu(r.first.properties.size_class)}
             </span>
           </div>
         ))}
-        {obs.length > 6 && !allObs && (
+        {obsRows.length > 6 && !allObs && (
           <button className="link-btn" onClick={() => setAllObs(true)}>
-            ещё {obs.length - 6}
+            ещё {obsRows.length - 6}
           </button>
         )}
         {!obs.length && <div className="muted small">Рядом измерений нет</div>}
       </Block>
 
-      {p.oil && (
+      {p.oilOn && oilList && (
         <Block title="Нефтяное пятно · эксперимент">
           {siteOil.n ? (
             <div className="small" title="Экспериментальный класс; оптика видит часть пятен, путает с тенями облаков и сликами" data-testid="oil-row">

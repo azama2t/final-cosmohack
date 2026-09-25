@@ -69,7 +69,8 @@ def main() -> None:
         pg.wait_for_timeout(1500)
         # (5) empty filter
         pg.click("[data-testid=nav-layers]")
-        pg.fill("input[aria-label='с']", "2030-01-01")
+        pg.fill("input[aria-label='с']", "01.01.2030")
+        pg.press("input[aria-label='с']", "Enter")
         pg.wait_for_timeout(400)
         empty_msg = pg.locator(".layers .err").count() > 0
         pg.screenshot(path=str(out / "05_empty_filter.png"))
@@ -78,7 +79,8 @@ def main() -> None:
         res["empty_filter"] = {"message": empty_msg, "reset": pg.locator(".layers .err").count() == 0}
         res["empty_filter"]["ok"] = res["empty_filter"]["message"] and res["empty_filter"]["reset"]
         # (3) saved query
-        pg.fill("input[aria-label='с']", "2016-01-01")
+        pg.fill("input[aria-label='с']", "01.01.2016")
+        pg.press("input[aria-label='с']", "Enter")
         pg.click("[data-testid=nav-export]")
         pg.fill(".export input.name", "smoke L94")
         pg.click("[data-testid=save-query]")

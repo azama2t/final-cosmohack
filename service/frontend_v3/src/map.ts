@@ -48,7 +48,7 @@ export interface Filters {
   zones: boolean;
   /** footprints of scenes that have real views (studio API) */
   scenes?: boolean;
-  /** experimental oil-spill layer */
+  /** experimental oil-spill layer (off unless switched on) */
   oil?: boolean;
 }
 export interface Cam {
@@ -561,7 +561,7 @@ export class MapCtl {
     for (const id of SCENE_LAYERS) vis(id, f.scenes !== false);
     for (const id of ['oil-fill', 'oil-line', 'oil-pt']) {
       if (!map.getLayer(id)) continue;
-      vis(id, f.oil !== false);
+      vis(id, f.oil === true);
       const base = id === 'oil-pt' ? [['==', ['geometry-type'], 'Point']] : [];
       map.setFilter(id, base.length + cond.length ? ['all', ...base, ...cond] : null);
     }

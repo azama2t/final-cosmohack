@@ -225,6 +225,8 @@ export interface StudioScene {
     run?: boolean | null;
     pixels?: number | null;
     objects?: number | null;
+    /** pairs / search: inside the observation strip */
+    strip?: { objects?: number | null; pixels?: number | null } | null;
     label?: string | null;
   } | null;
   fieldIds?: string[];
@@ -351,7 +353,7 @@ export async function studioScenes(bbox: number[] | null, signal?: AbortSignal):
 
 // ------------------------------------------------------------------ oil (contract 3.9, L101) — EXPERIMENTAL layer
 /** set to true when docs/LOG.md says «oil API готов»; ?oil=1 turns it on for testing, ?oil=0 off */
-const OIL_READY = false;
+const OIL_READY = true; // L101 26.09 02:30 «oil API готов»; the layer itself is OFF by default (experimental)
 const OIL_Q = new URLSearchParams(location.search).get('oil');
 export const OIL_ON = OIL_Q === '1' ? true : OIL_Q === '0' ? false : OIL_READY;
 

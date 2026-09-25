@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ApiErr, apiUrl, get, hasOilApi, type OilMeta, type OilProps, studioScenes, VIEW_LABEL, VIEW_ORDER, type FC, type Feat, type Meta, type ObsProps, type Scene, type StudioScene, type ZoneProps } from './api';
 import { CONC_BREAKS, CONC_COLORS, MapCtl, type Cam, type Filters, type Pick, type PickKind } from './map';
 import { bboxRing, DEFAULT_FILTERS, loadSites, loadUi, newId, saveSites, saveUi, STATUS_LABEL, type Section, type Site } from './state';
-import { fmtDate, fmtNum, fmtTime, geomBounds, inRing, padBBox, ringBBox, bboxHit, inBBox, plural, type BBox } from './geo';
+import { parseRuDate, sizeRu, fmtDate, fmtNum, fmtTime, geomBounds, inRing, padBBox, ringBBox, bboxHit, inBBox, plural, type BBox } from './geo';
 import Studio from './Studio';
 import { Icon } from './icons';
 import ExportSection, { fromQuery, queryFromUrl, type ApiQuery } from './Export';
@@ -37,7 +37,10 @@ export default function App() {
   const [zones, setZones] = useState<FC<ZoneProps> | null>(null);
   const [scenes, setScenes] = useState<Scene[]>([]);
   const [studioList, setStudioList] = useState<StudioScene[]>([]);
-  const [oil, setOil] = useState<{ meta: OilMeta; fc: FC<OilProps> } | null>(null);
+  const [oilMeta, setOilMeta] = useState<OilMeta | null>(null);
+  const [oilFc, setOilFc] = useState<FC<OilProps> | null>(null);
+  const oil = oilMeta ? { meta: oilMeta, fc: oilFc } : null;
+  const [viewTick, setViewTick] = useState(0);
   const [err, setErr] = useState<string | null>(null);
   const [offline, setOffline] = useState(false);
   const [cand, setCand] = useState<Cand | null>(null);
@@ -51,7 +54,7 @@ export default function App() {
 
   const obsById = useMemo(() => new Map((obs?.features ?? []).map((f) => [f.id, f])), [obs]);
   const zoneById = useMemo(() => new Map((zones?.features ?? []).map((f) => [f.id, f])), [zones]);
-  const oilById = useMemo(() => new Map((oil?.fc.features ?? []).map((f) => [String(f.id ?? f.properties.id), f])), [oil]);
+  const oilById = useMemo(() => new Map((oilFc?.features ?? []).map((f) => [String(f.id ?? f.properties.id), f])), [oilFc]);
   const sceneByKey = useMemo(() => new Map(studioList.map((s) => [s.key, s])), [studioList]);
   const srcLabel = useMemo(() => new Map((meta?.sources ?? []).map((s) => [s.id, s.label])), [meta]);
   const activeSite = sites.find((s) => s.id === active) ?? null;
@@ -70,7 +73,10 @@ export default function App() {
         onLasso: (ring) => onLasso.current(ring),
         onOffline: (on) => setOffline(on),
         onReady: () => setReady(true),
-        onMoveEnd: () => persist.current(),
+        onMoveEnd: () => {
+          persist.current();
+          if (st.current.filters.oil === true) setViewTick((t) => t + 1);
+        },
       },
       ui0.cam,
       colW,
@@ -103,10 +109,10 @@ export default function App() {
         studioScenes(null).then((l) => l && setStudioList(l));
         // experimental oil layer (API 3.9): only when its API is there
         hasOilApi().then((ok) => {
-          if (!ok) return;
-          Promise.all([get<OilMeta>('/api/v3/oil/meta'), get<FC<OilProps>>('/api/v3/oil/spills', { limit: 5000 })])
-            .then(([om, of]) => setOil({ meta: om, fc: of }))
-            .catch(() => {});
+          if (ok)
+            get<OilMeta>('/api/v3/oil/meta')
+              .then(setOilMeta)
+              .catch(() => {});
         });
       })
       .catch((e) => setErr(e instanceof ApiErr ? e.message : 'Сервис недоступен'));
@@ -115,7 +121,21 @@ export default function App() {
 
   useEffect(() => ctl.current?.setObs(obs), [obs]);
   useEffect(() => ctl.current?.setZones(zones), [zones]);
-  useEffect(() => ctl.current?.setOil(oil?.fc ?? null), [oil]);
+  // oil spills only while the layer is on: the current view (limit 1000, largest first — contract 3.9)
+  useEffect(() => {
+    if (!oilMeta || filters.oil !== true) {
+      setOilFc(null);
+      return;
+    }
+    const ac = new AbortController();
+    const b = viewBBox();
+    get<FC<OilProps>>('/api/v3/oil/spills', { bbox: b ? b.map((x) => x.toFixed(4)).join(',') : null, date_from: filters.from, date_to: filters.to, limit: 1000 }, ac.signal)
+      .then(setOilFc)
+      .catch(() => {});
+    return () => ac.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [oilMeta, filters.oil, filters.from, filters.to, viewTick]);
+  useEffect(() => ctl.current?.setOil(oilFc), [oilFc]);
   useEffect(() => ctl.current?.setScenes(studioList.map((s) => ({ id: s.key, coords: s.coords, datetime: s.datetime }))), [studioList]);
   useEffect(() => ctl.current?.setFilters(filters), [filters]);
   useEffect(() => {
@@ -148,7 +168,7 @@ export default function App() {
       const f = st.current.obsById.get(p.id);
       if (!f) return '';
       const v = f.properties.concentration_items_km2;
-      const val = v === null || v === undefined ? 'объект' : `<b>${fmtNum(v)}</b> шт./км²`;
+      const val = v === null || v === undefined ? 'предмет (без плотности)' : `<b>${fmtNum(v)}</b> шт./км²`;
       return `<div class="pop-k">измерение</div><div>${val} · ${esc(fmtDate(f.properties.date_utc))}</div>`;
     }
     const z = st.current.zoneById.get(p.id);
@@ -422,7 +442,7 @@ export default function App() {
                   obsById={obsById}
                   zoneById={zoneById}
                   scenes={scenes}
-                  oil={oil ? oil.fc.features : null}
+                  oilOn={!!oilMeta}
                   ctl={ctl.current!}
                   hasBack={hasBack}
                   onBack={goBack}
@@ -502,7 +522,7 @@ function CandCard(p: {
     const v = f.properties.concentration_items_km2;
     title = 'Измерение';
     lines = [
-      v === null || v === undefined ? 'отдельный объект, без плотности' : `${fmtNum(v)} шт./км²${f.properties.size_class ? ` · ${f.properties.size_class}` : ''}`,
+      v === null || v === undefined ? `предмет (без плотности)${f.properties.size_class ? ` · ${sizeRu(f.properties.size_class)}` : ''}` : `${fmtNum(v)} шт./км²${f.properties.size_class ? ` · ${sizeRu(f.properties.size_class)}` : ''}`,
       `${fmtDate(f.properties.date_utc)} · ${p.srcLabel.get(f.properties.source_id) ?? f.properties.region}`,
     ];
   } else if (c.kind === 'zone') {
@@ -577,7 +597,38 @@ export function SiteList(p: { sites: Site[]; active: string | null; onOpen: (s: 
   );
 }
 
-function LayersSection(p: { nScenes: number; oil: { meta: OilMeta; fc: FC<OilProps> } | null; meta: Meta | null; filters: Filters; setFilters: (f: Filters) => void; offline: boolean; obs: FC<ObsProps> | null; zones: FC<ZoneProps> | null }) {
+/** date entry in Russian «дд.мм.гггг» (the native date input follows the browser locale: mm/dd/yyyy in English) */
+function DateInput(p: { value: string | null; onChange: (v: string | null) => void; label: string; hint?: string }) {
+  const [text, setText] = useState(p.value ? fmtDate(p.value) : '');
+  const [bad, setBad] = useState(false);
+  useEffect(() => {
+    setText(p.value ? fmtDate(p.value) : '');
+    setBad(false);
+  }, [p.value]);
+  const commit = () => {
+    const v = parseRuDate(text);
+    if (v === undefined) return setBad(true);
+    setBad(false);
+    if (v !== p.value) p.onChange(v);
+    else setText(v ? fmtDate(v) : '');
+  };
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      className={bad ? 'bad' : ''}
+      placeholder="дд.мм.гггг"
+      value={text}
+      aria-label={p.label}
+      title={bad ? 'Формат: дд.мм.гггг' : p.hint}
+      onChange={(e) => setText(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => e.key === 'Enter' && commit()}
+    />
+  );
+}
+
+function LayersSection(p: { nScenes: number; oil: { meta: OilMeta; fc: FC<OilProps> | null } | null; meta: Meta | null; filters: Filters; setFilters: (f: Filters) => void; offline: boolean; obs: FC<ObsProps> | null; zones: FC<ZoneProps> | null }) {
   const f = p.filters;
   const set = (patch: Partial<Filters>) => p.setFilters({ ...f, ...patch });
   const sources = p.meta?.sources ?? [];
@@ -587,7 +638,7 @@ function LayersSection(p: { nScenes: number; oil: { meta: OilMeta; fc: FC<OilPro
     const next = cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id];
     set({ sources: next.length === sources.length ? null : next });
   };
-  const dirty = f.from || f.to || f.sources || !f.obs || !f.zones || f.scenes === false || f.oil === false;
+  const dirty = f.from || f.to || f.sources || !f.obs || !f.zones || f.scenes === false || f.oil === true;
   const nObs = useMemo(() => {
     if (!p.obs) return null;
     let n = 0;
@@ -618,18 +669,18 @@ function LayersSection(p: { nScenes: number; oil: { meta: OilMeta; fc: FC<OilPro
       </label>
       {p.oil && (
         <label className="tog" title={(p.oil.meta.limitations ?? []).join('; ') || undefined} data-testid="oil-toggle">
-          <input type="checkbox" checked={f.oil !== false} onChange={(e) => set({ oil: e.target.checked })} />
+          <input type="checkbox" checked={f.oil === true} onChange={(e) => set({ oil: e.target.checked })} />
           <span>
             {p.oil.meta.class_label} <i className="exp">эксперимент</i>
           </span>
-          <em>{p.oil.fc.total ?? p.oil.fc.features.length}</em>
+          <em>{f.oil === true && p.oil.fc ? p.oil.fc.total ?? p.oil.fc.features.length : ''}</em>
         </label>
       )}
       <div className="sub">Даты</div>
       <div className="row dates">
-        <input type="date" value={f.from ?? ''} min={dr?.min} max={dr?.max} onChange={(e) => set({ from: e.target.value || null })} aria-label="с" />
+        <DateInput value={f.from} onChange={(v) => set({ from: v })} label="с" hint={dr ? `с ${fmtDate(dr.min)}` : undefined} />
         <span>—</span>
-        <input type="date" value={f.to ?? ''} min={dr?.min} max={dr?.max} onChange={(e) => set({ to: e.target.value || null })} aria-label="по" />
+        <DateInput value={f.to} onChange={(v) => set({ to: v })} label="по" hint={dr ? `по ${fmtDate(dr.max)}` : undefined} />
       </div>
       <div className="sub">Источники</div>
       {sources.map((s) => (
@@ -661,7 +712,7 @@ function LayersSection(p: { nScenes: number; oil: { meta: OilMeta; fc: FC<OilPro
           <i className="lg-zero" /> измеренный ноль
         </div>
         <div className="lg">
-          <i className="lg-item" /> объект без плотности
+          <i className="lg-item" /> предмет без плотности
         </div>
         <div className="lg">
           <i className="lg-strip" /> полоса обследования (снимок-кандидат)
