@@ -34,3 +34,4 @@ __pycache__/
 /reports/screens/
 /reports/deck_preview/
 /service/labels/
+/.playwright-mcp/
