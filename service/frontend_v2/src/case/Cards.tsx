@@ -626,7 +626,7 @@ function pairLink(meta: Meta, p: ZoneProps): { ok: boolean; title: string; why: 
           ? `дрейф ${num(p.pair_drift_shift_km, 1)} км > допуск ${num(p.pair_tolerance_km ?? null, 1)} км`
           : 'дрейф больше допуска',
       );
-    else if (r === 'TIME_UNKNOWN') parts.push('время наблюдения неизвестно, ±12 ч');
+    else if (r === 'TIME_UNKNOWN') parts.push(`время наблюдения неизвестно, ±${num(p.pair_dt_uncertainty_h || 12, 0)} ч`);
     else if (r === 'CLOUD') parts.push('облака');
     else if (r === 'GLINT') parts.push('блик');
     else parts.push(label(meta.reject_reasons, r).toLowerCase());
@@ -643,9 +643,10 @@ function suspicious(p: ZoneProps, d: ZoneDetail | null): string {
   const tail = p.pair_status === 'accepted' ? '' : ', без полевого подтверждения';
   if (s?.quality_rejected) return n ? `пиксели на снимке, отклонённом по качеству, — вероятно ложные: ${plural(n, 'объект', 'объекта', 'объектов')}` : 'снимок отклонён по качеству (блик / облака) — пиксели не рассматриваются';
   if (n === null && a === null) return `детектор: ${reasonRu(p.status_reason) ?? 'нет результата'}`;
-  if (!n && !a) return 'подозрительных пикселей в полосе нет';
-  const nOut = d?.detections?.features?.filter((f) => f.properties.in_strip === false).length ?? 0;
-  return `подозрительные пиксели на снимке-кандидате${tail}: ${plural(n ?? 0, 'объект', 'объекта', 'объектов')}, ${num(a ?? null, 0)} м²${nOut ? ` (ещё ${nOut} вне полосы)` : ''}`;
+  const out = (d?.detections?.features ?? []).filter((f) => f.properties.in_strip === false);
+  const outTxt = out.length ? `${plural(out.length, 'объект', 'объекта', 'объектов')} детектора вне полосы (${detTypes(out)})` : '';
+  if (!n && !a) return `подозрительных пикселей в полосе нет${outTxt ? `; ${outTxt}` : ''}`;
+  return `подозрительные пиксели на снимке-кандидате${tail}: ${plural(n ?? 0, 'объект', 'объекта', 'объектов')}, ${num(a ?? null, 0)} м²${outTxt ? `; ещё ${outTxt}` : ''}`;
 }
 
 function hav(a: number[], b: number[]): number {
@@ -779,4 +780,18 @@ function scenLine(sc: any): string | null {
   const v = ['p25', 'p50', 'p75'].map(get);
   if (v.every((x) => typeof x !== 'number')) return null;
   return `сценарии p25 / p50 / p75: ${v.map((x) => (typeof x === 'number' ? num(x) : '—')).join(' / ')} шт./км²`;
+}
+
+/** the type of detector objects only if the API classifies them (vessel / wake / …); otherwise say so — never guess */
+function detTypes(fs: { properties: any }[]): string {
+  const t = new Map<string, number>();
+  for (const f of fs) {
+    const p = f.properties ?? {};
+    const k = p.type_label ?? p.object_type_label ?? p.artifact_label ?? p.type ?? p.object_type ?? p.artifact ?? null;
+    if (k) t.set(String(k), (t.get(String(k)) ?? 0) + 1);
+  }
+  if (!t.size) return 'тип не классифицирован';
+  const known = [...t].map(([k, v]) => `${k}: ${v}`).join(', ');
+  const rest = fs.length - [...t.values()].reduce((a, b) => a + b, 0);
+  return rest ? `${known}, не классифицировано: ${rest}` : known;
 }

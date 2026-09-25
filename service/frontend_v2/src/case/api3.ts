@@ -198,6 +198,8 @@ export interface ZoneProps {
   pair_sync?: string | null;
   pair_drift_shift_km?: number | null;
   pair_tolerance_km?: number | null;
+  pair_dt_uncertainty_h?: number | null;
+  pair_time_known?: boolean | null;
   strip_area_raster_km2?: number | null;
   // L62h
   layer_kind?: string | null;

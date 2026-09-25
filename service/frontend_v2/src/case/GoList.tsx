@@ -86,6 +86,15 @@ export function rankSites(all: FC<ObsProps> | null, shown: FC<ObsProps> | null, 
 
 const hm = (s?: string) => (s ? s.slice(11, 16) : '');
 
+/** «весь мусор > 2,5 см» / «пластик > 2 см»: what the number is about — rows of different profiles are not comparable */
+function profTag(meta: Meta, s: Site): string {
+  const scope = s.best.properties.target_scope;
+  const what = scope === 'all_litter' ? 'весь мусор' : scope === 'total_plastic' || scope === 'plastic_category' ? 'пластик' : (s.best.properties.target_scope_label ?? scope ?? '').toLowerCase();
+  const size = meta.measurement_profiles.find((p) => p.id === s.profile)?.size_class ?? s.best.properties.size_class ?? '';
+  const sz = size.replace(/cm/g, 'см').replace(/\s*\(.*\)/, '').replace(/^([<>])/, '$1 ').replace(/(\d)\.(\d)/, '$1,$2').trim();
+  return `${what}${sz ? ` ${sz}` : ''}`;
+}
+
 export default function GoList({
   meta,
   sites,
@@ -161,7 +170,7 @@ export default function GoList({
                 {eventRu(s.event)}
               </span>
               <span className="c-zi-s" title={`${num(s.value)} шт./км², ${profileRu(meta, s.profile)}`}>
-                {num(s.value)} шт./км² · верх {num(Math.max(1, Math.round((1 - s.pct) * 100)), 0)} %{s.clean ? ` · полоса чистая ${dateRu(s.clean.zone.properties.datetime)}` : ''}
+                <b className="c-go-prof">{profTag(meta, s)}</b> · {num(s.value)} шт./км² · верх {num(Math.max(1, Math.round((1 - s.pct) * 100)), 0)} %{s.clean ? ` · полоса чистая ${dateRu(s.clean.zone.properties.datetime)}` : ''}
               </span>
               {i < TOP && (
                 <span className="c-zi-s c-go-w" data-testid="go-window">

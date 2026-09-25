@@ -1031,3 +1031,8 @@
     font-size: 12px;
   }
 }
+
+.c-go-prof {
+  color: var(--text-2);
+  font-weight: 500;
+}
