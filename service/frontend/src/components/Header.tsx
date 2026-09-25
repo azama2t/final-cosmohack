@@ -8,9 +8,12 @@ interface Props {
   onTour: () => void;
   tourRunning: boolean;
   onCopy: () => void;
+  tab: 'map' | 'review';
+  onTab: (t: 'map' | 'review') => void;
+  reviewAvail: boolean;
 }
 
-export default function Header({ manifest, region, onHome, onTour, tourRunning, onCopy }: Props) {
+export default function Header({ manifest, region, onHome, onTour, tourRunning, onCopy, tab, onTab, reviewAvail }: Props) {
   const kind = manifest.kind;
   return (
     <header className="header">
@@ -27,8 +30,27 @@ export default function Header({ manifest, region, onHome, onTour, tourRunning, 
           <span className="brand-sub">плавающий макропластик по снимкам Sentinel-2</span>
         </span>
       </button>
+      {reviewAvail && (
+        <div className="tabs" role="tablist" aria-label="Режим">
+          <button role="tab" aria-selected={tab === 'map'} className={tab === 'map' ? 'on' : ''} onClick={() => onTab('map')} data-testid="tab-map">
+            Карта
+          </button>
+          <button
+            role="tab"
+            aria-selected={tab === 'review'}
+            className={tab === 'review' ? 'on' : ''}
+            onClick={() => onTab('review')}
+            data-testid="tab-review"
+            title="Проверка человеком: очередь сомнительных находок и дообучение"
+          >
+            Проверка
+          </button>
+        </div>
+      )}
       <div className="crumbs">
-        {region ? (
+        {tab === 'review' ? (
+          <span className="crumb-cur">Проверка человеком</span>
+        ) : region ? (
           <>
             <button className="crumb-link" onClick={onHome} data-testid="crumb-overview">
               Все районы

@@ -127,6 +127,11 @@ export interface Zone {
   mean_prob?: number;
   /** optional (L15): confirmed detections in this cell */
   n_confirmed?: number;
+  /** optional (newer zones.json): terms of the ranking formula */
+  flagged_water_px?: number;
+  observed_frac?: number;
+  n_detections?: number;
+  score?: number;
 }
 
 export interface ZonesFile {
@@ -134,6 +139,7 @@ export interface ZonesFile {
   date: string;
   model: string;
   threshold: number;
+  quality?: DateQuality;
   zones: Zone[];
 }
 

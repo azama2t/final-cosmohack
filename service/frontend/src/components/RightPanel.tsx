@@ -4,6 +4,8 @@ import { fmtThr, fmtArea, fmtDate, fmtNum, fmtPct, fmtPermille, modelLabel } fro
 import ExportBox from './ExportBox';
 import { isFlagged, regionHaze, shortName } from '../lib/data';
 import ComparePanel from './ComparePanel';
+import ObsCalendar from './ObsCalendar';
+import { verdictZone } from '../lib/priority';
 
 const TsChart = lazy(() => import('./TsChart'));
 
@@ -135,10 +137,11 @@ function RegionView(p: Props & { region: Region; dateEntry: DateEntry }) {
     return () => clearTimeout(t);
   }, []);
   // with «only confirmed» on, the verdict points to the best zone that has a confirmed detection (if any)
-  const top =
-    p.onlyConfirmed && zones.some((z) => typeof z.n_confirmed === 'number')
-      ? zones.find((z) => (z.n_confirmed ?? 0) > 0)
-      : zones[0];
+  // L20: the best zone with a finding confirmed by the second model, else zone №1 marked «не подтверждена»
+  // (with «only confirmed» on and no confirmed zone the verdict is hidden)
+  const vz = verdictZone(zones);
+  const top = vz && !(p.onlyConfirmed && vz.unconfirmed) ? vz.zone : undefined;
+  const topUnconf = !!vz?.unconfirmed;
   const empty = !!p.detections && det.length === 0 && n === 0;
 
   return (
@@ -168,6 +171,16 @@ function RegionView(p: Props & { region: Region; dateEntry: DateEntry }) {
             <span>
               <b>Куда отправить обследование:</b> зона №{top.rank} — {fmtPermille(top.index)} ‰, {top.lat.toFixed(4)},{' '}
               {top.lon.toFixed(4)}
+              {topUnconf ? (
+                <small className="verdict-note unconf" data-testid="verdict-unconfirmed" title="Ни одна находка в зонах этой даты не подтверждена второй моделью — согласие моделей, не проверка на месте">
+                  не подтверждена второй моделью
+                </small>
+              ) : typeof top.n_confirmed === 'number' ? (
+                <small className="verdict-note" title="согласие моделей, не проверка на месте">
+                  ✓ уверенная: подтверждена второй моделью ({top.n_confirmed})
+                  {top.rank !== 1 ? ' · зона №1 не подтверждена' : ''}
+                </small>
+              ) : null}
             </span>
           </button>
         )}
@@ -208,6 +221,8 @@ function RegionView(p: Props & { region: Region; dateEntry: DateEntry }) {
         <Kpi label="Площадь пятен" value={av} unit={au} hint="помеченная область" />
         <Kpi label="Облачность" value={fmtPct(cloud)} hint="доля сцены" warn={(cloud ?? 0) > 0.3} />
       </section>
+
+      <ObsCalendar region={p.region} model={p.model} date={p.dateEntry.date} timeseries={p.timeseries} onDate={p.onDate} />
 
       <section className="section">
         <div className="section-head">
@@ -252,7 +267,7 @@ function RegionView(p: Props & { region: Region; dateEntry: DateEntry }) {
               {zones.slice(0, 10).map((z) => {
                 const [za, zu] = fmtArea(z.area_m2);
                 return (
-                  <tr key={z.rank} data-testid={`zone-row-${z.rank}`} title={z.reason}>
+                  <tr key={z.rank} data-testid={`zone-row-${z.rank}`} title={`${z.reason} — клик: карточка зоны`} className="clickable" onClick={() => p.onZone(z)}>
                     <td>
                       <span className={`rank-badge ${z.rank <= 3 ? 'top' : ''}`}>{z.rank}</span>
                       {(z.n_confirmed ?? 0) > 0 && (
@@ -267,7 +282,14 @@ function RegionView(p: Props & { region: Region; dateEntry: DateEntry }) {
                     </td>
                     <td className="num">{z.repeat_dates ?? '—'}</td>
                     <td>
-                      <button className="btn tiny" onClick={() => p.onZone(z)} data-testid={`zone-show-${z.rank}`}>
+                      <button
+                        className="btn tiny"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          p.onZone(z);
+                        }}
+                        data-testid={`zone-show-${z.rank}`}
+                      >
                         показать
                       </button>
                     </td>

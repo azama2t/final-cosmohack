@@ -181,6 +181,14 @@ def run(args) -> dict:
         best_id = page.evaluate("window.__app && window.__app.bestRegion")
         best = next((r for r in regions if r["id"] == best_id), regions[0])
         res["best_region"] = best["id"]
+        if args.only_l20:  # quick iteration on the L20 frames only
+            ctx.close()
+            shoot_l20(browser, base, out, res, con, best["id"], regions, args)
+            browser.close()
+            res["console_errors"] = con.errors
+            res["external_errors"] = sorted(set(con.external))[:20]
+            res["console_warnings"] = con.warnings[:20]
+            return res
         # overview hover on a label collapsed to a dot (shows the full label)
         if args.extra:
             compact = page.locator(".region-marker.compact")
@@ -413,6 +421,10 @@ def run(args) -> dict:
             shot(p4, out, "19_drift_without_ensemble", res["shots"])
             ctx4.close()
 
+        # L20: zone card, place card, calendar, review tab ----------------------------
+        if args.l20 or args.only_l20:
+            shoot_l20(browser, base, out, res, con, best["id"], regions, args)
+
         # optional: record demo tour ---------------------------------------------
         if args.video:
             vdir = out / "_video"
@@ -443,6 +455,198 @@ def run(args) -> dict:
     res["external_errors"] = sorted(set(con.external))[:20]
     res["console_warnings"] = con.warnings[:20]
     return res
+
+
+def _img_ready(page: Page, testids: list[str], timeout: int = 15000) -> bool:
+    """Waits until every <img data-testid=...> present on the page has loaded (or none is present)."""
+    js = """(ids) => ids.every(id => { const i = document.querySelector(`[data-testid='${id}']`);
+              return !i || i.tagName !== 'IMG' || (i.complete && i.naturalWidth > 0); })"""
+    try:
+        page.wait_for_function(js, arg=testids, timeout=timeout)
+        return True
+    except Exception:
+        return False
+
+
+def shoot_l20(browser, base: str, out: Path, res: dict, con: "Console", best_id: str, regions: list, args):
+    """L20 frames: 21 zone card («почему первая»), 22 place card (+PDF), 23 observation calendar,
+    24 review tab, 25 retrain result (only with --review-write), + 1366 variants."""
+    info = res.setdefault("l20", {})
+    try:
+        with urllib.request.urlopen(base + "/openapi.json", timeout=5) as r:
+            api = set(json.loads(r.read().decode("utf-8")).get("paths", {}).keys())
+    except Exception:
+        api = set()
+    info["api"] = sorted(p for p in api if any(k in p for k in ("/api/zone", "/api/crop", "/api/place", "/api/calendar", "/api/review")))
+
+    def open_region(page: Page, rid: str, extra: str = ""):
+        page.goto(base + f"/?r={rid}{extra}", wait_until="domcontentloaded")
+        page.wait_for_function("window.__mapReady === true", timeout=30000)
+        page.wait_for_function("window.__app && window.__app.sceneReady", timeout=20000)
+        wait_idle(page, 600)
+
+    for vw, vh, sfx in ((1920, 1080, ""), (1366, 768, "_1366")):
+        ctx = browser.new_context(viewport={"width": vw, "height": vh}, device_scale_factor=1)
+        page = ctx.new_page()
+        con.attach(page)
+        open_region(page, best_id)
+
+        # 21 zone card: click the first row of the zones table
+        page.locator("[data-testid='zone-row-1']").first.click()
+        page.wait_for_selector("[data-testid='zone-card']", timeout=8000)
+        # the click scrolled the right panel down to the table: back to the top (verdict + calendar visible)
+        page.evaluate("(() => { const r = document.querySelector('.panel-right .panel-scroll'); if (r) { r.scrollTop = 0; r.scrollLeft = 0; } })()")
+        page.wait_for_timeout(300)
+        wait_idle(page, 400)
+        info[f"zone_crop_loaded{sfx}"] = _img_ready(page, ["zone-crop-img"])
+        info[f"zone_crop_source{sfx}"] = "api" if page.locator("[data-testid='zone-crop-img']").count() else "canvas"
+        info[f"zone_why{sfx}"] = page.locator("[data-testid='zone-why']").count()
+        if sfx and page.locator("[data-testid='zone-why-eq']").count() == 0 and page.locator("[data-testid='zone-why-toggle']").count():
+            click(page, "zone-why-toggle")  # collapsed by default on short screens
+            page.wait_for_timeout(200)
+        page.wait_for_timeout(500)
+        shot(page, out, f"21_zone_card{sfx}", res["shots"])
+
+        # 22 place card from the zone card
+        click(page, "zone-open-place")
+        page.wait_for_selector("[data-testid='place-table']", timeout=20000)
+        page.wait_for_timeout(600)
+        info[f"place_rows{sfx}"] = page.locator("[data-testid='place-table'] tbody tr").count()
+        pdf = page.locator("[data-testid='place-pdf']")
+        info[f"pdf_button{sfx}"] = pdf.count()
+        shot(page, out, f"22_place_card{sfx}", res["shots"])
+        if pdf.count() and not sfx:
+            href = pdf.first.get_attribute("href")
+            try:
+                r = page.request.get(base + href, timeout=60000)
+                body = r.body()
+                info["pdf"] = {"status": r.status, "type": r.headers.get("content-type"), "bytes": len(body),
+                               "magic": body[:5].decode("latin-1")}
+            except Exception as e:  # noqa: BLE001
+                info["pdf"] = {"error": str(e)[:200]}
+        click(page, "place-card-close")
+        page.wait_for_timeout(300)
+
+        # place card from a click on an H3 cell (zone 1 cell centre, H3 layer on, zone markers off)
+        if page.evaluate("window.__app.layers.zones"):
+            click(page, "layer-toggle-zones")
+        click(page, "layer-toggle-h3")
+        page.wait_for_function("window.__app && window.__app.h3Ready", timeout=15000)
+        page.wait_for_timeout(800)
+        pos = page.evaluate("window.__app.zoneScreen(1)")
+        if pos:
+            page.mouse.move(pos["x"], pos["y"])
+            page.wait_for_timeout(200)
+            page.mouse.click(pos["x"], pos["y"])
+            try:
+                page.wait_for_selector("[data-testid='place-table']", timeout=15000)
+                info[f"place_from_h3{sfx}"] = page.evaluate("window.__app.placeCard") == pos["h3"]
+            except Exception:
+                info[f"place_from_h3{sfx}"] = False
+            if sfx:
+                page.mouse.move(700, 20)  # over the header: clears the H3 hover tooltip
+                page.wait_for_timeout(400)
+                shot(page, out, "22b_place_from_h3_1366", res["shots"])
+            if page.locator("[data-testid='place-card-close']").count():
+                click(page, "place-card-close")
+        click(page, "layer-toggle-h3")
+
+        # 23 calendar: region with the most dates
+        cal = max(regions, key=lambda r: (len(r["dates"]), r["id"] == best_id))
+        open_region(page, cal["id"])
+        page.wait_for_selector("[data-testid='obs-calendar'] .cal-grid", timeout=10000)
+        page.evaluate("document.querySelector(\"[data-testid='obs-calendar']\").scrollIntoView({block: 'nearest'})")
+        page.wait_for_timeout(400)
+        info[f"calendar_region{sfx}"] = cal["id"]
+        info[f"calendar_dots{sfx}"] = page.locator("[data-testid='obs-calendar'] button.cal-dot").count()
+        shot(page, out, f"23_calendar{sfx}", res["shots"])
+        if not sfx:
+            cur = page.evaluate("window.__app.date")
+            other = next((d["date"] for d in cal["dates"] if d["date"] != cur and page.locator(f"[data-testid='cal-dot-{d['date']}']:not([disabled])").count()), None)
+            if other:
+                click(page, f"cal-dot-{other}")
+                page.wait_for_timeout(500)
+                info["calendar_click_ok"] = page.evaluate("window.__app.date") == other
+
+        # 24 review tab
+        review = "/api/review/queue" in api
+        info[f"review_tab{sfx}"] = page.locator("[data-testid='tab-review']").count()
+        if review:
+            if args.review_write and not sfx:
+                # «ложное?» from the detection card of the best region → the item appears in the queue with user_flag
+                open_region(page, best_id)
+                pos = page.evaluate("window.__app.largestDetectionScreen()")
+                if pos:
+                    page.mouse.click(pos["x"], pos["y"])
+                    page.wait_for_selector("[data-testid='flag-false']", timeout=8000)
+                    click(page, "flag-false")
+                    try:
+                        page.wait_for_function("document.querySelector(\"[data-testid='flag-false']\").textContent.includes('в очереди')", timeout=8000)
+                        info["flag_false_ok"] = True
+                    except Exception:
+                        info["flag_false_ok"] = False
+                    page.wait_for_timeout(300)
+                    shot(page, out, "24a_flag_false", res["shots"])
+                    click(page, "detection-card-close")
+            else:
+                open_region(page, best_id)
+            click(page, "tab-review")
+            try:
+                page.wait_for_selector("[data-testid='review-card']", timeout=20000)
+            except Exception:
+                info[f"review_card{sfx}"] = False
+            info[f"review_imgs{sfx}"] = _img_ready(page, ["review-rgb", "review-false"], 30000)
+            page.wait_for_timeout(500)
+            info[f"review_queue{sfx}"] = page.evaluate("window.__review && window.__review.n")
+            shot(page, out, f"24_review{sfx}", res["shots"])
+            if args.review_write and not sfx:
+                n0 = page.evaluate("window.__review.labels")
+                for key in ("1", "2", "ArrowRight", "6", "1"):
+                    page.keyboard.press(key)
+                    page.wait_for_timeout(700)
+                _img_ready(page, ["review-rgb", "review-false"], 20000)
+                info["labels_added"] = page.evaluate("window.__review.labels") - n0
+                click(page, "review-retrain")
+                t0 = time.time()
+                try:
+                    page.wait_for_function(
+                        "window.__review && window.__review.jobStatus && window.__review.jobStatus !== 'running'",
+                        timeout=args.retrain_timeout * 1000, polling=2000)
+                except Exception:
+                    info["retrain_timeout"] = True
+                info["retrain_s"] = round(time.time() - t0, 1)
+                info["retrain_status"] = page.evaluate("window.__review.jobStatus")
+                dec = page.locator("[data-testid='review-decision']")
+                info["retrain_decision"] = dec.first.text_content() if dec.count() else None
+                page.wait_for_timeout(400)
+                shot(page, out, "25_review_retrain", res["shots"])
+        ctx.close()
+
+    # fallbacks: the same UI against a backend without the L19 endpoints (/openapi.json without paths)
+    ctx = browser.new_context(viewport={"width": 1920, "height": 1080}, device_scale_factor=1)
+    ctx.route("**/openapi.json", lambda route: route.fulfill(status=200, content_type="application/json", body='{"paths": {}}'))
+    page = ctx.new_page()
+    con.attach(page)
+    open_region(page, best_id)
+    info["noapi_review_tab"] = page.locator("[data-testid='tab-review']").count()
+    page.locator("[data-testid='zone-row-1']").first.click()
+    page.wait_for_selector("[data-testid='zone-card']", timeout=8000)
+    page.evaluate("(() => { const r = document.querySelector('.panel-right .panel-scroll'); if (r) { r.scrollTop = 0; r.scrollLeft = 0; } })()")
+    wait_idle(page, 800)
+    info["noapi_zone_crop"] = "canvas" if page.locator("[data-testid='zone-crop-canvas']").count() else "img"
+    info["noapi_zone_why"] = page.locator("[data-testid='zone-why-eq']").count()
+    shot(page, out, "21c_zone_card_no_api", res["shots"])
+    click(page, "zone-open-place")
+    try:
+        page.wait_for_selector("[data-testid='place-table']", timeout=30000)
+        info["noapi_place_rows"] = page.locator("[data-testid='place-table'] tbody tr").count()
+    except Exception:
+        info["noapi_place_rows"] = 0
+    info["noapi_pdf_button"] = page.locator("[data-testid='place-pdf']").count()
+    info["noapi_calendar_dots"] = page.locator("[data-testid='obs-calendar'] button.cal-dot").count()
+    page.wait_for_timeout(400)
+    shot(page, out, "22c_place_card_no_api", res["shots"])
+    ctx.close()
 
 
 def append_perf(res: dict):
@@ -486,6 +690,13 @@ def main():
     ap.add_argument("--gl", choices=list(GL_ARGS), default="swiftshader", help="WebGL backend: swiftshader (default) or gpu")
     ap.add_argument("--extra", action="store_true", help="also shoot 11_region_1366")
     ap.add_argument("--no-perf", action="store_true", help="do not append to reports/ui_perf.md")
+    ap.add_argument("--l20", action="store_true",
+                    help="also shoot L20 frames 21-25 (zone card, place card, calendar, review tab)")
+    ap.add_argument("--only-l20", action="store_true", help="only the L20 frames (fast iteration)")
+    ap.add_argument("--review-write", action="store_true",
+                    help="L20: allow POST labels / «ложное?» / retrain (writes the backend labels file!) "
+                         "for frames 24b and 25; use with a backend started with MACROPLASTIC_LABELS=<scratch dir>")
+    ap.add_argument("--retrain-timeout", type=int, default=900, help="seconds to wait for the retrain job (frame 25)")
     args = ap.parse_args()
     if not args.base_url:
         args.base_url = "http://127.0.0.1:4173" if args.start_preview else "http://127.0.0.1:5173"
@@ -507,7 +718,7 @@ def main():
     out = Path(args.out) if Path(args.out).is_absolute() else ROOT / args.out
     (out / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")
     print(json.dumps({k: v for k, v in res.items() if k != "shots"}, ensure_ascii=False, indent=1))
-    ok = len(res["shots"]) >= 10 and not res["console_errors"]
+    ok = (args.only_l20 or len(res["shots"]) >= 10) and not res["console_errors"]
     sys.exit(0 if ok else 1)
 
 

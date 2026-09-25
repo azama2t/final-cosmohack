@@ -21,6 +21,11 @@ export interface UrlState {
   compare?: string; // "regionA:date,regionB:date"
   /** L15: only detections confirmed by both models */
   confirmed?: boolean;
+  /** L20: header tab «Проверка» */
+  tab?: 'review';
+  /** L20: open zone card (rank) / place card (h3 cell) */
+  zone?: number;
+  place?: string;
 }
 
 const LAYER_KEYS = Object.keys(DEFAULT_LAYERS) as LayerKey[];
@@ -47,6 +52,10 @@ export function readUrl(): UrlState {
   if (q.get('tour') === '1') s.tour = true;
   if (q.get('cmp')) s.compare = q.get('cmp')!;
   if (q.get('cf') === '1') s.confirmed = true;
+  if (q.get('tab') === 'review') s.tab = 'review';
+  const z = Number(q.get('zone'));
+  if (Number.isInteger(z) && z > 0) s.zone = z;
+  if (q.get('place')) s.place = q.get('place')!;
   return s;
 }
 
@@ -63,6 +72,9 @@ export function writeUrl(s: UrlState) {
   if (s.basemap) q.set('b', s.basemap);
   if (s.compare) q.set('cmp', s.compare);
   if (s.confirmed) q.set('cf', '1');
+  if (s.tab) q.set('tab', s.tab);
+  if (s.zone) q.set('zone', String(s.zone));
+  if (s.place) q.set('place', s.place);
   const qs = q.toString().replace(/%2C/g, ',').replace(/%3A/g, ':');
   history.replaceState(null, '', `${location.pathname}${qs ? '?' + qs : ''}`);
 }

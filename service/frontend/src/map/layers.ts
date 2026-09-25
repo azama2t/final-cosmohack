@@ -52,6 +52,8 @@ export interface LayerCtx {
   onHover: (h: HoverInfo | null) => void;
   onClickDet: (f: Feature<DetProps>) => void;
   onClickRegion: (id: string) => void;
+  /** L20: click on an H3 cell → place card */
+  onClickH3?: (p: H3Props) => void;
 }
 
 const boundsPoly = (b: Bounds) => [
@@ -147,6 +149,10 @@ export function buildLayers(c: LayerCtx): Layer[] {
         transitions: { getElevation: { duration: 900 } } as any,
         onHover: (info: PickingInfo) =>
           c.onHover(info.object ? { x: info.x, y: info.y, kind: 'h3', props: (info.object as any).properties } : null),
+        onClick: (info: PickingInfo) => {
+          const o = info.object as any;
+          if (o && c.onClickH3) c.onClickH3(o.properties);
+        },
         updateTriggers: {
           getFillColor: [c.h3, c.h3Scale],
           getElevation: [c.h3, vmax],

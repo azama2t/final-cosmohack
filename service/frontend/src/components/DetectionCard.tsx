@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { DateEntry, DetProps, Feature, FC, H3Props, Manifest } from '../types';
 import { centroid, featureBBox } from '../map/layers';
 import { agreeText, AGREE_NOTE } from '../lib/confirm';
+import { apiPaths, apiPost } from '../lib/api';
 import { ACCENT, fmtThr, fmtNum, fmtArea, fmtDate, fmtPct, fmtPermille, modelLabel } from '../lib/style';
 
 interface Props {
@@ -98,6 +99,28 @@ export default function DetectionCard({ feature, dateEntry, rgbImg, h3, manifest
     ctx.fillText(`${barM} м`, bx, by - 5 * dpr);
   }, [rgbImg, feature, dateEntry.bounds, lat, lon]);
 
+  // «ложное?» → review queue: POST /api/review/flag (or, on an older backend, /api/review/label with label «other»)
+  const [flagMode, setFlagMode] = useState<'flag' | 'label' | null>(null);
+  const [flagged, setFlagged] = useState<boolean | null>(false);
+  useEffect(() => {
+    let alive = true;
+    apiPaths().then((s) => alive && setFlagMode(s.has('/api/review/flag') ? 'flag' : s.has('/api/review/label') ? 'label' : null));
+    return () => {
+      alive = false;
+    };
+  }, []);
+  const flagFalse = async () => {
+    if (!flagMode) return;
+    setFlagged(null);
+    const body = { id: p.id, region: p.region, date: p.date, model: p.model, lon, lat, max_prob: p.max_prob };
+    const r =
+      flagMode === 'flag'
+        ? await apiPost('/api/review/flag', { ...body, note: 'ложное? (с карты)' })
+        : await apiPost('/api/review/label', { ...body, label: 'other', note: 'ложное? (с карты)' });
+    setFlagged(r.ok);
+    onToast(r.ok ? 'Находка добавлена в очередь «Проверка»' : `Не удалось отметить: ${r.error}`);
+  };
+
   const [a, u] = fmtArea(p.area_m2);
   const conf = p.mean_prob;
   const confLabel = conf >= 0.75 ? 'высокая' : conf >= 0.5 ? 'средняя' : 'низкая';
@@ -173,6 +196,20 @@ export default function DetectionCard({ feature, dateEntry, rgbImg, h3, manifest
           координаты
         </button>
       </div>
+      {flagMode && (
+        <div className="dc-flag">
+          <button
+            className={`btn tiny ${flagged ? '' : 'ghost'}`}
+            disabled={flagged !== false}
+            onClick={flagFalse}
+            data-testid="flag-false"
+            title="Добавить находку в очередь «Проверка» как возможно ложную"
+          >
+            {flagged === true ? '✓ в очереди проверки' : flagged === null ? 'сохраняю…' : 'ложное?'}
+          </button>
+          <span className="muted small">сомневаетесь — отправьте на проверку человеком</span>
+        </div>
+      )}
       <div className="dc-note muted">Площадь — пикселей с prob ≥ порога, а не масса пластика. Сцена {dateEntry.scene_id}.</div>
     </div>
   );

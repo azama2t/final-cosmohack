@@ -29,8 +29,13 @@ import Footer from './components/Footer';
 import EmptyState from './components/EmptyState';
 import { runTour, type TourApi } from './tour';
 import { hasConfirm, nConfirmed, onlyConfirmed as filterConfirmed } from './lib/confirm';
+import { hasApi, type ReviewItem } from './lib/api';
+import ZoneCard from './components/ZoneCard';
+import PlaceCard from './components/PlaceCard';
+import './l20.css';
 
 const CompareView = lazy(() => import('./components/CompareView'));
+const ReviewView = lazy(() => import('./components/ReviewView'));
 
 export default function App() {
   const url = useMemo(readUrl, []);
@@ -50,6 +55,11 @@ export default function App() {
   const [geoReady, setGeoReady] = useState(false);
   const [zonePopup, setZonePopup] = useState<Zone | null>(null);
   const [onlyConf, setOnlyConf] = useState<boolean>(!!url.confirmed);
+  // L20: place card (H3 cell history), header tab «Проверка»
+  const [place, setPlace] = useState<{ h3: string; fromZone: boolean } | null>(url.place ? { h3: url.place, fromZone: false } : null);
+  const [tab, setTab] = useState<'map' | 'review'>(url.tab ?? 'map');
+  const [reviewAvail, setReviewAvail] = useState(false);
+  const pendingZone = useRef<number | undefined>(url.zone);
   const camera = useRef<Camera | undefined>(url.camera);
   const tourAbort = useRef<AbortController | null>(null);
 
@@ -132,6 +142,23 @@ export default function App() {
     if ((layers.h3 || layers.drift) && !geoReady) loadGeo().then(() => setGeoReady(true));
   }, [layers.h3, layers.drift, geoReady]);
 
+  // L20: the «Проверка» tab exists only when the backend has the review endpoints
+  useEffect(() => {
+    if (!manifest) return;
+    hasApi('/api/review/queue').then((ok) => {
+      setReviewAvail(ok);
+      if (!ok) setTab('map');
+    });
+  }, [manifest]);
+
+  // L20: zone card from the URL (?zone=rank) once zones of the scene are loaded
+  useEffect(() => {
+    if (!zones || pendingZone.current === undefined) return;
+    const z = zones.zones.find((x) => x.rank === pendingZone.current);
+    pendingZone.current = undefined;
+    if (z) setZonePopup(z);
+  }, [zones]);
+
   // ---- URL state ----
   const syncUrl = useCallback(() => {
     writeUrl({
@@ -143,8 +170,11 @@ export default function App() {
       camera: camera.current,
       compare: compare ? `${compare.a.region}:${compare.a.date},${compare.b.region}:${compare.b.date}` : undefined,
       confirmed: onlyConf || undefined,
+      tab: tab === 'review' ? 'review' : undefined,
+      zone: regionId && zonePopup ? zonePopup.rank : undefined,
+      place: regionId && place ? place.h3 : undefined,
     });
-  }, [regionId, date, model, layers, basemap, compare, onlyConf]);
+  }, [regionId, date, model, layers, basemap, compare, onlyConf, tab, zonePopup, place]);
   useEffect(syncUrl, [syncUrl]);
 
   // ---- actions ----
@@ -158,6 +188,7 @@ export default function App() {
       setSelected(null);
       setHover(null);
       setZonePopup(null);
+      setPlace(null);
       if (!manifest) return;
       if (!id) {
         setRegionId(null);
@@ -198,6 +229,7 @@ export default function App() {
   const selectDate = useCallback(
     (d: string) => {
       setSelected(null);
+      setZonePopup(null); // zones are per date; the place card (cell history) stays open
       setDate(d);
       const de = region?.dates.find((x) => x.date === d);
       if (de && !de.models.includes(model)) setModel(de.models[0]);
@@ -208,15 +240,60 @@ export default function App() {
   const openDetection = useCallback((f: Feature<DetProps>) => {
     setSelected(f);
     setHover(null);
+    setZonePopup(null);
+    setPlace(null);
+  }, []);
+
+  const openZone = useCallback((z: Zone) => {
+    setSelected(null);
+    setPlace(null);
+    setZonePopup(z);
   }, []);
 
   const showZone = useCallback(
     (z: Zone) => {
       if (!layers.zones) toggleLayer('zones', true);
-      setZonePopup(z);
-      flyToPoint(z.lon, z.lat, 14);
+      openZone(z);
+      // centre the zone in the map area that the zone card leaves free (card is at the left edge of the map)
+      const map = ctl.map;
+      if (map) {
+        const W = map.getContainer().clientWidth;
+        const cs = getComputedStyle(document.querySelector('.app') ?? document.documentElement);
+        const lw = parseFloat(cs.getPropertyValue('--lw')) || 320;
+        const rw = parseFloat(cs.getPropertyValue('--rw')) || 376;
+        const cardW = window.innerWidth >= 1600 && window.innerHeight >= 900 ? 800 : window.innerHeight <= 800 ? 344 : 392;
+        const left = lw + 16 + cardW,
+          right = W - rw;
+        const off = right - left > 120 ? (left + right) / 2 - W / 2 : 0;
+        map.flyTo({ center: [z.lon, z.lat], zoom: 14, duration: 1800, essential: true, offset: [off, 0], pitch: map.getPitch() });
+      } else flyToPoint(z.lon, z.lat, 14);
     },
-    [layers.zones, toggleLayer],
+    [layers.zones, toggleLayer, openZone],
+  );
+
+  const openPlace = useCallback((h3: string, fromZone = false) => {
+    setSelected(null);
+    setHover(null);
+    setPlace({ h3, fromZone });
+    if (!fromZone) setZonePopup(null);
+  }, []);
+
+  // «на карте» from the review tab: region/date/model of the item, camera to the point
+  const showReviewItem = useCallback(
+    (it: ReviewItem) => {
+      if (!manifest) return;
+      const r = manifest.regions.find((x) => x.id === it.region);
+      if (!r) return;
+      setTab('map');
+      setSelected(null);
+      setZonePopup(null);
+      setPlace(null);
+      setRegionId(r.id);
+      setDate(it.date);
+      setModel(it.model);
+      setTimeout(() => flyToPoint(it.lon, it.lat, 15, 1200), 80);
+    },
+    [manifest],
   );
 
   const defaultCompare = useCallback((): { a: SceneRef; b: SceneRef } | null => {
@@ -319,6 +396,18 @@ export default function App() {
         return { x: p.x + r.left, y: p.y + r.top, id: f.properties.id };
       },
       isMoving: () => !!ctl.map?.isMoving(),
+      // L20 hooks: screen position of a zone (its H3 cell centre), open cards
+      zoneScreen: (rank: number) => {
+        const z = zones?.zones.find((x) => x.rank === rank);
+        if (!z || !ctl.map) return null;
+        const p = ctl.map.project([z.lon, z.lat] as any);
+        const r = ctl.map.getContainer().getBoundingClientRect();
+        return { x: p.x + r.left, y: p.y + r.top, h3: z.h3 };
+      },
+      zoneCard: zonePopup?.rank ?? null,
+      placeCard: place?.h3 ?? null,
+      tab,
+      reviewAvail,
       setDriftHour: (h: number) => {
         anim.hour = h;
         anim.listeners.forEach((l) => l(h));
@@ -353,18 +442,25 @@ export default function App() {
 
   return (
     <div
-      className={`app ${leftCollapsed ? 'left-collapsed' : ''} ${rightCollapsed ? 'right-collapsed' : ''} ${compare ? 'comparing' : ''} ${layers.drift && driftRaw ? 'has-drift' : ''}`}
+      className={`app ${leftCollapsed ? 'left-collapsed' : ''} ${rightCollapsed ? 'right-collapsed' : ''} ${compare ? 'comparing' : ''} ${layers.drift && driftRaw ? 'has-drift' : ''} ${(zonePopup && region) || (place && region) ? 'big-card' : ''}`}
     >
       <Header
         manifest={manifest}
         region={region}
         onHome={() => {
           setCompare(null);
+          setTab('map');
           selectRegion(null);
         }}
         onTour={tourCaption ? stopTour : startTour}
         tourRunning={!!tourCaption}
         onCopy={copyLink}
+        tab={tab}
+        onTab={(t) => {
+          setTab(t);
+          if (t === 'review') stopTour();
+        }}
+        reviewAvail={reviewAvail}
       />
       <div className="stage">
         <MapView
@@ -400,7 +496,8 @@ export default function App() {
                 : 'Спутниковые тайлы недоступны — офлайн-режим',
             );
           }}
-          onZoneClick={(z) => setZonePopup(z)}
+          onZoneClick={openZone}
+          onClickH3={(c) => openPlace(c.h3)}
         />
         {hover && <Tooltip hover={hover} manifest={manifest} />}
 
@@ -486,27 +583,46 @@ export default function App() {
           />
         )}
 
-        {zonePopup && region && (
-          <div className="zone-popup glass" data-testid="zone-popup">
-            <button className="icon-btn close" onClick={() => setZonePopup(null)} aria-label="Закрыть" data-testid="zone-popup-close">
-              ×
-            </button>
-            <div className="eyebrow">Приоритет обследования</div>
-            <div className="zp-title">
-              Зона №{zonePopup.rank} <span className="muted">· {zonePopup.index === null ? '—' : zonePopup.index.toFixed(2)} ‰</span>
-            </div>
-            <div className="zp-reason">{zonePopup.reason}</div>
-            {typeof zonePopup.n_confirmed === 'number' && (
-              <div className="zp-conf" data-testid="zone-popup-confirmed">
-                <span className="sw-double small" aria-hidden />
-                подтверждено обеими моделями: <b>{zonePopup.n_confirmed}</b>{' '}
-                <span className="muted">· согласие моделей, не проверка на месте</span>
-              </div>
-            )}
-            <div className="zp-coords mono">
-              {zonePopup.lat.toFixed(5)}, {zonePopup.lon.toFixed(5)}
-            </div>
-          </div>
+        {zonePopup && region && dateEntry && !place && (
+          <ZoneCard
+            key={`${sk}-${zonePopup.rank}`}
+            manifest={manifest}
+            region={region}
+            dateEntry={dateEntry}
+            model={model}
+            zone={zonePopup}
+            zones={zones?.zones ?? [zonePopup]}
+            detections={detections}
+            h3={h3}
+            rgbImg={rgbImg}
+            threshold={threshold}
+            onClose={() => setZonePopup(null)}
+            onPlace={(c) => openPlace(c, true)}
+            onToast={showToast}
+          />
+        )}
+
+        {place && region && (
+          <PlaceCard
+            key={`${region.id}-${model}-${place.h3}`}
+            manifest={manifest}
+            region={region}
+            model={model}
+            h3={place.h3}
+            date={date}
+            onClose={() => {
+              setPlace(null);
+              setZonePopup(null);
+            }}
+            onBack={place.fromZone && zonePopup ? () => setPlace(null) : undefined}
+            onDate={selectDate}
+          />
+        )}
+
+        {tab === 'review' && reviewAvail && (
+          <Suspense fallback={<div className="review loading">Загрузка проверки…</div>}>
+            <ReviewView manifest={manifest} initialRegion={regionId ?? bestRegion(manifest)?.id ?? null} onToast={showToast} onShowOnMap={showReviewItem} />
+          </Suspense>
         )}
 
         {compare && (

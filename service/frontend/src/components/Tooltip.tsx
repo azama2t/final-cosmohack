@@ -31,6 +31,7 @@ export default function Tooltip({ hover, manifest }: { hover: HoverInfo; manifes
       <div className="tt-row"><span>Наблюдалось ячейки</span><b>{fmtPct(p.observed_frac)}</b></div>
       <div className="tt-row"><span>Пятен</span><b>{p.n_detections}</b></div>
       {p.share_permille === null && <div className="tt-hint">Наблюдалось &lt; 50 % ячейки — не ноль, а «нет данных»</div>}
+      <div className="tt-hint">Клик — карточка места: история ячейки по всем датам</div>
     </div>
   );
 }

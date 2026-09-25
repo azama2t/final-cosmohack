@@ -92,3 +92,7 @@
 | `scripts/tools/adapter.py`, `scripts/tools/ingest.py` | обёртки для запуска адаптера и загрузчика из корня без PYTHONPATH | хакатон |
 | `docs/img/` | кадры интерфейса для README | README |
 | `reports/final_numbers.json`, `reports/deck.pptx` | единый источник чисел; дека (генерируются скриптами) | README, отчёт, выступление |
+| `service/frontend/src/components/{ZoneCard,PlaceCard,ObsCalendar,ReviewView}.tsx`, `src/lib/{api,priority,crop}.ts` | карточка зоны с формулой приоритета, карточка места + PDF, календарь реальных наблюдений, вкладка «Проверка» (клавиши 1–6, дообучение); доступность API — по `/openapi.json` | фронт |
+| `tests/test_robustness.py`, `scripts/robustness_report.py`, `reports/robustness.md` | устойчивость инференса: пустые/NaN чипы, облака, блик, шум, размеры, dtype, каналы, битые файлы, пути | pytest / отчёт |
+| `scripts/offline_check.py`, `reports/offline_check.md` | проверка карты без интернета (4 режима подложки) | перед показом |
+| `docs/DEMO.md` | сценарий демо на 4 минуты и план Б (нет интернета / сервис не стартует / видео) | выступление |

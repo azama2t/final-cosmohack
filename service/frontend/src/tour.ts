@@ -2,6 +2,7 @@ import type { MutableRefObject } from 'react';
 import type { DateEntry, DetProps, Feature, FC, LayerKey, Layers, Manifest, Region, Zone, ZonesFile } from './types';
 import { bestRegion, shortName, summaryDate } from './lib/data';
 import { anim } from './map/controller';
+import { verdictZone } from './lib/priority';
 
 export interface TourApi {
   get: () => {
@@ -98,7 +99,7 @@ export async function runTour(apiRef: MutableRefObject<TourApi>, signal: AbortSi
       api().toggleLayer('h3', false);
       api().toggleLayer('zones', true);
       await wait(400);
-      const z = api().get().zones?.zones?.[0];
+      const z = verdictZone(api().get().zones?.zones ?? [])?.zone;
       if (z) api().showZone(z);
       await wait(z ? 7000 : 3000);
       api().closeZone();
