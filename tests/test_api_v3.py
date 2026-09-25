@@ -447,3 +447,79 @@ def test_quality_png_rgba_palette(tmp_path, monkeypatch, client):
     sc = client.get("/api/v3/scenes/SCN_1").json()
     assert sc["quality_url"] == "/api/v3/scenes/SCN_1/quality.png"
     _err(client.get("/api/v3/scenes/SCN_2/quality.png"), 404, "NO_SCENE")
+
+
+# ------------------------------------------------------------------ L62e (L67 consistency findings)
+HAS_PAIRS = (cs.PATHS["pairs_dir"] / "candidates.csv").is_file()
+
+
+def test_meta_has_drift_and_time_codes(client):
+    ids = {r["id"] for r in client.get("/api/v3/meta").json()["reject_reasons"]}
+    assert {"DRIFT_TOO_LARGE", "TIME_UNKNOWN"} <= ids
+
+
+@pytest.mark.skipif(not (HAS_PAIRS and HAS_SAMPLES), reason="нет реестра пар")
+def test_pairs_drift_fields_and_codes(client):
+    pairs = client.get("/api/v3/pairs").json()["pairs"]
+    assert all(p["reject_reasons"] for p in pairs if p["status"] == "rejected")
+    cand = {}
+    for r in csv.DictReader(open(cs.PATHS["pairs_dir"] / "candidates.csv", encoding="utf-8-sig")):
+        cand.setdefault((r["event_id"], r.get("item_id") or ""), r)
+    n = 0
+    for p in pairs:
+        r = cand.get((p["event_id"], p["scene_id"] or ""))
+        if r and r.get("drift_shift_km"):
+            n += 1
+            assert abs(p["drift_shift_km"] - float(r["drift_shift_km"])) < 0.001
+            assert abs(p["tolerance_km"] - float(r["tolerance_km"])) < 0.001
+            if "sync_unreliable_drift" in (r.get("reject_reason") or ""):
+                assert "DRIFT_TOO_LARGE" in p["reject_reasons"]
+        assert p["status_without_drift"] in ("accepted", "rejected")
+    if "drift_shift_km" in next(iter(cand.values()), {}):
+        assert n > 0
+
+
+def test_zone_area_is_polygon_area_and_pair_status(client):
+    for f in client.get("/api/v3/zones").json()["features"]:
+        p = f["properties"]
+        ga = cs.geodesic_area_km2(f["geometry"])
+        assert ga is None or abs(p["area_km2"] - ga) <= 1e-3 * max(ga, 1e-6) + 1e-4
+        assert "strip_area_raster_km2" in p
+        assert p["concentration_status"] == "unavailable" and p["support"]["linked_sample_ids"]
+        if p["pair_status"] == "rejected" and "DRIFT_TOO_LARGE" in p["pair_reject_reasons"]:
+            assert "pair_rejected_drift" in p["quality"]["flags"] and p["pair_sync"] == "unsynchronized"
+
+
+@pytest.mark.skipif(not HAS_SAMPLES, reason="нет task/macroplastic_marine_samples.csv")
+def test_zones_source_filter_and_export_equal_run(client):
+    z = client.get("/api/v3/zones", params={"source": "S4_BLACK_SEA_DOORS3"}).json()["features"]
+    for f in z:
+        srcs = {(cs.sample_row(s) or {}).get("source_id") for s in f["properties"]["support"]["linked_sample_ids"]}
+        assert "S4_BLACK_SEA_DOORS3" in srcs
+    qid = client.post("/api/v3/queries", json={"name": "t", "query": {"sources": ["S4_BLACK_SEA_DOORS3"]}}).json()["query_id"]
+    run = client.get(f"/api/v3/queries/{qid}/run").json()
+    ex = client.get("/api/v3/export", params={"layer": "zones", "format": "geojson", "query_id": qid}).json()
+    assert [f["id"] for f in ex["features"]] == [f["id"] for f in run["zones"]["features"]] == [f["id"] for f in z]
+    # a zone's scene is among linked_scenes of its samples (unsynchronized ones listed separately)
+    obs = {f["id"]: f["properties"] for f in run["observations"]["features"]}
+    for f in run["zones"]["features"]:
+        p = f["properties"]
+        for s in p["support"]["linked_sample_ids"]:
+            if s in obs and p["scene_id"]:
+                assert p["scene_id"] in obs[s]["linked_scenes"]
+                if p["pair_status"] == "rejected":
+                    assert p["scene_id"] in obs[s]["linked_scenes_unsynced"]
+
+
+@pytest.mark.skipif(not HAS_SAMPLES, reason="нет task/macroplastic_marine_samples.csv")
+def test_query_with_scopes(client):
+    r = client.post("/api/v3/queries", json={"name": "S2 пластик", "query": {"sources": ["S2_SARGASSO_MSM41"],
+                                                                             "scopes": ["total_plastic"]}})
+    assert r.status_code == 201 and r.json()["query"]["scopes"] == ["total_plastic"]
+    qid = r.json()["query_id"]
+    run = client.get(f"/api/v3/queries/{qid}/run").json()
+    assert run["summary"]["n_obs"] == 63
+    assert all(f["properties"]["target_scope"] == "total_plastic" for f in run["observations"]["features"])
+    ex = client.get("/api/v3/export", params={"layer": "observations", "format": "geojson", "query_id": qid}).json()
+    assert ex["count"] == 63
+    _err(client.post("/api/v3/queries", json={"name": "x", "query": {"scopes": ["plastic"]}}), 400, "BAD_PARAM")

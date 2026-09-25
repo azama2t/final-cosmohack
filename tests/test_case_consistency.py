@@ -129,9 +129,7 @@ def test_invalid_inputs_are_4xx_with_message(client):
     assert client.get("/api/v3/queries").json()["queries"] == []  # nothing invalid was saved
 
 
-# ------------------------------------------------------------------ known inconsistencies (owner: L62/L61)
-@pytest.mark.xfail(reason="67_consistency: export?layer=zones&query_id не фильтрует зоны по sources, run — фильтрует",
-                   strict=False)
+# ------------------------------------------------------------------ formerly known inconsistencies (fixed in L62e)
 def test_export_zones_query_id_equals_run(client):
     qid = _save(client, {"sources": ["S4_BLACK_SEA_DOORS3"]})
     run = client.get(f"/api/v3/queries/{qid}/run").json()
@@ -139,14 +137,11 @@ def test_export_zones_query_id_equals_run(client):
     assert [f["id"] for f in gj["features"]] == [z["id"] for z in run["zones"]["features"]]
 
 
-@pytest.mark.xfail(reason="67_consistency: sync_unreliable_drift/time_unknown не переводятся в код reject_reasons",
-                   strict=False)
 def test_rejected_pairs_have_reason(client):
     pairs = client.get("/api/v3/pairs?status=rejected").json()["pairs"]
     assert all(p["reject_reasons"] for p in pairs)
 
 
-@pytest.mark.xfail(reason="67_consistency: drift_shift_km есть в candidates.csv, в API всегда null", strict=False)
 def test_pairs_drift_shift_from_registry(client):
     cand = {(r["event_id"], r.get("item_id") or ""): r for r in cc.read_csv(cc.CANDIDATES)}
     pairs = client.get("/api/v3/pairs?source=S3_SE_NORTH_SEA").json()["pairs"]

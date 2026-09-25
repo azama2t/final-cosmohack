@@ -31,6 +31,7 @@ PATHS: dict[str, Path] = {
     "dev_cv": REPO / "reports" / "case_conc" / "dev_cv.json",
     "final_test": REPO / "reports" / "case_conc" / "final_test.json",
     "conc_weights_dir": REPO / "weights" / "case_conc",
+    "registry_pairs": REPO / "data" / "case" / "run" / "registry_pairs.csv",
 }
 
 # ------------------------------------------------------------------ dictionaries (contract section 2)
@@ -85,6 +86,8 @@ REJECT_REASONS = [
     # additions (contract: only additions allowed)
     {"id": "MISSION_NOT_TARGET", "label": "Миссия не целевая (Landsat-7)"},
     {"id": "PROCESSING_ERROR", "label": "Ошибка обработки снимка"},
+    {"id": "DRIFT_TOO_LARGE", "label": "Дрейф за разрыв времени больше допуска (несинхронно)"},
+    {"id": "TIME_UNKNOWN", "label": "Время наблюдения неизвестно (окно по суткам)"},
 ]
 # Quality mask legend (contract 3.1). /api/v3/scenes/{id}/quality.png is rendered from quality.tif of
 # scripts/case/pair_quality.py with exactly these RGBA colours (codes: 0 nodata, 1 water, 2 land, 3 SCL cloud/shadow/
@@ -149,6 +152,7 @@ QUERY_LAYERS = ["scene", "quality", "observations", "zones", "pairs"]
 _CAND_REASON = {
     "no_scene_in_window": "NO_SCENE_IN_WINDOW", "mission_not_launched": "NO_SCENE_IN_WINDOW",
     "dt>1d": "DT_TOO_LARGE", "cloud_cover>60": "CLOUD", "point_outside_footprint": "NODATA",
+    "sync_unreliable_drift": "DRIFT_TOO_LARGE",
 }
 _PQ_REASON = {"cloud": "CLOUD", "glint": "GLINT", "insufficient_coverage": "NODATA", "land": "LAND_OR_COAST",
               "low_valid_water": "NODATA"}
@@ -492,11 +496,30 @@ def _obs_feature(r: dict, linked: list[str], geometry: str = "point") -> dict:
 
 
 def linked_scenes_by_sample() -> dict[str, list[str]]:
+    """Scenes of accepted pairs + scenes the sample was actually checked on (pair_quality -> zone), even if the
+    pair was rejected (e.g. drift); the latter are also listed in linked_scenes_unsynced."""
     out: dict[str, set] = {}
     for p in pairs_all():
         if p["status"] == "accepted" and p["scene_id"]:
             out.setdefault(p["sample_id"], set()).add(p["scene_id"])
+    for sid, scenes in checked_scenes_by_sample().items():
+        out.setdefault(sid, set()).update(scenes)
     return {k: sorted(v) for k, v in out.items()}
+
+
+def checked_scenes_by_sample() -> dict[str, set]:
+    out: dict[str, set] = {}
+    for q in pair_quality_raw():
+        if q.get("scene_id"):
+            for sid in (q.get("sample_ids") or "").split(";"):
+                if sid:
+                    out.setdefault(sid, set()).add(q["scene_id"])
+    return out
+
+
+def unsynced_scenes_by_sample() -> dict[str, list[str]]:
+    acc = {(p["sample_id"], p["scene_id"]) for p in pairs_all() if p["status"] == "accepted"}
+    return {sid: sorted(x for x in sc if (sid, x) not in acc) for sid, sc in checked_scenes_by_sample().items()}
 
 
 def filter_samples(bbox=None, date_from=None, date_to=None, sources=None, profiles=None, scopes=None,
@@ -526,7 +549,10 @@ def observations_fc(rows: list[dict], geometry: str = "point", limit: Optional[i
     if limit is not None:
         rows = rows[:limit]
     linked = linked_scenes_by_sample() if rows else {}
+    uns = unsynced_scenes_by_sample() if rows else {}
     feats = [_obs_feature(r, linked.get(r.get("sample_id"), []), geometry) for r in rows]
+    for f in feats:
+        f["properties"]["linked_scenes_unsynced"] = uns.get(f["id"], [])
     fc = {"type": "FeatureCollection", "kind": "measurement", "count": len(feats), "total": total,
           "empty_reason": None, "features": feats}
     if not feats:
@@ -557,6 +583,8 @@ def _codes(raw: str, table: dict) -> list[str]:
             c = "MISSION_NOT_TARGET"
         elif part.startswith("read_error") or part.startswith("error"):
             c = "PROCESSING_ERROR"
+        elif part.startswith("time_unknown"):
+            c = "TIME_UNKNOWN"
         else:
             c = table.get(part)
         if c and c not in out:
@@ -583,13 +611,20 @@ def _pairs_build(cands, pq_rows, samples) -> list[dict]:
         q = pq.get((ev, item or ""))
         cloud_local = valid_local = None
         quality_decision = None
+        # L59b: accept_meta = all metadata rules except drift sync; accept = accept_meta and drift ok
+        accept_meta = _truthy(c.get("accept_meta")) if (c.get("accept_meta") or "") != "" else accept
         if q:
             cloud_local = _r(fnum(q.get("cloud_frac")) * 100, 2) if fnum(q.get("cloud_frac")) is not None else None
             valid_local = _r(q.get("valid_water_frac"))
             quality_decision = q.get("decision") or None
-            if accept and quality_decision != "accept":
-                accept = False
-                reasons = _codes(q.get("reason") or "", _PQ_REASON) or ["PROCESSING_ERROR"]
+            if quality_decision != "accept":
+                pq_codes = _codes(q.get("reason") or "", _PQ_REASON) or ["PROCESSING_ERROR"]
+                if accept:
+                    accept = False
+                    reasons = pq_codes
+                else:
+                    reasons = reasons + [x for x in pq_codes if x not in reasons]
+        without_drift = accept_meta and (quality_decision in (None, "accept"))
         for s in by_event.get(ev, []):
             sid = s.get("sample_id")
             pid = f"{sid}__{key_scene}"
@@ -606,7 +641,7 @@ def _pairs_build(cands, pq_rows, samples) -> list[dict]:
                 "scene_id": item, "mission": mission_of(item or "", c.get("mission", "")),
                 "scene_datetime": iso_dt(c.get("scene_datetime")), "obs_datetime": iso_dt(c.get("obs_datetime")),
                 "dt_hours": _r(c.get("dt_hours"), 2),
-                "distance_km": None, "drift_shift_km": None, "geometry": geom,
+                "distance_km": None, "drift_shift_km": _r(c.get("drift_shift_km"), 3), "geometry": geom,
                 "cloud_pct_local": cloud_local, "valid_fraction_local": valid_local,
                 "status": "accepted" if accept else "rejected", "reject_reasons": reasons,
                 "split": None,
@@ -616,6 +651,13 @@ def _pairs_build(cands, pq_rows, samples) -> list[dict]:
                 "time_known": _truthy(c.get("time_known")),
                 "registry_note": raw or None,
                 "quality_decision": quality_decision,
+                "tolerance_km": _r(c.get("tolerance_km"), 3),
+                "drift_scenarios_km": ({"low": _r(c.get("drift_shift_km_low"), 3),
+                                        "typical": _r(c.get("drift_shift_km_typical"), 3),
+                                        "high": _r(c.get("drift_shift_km_high"), 3)}
+                                       if fnum(c.get("drift_shift_km_typical")) is not None else None),
+                "dt_drift_hours": _r(c.get("dt_drift_h"), 2),
+                "status_without_drift": "accepted" if without_drift else "rejected",
             })
     out.sort(key=lambda p: p["pair_id"])
     return out
@@ -891,8 +933,10 @@ def zones_all() -> list[dict]:
             "status": status, "detection_status": status, "status_reason": reason,
             "concentration_status": "unavailable",
             "concentration_reason": "нет проверенного переноса «снимок → шт./км²»; спутниковая концентрация не выдаётся",
-            "area_km2": _r(q.get("strip_area_km2")),
-            "area_basis": "полоса наблюдения (буфер трансекты/точки), по которой проверен снимок",
+            "area_km2": _r(geodesic_area_km2(geom)),
+            "area_basis": "геодезическая площадь полигона geometry (WGS84): полоса наблюдения вокруг трансекты/точки",
+            "strip_area_raster_km2": _r(q.get("strip_area_km2")),
+            **zone_pair_info(q.get("event_id", ""), q.get("scene_id") or "", sids),
             "detected_area_m2": _r(q.get("det_area_m2"), 1),
             "detector": {"prob_mean": None, "prob_max": _r(prob_max), "n_pixels": det.get("det_px_strip"),
                          "n_objects": None if n_det is None else int(n_det),
@@ -910,8 +954,52 @@ def zones_all() -> list[dict]:
                         "field_scope_label": scope_label(frow.get("target_scope") or "")},
             "event_id": q.get("event_id"), "quality_dir": d,
         }})
+    for f in feats:
+        pr = f["properties"]
+        pr["quality"]["flags"] = sorted(set(pr["quality"]["flags"]) | set(pr.pop("_flags", [])))
+        if pr.get("pair_status") == "rejected" and pr["detection_status"] != "insufficient_data":
+            pr["status_reason"] += "; пара с полем отклонена (" + ", ".join(pr["pair_reject_reasons"]) + \
+                "): снимок не синхронен измерению"
     feats.sort(key=lambda f: f["id"])
     return feats
+
+
+def geodesic_area_km2(geom) -> Optional[float]:
+    if not geom:
+        return None
+    try:
+        from pyproj import Geod
+        from shapely.geometry import shape
+        a, _ = Geod(ellps="WGS84").geometry_area_perimeter(shape(geom))
+        return abs(a) / 1e6
+    except Exception:
+        return None
+
+
+def registry_pairs() -> dict[str, dict]:
+    """data/case/run/registry_pairs.csv (L65 run_all): per event status / stage / status_without_drift."""
+    rows = _cached("registry_pairs", PATHS["registry_pairs"], _read_csv) or []
+    return {r.get("event_id", ""): r for r in rows}
+
+
+def zone_pair_info(event_id: str, scene_id: str, sids: list[str]) -> dict:
+    """Status of the observation<->scene pair behind a zone (the detector verdict stays; the pair may be rejected
+    e.g. for drift: the scene is then NOT synchronous with the field measurement)."""
+    ps = [p for p in pairs_all() if p["event_id"] == event_id and p["scene_id"] == scene_id]
+    acc = any(p["status"] == "accepted" for p in ps)
+    reasons = sorted({c for p in ps for c in p["reject_reasons"]}) if not acc else []
+    reg = registry_pairs().get(event_id) or {}
+    flags = []
+    if "DRIFT_TOO_LARGE" in reasons:
+        flags.append("pair_rejected_drift")
+    return {"pair_status": ("accepted" if acc else "rejected") if ps else None,
+            "pair_reject_reasons": reasons,
+            "pair_sync": ("synchronous" if acc else "unsynchronized") if ps else None,
+            "pair_drift_shift_km": ps[0]["drift_shift_km"] if ps else None,
+            "pair_tolerance_km": ps[0]["tolerance_km"] if ps else None,
+            "registry": {"status": reg.get("status") or None, "stage": reg.get("stage") or None,
+                         "status_without_drift": reg.get("status_without_drift") or None} if reg else None,
+            "_flags": flags}
 
 
 def zone_status_tags(p: dict) -> set:
@@ -925,7 +1013,8 @@ def zone_status_tags(p: dict) -> set:
 
 
 def filter_zones(bbox=None, date_from=None, date_to=None, scene_id=None, statuses=None, profiles=None,
-                 min_area_km2=None, detection_statuses=None, concentration_statuses=None) -> list[dict]:
+                 min_area_km2=None, detection_statuses=None, concentration_statuses=None, sources=None,
+                 scopes=None) -> list[dict]:
     out = []
     for f in zones_all():
         p = f["properties"]
@@ -945,9 +1034,13 @@ def filter_zones(bbox=None, date_from=None, date_to=None, scene_id=None, statuse
             g = f["geometry"]
             if not g or not bbox_intersects(_geom_bounds(g), bbox):
                 continue
-        if profiles:
-            profs = {(sample_row(s) or {}).get("measurement_profile") for s in p["support"]["linked_sample_ids"]}
-            if not profs & set(profiles):
+        if profiles or sources or scopes:  # zones have no source/profile/scope of their own -> linked observations
+            rows = [sample_row(s) or {} for s in p["support"]["linked_sample_ids"]]
+            if profiles and not {r.get("measurement_profile") for r in rows} & set(profiles):
+                continue
+            if sources and not {r.get("source_id") for r in rows} & set(sources):
+                continue
+            if scopes and not {r.get("target_scope") for r in rows} & set(scopes):
                 continue
         out.append(f)
     return out
@@ -1155,7 +1248,7 @@ def normalize_query(q) -> dict:
         q = {}
     if not isinstance(q, dict):
         raise ApiError(400, "BAD_PARAM", "query: ожидается JSON-объект", {})
-    known = {"bbox", "date_from", "date_to", "statuses", "sources", "profiles", "layers", "scene_id"}
+    known = {"bbox", "date_from", "date_to", "statuses", "sources", "profiles", "scopes", "layers", "scene_id"}
     unknown = sorted(set(q) - known)
     if unknown:
         raise ApiError(400, "BAD_PARAM", f"query: неизвестные поля {', '.join(unknown)}", {"unknown": unknown})
@@ -1163,7 +1256,7 @@ def normalize_query(q) -> dict:
     sid = q.get("scene_id")
     if sid is not None and not isinstance(sid, str):
         raise ApiError(400, "BAD_PARAM", "query.scene_id: строка или null", {})
-    for k in ("statuses", "sources", "profiles", "layers"):
+    for k in ("statuses", "sources", "profiles", "scopes", "layers"):
         if q.get(k) is not None and not isinstance(q.get(k), list):
             raise ApiError(400, "BAD_PARAM", f"query.{k}: ожидается список", {"param": k})
     bbox = q.get("bbox")
@@ -1175,6 +1268,7 @@ def normalize_query(q) -> dict:
         "statuses": parse_list(q.get("statuses"), "statuses", STATUS_IDS) or [],
         "sources": parse_list(q.get("sources"), "sources", SOURCE_IDS) or [],
         "profiles": parse_list(q.get("profiles"), "profiles", PROFILE_IDS) or [],
+        "scopes": parse_list(q.get("scopes"), "scopes", SCOPE_IDS) or [],
         "layers": parse_list(q.get("layers"), "layers", QUERY_LAYERS) or [],
         "scene_id": sid or None,
     }
@@ -1245,7 +1339,7 @@ ZONE_COLS_31 = ZONE_COLS + ["detection_status", "concentration_status", "field_e
 PAIR_COLS = ["pair_id", "sample_id", "event_id", "source_id", "scene_id", "mission", "scene_datetime", "obs_datetime",
              "dt_hours", "distance_km", "drift_shift_km", "geometry", "cloud_pct_local", "valid_fraction_local",
              "status", "reject_reasons", "split", "scene_cloud_pct", "catalog", "time_known", "registry_note",
-             "quality_decision"]
+             "quality_decision", "tolerance_km", "dt_drift_hours", "status_without_drift"]
 
 
 def _cell(v) -> str:
@@ -1307,3 +1401,24 @@ def zones_csv(feats: list[dict]) -> str:
                     p["support"]["linked_sample_ids"], cen[0], cen[1], "model_estimate",
                     p["detection_status"], p["concentration_status"], (p.get("field_estimate") or {}).get("value")])
     return _csv(ZONE_COLS_31, out)
+
+
+# ------------------------------------------------------------------ saved query execution (run + export share it)
+def run_query_layers(qr: dict) -> dict:
+    """The single filter used by GET /queries/{id}/run and GET /export?query_id=: observations, zones, scenes."""
+    qr = {**{"scopes": []}, **qr}
+    obs_rows = filter_samples(bbox=qr.get("bbox"), date_from=qr.get("date_from"), date_to=qr.get("date_to"),
+                              sources=qr.get("sources") or None, profiles=qr.get("profiles") or None,
+                              scopes=qr.get("scopes") or None)
+    zf = filter_zones(bbox=qr.get("bbox"), date_from=qr.get("date_from"), date_to=qr.get("date_to"),
+                      scene_id=qr.get("scene_id"), statuses=qr.get("statuses") or None,
+                      profiles=qr.get("profiles") or None, sources=qr.get("sources") or None,
+                      scopes=qr.get("scopes") or None)
+    sc = filter_scenes(bbox=qr.get("bbox"), date_from=qr.get("date_from"), date_to=qr.get("date_to"))
+    if qr.get("scene_id"):
+        sc = [x for x in sc if x["scene_id"] == qr["scene_id"]]
+    if qr.get("sources") or qr.get("profiles") or qr.get("scopes"):
+        ids = {r.get("sample_id") for r in obs_rows}
+        linked = {p["scene_id"] for p in pairs_all() if p["sample_id"] in ids and p["scene_id"]}
+        sc = [x for x in sc if x["scene_id"] in linked]
+    return {"obs_rows": obs_rows, "zones": zf, "scenes": sc}

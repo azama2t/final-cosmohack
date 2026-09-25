@@ -86,6 +86,8 @@ def _zone_filters(q: dict) -> dict:
             "statuses": cs.parse_list(q.get("status"), "status", cs.STATUS_IDS),
             "profiles": cs.parse_list(q.get("profile"), "profile", cs.PROFILE_IDS),
             "min_area_km2": cs.parse_float(q.get("min_area_km2"), "min_area_km2", 0, 1e9),
+            "sources": cs.parse_list(q.get("source"), "source", cs.SOURCE_IDS),
+            "scopes": cs.parse_list(q.get("scope"), "scope", cs.SCOPE_IDS),
             "detection_statuses": cs.parse_list(q.get("detection_status"), "detection_status",
                                                 cs.DETECTION_STATUS_IDS),
             "concentration_statuses": cs.parse_list(q.get("concentration_status"), "concentration_status",
@@ -239,6 +241,10 @@ def _query_to_params(qr: dict, layer: str) -> dict:
         out["source"] = ",".join(qr["sources"])
     if layer in ("observations", "zones") and qr.get("profiles"):
         out["profile"] = ",".join(qr["profiles"])
+    if layer in ("observations", "zones") and qr.get("scopes"):
+        out["scope"] = ",".join(qr["scopes"])
+    if layer == "zones" and qr.get("sources"):
+        out["source"] = ",".join(qr["sources"])
     if layer == "zones":
         if qr.get("statuses"):
             out["status"] = ",".join(qr["statuses"])
@@ -259,12 +265,14 @@ def export(request: Request):
     if layer is None:
         raise ApiError(400, "BAD_PARAM", "layer: обязателен, observations | pairs | zones", {"param": "layer"})
     fmt = cs.parse_choice(q.get("format"), "format", ["geojson", "csv"], "geojson")
+    ran = None
     if q.get("query_id"):
-        q = {**_query_to_params(cs.get_query(q["query_id"])["query"], layer),
-             **{k: v for k, v in q.items() if k in ("geometry", "limit")}}
+        qr = cs.get_query(q["query_id"])["query"]
+        ran = cs.run_query_layers(qr)  # the same executor as /queries/{id}/run
+        q = {**_query_to_params(qr, layer), **{k: v for k, v in q.items() if k in ("geometry", "limit")}}
     stamp = dt.date.today().isoformat()
     if layer == "observations":
-        rows = cs.filter_samples(**_obs_filters(q))
+        rows = ran["obs_rows"] if ran is not None else cs.filter_samples(**_obs_filters(q))
         if fmt == "csv":
             body = cs.observations_csv(rows)
         else:
@@ -279,7 +287,7 @@ def export(request: Request):
                    "features": [{"type": "Feature", "id": p["pair_id"], "geometry": p["geometry"],
                                  "properties": {k: v for k, v in p.items() if k != "geometry"}} for p in items]}
     else:
-        feats = cs.filter_zones(**_zone_filters(q))
+        feats = ran["zones"] if ran is not None else cs.filter_zones(**_zone_filters(q))
         if fmt == "csv":
             body = cs.zones_csv(feats)
         else:
@@ -320,18 +328,8 @@ def query_get(query_id: str):
 def query_run(query_id: str):
     rec = cs.get_query(query_id)
     qr = rec["query"]
-    obs_rows = cs.filter_samples(bbox=qr["bbox"], date_from=qr["date_from"], date_to=qr["date_to"],
-                                 sources=qr["sources"] or None, profiles=qr["profiles"] or None)
-    zf = cs.filter_zones(bbox=qr["bbox"], date_from=qr["date_from"], date_to=qr["date_to"], scene_id=qr["scene_id"],
-                         statuses=qr["statuses"] or None, profiles=qr["profiles"] or None)
-    sc = cs.filter_scenes(bbox=qr["bbox"], date_from=qr["date_from"], date_to=qr["date_to"])
-    if qr["scene_id"]:
-        sc = [s for s in sc if s["scene_id"] == qr["scene_id"]]
-    if qr["sources"] or qr["profiles"]:  # zones/scenes have no source of their own -> via linked observations
-        ids = {r.get("sample_id") for r in obs_rows}
-        zf = [f for f in zf if ids & set(f["properties"]["support"]["linked_sample_ids"])]
-        linked = {p["scene_id"] for p in cs.pairs_all() if p["sample_id"] in ids and p["scene_id"]}
-        sc = [s for s in sc if s["scene_id"] in linked]
+    ran = cs.run_query_layers(qr)
+    obs_rows, zf, sc = ran["obs_rows"], ran["zones"], ran["scenes"]
     by_status: dict[str, int] = {}
     by_conc: dict[str, int] = {}
     for f in zf:
