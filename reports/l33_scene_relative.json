@@ -1,0 +1,684 @@
+{
+ "lane": "L33 scene-relative features",
+ "marida_test_read": false,
+ "control": {
+  "val_s0": 0.9226,
+  "val_final_meta": 0.9226,
+  "lro_by_seed": [
+   0.8605,
+   0.8523,
+   0.8476
+  ],
+  "l16_reference": [
+   0.8605,
+   0.8523,
+   0.8476
+  ]
+ },
+ "rule": "accept if LRO >= 0.854 + max(0.01, 2*std(variant), 2*std(delta)) and val mean(3 seeds) >= 0.9226 - 0.005",
+ "summary": {
+  "base": {
+   "n_features": 48,
+   "val_f1_by_seed": [
+    0.9226,
+    0.9224,
+    0.9234
+   ],
+   "val_mean": 0.9228,
+   "val_std": 0.0005,
+   "val_f1_at_0.63_mean": 0.9203,
+   "lro_by_seed": [
+    0.8605,
+    0.8523,
+    0.8476
+   ],
+   "lro_mean": 0.8535,
+   "lro_std": 0.0065,
+   "lro_delta_vs_base": 0.0,
+   "lro_delta_std": 0.0,
+   "lro_per_region": {
+    "honduras_gulf": 0.8276,
+    "haiti_pap": 0.9457,
+    "jakarta": 0.9345,
+    "bay_islands": 0.706
+   },
+   "lro_per_region_std": {
+    "honduras_gulf": 0.0071,
+    "haiti_pap": 0.0027,
+    "jakarta": 0.0099,
+    "bay_islands": 0.0339
+   },
+   "lro_mean_at_0.63": 0.8541,
+   "lro_mean_oracle": 0.8718,
+   "accept_lro_needed": 0.8671,
+   "accept_val_needed": 0.9176,
+   "pass_lro": false,
+   "pass_val": true,
+   "accept": false
+  },
+  "zs": {
+   "n_features": 63,
+   "val_f1_by_seed": [
+    0.9138,
+    0.9136,
+    0.9127
+   ],
+   "val_mean": 0.9134,
+   "val_std": 0.0006,
+   "val_f1_at_0.63_mean": 0.9117,
+   "lro_by_seed": [
+    0.8787,
+    0.8672,
+    0.8749
+   ],
+   "lro_mean": 0.8736,
+   "lro_std": 0.0059,
+   "lro_delta_vs_base": 0.0201,
+   "lro_delta_std": 0.0064,
+   "lro_per_region": {
+    "honduras_gulf": 0.819,
+    "haiti_pap": 0.958,
+    "jakarta": 0.9451,
+    "bay_islands": 0.7724
+   },
+   "lro_per_region_std": {
+    "honduras_gulf": 0.0075,
+    "haiti_pap": 0.004,
+    "jakarta": 0.0007,
+    "bay_islands": 0.015
+   },
+   "lro_mean_at_0.63": 0.8576,
+   "lro_mean_oracle": 0.8817,
+   "accept_lro_needed": 0.8668,
+   "accept_val_needed": 0.9176,
+   "pass_lro": true,
+   "pass_val": false,
+   "accept": false
+  },
+  "zd": {
+   "n_features": 63,
+   "val_f1_by_seed": [
+    0.9131,
+    0.9104,
+    0.9136
+   ],
+   "val_mean": 0.9124,
+   "val_std": 0.0017,
+   "val_f1_at_0.63_mean": 0.9074,
+   "lro_by_seed": [
+    0.88,
+    0.8641,
+    0.8753
+   ],
+   "lro_mean": 0.8731,
+   "lro_std": 0.0082,
+   "lro_delta_vs_base": 0.0197,
+   "lro_delta_std": 0.008,
+   "lro_per_region": {
+    "honduras_gulf": 0.8292,
+    "haiti_pap": 0.9492,
+    "jakarta": 0.9499,
+    "bay_islands": 0.7642
+   },
+   "lro_per_region_std": {
+    "honduras_gulf": 0.0093,
+    "haiti_pap": 0.0067,
+    "jakarta": 0.0061,
+    "bay_islands": 0.0124
+   },
+   "lro_mean_at_0.63": 0.8736,
+   "lro_mean_oracle": 0.8876,
+   "accept_lro_needed": 0.8703,
+   "accept_val_needed": 0.9176,
+   "pass_lro": true,
+   "pass_val": false,
+   "accept": false
+  },
+  "wide": {
+   "n_features": 53,
+   "val_f1_by_seed": [
+    0.9207,
+    0.9216,
+    0.9182
+   ],
+   "val_mean": 0.9202,
+   "val_std": 0.0018,
+   "val_f1_at_0.63_mean": 0.919,
+   "lro_by_seed": [
+    0.8622,
+    0.8644,
+    0.8547
+   ],
+   "lro_mean": 0.8604,
+   "lro_std": 0.0051,
+   "lro_delta_vs_base": 0.007,
+   "lro_delta_std": 0.0052,
+   "lro_per_region": {
+    "honduras_gulf": 0.8447,
+    "haiti_pap": 0.9526,
+    "jakarta": 0.953,
+    "bay_islands": 0.6915
+   },
+   "lro_per_region_std": {
+    "honduras_gulf": 0.0031,
+    "haiti_pap": 0.0016,
+    "jakarta": 0.0002,
+    "bay_islands": 0.0238
+   },
+   "lro_mean_at_0.63": 0.8503,
+   "lro_mean_oracle": 0.8717,
+   "accept_lro_needed": 0.8644,
+   "accept_val_needed": 0.9176,
+   "pass_lro": false,
+   "pass_val": true,
+   "accept": false
+  },
+  "zs_wide": {
+   "n_features": 68,
+   "val_f1_by_seed": [
+    0.9083,
+    0.9052,
+    0.9082
+   ],
+   "val_mean": 0.9072,
+   "val_std": 0.0018,
+   "val_f1_at_0.63_mean": 0.9048,
+   "lro_by_seed": [
+    0.8734,
+    0.8782,
+    0.8788
+   ],
+   "lro_mean": 0.8768,
+   "lro_std": 0.003,
+   "lro_delta_vs_base": 0.0233,
+   "lro_delta_std": 0.0094,
+   "lro_per_region": {
+    "honduras_gulf": 0.8327,
+    "haiti_pap": 0.9588,
+    "jakarta": 0.949,
+    "bay_islands": 0.7666
+   },
+   "lro_per_region_std": {
+    "honduras_gulf": 0.0041,
+    "haiti_pap": 0.0025,
+    "jakarta": 0.0012,
+    "bay_islands": 0.0116
+   },
+   "lro_mean_at_0.63": 0.8608,
+   "lro_mean_oracle": 0.8844,
+   "accept_lro_needed": 0.8728,
+   "accept_val_needed": 0.9176,
+   "pass_lro": true,
+   "pass_val": false,
+   "accept": false
+  },
+  "zs_nir": {
+   "n_features": 58,
+   "val_f1_by_seed": [
+    0.9153,
+    0.9175,
+    0.9144
+   ],
+   "val_mean": 0.9157,
+   "val_std": 0.0016,
+   "val_f1_at_0.63_mean": 0.9144,
+   "lro_by_seed": [
+    0.8594,
+    0.8556,
+    0.8427
+   ],
+   "lro_mean": 0.8526,
+   "lro_std": 0.0088,
+   "lro_delta_vs_base": -0.0009,
+   "lro_delta_std": 0.0041,
+   "lro_per_region": {
+    "honduras_gulf": 0.8065,
+    "haiti_pap": 0.9582,
+    "jakarta": 0.9478,
+    "bay_islands": 0.6977
+   },
+   "lro_per_region_std": {
+    "honduras_gulf": 0.0055,
+    "haiti_pap": 0.0019,
+    "jakarta": 0.0047,
+    "bay_islands": 0.0247
+   },
+   "lro_mean_at_0.63": 0.8483,
+   "lro_mean_oracle": 0.8696,
+   "accept_lro_needed": 0.8715,
+   "accept_val_needed": 0.9176,
+   "pass_lro": false,
+   "pass_val": false,
+   "accept": false
+  },
+  "zs_idx": {
+   "n_features": 53,
+   "val_f1_by_seed": [
+    0.9143,
+    0.9158,
+    0.9155
+   ],
+   "val_mean": 0.9152,
+   "val_std": 0.0008,
+   "val_f1_at_0.63_mean": 0.9141,
+   "lro_by_seed": [
+    0.8633,
+    0.8604,
+    0.8584
+   ],
+   "lro_mean": 0.8607,
+   "lro_std": 0.0025,
+   "lro_delta_vs_base": 0.0072,
+   "lro_delta_std": 0.0041,
+   "lro_per_region": {
+    "honduras_gulf": 0.8181,
+    "haiti_pap": 0.9603,
+    "jakarta": 0.9467,
+    "bay_islands": 0.7176
+   },
+   "lro_per_region_std": {
+    "honduras_gulf": 0.0054,
+    "haiti_pap": 0.0004,
+    "jakarta": 0.0024,
+    "bay_islands": 0.0057
+   },
+   "lro_mean_at_0.63": 0.8424,
+   "lro_mean_oracle": 0.8741,
+   "accept_lro_needed": 0.864,
+   "accept_val_needed": 0.9176,
+   "pass_lro": false,
+   "pass_val": false,
+   "accept": false
+  }
+ },
+ "implementations": {
+  "1": [
+   "zs",
+   "zd",
+   "wide",
+   "zs_wide"
+  ],
+  "2": [
+   "zs_nir",
+   "zs_idx"
+  ]
+ },
+ "scene_info": {
+  "scene_modes": {
+   "dark_half": 174,
+   "candidates": 0,
+   "default": 6
+  },
+  "scenes_default": [
+   "Scene_109",
+   "Scene_111",
+   "Scene_30",
+   "Scene_72",
+   "Scene_87",
+   "Scene_96"
+  ],
+  "water_px_per_scene_median": 64762,
+  "default_med": [
+   0.05012,
+   0.04066,
+   0.02895,
+   0.02015,
+   0.01766,
+   0.01682,
+   0.01759,
+   0.01449,
+   0.01571,
+   0.00897,
+   0.0061,
+   0.00989,
+   -0.00264,
+   -0.13922,
+   0.31335
+  ]
+ },
+ "speed_2500": {
+  "tile": "2500x2500",
+  "feature_seconds_median": {
+   "base": 3.87,
+   "zs": 4.84,
+   "zs_extra_only": 0.97,
+   "zd": 4.84,
+   "zd_extra_only": 0.97,
+   "wide": 5.08,
+   "wide_extra_only": 1.21,
+   "zs_wide": 5.95,
+   "zs_wide_extra_only": 2.08
+  },
+  "feature_time_increase_pct": {
+   "zs": 25.1,
+   "zd": 25.1,
+   "wide": 31.3,
+   "zs_wide": 53.7
+  },
+  "predict_half_tile_10_threads": {
+   "base": {
+    "n_features": 48,
+    "seconds_half_tile": 3.91
+   },
+   "zs": {
+    "n_features": 63,
+    "seconds_half_tile": 3.91
+   },
+   "zd": {
+    "n_features": 63,
+    "seconds_half_tile": 4.54
+   },
+   "wide": {
+    "n_features": 53,
+    "seconds_half_tile": 4.55
+   },
+   "zs_wide": {
+    "n_features": 68,
+    "seconds_half_tile": 4.57
+   }
+  },
+  "note": "features: one process (blocked product path). zd has the same cost as zs. wide needs halo 64 (dmed63); predict uses random values for extra columns (time only)."
+ },
+ "top_gain_s0": {
+  "base": [
+   [
+    "FDI_dmed15",
+    580137.6
+   ],
+   [
+    "B8_mean15",
+    89871.6
+   ],
+   [
+    "NDVI_std7",
+    46720.7
+   ],
+   [
+    "NDMI",
+    29914.4
+   ],
+   [
+    "FAI",
+    23130.4
+   ],
+   [
+    "NDVI",
+    22288.1
+   ],
+   [
+    "NDWI",
+    14183.5
+   ],
+   [
+    "NDVI_mean3",
+    13439.3
+   ],
+   [
+    "FDI_dmed31",
+    13406.8
+   ],
+   [
+    "B12",
+    13337.6
+   ]
+  ],
+  "zs": [
+   [
+    "FDI_dmed15",
+    468195.4
+   ],
+   [
+    "FDI_dmed31",
+    119192.0
+   ],
+   [
+    "B8_mean15",
+    88313.4
+   ],
+   [
+    "NDVI_std7",
+    47416.6
+   ],
+   [
+    "NDMI",
+    21195.6
+   ],
+   [
+    "FAI",
+    20247.8
+   ],
+   [
+    "NDVI",
+    18110.1
+   ],
+   [
+    "zs_B1",
+    15148.9
+   ],
+   [
+    "NDWI",
+    12311.8
+   ],
+   [
+    "zs_B2",
+    10473.1
+   ]
+  ],
+  "zd": [
+   [
+    "FDI_dmed15",
+    467489.4
+   ],
+   [
+    "FDI_dmed31",
+    119204.3
+   ],
+   [
+    "B8_mean15",
+    85041.1
+   ],
+   [
+    "NDVI_std7",
+    49606.4
+   ],
+   [
+    "NDMI",
+    20058.6
+   ],
+   [
+    "NDVI",
+    19682.9
+   ],
+   [
+    "B12",
+    14822.7
+   ],
+   [
+    "FAI",
+    14778.4
+   ],
+   [
+    "zd_B1",
+    14525.8
+   ],
+   [
+    "NDWI",
+    13530.4
+   ]
+  ],
+  "wide": [
+   [
+    "FDI_dmed15",
+    288299.6
+   ],
+   [
+    "FDI_dmed31",
+    194965.9
+   ],
+   [
+    "NDWI_dmed31",
+    114043.4
+   ],
+   [
+    "NDVI_std15",
+    59032.0
+   ],
+   [
+    "NDMI",
+    55046.2
+   ],
+   [
+    "B8_mean15",
+    51036.9
+   ],
+   [
+    "NDVI",
+    17259.1
+   ],
+   [
+    "NDWI",
+    15542.0
+   ],
+   [
+    "NDVI_std7",
+    15436.7
+   ],
+   [
+    "B12",
+    14240.8
+   ]
+  ],
+  "zs_wide": [
+   [
+    "FDI_dmed15",
+    397920.9
+   ],
+   [
+    "NDWI_dmed31",
+    174645.3
+   ],
+   [
+    "NDMI",
+    62751.5
+   ],
+   [
+    "NDVI_std15",
+    59782.2
+   ],
+   [
+    "B8_mean15",
+    32327.8
+   ],
+   [
+    "FDI_dmed31",
+    27599.7
+   ],
+   [
+    "NDVI",
+    26043.9
+   ],
+   [
+    "NRD",
+    16173.0
+   ],
+   [
+    "NDWI",
+    15008.8
+   ],
+   [
+    "zs_B2",
+    11795.3
+   ]
+  ],
+  "zs_nir": [
+   [
+    "FDI_dmed15",
+    413420.8
+   ],
+   [
+    "FDI_dmed31",
+    163373.8
+   ],
+   [
+    "B8_mean15",
+    97657.5
+   ],
+   [
+    "NDVI_std7",
+    45078.7
+   ],
+   [
+    "NDMI",
+    23076.2
+   ],
+   [
+    "FAI",
+    20098.8
+   ],
+   [
+    "B8_dmed15",
+    17394.0
+   ],
+   [
+    "NDVI_mean3",
+    16966.1
+   ],
+   [
+    "NDVI",
+    14967.0
+   ],
+   [
+    "zs_B12",
+    13301.9
+   ]
+  ],
+  "zs_idx": [
+   [
+    "FDI_dmed31",
+    292811.2
+   ],
+   [
+    "FDI_dmed15",
+    288758.7
+   ],
+   [
+    "B8_mean15",
+    104996.2
+   ],
+   [
+    "NDVI_std15",
+    43078.2
+   ],
+   [
+    "NDMI",
+    23453.6
+   ],
+   [
+    "NDVI",
+    20857.9
+   ],
+   [
+    "FAI",
+    16728.5
+   ],
+   [
+    "NDVI_mean3",
+    13560.0
+   ],
+   [
+    "NDWI",
+    11823.0
+   ],
+   [
+    "B12",
+    11290.2
+   ]
+  ]
+ },
+ "decision": "rejected: no variant passes both conditions; idea closed after 2 implementations",
+ "sources": [
+  "weights_exp/l33/run.json",
+  "weights_exp/l33/run2.json",
+  "weights_exp/l33/speed.json"
+ ]
+}
