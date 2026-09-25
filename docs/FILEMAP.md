@@ -103,3 +103,4 @@
 | `docs/SPEECH.md` | речь на 4 минуты с таймингом, цифры наизусть, ответы на неприятные вопросы (генерируется `scripts/make_deck.py` из final_numbers) | выступление |
 | `reports/qa.md` | 30 вопросов жюри с ответами (генерируется `scripts/make_deck.py`) | выступление |
 | `src/macroplastic/grid/cloudmask.py`, `reports/cloud_edge.md`, `reports/figures/cloud_edge_*.png` | защита от облаков и теней, пропущенных SCL: спектральная маска (B2 ≥ 0.06 и B11 ≥ 0.03), буфер 5 px, проверка тени по NIR | build_service_data |
+| `reports/l31_midsize.md` | средняя модель под CPU (не принята): F1, LRO, скорость по потокам | отчёт |

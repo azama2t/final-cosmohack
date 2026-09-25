@@ -1,7 +1,7 @@
 """Single inference entry point: folder of Sentinel-2 GeoTIFFs -> probability and mask GeoTIFFs.
 
     python inference.py --data-dir DIR --output OUT_DIR [--device cpu|cuda|auto]
-                        [--model lgbm|fdi_rule|mdd|unet] [--channels marida|s2_l2a_12|...]
+                        [--model lgbm|fdi_rule|mdd|unet] [--weights DIR] [--channels marida|s2_l2a_12|...]
                         [--threshold T] [--scale auto|1|0.0001] [--offset auto|0|-1000] [--strict]
                         [--profile] [--workers N] [--profile-json PATH] [--report errors.json]
 
@@ -13,7 +13,7 @@ configs/channels.yaml, else band descriptions, else by band count (11 -> marida,
 Reflectance = (input + offset) * scale.
 --scale auto multiplies by 1e-4 if the data look like DN (median > 2); for such DN files --offset auto
 decides the L2A BOA_ADD_OFFSET (processing baseline >= 04.00: DN = 10000*rho + 1000) from the data:
-median B12 DN of the dark pixels (B8 <= its 25th percentile, i.e. water) >= 1000 -> offset -1000 (DN 0 =
+median B12 DN of the dark pixels (B8 <= its 25th percentile, i.e. water) >= 500 -> offset -1000 (DN 0 =
 nodata -> NaN), else 0; the rule and the measured median are logged per file. Manual mode:
 --scale 1e-4 --offset -1000 (with an explicit --scale, --offset auto means 0).
 1-band rasters (scl.tif, masks, prob_*.tif) are skipped with a warning (not an S2 image).
@@ -56,6 +56,8 @@ def parse_args(argv=None):
     ap.add_argument("--output", required=True, help="output folder")
     ap.add_argument("--device", default="auto", choices=["auto", "cpu", "cuda"])
     ap.add_argument("--model", default="lgbm", help="predictor name: lgbm | fdi_rule | mdd | unet (default lgbm)")
+    ap.add_argument("--weights", default=None,
+                    help="weights folder of the model (model.txt/model.pt + meta.json); default: weights/<model>")
     ap.add_argument("--channels", default=None, help="channel set from configs/channels.yaml (default: auto)")
     ap.add_argument("--threshold", type=float, default=None, help="mask threshold (default: model's, else 0.5)")
     ap.add_argument("--scale", default="auto", help="auto | factor applied to inputs (e.g. 0.0001 for DN)")
@@ -109,12 +111,16 @@ def _median_finite_gt2(np, arr) -> bool:
 
 #: L2A processing baseline >= 04.00 (from 2022-01-25): DN = 10000 * rho + BOA_ADD_OFFSET(1000)
 BOA_OFFSET_DN = 1000.0
+#: detection threshold on the dark-pixel SWIR median (lane L31: 1000 -> 500). Water without the offset:
+#: DN ~10..240 (rho_B12 0.001..0.024); with it: ~950+ (L2A water is often slightly negative, rho -0.005 ->
+#: DN 950, which the old >= 1000 test missed). 500 DN = 0.05 reflectance of margin on both sides.
+BOA_DETECT_DN = 500.0
 
 
 def _boa_offset_rule(np, arr, names) -> tuple[float, str]:
     """DN file: is the L2A BOA_ADD_OFFSET (+1000) inside the pixels? Same idea as live.stac.es_offset_in_pixels:
-    open water is dark in SWIR (rho_B12 ~ 0.000-0.02 -> DN 0..200 without, >= ~1000 with the offset; DN < 1000
-    would be negative reflectance). Dark pixels = B8 <= its 25th percentile (water), both bands finite and > 0.
+    open water is dark in SWIR (rho_B12 ~ 0.000-0.024 -> DN 0..240 without, ~950+ with the offset: L2A water can
+    be slightly negative); threshold BOA_DETECT_DN = 500 sits in the gap. Dark pixels = B8 <= its 25th percentile (water), both bands finite and > 0.
     Returns (offset to add, evidence)."""
     from macroplastic.io import normalize_band
 
@@ -132,11 +138,11 @@ def _boa_offset_rule(np, arr, names) -> tuple[float, str]:
     bv, nv = b[ok], nir[ok]
     dark = bv[nv <= np.percentile(nv, 25)]
     med = float(np.median(dark))
-    if med >= BOA_OFFSET_DN:
-        return -BOA_OFFSET_DN, (f"dark-pixel {sw} median DN={med:.0f} >= {BOA_OFFSET_DN:.0f} -> L2A BOA_ADD_OFFSET "
-                                f"in pixels (baseline >= 04.00): subtracting {BOA_OFFSET_DN:.0f} DN")
-    extra = " (ambiguous 500..1000: check the product baseline, set --offset explicitly)" if med >= 500 else ""
-    return 0.0, f"dark-pixel {sw} median DN={med:.0f} < {BOA_OFFSET_DN:.0f} -> no BOA offset{extra}"
+    if med >= BOA_DETECT_DN:
+        neg = " (water slightly below 0 after subtraction, usual for L2A)" if med < BOA_OFFSET_DN else ""
+        return -BOA_OFFSET_DN, (f"dark-pixel {sw} median DN={med:.0f} >= {BOA_DETECT_DN:.0f} -> L2A BOA_ADD_OFFSET "
+                                f"in pixels (baseline >= 04.00): subtracting {BOA_OFFSET_DN:.0f} DN{neg}")
+    return 0.0, f"dark-pixel {sw} median DN={med:.0f} < {BOA_DETECT_DN:.0f} -> no BOA offset"
 
 
 def _run(a) -> int:
@@ -198,7 +204,8 @@ def _run(a) -> int:
 
         device = resolve_device(a.device)
     try:
-        predictor = get_predictor(a.model, fallback=not a.strict, device=device)
+        wkw = {"weights": a.weights} if a.weights else {}  # default: the loader's weights/<model>
+        predictor = get_predictor(a.model, fallback=not a.strict, device=device, **wkw)
     except KeyError as e:
         _err(str(e).strip("'\""))
         return EXIT_MODEL

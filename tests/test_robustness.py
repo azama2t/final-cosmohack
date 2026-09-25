@@ -224,3 +224,51 @@ def test_l26_tiny_chips_all_sizes():
         q = p.predict_proba(a, names)
         q2 = p.predict_rows_many([p.prepare_rows(a, names)])[0]
         assert q.shape == (h, w) and np.isfinite(q).all() and np.array_equal(q, q2)
+
+
+def test_l31_boa_offset_threshold_500(monkeypatch):
+    """Lane L31: --scale auto detects the L2A BOA offset from dark-pixel B12 median >= 500 DN (was 1000).
+    Water without the offset: B12 DN 10..240; with it: ~950+ (L2A water is often slightly negative -> DN < 1000,
+    which the old >= 1000 rule missed and left the whole scene shifted by +0.1)."""
+    import json
+
+    import numpy as np
+
+    import macroplastic.models as models
+    from macroplastic.io import channel_names
+
+    inf = _inference_module()
+    assert inf.BOA_DETECT_DN == 500 and inf.BOA_OFFSET_DN == 1000
+    names = channel_names("marida")
+    i8, i12 = names.index("B8"), names.index("B12")
+    g = np.random.default_rng(31)
+
+    def dn(b12_lo, b12_hi, offset):
+        rho = g.uniform(0.01, 0.06, (11, 48, 48)).astype(np.float32)
+        rho[i8] = g.uniform(0.005, 0.03, (48, 48))
+        rho[i12] = g.uniform(b12_lo, b12_hi, (48, 48))
+        return np.rint(rho * 1e4) + offset, rho
+
+    cases = {  # name: (B12 rho range, offset in pixels, expected offset to add)
+        "neg_water_off": ((-0.009, 0.0), 1000, -1000),   # median ~955 DN: missed by the old rule
+        "water_off": ((0.0, 0.02), 1000, -1000),         # ~1100 DN
+        "water_noff": ((0.001, 0.024), 0, 0),            # ~125 DN
+        "bright_water_noff": ((0.02, 0.045), 0, 0),      # ~325 DN (turbid / glint edge): still no offset
+    }
+    for name, ((lo, hi), off, want) in cases.items():
+        arr, _ = dn(lo, hi, off)
+        got, why = inf._boa_offset_rule(np, arr.astype(np.float32), names)
+        assert got == want, (name, why)
+        assert ("subtracting 1000" in why) == (want == -1000), (name, why)
+    # end to end through the CLI (fake predictor: prob = B1 * 10 encodes the reflectance the model saw)
+    rr = _load_script()
+    monkeypatch.setattr(models, "get_predictor", lambda *a, **k: _FakeB1())
+    d = _fresh_dir("offset500")
+    arr, rho = dn(-0.009, 0.0, 1000)
+    rr.write_tif(d / "in" / "neg_water_off.tif", arr, dtype="uint16")
+    o = d / "out"
+    assert inf.main(["--data-dir", str(d / "in"), "--output", str(o), "--report", str(o / "r.json")]) == 0
+    rules = {Path(x["file"]).name: x for x in json.loads((o / "r.json").read_text(encoding="utf-8"))["input_rules"]}
+    assert rules["neg_water_off.tif"]["offset"] == -1000, rules
+    expect = np.clip(np.rint(np.clip(np.rint(rho[0] * 1e4) * np.float32(1e-4) * 10, 0, 1) * 255), 0, 255)
+    assert np.abs(rr.read_out(o / "neg_water_off_prob.tif").astype(int) - expect).max() <= 1
