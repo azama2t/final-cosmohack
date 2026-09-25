@@ -23,7 +23,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DASH = "—"
-PAIRS = [("README.md.tmpl", "README.md"), ("reports/report.md.tmpl", "reports/report.md")]
+PAIRS = [("README.md.tmpl", "README.md"), ("reports/report.md.tmpl", "reports/report.md"), ("docs/PREP.md.tmpl", "docs/PREP.md")]
 PH = re.compile(r"\{\{\s*([A-Za-z_][\w.]*)\s*(?:\|\s*(\w+)(?::([^{}]*?))?\s*)?\}\}")
 
 
@@ -84,7 +84,7 @@ def fmt(v, flt: str | None) -> str:
         x = float(v)
     except (TypeError, ValueError):
         return str(v)
-    if flt in ("f1", "f2", "f3"):
+    if flt in ("f0", "f1", "f2", "f3"):
         return f"{x:.{int(flt[1])}f}"
     if flt == "pct":
         return f"{100 * x:.1f}"
@@ -342,6 +342,159 @@ def _test_sentence(t: dict) -> str:
     return f"Test MARIDA посчитан один раз на итоговой модели{num}; порог взят с val, после этого модель не менялась."
 
 
+# ----------------------------------------------------------------------------------------------- case tables
+DET_NAMES = [("lgbm", "**LightGBM, MARIDA + MADOS (основной)**"), ("rf_argmax", "RandomForest, протокол статьи MARIDA"),
+             ("rf_prob", "RandomForest, порог P(MD)"), ("fdi_ndvi_box", "окно FDI × NDVI (4 порога)"),
+             ("fdi_interval", "интервал FDI (2 порога)"), ("fdi_threshold", "один порог FDI"),
+             ("ndvi_threshold", "один порог NDVI")]
+CONC_NAMES = {"median": "медиана train (бейзлайн)", "mean": "среднее train", "geomean": "геометрическое среднее",
+              "pooled": "ΣN/ΣA (пуассоновская без признаков)", "knn5_log": "kNN-5 в log (соседи ±1 сут запрещены)",
+              "ridge_log": "ridge в log (широта, долгота, сезон, время суток)",
+              "poisson_glm": "пуассоновская GLM (вес A, offset log A)", "tweedie_glm": "Tweedie GLM (p = 1,5)",
+              "lgbm_log": "LightGBM в log (100 деревьев, 4 листа)"}
+FP_RU = {"Ship": "суда", "Natural Organic Material": "природная органика", "Waves": "волны", "Mixed Water": "смешанная вода",
+         "Wakes": "кильватерные следы", "Marine Water": "чистая вода", "Foam": "пена", "Clouds": "облака",
+         "Dense Sargassum": "саргассум плотный", "Sparse Sargassum": "саргассум разреженный",
+         "Turbid Water": "мутная вода", "Sediment-Laden Water": "вода со взвесью", "Shallow Water": "мелководье",
+         "Cloud Shadows": "тени облаков"}
+SRC_RU = {"S1_GPGP2018": "S1 Тихий океан, мусорное пятно (2015–2016)", "S2_SARGASSO_MSM41": "S2 Саргассово море (04.2015)",
+          "S3_SE_NORTH_SEA": "S3 Северное море (2014, 2016)", "S4_BLACK_SEA_DOORS3": "S4 Чёрное море (06.2024)",
+          "ВСЕ": "**все**"}
+
+
+def _num(x, nd=1, signed=False):
+    if x is None:
+        return DASH
+    s = f"{float(x):+.{nd}f}" if signed else f"{float(x):.{nd}f}"
+    return s.replace("-", "−")
+
+
+def _ci_txt(ci, nd=1):
+    if not (isinstance(ci, list) and len(ci) == 2 and None not in ci):
+        return DASH
+    return f"[{_num(ci[0], nd, True)}; {_num(ci[1], nd, True)}]"
+
+
+def case_detector_table(fn: dict) -> str:
+    d = ((fn.get("case") or {}).get("detector") or {})
+    te, va, st = d.get("test") or {}, d.get("val") or {}, d.get("settings") or {}
+    if not te:
+        return DASH
+    out = ["| Детектор | Настройка (выбрана на val) | F1 val | Precision test | Recall test | **F1 test** | IoU test | 95 % ДИ F1 test (по сценам) | Помечено неразмеченных пикселей test, % |",
+           "|---|---|---|---|---|---|---|---|---|"]
+    for k, name in DET_NAMES:
+        t, v = te.get(k) or {}, va.get(k) or {}
+        if not t:
+            continue
+        ci = t.get("ci95_f1") or [None, None]
+        out.append(f"| {name} | `{st.get(k) or DASH}` | {fmt(v.get('f1'), 'f3')} | {fmt(t.get('precision'), 'f3')} | "
+                   f"{fmt(t.get('recall'), 'f3')} | **{fmt(t.get('f1'), 'f3')}** | {fmt(t.get('iou'), 'f3')} | "
+                   f"{fmt(ci[0], 'f3')}–{fmt(ci[1], 'f3')} | {fmt(t.get('unlabelled_rate_pct'), 'f3')} |")
+    return "\n".join(out)
+
+
+def case_fp_table(fn: dict) -> str:
+    d = ((fn.get("case") or {}).get("detector") or {})
+    fp = d.get("fp_by_class") or {}
+    if not fp:
+        return DASH
+    rows = sorted(fp.items(), key=lambda kv: (-(kv[1].get("fp") or 0), -(kv[1].get("n") or 0)))
+    out = ["| Класс фона MARIDA (test) | Размечено пикселей | Ложных срабатываний основного детектора | Доля класса, % |",
+           "|---|---:|---:|---:|"]
+    for k, v in rows:
+        out.append(f"| {FP_RU.get(k, k)} | {fmt(v.get('n'), 'int')} | {fmt(v.get('fp'), 'int')} | {fmt(v.get('rate_pct'), 'f2')} |")
+    out.append(f"| **всего** | | **{fmt(d.get('fp_total'), 'int')}** | |")
+    return "\n".join(out)
+
+
+def case_conc_table(fn: dict, key: str) -> str:
+    c = (((fn.get("case") or {}).get("conc") or {}).get(key) or {})
+    tb = c.get("table") or []
+    if not tb:
+        return DASH
+    prim = c.get("primary")
+    out = ["| Модель | MAE, шт./км² | RMSE | медиана abs ошибки | MAE в log1p | ΔMAE к медиане [95 % ДИ] | ДИ с поправкой Бонферрони | Покрытие 90 %-интервала | Медианная ширина интервала |",
+           "|---|---:|---:|---:|---:|---|---|---:|---:|"]
+    for r in tb:
+        m = r.get("model")
+        nm = CONC_NAMES.get(m, m)
+        nm = f"**{nm} — основная**" if m == prim else nm
+        d = DASH if m == "median" else f"{_num(r.get('d_mae'), 1, True)} {_ci_txt(r.get('d_mae_ci95'))}"
+        b = DASH if m == "median" else _ci_txt(r.get("d_mae_ci95_bonf"))
+        cov = DASH if r.get("coverage90_pct") is None else f"{r['coverage90_pct']:.0f} %"
+        out.append(f"| {nm} | {_num(r.get('mae'))} | {_num(r.get('rmse'))} | {_num(r.get('median_ae'))} | "
+                   f"{_num(r.get('log1p_mae'), 3)} | {d} | {b} | {cov} | {_num(r.get('width_median'), 0)} |")
+    return "\n".join(out)
+
+
+SCHEME_RU = {"event": "по событиям", "daycell": "день × ячейка 1°", "cruiseday": "день рейса",
+             "st": "связные компоненты ≤ 100 км и ≤ 2 сут", "route": "участки маршрута",
+             "route_buf1": "**участки маршрута + буфер 1 сут (основная)**"}
+
+
+def case_schemes_table(fn: dict) -> str:
+    c = ((fn.get("case") or {}).get("conc") or {})
+    out = ["| Схема разбиения | Профиль | MAE медианы | MAE kNN-5 (log) | ΔMAE kNN − медиана [95 % ДИ] | Соседей kNN из того же или соседнего дня рейса |",
+           "|---|---|---:|---:|---|---:|"]
+    for key in ("S2", "S1"):
+        for s in (c.get(key) or {}).get("schemes") or []:
+            out.append(f"| {SCHEME_RU.get(s['split'], s['split'])} | {key} | {_num(s.get('median_mae'))} | {_num(s.get('knn5_log_mae'))} | "
+                       f"{_num(s.get('d'), 1, True)} {_ci_txt(s.get('ci95'))} | {fmt(s.get('neighbors_1d_pct'), 'f0')} % |")
+    return "\n".join(out) if len(out) > 2 else DASH
+
+
+def case_pairs_table(fn: dict) -> str:
+    p = ((fn.get("case") or {}).get("pairs") or {}).get("by_source") or {}
+    if not p:
+        return DASH
+    out = ["| Источник | Событий | S2 ±1 сут | Landsat ±1 сут | любая сцена ±1 | ±3 | ±5 сут |", "|---|---:|---:|---:|---:|---:|---:|"]
+    for k in ("S1_GPGP2018", "S2_SARGASSO_MSM41", "S3_SE_NORTH_SEA", "S4_BLACK_SEA_DOORS3", "ВСЕ"):
+        r = p.get(k)
+        if r:
+            out.append(f"| {SRC_RU.get(k, k)} | {r['events']} | {r['s2_1']} | {r['l_1']} | {r['any_1']} | {r['any_3']} | {r['any_5']} |")
+    return "\n".join(out)
+
+
+def case_drift_table(fn: dict) -> str:
+    dr = ((fn.get("case") or {}).get("pairs") or {}).get("drift") or {}
+    if not dr:
+        return DASH
+    names = {"low": "низкий", "typical": "**типичный (принят)**", "high": "высокий"}
+    out = ["| Сценарий течения | м/с | Медиана сдвига за |dt|, км (p25–p75) | Проходят при допуске 3 км | 10 км | ½ длины трансекты |",
+           "|---|---:|---|---:|---:|---:|"]
+    for k in ("low", "typical", "high"):
+        r = dr.get(k)
+        if r:
+            out.append(f"| {names[k]} | {_num(r['current_ms'], 2)} | {_num(r['shift_median_km'])} ({_num(r['shift_p25_km'])}–{_num(r['shift_p75_km'])}) | "
+                       f"{r['events_buf3']} | {r['events_buf10']} | {r['events_half_transect']} |")
+    return "\n".join(out)
+
+
+def case_final_test_text(fn: dict) -> str:
+    """Deferred test of the concentration model: pending text or, once reports/case_conc/final_test.json exists, its numbers."""
+    c = ((fn.get("case") or {}).get("conc") or {})
+    s2, s1 = c.get("S2") or {}, c.get("S1") or {}
+    ft2, ft1 = s2.get("final_test") or {}, s1.get("final_test") or {}
+    if not c.get("final_test_done"):
+        return (f"**Отложенный test ещё не считался.** Он {c.get('final_test_status') or DASH} командой "
+                f"`scripts\\case\\final_test_conc.py`: основная модель против медианы dev на одних и тех же "
+                f"{fmt(ft2.get('n_test'), None)} событиях S2 и {fmt(ft1.get('n_test'), None)} событиях S1, ДИ — бутстреп по дням рейса. "
+                "Числа появятся в `reports/case_conc/final_test.json`, в README и в отчёте после пересборки "
+                "(`scripts\\final_numbers.py` → `scripts\\render_docs.py`). До этого все числа концентрации ниже — только кросс-валидация на dev.")
+    parts = []
+    for key, c_ in (("S2", s2), ("S1", s1)):
+        r = (c_.get("final_test") or {}).get("result") or {}
+        if not r:
+            continue
+        mm, bm, dd = r.get("main") or {}, r.get("baseline_metrics") or {}, r.get("main_vs_baseline") or {}
+        cov = mm.get("coverage90")
+        parts.append(f"{c_.get('profile')}: {r.get('main_model')} MAE {_num(mm.get('mae'))} против медианы {_num(bm.get('mae'))} шт./км² "
+                     f"(n = {fmt(r.get('n_test'), None)}), ΔMAE {_num(dd.get('d_mae'), 1, True)} {_ci_txt(dd.get('ci95'))}"
+                     + (f", покрытие 90 %-интервала {100 * float(cov):.0f} %" if cov is not None else "")
+                     + ("; выигрыш значим" if r.get("main_better_significant") else "; выигрыш не значим"))
+    return "**Отложенный test посчитан один раз** (`reports/case_conc/final_test.json`): " + "; ".join(parts) + "."
+
+
 def derived(fn: dict) -> dict:
     l3, l4 = fn.get("l3_lgbm") or {}, fn.get("l4_unet") or {}
     test_done = bool(l3.get("test"))
@@ -483,7 +636,11 @@ def derived(fn: dict) -> dict:
             "speed_block": speed_block, "ui_perf_text": ui_txt, "baselines_table": baselines_table(fn),
             "l23_channels_table": l23_channels_table(fn), "threads_table": threads_table(fn),
             "rejected_table": rejected_table(fn), "rehearsal_text": rehearsal_text(fn),
-            "robustness_text": robustness_text(fn)}
+            "robustness_text": robustness_text(fn),
+            "case_detector_table": case_detector_table(fn), "case_fp_table": case_fp_table(fn),
+            "case_conc_table_S2": case_conc_table(fn, "S2"), "case_conc_table_S1": case_conc_table(fn, "S1"),
+            "case_pairs_table": case_pairs_table(fn), "case_schemes_table": case_schemes_table(fn),"case_drift_table": case_drift_table(fn),
+            "case_final_test_text": case_final_test_text(fn)}
 
 
 def render(text: str, ctx: dict, missing: list) -> str:
@@ -522,7 +679,7 @@ def main(argv=None) -> int:
         missing: list = []
         out = render(sp.read_text(encoding="utf-8"), ctx, missing)
         dp.write_text(out, encoding="utf-8", newline="\n")
-        left = sorted(set(PH.findall(out)))
+        left = sorted(set(PH.findall(out)) | set(re.findall(r"\{\{[^}]*\}\}", out)))
         print(f"[render_docs] {src} -> {dst}: {len(missing)} empty values"
               + (f" ({', '.join(sorted(set(missing)))})" if missing else "")
               + (f"; unreplaced placeholders: {left}" if left else ""))

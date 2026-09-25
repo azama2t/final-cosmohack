@@ -25,13 +25,13 @@
 | `scripts/eda_marida.py` | EDA MARIDA → `reports/eda/` (eda.md + 8 PNG), `reports/marida_scenes.csv`, `reports/marida_regions.md` | вручную |
 | `scripts/check_mados_overlap.py` | пересечения сцен MARIDA↔MADOS по тайлу+дате | дорожка MADOS |
 | `reports/eda/`, `reports/marida_scenes.csv`, `reports/marida_regions.md`, `reports/sources.md` | EDA, таблица 63 сцен, регионы по MD px, источники и лицензии | отчёт, выбор регионов |
-| `README.md.tmpl` → `README.md` | шаблон README; README генерирует `scripts/render_docs.py` (правь только .tmpl) | render_docs |
-| `reports/report.md.tmpl` → `reports/report.md` | шаблон отчёта | render_docs |
+| `README.md.tmpl` → `README.md` | шаблон README (кейс первым, подготовительный этап — в `docs/PREP.md`); README генерирует `scripts/render_docs.py` (правь только .tmpl) | render_docs |
+| `reports/report.md.tmpl` → `reports/report.md` | шаблон отчёта: кейс, затем часть «Подготовка» | render_docs |
 | `run.ps1` | запуск одной командой: venv, сборка фронта, сервис, браузер (`-Port -DataRoot -NoBrowser`), UTF-8 с BOM | пользователь |
 | `TOMORROW.md` | первые 60 минут хакатона: команды и развилки | команда |
 | `reports/qa.md` | вопросы жюри с ответами | защита |
-| `scripts/final_numbers.py` | артефакты → `reports/final_numbers.json` (единственный источник чисел) | render_docs, make_deck |
-| `scripts/render_docs.py` | `*.tmpl` + final_numbers → README.md, report.md | вручную |
+| `scripts/final_numbers.py` | артефакты → `reports/final_numbers.json` (единственный источник чисел; блок `case` — числа кейса из `reports/case_*`, `configs/case_*`, `run_summary.json`) | render_docs, make_deck |
+| `scripts/render_docs.py` | `*.tmpl` + final_numbers → README.md, report.md, docs/PREP.md; пустые значения печатает списком | вручную |
 | `scripts/make_deck.py` | `reports/deck.pptx` (10 слайдов), `--preview` → PNG через LibreOffice | вручную |
 | `src/macroplastic/features/pixel.py` | пиксельные признаки: каналы, индексы, оконные mean/std 3/7/15, контраст с локальной медианой; блочный режим для больших тайлов | train_lgbm, lgbm_predict |
 | `src/macroplastic/models/lgbm_predict.py` | LGBMPredictor / load_predictor (реестр 'lgbm'): P(MD) по тайлу любого размера, опция harmonize="water_median" для L2A | inference, живые сцены |
@@ -116,3 +116,49 @@
 | `scripts/tools/org_to_map.py`, `tests/test_org_to_map.py` | данные организаторов (георефер. чипы + предсказания) → мозаика сцен → корень данных карты (kind organizer) | хакатон |
 | `service/routes_incidents.py`, `service/routes_drift_check.py`, `service/routes_context.py` | API: инциденты/лента; проверка прогноза дрейфа (эксперимент) и поля течений/ветра; объекты OSM и пересечение с демо-дрейфом | фронт |
 | `HACK-START.md` | первые 60 минут после выдачи кейса | команда |
+
+## Кейс «Детектирование и оценка концентрации макропластика» (шт./км²)
+
+| Путь | Что делает | Кто вызывает |
+|---|---|---|
+| `task/postanovka.pdf`, `task/kriterii.pdf`, `task/macroplastic_marine_samples.csv`, `task/README_macroplastic_dataset.md` | постановка, критерии, реестр полевых наблюдений (935 строк, 318 событий) и его описание | все шаги кейса |
+| `docs/CASE_ANALYSIS.md` | разбор постановки и критериев, EDA реестра, спутниковое покрытие, утечки, разрешение против размера предметов | README, отчёт |
+| `docs/CASE_RUN.md` | маршрут кейса одной командой: шаги и выходы, время с кэшем и без, ресурсы, повторяемость | README |
+| `docs/CONTRACTS_V3.md` (+ `CONTRACTS_V3_1.txt`) | контракт API v3.1: наблюдения, пары, сцены, зоны, метрики, экспорт, сохранённые запросы, коды ошибок | API, фронт |
+| `docs/PREP.md.tmpl` → `docs/PREP.md` | прежний README подготовительного этапа без сокращений (генерирует `render_docs.py`) | README |
+| `run.ps1 -Case prepare\|eval\|export\|all [-Offline] [-Force]` | запуск маршрута кейса без старта сервиса | пользователь |
+| `configs/case_selection.yaml` | профили целевой величины (S2 визуальный > 2 см — основной, S1 трал 5–50 см), правила команды с причинами отказа, основной сплит (участки маршрута + буфер 1 сут), отложенный test (правило, sha256 составов, срок) | selection, splits, модели |
+| `configs/case_pairs.yaml` | пороги полосы и масок качества (покрытие, облака, суша, вода, блик), детектор на парах, сценарии дрейфа и допуск синхронности со ссылками на литературу | find_pairs, pair_quality |
+| `configs/case_conc_model.yaml` | протокол моделей концентрации, записанный до CV (кандидаты, гиперпараметры, правило выбора, интервал), и выбранная модель | conc_model_cv, final_test_conc, API |
+| `src/macroplastic/case/__init__.py` | пакет кейса | — |
+| `src/macroplastic/case/selection.py` | отбор записей по конфигу с причиной для каждой строки, поля-утечки (`LEAK_EXPLICIT`, `ALLOWED_FEATURES`), сверка C = N/A | run_all, baseline, модели |
+| `src/macroplastic/case/concentration.py` | C = N/A, перевод единиц, площадь полосы, точный интервал Пуассона (Гарвуд), статусы, агрегация ΣN/ΣA, MAE/RMSE/medAE/log1p-MAE | модели, API (контрольный пример) |
+| `src/macroplastic/case/splits.py` | группы event / scene / daycell / st / cruiseday / route, буфер по дням, проверка пересечений, отложенный test и sha256 состава | baseline, модели, тесты |
+| `src/macroplastic/case/conc_models.py` | 9 моделей концентрации, признаки без утечек, вложенная CV по участкам маршрута, интервал по лог-остаткам, бутстреп по дням рейса, правило выбора | conc_model_cv, final_test_conc, API (`field_estimate`) |
+| `scripts/case/eda_samples.py` | EDA реестра без сети → `reports/case_eda/` | вручную |
+| `scripts/case/find_pairs.py` | поиск сцен Sentinel-2 / Landsat в STAC вокруг каждого события, отбор по метаданным, дрейф и допуск синхронности, кэш ответов → `data/pairs/{events,candidates,best_per_event}.csv`, `reports/case_pairs/summary.md` | run_all |
+| `scripts/case/pair_quality.py` | вырезки вокруг полосы наблюдения, маски качества, решение по паре, детектор LightGBM на S2 → `data/pairs/quality/<событие>/`, `data/pairs/pair_quality.csv`, `reports/case_pairs/quality.md` | run_all |
+| `scripts/case/baseline_concentration.py` | бейзлайны концентрации (медиана, среднее, kNN) на 6 схемах разбиения, бутстреп → `reports/case_conc/{metrics.json, predictions.csv, metrics_by_fold.csv, consistency.csv, baseline.md}`, составы сплитов | run_all |
+| `scripts/case/freeze_final_test.py` | фиксация отложенного test концентрации до моделей; повторный запуск только сверяет sha256 | вручную (один раз) |
+| `scripts/case/conc_model_cv.py` | CV кандидатов против медианы на dev → `reports/case_conc/dev_cv.{md,json}`, `dev_predictions.csv`, `weights/case_conc/*.json`, `selected` в конфиге | вручную |
+| `scripts/case/final_test_conc.py` | однократная оценка на отложенном test (отказ до срока и при существующем результате) → `reports/case_conc/final_test.json`, `final_test_predictions.csv` | приёмка |
+| `scripts/case/detector_compare.py` | основной детектор и 6 бейзлайнов на val и test MARIDA, ДИ по сценам, ложные срабатывания по классам фона, примеры → `reports/case_detector/*`, `data/case/detector_preds/*` | вручную |
+| `scripts/case/pairs_experiment.py` | признаки снимка в полосе (P детектора, FDI) против полевой плотности всего мусора: Спирмен, бутстреп групп, нулевая модель, мощность → `reports/case_pairs/experiment.*` | вручную |
+| `scripts/case/run_all.py` | маршрут кейса: отбор → пары → маски и детектор → реестры → концентрация → пересчёт метрик детектора → экспорт API v3; `run_summary.json` с версиями и sha256 | `run.ps1 -Case` |
+| `scripts/case/consistency_check.py` | самопроверка: алгоритм = JSON = CSV = GeoJSON по id, повтор сохранённого запроса по SHA-256, некорректные входы, p50/p95 → `reports/selfcheck/consistency_<дата>.{md,json}` | QA |
+| `scripts/screenshots_case.py` | кадры и смоук-проверки режима «Кейс» во фронте v2 | ревью UI |
+| `service/case_store.py` | слой данных API v3: наблюдения, реестр пар, сцены, зоны (два статуса), метрики, `field_estimate`, сохранённые запросы, CSV/GeoJSON | routes_v3 |
+| `service/routes_v3.py` | роутер `/api/v3/*`: meta, observations, pairs, scenes (+ PNG), zones, metrics, export, queries; единый формат ошибок, CORS | фронт кейса |
+| `service/frontend_v2/src/case/` | интерфейс кейса (режим по умолчанию): карта, карточки наблюдения и зоны, реестр пар, метрики, выгрузка, сохранённые запросы | FastAPI (`service/static_v2`) |
+| `data/pairs/` (`cache/`, `events.csv`, `candidates.{csv,parquet}`, `best_per_event.csv`, `pair_quality.csv`, `quality/`) | кэш STAC и реестр кандидатов пар, маски качества и вырезки по парам (в git — для работы без сети) | run_all, API |
+| `data/case/` (`selection_*.csv`, `run/registry_{samples,pairs}.csv`, `splits/`, `detector_preds/*.npz`) | принятые и отклонённые записи, реестры записей и пар, составы сплитов, предсказания детекторов на MARIDA | run_all, API, тесты |
+| `weights/case_conc/<профиль>.json` | выбранная модель концентрации, обученная на dev, и квантили интервала | API, final_test_conc |
+| `reports/case_eda/` | таблицы и графики EDA реестра | отчёт |
+| `reports/case_pairs/` | `summary.md` (кандидаты, дрейф, причины), `quality.md` (маски), `experiment.{md,json,png}` (связь снимка с полем) | README, отчёт |
+| `reports/case_detector/` | `compare.md`, `metrics.json`, `per_patch.csv`, `fn_by_scene.csv`, `fp_by_class.{csv,png}`, `examples/` | README, отчёт, API |
+| `reports/case_conc/` | бейзлайны на 6 схемах (`baseline.md`, `metrics.json`, `predictions.csv`), модели на dev (`dev_cv.{md,json}`, `dev_predictions.csv`), сверка C = N/A (`consistency.csv`); после приёмки — `final_test.json` | README, отчёт, API |
+| `reports/case_splits/` | составы выборок с sample_id / event_id / scene_id / фолдом, отложенный test, принятые и отклонённые записи | проверка утечек, тесты |
+| `reports/case_run/` | `run_summary.json` (версии, sha256 входов и выходов, время шагов), `detector_recomputed.json`, `concentration_stdout.md` | README, final_numbers |
+| `reports/selfcheck/` | отчёты самопроверки согласованности и скорости API | QA |
+| `out/case_export/` | выгрузки API v3 (наблюдения, пары, зоны; примеры запросов; `requests.json`), не в git | run_all |
+| `tests/test_case_concentration.py`, `tests/test_case_conc_model.py`, `tests/test_case_run_all.py`, `tests/test_case_consistency.py`, `tests/test_api_v3.py` | контрольные примеры 60 и 15, пересечения групп и дней рейса, утечки, отложенный test, реестры, согласованность API и экспорта, контракт v3 | pytest |

@@ -214,6 +214,7 @@ def zone(zone_id: str):
             out["prob_crop_url"] = f"/api/v3/scenes/{sid}/mask.png" if sid and cs.quality_file(sid, "mask.png") else None
             rows = [r for r in (cs.sample_row(s) for s in p["support"]["linked_sample_ids"]) if r]
             out["linked_observations"] = cs.observations_fc(rows)
+            out["detections"] = cs.detections_fc([f])
             out["explain"] = [p["status_reason"][:80], "Концентрация по снимку не оценивается: перенос не подтверждён",
                               "Площадь — полоса наблюдения, не пятно мусора"]
             if p["support"].get("field_target_scope") and p["support"]["field_target_scope"] not in cs.PLASTIC_SCOPES:
@@ -261,15 +262,17 @@ def _query_to_params(qr: dict, layer: str) -> dict:
 @api
 def export(request: Request):
     q = _q(request)
-    layer = cs.parse_choice(q.get("layer"), "layer", ["observations", "pairs", "zones"])
+    layer = cs.parse_choice(q.get("layer"), "layer", ["observations", "pairs", "zones", "detections"])
     if layer is None:
-        raise ApiError(400, "BAD_PARAM", "layer: обязателен, observations | pairs | zones", {"param": "layer"})
+        raise ApiError(400, "BAD_PARAM", "layer: обязателен, observations | pairs | zones | detections",
+                       {"param": "layer"})
     fmt = cs.parse_choice(q.get("format"), "format", ["geojson", "csv"], "geojson")
     ran = None
     if q.get("query_id"):
         qr = cs.get_query(q["query_id"])["query"]
         ran = cs.run_query_layers(qr)  # the same executor as /queries/{id}/run
-        q = {**_query_to_params(qr, layer), **{k: v for k, v in q.items() if k in ("geometry", "limit")}}
+        q = {**_query_to_params(qr, "zones" if layer == "detections" else layer),
+             **{k: v for k, v in q.items() if k in ("geometry", "limit")}}
     stamp = dt.date.today().isoformat()
     if layer == "observations":
         rows = ran["obs_rows"] if ran is not None else cs.filter_samples(**_obs_filters(q))
@@ -286,6 +289,12 @@ def export(request: Request):
                    "empty_reason": cs.pairs_empty_reason(len(items)),
                    "features": [{"type": "Feature", "id": p["pair_id"], "geometry": p["geometry"],
                                  "properties": {k: v for k, v in p.items() if k != "geometry"}} for p in items]}
+    elif layer == "detections":  # detector objects of the zones selected by the same zone filters
+        dfc = cs.detections_fc(ran["zones"] if ran is not None else cs.filter_zones(**_zone_filters(q)))
+        if fmt == "csv":
+            body = cs.detections_csv(dfc)
+        else:
+            obj = dfc
     else:
         feats = ran["zones"] if ran is not None else cs.filter_zones(**_zone_filters(q))
         if fmt == "csv":

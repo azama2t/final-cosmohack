@@ -48,3 +48,5 @@ __pycache__/
 /data/pairs/experiment/
 !/data/case/
 /data/case/detector_preds/*.joblib
+/reports/selfcheck/jury_*
+/reports/selfcheck/*.log

@@ -32,6 +32,7 @@ PATHS: dict[str, Path] = {
     "final_test": REPO / "reports" / "case_conc" / "final_test.json",
     "conc_weights_dir": REPO / "weights" / "case_conc",
     "registry_pairs": REPO / "data" / "case" / "run" / "registry_pairs.csv",
+    "det_metrics": REPO / "reports" / "case_detector" / "metrics.json",
 }
 
 # ------------------------------------------------------------------ dictionaries (contract section 2)
@@ -91,16 +92,16 @@ REJECT_REASONS = [
 ]
 # Quality mask legend (contract 3.1). /api/v3/scenes/{id}/quality.png is rendered from quality.tif of
 # scripts/case/pair_quality.py with exactly these RGBA colours (codes: 0 nodata, 1 water, 2 land, 3 SCL cloud/shadow/
-# cirrus, 4 spectral cloud, 5 other = water-edge buffer/dark/defect). The mask has no per-pixel shadow and glint classes:
-# SCL shadow is merged into code 3, glint is a strip-level check (B11 median), so "present": false for them.
+# cirrus, 4 spectral cloud, 5 other = water-edge buffer/dark/defect, 6 glint (L61: spectral cloud test fired on
+# sunglint water -> glint). SCL cloud shadow is merged into code 3, so "shadow" has "present": false.
 QUALITY_CLASSES = [
     {"id": "valid", "label": "Пригодная вода", "color": "#00000000", "codes": [1], "present": True},
     {"id": "cloud", "label": "Облако (вкл. тень и перистые по SCL)", "color": "#ffffff99", "codes": [3, 4],
      "present": True},
     {"id": "shadow", "label": "Тень облака", "color": "#74c0fc99", "codes": [], "present": False,
      "note": "отдельно не выделяется: тень входит в класс «Облако»"},
-    {"id": "glint", "label": "Блики", "color": "#ffd43b99", "codes": [], "present": False,
-     "note": "блики оцениваются по полосе целиком (медиана B11), не по пикселям"},
+    {"id": "glint", "label": "Блики", "color": "#ffd43b99", "codes": [6], "present": True,
+     "note": "код 6 маски L61: вода, на которой облачный тест сработал от солнечного блика"},
     {"id": "land", "label": "Суша", "color": "#495057cc", "codes": [2], "present": True},
     {"id": "nodata", "label": "Нет данных / непригодно", "color": "#00000066", "codes": [0, 5], "present": True},
 ]
@@ -490,9 +491,75 @@ def _obs_feature(r: dict, linked: list[str], geometry: str = "point") -> dict:
         "material": r.get("material") or None,
         "notes": r.get("notes") or None,
         "source_doi": r.get("source_doi") or None,
+        "source_short": r.get("source_short") or None,
+        "source_license": r.get("source_license") or None,
+        **field_poisson_ci(r),
+        "model_estimate": model_estimate_for(r.get("sample_id") or ""),
         "linked_scenes": linked,
     }
     return {"type": "Feature", "id": r.get("sample_id"), "geometry": geom, "properties": props}
+
+
+def field_poisson_ci(r: dict) -> dict:
+    """Reference field value and its counting uncertainty: C = N/A with a 95 % Poisson CI
+    (src/macroplastic/case/concentration.py). N = density_numerator_items, A = sampled_area_km2.
+    Not a predictor (the measured value itself), so no leakage. null + reason when N or A is missing, when the row
+    is a single object, or when N/A does not reproduce the published concentration (N is then not the numerator
+    of that concentration)."""
+    out = {"n_items": None, "ci95_lo": None, "ci95_hi": None, "ci95_method": None, "ci95_reason": None}
+    if r.get("record_type") == "item_observation":
+        out["ci95_reason"] = "отдельный объект, не плотность"
+        return out
+    n, a = fnum(r.get("density_numerator_items")), fnum(r.get("sampled_area_km2"))
+    if n is None or a is None:
+        out["ci95_reason"] = "нет числа предметов N или площади A в источнике"
+        return out
+    try:
+        from src.macroplastic.case.concentration import concentration as conc_fn
+        res = conc_fn(n, a)
+    except Exception:
+        out["ci95_reason"] = "расчёт интервала недоступен"
+        return out
+    pub = fnum(r.get("concentration_items_km2"))
+    if res.value is None:
+        out["ci95_reason"] = res.note or "недостаточно данных"
+        return out
+    if pub is not None and abs(res.value - pub) > max(0.02 * abs(pub), 0.05):
+        out["ci95_reason"] = (f"N/A = {res.value:.4g} не совпадает с опубликованной концентрацией {pub:.4g}: "
+                              "N — не числитель этой величины")
+        return out
+    out.update({"n_items": n, "ci95_lo": round(res.lower, 4), "ci95_hi": round(res.upper, 4),
+                "ci95_method": "95 % ДИ Пуассона для N, делённый на A (эталон, не прогноз)"
+                               + (f"; {res.note}" if res.note else "")})
+    return out
+
+
+def _dev_predictions() -> dict:
+    """reports/case_conc/dev_predictions.csv (L68, out-of-fold dev CV) rows of the MAIN model of each profile."""
+    rows = _cached("dev_predictions", PATHS["dev_cv"].parent / "dev_predictions.csv", _read_csv) or []
+    key = ("devpred_idx", id(rows), tuple(sorted((k, v.get("model")) for k, v in selected_models().items())))
+    with _lock:
+        hit = _cache.get("devpred_idx")
+        if hit and hit[0] == key:
+            return hit[1]
+    main = {k: v.get("model") for k, v in selected_models().items()}
+    idx = {r.get("sample_id"): r for r in rows if r.get("model") and main.get(r.get("profile")) == r.get("model")}
+    with _lock:
+        _cache["devpred_idx"] = (key, idx)
+    return idx
+
+
+def model_estimate_for(sample_id: str) -> Optional[dict]:
+    r = _dev_predictions().get(sample_id)
+    if not r:
+        return None
+    fold = r.get("fold")
+    return {"value": _r(r.get("y_pred"), 3), "lo": _r(r.get("lo"), 3), "hi": _r(r.get("hi"), 3),
+            "unit": "items/km2", "model": r.get("model"), "profile_config": r.get("profile"),
+            "fold": int(fold) if fold not in (None, "") and str(fold).lstrip("-").isdigit() else fold,
+            "interval_coverage_cv": fnum(((selected_models().get(r.get("profile")) or {}).get("dev_cv") or {})
+                                         .get("coverage90")),
+            "note": "прогноз по CV вне обучающего участка"}
 
 
 def linked_scenes_by_sample() -> dict[str, list[str]]:
@@ -658,6 +725,9 @@ def _pairs_build(cands, pq_rows, samples) -> list[dict]:
                                        if fnum(c.get("drift_shift_km_typical")) is not None else None),
                 "dt_drift_hours": _r(c.get("dt_drift_h"), 2),
                 "status_without_drift": "accepted" if without_drift else "rejected",
+                "dt_uncertainty_h": 0 if _truthy(c.get("time_known")) else 12,
+                "time_note": ("время неизвестно, ±12 ч (известна только дата)"
+                              if not _truthy(c.get("time_known")) else None),
             })
     out.sort(key=lambda p: p["pair_id"])
     return out
@@ -997,6 +1067,8 @@ def zone_pair_info(event_id: str, scene_id: str, sids: list[str]) -> dict:
             "pair_sync": ("synchronous" if acc else "unsynchronized") if ps else None,
             "pair_drift_shift_km": ps[0]["drift_shift_km"] if ps else None,
             "pair_tolerance_km": ps[0]["tolerance_km"] if ps else None,
+            "pair_time_known": ps[0]["time_known"] if ps else None,
+            "pair_dt_uncertainty_h": ps[0]["dt_uncertainty_h"] if ps else None,
             "registry": {"status": reg.get("status") or None, "stage": reg.get("stage") or None,
                          "status_without_drift": reg.get("status_without_drift") or None} if reg else None,
             "_flags": flags}
@@ -1203,6 +1275,48 @@ def meta() -> dict:
 
 
 # ------------------------------------------------------------------ metrics
+def _det_row(name: str, d: dict, split: str) -> Optional[dict]:
+    if not d:
+        return None
+    return {"name": name, "split": split, "precision": _r(d.get("precision_md")), "recall": _r(d.get("recall_md")),
+            "f1": _r(d.get("f1_md")), "iou": _r(d.get("iou_md")),
+            "ci95_precision": d.get("ci95_precision"), "ci95_recall": d.get("ci95_recall"),
+            "ci95_f1": d.get("ci95_f1"), "ci95_iou": d.get("ci95_iou"),
+            "tp": d.get("tp"), "fp": d.get("fp"), "fn": d.get("fn"), "n_scenes": d.get("n_scenes")}
+
+
+def detector_metrics_block(test: dict, val: dict, tmd: dict, fdi_val: dict) -> dict:
+    """Detector: main (LightGBM) vs baseline RF (MARIDA code) vs FDI threshold on the SAME MARIDA test
+    (reports/case_detector/metrics.json, L63; scene bootstrap CI). Fallback: lgbm_final_test + val FDI (old)."""
+    det = _cached("det_metrics", PATHS["det_metrics"], _read_json) or {}
+    dt_ = det.get("test") or {}
+    st = det.get("settings") or {}
+    if dt_.get("lgbm"):
+        main = _det_row("LightGBM", dt_["lgbm"], "test")
+        main["setting"] = (st.get("lgbm") or {}).get("setting")
+        main["val_f1"] = _r(((det.get("val") or {}).get("lgbm") or {}).get("f1_md"))
+        main["test_f1"], main["test_iou"] = main["f1"], main["iou"]  # 3.0 compatibility fields
+        base = _det_row("RandomForest (код MARIDA)", dt_.get("rf_argmax") or {}, "test")
+        if base:
+            base["setting"] = (st.get("rf_argmax") or {}).get("setting")
+        fdi = _det_row("FDI threshold", dt_.get("fdi_threshold") or {}, "test")
+        if fdi:
+            fdi["setting"] = (st.get("fdi_threshold") or {}).get("setting")
+            fdi["note"] = "порог подобран на val"
+        rows = [x for x in (main, base, fdi) if x]
+        return {"split": f"MARIDA test ({(dt_['lgbm'].get('n_scenes'))} сцен), один прогон после заморозки; "
+                         "ДИ — бутстреп по сценам", "metric": det.get("metric"),
+                "main": main, "baseline": base, "fdi": fdi, "rows": rows}
+    return {  # fallback when L63 file is absent
+        "split": "MARIDA val (сплит по сценам); test — один прогон после заморозки",
+        "baseline": {"name": "FDI threshold", "f1": _r(fdi_val.get("f1_md")), "iou": _r(fdi_val.get("iou_md")),
+                     "split": "val", "note": fdi_val.get("note")} if fdi_val else None,
+        "main": {"name": "LightGBM", "f1": _r(val.get("f1_md")), "iou": _r(val.get("iou_md")), "split": "val",
+                 "test_f1": _r(tmd.get("f1_md")), "test_iou": _r(tmd.get("iou_md")),
+                 "test_ci95_f1": tmd.get("ci95"), "threshold": tmd.get("threshold")} if (val or tmd) else None,
+        "fdi": None, "rows": []}
+
+
 def metrics() -> dict:
     fn = _cached("final_numbers", PATHS["final_numbers"], _read_json) or {}
     test = _cached("lgbm_test", PATHS["lgbm_test"], _read_json) or {}
@@ -1211,14 +1325,7 @@ def metrics() -> dict:
     val = lg.get("val") or (test.get("val_md") and {"f1_md": test["val_md"].get("f1_md"),
                                                      "iou_md": test["val_md"].get("iou_md")}) or {}
     tmd = test.get("test_md") or lg.get("test") or {}
-    detector = {
-        "split": "MARIDA val (сплит по сценам); test — один прогон после заморозки",
-        "baseline": {"name": "FDI threshold", "f1": _r(base.get("f1_md")), "iou": _r(base.get("iou_md")),
-                     "split": "val", "note": base.get("note")} if base else None,
-        "main": {"name": "LightGBM", "f1": _r(val.get("f1_md")), "iou": _r(val.get("iou_md")), "split": "val",
-                 "test_f1": _r(tmd.get("f1_md")), "test_iou": _r(tmd.get("iou_md")),
-                 "test_ci95_f1": tmd.get("ci95"), "threshold": tmd.get("threshold")} if (val or tmd) else None,
-    }
+    detector = detector_metrics_block(test, val, tmd, base)
     concentration = conc_metrics_block()
     dp = (concentration.get("profiles") or {}).get(concentration.get("profile")) or {}
     try:
@@ -1251,7 +1358,8 @@ def normalize_query(q) -> dict:
     known = {"bbox", "date_from", "date_to", "statuses", "sources", "profiles", "scopes", "layers", "scene_id"}
     unknown = sorted(set(q) - known)
     if unknown:
-        raise ApiError(400, "BAD_PARAM", f"query: неизвестные поля {', '.join(unknown)}", {"unknown": unknown})
+        raise ApiError(422, "BAD_PARAM", f"query: неизвестные поля {', '.join(unknown)}",
+                       {"unknown": unknown, "allowed": sorted(known)})
     a, b = parse_dates(q.get("date_from"), q.get("date_to"))
     sid = q.get("scene_id")
     if sid is not None and not isinstance(sid, str):
@@ -1305,6 +1413,10 @@ def get_query(qid: str) -> dict:
 def add_query(body) -> dict:
     if not isinstance(body, dict):
         raise ApiError(400, "BAD_PARAM", "тело: ожидается {\"name\": ..., \"query\": {...}}", {})
+    extra = sorted(set(body) - {"name", "query"})
+    if extra:
+        raise ApiError(422, "BAD_PARAM", f"тело: неизвестные поля {', '.join(extra)}",
+                       {"unknown": extra, "allowed": ["name", "query"]})
     name = body.get("name")
     if not isinstance(name, str) or not name.strip() or len(name) > 200:
         raise ApiError(400, "BAD_PARAM", "name: непустая строка до 200 символов", {})
@@ -1339,7 +1451,7 @@ ZONE_COLS_31 = ZONE_COLS + ["detection_status", "concentration_status", "field_e
 PAIR_COLS = ["pair_id", "sample_id", "event_id", "source_id", "scene_id", "mission", "scene_datetime", "obs_datetime",
              "dt_hours", "distance_km", "drift_shift_km", "geometry", "cloud_pct_local", "valid_fraction_local",
              "status", "reject_reasons", "split", "scene_cloud_pct", "catalog", "time_known", "registry_note",
-             "quality_decision", "tolerance_km", "dt_drift_hours", "status_without_drift"]
+             "quality_decision", "tolerance_km", "dt_drift_hours", "status_without_drift", "dt_uncertainty_h"]
 
 
 def _cell(v) -> str:
@@ -1422,3 +1534,105 @@ def run_query_layers(qr: dict) -> dict:
         linked = {p["scene_id"] for p in pairs_all() if p["sample_id"] in ids and p["scene_id"]}
         sc = [x for x in sc if x["scene_id"] in linked]
     return {"obs_rows": obs_rows, "zones": zf, "scenes": sc}
+
+
+# ------------------------------------------------------------------ detector objects (g3)
+DET_COLS = ["det_id", "zone_id", "scene_id", "datetime", "n_pixels", "area_m2", "prob_max", "prob_mean", "in_strip",
+            "threshold", "centroid_lon", "centroid_lat", "kind"]
+
+
+def _detections_dir(d: str) -> list[dict]:
+    """Detector objects of a pair_quality crop: connected pixels of prob.tif >= threshold that are in the final
+    detector mask of L61 (mask.png red, drawn dilated by 2 px; cloud/shadow-filtered objects are not red),
+    vectorised in the crop CRS and reprojected to EPSG:4326. Cached by prob.tif mtime."""
+    base = PATHS["pairs_dir"] / "quality" / d
+    tif = base / "prob.tif"
+
+    def load(path):
+        import numpy as np
+        import rasterio
+        from rasterio import features
+        from PIL import Image
+        from shapely.geometry import mapping, shape
+        from shapely.ops import transform as sh_tr
+        from pyproj import Transformer
+        meta = quality_meta(d) or {}
+        thr = fnum((meta.get("detector") or {}).get("threshold"))
+        if thr is None:
+            return []
+        with rasterio.open(path) as ds:
+            prob = ds.read(1).astype("float32")
+            if ds.dtypes[0] == "uint8":  # scripts/case/pair_quality.py writes P(marine debris)*255 as uint8
+                prob = prob / 255.0
+            tr, crs = ds.transform, ds.crs
+        det = np.nan_to_num(prob, nan=0.0) >= thr
+        mp = base / "mask.png"
+        if mp.is_file():
+            a = np.asarray(Image.open(mp).convert("RGB"))
+            if a.shape[:2] == det.shape:
+                det &= (a[..., 0] == 255) & (a[..., 1] == 40) & (a[..., 2] == 40)
+        if not det.any():
+            return []
+        from scipy import ndimage
+        lab, n = ndimage.label(det, structure=np.ones((3, 3)))
+        inv = Transformer.from_crs(crs, "EPSG:4326", always_xy=True).transform
+        out = []
+        for geom, val in features.shapes(lab.astype("int32"), mask=lab > 0, transform=tr, connectivity=8):
+            k = int(val)
+            px = lab == k
+            g = sh_tr(inv, shape(geom))
+            gj = json.loads(json.dumps(mapping(g)), parse_float=lambda x: round(float(x), 7))
+            gj = {"type": gj["type"], "coordinates": gj["coordinates"]}
+            out.append({"k": k, "geometry": gj, "n_pixels": int(px.sum()),
+                        "prob_max": round(float(prob[px].max()), 4), "prob_mean": round(float(prob[px].mean()), 4),
+                        "area_m2": round((geodesic_area_km2(gj) or 0.0) * 1e6, 1), "threshold": thr})
+        out.sort(key=lambda x: x["k"])
+        return out
+    return _cached(f"dets:{d}", tif, load) or []
+
+
+def zone_detections(zone: dict) -> list[dict]:
+    p = zone["properties"]
+    d = p.get("quality_dir") or ""
+    try:
+        from shapely.geometry import shape
+        zg = shape(zone["geometry"]) if zone.get("geometry") else None
+    except Exception:
+        zg = None
+    feats = []
+    for i, x in enumerate(_detections_dir(d), 1):
+        in_strip = None
+        if zg is not None:
+            try:
+                in_strip = bool(zg.intersects(shape(x["geometry"])))
+            except Exception:
+                in_strip = None
+        did = f"D-{d}-{i:04d}"
+        feats.append({"type": "Feature", "id": did, "geometry": x["geometry"], "properties": {
+            "kind": "detection", "det_id": did, "zone_id": zone["id"], "scene_id": p.get("scene_id"),
+            "datetime": p.get("datetime"), "n_pixels": x["n_pixels"], "area_m2": x["area_m2"],
+            "prob_max": x["prob_max"], "prob_mean": x["prob_mean"], "threshold": x["threshold"],
+            "in_strip": in_strip,
+            "note": "объект детектора (пиксели P ≥ порога), не концентрация; в полосе наблюдения — in_strip"}})
+    return feats
+
+
+def detections_fc(zones: list[dict]) -> dict:
+    feats = [f for z in zones for f in zone_detections(z)]
+    fc = {"type": "FeatureCollection", "kind": "detection", "count": len(feats), "empty_reason": None,
+          "features": feats}
+    if not feats:
+        fc["empty_reason"] = "Детектор не нашёл объектов на снимках выбранных зон" if zones else \
+            "Нет зон под выбранные фильтры"
+    return fc
+
+
+def detections_csv(fc: dict) -> str:
+    rows = []
+    for f in fc["features"]:
+        p = f["properties"]
+        b = _geom_bounds(f["geometry"]) if f.get("geometry") else None
+        cen = [round((b[0] + b[2]) / 2, 7), round((b[1] + b[3]) / 2, 7)] if b else [None, None]
+        rows.append([p["det_id"], p["zone_id"], p["scene_id"], p["datetime"], p["n_pixels"], p["area_m2"],
+                     p["prob_max"], p["prob_mean"], p["in_strip"], p["threshold"], cen[0], cen[1], "detection"])
+    return _csv(DET_COLS, rows)

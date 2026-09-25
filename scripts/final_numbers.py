@@ -27,6 +27,14 @@ Sources (all optional; a missing source gives null, never an error):
   reports/drift_check.json               drift forecast check on pairs of scenes (experiment; criterion fixed in advance)
   reports/context.json                   OSM objects by kind, demo drift clouds touching objects (no alerts)
   service/routes_incidents.py            incidents: same logic as /api/incidents/summary (total, excluded, reviewed)
+  case (block "case", the hackathon case «макропластик, шт./км²»):
+    task/macroplastic_marine_samples.csv, reports/case_run/run_summary.json   rows/events, selection, pairs registry, versions, sha256
+    reports/case_pairs/summary.md, configs/case_pairs.yaml                  scenes by source/window, drift scenarios, mask thresholds
+    reports/case_detector/{metrics.json, per_patch.csv, fn_by_scene.csv}    7 detectors on val/test MARIDA, FP by class, paired ΔF1
+    reports/case_conc/{dev_cv.json, metrics.json}, configs/case_{selection,conc_model}.yaml, reports/case_splits/selection_*.csv
+                                                                            targets, dev CV tables, split schemes, frozen test, final_test.json if present
+    reports/case_pairs/experiment.json, reports/selfcheck/consistency_*.json  pairs experiment, API self-check
+    src/macroplastic/case/concentration.py                                  control example 12 / 0.20 (same code as the service)
 
 The file is generated; do not edit it by hand.
 """
@@ -801,6 +809,405 @@ def collect_incidents(root: Path | None = None) -> dict:
     return res
 
 
+# ----------------------------------------------------------------------------------------------- case (macroplastic, шт./км²)
+CASE_PROFILES = {"S2": "S2_visual_total_plastic", "S1": "S1_trawl_total_plastic"}
+DET_MODELS = ("lgbm", "rf_argmax", "rf_prob", "fdi_ndvi_box", "fdi_interval", "fdi_threshold", "ndvi_threshold")
+
+
+def _load_yaml(p: Path):
+    try:
+        import yaml  # noqa: WPS433
+        with open(p, encoding="utf-8") as f:
+            return yaml.safe_load(f)
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _ci2(x, nd=1):
+    if not (isinstance(x, (list, tuple)) and len(x) == 2) or any(v is None or v != v for v in x):
+        return None
+    return [_r(x[0], nd), _r(x[1], nd)]
+
+
+def _case_csv() -> dict:
+    """task/macroplastic_marine_samples.csv: rows, events, events by source."""
+    p = ROOT / "task" / "macroplastic_marine_samples.csv"
+    if not p.exists():
+        return {}
+    with open(p, encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    ev = {}
+    for r in rows:
+        ev.setdefault(r.get("source_id"), set()).add(r.get("event_id"))
+    return {"rows": len(rows), "fields": len(rows[0]) if rows else None,
+            "events": len({r.get("event_id") for r in rows}),
+            "events_by_source": {k: len(v) for k, v in sorted(ev.items())},
+            "rows_by_scope": {k: sum(1 for r in rows if r.get("target_scope") == k)
+                              for k in sorted({r.get("target_scope") for r in rows})}}
+
+
+def _case_target(profile: str) -> dict | None:
+    """Accepted rows of a profile (tracked copy reports/case_splits/selection_<profile>.csv)."""
+    p = ROOT / "reports" / "case_splits" / f"selection_{profile}.csv"
+    if not p.exists():
+        p = ROOT / "data" / "case" / f"selection_{profile}.csv"
+    if not p.exists():
+        return None
+    import statistics as st
+    with open(p, encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    y = [float(r["target"]) for r in rows if r.get("target") not in (None, "")]
+    n = [float(r["density_numerator_items"]) for r in rows if r.get("density_numerator_items") not in (None, "")]
+    a = [float(r["sampled_area_km2"]) for r in rows if r.get("sampled_area_km2") not in (None, "")]
+    days = {r.get("date_utc") for r in rows}
+    return {"n_rows": len(rows), "n_events": len({r.get("event_id") for r in rows}), "n_days": len(days),
+            "date_min": min(days) if days else None, "date_max": max(days) if days else None,
+            "c_median": _r(st.median(y), 1) if y else None, "c_mean": _r(st.mean(y), 1) if y else None,
+            "c_min": _r(min(y), 1) if y else None, "c_max": _r(max(y), 1) if y else None,
+            "n_zero": sum(1 for v in y if v == 0), "n_with_n": len(n), "n_with_a": len(a),
+            "n_median": _r(st.median(n), 1) if n else None, "n_min": _r(min(n), 0) if n else None,
+            "n_max": _r(max(n), 0) if n else None,
+            "a_median": _r(st.median(a), 3) if a else None, "a_min": _r(min(a), 3) if a else None,
+            "a_max": _r(max(a), 3) if a else None}
+
+
+def _case_pairs_summary_md() -> dict:
+    """reports/case_pairs/summary.md (tracked): events with a scene by source/window, drift scenarios."""
+    txt = _read("reports/case_pairs/summary.md")
+    out = {"by_source": {}, "drift": {}}
+    cols = ("events", "s2_1", "s2_3", "s2_5", "l_1", "l_3", "l_5", "any_1", "any_3", "any_5", "s2_1_cloud60", "l_1_cloud60")
+    for m in re.finditer(r"^\|\s*([A-Z0-9_ВСЕ]+)\s*\|((?:\s*\d+\s*\|){12})\s*$", txt, re.M):
+        vals = [int(x) for x in re.findall(r"\d+", m.group(2))]
+        out["by_source"][m.group(1).strip()] = dict(zip(cols, vals))
+    for m in re.finditer(r"^\|\s*(low|typical|high)\s*\|\s*([\d.]+)\s*\|\s*(\d+) соб\. / \d+\s*\|\s*(\d+) соб\. / \d+\s*\|"
+                         r"\s*(\d+) соб\. / \d+\s*\|\s*(\d+) соб\. / \d+\s*\|\s*([\d.]+) \(([\d.]+)–([\d.]+)\)", txt, re.M):
+        out["drift"][m.group(1)] = {"current_ms": _fl(m.group(2)), "events_buf05": int(m.group(3)),
+                                    "events_buf3": int(m.group(4)), "events_buf10": int(m.group(5)),
+                                    "events_half_transect": int(m.group(6)), "shift_median_km": _fl(m.group(7)),
+                                    "shift_p25_km": _fl(m.group(8)), "shift_p75_km": _fl(m.group(9))}
+    m = re.search(r"Предельное \|dt\|[^≈]*≈\s*([\d.]+)\s*ч", txt)
+    out["max_dt_h_typical"] = _fl(m.group(1)) if m else None
+    m = re.search(r"событий без времени \(окно по суткам\):\s*(\d+)", txt)
+    out["events_time_unknown"] = int(m.group(1)) if m else None
+    reasons = {}
+    for m in re.finditer(r"^\|\s*([a-z_]+(?:[<>]\d+\w*)?(?:\([^)]*\))?)\s*\|\s*(\d+)\s*\|\s*$", txt, re.M):
+        reasons[m.group(1)] = int(m.group(2))
+    out["reject_rows"] = reasons or None
+    out["reject_dt_gt_1d"] = reasons.get("dt>1d")
+    out["reject_cloud_cover_gt_60"] = reasons.get("cloud_cover>60")
+    return out
+
+
+def _paired_scene_bootstrap(per_patch: Path, a: str, b: str, reps=2000, seed=0):
+    """ΔF1 (a − b) on MARIDA test, paired bootstrap over scenes (per_patch.csv: tp/fp/fn by patch)."""
+    try:
+        import numpy as np
+        with open(per_patch, encoding="utf-8") as f:
+            rows = list(csv.DictReader(f))
+        scenes = sorted({r["scene"] for r in rows})
+        agg = {s: np.zeros(6) for s in scenes}
+        for r in rows:
+            agg[r["scene"]] += [float(r[f"{a}_tp"]), float(r[f"{a}_fp"]), float(r[f"{a}_fn"]),
+                                float(r[f"{b}_tp"]), float(r[f"{b}_fp"]), float(r[f"{b}_fn"])]
+        m = np.stack([agg[s] for s in scenes])
+
+        def f1(v, o):
+            tp, fp, fn = v[..., o], v[..., o + 1], v[..., o + 2]
+            return 2 * tp / np.maximum(2 * tp + fp + fn, 1e-9)
+        tot = m.sum(0)
+        point = float(f1(tot, 0) - f1(tot, 3))
+        rng = np.random.default_rng(seed)
+        idx = rng.integers(0, len(scenes), size=(reps, len(scenes)))
+        s = m[idx].sum(1)
+        d = f1(s, 0) - f1(s, 3)
+        per_scene = f1(m, 0) - f1(m, 3)
+        has_md = (m[:, 0] + m[:, 2]) > 0
+        return {"delta_f1": _r(point, 3), "ci95": [_r(np.quantile(d, 0.025), 3), _r(np.quantile(d, 0.975), 3)],
+                "p_le_0": _r(float((d <= 0).mean()), 4), "n_scenes": len(scenes), "reps": reps, "seed": seed,
+                "scenes_better": int(((per_scene > 1e-12) & has_md).sum()),
+                "scenes_worse": int(((per_scene < -1e-12) & has_md).sum())}
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _case_detector() -> dict:
+    d = _load_json(ROOT / "reports" / "case_detector" / "metrics.json")
+    if not isinstance(d, dict):
+        return {"available": False}
+    out = {"available": True, "source": "reports/case_detector/metrics.json", "val": {}, "test": {},
+           "reproducible_vs_final_test": (d.get("reproducibility_vs_lgbm_final_test") or {}).get("all_equal"),
+           "seconds": _r(d.get("seconds"), 0)}
+    for split in ("val", "test"):
+        for k in DET_MODELS:
+            m = (d.get(split) or {}).get(k)
+            if not isinstance(m, dict):
+                continue
+            out[split][k] = {"precision": _r(m.get("precision_md"), 3), "recall": _r(m.get("recall_md"), 3),
+                             "f1": _r(m.get("f1_md"), 3), "iou": _r(m.get("iou_md"), 3),
+                             "ci95_f1": _ci2(m.get("ci95_f1"), 3), "tp": m.get("tp"), "fp": m.get("fp"), "fn": m.get("fn"),
+                             "unlabelled_rate_pct": _r(100 * (m.get("unlabelled_pred_md_rate") or 0), 3),
+                             "n_patches": m.get("n_patches"), "n_scenes": m.get("n_scenes"), "md_px": m.get("md_px")}
+    for split in ("val", "test"):
+        lg = out[split].get("lgbm") or {}
+        out[f"{split}_n_patches"], out[f"{split}_n_scenes"], out[f"{split}_md_px"] = (
+            lg.get("n_patches"), lg.get("n_scenes"), lg.get("md_px"))
+    set_ = d.get("settings") or {}
+    out["settings"] = {k: (v or {}).get("setting") for k, v in set_.items()}
+    # FP of the main model on MARIDA test by background class
+    pc = (((d.get("test") or {}).get("lgbm") or {}).get("per_class")) or {}
+    fp = {k: {"n": v.get("n"), "fp": v.get("pred_md"), "rate_pct": _r(100 * (v.get("rate") or 0), 2)}
+          for k, v in pc.items() if k not in ("Marine Debris", "Unlabelled") and isinstance(v, dict)}
+    out["fp_by_class"] = fp
+    out["fp_total"] = sum(v["fp"] or 0 for v in fp.values()) or None
+    hard = ("Dense Sargassum", "Sparse Sargassum", "Turbid Water", "Sediment-Laden Water")
+    out["fp_hard_bg_px"] = sum((fp.get(k) or {}).get("n") or 0 for k in hard) or None
+    out["fp_hard_bg"] = sum((fp.get(k) or {}).get("fp") or 0 for k in hard)
+    ship, org = (fp.get("Ship") or {}).get("fp") or 0, (fp.get("Natural Organic Material") or {}).get("fp") or 0
+    out["fp_ship_organic_pct"] = _r(100 * (ship + org) / out["fp_total"], 0) if out["fp_total"] else None
+    pcr = (((d.get("test") or {}).get("fdi_ndvi_box") or {}).get("per_class")) or {}
+    out["fdi_ndvi_box_rate_pct"] = {k: _r(100 * (v.get("rate") or 0), 0) for k, v in pcr.items()
+                                   if k in ("Dense Sargassum", "Sparse Sargassum", "Clouds", "Ship", "Foam")}
+    sg = [pcr.get(k) or {} for k in ("Dense Sargassum", "Sparse Sargassum")]
+    n_sg = sum(v.get("n") or 0 for v in sg)
+    out["sargassum_px"] = n_sg or None
+    out["fdi_ndvi_box_sargassum_pct"] = _r(100 * sum(v.get("pred_md") or 0 for v in sg) / n_sg, 0) if n_sg else None
+    # FN concentrated in few scenes
+    fns = []
+    p = ROOT / "reports" / "case_detector" / "fn_by_scene.csv"
+    if p.exists():
+        with open(p, encoding="utf-8") as f:
+            fns = sorted(((r["scene"], int(float(r["lgbm_fn"]))) for r in csv.DictReader(f)), key=lambda x: -x[1])
+    out["fn_top3"] = sum(x[1] for x in fns[:3]) if fns else None
+    out["fn_top3_scenes"] = [x[0] for x in fns[:3]] or None
+    out["paired_vs_rf"] = _paired_scene_bootstrap(ROOT / "reports" / "case_detector" / "per_patch.csv", "lgbm", "rf_argmax")
+    return out
+
+
+def _case_dev_row(table, model):
+    for r in table or []:
+        if r.get("model") == model:
+            return {"mae": _r(r.get("mae"), 1), "rmse": _r(r.get("rmse"), 1), "median_ae": _r(r.get("median_ae"), 1),
+                    "log1p_mae": _r(r.get("log1p_mae"), 3), "bias": _r(r.get("bias"), 1),
+                    "coverage90_pct": _r(100 * r["coverage90"], 0) if r.get("coverage90") is not None else None,
+                    "width_median": _r(r.get("width_median"), 0),
+                    "d_mae": _r(r.get("d_mae"), 1), "d_mae_ci95": _ci2([r.get("d_mae_lo"), r.get("d_mae_hi")]),
+                    "d_mae_ci95_bonf": _ci2([r.get("d_mae_bonf_lo"), r.get("d_mae_bonf_hi")])}
+    return None
+
+
+def _dt_ru(s):
+    """'2026-09-26T12:00' -> '26.09.2026 12:00'."""
+    try:
+        return dt.datetime.fromisoformat(str(s)).strftime("%d.%m.%Y %H:%M")
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _case_conc() -> dict:
+    dev = _load_json(ROOT / "reports" / "case_conc" / "dev_cv.json") or {}
+    met = _load_json(ROOT / "reports" / "case_conc" / "metrics.json") or {}
+    sel = _load_yaml(ROOT / "configs" / "case_selection.yaml") or {}
+    mdl = _load_yaml(ROOT / "configs" / "case_conc_model.yaml") or {}
+    ft_cfg = (sel.get("final_test") or {})
+    ft_res = _load_json(ROOT / (ft_cfg.get("result") or "reports/case_conc/final_test.json"))
+    proto = (dev.get("protocol") or mdl.get("protocol") or {})
+    out = {"available": bool(dev), "main_split": sel.get("main_split"),
+           "protocol": {"k_blocks": (proto.get("cv") or {}).get("k_blocks"),
+                        "buffer_days": (proto.get("cv") or {}).get("buffer_days"),
+                        "n_candidates": len(proto.get("candidates") or []) or None,
+                        "candidates": proto.get("candidates"), "baseline": proto.get("baseline"),
+                        "acceptance_rule": proto.get("acceptance_rule"), "interval": proto.get("interval")},
+           "final_test_done": isinstance(ft_res, dict),
+           "final_test_not_before": ft_cfg.get("not_before"), "final_test_frozen_at": ft_cfg.get("frozen_at"),
+           "final_test_frozen_text": _dt_ru(ft_cfg.get("frozen_at")),
+           "consistency": met.get("consistency")}
+    out["final_test_status"] = ("посчитан один раз" if out["final_test_done"] else
+                                f"будет посчитан один раз в приёмке, не раньше {_dt_ru(ft_cfg.get('not_before')) or ft_cfg.get('not_before')}")
+    for key, prof in CASE_PROFILES.items():
+        p = (dev.get("profiles") or {}).get(prof) or {}
+        table = p.get("table") or []
+        prim = p.get("primary")
+        sens = {}
+        for s in p.get("sensitivity_k_blocks") or []:
+            if s.get("model") == prim:
+                sens[f"k{s.get('k_blocks')}"] = {"d_mae": _r(s.get("d_mae"), 1),
+                                                  "ci95": _ci2([s.get("d_mae_lo"), s.get("d_mae_hi")])}
+        ftp = (ft_cfg.get("profiles") or {}).get(prof) or {}
+        m = met.get(prof) or {}
+        boot = m.get("bootstrap_mae_diff_vs_median") or {}
+        split = m.get("main_split") or "route_buf1"
+
+        def ov(model):
+            for r in m.get("overall") or []:
+                if r.get("split") == split and r.get("model") == model:
+                    return _r(r.get("mae"), 1)
+            return None
+        bk = boot.get(f"{split}:knn5_log")
+        nb = m.get("knn_neighbors_within_1d") or {}
+        schemes = []
+        for sp in ("event", "daycell", "cruiseday", "st", "route", "route_buf1"):
+            mae = {r.get("model"): r for r in (m.get("overall") or []) if r.get("split") == sp}
+            if not mae:
+                continue
+            b = boot.get(f"{sp}:knn5_log")
+            chk = (m.get("split_checks") or {}).get(sp) or []
+            schemes.append({"split": sp, "median_mae": _r((mae.get("median") or {}).get("mae"), 1),
+                            "knn5_log_mae": _r((mae.get("knn5_log") or {}).get("mae"), 1),
+                            "d": _r(b[0], 1) if isinstance(b, list) and b else None,
+                            "ci95": _ci2(b[1:]) if isinstance(b, list) and len(b) == 3 else None,
+                            "neighbors_1d_pct": _r(100 * nb[sp], 0) if nb.get(sp) is not None else None,
+                            "shared_events": sum(int(c.get("shared_events") or 0) for c in chk) if chk else None,
+                            "shared_cruise_days": sum(int(c.get("shared_cruise_days") or 0) for c in chk) if chk else None})
+        sel_m = ((mdl.get("selected") or {}).get(prof) or {})
+        out[key] = {
+            "profile": prof, "target": _case_target(prof),
+            "n_dev": p.get("n_dev"), "dev_days": p.get("dev_cruise_days"),
+            "dev_median_c": _r((p.get("dev_target") or {}).get("median"), 1),
+            "primary": prim, "why": p.get("why"),
+            "features": sel_m.get("features"), "interval_q": [_r(x, 2) for x in (p.get("q_app") or [])] or None,
+            "median": _case_dev_row(table, "median"), "main": _case_dev_row(table, prim),
+            "knn5_log": _case_dev_row(table, "knn5_log"), "ridge_log": _case_dev_row(table, "ridge_log"),
+            "poisson_glm": _case_dev_row(table, "poisson_glm"), "geomean": _case_dev_row(table, "geomean"),
+            "accepted_models": [r.get("model") for r in table if r.get("d_mae_hi") is not None
+                                and r.get("d_mae_hi") == r.get("d_mae_hi") and r["d_mae_hi"] < 0] or None,
+            "sensitivity": sens or None,
+            "table": [{"model": r.get("model"), **(_case_dev_row(table, r.get("model")) or {})} for r in table] or None,
+            "final_test": {"n_test": ftp.get("n_test"), "n_buffer": ftp.get("n_buffer"), "n_dev": ftp.get("n_dev"),
+                           "test_days": ftp.get("test_days"), "min_dt_days": _r(ftp.get("min_dt_days"), 2),
+                           "min_dist_km": _r(ftp.get("min_dist_km"), 0),
+                           "test_sha256_short": (ftp.get("test_sha256") or "")[:12] or None,
+                           "dev_sha256_short": (ftp.get("dev_sha256") or "")[:12] or None,
+                           "result": ((ft_res or {}).get("profiles") or {}).get(prof) if isinstance(ft_res, dict) else None},
+            "schemes": schemes or None,
+            "all_events_route_buf1": {"median_mae": ov("median"), "knn5_log_mae": ov("knn5_log"), "knn5_mae": ov("knn5"),
+                                      "d_knn5_log_ci95": _ci2(bk[1:]) if isinstance(bk, list) and len(bk) == 3 else None,
+                                      "d_knn5_log": _r(bk[0], 1) if isinstance(bk, list) and bk else None,
+                                      "n": m.get("rows")},
+        }
+    return out
+
+
+def _case_experiment() -> dict:
+    e = _load_json(ROOT / "reports" / "case_pairs" / "experiment.json")
+    if not isinstance(e, dict):
+        return {"available": False}
+    res = e.get("results") or []
+    main = res[0] if res else {}
+    feats = main.get("features") or {}
+
+    def fe(name):
+        f = feats.get(name) or {}
+        nl = f.get("null") or {}
+        return {"n": f.get("n"), "rho": _r(f.get("spearman"), 2), "ci95": _ci2(f.get("spearman_ci95_groupboot"), 2),
+                "p_perm": _r(f.get("p_perm_spearman"), 3), "p_holm": _r(f.get("p_holm"), 2),
+                "null_median": _r(nl.get("null_median"), 2), "null_frac_ge": _r(nl.get("frac_null_abs_ge_obs"), 2)}
+    pairs = e.get("pairs") or []
+    return {"available": True, "source": "reports/case_pairs/experiment.json",
+            "n_pairs": e.get("n_pairs_total"), "n_accept": e.get("n_accept"),
+            "n_accept_s2": main.get("n"), "n_groups": main.get("n_groups"),
+            "n_s2_pairs": sum(1 for p in pairs if p.get("has_detector")) or None,
+            "n_landsat_pairs": sum(1 for p in pairs if not p.get("has_detector")) or None,
+            "n_black_sea_accept_zero_det": sum(1 for p in pairs if p.get("status") == "accept" and p.get("has_detector")
+                                               and str(p.get("region", "")).startswith("S4") and not p.get("s_frac_p_thr")),
+            "field_min": _r(min((p["field_items_km2"] for p in pairs if p.get("status") == "accept"
+                                 and p.get("field_items_km2") is not None), default=None), 0),
+            "field_max": _r(max((p["field_items_km2"] for p in pairs if p.get("status") == "accept"
+                                 and p.get("field_items_km2") is not None), default=None), 0),
+            "fdi": fe("s_fdi_p95_anom"), "p_mean": fe("s_p_mean"), "fdi_context": fe("c_fdi_p95"),
+            "fdi_strip_resid": fe("x_fdi_p95_anom"),
+            "power_min_rho": {str(k): (v or {}).get("min_abs_rho_fisher") for k, v in (e.get("power") or {}).items()},
+            "n_needed": e.get("n_needed"), "n_needed_rho05": (e.get("n_needed") or {}).get("0.5"),
+            "n_needed_rho03": (e.get("n_needed") or {}).get("0.3"), "threshold_p": e.get("threshold_p")}
+
+
+def _case_selfcheck() -> dict:
+    files = sorted(glob.glob(str(ROOT / "reports" / "selfcheck" / "consistency_*.json")))
+    if not files:
+        return {"available": False}
+    d = _load_json(Path(files[-1])) or {}
+    def _rows(x):
+        return x.get("rows") or [] if isinstance(x, dict) else (x if isinstance(x, list) else [])
+    p95 = [r.get("p95_ms") for key in ("speed_testclient", "speed_live") for r in _rows(d.get(key))
+           if isinstance(r, dict) and r.get("p95_ms") is not None and (r.get("target_ms") or 0) <= 300]
+    inv = d.get("invalid_inputs") or []
+    return {"available": True, "file": str(Path(files[-1]).relative_to(ROOT)).replace("\\", "/"), "when": d.get("when"),
+            "checks": len(d.get("checks") or []) or None,
+            **({"ok": 0, "fail": 0, "warn": 0} if d.get("stats") else {}), **(d.get("stats") or {}), "seconds": _r(d.get("seconds"), 0),
+            "invalid_ok": sum(1 for x in inv if isinstance(x, dict) and x.get("ok")), "invalid_total": len(inv) or None,
+            "p95_max_ms": _r(max(p95), 0) if p95 else None}
+
+
+def collect_case() -> dict:
+    """Case «макропластик, шт./км²»: selection, pairs, detector on MARIDA test, concentration (dev CV + frozen test),
+    pairs experiment, run_all summary. Sources: reports/case_run/run_summary.json, reports/case_conc/*, configs/case_*.yaml,
+    reports/case_detector/*, reports/case_pairs/*, reports/case_splits/*, reports/selfcheck/consistency_*.json."""
+    rs = _load_json(ROOT / "reports" / "case_run" / "run_summary.json") or {}
+    out = {"available": bool(rs), "csv": _case_csv()}
+    sel = rs.get("selection") or {}
+    out["selection"] = {"default_profile": sel.get("default_profile")}
+    for key, prof in CASE_PROFILES.items():
+        p = (sel.get("profiles") or {}).get(prof) or {}
+        rs_ = p.get("reasons") or {}
+
+        def rc(prefix):
+            return next((v for k, v in rs_.items() if k.startswith(prefix)), None)
+        out["selection"][key] = {"accepted_rows": p.get("accepted_rows"), "accepted_events": p.get("accepted_events"),
+                                 "rejected_rows": p.get("rejected_rows"),
+                                 "rej_item_observation": rc("item_observation"), "rej_plastic_category": rc("plastic_category"),
+                                 "rej_all_litter": rc("all_litter"), "rej_fisheries": rc("fisheries_litter_category"),
+                                 "rej_aerial": rc("S1_aerial_GT50"), "rej_other_source": rc("source_id_not_in_profile")}
+    pr = rs.get("pairs") or {}
+    qr = pr.get("quality_reject_reasons") or {}
+    out["pairs"] = {"events": pr.get("events"), "candidate_rows": pr.get("candidate_rows"),
+                    "candidate_rows_with_scene": pr.get("candidate_rows_with_scene"),
+                    "rows_accept_meta": pr.get("rows_accept_meta"), "events_accept_meta": pr.get("events_accept_meta"),
+                    "events_accept_drift": pr.get("events_accept_drift"),
+                    "quality_accept": (pr.get("quality_decisions") or {}).get("accept"),
+                    "quality_reject": (pr.get("quality_decisions") or {}).get("reject"),
+                    "reject_glint": qr.get("glint"), "reject_cloud": sum(v for k, v in qr.items() if k.startswith("cloud")) or None,
+                    "reject_cloud_qa_suspect": sum(v for k, v in qr.items() if k.startswith("cloud(")) or None,
+                    "reject_coverage": qr.get("insufficient_coverage"),
+                    "pairs_with_detections": pr.get("pairs_with_detections"),
+                    "registry_reject": (pr.get("registry_status") or {}).get("reject"),
+                    "registry_accept": (pr.get("registry_status") or {}).get("accept", 0),
+                    "stage_metadata": (pr.get("registry_stage") or {}).get("metadata"),
+                    "stage_drift": (pr.get("registry_stage") or {}).get("drift"),
+                    "accept_without_drift": (pr.get("registry_status_without_drift") or {}).get("accept"),
+                    **_case_pairs_summary_md()}
+    cfg = _load_yaml(ROOT / "configs" / "case_pairs.yaml") or {}
+    dr = cfg.get("drift") or {}
+    out["pairs"]["tolerance_buffer_km"] = ((dr.get("tolerance") or {}).get("buffer_km"))
+    out["pairs"]["unknown_time_extra_h"] = dr.get("unknown_time_extra_h")
+    out["pairs"]["decision"] = cfg.get("decision")
+    out["detector"] = _case_detector()
+    out["conc"] = _case_conc()
+    out["experiment"] = _case_experiment()
+    out["selfcheck"] = _case_selfcheck()
+    try:  # control example through the same code as the service (src/macroplastic/case/concentration.py)
+        if str(ROOT / "src") not in sys.path:
+            sys.path.insert(0, str(ROOT / "src"))
+        from macroplastic.case.concentration import concentration as _conc  # noqa: WPS433
+        r = _conc(12, 0.20)
+        out["control"] = {"n": 12, "area_km2": 0.2, "value": _r(r.value, 1), "lower": _r(r.lower, 1),
+                          "upper": _r(r.upper, 1), "unit": r.unit, "model_example": 75.0, "abs_error": _r(abs(75.0 - r.value), 1)}
+    except Exception as e:  # noqa: BLE001
+        out["control"] = {"error": f"{type(e).__name__}: {e}"}
+    steps = rs.get("steps") or {}
+    out["run"] = {"command": rs.get("command"), "finished": rs.get("finished"), "versions": rs.get("versions"),
+                  "outputs_fingerprint_short": (rs.get("outputs_fingerprint") or "")[:16] or None,
+                  "n_outputs": len(rs.get("outputs_sha256") or {}) or None,
+                  "total_s": _r((steps.get("total_all") or {}).get("seconds"), 1),
+                  "step_s": {k: (v or {}).get("seconds") for k, v in steps.items() if not k.startswith("total")},
+                  "export": {Path(f.get("file", "")).stem: f.get("records") for f in (rs.get("export") or {}).get("files") or []},
+                  "detector_recomputed": ((rs.get("detector") or {}).get("recomputed_from_preds") or {}).get("test")}
+    out["splits_files"] = len(glob.glob(str(ROOT / "reports" / "case_splits" / "*.csv"))) or None
+    tests = 0
+    for p in glob.glob(str(ROOT / "tests" / "test_case_*.py")) + [str(ROOT / "tests" / "test_api_v3.py")]:
+        tests += len(re.findall(r"^def test_", _read(str(Path(p).relative_to(ROOT))), re.M))
+    out["n_tests"] = tests or None
+    return out
+
+
 def collect_artifacts() -> dict:
     def ex(rel):
         return (ROOT / rel).exists()
@@ -853,6 +1260,7 @@ def main(argv=None) -> int:
     fn["drift_check"] = collect_drift_check()
     fn["context"] = collect_context()
     fn["incidents"] = collect_incidents()
+    fn["case"] = collect_case()
     out = Path(a.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
@@ -898,6 +1306,13 @@ def main(argv=None) -> int:
         u = fn["ui_perf"]
         print(f"  ui: load={u.get('load_s')} flyto={u.get('flyto_fps')} globe={u.get('globe_fps')} "
               f"tour={u.get('tour_s')} gzip={u.get('bundle_gzip_mb')} err={u.get('console_errors')}")
+        cs = fn["case"]
+        cc, cd = cs.get("conc") or {}, (cs.get("detector") or {}).get("test") or {}
+        print(f"  case: selection S2 {((cs.get('selection') or {}).get('S2') or {}).get('accepted_events')} | pairs meta "
+              f"{(cs.get('pairs') or {}).get('events_accept_meta')} drift {(cs.get('pairs') or {}).get('events_accept_drift')} | "
+              f"det test F1 {(cd.get('lgbm') or {}).get('f1')} vs RF {(cd.get('rf_argmax') or {}).get('f1')} | conc S2 "
+              f"{(cc.get('S2') or {}).get('primary')} {((cc.get('S2') or {}).get('main') or {}).get('mae')} vs median "
+              f"{((cc.get('S2') or {}).get('median') or {}).get('mae')} | final test done={cc.get('final_test_done')}")
         missing = [k for k, v in fn["artifacts"].items() if v is False]
         if missing:
             print(f"  not yet present: {', '.join(missing)}")

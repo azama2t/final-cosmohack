@@ -397,9 +397,12 @@ def check_query(c, ck: Checker, spec: dict, src: dict, qrec: dict) -> dict:
     for z in zones:
         p, e = z["properties"], exp_z.get(z["id"])
         if e:
-            for fld, tol in (("area_km2", 1e-4), ("detected_area_m2", 0.1)):
-                if not near(p[fld], e[fld] if e[fld] is None else round(e[fld], 4 if fld == "area_km2" else 1), tol):
-                    badz.append({"id": z["id"], "field": fld, "api": p[fld], "pair_quality": e[fld]})
+            # L62e: area_km2 = geodesic area of the polygon (checked in zones.area_km2_vs_polygon);
+            # the raster strip area of pair_quality lives in strip_area_raster_km2
+            for fld, efld, tol in (("strip_area_raster_km2", "area_km2", 1e-4), ("detected_area_m2", "detected_area_m2", 0.1)):
+                api_v = p.get(fld, p["area_km2"] if fld == "strip_area_raster_km2" else None)
+                if not near(api_v, e[efld] if e[efld] is None else round(e[efld], 4 if efld == "area_km2" else 1), tol):
+                    badz.append({"id": z["id"], "field": fld, "api": api_v, "pair_quality": e[efld]})
             if p["status"] != e["status"] or p["detection_status"] != e["status"]:
                 badst.append({"id": z["id"], "api": p["status"], "expected": e["status"]})
         if p["concentration"] is not None or p["concentration_status"] not in ("unavailable", "research_estimate",
@@ -494,7 +497,9 @@ def check_query(c, ck: Checker, spec: dict, src: dict, qrec: dict) -> dict:
         p = z["properties"]
         if p["detection_status"] in ("detected", "not_detected"):
             pst = {pairs_idx.get((s, p["scene_id"])) for s in p["support"]["linked_sample_ids"]}
-            if "accepted" not in pst or scene_st.get(p["scene_id"]) != "accepted":
+            flagged = (p.get("pair_status") == "rejected" and "rejected" in pst
+                       and "pair_rejected_drift" in ((p.get("quality") or {}).get("flags") or []))
+            if not flagged and ("accepted" not in pst or scene_st.get(p["scene_id"]) != "accepted"):
                 badzp.append({"zone": z["id"], "detection_status": p["detection_status"],
                               "pair_status": sorted(x for x in pst if x), "scene_status": scene_st.get(p["scene_id"])})
     ck.add(qk, "zone_vs_pair.status", not badzp, "зона с вердиктом детектора на отклонённой паре/снимке",
@@ -575,20 +580,26 @@ def check_metrics(c, ck: Checker, src: dict) -> dict:
     main = (m.get("detector") or {}).get("main") or {}
     base = (m.get("detector") or {}).get("baseline") or {}
     dv = (det.get("val") or {})
-    ck.add("metrics", "detector.main.f1 = case_detector val lgbm", near(main.get("f1"),
+    dtest = (det.get("test") or {})
+    for lab, blk, key in (("main", main, "lgbm"), ("baseline", base, "rf_argmax"),
+                          ("fdi", (m.get("detector") or {}).get("fdi") or {}, "fdi_threshold")):
+        ref = dtest.get(key) or {}
+        okk = all(near(blk.get(a), round(ref[b], 4), 1e-4) for a, b in (("precision", "precision_md"),
+                  ("recall", "recall_md"), ("f1", "f1_md"), ("iou", "iou_md")) if ref.get(b) is not None) \
+            and blk.get("ci95_f1") == ref.get("ci95_f1") and blk.get("split") == "test"
+        ck.add("metrics", f"detector.{lab} P/R/F1/IoU + CI = case_detector test {key}", okk,
+               f"api f1 {blk.get('f1')} vs {ref.get('f1_md')}")
+    ck.add("metrics", "detector.main.val_f1 = case_detector val lgbm", near(main.get("val_f1"),
            round(dv.get("lgbm", {}).get("f1_md", float("nan")), 4), 1e-4),
-           f"api {main.get('f1')} vs {dv.get('lgbm', {}).get('f1_md')}")
+           f"api {main.get('val_f1')} vs {dv.get('lgbm', {}).get('f1_md')}")
     ck.add("metrics", "detector.main.test_f1 = lgbm_final_test = case_detector test",
            near(main.get("test_f1"), round(lt["test_md"]["f1_md"], 4), 1e-4)
            and near(lt["test_md"]["f1_md"], (det.get("test") or {}).get("lgbm", {}).get("f1_md")),
            f"api {main.get('test_f1')} vs {lt['test_md']['f1_md']}")
     ck.add("metrics", "detector.main.test_iou = lgbm_final_test", near(main.get("test_iou"),
            round(lt["test_md"]["iou_md"], 4), 1e-4), f"api {main.get('test_iou')}")
-    fdi = (dv.get("fdi_threshold") or {}).get("f1_md")
-    if fdi is None:
-        fdi = ((det.get("settings") or {}).get("fdi_threshold") or {}).get("val_f1_tuning_cache")
-    ck.add("metrics", "detector.baseline.f1 = case_detector val fdi_threshold", near(base.get("f1"), fdi, 1e-4),
-           f"api {base.get('f1')} vs {fdi}")
+    ck.add("metrics", "detector.baseline = RandomForest (MARIDA) on the same test",
+           str(base.get("name", "")).startswith("RandomForest"), f"api {base.get('name')}")
     cm = src["conc_metrics"]
     dcv = (src.get("dev_cv") or {}).get("profiles") or {}
     sel = src.get("conc_model_selected") or {}
@@ -682,7 +693,7 @@ INVALID = [
     ("POST", ("/api/v3/queries", {"name": "x", "query": {"bbox": [1, 2, 3]}}), 400, "BAD_BBOX"),
     ("POST", ("/api/v3/queries", {"name": "x", "query": {"statuses": ["foo"]}}), 400, "BAD_PARAM"),
     ("POST", ("/api/v3/queries", {"name": "x", "query": {"profiles": ["XYZ"]}}), 400, "BAD_PARAM"),
-    ("POST", ("/api/v3/queries", {"name": "x", "query": {"scope": ["total_plastic"]}}), 400, "BAD_PARAM"),
+    ("POST", ("/api/v3/queries", {"name": "x", "query": {"scope": ["total_plastic"]}}), 422, "BAD_PARAM"),
 ]
 EMPTY = [
     ("/api/v3/observations?bbox=-30,-50,-29,-49", "features"),

@@ -244,11 +244,20 @@ def test_queries_round_trip(client):
     ({"name": "x", "query": {"bbox": [1, 2]}}, "BAD_BBOX"),
     ({"name": "x", "query": {"date_from": "2018-99-01"}}, "BAD_DATE"),
     ({"name": "x", "query": {"statuses": ["nope"]}}, "BAD_PARAM"),
-    ({"name": "x", "query": {"foo": 1}}, "BAD_PARAM"),
     ({"name": "x", "query": "text"}, "BAD_PARAM"),
 ])
 def test_queries_bad_body(client, body, code):
     _err(client.post("/api/v3/queries", json=body), 400, code)
+
+
+@pytest.mark.parametrize("body,unknown", [({"name": "x", "query": {"foo": 1}}, ["foo"]),
+                                          ({"name": "x", "query": {"scope": ["total_plastic"], "zzz": 1}},
+                                           ["scope", "zzz"]),
+                                          ({"name": "x", "query": {}, "extra": 1}, ["extra"])])
+def test_queries_unknown_fields_422(client, body, unknown):
+    r = client.post("/api/v3/queries", json=body)
+    _err(r, 422, "BAD_PARAM")
+    assert r.json()["error"]["details"]["unknown"] == unknown and r.json()["error"]["details"]["allowed"]
 
 
 def test_queries_not_json(client):
@@ -523,3 +532,100 @@ def test_query_with_scopes(client):
     ex = client.get("/api/v3/export", params={"layer": "observations", "format": "geojson", "query_id": qid}).json()
     assert ex["count"] == 63
     _err(client.post("/api/v3/queries", json={"name": "x", "query": {"scopes": ["plastic"]}}), 400, "BAD_PARAM")
+
+
+# ------------------------------------------------------------------ L62f
+@pytest.mark.skipif(not HAS_SAMPLES, reason="нет task/macroplastic_marine_samples.csv")
+def test_observation_source_license_and_poisson_ci(client):
+    f = client.get("/api/v3/observations/MPL-0200").json()["properties"]
+    assert f["source_license"] and f["source_short"] and f["source_doi"]
+    if f["n_items"] is not None:
+        from src.macroplastic.case.concentration import concentration as conc_fn
+        res = conc_fn(f["n_items"], f["sampled_area_km2"])
+        assert f["ci95_lo"] == round(res.lower, 4) and f["ci95_hi"] == round(res.upper, 4)
+        assert f["ci95_lo"] <= f["concentration_items_km2"] <= f["ci95_hi"] and f["ci95_reason"] is None
+    items = client.get("/api/v3/observations", params={"record_type": "item_observation", "limit": 5}).json()
+    for x in items["features"]:
+        p = x["properties"]
+        assert p["ci95_lo"] is None and p["ci95_hi"] is None and p["ci95_reason"]
+    s4 = client.get("/api/v3/observations", params={"source": "S4_BLACK_SEA_DOORS3"}).json()["features"]
+    assert all(x["properties"]["ci95_lo"] is None and x["properties"]["ci95_reason"] for x in s4)  # no N in S4
+
+
+@pytest.mark.skipif(not (HAS_SAMPLES and HAS_CONC_MODEL), reason="нет CSV или модели L68")
+def test_observation_model_estimate_from_dev_predictions(client):
+    rows = list(csv.DictReader(open(cs.PATHS["dev_cv"].parent / "dev_predictions.csv", encoding="utf-8-sig")))
+    main = {k: v["model"] for k, v in cs.selected_models().items()}
+    r = next(x for x in rows if x["profile"] == "S2_visual_total_plastic" and x["model"] == main[x["profile"]])
+    me = client.get(f"/api/v3/observations/{r['sample_id']}").json()["properties"]["model_estimate"]
+    assert me["model"] == main["S2_visual_total_plastic"] and me["note"] == "прогноз по CV вне обучающего участка"
+    assert abs(me["value"] - float(r["y_pred"])) < 1e-3 and abs(me["lo"] - float(r["lo"])) < 1e-3
+    assert me["fold"] == int(r["fold"])
+    s4 = client.get("/api/v3/observations", params={"source": "S4_BLACK_SEA_DOORS3"}).json()["features"]
+    assert all(x["properties"]["model_estimate"] is None for x in s4)
+
+
+def test_metrics_detector_same_test_rows(client):
+    d = client.get("/api/v3/metrics").json()["detector"]
+    if not cs.PATHS["det_metrics"].is_file():
+        pytest.skip("нет reports/case_detector/metrics.json")
+    assert [r["name"] for r in d["rows"]][:2] == ["LightGBM", "RandomForest (код MARIDA)"]
+    assert {r["split"] for r in d["rows"]} == {"test"}
+    for r in d["rows"]:
+        for k in ("precision", "recall", "f1", "iou"):
+            assert r[k] is not None and len(r[f"ci95_{k}"]) == 2
+    assert d["main"]["f1"] > d["baseline"]["f1"] > d["fdi"]["f1"]
+
+
+# ------------------------------------------------------------------ L62g (jury-1)
+def test_glint_class_code6(client, tmp_path, monkeypatch):
+    m = {q["id"]: q for q in client.get("/api/v3/meta").json()["quality_classes"]}
+    assert m["glint"]["present"] is True and m["glint"]["codes"] == [6] and m["shadow"]["present"] is False
+    np = pytest.importorskip("numpy")
+    rasterio = pytest.importorskip("rasterio")
+    from PIL import Image
+    d = tmp_path / "pairs"
+    q = d / "quality" / "S4_G"
+    q.mkdir(parents=True)
+    with rasterio.open(q / "quality.tif", "w", driver="GTiff", width=2, height=1, count=1, dtype="uint8") as ds:
+        ds.write(np.array([[6, 1]], dtype=np.uint8), 1)
+    (d / "pair_quality.csv").write_text("event_id,sample_ids,scene_id,dir,decision,reason\nS4:G,,SCN_G,S4_G,reject,glint\n",
+                                        encoding="utf-8")
+    monkeypatch.setitem(cs.PATHS, "pairs_dir", d)
+    img = Image.open(io.BytesIO(client.get("/api/v3/scenes/SCN_G/quality.png").content))
+    assert "#" + "".join(f"{v:02x}" for v in img.getpixel((0, 0))) == m["glint"]["color"]
+
+
+@pytest.mark.skipif(not (HAS_PAIRS and HAS_SAMPLES), reason="нет реестра пар")
+def test_pairs_time_uncertainty(client):
+    pairs = client.get("/api/v3/pairs", params={"source": "S4_BLACK_SEA_DOORS3"}).json()["pairs"]
+    assert pairs
+    for p in pairs:
+        if not p["time_known"]:
+            assert p["dt_uncertainty_h"] == 12 and "±12 ч" in p["time_note"]
+        else:
+            assert p["dt_uncertainty_h"] == 0
+
+
+@pytest.mark.skipif(not (cs.PATHS["pairs_dir"] / "quality").is_dir(), reason="нет data/pairs/quality")
+def test_zone_detections_and_export(client):
+    zones = client.get("/api/v3/zones", params={"detection_status": "detected"}).json()["features"]
+    if not zones:
+        pytest.skip("нет зон с детекциями")
+    z = client.get(f"/api/v3/zones/{zones[0]['id']}").json()
+    det = z["detections"]
+    assert det["kind"] == "detection" and det["count"] == len(det["features"]) > 0
+    for f in det["features"]:
+        p = f["properties"]
+        assert f["geometry"]["type"] in ("Polygon", "MultiPolygon") and p["kind"] == "detection"
+        assert p["prob_max"] <= 1.0 and p["prob_max"] >= p["threshold"] and p["area_m2"] > 0
+        assert p["zone_id"] == zones[0]["id"] and isinstance(p["in_strip"], bool)
+    assert any(f["properties"]["in_strip"] for f in det["features"])
+    ex = client.get("/api/v3/export", params={"layer": "detections", "format": "geojson",
+                                              "detection_status": "detected"}).json()
+    assert [f["id"] for f in ex["features"]] == [f["id"] for zz in zones
+                                                  for f in client.get(f"/api/v3/zones/{zz['id']}").json()["detections"]["features"]]
+    rows = list(csv.DictReader(io.StringIO(client.get("/api/v3/export", params={
+        "layer": "detections", "format": "csv", "detection_status": "detected"}).content.decode("utf-8-sig"))))
+    assert [r["det_id"] for r in rows] == [f["id"] for f in ex["features"]]
+    assert list(rows[0].keys()) == cs.DET_COLS
