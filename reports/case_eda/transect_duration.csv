@@ -1,0 +1,9 @@
+measurement_profile,n,dur_known,dur_med_h,dur_max_h,midnight_wrap
+S1_aerial_GT50,97,0,,,0
+S1_trawl_5_to_50,83,83,3.2333333333333334,4.016666666666666,10
+S1_trawl_GT5_F,6,6,2.9416666666666664,3.533333333333333,0
+S1_trawl_GT5_H,70,70,3.225,3.85,6
+S1_trawl_GT5_N,94,94,3.2583333333333333,4.016666666666666,11
+S2_visual_GT2,133,133,1.0,1.85,0
+S3_visual_GT2,82,82,0.75,3.85,0
+S4_visual_GT2_5,33,0,,,0

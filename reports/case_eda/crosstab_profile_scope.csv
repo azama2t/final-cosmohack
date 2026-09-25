@@ -1,0 +1,9 @@
+source_id,measurement_profile,item_observation/object_context,transect_density/all_litter,transect_density/fisheries_litter_category,transect_density/plastic_category,transect_density/total_plastic
+S1_GPGP2018,S1_aerial_GT50,0,0,0,81,16
+S1_GPGP2018,S1_trawl_5_to_50,0,0,0,0,83
+S1_GPGP2018,S1_trawl_GT5_F,0,0,0,6,0
+S1_GPGP2018,S1_trawl_GT5_H,0,0,0,70,0
+S1_GPGP2018,S1_trawl_GT5_N,0,0,0,94,0
+S2_SARGASSO_MSM41,S2_visual_GT2,197,0,0,70,63
+S3_SE_NORTH_SEA,S3_visual_GT2,140,41,41,0,0
+S4_BLACK_SEA_DOORS3,S4_visual_GT2_5,0,33,0,0,0

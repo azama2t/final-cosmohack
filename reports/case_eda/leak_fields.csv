@@ -1,0 +1,14 @@
+field,non_null_rows
+concentration_items_km2,583
+concentration_g_km2,335
+concentration_value_orig,935
+concentration_unit_orig,935
+items_count,804
+density_numerator_items,467
+source_object_filtered_items,427
+source_reported_total_items,427
+reported_concentration_items_km2,935
+reported_concentration_g_km2,350
+parent_concentration_items_km2,337
+parent_sample_id,584
+zero_scope,38

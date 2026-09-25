@@ -1,0 +1,5 @@
+source,events,rows_med,rows_max,multi_row_events,events_with_items
+S1_GPGP2018,181,2.0,5,120,0
+S2_SARGASSO_MSM41,63,5.0,15,63,60
+S3_SE_NORTH_SEA,41,5.0,13,41,39
+S4_BLACK_SEA_DOORS3,33,1.0,1,0,0

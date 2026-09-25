@@ -1,0 +1,438 @@
+{
+ "rows": 935,
+ "cols": 56,
+ "events": 318,
+ "dist_source_id": {
+  "S1_GPGP2018": 350,
+  "S2_SARGASSO_MSM41": 330,
+  "S3_SE_NORTH_SEA": 222,
+  "S4_BLACK_SEA_DOORS3": 33
+ },
+ "dist_record_type": {
+  "transect_density": 598,
+  "item_observation": 337
+ },
+ "dist_target_scope": {
+  "object_context": 337,
+  "plastic_category": 321,
+  "total_plastic": 162,
+  "all_litter": 74,
+  "fisheries_litter_category": 41
+ },
+ "dist_measurement_profile": {
+  "S2_visual_GT2": 330,
+  "S3_visual_GT2": 222,
+  "S1_aerial_GT50": 97,
+  "S1_trawl_GT5_N": 94,
+  "S1_trawl_5_to_50": 83,
+  "S1_trawl_GT5_H": 70,
+  "S4_visual_GT2_5": 33,
+  "S1_trawl_GT5_F": 6
+ },
+ "dist_size_class": {
+  ">2 cm (macro)": 552,
+  ">5 cm (macro+mega)": 170,
+  ">50 cm (megaplastic)": 97,
+  "5-50 cm (macroplastic)": 83,
+  ">2.5 cm (macro)": 33
+ },
+ "dist_position_role": {
+  "transect_midpoint_arithmetic": 386,
+  "observer_at_sighting": 197,
+  "sighting_position": 140,
+  "mosaic_center": 97,
+  "published_transect_center": 82,
+  "reported_transect_center": 33
+ },
+ "dist_material": {
+  "plastic": 736,
+  "mixed (predominantly plastic)": 74,
+  "plastic (all polymers)": 63,
+  "plastic (fishing gear)": 41,
+  "expanded polystyrene (EPS)": 15,
+  "foamed plastic (including EPS)": 6
+ },
+ "dist_missions_calendar_eligible": {
+  "Landsat-8": 525,
+  "Landsat-8; Sentinel-2": 377,
+  "Landsat-8; Sentinel-2; Landsat-9": 33
+ },
+ "dist_concentration_basis": {
+  "transect/sampling event": 350,
+  "transect": 215,
+  "none; parent total plastic density stored separately": 197,
+  "none; parent all-litter density stored separately": 140,
+  "transect (mid-point position)": 33
+ },
+ "sources": [
+  {
+   "source_id": "S1_GPGP2018",
+   "rows": 350,
+   "events": 181,
+   "date_min": "2015-07-25",
+   "date_max": "2016-10-06",
+   "n_dates": 26,
+   "time_known_pct": 72,
+   "lat_min": 28.99,
+   "lat_max": 33.79,
+   "lon_min": -143.84,
+   "lon_max": -128.79
+  },
+  {
+   "source_id": "S2_SARGASSO_MSM41",
+   "rows": 330,
+   "events": 63,
+   "date_min": "2015-04-01",
+   "date_max": "2015-04-26",
+   "n_dates": 26,
+   "time_known_pct": 100,
+   "lat_min": 22.56,
+   "lat_max": 32.24,
+   "lon_min": -70.0,
+   "lon_max": -58.01
+  },
+  {
+   "source_id": "S3_SE_NORTH_SEA",
+   "rows": 222,
+   "events": 41,
+   "date_min": "2014-04-03",
+   "date_max": "2016-04-10",
+   "n_dates": 12,
+   "time_known_pct": 100,
+   "lat_min": 53.69,
+   "lat_max": 55.88,
+   "lon_min": 3.42,
+   "lon_max": 8.14
+  },
+  {
+   "source_id": "S4_BLACK_SEA_DOORS3",
+   "rows": 33,
+   "events": 33,
+   "date_min": "2024-06-02",
+   "date_max": "2024-06-18",
+   "n_dates": 12,
+   "time_known_pct": 0,
+   "lat_min": 41.6,
+   "lat_max": 43.61,
+   "lon_min": 29.21,
+   "lon_max": 41.68
+  }
+ ],
+ "events_by_source": [
+  {
+   "source": "S1_GPGP2018",
+   "events": 181,
+   "rows_med": 2.0,
+   "rows_max": 5,
+   "multi_row_events": 120,
+   "events_with_items": 0,
+   "events_per_day_med": 6.0,
+   "events_per_day_max": 16
+  },
+  {
+   "source": "S2_SARGASSO_MSM41",
+   "events": 63,
+   "rows_med": 5.0,
+   "rows_max": 15,
+   "multi_row_events": 63,
+   "events_with_items": 60,
+   "events_per_day_med": 2.0,
+   "events_per_day_max": 4
+  },
+  {
+   "source": "S3_SE_NORTH_SEA",
+   "events": 41,
+   "rows_med": 5.0,
+   "rows_max": 13,
+   "multi_row_events": 41,
+   "events_with_items": 39,
+   "events_per_day_med": 4.0,
+   "events_per_day_max": 6
+  },
+  {
+   "source": "S4_BLACK_SEA_DOORS3",
+   "events": 33,
+   "rows_med": 1.0,
+   "rows_max": 1,
+   "multi_row_events": 0,
+   "events_with_items": 0,
+   "events_per_day_med": 2.0,
+   "events_per_day_max": 8
+  }
+ ],
+ "targets": [
+  {
+   "measurement_profile": "S1_aerial_GT50",
+   "target_scope": "plastic_category",
+   "rows": 81,
+   "events": 30,
+   "conc_known": 81,
+   "zeros": 2,
+   "area_known": 81,
+   "numerator_known": 81,
+   "time_known": 0,
+   "median": 0.377898993079,
+   "p90": 1.51026916961,
+   "max": 5.11329935072,
+   "date_min": "2016-10-02",
+   "date_max": "2016-10-06"
+  },
+  {
+   "measurement_profile": "S1_aerial_GT50",
+   "target_scope": "total_plastic",
+   "rows": 16,
+   "events": 16,
+   "conc_known": 1,
+   "zeros": 1,
+   "area_known": 16,
+   "numerator_known": 1,
+   "time_known": 0,
+   "median": 0.0,
+   "p90": 0.0,
+   "max": 0.0,
+   "date_min": "2016-10-02",
+   "date_max": "2016-10-06"
+  },
+  {
+   "measurement_profile": "S1_trawl_5_to_50",
+   "target_scope": "total_plastic",
+   "rows": 83,
+   "events": 83,
+   "conc_known": 83,
+   "zeros": 0,
+   "area_known": 83,
+   "numerator_known": 0,
+   "time_known": 83,
+   "median": 633.666764,
+   "p90": 1412.1762442,
+   "max": 2209.120417,
+   "date_min": "2015-07-25",
+   "date_max": "2015-08-18"
+  },
+  {
+   "measurement_profile": "S1_trawl_GT5_F",
+   "target_scope": "plastic_category",
+   "rows": 6,
+   "events": 6,
+   "conc_known": 6,
+   "zeros": 0,
+   "area_known": 6,
+   "numerator_known": 6,
+   "time_known": 6,
+   "median": 16.580689459749998,
+   "p90": 23.65167996705,
+   "max": 24.761756691,
+   "date_min": "2015-08-01",
+   "date_max": "2015-08-17"
+  },
+  {
+   "measurement_profile": "S1_trawl_GT5_H",
+   "target_scope": "plastic_category",
+   "rows": 70,
+   "events": 70,
+   "conc_known": 70,
+   "zeros": 0,
+   "area_known": 70,
+   "numerator_known": 70,
+   "time_known": 70,
+   "median": 346.78275164800004,
+   "p90": 1039.535468638,
+   "max": 1425.1197968,
+   "date_min": "2015-07-25",
+   "date_max": "2015-08-17"
+  },
+  {
+   "measurement_profile": "S1_trawl_GT5_N",
+   "target_scope": "plastic_category",
+   "rows": 94,
+   "events": 94,
+   "conc_known": 94,
+   "zeros": 0,
+   "area_known": 94,
+   "numerator_known": 94,
+   "time_known": 94,
+   "median": 203.71238533500002,
+   "p90": 648.8243864939002,
+   "max": 1745.14809941,
+   "date_min": "2015-07-27",
+   "date_max": "2015-08-18"
+  },
+  {
+   "measurement_profile": "S2_visual_GT2",
+   "target_scope": "plastic_category",
+   "rows": 70,
+   "events": 63,
+   "conc_known": 70,
+   "zeros": 0,
+   "area_known": 70,
+   "numerator_known": 70,
+   "time_known": 70,
+   "median": 31.74063546195,
+   "p90": 98.86596499861,
+   "max": 222.699113253,
+   "date_min": "2015-04-01",
+   "date_max": "2015-04-26"
+  },
+  {
+   "measurement_profile": "S2_visual_GT2",
+   "target_scope": "total_plastic",
+   "rows": 63,
+   "events": 63,
+   "conc_known": 63,
+   "zeros": 0,
+   "area_known": 63,
+   "numerator_known": 63,
+   "time_known": 63,
+   "median": 36.0923965351,
+   "p90": 100.28970201058002,
+   "max": 222.699113253,
+   "date_min": "2015-04-01",
+   "date_max": "2015-04-26"
+  },
+  {
+   "measurement_profile": "S3_visual_GT2",
+   "target_scope": "all_litter",
+   "rows": 41,
+   "events": 41,
+   "conc_known": 41,
+   "zeros": 0,
+   "area_known": 41,
+   "numerator_known": 41,
+   "time_known": 41,
+   "median": 29.5,
+   "p90": 52.3,
+   "max": 195.1,
+   "date_min": "2014-04-03",
+   "date_max": "2016-04-10"
+  },
+  {
+   "measurement_profile": "S3_visual_GT2",
+   "target_scope": "fisheries_litter_category",
+   "rows": 41,
+   "events": 41,
+   "conc_known": 41,
+   "zeros": 35,
+   "area_known": 41,
+   "numerator_known": 41,
+   "time_known": 41,
+   "median": 0.0,
+   "p90": 4.745,
+   "max": 13.247,
+   "date_min": "2014-04-03",
+   "date_max": "2016-04-10"
+  },
+  {
+   "measurement_profile": "S4_visual_GT2_5",
+   "target_scope": "all_litter",
+   "rows": 33,
+   "events": 33,
+   "conc_known": 33,
+   "zeros": 0,
+   "area_known": 0,
+   "numerator_known": 0,
+   "time_known": 0,
+   "median": 224.92,
+   "p90": 597.874,
+   "max": 976.01,
+   "date_min": "2024-06-02",
+   "date_max": "2024-06-18"
+  }
+ ],
+ "control_example": {
+  "N": 12,
+  "A_km2": 0.2,
+  "C": 60.0,
+  "model": 75,
+  "abs_err": 15.0
+ },
+ "formula_check": [
+  {
+   "measurement_profile": "S1_aerial_GT50",
+   "rows": 82,
+   "max_abs_err": 4.61142235508305e-12,
+   "max_rel_err": 3.5581774040631716e-12
+  },
+  {
+   "measurement_profile": "S1_trawl_GT5_F",
+   "rows": 6,
+   "max_abs_err": 3.746336574295128e-11,
+   "max_rel_err": 3.2588589812787434e-12
+  },
+  {
+   "measurement_profile": "S1_trawl_GT5_H",
+   "rows": 70,
+   "max_abs_err": 5.2032191888429224e-09,
+   "max_rel_err": 5.318908377667965e-12
+  },
+  {
+   "measurement_profile": "S1_trawl_GT5_N",
+   "rows": 94,
+   "max_abs_err": 4.836692824028432e-09,
+   "max_rel_err": 4.5897507111421345e-12
+  },
+  {
+   "measurement_profile": "S2_visual_GT2",
+   "rows": 133,
+   "max_abs_err": 4.331610625740723e-10,
+   "max_rel_err": 4.301650318931187e-12
+  },
+  {
+   "measurement_profile": "S3_visual_GT2",
+   "rows": 82,
+   "max_abs_err": 0.966666666666697,
+   "max_rel_err": 0.008878127522195337
+  }
+ ],
+ "calendar": [
+  {
+   "source": "S1_GPGP2018",
+   "events": 181,
+   "s2_calendar": 181,
+   "landsat_calendar": 181,
+   "E_pm0": 27.1,
+   "E_pm1": 69.8,
+   "E_pm3": 123.0,
+   "E_pm5": 150.7
+  },
+  {
+   "source": "S2_SARGASSO_MSM41",
+   "events": 63,
+   "s2_calendar": 0,
+   "landsat_calendar": 63,
+   "E_pm0": 3.8,
+   "E_pm1": 10.8,
+   "E_pm3": 22.3,
+   "E_pm5": 31.3
+  },
+  {
+   "source": "S3_SE_NORTH_SEA",
+   "events": 41,
+   "s2_calendar": 3,
+   "landsat_calendar": 41,
+   "E_pm0": 2.8,
+   "E_pm1": 7.7,
+   "E_pm3": 15.5,
+   "E_pm5": 21.4
+  },
+  {
+   "source": "S4_BLACK_SEA_DOORS3",
+   "events": 33,
+   "s2_calendar": 33,
+   "landsat_calendar": 33,
+   "E_pm0": 9.2,
+   "E_pm1": 20.6,
+   "E_pm3": 29.6,
+   "E_pm5": 32.1
+  },
+  {
+   "source": "ИТОГО",
+   "events": 318.0,
+   "s2_calendar": 217.0,
+   "landsat_calendar": 318.0,
+   "E_pm0": 42.900000000000006,
+   "E_pm1": 108.9,
+   "E_pm3": 190.4,
+   "E_pm5": 235.5
+  }
+ ]
+}

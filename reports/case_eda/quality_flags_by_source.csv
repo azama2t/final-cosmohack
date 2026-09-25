@@ -1,0 +1,17 @@
+quality_flags,S1_GPGP2018,S2_SARGASSO_MSM41,S3_SE_NORTH_SEA,S4_BLACK_SEA_DOORS3
+(пусто),84,0,6,0
+all_litter_not_plastic,0,0,41,33
+author_area_replaces_endpoint_distance,0,330,0,0
+category_dictionary_corrected,76,0,0,0
+companion_count_differs_sum_float_items,0,51,0,0
+interrupted_transect_summary_area,0,23,0,0
+numerator_area_unavailable,0,0,0,33
+object_row_match_ambiguous_or_unresolved,0,29,0,0
+object_time_is_parent_interval,0,197,140,0
+size_filter_corrected,29,0,0,0
+source_not_revalidated_in_repair,0,0,0,33
+source_object_row_not_reconstructed,0,0,140,0
+source_total_vs_object_count_conflict,94,0,0,0
+start_coordinate_corrected_to_midpoint,170,0,0,0
+summary_area_rounded_differs_from_segment_sum,0,23,0,0
+zero_only_for_defined_scope,3,0,35,0
