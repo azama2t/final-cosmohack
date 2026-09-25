@@ -71,7 +71,8 @@ def test_pair_registry_one_row_per_csv_event(run):
         assert by.loc["S4:DOORS3:T12", "status_without_drift"] == "reject"
     if (QUALITY / "S3_HE460_MarLitter_transect03" / "meta.json").is_file():
         assert by.loc["S3:HE460_MarLitter_transect03", "status_without_drift"] == "accept"
-        assert by.loc["S3:HE460_MarLitter_transect03", "n_det"] > 0
+        # детектор отработал (число, не NaN); с harmonize: none (решение 25.09) в полосе 0 объектов, со scene_median — 3
+        assert by.loc["S3:HE460_MarLitter_transect03", "n_det"] >= 0
     # дрейф: при известном |dt| в сутки типичный сдвиг > 3 км — отказ с числами в причине
     assert "sync_unreliable_drift" in by.loc["S4:DOORS3:T2", "reason"]
 

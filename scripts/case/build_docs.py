@@ -85,6 +85,7 @@ def main(argv=None) -> int:
     t0 = time.time()
     if not a.no_run:
         run([PY, "scripts/case/run_all.py", "all", "--offline"])
+    run([PY, "scripts/case/pairs_detector_summary.py"])  # текущий результат детектора на снимках пар
     first = run([PY, "scripts/final_numbers.py"])  # noqa: F841
     run([PY, "scripts/render_docs.py"])
     run([PY, "scripts/make_deck_case.py"], check=False)  # при самом первом запуске ещё нет case_tests.json

@@ -1342,8 +1342,14 @@ def _zones_all_build() -> list[dict]:
                         "field_sample_id": frow.get("sample_id") or None,
                         "field_target_scope": frow.get("target_scope") or None,
                         "field_scope_label": scope_label(frow.get("target_scope") or "")},
-            "event_id": q.get("event_id"), "quality_dir": d, "quality_decision": decision or None,
+            "event_id": q.get("event_id"), "quality_dir": d,
+            # decision of the strip quality masks (pair_quality.csv decision): accept | reject (error -> reject)
+            "quality_decision": ("accept" if decision == "accept" else "reject") if decision else None,
             "quality_reason": q.get("reason") or None,
+            "quality_reject_reason": (q.get("reason") or ("error" if decision == "error" else None))
+            if decision and decision != "accept" else None,
+            "quality_reject_label": (_ZONE_REASON_RU.get(q.get("reason") or "", q.get("reason") or "ошибка обработки")
+                                     if decision and decision != "accept" else None),
         }})
     labels = {r["id"]: r["label"] for r in REJECT_REASONS}
     for f in feats:
@@ -1818,7 +1824,8 @@ ZONE_COLS = ["zone_id", "scene_id", "mission", "datetime", "status", "area_km2",
              "linked_sample_ids", "centroid_lon", "centroid_lat", "kind"]
 ZONE_COLS_31 = ZONE_COLS + ["detection_status", "concentration_status", "field_estimate_items_km2",  # 3.1
                              "layer_kind", "detector_verdict", "detection_reason", "suspicious_n_objects",  # 3.2
-                             "suspicious_area_m2", "pair_status", "pair_reject_reasons", "strip_area_raster_km2"]
+                             "suspicious_area_m2", "pair_status", "pair_reject_reasons", "strip_area_raster_km2",
+                             "quality_decision", "quality_reject_reason"]  # 3.6
 PAIR_COLS = ["pair_id", "sample_id", "event_id", "source_id", "scene_id", "mission", "scene_datetime", "obs_datetime",
              "dt_hours", "distance_km", "drift_shift_km", "geometry", "cloud_pct_local", "valid_fraction_local",
              "status", "reject_reasons", "split", "scene_cloud_pct", "catalog", "time_known", "registry_note",
@@ -1900,7 +1907,8 @@ def zones_csv(feats: list[dict]) -> str:
                     p["detection_status"], p["concentration_status"], (p.get("field_estimate") or {}).get("value"),
                     p.get("layer_kind"), p.get("detector_verdict"), p.get("detection_reason"),
                     (p.get("suspicious_pixels") or {}).get("n_objects"), (p.get("suspicious_pixels") or {}).get("area_m2"),
-                    p.get("pair_status"), p.get("pair_reject_reasons") or [], p.get("strip_area_raster_km2")])
+                    p.get("pair_status"), p.get("pair_reject_reasons") or [], p.get("strip_area_raster_km2"),
+                    p.get("quality_decision"), p.get("quality_reject_reason")])
     return _csv(ZONE_COLS_31, out)
 
 

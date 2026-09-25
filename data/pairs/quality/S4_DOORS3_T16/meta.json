@@ -30,7 +30,7 @@
   },
   "detector": {
    "weights": "weights/lgbm",
-   "harmonize": "water_median",
+   "harmonize": "none",
    "min_px": 1,
    "cloud_buffer_px": 5
   },
@@ -104,31 +104,19 @@
  "reason": "glint",
  "detector": {
   "threshold": 0.63,
-  "n_det_crop": 89,
-  "n_det_crop_raw": 89,
+  "n_det_crop": 0,
+  "n_det_crop_raw": 0,
   "n_dropped_cloud_shadow": 0,
-  "det_px_crop": 122,
-  "det_frac_water_crop": 0.000245,
+  "det_px_crop": 0,
+  "det_frac_water_crop": 0.0,
   "n_det": 0,
   "det_px_strip": 0,
   "det_area_m2": 0,
-  "prob_max": 0.0001,
+  "prob_max": 0.0,
   "prob_p99_strip": 0.0,
   "prob_p99_crop_water": 0.0,
-  "harmonize_offset": [
-   -0.026419999077916145,
-   -0.02501000091433525,
-   -0.01051000040024519,
-   0.003370000049471855,
-   0.003329999977722764,
-   0.003710000077262521,
-   0.0034000000450760126,
-   0.0030400000978261232,
-   0.002469999948516488,
-   -0.0024999999441206455,
-   -0.0038499999791383743
-  ],
-  "runtime_s": 1.1
+  "harmonize_offset": null,
+  "runtime_s": 0.8
  },
  "files": [
   "rgb.png",
@@ -137,6 +125,6 @@
   "prob.tif",
   "mask.png"
  ],
- "elapsed_s": 22.2,
- "created": "2026-09-25T21:09:36"
+ "elapsed_s": 22.5,
+ "created": "2026-09-25T22:41:31"
 }

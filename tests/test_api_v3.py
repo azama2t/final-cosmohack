@@ -836,3 +836,24 @@ def test_final_test_predictions_split_by_role():
         ref = list(csv.DictReader(lines[1:]))
         assert ref and {r["role"] for r in ref} == {"reference"}
         assert not ({(r["profile"], r["model"]) for r in ref} & {(r["profile"], r["model"]) for r in main})
+
+
+# ------------------------------------------------------------------ 3.6 additions (L62m): quality decision of the strip
+@pytest.mark.skipif(not (cs.PATHS["pairs_dir"] / "pair_quality.csv").is_file(), reason="нет pair_quality.csv")
+def test_zone_quality_decision(client):
+    pq = {r["event_id"]: r for r in csv.DictReader(open(cs.PATHS["pairs_dir"] / "pair_quality.csv",
+                                                         encoding="utf-8-sig"))}
+    zones = client.get("/api/v3/zones").json()["features"]
+    rows = {r["zone_id"]: r for r in csv.DictReader(io.StringIO(client.get(
+        "/api/v3/export", params={"layer": "zones", "format": "csv"}).content.decode("utf-8-sig")))}
+    for z in zones:
+        p = z["properties"]
+        exp = "accept" if pq[p["event_id"]]["decision"] == "accept" else "reject"
+        assert p["quality_decision"] == exp
+        if exp == "accept":
+            assert p["quality_reject_reason"] is None and p["quality_reject_label"] is None
+        else:
+            assert p["quality_reject_reason"] and p["quality_reject_label"]
+            assert p["quality_reject_reason"] == (pq[p["event_id"]]["reason"] or "error")
+        assert rows[z["id"]]["quality_decision"] == exp
+        assert rows[z["id"]]["quality_reject_reason"] == (p["quality_reject_reason"] or "")

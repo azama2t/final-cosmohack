@@ -498,3 +498,16 @@ CSV наблюдений: + field_estimate_items_km2, field_estimate_lo, field_e
   research_estimate_model, research_estimate_fold (в конце).
 GET /api/v3/metrics: concentration.profiles[p].map_field_estimate =
   { model, value, lo, hi, interval, interval_coverage_test, interval_coverage_cv, n_test, note }.
+
+3.6 (ДОБАВЛЕНИЯ, 25.09 23:00)
+GET /api/v3/zones, properties зоны:
+  "quality_decision": "accept" | "reject"   // решение масок качества полосы (data/pairs/pair_quality.csv decision; error → reject)
+  "quality_reject_reason": "cloud" | "glint" | "insufficient_coverage" | … | "error" | null (null при accept)
+  "quality_reject_label": русская подпись причины | null
+  "quality_reason": как в pair_quality.csv (оставлено)
+  "suspicious_pixels.quality_rejected": true, если полоса отклонена масками качества (детекции вероятно ложные)
+CSV зон: + quality_decision, quality_reject_reason (в конце).
+GET /api/v3/export?layer=detections: + properties.quality_rejected.
+GET /api/v3/meta.summary: + n_strips_quality_ok, n_suspicious_in_quality_ok_strips, n_suspicious_in_quality_rejected_strips.
+GET /api/v3/metrics.concentration: + selected {profile: "median_train"}, profiles[p].selected, profiles[p].selected_reason;
+  field_estimate.scenarios {p25, p50, p75, n, unit, note} — квартили обучающего профиля.

@@ -15,7 +15,11 @@ decision:
   glint_scene_max_scl_cloud: 0.01  # ... а облаков SCL < 1% -> это блик, а не облака (код 6 в quality.tif)
 detector:
   weights: weights/lgbm
-  harmonize: water_median    # как в живом контуре (сдвиг медианы воды к эталону MARIDA)
+  # Гармонизация каналов перед LightGBM: none | scene_median (сдвиг медианы воды сцены к медиане воды MARIDA,
+  # = harmonize='water_median' живого контура). Решение 25.09 22:40 (docs/DECISIONS.md, коммит aebebf5): на снимках пар
+  # выключена — выбор по MARIDA val, F1 0.923 без сдвига против 0.897 со сдвигом (reports/case_pairs/visual_review.md).
+  # Прежние числа (до решения): pair_quality.py --harmonize scene_median.
+  harmonize: none
   min_px: 1
   cloud_buffer_px: 5
 network:

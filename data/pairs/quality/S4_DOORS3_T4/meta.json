@@ -30,7 +30,7 @@
   },
   "detector": {
    "weights": "weights/lgbm",
-   "harmonize": "water_median",
+   "harmonize": "none",
    "min_px": 1,
    "cloud_buffer_px": 5
   },
@@ -115,20 +115,8 @@
   "prob_max": null,
   "prob_p99_strip": null,
   "prob_p99_crop_water": null,
-  "harmonize_offset": [
-   -0.09591999650001526,
-   -0.10281000286340714,
-   -0.09150999784469604,
-   -0.07312999665737152,
-   -0.06776999682188034,
-   -0.06988999992609024,
-   -0.0746999979019165,
-   -0.07016000151634216,
-   -0.07923000305891037,
-   -0.07649999856948853,
-   -0.06605000048875809
-  ],
-  "runtime_s": 1.1
+  "harmonize_offset": null,
+  "runtime_s": 0.9
  },
  "files": [
   "rgb.png",
@@ -137,6 +125,6 @@
   "prob.tif",
   "mask.png"
  ],
- "elapsed_s": 13.6,
- "created": "2026-09-25T21:10:05"
+ "elapsed_s": 6.1,
+ "created": "2026-09-25T22:42:14"
 }

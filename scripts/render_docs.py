@@ -526,12 +526,18 @@ def case_sections_table(fn: dict) -> str:
             f"{ft.get('protocol') or DASH}. Ограничение: ранняя разведка бейзлайнов видела все события профиля | `{ft.get('source') or DASH}` |",
             f"| 4. Эксперимент на снимках | {fmt(ex.get('n_pairs'), None)} пар S2 ({fmt(ex.get('n_groups'), None)} групп), весь мусор, не пластик: FDI ρ {fmt(ex.get('fdi_rho'), 'f2')}, "
             f"p Холма {fmt(ex.get('fdi_p_holm'), 'f2')}, случайная вода сцены {fmt(ex.get('fdi_null_median'), 'f2')} — {ex.get('verdict')} | {ex.get('protocol') or DASH} | `{ex.get('source') or DASH}` |"]
+    dc = s.get("sat_detector_current") or {}
+    if dc.get("n_obj") is not None:
+        rows.append(f"| 5. Детектор на снимках пар (L2A), текущий режим | {fmt(dc.get('n_obj'), None)} объектов на {fmt(dc.get('n_crops'), None)} вырезках, "
+                    f"в полосах обследования {fmt(dc.get('n_in_strip'), None)}; гармонизация выключена (выбор по MARIDA val) | "
+                    f"{dc.get('protocol') or DASH} | `{dc.get('source') or DASH}` |")
     dr = s.get("sat_detector_review") or {}
     if dr.get("n_obj") is not None:
-        rows.append(f"| 5. Детектор на снимках пар (L2A) | {fmt(dr.get('n_obj'), None)} объектов на {fmt(dr.get('n_crops'), None)} вырезках, "
+        rows.append(f"| 6. Прежний режим с гармонизацией (до решения 22:40) — основание для отказа | {fmt(dr.get('n_obj'), None)} объектов, "
                     f"в полосах {fmt(dr.get('n_in_strip'), None)}; без HE460 t03 ложные типы (блик, облака) {fmt(dr.get('wo_he460_false_share_pct'), 'f1')} %; "
-                    f"без гармонизации {fmt(dr.get('no_harmonize_n_obj'), None)} объектов — точность MARIDA test не переносится | "
-                    f"{dr.get('protocol') or DASH} | `{dr.get('source') or DASH}` |")
+                    f"визуально «вероятное скопление» ≈ {fmt(dr.get('visual_precision_pct'), 'f1')} % | "
+                    f"{dr.get('protocol') or DASH}; визуальная разметка — один аннотатор по вырезкам, не полевая | "
+                    f"`{dr.get('source') or DASH}`, `reports/case_pairs/visual_review.json` |")
     return "\n".join(rows)
 
 

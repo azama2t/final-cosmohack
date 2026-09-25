@@ -30,7 +30,7 @@
   },
   "detector": {
    "weights": "weights/lgbm",
-   "harmonize": "water_median",
+   "harmonize": "none",
    "min_px": 1,
    "cloud_buffer_px": 5
   },
@@ -104,31 +104,19 @@
  "reason": "",
  "detector": {
   "threshold": 0.63,
-  "n_det_crop": 724,
-  "n_det_crop_raw": 724,
+  "n_det_crop": 5,
+  "n_det_crop_raw": 5,
   "n_dropped_cloud_shadow": 0,
-  "det_px_crop": 894,
-  "det_frac_water_crop": 0.000214,
-  "n_det": 3,
-  "det_px_strip": 4,
-  "det_area_m2": 400,
-  "prob_max": 0.8936,
-  "prob_p99_strip": 0.0,
-  "prob_p99_crop_water": 0.0,
-  "harmonize_offset": [
-   0.02858000062406063,
-   0.02369000017642975,
-   0.008089999668300152,
-   0.016270000487565994,
-   0.012729999609291553,
-   0.016109999269247055,
-   0.016499999910593033,
-   0.014440000057220459,
-   0.015969999134540558,
-   0.0044999998062849045,
-   0.0012499999720603228
-  ],
-  "runtime_s": 8.7
+  "det_px_crop": 5,
+  "det_frac_water_crop": 1e-06,
+  "n_det": 0,
+  "det_px_strip": 0,
+  "det_area_m2": 0,
+  "prob_max": 0.1535,
+  "prob_p99_strip": 0.0003,
+  "prob_p99_crop_water": 0.0002,
+  "harmonize_offset": null,
+  "runtime_s": 8.1
  },
  "files": [
   "rgb.png",
@@ -137,6 +125,6 @@
   "prob.tif",
   "mask.png"
  ],
- "elapsed_s": 17.8,
- "created": "2026-09-25T21:16:22"
+ "elapsed_s": 14.1,
+ "created": "2026-09-25T22:44:10"
 }

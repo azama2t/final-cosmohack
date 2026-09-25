@@ -55,7 +55,7 @@
    "glint": 10,
    "insufficient_coverage": 1
   },
-  "pairs_with_detections": 4,
+  "pairs_with_detections": 0,
   "registry_status": {
    "reject": 318
   },
@@ -70,7 +70,7 @@
  },
  "command": "run_all.py all --offline",
  "last_subcommand": "all",
- "finished": "2026-09-25T22:31:48",
+ "finished": "2026-09-25T23:17:08",
  "offline": true,
  "force": false,
  "workdir": null,
@@ -85,12 +85,12 @@
   "shapely": "2.1.2",
   "fastapi": "0.141.1",
   "yaml": "6.0.3",
-  "git_commit": "3df690af8b294de6678ab2398f3fb23a83ae7e4c"
+  "git_commit": "aebebf57cf9c659ea13931fe1ec476164c17744f"
  },
  "inputs": {
   "task/macroplastic_marine_samples.csv": "30ce0a65e3880b833b5dfe3bc6f528ee5f5af14a0d22f25995f4ef8af585a764",
   "configs/case_selection.yaml": "fd6683835e58156762c5bbd900f40cd7353ba03e27b5dd55465070f068e8ff63",
-  "configs/case_pairs.yaml": "0dc8bf61caf6df93c04b20d8ce8290a862b6c3586c593d72587b7d195cacdb7e",
+  "configs/case_pairs.yaml": "445453dc480668baa6b5690d7478b5d554d9056abb89855cfea1e713fd73994a",
   "weights/lgbm/meta.json": "97db8f94afb5b46b89f45f08562519b0b6a1ee91dc0e2aa5716b5926c4a1da07"
  },
  "outputs_sha256": {
@@ -99,11 +99,11 @@
   "data/case/selection_S2_visual_total_plastic.csv": "681891ba9128a553bc96c449cc449ebc877bfd1863739b5657707e80fb3f387e",
   "data/case/selection_S2_visual_total_plastic_rejected.csv": "0a91527bc96f0a30a9b37c2150bc38f04c912db63f9d1a0cb965eb8b339dba2f",
   "data/case/run/registry_samples.csv": "ad18fda9af315dbfce398601f05f11c4e212b323a14c53ad0ee98366d1279690",
-  "data/case/run/registry_pairs.csv": "5b286619d45a8dccb03444639bc8a135aa6d522697c6c6a1f387b814b9e03d18",
+  "data/case/run/registry_pairs.csv": "13c86ff514a2eb1153b9ae8ab6ff97d0a42daa365ad05d2e2a8cb5dd636196bb",
   "data/pairs/events.csv": "adf102a44ed29df914c936c896781bb45ee1e1fe82150a70eaba56221da699c5",
   "data/pairs/candidates.csv": "1799265e31cbf3f58282b015feaf61244f4117f258d30c031548099d97806c01",
   "data/pairs/best_per_event.csv": "6661b3dd12464acf38a01c428a9dc5a0cf1ae88a7efd86bffef1b90b4ebbe305",
-  "data/pairs/pair_quality.csv": "40b7b2797e6ae2096e60c7acaadc0c9de8e7a2a6ba8b7b09cf9ac2488d73d385",
+  "data/pairs/pair_quality.csv": "2d4ae666e33c4fb22efb8397d13fdf600071382e1de32e11571b1733b191fa64",
   "reports/case_conc/predictions.csv": "1e9b3d8a2ac056edbc6fc20ac95adf5280076ca8c94f923ce80c796b5c5a6fa7",
   "reports/case_conc/metrics_by_fold.csv": "cf385c7505bcb67966d71de7f0caa83fdae0a3016bb62d884d394cb5270ebd74",
   "reports/case_conc/consistency.csv": "8ce619025128c25384b37f17ffbf9c9037fdc8419e823c0a725a3b93cf9af86d",
@@ -113,13 +113,13 @@
   "out/case_export/observations.csv": "5b7d4d4d38761b44d0ed90b68048a5be12caa6adb36770785e0a8a6c452a9c44",
   "out/case_export/pairs.geojson": "628db7fa26cbf43fe6f81e6f34713d41dfb17f8ed8ce52fb5deee504069d5812",
   "out/case_export/pairs.csv": "507024a241b80fff91104dd20a2de9659fe4a3f176b40b779966cdccdb8eb6f2",
-  "out/case_export/zones.geojson": "621da66dd02877a937e2e7dcfcba490f60f8ac6f9055f245b08767ce1c0480d4",
-  "out/case_export/zones.csv": "2f87350187d93acbaa38da4e110b79a44e78545401a5bac3d15df6a23a4093bb",
+  "out/case_export/zones.geojson": "a711d0e9a319e4e05f46ab88dd69563b56b3c575179614ed0f20c75b6cf0de58",
+  "out/case_export/zones.csv": "850b495f9ae250f1ec4ef3f1ebb8f9b919580a3ae84f986cacc80861920dc05b",
   "out/case_export/example_pairs_black_sea_24h.csv": "d19ca108880f26760d2a86ef18f35ef23f2fbfd5570d87f560cf32b6e0a5eef5",
   "out/case_export/example_pairs_accepted.csv": "c98dfb6d693c97b031d7abb94751e54b4baf7972f9f493e0a2b997bffcae2dbe",
   "out/case_export/example_zones_detected.geojson": "58fd0941b152a511fe654ad736dec6fc78e45ec37dc7e9b29cab9792fe7ca0c6"
  },
- "outputs_fingerprint": "8f765cc35dfefef302d76828b5f5d10005827335e9e4ae3415423d34d85edeab",
+ "outputs_fingerprint": "fccf808a8817d7c46dd455cc790e30d80d084a74eb0907620cd82f1f6428de2a",
  "steps": {
   "1_selection": {
    "step": "1_selection",
@@ -131,7 +131,7 @@
    "step": "2_pairs",
    "ok": true,
    "note": "строк 1774, запросов мимо кэша 0, ошибок 0",
-   "seconds": 1.6
+   "seconds": 1.7
   },
   "3_quality_detector": {
    "step": "3_quality_detector",
@@ -154,7 +154,7 @@
    "step": "4_concentration",
    "ok": true,
    "note": "S2_visual_total_plastic: median MAE 35.9 vs knn5 31.3; S1_trawl_total_plastic: median MAE 456.4 vs knn5 448.9",
-   "seconds": 2.3
+   "seconds": 2.4
   },
   "total_eval": {
    "step": "total_eval",
@@ -181,7 +181,7 @@
   "total_all": {
    "step": "total_all",
    "ok": true,
-   "seconds": 6.7
+   "seconds": 7.0
   }
  },
  "concentration": {

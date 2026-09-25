@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-25T22:32:12+03:00",
+ "generated": "2026-09-25T23:17:29+03:00",
  "note": "генерируется scripts/final_numbers.py; руками не править; null = ещё не посчитано",
  "l3_lgbm": {
   "available": true,
@@ -3264,7 +3264,7 @@
    "reject_cloud": 6,
    "reject_cloud_qa_suspect": 4,
    "reject_coverage": 1,
-   "pairs_with_detections": 4,
+   "pairs_with_detections": 0,
    "registry_reject": 318,
    "registry_accept": 0,
    "stage_metadata": 289,
@@ -5140,9 +5140,9 @@
      -1.0,
      -0.14
     ],
-    "p_perm": 0.013,
-    "p_holm": 0.15,
-    "null_median": -0.54,
+    "p_perm": 0.012,
+    "p_holm": 0.12,
+    "null_median": -0.52,
     "null_frac_ge": 0.15
    },
    "p_mean": {
@@ -5152,20 +5152,20 @@
      -0.87,
      -0.46
     ],
-    "p_perm": 0.179,
-    "p_holm": 0.9,
-    "null_median": -0.17,
-    "null_frac_ge": 0.24
+    "p_perm": 0.18,
+    "p_holm": 0.53,
+    "null_median": -0.13,
+    "null_frac_ge": 0.43
    },
    "fdi_context": {
     "n": 11,
     "rho": -0.49,
     "ci95": [
-     -0.94,
-     0.39
+     -0.95,
+     0.38
     ],
-    "p_perm": 0.127,
-    "p_holm": 0.76,
+    "p_perm": 0.132,
+    "p_holm": 0.53,
     "null_median": null,
     "null_frac_ge": null
    },
@@ -5173,11 +5173,11 @@
     "n": 11,
     "rho": -0.61,
     "ci95": [
-     -0.96,
+     -0.93,
      0.16
     ],
-    "p_perm": 0.055,
-    "p_holm": 0.51,
+    "p_perm": 0.054,
+    "p_holm": 0.43,
     "null_median": null,
     "null_frac_ge": null
    },
@@ -5200,15 +5200,15 @@
   "selfcheck": {
    "available": true,
    "file": "reports/selfcheck/consistency_latest.json",
-   "when": "2026-09-25T22:11:51",
-   "checks": 284,
-   "ok": 284,
+   "when": "2026-09-25T22:59:13",
+   "checks": 259,
+   "ok": 259,
    "fail": 0,
    "warn": 0,
-   "seconds": 27.0,
+   "seconds": 4.0,
    "invalid_ok": 46,
    "invalid_total": 46,
-   "p95_max_ms": 89.0
+   "p95_max_ms": 66.0
   },
   "control": {
    "n": 12,
@@ -5222,7 +5222,7 @@
   },
   "run": {
    "command": "run_all.py all --offline",
-   "finished": "2026-09-25T22:31:48",
+   "finished": "2026-09-25T23:17:08",
    "versions": {
     "python": "3.12.7",
     "platform": "Windows-10-10.0.19045-SP0",
@@ -5234,17 +5234,17 @@
     "shapely": "2.1.2",
     "fastapi": "0.141.1",
     "yaml": "6.0.3",
-    "git_commit": "3df690af8b294de6678ab2398f3fb23a83ae7e4c"
+    "git_commit": "aebebf57cf9c659ea13931fe1ec476164c17744f"
    },
-   "outputs_fingerprint_short": "8f765cc35dfefef3",
+   "outputs_fingerprint_short": "fccf808a8817d7c4",
    "n_outputs": 24,
-   "total_s": 6.7,
+   "total_s": 7.0,
    "step_s": {
     "1_selection": 0.1,
-    "2_pairs": 1.6,
+    "2_pairs": 1.7,
     "3_quality_detector": 0.2,
     "3b_registry": 0.7,
-    "4_concentration": 2.3,
+    "4_concentration": 2.4,
     "5_detector_marida": 1.0,
     "6_export_api_v3": 0.9
    },
@@ -5363,18 +5363,28 @@
     "n_pairs": 11,
     "n_groups": 6,
     "fdi_rho": -0.75,
-    "fdi_p_holm": 0.15,
-    "fdi_null_median": -0.54,
+    "fdi_p_holm": 0.12,
+    "fdi_null_median": -0.52,
     "verdict": "связь не установлена"
+   },
+   "sat_detector_current": {
+    "source": "reports/case_pairs/detector_current.json (из data/pairs/quality/*/meta.json)",
+    "protocol": "текущий режим детектора на вырезках Sentinel-2 L2A пар: LightGBM weights/lgbm, порог P ≥ 0.63, harmonize = 'none'; объекты — 8-связные компоненты на пригодной воде без объектов у облаков; «в полосе» — пересечение с растровой полосой обследования",
+    "harmonize": "none",
+    "n_crops": 22,
+    "n_obj": 5,
+    "n_in_strip": 0
    },
    "sat_detector_review": {
     "source": "reports/case_pairs/detector_review.json (разбор: reports/case_pairs/detector_review.md)",
     "protocol": "22 вырезки Sentinel-2 L2A пар; объекты пересобраны как в pair_quality.py; типы назначены правилами (grid.artifacts, край облака, мелкое облако по B11, блик по B11, берег), без ручной разметки",
+    "mode": "прежний режим с гармонизацией water_median (до решения 25.09 22:40); основание для отказа от неё, не текущий результат",
     "n_crops": 22,
     "n_obj": 975,
     "n_in_strip": 6,
     "wo_he460_false_share_pct": 55.0,
-    "no_harmonize_n_obj": 5
+    "no_harmonize_n_obj": 5,
+    "visual_precision_pct": 1.7
    }
   },
   "clean_clone": {
@@ -5420,7 +5430,52 @@
    "no_harmonize_n_obj": 5,
    "no_harmonize_n_in_strip": 0,
    "t25_wake_lost_without_harmonize": true,
-   "marida_test_f1": 0.871
+   "marida_test_f1": 0.871,
+   "mode": "прежний режим с гармонизацией water_median (до решения 25.09 22:40); основание для отказа от неё, не текущий результат"
+  },
+  "detector_current": {
+   "available": true,
+   "source": "reports/case_pairs/detector_current.json (из data/pairs/quality/*/meta.json)",
+   "protocol": "текущий режим детектора на вырезках Sentinel-2 L2A пар: LightGBM weights/lgbm, порог P ≥ 0.63, harmonize = 'none'; объекты — 8-связные компоненты на пригодной воде без объектов у облаков; «в полосе» — пересечение с растровой полосой обследования",
+   "harmonize": "none",
+   "n_crops": 22,
+   "n_obj": 5,
+   "n_in_strip": 0,
+   "n_crops_with_obj": 1,
+   "n_strips_with_obj": 0,
+   "prob_max": 0.15,
+   "crops_with_objects": "S3 HE460 transect03",
+   "n_ship": 1,
+   "n_other_single": 4,
+   "harmonize_val": {
+    "source": "reports/case_pairs/harmonize_val.json",
+    "protocol": "MARIDA val (12 сцен), тот же LightGBM и порог; test не использовался",
+    "f1_none": 0.923,
+    "f1_per_scene": 0.897,
+    "f1_per_patch": 0.824,
+    "delta_per_scene": -0.025,
+    "delta_per_scene_ci95": [
+     -0.072,
+     -0.013
+    ]
+   },
+   "visual_review": {
+    "source": "reports/case_pairs/visual_review.json",
+    "protocol": "визуальная разметка по вырезкам (не полевая), одним аннотатором (ИИ-агент, осмотр вырезок RGB и SWIR 64 px и контекста 256 px); листы без сцены, типа по правилам и P; порядок случайный; положительный класс = «вероятное скопление / плавучий материал»",
+    "n_labelled": 111,
+    "h_out_n": 100,
+    "h_out_k": 1,
+    "h_out_precision_pct": 1.7,
+    "h_out_ci95_pct": [
+     0.0,
+     5.0
+    ],
+    "h_in_n": 6,
+    "h_in_k": 0,
+    "n_none_n": 5,
+    "n_none_k": 0,
+    "kappa": 0.77
+   }
   },
   "splits_files": 17,
   "pairfinder": {
@@ -5446,13 +5501,13 @@
    "available": true,
    "source": "reports/case_run/case_tests.json",
    "passed": 211,
-   "skipped": 1,
+   "skipped": 2,
    "failed": 0,
-   "seconds": 21.5,
-   "when": "25.09.2026 22:32",
+   "seconds": 17.8,
+   "when": "25.09.2026 23:17",
    "command": "python -m pytest -q tests/test_case_conc_model.py tests/test_case_concentration.py tests/test_case_consistency.py tests/test_case_docs_numbers.py tests/test_case_geometry.py tests/test_case_geometry_integration.py tests/test_case_pairfinder.py tests/test_case_run_all.py tests/test_api_v3.py"
   },
-  "n_test_funcs": 137,
+  "n_test_funcs": 138,
   "n_tests": 211
  }
 }

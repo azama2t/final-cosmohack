@@ -1220,6 +1220,47 @@ def _case_detector_review() -> dict:
             "marida_test_f1": None}
 
 
+def _case_detector_current() -> dict:
+    """Current detector on the pairs (reports/case_pairs/detector_current.json, scripts/case/pairs_detector_summary.py)
+    + the MARIDA val choice of the harmonisation (reports/case_pairs/harmonize_val.json) + visual review of the former
+    objects (reports/case_pairs/visual_review.json)."""
+    d = _load_json(ROOT / "reports" / "case_pairs" / "detector_current.json")
+    out = {"available": isinstance(d, dict)}
+    if isinstance(d, dict):
+        t = d.get("totals") or {}
+        rt = (d.get("review_types") or {}).get("by_type") or {}
+        out.update({"source": "reports/case_pairs/detector_current.json (из data/pairs/quality/*/meta.json)",
+                    "protocol": d.get("protocol"), "harmonize": d.get("harmonize"),
+                    "n_crops": t.get("n_crops"), "n_obj": t.get("n_obj"), "n_in_strip": t.get("n_in_strip"),
+                    "n_crops_with_obj": t.get("n_crops_with_obj"), "n_strips_with_obj": t.get("n_strips_with_obj"),
+                    "prob_max": _r(t.get("prob_max"), 2),
+                    "crops_with_objects": ", ".join(k.replace("_MarLitter_", " ").replace("_", " ")
+                                                    for k in (d.get("crops_with_objects") or {})) or "нет",
+                    "n_ship": rt.get("ship"), "n_other_single": rt.get("other_single")})
+    h = _load_json(ROOT / "reports" / "case_pairs" / "harmonize_val.json")
+    if isinstance(h, dict):
+        v = h.get("variants") or {}
+        ps = (h.get("paired_bootstrap") or {}).get("per_scene_minus_none") or {}
+        out["harmonize_val"] = {"source": "reports/case_pairs/harmonize_val.json",
+                                "protocol": "MARIDA val (12 сцен), тот же LightGBM и порог; test не использовался",
+                                "f1_none": _r((v.get("none") or {}).get("f1_md"), 3),
+                                "f1_per_scene": _r((v.get("per_scene") or {}).get("f1_md"), 3),
+                                "f1_per_patch": _r((v.get("per_patch") or {}).get("f1_md"), 3),
+                                "delta_per_scene": _r(ps.get("delta_f1"), 3), "delta_per_scene_ci95": _ci2(ps.get("ci95"), 3)}
+    vr = _load_json(ROOT / "reports" / "case_pairs" / "visual_review.json")
+    if isinstance(vr, dict):
+        ho, hi, nn = vr.get("H_out") or {}, vr.get("H_in_strip") or {}, vr.get("N_none") or {}
+        out["visual_review"] = {"source": "reports/case_pairs/visual_review.json",
+                                "protocol": vr.get("protocol"), "n_labelled": vr.get("n_labelled_objects"),
+                                "h_out_n": ho.get("n"), "h_out_k": ho.get("k_accumulation"),
+                                "h_out_precision_pct": _r(100 * (ho.get("precision_stratified") or 0), 1),
+                                "h_out_ci95_pct": [_r(100 * x, 1) for x in (ho.get("ci95_stratified_bootstrap") or [])] or None,
+                                "h_in_n": hi.get("n"), "h_in_k": hi.get("k_accumulation"),
+                                "n_none_n": nn.get("n"), "n_none_k": nn.get("k_accumulation"),
+                                "kappa": _r((vr.get("repeatability") or {}).get("kappa_7class"), 2)}
+    return out
+
+
 def _case_clean_clone() -> dict:
     """Latest reports/selfcheck/clean_clone_*.md: a real `git clone` run by README (timings, tests, numbers)."""
     files = sorted(glob.glob(str(ROOT / "reports" / "selfcheck" / "clean_clone_*.md")))
@@ -1380,9 +1421,16 @@ def collect_case() -> dict:
     out["clean_clone"] = _case_clean_clone()
     out["detector_review"] = _case_detector_review()
     out["detector_review"]["marida_test_f1"] = (((out.get("detector") or {}).get("test") or {}).get("lgbm") or {}).get("f1")
-    out["sections"]["sat_detector_review"] = {k: out["detector_review"].get(k) for k in
-                                              ("source", "protocol", "n_crops", "n_obj", "n_in_strip", "wo_he460_false_share_pct",
-                                               "no_harmonize_n_obj")}
+    out["detector_review"]["mode"] = ("прежний режим с гармонизацией water_median (до решения 25.09 22:40); "
+                                      "основание для отказа от неё, не текущий результат")
+    out["detector_current"] = _case_detector_current()
+    dc = out["detector_current"]
+    out["sections"]["sat_detector_current"] = {k: dc.get(k) for k in
+                                               ("source", "protocol", "harmonize", "n_crops", "n_obj", "n_in_strip")}
+    out["sections"]["sat_detector_review"] = {**{k: out["detector_review"].get(k) for k in
+                                                 ("source", "protocol", "mode", "n_crops", "n_obj", "n_in_strip",
+                                                  "wo_he460_false_share_pct", "no_harmonize_n_obj")},
+                                              "visual_precision_pct": (dc.get("visual_review") or {}).get("h_out_precision_pct")}
     out["splits_files"] = len(glob.glob(str(ROOT / "reports" / "case_splits" / "*.csv"))) or None
     tests = 0
     for p in glob.glob(str(ROOT / "tests" / "test_case_*.py")) + [str(ROOT / "tests" / "test_api_v3.py")]:

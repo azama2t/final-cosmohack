@@ -30,7 +30,7 @@
   },
   "detector": {
    "weights": "weights/lgbm",
-   "harmonize": "water_median",
+   "harmonize": "none",
    "min_px": 1,
    "cloud_buffer_px": 5
   },
@@ -112,23 +112,11 @@
   "n_det": 0,
   "det_px_strip": 0,
   "det_area_m2": 0,
-  "prob_max": 0.0094,
+  "prob_max": 0.0001,
   "prob_p99_strip": 0.0,
   "prob_p99_crop_water": 0.0,
-  "harmonize_offset": [
-   -0.028020000085234642,
-   -0.030810000374913216,
-   -0.016909999772906303,
-   -0.0037299999967217445,
-   -0.0027699999045580626,
-   -0.002090000081807375,
-   -0.0019000000320374966,
-   -0.006060000043362379,
-   -0.0021299999207258224,
-   -0.008200000040233135,
-   -0.007249999791383743
-  ],
-  "runtime_s": 0.9
+  "harmonize_offset": null,
+  "runtime_s": 0.8
  },
  "files": [
   "rgb.png",
@@ -137,6 +125,6 @@
   "prob.tif",
   "mask.png"
  ],
- "elapsed_s": 20.7,
- "created": "2026-09-25T21:09:13"
+ "elapsed_s": 10.8,
+ "created": "2026-09-25T22:41:08"
 }

@@ -60,6 +60,21 @@ def load_cfg(path: Path) -> dict:
     return yaml.safe_load(path.read_text(encoding="utf-8"))
 
 
+# detector.harmonize (configs/case_pairs.yaml) -> load_predictor(harmonize=...). Default none (decision 25.09, MARIDA val
+# F1 0.923 without vs 0.897 with the per-scene shift); 'water_median' is accepted as an alias of scene_median (old metas).
+HARMONIZE = {"none": None, "scene_median": "water_median"}
+
+
+def harmonize_mode(cfg: dict):
+    h = (cfg.get("detector") or {}).get("harmonize", "none")
+    h = "none" if h in (None, False) else str(h)
+    if h == "water_median":
+        h = "scene_median"
+    if h not in HARMONIZE:
+        raise ValueError(f"detector.harmonize must be one of {list(HARMONIZE)}, got {h!r}")
+    return HARMONIZE[h]
+
+
 def event_geometry(samples: pd.DataFrame, eid: str, cfg: dict | None = None) -> dict:
     s = samples[samples.event_id == eid]
     top = s[s.parent_sample_id.isna()] if s.parent_sample_id.isna().any() else s
@@ -394,6 +409,21 @@ def build_table() -> pd.DataFrame:
     return t
 
 
+def _det_sentence(t: pd.DataFrame, cfg: dict) -> str:
+    """Detector summary from the table (was a hand-written sentence of the harmonize=scene_median run)."""
+    s2 = t[t.n_det.notna()]
+    h = (cfg.get("detector") or {}).get("harmonize", "none")
+    hit = s2[s2.n_det > 0]
+    crop = int(s2.n_det_crop.fillna(0).sum()) if "n_det_crop" in s2 else 0
+    if not len(hit):
+        return (f"- Гармонизация детектора: `{h}` (configs/case_pairs.yaml). Детекций LightGBM в полосах наблюдения нет ни на "
+                f"одной из {len(s2)} S2-вырезок; во всех вырезках целиком — {crop} объект(ов).")
+    parts = ", ".join(f"{r.event_id} ({int(r.n_det)}; {r.decision} {r.reason if isinstance(r.reason, str) else ''})".strip()
+                      for r in hit.itertuples())
+    return (f"- Гармонизация детектора: `{h}`. Детекции LightGBM в полосе наблюдения: {parts}; во всех вырезках целиком — "
+            f"{crop} объект(ов).")
+
+
 def write_report(t: pd.DataFrame, n_total: int, cfg: dict):
     REPORT.parent.mkdir(parents=True, exist_ok=True)
     L = ["# Маски качества и детектор на принятых парах «событие ↔ сцена»", "",
@@ -452,9 +482,7 @@ def write_report(t: pd.DataFrame, n_total: int, cfg: dict):
           "- Маски отсекают больше половины пар: главная причина на Чёрном море 2–7 июня 2024 — солнечный блик "
           "(у сцен облачность ~0 %, но вода яркая: медиана B11 0.012–0.024, а на T3–T5 блик на всю вырезку и "
           "спектральный облачный тест grid.cloudmask срабатывает на 100 % воды — такие сцены помечены glint, а не cloud).",
-          "- Детекции LightGBM, попавшие в полосу наблюдения, есть только в двух бликовых сценах (T14, T21; p до 0.97) и "
-          "в одной чистой (Северное море, HE460 transect03: 3 пятна по 1–2 пикселя на полосе 25 км, при фоне 724 пятна "
-          "в вырезке — число в полосе на уровне случайного). На 10 принятых черноморских парах в полосе детекций нет.",
+          _det_sentence(t, cfg),
           "- Это согласуется с физикой: полевые плотности — десятки–сотни предметов >2 см на км², а пиксель 10 м видит "
           "только скопления (линии/пятна плавающего материала площадью от долей пикселя с высоким покрытием). "
           "Отсутствие детекций не означает отсутствия мусора; наличие детекции не даёт концентрации.",
@@ -470,10 +498,14 @@ def main():
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--no-landsat", action="store_true")
     ap.add_argument("--summary-only", action="store_true")
+    ap.add_argument("--harmonize", choices=list(HARMONIZE),
+                    help="detector.harmonize override: none (default in config) | scene_median (old runs, before the decision)")
     ap.add_argument("--min-coverage", type=float); ap.add_argument("--max-cloud", type=float)
     ap.add_argument("--max-land", type=float); ap.add_argument("--min-water", type=float)
     a = ap.parse_args()
     cfg = load_cfg(Path(a.config))
+    if a.harmonize:
+        cfg["detector"]["harmonize"] = a.harmonize
     for k, v in (("min_coverage", a.min_coverage), ("max_cloud_frac", a.max_cloud), ("max_land_frac", a.max_land),
                  ("min_valid_water_frac", a.min_water)):
         if v is not None:
@@ -482,7 +514,7 @@ def main():
     if not a.summary_only:
         samples = pd.read_csv(ROOT / "task" / "macroplastic_marine_samples.csv", low_memory=False)
         from macroplastic.models.lgbm_predict import load_predictor
-        pred = load_predictor(ROOT / cfg["detector"]["weights"], harmonize=cfg["detector"]["harmonize"])
+        pred = load_predictor(ROOT / cfg["detector"]["weights"], harmonize=harmonize_mode(cfg))
         order = best.assign(_ls=best.collection.str.startswith("landsat")).sort_values(["_ls", "collection", "dt_hours"])
         for row in order.itertuples():
             if a.only and row.event_id not in a.only:
