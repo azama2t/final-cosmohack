@@ -23,6 +23,9 @@ L37 artefacts (macroplastic.grid.artifacts, reports/artifacts.md): straight line
 "seam"|"wake"|"ship" in detections.geojson; they are not counted in h3 flagged_water_px, zones, timeseries
 n_detections / area (timeseries n_artifacts) and n_confirmed. Zones: score x (1 + share of confirmed pixels)
 x 0.5 on a haze/glint date; repeat_dates counts reliable dates only (grid.zones); zones[].score_terms / why.
+L42 cross-model artefacts: collinear pieces of one model are classified as one strip (grid.artifacts
+collinear_groups); an object of one model with >= 30 % of its pixels within 2 px of an artefact of the other model
+gets the same mark and properties.artifact_from = that model; the partner's artefact pixels do not confirm.
 Idempotent: region folders being built are recreated; with --regions, other regions of an existing
 manifest are kept.
 """
@@ -48,7 +51,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from macroplastic.grid import H3_RES  # noqa: E402
-from macroplastic.grid.artifacts import RULES_TEXT, classify as classify_artifacts  # noqa: E402
+from macroplastic.grid.artifacts import RULES_TEXT, classify as classify_artifacts, propagate_artifacts  # noqa: E402
 from macroplastic.grid.cloudmask import (CLOUD_BUFFER_PX, drop_components, near_cloud_components,  # noqa: E402
                                          shadow_components, spectral_cloud)
 from macroplastic.grid.confirm import CONFIRM_RADIUS_PX, confirmed_components, label_of_records  # noqa: E402
@@ -274,6 +277,7 @@ def process_scene(region: str, date: str, sdir: Path, models: list[str], out: Pa
     cellr, cells = cell_raster(s_transform, s_crs, shape, H3_RES)
     res = {"date": date, "scene": scene, "bounds": bounds, "cloud": cloud, "drift": drift, "models": {}}
     masks: dict[str, tuple] = {}
+    pre: dict[str, dict] = {}
     for m in models:
         prob, p_transform, p_crs, prof = read_band(sdir / f"prob_{m}.tif")
         if prob.shape != shape or p_transform != s_transform:
@@ -307,12 +311,31 @@ def process_scene(region: str, date: str, sdir: Path, models: list[str], out: Pa
             log(f"  {region}/{date}/{m}: cloud guard dropped {n0 - n} of {n0} components {guard}")
         # L37: linear artefacts / ships are marked (kept in detections.geojson), not counted in H3 index and zones
         art, _ = classify_artifacts(labels, n, bands, water, raw)
+        pre[m] = dict(prob=prob, thr=thr, pj=pj, mdir=mdir, labels=labels, n=n, raw=raw, guard=guard, art=art)
+    # L42: marks of the other model's artefacts (own marks only, no chains)
+    own = {m: list(v["art"]) for m, v in pre.items()}
+    art_from: dict[str, dict[int, str]] = {m: {} for m in pre}
+    for m, v in pre.items():
+        for o, w in pre.items():
+            if o == m:
+                continue
+            for k, a, frm, _sh in propagate_artifacts(v["labels"], v["n"], v["art"], w["labels"], own[o], o):
+                if v["art"][k] is None:
+                    v["art"][k] = a
+                    art_from[m][k] = frm
+        if art_from[m]:
+            log(f"  {region}/{date}/{m}: {len(art_from[m])} objects marked from the other model's artefacts")
+    for m, v in pre.items():
+        prob, thr, pj, mdir, labels, n, raw, guard, art = (v[k] for k in ("prob", "thr", "pj", "mdir", "labels", "n",
+                                                                          "raw", "guard", "art"))
         is_art = np.zeros(n + 1, bool)
         is_art[1:] = [a is not None for a in art]
         recs = vectorize_detections(labels, n, prob, s_transform, s_crs, region, date, m)
         for rec, k in zip(recs, label_of_records(labels, recs)):
             if k > 0 and art[k - 1]:
                 rec["props"]["artifact"] = art[k - 1]
+                if (k - 1) in art_from[m]:
+                    rec["props"]["artifact_from"] = art_from[m][k - 1]
         real = [rec for rec in recs if not rec["props"].get("artifact")]
         art_px = is_art[labels]
         a_stat = {"seam": 0, "wake": 0, "ship": 0}
@@ -320,6 +343,7 @@ def process_scene(region: str, date: str, sdir: Path, models: list[str], out: Pa
             if rec["props"].get("artifact"):
                 a_stat[rec["props"]["artifact"]] += 1
         a_stat["px"] = int(art_px.sum())
+        a_stat["from_other"] = len(art_from[m])
         if a_stat["px"]:
             log(f"  {region}/{date}/{m}: artefacts {a_stat} of {len(recs)} det / {int((labels > 0).sum())} px")
         masks[m] = (labels, n, raw, is_art)
@@ -344,7 +368,8 @@ def process_scene(region: str, date: str, sdir: Path, models: list[str], out: Pa
             for o in done:
                 if o == m:
                     continue
-                conf = confirmed_components(labels, n, masks[o][2], CONFIRM_RADIUS_PX)
+                # L42: the partner's artefact pixels do not confirm
+                conf = confirmed_components(labels, n, masks[o][2] & ~masks[o][3][masks[o][0]], CONFIRM_RADIUS_PX)
                 for i, k in enumerate(lab_of):
                     if k > 0 and conf[k - 1] and i not in by:
                         by[i] = o

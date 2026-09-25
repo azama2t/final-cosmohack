@@ -2,12 +2,12 @@
  {
   "date": "2025-01-31",
   "model": "lgbm",
-  "total_debris_area_m2": 150200.0,
-  "mean_index": 0.4359,
-  "n_detections": 256,
+  "total_debris_area_m2": 142100.0,
+  "mean_index": 0.4129,
+  "n_detections": 244,
   "cloud_frac": 0.0001,
   "n_cells_valid": 527,
-  "n_artifacts": 23
+  "n_artifacts": 35
  },
  {
   "date": "2025-01-31",
@@ -22,12 +22,12 @@
  {
   "date": "2026-01-01",
   "model": "lgbm",
-  "total_debris_area_m2": 32300.0,
-  "mean_index": 0.0895,
-  "n_detections": 96,
+  "total_debris_area_m2": 26600.0,
+  "mean_index": 0.0726,
+  "n_detections": 90,
   "cloud_frac": 0.0001,
   "n_cells_valid": 526,
-  "n_artifacts": 25
+  "n_artifacts": 31
  },
  {
   "date": "2026-01-01",

@@ -2,9 +2,12 @@
 
 Usage: python scripts/make_demo.py [--src service/data] [--out service/demo] [--regions a,b] [--n-regions 5]
                                    [--max-dates 2] [--max-px 1024] [--max-mb 19] [--rgb-colors 256]
-Default regions (L37): the top `--n-top` (3) regions of the rating on reliable dates (manifest summary without
-haze, by index_permille, as the front's rating) plus the best-rated regions with a drift date until >= `--n-drift` (2)
-regions of the set have drift (they may coincide with the top). Per region the `--max-dates` most interesting dates
+Default regions (L42): the top `--n-top` (3) regions of the *reliable* rating, by summary index_permille - the same
+rule as the site: a region is reliable when its latest date is reliable (front lib/data.ts regionReliability /
+isUnreliableDate + service/place.py date_reliability): no haze / glint_or_haze flag, cloud_frac <= 50 % and observed
+water >= 30 % of the water H3 cells (primary model mdd). Then reliable regions with a drift date are added until
+>= `--n-drift` (2) regions of the set have drift (they may coincide with the top). The region's latest (reliable)
+date is always kept, so the demo manifest gives the same reliability as the full one. Per region the `--max-dates` most interesting dates
 (drift, reliable, both models, cloud < 30 %, more detections, newer); the default date is reliable when possible. If the set is larger than --max-mb, the least-interesting extra date of the region with the most
 dates is dropped (never below 1 date) until it fits.
 PNGs are downscaled to <= max-px (prob.png with a 3x3 max filter first so small detections stay visible);
@@ -29,6 +32,30 @@ def read_json(p: Path):
 def write_json(p: Path, obj):
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(json.dumps(obj, ensure_ascii=False, indent=1), encoding="utf-8")
+
+
+CLOUD_MAX, OBS_WATER_MIN = 0.5, 0.3  # service/place.py date_reliability, front isUnreliableDate
+
+
+def date_reasons(src: Path, rid: str, d: dict) -> list[str]:
+    """Why a date is unreliable (empty = reliable): the rule of service/place.py date_reliability."""
+    q = d.get("quality") or {}
+    out = []
+    if q.get("haze") or q.get("glint_or_haze"):
+        out.append("haze/glint")
+    if (d.get("cloud_frac") or 0.0) > CLOUD_MAX:
+        out.append(f"cloud {d['cloud_frac'] * 100:.0f} %")
+    models = d.get("models") or []
+    m = "mdd" if "mdd" in models else (models[0] if models else None)
+    p = src / rid / d["date"] / m / "h3.geojson" if m else None
+    if p is not None and p.exists():
+        props = [f["properties"] for f in read_json(p).get("features", [])]
+        water = [c for c in props if (c.get("observed_water_px") or 0) > 0 or c.get("share_permille") is not None]
+        obs = [c for c in water if c.get("share_permille") is not None]
+        ofw = len(obs) / len(water) if water else 0.0
+        if ofw < OBS_WATER_MIN:
+            out.append(f"observed water {ofw * 100:.0f} %")
+    return out
 
 
 def shrink_png(src: Path, dst: Path, max_px: int, is_prob: bool, colors: int = 0) -> tuple[int, int]:
@@ -68,15 +95,18 @@ def main(argv=None):
         want = a.regions.split(",")
         regs = [r for r in regs if r["id"] in want]
     else:
-        def rating(r):  # reliable summary first, by index (as the front's rating); hazy summaries last
-            sm = r.get("summary") or {}
-            return (bool(sm.get("haze")), -(sm.get("index_permille") or 0.0), r["id"])
+        def reliable(r):  # the site's rule: the region's latest date is reliable
+            return not date_reasons(src, r["id"], r["dates"][-1]) if r["dates"] else False
 
         def has_drift(r):
-            return any(d.get("drift") and not (d.get("quality") or {}).get("haze") for d in r["dates"])
-        ranked = sorted(regs, key=rating)
-        chosen = [r for r in ranked if not (r.get("summary") or {}).get("haze")][:a.n_top]
+            return any(d.get("drift") and not date_reasons(src, r["id"], d) for d in r["dates"])
+        ranked = sorted(regs, key=lambda r: (-((r.get("summary") or {}).get("index_permille") or 0.0), r["id"]))
+        ok = [r for r in ranked if reliable(r)]
         for r in ranked:
+            if not reliable(r):
+                print(f"  unreliable: {r['id']} ({', '.join(date_reasons(src, r['id'], r['dates'][-1]))})")
+        chosen = ok[:a.n_top]
+        for r in ok:
             if sum(has_drift(x) for x in chosen) >= a.n_drift or len(chosen) >= a.n_regions:
                 break
             if has_drift(r) and r not in chosen:
@@ -118,7 +148,9 @@ def write_demo(a, src: Path, out: Path, man: dict, regs: list, n_dates: dict, in
     for r in regs:
         rid = r["id"]
         interest = interest_fn(rid)
-        dates = sorted(sorted(r["dates"], key=interest)[-n_dates[rid]:], key=lambda d: d["date"])
+        last = r["dates"][-1]  # L42: the latest date always stays (reliability of the region as on the site)
+        rest = [d for d in sorted(r["dates"], key=interest) if d is not last][-(n_dates[rid] - 1):]             if n_dates[rid] > 1 else []
+        dates = sorted(rest + [last], key=lambda d: d["date"])
         for d in dates:
             date = d["date"]
             rj = read_json(src / rid / date / "rgb.json")

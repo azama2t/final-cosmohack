@@ -439,3 +439,114 @@ def test_zone_score_agreement_and_haze_penalty():
     zh = rank_zones(stats, n_dates=1, unreliable=True)
     assert zh[0]["score"] == 25.0 and zh[0]["score_terms"]["date_penalty"]["value"] == 0.5
     assert zone_score(10, 0.5, 1, 0.5, True) == 10 * 0.5 * 1.5 * 0.5
+
+
+def _boat(b, r0, r1, c0, c1):
+    for k in ("B2", "B3", "B4"):
+        b[k][r0:r1, c0:c1] = 0.05
+    b["B8"][r0:r1, c0:c1] = 0.08
+
+
+def test_artifact_collinear_pieces_grouped_l42():
+    """L42: a strip broken into short collinear pieces is checked as one strip; curved / far pieces are not merged."""
+    from macroplastic.grid.artifacts import collinear_groups
+    shape = (160, 160)
+    water = np.ones(shape, bool)
+    m = np.zeros(shape, bool)
+    for c0 in (40, 51, 62, 73):  # four 8-px pieces (80 m each, gaps 3 px) along one row: 410 m in total
+        m[60:62, c0:c0 + 8] = True
+    lab, n = _label(m)
+    assert n == 4
+    b = _bands(shape)
+    _boat(b, 59, 63, 84, 87)  # boat 3 px beyond the east end of the whole strip
+    art, f = classify(lab, n, b, water, group=False)
+    assert art == [None] * 4  # each piece alone is too short for any rule
+    art, f = classify(lab, n, b, water)
+    assert art == ["wake"] * 4 and len(set(f["group"])) == 1
+    # gaps of 10 px: no group, no mark
+    m2 = np.zeros(shape, bool)
+    for c0 in (20, 38, 56, 74):
+        m2[60:62, c0:c0 + 8] = True
+    lab2, n2 = _label(m2)
+    b2 = _bands(shape)
+    _boat(b2, 59, 63, 85, 88)
+    art2, f2 = classify(lab2, n2, b2, water)
+    assert art2 == [None] * 4 and len(set(f2["group"])) == 4
+    # dashed straight line 1.2 km (9-px pieces, 3-px gaps), no boat: as one strip it is a ship-free wake
+    ms = np.zeros(shape, bool)
+    for c in range(20, 140):
+        if c % 12 < 9:
+            ms[80:82, c] = True
+    labs, ns = _label(ms)
+    assert classify(labs, ns, _bands(shape), water, group=False)[0] == [None] * ns
+    assert classify(labs, ns, _bands(shape), water)[0] == ["wake"] * ns
+    # the same dashed filament bent into a wave: pieces may chain locally, but the union is curved -> untouched
+    mc = np.zeros(shape, bool)
+    for c in range(20, 140):
+        if c % 12 < 9:
+            r = int(80 + 12 * np.sin(c / 14.0))
+            mc[r:r + 2, c] = True
+    labc, nc = _label(mc)
+    artc, fc = classify(labc, nc, _bands(shape), water)
+    assert all(a is None for a in artc) and len(set(fc["group"])) > 1
+    # parallel (side-by-side) pieces are not collinear
+    mp = np.zeros(shape, bool)
+    mp[60:62, 40:50] = True
+    mp[66:68, 40:50] = True
+    labp, np_ = _label(mp)
+    assert len(set(collinear_groups(component_shape(labp, np_)))) == 2
+
+
+def test_artifact_marks_propagate_between_models_l42():
+    """L42: objects of model A on / within 2 px of an artefact of model B get B's mark (artifact_from = B)."""
+    from macroplastic.grid.artifacts import propagate_artifacts
+    shape = (120, 120)
+    mdd = np.zeros(shape, bool)
+    mdd[50:52, 20:80] = True  # MDD wake strip
+    mdd[100:103, 100:103] = True  # MDD real object
+    lab_b, n_b = _label(mdd)
+    art_b = ["wake", None]
+    lg = np.zeros(shape, bool)
+    lg[49:51, 25:32] = True  # LGBM piece on the wake
+    lg[53:54, 40:46] = True  # 1 px below the strip edge (within 2 px)
+    lg[70:73, 70:73] = True  # far from any artefact
+    lg[99:102, 99:102] = True  # on MDD's real object
+    lg[54:70, 60:76] = True  # big patch touching the wake corridor with a thin edge (share < 0.3)
+    lab_a, n_a = _label(lg)
+    art_a = [None] * n_a
+    out = propagate_artifacts(lab_a, n_a, art_a, lab_b, art_b, "mdd")
+    marked = {k: (a, frm) for k, a, frm, _ in out}
+    k_of = {name: int(lab_a[r, c]) - 1 for name, (r, c) in
+            {"on": (49, 26), "below": (53, 41), "far": (71, 71), "real": (100, 100), "big": (60, 65)}.items()}
+    assert marked.get(k_of["on"]) == ("wake", "mdd") and marked.get(k_of["below"]) == ("wake", "mdd")
+    for name in ("far", "real", "big"):
+        assert k_of[name] not in marked
+    # a curved arc leaving the other model's straight strip (>= 30 % of it on the strip) does not take a line mark
+    arc = np.zeros(shape, bool)
+    for c in range(60, 100):
+        r = int(50 + 0.02 * (c - 60) ** 2)
+        arc[r:r + 2, c] = True
+    lab_c, n_c = _label(arc)
+    f_c = component_shape(lab_c, n_c)
+    assert n_c == 1 and f_c["dev"][0] > 0.08
+    lab_s, _ = _label(mdd & (np.arange(120)[:, None] < 60))  # the strip alone (share of the arc near it: 0.35)
+    assert propagate_artifacts(lab_c, n_c, [None], lab_s, ["wake"], "mdd") == []
+    # own marks are kept (not overwritten)
+    art_a2 = list(art_a)
+    art_a2[k_of["on"]] = "ship"
+    assert k_of["on"] not in {k for k, *_ in propagate_artifacts(lab_a, n_a, art_a2, lab_b, art_b, "mdd")}
+
+
+def test_confirmation_ignores_partner_artifact_pixels_l42():
+    """L42: a detection next to an artefact of the other model only is not confirmed."""
+    from macroplastic.grid.confirm import confirmed_components
+    shape = (60, 60)
+    a = np.zeros(shape, bool)
+    a[10:13, 10:13] = True
+    lab_a, n_a = _label(a)
+    partner = np.zeros(shape, bool)
+    partner[14, 10:20] = True  # 1 px below the detection
+    lab_p, n_p = _label(partner)
+    is_art = np.array([False, True])  # the partner's only object is an artefact
+    assert confirmed_components(lab_a, n_a, partner)[0]
+    assert not confirmed_components(lab_a, n_a, partner & ~is_art[lab_p])[0]

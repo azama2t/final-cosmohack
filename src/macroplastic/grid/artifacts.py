@@ -48,6 +48,22 @@ Rules (first match wins):
           V are still wakes), but a curved filament without a bright point at an end stays unmarked.
 Curved or irregular objects (dev > 0.08) are never marked by the line rules; big irregular objects that merely
 touch a bright target (ship_frac < 0.5, no straight tail) are not marked.
+
+L42 additions:
+    collinear pieces  a model may break one strip into short pieces (LGBM on the Mumbai wake: pieces <= 160 m). Before
+          the line rules, pieces (>= 2 px) are grouped when they lie on one straight line: major axes within
+          GROUP_ANGLE = 15 deg (pieces shorter than 4 px have no reliable direction and only have to lie on the
+          partner's axis), the centre of each piece <= GROUP_PERP_PX = 2 px from the other's axis, end-to-end gap
+          along the axis <= GROUP_GAP_PX = 5 px. A group is kept only if the union is itself straight
+          (dev <= GROUP_DEV = 0.08) - a curved filament broken into pieces is never merged into a "line". The group
+          is classified as one object; a "wake" / "seam" of the group is given to every member that has no mark of
+          its own (a group "ship" is ignored: the ship rule is not a straightness rule).
+    cross-model (propagate_artifacts)  an object of model A that intersects or lies within CROSS_NEAR_PX = 2 px of an
+          artefact of model B gets the same mark with `artifact_from` = B, if >= CROSS_MIN_SHARE of its pixels
+          are within those 2 px (a big irregular patch that merely touches B's ship halo stays unmarked). Line marks
+          (seam / wake) go only to objects that are not curved themselves (n_px < MIN_PX_LINE or dev <= GROUP_DEV):
+          a curved arc continuing another model's straight seam is not a seam (Karachi 2025-11-11). Only B's
+          own marks propagate (no chains). The confirmation (grid.confirm) ignores the partner's artefact pixels.
 """
 from __future__ import annotations
 
@@ -74,6 +90,9 @@ SMALL_STEP, SMALL_SIGMA, SMALL_MAX_PX = 0.25, 3.0, 30
 END_LEN_M, END_ELONG, END_CAP_PX, END_NEAR_PX = 250.0, 4.0, 2.0, 5.0
 END_B8, END_REL8, END_REL_VIS, END_MAX_PX, END_CONTRAST, END_FLAT = 0.04, 8.0, 1.3, 60, 2.0, 0.6
 STEP_OFFSETS = (3, 4, 5, 6)
+# L42: collinear pieces of one model are one strip for the line rules; cross-model propagation of marks
+GROUP_ANGLE, GROUP_PERP_PX, GROUP_GAP_PX, GROUP_MIN_DIR_PX, GROUP_DEV = 15.0, 2.0, 5.0, 4.0, 0.08
+CROSS_NEAR_PX, CROSS_MIN_SHARE = 2, 0.3
 
 RULES_TEXT = {
     "ship": "у яркой малой цели (судно, платформа, буй, островок; B8 ≥ 0.06 и B2,B3,B4 ≥ 0.04, ≤ 150 px) — ≥ 50 % пикселей в ≤ 3 px",
@@ -81,6 +100,11 @@ RULES_TEXT = {
             "вытянутый объект ≥ 250 м с яркой точкой-судном в ≤ 5 px (50 м) от торца (L41)",
     "seam": "прямая линия по резкой границе яркости воды (шов детекторов / край мутного шлейфа) "
             "или ≥ 1,5 км вдоль трека S2",
+    "grouping": "соседние куски одной модели на одной прямой (оси ≤ 15°, центр ≤ 2 px от оси соседа, зазор ≤ 5 px, "
+                "объединение прямое: dev ≤ 0,08) проверяются правилами прямых линий как одна полоса (L42)",
+    "cross_model": "объект одной модели, ≥ 30 % пикселей которого в ≤ 2 px от артефакта другой модели, получает ту же "
+                   "метку (artifact_from; метку шва/кильватера — только некривой объект); пиксели артефактов другой "
+                   "модели не подтверждают находку (L42)",
 }
 
 
@@ -245,9 +269,121 @@ def brightness_step(labels: np.ndarray, n: int, shp: dict, vis: np.ndarray, vali
     return step, cons, exc
 
 
+def collinear_groups(shp: dict) -> np.ndarray:
+    """L42: group id (a component index, 0..n-1; the component's own index when ungrouped) of pieces on one line."""
+    n = len(shp["n_px"])
+    parent = np.arange(n)
+    if n < 2:
+        return parent
+    idx = np.flatnonzero(shp["n_px"] >= 2)
+    if idx.size < 2:
+        return parent
+    cx, cy, L = shp["cx"][idx], shp["cy"][idx], shp["length_px"][idx]
+    ue, un = -shp["ny"][idx], -shp["nx"][idx]  # major axis (east, north)
+    has_dir = L >= GROUP_MIN_DIR_PX
+    de = cx[None, :] - cx[:, None]
+    dn = -(cy[None, :] - cy[:, None])
+    along = de * ue[:, None] + dn * un[:, None]  # centre of j along the axis of i
+    perp = np.abs(-de * un[:, None] + dn * ue[:, None])  # centre of j off the axis of i
+    gap = np.abs(along) - (L[:, None] + L[None, :]) / 2.0
+    cosang = np.abs(ue[:, None] * ue[None, :] + un[:, None] * un[None, :])
+    ang_ok = (cosang >= np.cos(np.radians(GROUP_ANGLE))) | ~(has_dir[:, None] & has_dir[None, :])
+    on_i = np.where(has_dir[:, None], perp <= GROUP_PERP_PX, True)  # j lies on i's axis (if i has a direction)
+    pair = ang_ok & on_i & on_i.T & (gap <= GROUP_GAP_PX) & (has_dir[:, None] | has_dir[None, :])
+    np.fill_diagonal(pair, False)
+
+    def find(a):
+        while parent[a] != a:
+            parent[a] = parent[parent[a]]
+            a = parent[a]
+        return a
+    for i, j in zip(*np.nonzero(np.triu(pair))):
+        a, b = find(idx[i]), find(idx[j])
+        if a != b:
+            parent[max(a, b)] = min(a, b)
+    return np.array([find(k) for k in range(n)])
+
+
+def _group_marks(labels: np.ndarray, n: int, shp: dict, bands, water, flagged, art: list) -> None:
+    """L42: classify straight groups of collinear pieces as one object; wake/seam goes to unmarked members."""
+    grp = collinear_groups(shp)
+    shp["group"] = grp
+    shp["group_mark"] = [None] * n
+    roots, counts = np.unique(grp, return_counts=True)
+    multi = roots[counts >= 2]
+    if multi.size == 0:
+        return
+    remap = np.zeros(n + 1, np.int32)
+    gid = {int(r): i + 1 for i, r in enumerate(multi)}
+    for k in range(n):
+        if int(grp[k]) in gid:
+            remap[k + 1] = gid[int(grp[k])]
+    glab = remap[labels]
+    gshp = component_shape(glab, len(multi))
+    straight = gshp["dev"] <= GROUP_DEV
+    if not straight.any():
+        return
+    keep = np.zeros(len(multi) + 1, np.int32)
+    keep[1:][straight] = np.arange(1, int(straight.sum()) + 1)
+    fl = (labels > 0) if flagged is None else (flagged | (labels > 0))
+    gart, _ = classify(keep[glab], int(straight.sum()), bands, water, fl, group=False)
+    for gi, r in enumerate(multi[straight]):
+        a = gart[gi]
+        if a not in ("wake", "seam"):
+            continue
+        for k in np.flatnonzero(grp == r):
+            shp["group_mark"][k] = a
+            if art[k] is None:
+                art[k] = a
+
+
+def propagate_artifacts(labels: np.ndarray, n: int, art: list, other_labels: np.ndarray, other_art: list,
+                        other_model: str, near_px: int = CROSS_NEAR_PX,
+                        min_share: float = CROSS_MIN_SHARE) -> list[tuple[int, str, str, float]]:
+    """L42: marks taken from another model: [(k (0-based component), artifact, other_model, share)] for components
+    of `labels` without their own mark that intersect / lie within near_px of an artefact of the other model with
+    >= min_share of their pixels. Pass the other model's own marks (not propagated ones): no chains."""
+    out: list[tuple[int, str, str, float]] = []
+    if n == 0 or not any(other_art):
+        return out
+    from .confirm import disk
+    kinds = ("seam", "wake", "ship")
+    lut = np.zeros(len(other_art) + 1, np.int8)
+    for i, a in enumerate(other_art):
+        if a in kinds:
+            lut[i + 1] = kinds.index(a) + 1
+    omask = lut[other_labels]
+    if not omask.any():
+        return out
+    tot = np.bincount(labels.ravel(), minlength=n + 1)[1:]
+    near_any = ndimage.binary_dilation(omask > 0, structure=disk(near_px))
+    share = np.bincount(labels[near_any & (labels > 0)], minlength=n + 1)[1:] / np.maximum(tot, 1)
+    best = np.zeros(n)
+    best_kind = np.zeros(n, int)
+    for ki in range(1, len(kinds) + 1):
+        m = omask == ki
+        if not m.any():
+            continue
+        near = ndimage.binary_dilation(m, structure=disk(near_px))
+        h = np.bincount(labels[near & (labels > 0)], minlength=n + 1)[1:]
+        better = h > best
+        best = np.where(better, h, best)
+        best_kind = np.where(better, ki, best_kind)
+    shp = component_shape(labels, n)
+    curved = (shp["n_px"] >= MIN_PX_LINE) & (shp["dev"] > GROUP_DEV)
+    for k in np.flatnonzero((share >= min_share) & (best_kind > 0)):
+        if curved[k] and kinds[best_kind[k] - 1] != "ship":
+            continue
+        if art[k] is None:
+            out.append((int(k), kinds[best_kind[k] - 1], other_model, float(share[k])))
+    return out
+
+
 def classify(labels: np.ndarray, n: int, bands: dict | None, water: np.ndarray,
-             flagged: np.ndarray | None = None) -> tuple[list, dict]:
-    """Return (artifact per component: None | "seam" | "wake" | "ship", features dict of arrays)."""
+             flagged: np.ndarray | None = None, group: bool = True) -> tuple[list, dict]:
+    """Return (artifact per component: None | "seam" | "wake" | "ship", features dict of arrays).
+
+    group=True (L42): straight groups of collinear pieces are also classified as one strip (collinear_groups)."""
     shp = component_shape(labels, n)
     art: list = [None] * n
     if n == 0:
@@ -313,6 +449,8 @@ def classify(labels: np.ndarray, n: int, bands: dict | None, water: np.ndarray,
             art[k] = "wake"
         elif end_ship[k]:
             art[k] = "wake"
+    if group and n >= 2:
+        _group_marks(labels, n, shp, bands, water, flagged, art)
     _join_seams(art, shp)
     return art, shp
 
@@ -341,4 +479,4 @@ def _join_seams(art: list, shp: dict, rounds: int = 2) -> None:
 
 
 __all__ = ["classify", "component_shape", "ship_blobs", "brightness_step", "end_bright_clusters", "ship_at_end",
-           "RULES_TEXT"]
+           "collinear_groups", "propagate_artifacts", "RULES_TEXT"]

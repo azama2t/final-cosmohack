@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-25T11:23:35+03:00",
+ "generated": "2026-09-25T12:03:33+03:00",
  "note": "генерируется scripts/final_numbers.py; руками не править; null = ещё не посчитано",
  "l3_lgbm": {
   "available": true,
@@ -1300,7 +1300,7 @@
   "kind": "real",
   "n_regions": 18,
   "n_dates": 64,
-  "n_detections_total": 211,
+  "n_detections_total": 210,
   "models": [
    "lgbm",
    "mdd"
@@ -1308,9 +1308,9 @@
   "mdd_threshold": 0.5,
   "lgbm_threshold_map": 0.64,
   "n_drift": 44,
-  "n_confirmed_total": 294,
+  "n_confirmed_total": 290,
   "n_dates_with_confirmed": 38,
-  "n_confirmed_latest_total": 54,
+  "n_confirmed_latest_total": 53,
   "regions": [
    {
     "id": "accra",
@@ -1610,12 +1610,12 @@
     ],
     "latest_date": "2026-03-02",
     "model": "mdd",
-    "index_permille": 0.8684,
-    "n_detections": 81,
-    "total_debris_area_km2": 0.3446,
+    "index_permille": 0.8601,
+    "n_detections": 80,
+    "total_debris_area_km2": 0.3413,
     "n_dates": 1,
     "n_drift": 1,
-    "n_confirmed_latest": 9,
+    "n_confirmed_latest": 8,
     "n_zones": 10,
     "last_date": "2026-03-02",
     "reliable": false,
