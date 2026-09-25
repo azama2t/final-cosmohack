@@ -63,6 +63,8 @@ def create_app(data_root: Optional[str | Path] = None) -> FastAPI:
                   description="Обнаружение плавающего мусора по Sentinel-2. Индекс — доля наблюдаемой воды "
                               "с признаками мусора (‰), по снимку; не масса и не концентрация пластика.")
     app.add_middleware(GZipMiddleware, minimum_size=1000)
+    app.state.store_getter = store  # feature routers (service/routes_*.py) read the data store through this
+    app.state.store = store  # callable; routers call it (see routes_incidents._store_of)
 
     @app.exception_handler(core.NotFound)
     async def _nf(request: Request, exc: core.NotFound):
