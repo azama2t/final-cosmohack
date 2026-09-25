@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Manifest } from '../types';
 import { KIND_CLASS, feedDate, type FeedEvent } from '../lib/feed';
 import { rankRegions, regionReliability, shortName, summaryDate } from '../lib/data';
-import { fmtArea, fmtNum, fmtPermille, isUnknownDate } from '../lib/style';
+import { fmtM2, fmtNum, fmtPermille, isUnknownDate } from '../lib/style';
 import { plural } from './RegionPanel';
+import Info from './Info';
 
 interface Props {
   manifest: Manifest;
@@ -22,7 +23,7 @@ interface Props {
 const SUB: Record<string, string> = {
   new: 'не проверено',
   zone: 'зона обследования',
-  excluded: 'исключено системой, не входит в индекс',
+  excluded: 'исключено системой',
   under_review: 'на проверке',
   confirmed: 'решение оператора',
   false_alarm: 'решение оператора',
@@ -35,6 +36,23 @@ export default function LeftColumn(p: Props) {
   const body = useRef<HTMLDivElement>(null);
   const { ok, bad } = useMemo(() => rankRegions(p.manifest.regions), [p.manifest]);
   const nDates = p.manifest.regions.reduce((a, r) => a + r.dates.length, 0);
+  // regions with findings first; «без находок» and «снимок ненадёжен» are folded groups (shorter first screen)
+  const withF = ok.filter((r) => (r.summary?.n_detections ?? 0) > 0);
+  const noF = ok.filter((r) => !((r.summary?.n_detections ?? 0) > 0));
+  const [openNo, setOpenNo] = useState(false);
+  const [openBad, setOpenBad] = useState(false);
+  useEffect(() => {
+    if (noF.some((r) => r.id === p.regionId)) setOpenNo(true);
+    if (bad.some((r) => r.id === p.regionId)) setOpenBad(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [p.regionId]);
+  const nameOf = (id: string, fallback: string) => shortName(p.manifest.regions.find((r) => r.id === id)?.name ?? fallback);
+  const feedTitle = (e: FeedEvent) => {
+    const nm = nameOf(e.region, e.regionName);
+    if (e.kind === 'haze') return `${nm} · дымка или блик`;
+    if (e.kind === 'threat') return e.text;
+    return e.area_m2 ? `${nm} · ${fmtM2(e.area_m2)}` : nm;
+  };
 
   // keep the selected feed item in view (tour, clicks on the map)
   useEffect(() => {
@@ -46,19 +64,20 @@ export default function LeftColumn(p: Props) {
   return (
     <aside className={`left ${p.collapsed ? 'collapsed' : ''}`} data-panel="left" data-testid="left-panel">
       <div className="brand">
-        <div>
-          <div className="brand-name">
-            <span className="brand-dot" aria-hidden />
-            Морской мусор
-          </div>
-          <div className="brand-sub">
-            {p.manifest.regions.length} районов · {nDates} снимков{p.manifest.kind && !['real', 'demo', 'fixture'].includes(p.manifest.kind) ? ` · ${p.manifest.kind}` : ''}
-          </div>
+        <div className="brand-name">
+          <span className="brand-dot" aria-hidden />
+          Морской мусор
+          <Info label="О карте" testid="info-index">
+            Находки — участки, где модель видит признаки плавающего материала на снимке; это приоритет проверки, не подтверждённый мусор.
+            Индекс района, ‰ — доля наблюдаемой воды с такими признаками на последнем надёжном снимке (в подсказке у района), не масса
+            пластика. {p.manifest.regions.length} районов, {nDates} снимков.
+          </Info>
         </div>
-      </div>
-      <div style={{ padding: '12px 24px 0' }}>
-        <button className={`btn sm ${p.regionId ? '' : 'on'}`} style={{ width: '100%', justifyContent: 'center' }} onClick={p.onWorld} data-testid="world">
-          Обзор мира
+        <button className={`btn icon sm ${p.regionId ? '' : 'on'}`} onClick={p.onWorld} data-testid="world" title="Обзор мира" aria-label="Обзор мира">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden>
+            <circle cx="8" cy="8" r="6.2" />
+            <path d="M1.8 8h12.4M8 1.8c1.8 1.9 2.6 4 2.6 6.2S9.8 12.3 8 14.2M8 1.8C6.2 3.7 5.4 5.8 5.4 8s.8 4.3 2.6 6.2" />
+          </svg>
         </button>
       </div>
       <div className="tabs" role="tablist">
@@ -66,54 +85,58 @@ export default function LeftColumn(p: Props) {
           Районы
         </button>
         <button className={`tab ${p.tab === 'feed' ? 'on' : ''}`} onClick={() => p.onTab('feed')} data-testid="tab-feed">
-          Лента находок
+          Лента
         </button>
       </div>
       <div className="left-body" ref={body}>
         {p.tab === 'feed' ? (
           <div data-testid="feed">
             <div className="feed-head">
-              <span>{p.feed ? `${p.feed.items.length} событий · по дате снимка` : 'Загрузка…'}</span>
-              <span title={p.feed?.source === 'api' ? 'из /api/feed' : 'построено в браузере из данных'}>{p.feed?.source === 'api' ? '' : 'из файлов'}</span>
+              <span>{p.feed ? `${p.feed.items.length} событий` : 'Загрузка…'}</span>
             </div>
             {p.feed?.items.map((e, i) => (
               <button
                 key={e.key}
                 data-key={e.key}
                 className={`feed-item ${KIND_CLASS[e.kind] ?? ''} ${p.feedSel === e.key ? 'on' : ''}`}
-                style={{ animationDelay: `${Math.min(i, 12) * 18}ms` }}
                 onClick={() => p.onFeed(e)}
                 data-testid={`feed-item-${i}`}
                 data-region={e.region}
                 data-kind={e.kind}
               >
                 <span className="fi-mark" aria-hidden />
-                <div className="fi-title">{e.text}</div>
+                <div className="fi-title">{feedTitle(e)}</div>
                 <div className="fi-sub">
-                  снимок {feedDate(e.date)} · {SUB[e.kind] ?? e.status ?? ''}
-                  {e.model && e.kind !== 'threat' ? ` · ${e.model === 'mdd' ? 'MDD' : e.model === 'lgbm' ? 'LGBM' : e.model}` : ''}
+                  {feedDate(e.date)} · {SUB[e.kind] ?? e.status ?? ''}
                 </div>
               </button>
             ))}
           </div>
         ) : (
           <div data-testid="region-list">
-            <div className="reg-group">
-              Справа — индекс, ‰: доля наблюдаемой воды с признаками плавающего материала на последнем надёжном снимке (не масса пластика).
-            </div>
-            <div className="reg-group" style={{ paddingTop: 0 }}>Надёжный последний снимок</div>
-            {ok.map((r) => (
+            {withF.map((r) => (
               <RegionRow key={r.id} r={r} on={r.id === p.regionId} onClick={() => p.onRegion(r.id)} />
             ))}
-            {bad.length > 0 && <div className="reg-group">Последний снимок с дымкой, бликом или облаками — индекс ненадёжен</div>}
-            {bad.map((r) => (
-              <RegionRow key={r.id} r={r} bad on={r.id === p.regionId} onClick={() => p.onRegion(r.id)} />
-            ))}
+            {noF.length > 0 && (
+              <button className="reg-fold" onClick={() => setOpenNo((v) => !v)} aria-expanded={openNo} data-testid="fold-nofind">
+                <span>{openNo ? '▾' : '▸'}</span> Без находок ({noF.length})
+              </button>
+            )}
+            {openNo && noF.map((r) => <RegionRow key={r.id} r={r} on={r.id === p.regionId} onClick={() => p.onRegion(r.id)} />)}
+            {bad.length > 0 && (
+              <button
+                className="reg-fold"
+                onClick={() => setOpenBad((v) => !v)}
+                aria-expanded={openBad}
+                data-testid="fold-bad"
+                title="Последний снимок с дымкой, бликом или облаками — находки могут быть ложными"
+              >
+                <span>{openBad ? '▾' : '▸'}</span> Ненадёжные ({bad.length})
+              </button>
+            )}
+            {openBad && bad.map((r) => <RegionRow key={r.id} r={r} bad on={r.id === p.regionId} onClick={() => p.onRegion(r.id)} />)}
           </div>
         )}
-      </div>
-      <div className="left-foot">
-        <span>Индекс по снимку, не масса пластика</span>
       </div>
       <button className="collapse-tab" onClick={p.onCollapse} aria-label={p.collapsed ? 'Показать панель' : 'Скрыть панель'} data-testid="left-collapse">
         {p.collapsed ? '›' : '‹'}
@@ -124,20 +147,15 @@ export default function LeftColumn(p: Props) {
 
 function RegionRow({ r, on, bad, onClick }: { r: any; on: boolean; bad?: boolean; onClick: () => void }) {
   const d = summaryDate(r);
-  const [a, u] = fmtArea(r.summary?.total_debris_area_m2);
+  const n = r.summary?.n_detections ?? 0;
+  const tip = `${r.name}${r.country ? `, ${r.country}` : ''} · индекс ${fmtPermille(r.summary?.index_permille)} ‰ (доля воды с признаками, не масса)${bad ? ` · ${regionReliability(r).why}` : ''}`;
   return (
-    <button className={`reg-item ${on ? 'on' : ''} ${bad ? 'bad' : ''}`} onClick={onClick} data-testid={`region-${r.id}`} title={bad ? regionReliability(r).why : r.name}>
+    <button className={`reg-item ${on ? 'on' : ''} ${bad ? 'bad' : ''}`} onClick={onClick} data-testid={`region-${r.id}`} title={tip}>
       <span className="ri-name">{shortName(r.name)}</span>
-      <span className="ri-val">
-        {fmtPermille(r.summary?.index_permille)} <span className="faint">‰</span>
+      <span className={`ri-val ${n ? '' : 'faint'}`}>
+        {n ? `${fmtNum(n)} ${plural(n, 'находка', 'находки', 'находок')}` : 'нет'}
       </span>
-      <span className="ri-sub">
-        {r.country ? `${r.country} · ` : ''}
-        {d ? (isUnknownDate(d.date) ? 'дата ?' : d.date.split('-').reverse().join('.')) : '—'}
-      </span>
-      <span className="ri-sub" style={{ textAlign: 'right' }}>
-        {fmtNum(r.summary?.n_detections)} {plural(r.summary?.n_detections ?? 0, 'участок', 'участка', 'участков')}
-      </span>
+      <span className="ri-sub">{d ? (isUnknownDate(d.date) ? 'дата неизвестна' : d.date.split('-').reverse().join('.')) : '—'}</span>
     </button>
   );
 }

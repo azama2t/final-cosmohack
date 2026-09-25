@@ -7,6 +7,7 @@ import { apiGet, apiPost, apiUrl } from '../lib/api';
 import { isFlagged } from '../lib/data';
 import { fmtArea, fmtDate, fmtNum, fmtPct, fmtPermille, fmtProb, fmtTs, modelLabel, modelTitle } from '../lib/style';
 import { sceneTime, sensorOf, STATUS_RU } from './RegionPanel';
+import Info from './Info';
 
 type Props = RightProps & { feature: Feature<DetProps>; region: Region; dateEntry: DateEntry };
 type Bands = 'rgb' | 'false' | 'swir';
@@ -138,15 +139,9 @@ export default function EvidencePanel(p: Props) {
             )}
           </span>
         </div>
-        {p.otherModel && !art && (
-          <p className="hint-line" data-testid="evidence-second-model">
-            Вторая модель ({modelLabel(p.otherModel)}):{' '}
-            {p.otherDet === null ? '…' : other?.f || pr.confirmed ? 'тоже видит этот участок — это сигнал, не подтверждение' : 'не видит этот участок'}
-          </p>
-        )}
         {art && (
           <div className="warnline" style={{ marginTop: 12 }} data-testid="detection-artifact">
-            {artifactText(art).replace(/^в/, 'В')}. Объект оставлен на карте для прозрачности; в счёт и зоны не входит.
+            {artifactText(art).replace(/^в/, 'В')}. В счёт и зоны не входит.
           </div>
         )}
         <div className="crop" style={{ marginTop: 12 }}>
@@ -189,9 +184,9 @@ export default function EvidencePanel(p: Props) {
             </div>
           )}
         </div>
-        <div className="crop-cap">
-          Исходный снимок {sensorOf(p.dateEntry.scene_id, p.dateEntry.source).name}, {fmtNum(sizeM)} × {fmtNum(sizeM)} м
-          {sensorOf(p.dateEntry.scene_id, p.dateEntry.source).px ? `, пиксель ${sensorOf(p.dateEntry.scene_id, p.dateEntry.source).px} м` : ''}. Жёлтый контур — участок, отмеченный моделью.
+        <div className="crop-cap" title="Жёлтый контур — участок, отмеченный моделью">
+          {sensorOf(p.dateEntry.scene_id, p.dateEntry.source).name}, {fmtNum(sizeM)} × {fmtNum(sizeM)} м
+          {sensorOf(p.dateEntry.scene_id, p.dateEntry.source).px ? `, пиксель ${sensorOf(p.dateEntry.scene_id, p.dateEntry.source).px} м` : ''}
         </div>
       </section>
 
@@ -212,16 +207,20 @@ export default function EvidencePanel(p: Props) {
               {coords}
             </button>
           </dd>
-          <dt>Площадь отмеченного участка</dt>
+          <dt>
+            Площадь
+            <Info label="Что такое площадь" testid="info-area">
+              Пиксели с вероятностью ≥ порога модели, не масса и не объём. Наблюдалось воды в ячейке H3:{' '}
+              {cell ? `${fmtPct(cell.obs)}, индекс ${fmtPermille(cell.idx)} ‰` : '—'}. Сцена {p.dateEntry.scene_id}, id {pr.id}.
+            </Info>
+          </dt>
           <dd className={art ? '' : 'accent'}>
             {a} {u}
           </dd>
-          <dt>Облачность сцены</dt>
+          <dt>Облачность</dt>
           <dd>{fmtPct(p.dateEntry.cloud_frac)}</dd>
-          <dt>Качество снимка</dt>
-          <dd>{hazy ? 'дымка или блик — признаки могут быть завышены' : 'без флагов дымки и блика'}</dd>
-          <dt>Наблюдалось воды в ячейке</dt>
-          <dd>{cell ? `${fmtPct(cell.obs)} · индекс ${fmtPermille(cell.idx)} ‰` : '…'}</dd>
+          <dt>Дымка, блик</dt>
+          <dd className={hazy ? 'warn-t' : ''}>{hazy ? 'есть — возможны ложные' : 'нет'}</dd>
         </dl>
       </section>
 
@@ -240,7 +239,7 @@ export default function EvidencePanel(p: Props) {
           </thead>
           <tbody>
             <tr>
-              <td title={mainT.hint}>основная · {mainT.label}</td>
+              <td title={`${mainT.label}. ${mainT.hint}`}>{modelLabel(pr.model)}</td>
               <td className="r">
                 {fmtProb(pr.mean_prob)} <span className="faint">макс. {fmtProb(pr.max_prob)}</span>
               </td>
@@ -248,7 +247,7 @@ export default function EvidencePanel(p: Props) {
             </tr>
             {p.otherModel && (
               <tr data-testid="evidence-other-model">
-                <td title={otherT?.hint}>вторая · {otherT?.label}</td>
+                <td title={`${otherT?.label}. ${otherT?.hint}`}>{modelLabel(p.otherModel)}</td>
                 <td className="r">
                   {other?.f ? (
                     <>
@@ -258,14 +257,14 @@ export default function EvidencePanel(p: Props) {
                     '—'
                   )}
                 </td>
-                <td className="r">
+                <td className="r" data-testid="evidence-second-model">
                   {p.otherDet === null
                     ? '…'
                     : other?.f
-                      ? `отметила рядом, ${fmtNum(other.d)} м`
+                      ? `тоже видит, ${fmtNum(other.d)} м`
                       : pr.confirmed
-                        ? 'пиксель ≥ порога в 20 м'
-                        : 'не отметила'}
+                        ? 'тоже видит (≤ 20 м)'
+                        : 'не видит'}
                 </td>
               </tr>
             )}
@@ -273,7 +272,10 @@ export default function EvidencePanel(p: Props) {
         </table>
         {(mainT.variant || otherT?.variant) && (
           <p className="note" style={{ marginTop: 8 }} data-testid="evidence-model-variant">
-            {mainT.variant ? mainT.hint : otherT?.hint}
+            LGBM — вариант для снимков L2A
+            <Info label="Про вариант модели" align="right">
+              {mainT.variant ? mainT.hint : otherT?.hint}
+            </Info>
           </p>
         )}
       </section>
@@ -281,20 +283,17 @@ export default function EvidencePanel(p: Props) {
       <section className="sec" data-testid="evidence-alternatives">
         <div className="sec-h">
           <h3>Что это ещё может быть</h3>
-          <span className="aside">проверьте на вырезке</span>
+
         </div>
         <dl className="alt">
           <dt className={art === 'wake' || art === 'ship' || elong > 5 ? 'hint' : ''}>След судна</dt>
-          <dd>
-            Длинная узкая полоса, часто с яркой точкой-судном в торце; судно ярче в SWIR.
-            {elong > 5 && !art ? ' Участок вытянутый — стоит проверить.' : ''}
-          </dd>
+          <dd>{elong > 5 && !art ? 'участок вытянутый — проверьте' : 'узкая полоса, судно ярче в SWIR'}</dd>
           <dt>Пена</dt>
-          <dd>Белые полосы у прибоя и на фронтах течений; одинаково яркая во всех каналах.</dd>
+          <dd>белые полосы у прибоя</dd>
           <dt>Водоросли</dt>
-          <dd>Зеленовато-бурые нити; на вырезке «ИК» ярче воды, как растительность.</dd>
+          <dd>ярче воды на «ИК»</dd>
           <dt className={hazy ? 'hint' : ''}>Блик, дымка, облако</dt>
-          <dd>{hazy ? 'На этом снимке есть флаг дымки/блика — ложные срабатывания вероятнее.' : 'Тонкие облака и блик солнца дают ложные яркие пятна.'}</dd>
+          <dd>{hazy ? 'на снимке есть флаг' : 'ложные яркие пятна'}</dd>
         </dl>
       </section>
 
@@ -311,14 +310,14 @@ export default function EvidencePanel(p: Props) {
               {status === 'detected' ? 'Отправить на проверку' : status === 'under_review' ? 'Уже на проверке' : 'Решение оператора принято'}
             </button>
             <p className="note" style={{ marginTop: 8 }}>
-              Подтвердить или отклонить находку может только человек во вкладке «Проверка»; решение записывается в журнал (кто и когда).
+              Подтверждает только человек во вкладке «Проверка».
             </p>
           </>
         )}
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
           {p.dateEntry.drift && (
             <button className="btn sm" onClick={() => p.onView('drift')} data-testid="evidence-drift">
-              Куда может унести (дрейф)
+              Дрейф
             </button>
           )}
           {cell && (
@@ -363,11 +362,6 @@ export default function EvidencePanel(p: Props) {
           </table>
         </section>
       )}
-      <section className="sec">
-        <p className="note">
-          Площадь — пиксели с вероятностью ≥ порога, не масса. Сцена {p.dateEntry.scene_id}. id {pr.id}.
-        </p>
-      </section>
     </>
   );
 }

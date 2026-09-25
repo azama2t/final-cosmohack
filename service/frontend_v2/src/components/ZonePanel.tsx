@@ -7,6 +7,7 @@ import { localWhy, PRIORITY_NOTE, repeatFactor, scoreTerms, zonePx, zoneScore } 
 import { AGREE_NOTE } from '../lib/confirm';
 import { isFlagged } from '../lib/data';
 import { fmtArea, fmtNum, fmtPct, fmtPermille, fmtProb, fmtThr } from '../lib/style';
+import Info from './Info';
 
 interface Props {
   manifest: Manifest;
@@ -117,12 +118,9 @@ export default function ZonePanel(p: Props) {
   return (
     <>
       <section className="sec" data-testid="zone-card">
-        <p className="note" data-testid="zone-note" style={{ marginBottom: 12 }}>
-          {PRIORITY_NOTE}.
-        </p>
         {isFlagged(p.dateEntry) && (
           <div className="warnline" style={{ marginBottom: 12 }}>
-            Дымка или блик на снимке — находки могут быть завышены
+            Дымка или блик на снимке
           </div>
         )}
         <div className="crop">
@@ -152,15 +150,48 @@ export default function ZonePanel(p: Props) {
             </div>
           )}
         </div>
-        <div className="crop-cap">≈ 1,5 × 1,5 км · контур — пятна, пунктир — ячейка H3</div>
+        <div className="crop-cap" title="контур — участки с признаками, пунктир — ячейка H3">
+          ≈ 1,5 × 1,5 км
+        </div>
       </section>
 
       {why && (
         <section className="sec" data-testid="zone-why">
           <div className="sec-h">
-            <h3>{z.rank === 1 ? 'Почему это место первое' : 'Почему это место в приоритете'}</h3>
+            <h3>
+              {z.rank === 1 ? 'Почему первая' : `Почему №${z.rank}`}
+              <Info label="Что такое приоритет" testid="zone-note">
+                {PRIORITY_NOTE}.
+              </Info>
+            </h3>
           </div>
-          <div className="eq" data-testid="zone-why-eq">
+          {(() => {
+            const me = ranked.list.find((x) => x.rank === z.rank)?.score ?? 0;
+            const nb = ranked.list.find((x) => x.rank === (z.rank === 1 ? 2 : z.rank - 1));
+            if (!nb || !me) return null;
+            const k = z.rank === 1 ? me / Math.max(1e-9, nb.score) : nb.score / Math.max(1e-9, me);
+            return (
+              <p className="big-line" style={{ marginBottom: 8 }} data-testid="zone-balance">
+                балл {fmtNum(me, 1)} — {z.rank === 1 ? `в ${fmtNum(k, 1)} раза выше №2` : `в ${fmtNum(k, 1)} раза ниже №${nb.rank}`}
+              </p>
+            );
+          })()}
+          <div className="bars" aria-label="Балл зон этой даты">
+            {ranked.list.map((x) => (
+              <div key={x.rank} className={`bar-row ${x.rank === z.rank ? 'on' : ''}`}>
+                <span>№{x.rank}</span>
+                <span className="bar">
+                  <span style={{ width: `${Math.max(2, (x.score / ranked.max) * 100)}%` }} />
+                </span>
+                <span className="bv">{fmtNum(x.score, 1)}</span>
+              </div>
+            ))}
+          </div>
+          <details style={{ marginTop: 12 }} data-testid="zone-why-more">
+            <summary className="note" style={{ cursor: 'pointer' }}>
+              Подробнее
+            </summary>
+          <div className="eq" data-testid="zone-why-eq" style={{ marginTop: 8 }}>
             <Term v={fmtNum(why.terms[0]?.value ?? zonePx(z))} l="пикс. с признаками" />
             <span className="op">×</span>
             <Term v={fmtProb(why.terms[1]?.value ?? z.mean_prob ?? 0)} l="ср. уверенность" />
@@ -177,24 +208,9 @@ export default function ZonePanel(p: Props) {
             <span className="op">=</span>
             <Term v={fmtNum(terms ? terms.score : why.score, 1)} l="балл" />
           </div>
-          <div className="bars" aria-label="Балл зон этой даты">
-            {ranked.list.map((x) => (
-              <div key={x.rank} className={`bar-row ${x.rank === z.rank ? 'on' : ''}`}>
-                <span>№{x.rank}</span>
-                <span className="bar">
-                  <span style={{ width: `${Math.max(2, (x.score / ranked.max) * 100)}%` }} />
-                </span>
-                <span className="bv">{fmtNum(x.score, 1)}</span>
-              </div>
-            ))}
-          </div>
           <p className="note" style={{ marginTop: 12, color: 'var(--text-2)' }}>
             {why.text.replace(/\s*Это приоритет обследования.*$/, '')}
           </p>
-          <details style={{ marginTop: 8 }}>
-            <summary className="note" style={{ cursor: 'pointer' }}>
-              Формула
-            </summary>
             <p className="note mono" style={{ marginTop: 6, fontSize: 11 }}>
               {why.formula}
             </p>
@@ -214,25 +230,23 @@ export default function ZonePanel(p: Props) {
               <small>‰</small>
             </div>
             <div className="h">
-              {nDet ?? '—'} пятен · {av} {au}
+              {nDet ?? '—'} уч. · {av} {au}
             </div>
           </div>
           <div>
             <div className="k">Уверенность</div>
             <div className="v">{z.mean_prob === undefined ? '—' : fmtProb(z.mean_prob)}</div>
-            <div className="h">
-              макс. {fmtProb(maxProb)} · порог {fmtThr(p.threshold)}
+            <div className="h" title={`порог ${fmtThr(p.threshold)}`}>
+              макс. {fmtProb(maxProb)}
             </div>
           </div>
         </div>
         <dl className="rows" style={{ marginTop: 12 }}>
-          <dt>Облачность сцены</dt>
+          <dt title={`наблюдалось воды в ячейке: ${fmtPct(obs)}`}>Облачность</dt>
           <dd>{fmtPct(cloud)}</dd>
-          <dt>Наблюдалось ячейки</dt>
-          <dd>{fmtPct(obs)}</dd>
           {typeof nConf === 'number' && (
             <>
-              <dt>Уверенные находки</dt>
+              <dt title={`Обе модели согласны — ${AGREE_NOTE}`}>Обе модели</dt>
               <dd data-testid="zone-confirmed">
                 {nConf} из {nDet ?? '—'}
               </dd>
@@ -255,12 +269,11 @@ export default function ZonePanel(p: Props) {
             </button>
           </dd>
         </dl>
-        {typeof nConf === 'number' && <p className="note" style={{ marginTop: 8 }}>Уверенные — {AGREE_NOTE}.</p>}
       </section>
 
       <section className="sec">
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button className="btn sm" onClick={() => p.onPlace(z.h3)} data-testid="zone-open-place">
+          <button className="btn sm" onClick={() => p.onPlace(z.h3)} data-testid="zone-open-place" title={`H3 ${z.h3}${api === null ? ' · расчёт в браузере' : ''}`}>
             История места
           </button>
           {pdfOk && (
@@ -269,10 +282,6 @@ export default function ZonePanel(p: Props) {
             </a>
           )}
         </div>
-        <p className="note" style={{ marginTop: 8 }}>
-          H3 {z.h3}
-          {api === null ? ' · расчёт в браузере (нет /api/zone)' : ''}
-        </p>
       </section>
     </>
   );

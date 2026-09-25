@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { DriftFile } from '../types';
 import type { FlowField } from '../map/flow';
+import Info from './Info';
 import { anim } from '../map/controller';
 
 const SPEEDS = [1, 2, 4];
@@ -118,11 +119,12 @@ export default function DriftPlayer({ drift, onRender, flow, autoplay }: { drift
         )}
       </div>
       <div className="dp-cap">
-        <b>Демонстрационный прогноз, не валидирован.</b> {f.model ?? 'OpenDrift'} · течения {shortSrc(f.currents)} · ветер {shortSrc(f.wind)} · коэф.
-        ветра {f.wind_drift_factor ?? '—'}
-        {ens.length > 0 ? ` · облако: ${wdfs.join('–')}` : ''}
-        {cur ? ` · ${cur.slice(8, 10)}.${cur.slice(5, 7)} ${cur.slice(11, 16)} UTC` : ''}
-        {flow.length ? ` · частицы: ${flow.map((x) => (x.kind === 'wind' ? 'ветер' : 'течения')).join(' и ')}, поле на +${Math.floor(hour / 6) * 6} ч` : ''}
+        Демо-прогноз, не валидирован{cur ? ` · ${cur.slice(8, 10)}.${cur.slice(5, 7)} ${cur.slice(11, 16)} UTC` : ''}
+        <Info label="Источники прогноза" testid="info-drift-src">
+          {f.model ?? 'OpenDrift'} · течения {shortSrc(f.currents)} · ветер {shortSrc(f.wind)} · коэф. ветра {f.wind_drift_factor ?? '—'}
+          {ens.length > 0 ? ` · облако неопределённости: коэф. ${wdfs.join('–')}` : ''}
+          {flow.length ? ` · частицы: ${flow.map((x) => (x.kind === 'wind' ? 'ветер' : 'течения')).join(' и ')}, поле на +${Math.floor(hour / 6) * 6} ч` : ''}
+        </Info>
       </div>
     </div>
   );

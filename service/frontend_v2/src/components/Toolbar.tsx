@@ -7,6 +7,8 @@ interface Props {
   layers: Layers;
   onLayer: (k: LayerKey, on?: boolean) => void;
   basemap: Basemap;
+  /** temporary offline fallback is active (the chosen basemap is kept) */
+  offline: boolean;
   onBasemap: (b: Basemap) => void;
   projection: Projection;
   onProjection: (p: Projection) => void;
@@ -32,7 +34,38 @@ interface Props {
   onCopy: () => void;
 }
 
-/** Right-top: ONE menu with the technical settings (model, basemap, projection, H3, extra layers) + share / compare / tour. */
+const Ico = {
+  layers: (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden>
+      <path d="M8 2 1.5 5.5 8 9l6.5-3.5L8 2Z" />
+      <path d="m1.5 8.5 6.5 3.5 6.5-3.5" />
+    </svg>
+  ),
+  compare: (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden>
+      <rect x="1.5" y="3" width="5.5" height="10" rx="1" />
+      <rect x="9" y="3" width="5.5" height="10" rx="1" />
+    </svg>
+  ),
+  link: (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden>
+      <path d="M6.5 9.5a3 3 0 0 0 4.2 0l2.3-2.3a3 3 0 0 0-4.2-4.2l-.9.9" />
+      <path d="M9.5 6.5a3 3 0 0 0-4.2 0L3 8.8a3 3 0 0 0 4.2 4.2l.9-.9" />
+    </svg>
+  ),
+  play: (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden>
+      <path d="M5 3.2v9.6L12.5 8 5 3.2Z" />
+    </svg>
+  ),
+  stop: (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden>
+      <rect x="4" y="4" width="8" height="8" rx="1" />
+    </svg>
+  ),
+};
+
+/** Right-top: ONE «Слои» menu (model, layers, basemap, projection) + icon buttons compare / link / tour. */
 export default function Toolbar(p: Props) {
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLDivElement>(null);
@@ -52,29 +85,29 @@ export default function Toolbar(p: Props) {
   (window as any).__layersMenu = setOpen;
 
   const L = p.layers;
-  const needR = !p.hasRegion ? 'выберите район' : '';
   const row = (k: LayerKey, label: string, hint = '', disabled = false) => (
-    <button className="menu-row" disabled={disabled} onClick={() => p.onLayer(k)} data-testid={`layer-${k}`} aria-pressed={L[k]}>
+    <button className="menu-row" disabled={disabled} onClick={() => p.onLayer(k)} data-testid={`layer-${k}`} aria-pressed={L[k]} title={hint || undefined}>
       <span className={`check ${L[k] && !disabled ? 'on' : ''}`} aria-hidden />
       <span>{label}</span>
-      {hint && <span className="mr-hint">{hint}</span>}
     </button>
   );
   const flowHint = (k: string) => (!p.hasRegion ? 'выберите район' : !p.paths.has('/api/flow') ? 'нет данных' : p.flowAvail.includes(k) ? '' : 'нет поля для даты');
+  const needR = p.hasRegion ? '' : 'выберите район';
 
   return (
     <div className="toolbar" ref={box} data-testid="toolbar">
-      <button className={`btn ${open ? 'on' : ''}`} onClick={() => setOpen((v) => !v)} data-testid="layers-menu" aria-expanded={open}>
-        Настройки карты
+      <button className={`btn ${open ? 'on' : ''}`} onClick={() => setOpen((v) => !v)} data-testid="layers-menu" aria-expanded={open} title="Модель, слои, подложка, проекция">
+        {Ico.layers}
+        Слои
       </button>
-      <button className={`btn ${p.compareOn ? 'on' : ''}`} onClick={p.onCompare} data-testid="compare-open">
-        Сравнить
+      <button className={`btn icon ${p.compareOn ? 'on' : ''}`} onClick={p.onCompare} data-testid="compare-open" title="Сравнить два снимка" aria-label="Сравнить два снимка">
+        {Ico.compare}
       </button>
-      <button className="btn" onClick={p.onCopy} data-testid="copy-link" title="Скопировать ссылку на текущий вид">
-        Ссылка
+      <button className="btn icon" onClick={p.onCopy} data-testid="copy-link" title="Скопировать ссылку на этот вид" aria-label="Скопировать ссылку">
+        {Ico.link}
       </button>
-      <button className={`btn ${p.tourOn ? 'on' : ''}`} onClick={p.onTour} data-testid="tour-start">
-        {p.tourOn ? 'Стоп' : 'Демо-тур'}
+      <button className={`btn icon ${p.tourOn ? 'on' : ''}`} onClick={p.onTour} data-testid="tour-start" title={p.tourOn ? 'Остановить демо-тур' : 'Демо-тур'} aria-label={p.tourOn ? 'Остановить демо-тур' : 'Демо-тур'}>
+        {p.tourOn ? Ico.stop : Ico.play}
       </button>
 
       {open && (
@@ -83,43 +116,33 @@ export default function Toolbar(p: Props) {
           {Object.keys(p.models ?? {}).map((m) => {
             const t = modelTitle(m, { kind: p.kind, models: p.models });
             return (
-              <div key={m}>
-                <button className="menu-row" disabled={!p.sceneModels.includes(m)} onClick={() => p.onModel(m)} data-testid={`model-${m}`} title={t.hint}>
-                  <span className={`radio ${p.model === m ? 'on' : ''}`} aria-hidden />
-                  <span>{t.label}</span>
-                </button>
-                {t.variant && (
-                  <div className="menu-group" style={{ paddingTop: 0 }} data-testid={`model-${m}-hint`}>
-                    {t.hint}
-                  </div>
-                )}
-              </div>
+              <button key={m} className="menu-row" disabled={!p.sceneModels.includes(m)} onClick={() => p.onModel(m)} data-testid={`model-${m}`} title={t.hint}>
+                <span className={`radio ${p.model === m ? 'on' : ''}`} aria-hidden />
+                <span>{m === 'lgbm' ? 'Наша модель (LGBM)' : m === 'mdd' ? 'MDD (открытая)' : t.label}</span>
+              </button>
             );
           })}
-          <button className="menu-row" disabled={!p.confAvail} onClick={() => p.onOnlyConfirmed(!p.onlyConfirmed)} data-testid="only-confirmed">
+          <button className="menu-row" disabled={!p.confAvail} onClick={() => p.onOnlyConfirmed(!p.onlyConfirmed)} data-testid="only-confirmed" title={AGREE_NOTE}>
             <span className={`check ${p.onlyConfirmed && p.confAvail ? 'on' : ''}`} aria-hidden />
-            <span>Только с согласием второй модели</span>
+            <span>Только где обе модели согласны</span>
           </button>
-          <div className="menu-group" style={{ paddingTop: 0 }}>
-            {AGREE_NOTE}
-          </div>
           <div className="menu-sep" />
           <div className="menu-group">Слои</div>
           {row('rgb', 'Снимок Sentinel-2', needR, !p.hasRegion)}
           {row('prob', 'Вероятность модели', needR, !p.hasRegion)}
-          {row('h3', 'Индекс по сетке H3', needR, !p.hasRegion)}
-          {row('h3_3d', 'H3 в объёме (3D)', needR, !p.hasRegion)}
-          {row('artifacts', 'Исключённые артефакты', p.hasRegion ? String(p.nArtifacts || '0') : needR, !p.hasRegion)}
+          {row('h3', 'Индекс H3', needR, !p.hasRegion)}
+          {row('h3_3d', 'Индекс H3 в 3D', needR, !p.hasRegion)}
+          {row('artifacts', `Исключённые артефакты${p.hasRegion ? ` (${p.nArtifacts || 0})` : ''}`, needR, !p.hasRegion)}
           {row('osm', 'Объекты OSM', !p.hasRegion ? needR : !p.contextOk ? 'нет данных' : '', !p.hasRegion || !p.contextOk)}
           {row('currents', 'Частицы течений', flowHint('currents'), !!flowHint('currents'))}
           {row('wind', 'Частицы ветра', flowHint('wind'), !!flowHint('wind'))}
           <div className="menu-sep" />
-          <div className="menu-group">Подложка</div>
+          <div className="menu-group">Подложка{p.offline ? ' · сейчас офлайн' : ''}</div>
           {(
             [
-              ['dark', 'Тёмная (CARTO)'],
               ['satellite', 'Спутник (Esri)'],
-              ['none', 'Без сети: только снимки и берег'],
+              ['dark', 'Тёмная (CARTO)'],
+              ['none', 'Без подложки'],
             ] as [Basemap, string][]
           ).map(([b, l]) => (
             <button key={b} className="menu-row" onClick={() => p.onBasemap(b)} data-testid={`basemap-${b}`}>

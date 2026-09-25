@@ -17,8 +17,9 @@ import {
 import { useAsync } from './lib/hooks';
 import { makeScale, registerUnknownDates } from './lib/style';
 import { DEFAULT_LAYERS, readUrl, writeUrl } from './lib/url';
+import { loadPrefs, PERSIST_LAYERS, savePrefs } from './lib/prefs';
 import MapView from './map/MapView';
-import { anim, ctl, defaultProjection, fitOverview, flyToArea, flyToBounds, flyToPoint, getCamera, waitIdle } from './map/controller';
+import { anim, ctl, fitOverview, flyToArea, flyToBounds, getCamera, waitIdle } from './map/controller';
 import { featureBBox } from './map/layers';
 import { planRoute } from './lib/route';
 import { centroid, loadGeo, prepareDrift, type CheckOverlay, type HoverInfo } from './map/layers';
@@ -70,16 +71,38 @@ function flyToFeature(f: Feature<DetProps>, duration = 1600) {
   flyToArea(lon, lat, Math.min(4000, Math.max(1500, ext * 3)), duration);
 }
 
+/** the user's model if the date has it, else the first model of the date (the preference itself is kept) */
+function pickModelFrom(want: string, models: string[]): string {
+  return models.includes(want) ? want : models[0];
+}
+
 export default function App() {
   const url = useMemo(readUrl, []);
+  // the user's own choices (localStorage); the URL of a shared link wins over them
+  const prefs = useMemo(loadPrefs, []);
+  const wantModel = useRef<string>(url.model ?? prefs.model ?? 'mdd');
   const [manifest, setManifest] = useState<Manifest | null | undefined>(undefined);
   const [paths, setPaths] = useState<Set<string>>(new Set());
   const [regionId, setRegionId] = useState<string | null>(null);
   const [date, setDate] = useState<string | null>(null);
-  const [model, setModel] = useState<string>(url.model ?? 'mdd');
-  const [layers, setLayers] = useState<Layers>({ ...DEFAULT_LAYERS, ...(url.layers ?? {}) });
-  const [basemap, setBasemap] = useState<Basemap>(url.basemap ?? 'dark');
-  const [projection, setProjection] = useState<Projection>(() => url.projection ?? defaultProjection());
+  const [model, setModel] = useState<string>(wantModel.current);
+  // heavy layers (drift, particles, H3 3D) are never restored: only by a button
+  const [layers, setLayers] = useState<Layers>(() => ({
+    ...DEFAULT_LAYERS,
+    ...(prefs.layers ?? {}),
+    ...(url.layers ?? {}),
+    drift: false,
+    currents: false,
+    wind: false,
+    h3_3d: false,
+  }));
+  // default: Esri satellite on the globe; changed only by the user (menu) — never by the app
+  const [basemap, setBasemap] = useState<Basemap>(url.basemap ?? prefs.basemap ?? 'satellite');
+  const [projection, setProjection] = useState<Projection>(url.projection ?? prefs.projection ?? 'globe');
+  /** temporary offline fallback (online tiles do not load); does not touch the chosen basemap */
+  const [offline, setOffline] = useState(false);
+  const layersRef = useRef(layers);
+  layersRef.current = layers;
   const [view, setView] = useState<RegionView>(VIEWS.includes(url.view as RegionView) ? (url.view as RegionView) : 'findings');
   const [routeOn, setRouteOn] = useState<boolean>(!!url.route);
   const [selected, setSelected] = useState<Feature<DetProps> | null>(null);
@@ -104,6 +127,7 @@ export default function App() {
   const [flowInfo, setFlowInfo] = useState<FlowField[]>([]);
   const [incidents, setIncidents] = useState<Map<string, IncidentLite> | null>(null);
   const [incTick, setIncTick] = useState(0);
+  const pickModel = (models: string[]) => pickModelFrom(wantModel.current, models);
   const pendingZone = useRef<number | undefined>(url.zone);
   const pendingDet = useRef<{ id?: string; lon?: number; lat?: number } | null>(url.det ? { id: url.det } : null);
   const camera = useRef<Camera | undefined>(url.camera);
@@ -126,9 +150,9 @@ export default function App() {
         const d = want && r.dates.some((x) => x.date === want) ? want : summaryDate(r)?.date;
         setDate(d ?? null);
         const de = r.dates.find((x) => x.date === d);
-        if (de && !de.models.includes(model)) setModel(de.models[0]);
-        // globe → region: a short, calm fly-in (the globe is the first frame, the region is where the work is)
-        if (!url.camera) setTimeout(() => flyToBounds(de?.bounds ?? r.bounds, { duration: url.region ? 0 : 3200, rightPanel: true }), url.region ? 60 : 700);
+        if (de) setModel(pickModel(de.models));
+        // globe → region: one calm fly-in (the globe is the first frame, the region is where the work is)
+        if (!url.camera) setTimeout(() => flyToBounds(de?.bounds ?? r.bounds, { duration: url.region ? 0 : 2800, rightPanel: true }), url.region ? 60 : 600);
       }
       if (url.compare) {
         const [a, b] = url.compare.split(',').map((s) => {
@@ -227,7 +251,8 @@ export default function App() {
       detections: true,
       zones: view === 'zones',
       drift: view === 'drift' && !!dateEntry?.drift,
-      currents: view === 'drift' ? flowAvail.includes('currents') : false,
+      // particles are a separate, on-demand layer (checkbox in the drift panel), never switched on by the view
+      currents: view === 'drift' ? l.currents && flowAvail.includes('currents') : false,
       wind: view === 'drift' ? l.wind && flowAvail.includes('wind') : false,
     }));
     if (view !== 'drift') {
@@ -342,8 +367,9 @@ export default function App() {
     if (f) {
       if (f.properties.artifact && !layers.artifacts) setLayers((l) => ({ ...l, artifacts: true }));
       setSelected(f);
-      setTimeout(() => flyToFeature(f, 2200), 80);
-    }
+      // ONE flight, after the evidence panel has widened the layout
+      setTimeout(() => flyToFeature(f!, 2200), 80);
+    } else if (pd.lon !== undefined && pd.lat !== undefined) setTimeout(() => flyToArea(pd.lon!, pd.lat!, 2000, 2200), 80);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [detectionsAll]);
 
@@ -354,8 +380,8 @@ export default function App() {
       date: regionId ? date ?? undefined : undefined,
       model,
       layers,
-      basemap,
-      projection,
+      basemap: basemap !== 'satellite' ? basemap : undefined,
+      projection: projection !== 'globe' ? projection : undefined,
       route: regionId && routeOn ? true : undefined,
       camera: camera.current,
       compare: compare ? `${compare.a.region}:${compare.a.date},${compare.b.region}:${compare.b.date}` : undefined,
@@ -402,16 +428,16 @@ export default function App() {
       if (!r) return;
       setRegionId(r.id);
       setView(opts.view ?? 'findings');
+      // heavy layers are switched off when the region changes (they are on-demand only)
+      setLayers((l) => ({ ...l, drift: false, currents: false, wind: false, h3_3d: false }));
+      anim.playing = false;
       const de = (opts.date && r.dates.find((d) => d.date === opts.date)) || summaryDate(r);
       setDate(de?.date ?? null);
-      const m = opts.model ?? model;
-      if (de && !de.models.includes(m)) setModel(de.models[0]);
-      else if (opts.model) setModel(opts.model);
-      if (opts.fly !== false)
-        flyToBounds(de?.bounds ?? r.bounds, { pitch: layers.h3_3d ? 50 : 0, bearing: layers.h3_3d ? -18 : 0, rightPanel: true, duration: 3000 });
+      if (de) setModel(opts.model && de.models.includes(opts.model) ? opts.model : pickModel(de.models));
+      if (opts.fly !== false) flyToBounds(de?.bounds ?? r.bounds, { pitch: 0, bearing: 0, rightPanel: true, duration: 2600 });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [manifest, model, layers.h3_3d],
+    [manifest],
   );
 
   const toggleLayer = useCallback((k: LayerKey, on?: boolean) => {
@@ -435,6 +461,16 @@ export default function App() {
     });
   }, []);
 
+  /** a layer switched by the user: light layers are remembered */
+  const userToggleLayer = useCallback(
+    (k: LayerKey, on?: boolean) => {
+      const v = on ?? !layersRef.current[k];
+      toggleLayer(k, v);
+      if (PERSIST_LAYERS.includes(k)) savePrefs({ layers: { [k]: v } });
+    },
+    [toggleLayer],
+  );
+
   const changeProjection = useCallback(
     (pr: Projection) => {
       setProjection(pr);
@@ -452,9 +488,10 @@ export default function App() {
       setZone(null);
       setDate(d);
       const de = region?.dates.find((x) => x.date === d);
-      if (de && !de.models.includes(model)) setModel(de.models[0]);
+      if (de) setModel(pickModel(de.models));
     },
-    [region, model],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [region],
   );
 
   const openDetection = useCallback((f: Feature<DetProps>, fly = false) => {
@@ -520,8 +557,8 @@ export default function App() {
         }
         return;
       }
+      // one flight: the pending selection flies to the finding once its scene is loaded
       selectRegion(r.id, { date: e.date, model: e.model, fly: false });
-      if (e.lon !== undefined && e.lat !== undefined) setTimeout(() => flyToArea(e.lon!, e.lat!, 2000, 3000), 240);
     },
     [manifest, regionId, date, model, detectionsAll, selectRegion, openDetection],
   );
@@ -532,7 +569,6 @@ export default function App() {
       setTab('map');
       pendingDet.current = { id: it.id, lon: it.lon, lat: it.lat };
       selectRegion(it.region, { date: it.date, model: it.model, fly: false });
-      setTimeout(() => flyToArea(it.lon, it.lat, 1600, 2000), 240);
     },
     [manifest, selectRegion],
   );
@@ -614,18 +650,12 @@ export default function App() {
     openPlace: (h) => openPlace(h, true),
     closePlace: () => setPlace(null),
     waitIdle,
-    ensureGlobe: () => {
-      if (ctl.projection !== 'globe' && defaultProjection() === 'globe') {
-        ctl.projection = 'globe';
-        setProjection('globe');
-      }
-    },
+    ensureGlobe: () => {},
     setLeftTab,
     highlightFeed: (key) => setFeedSel(key),
     openCheck,
     selectCheckPair,
     setTab,
-    setBasemap,
     showToast,
   };
   const tourApiRef = useRef(tourApi);
@@ -685,6 +715,8 @@ export default function App() {
       view,
       layers,
       basemap,
+      offline,
+      prefs: () => loadPrefs(),
       sceneReady: !!scene && (!layers.rgb || !!rgbImg) && !!detections,
       h3Ready: !!h3 && geoReady,
       driftReady: !!drift && geoReady,
@@ -707,6 +739,7 @@ export default function App() {
         return { x: p.x + r.left, y: p.y + r.top, id: f.properties.id };
       },
       isMoving: () => !!ctl.map?.isMoving(),
+      tiles: () => ({ loaded: !!ctl.map?.areTilesLoaded(), zoom: ctl.map?.getZoom(), style: (ctl.map?.getStyle() as any)?.name ?? null }),
       zoneScreen: (rank: number) => {
         const z = zones?.zones.find((x) => x.rank === rank);
         if (!z || !ctl.map) return null;
@@ -809,13 +842,10 @@ export default function App() {
           onClickDet={(f) => openDetection(f)}
           onClickRegion={(id) => selectRegion(id)}
           basemap={basemap}
-          onBasemapFailed={(b) => {
-            setBasemap('none');
-            showToast(
-              b === 'dark'
-                ? 'Нет сети для тёмной подложки — показаны снимки Sentinel-2 и береговая линия (офлайн)'
-                : 'Спутниковые тайлы недоступны — офлайн-подложка: снимки Sentinel-2 и береговая линия',
-            );
+          offline={offline}
+          onOffline={(on) => {
+            setOffline(on);
+            if (on) showToast('Нет сети — офлайн-подложка');
           }}
           projection={projection}
           route={route}
@@ -841,7 +871,7 @@ export default function App() {
               Находки<span className="n">{detections ? detections.features.length : ''}</span>
             </button>
             <button className={view === 'zones' || !!zone ? 'on' : ''} onClick={() => changeView('zones')} data-testid="act-zones" disabled={!scene || (!!zones && !nZones)}>
-              Зоны обследования<span className="n">{nZones || ''}</span>
+              Зоны<span className="n">{nZones || ''}</span>
             </button>
             <button className={view === 'history' ? 'on' : ''} onClick={() => changeView('history')} data-testid="act-history">
               История<span className="n">{region.dates.length}</span>
@@ -860,17 +890,25 @@ export default function App() {
         )}
         {!region && tab === 'map' && !compare && (
           <div className="actions" style={{ padding: '0 16px', alignItems: 'center', height: 42, color: 'var(--text-2)' }} data-testid="world-hint">
-            Обзор мира · выберите район в списке слева или точку на глобусе
+            Выберите район
           </div>
         )}
 
         <Toolbar
           layers={layers}
-          onLayer={toggleLayer}
+          onLayer={userToggleLayer}
           basemap={basemap}
-          onBasemap={setBasemap}
+          offline={offline}
+          onBasemap={(b) => {
+            setBasemap(b);
+            setOffline(false);
+            savePrefs({ basemap: b });
+          }}
           projection={projection}
-          onProjection={changeProjection}
+          onProjection={(pr) => {
+            changeProjection(pr);
+            savePrefs({ projection: pr });
+          }}
           hasRegion={!!region}
           hasDrift={!!dateEntry?.drift}
           flowAvail={flowAvail}
@@ -883,7 +921,9 @@ export default function App() {
           sceneModels={dateEntry?.models ?? []}
           onModel={(m) => {
             setSelected(null);
+            wantModel.current = m;
             setModel(m);
+            savePrefs({ model: m });
           }}
           confAvail={confAvail}
           onlyConfirmed={onlyConf}
@@ -914,9 +954,9 @@ export default function App() {
         )}
 
         <div className="attrib" data-testid="attribution">
-          {basemap === 'dark' && '© CARTO, © OpenStreetMap contributors'}
-          {basemap === 'satellite' && 'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community'}
-          {basemap === 'none' && 'Офлайн: контур суши Natural Earth (public domain)'}
+          {!offline && basemap === 'dark' && '© CARTO, © OpenStreetMap contributors'}
+          {!offline && basemap === 'satellite' && 'Tiles © Esri — Esri, Maxar, Earthstar Geographics'}
+          {(offline || basemap === 'none') && 'Natural Earth'}
           {` · Снимки: ${imgSource}`}
           {layers.osm ? ' · Объекты: © OpenStreetMap contributors (ODbL)' : ''}
         </div>
@@ -986,7 +1026,7 @@ export default function App() {
         }}
         onCompare={openCompare}
         onCheck={() => openCheck(true)}
-        onLayer={toggleLayer}
+        onLayer={userToggleLayer}
         drift={driftRaw}
         layers={layers}
         flowAvail={flowAvail}
@@ -1010,7 +1050,7 @@ export default function App() {
 
       {compare && (
         <Suspense fallback={<div className="view" />}>
-          <CompareView manifest={manifest} compare={compare} model={model} basemap={basemap} onClose={() => setCompare(null)} onChange={setCompare} />
+          <CompareView manifest={manifest} compare={compare} model={model} basemap={offline ? 'none' : basemap} onClose={() => setCompare(null)} onChange={setCompare} />
         </Suspense>
       )}
     </div>

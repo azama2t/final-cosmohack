@@ -111,6 +111,12 @@ export function fmtArea(m2: number | null | undefined): [string, string] {
   return [nf(m2 >= 1e6 ? 0 : 2).format(m2 / 10000), 'га'];
 }
 
+/** Area always in m² (lists and feed: one unit everywhere, comparable at a glance). */
+export function fmtM2(m2: number | null | undefined): string {
+  if (m2 === null || m2 === undefined || Number.isNaN(m2)) return '—';
+  return `${nf(0).format(Math.round(m2 / 100) * 100 || Math.round(m2))} м²`;
+}
+
 export const fmtPct = (f: number | null | undefined, digits = 0) =>
   f === null || f === undefined || Number.isNaN(f) ? '—' : `${nf(digits).format(f * 100)} %`;
 
@@ -194,4 +200,14 @@ export function probLegendGradient(thr: number): string {
   const pos = (p: number) => `${(((p - 0.05) / 0.95) * 100).toFixed(1)}%`;
   const mid = (0.05 + t) / 2;
   return `linear-gradient(90deg, rgba(43,108,176,${(40 / 255).toFixed(2)}) 0%, rgba(183,148,244,0.45) ${pos(mid)}, rgba(246,173,85,${(170 / 255).toFixed(2)}) ${pos(t)}, rgba(255,107,74,${(230 / 255).toFixed(2)}) ${pos(t)}, rgba(255,107,74,${(230 / 255).toFixed(2)}) 100%)`;
+}
+
+/** Confidence in words relative to the model threshold (manifest): share of the way from the threshold to 1. */
+export function confWord(p: number | null | undefined, thr: number | null | undefined): { word: string; cls: string } {
+  if (p === null || p === undefined || Number.isNaN(Number(p))) return { word: '—', cls: '' };
+  const t = typeof thr === 'number' && thr < 1 ? thr : 0.5;
+  const m = (Number(p) - t) / Math.max(1e-6, 1 - t);
+  if (m < 0.2) return { word: 'низкая', cls: 'c-low' };
+  if (m < 0.5) return { word: 'средняя', cls: 'c-mid' };
+  return { word: 'высокая', cls: 'c-high' };
 }

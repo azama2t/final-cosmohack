@@ -23,7 +23,7 @@
   --rw: 420px;
   --lwc: var(--lw);
   --rwc: 0px;
-  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease: cubic-bezier(0, 0, 0.2, 1); /* one transition: 200 ms ease-out */
   --t: 200ms;
   --s1: 8px;
   --s2: 16px;
@@ -108,7 +108,6 @@ p {
   /* one row exactly the viewport height: panels scroll inside, the map never grows below the screen */
   grid-template-rows: minmax(0, 1fr);
   height: 100vh;
-  transition: grid-template-columns 220ms var(--ease);
 }
 .app.right-open {
   --rwc: var(--rw);
@@ -129,12 +128,40 @@ p {
   container-type: inline-size;
 }
 
-.stars {
+.space {
   position: absolute;
   inset: 0;
-  background-color: var(--bg);
+  overflow: hidden;
+  background: var(--bg);
+  pointer-events: none;
+}
+/* static star tile, moved only by transform (compositor) — no repaint while panning */
+.stars {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(100% + 1024px);
+  height: calc(100% + 1024px);
   background-repeat: repeat;
-  transition: opacity 600ms var(--ease);
+  will-change: transform;
+  pointer-events: none;
+}
+/* soft atmosphere at the limb of the globe (the globe itself covers the inner part) */
+.halo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle closest-side,
+    rgba(0, 0, 0, 0) 87.5%,
+    rgba(130, 185, 255, 0.42) 89.2%,
+    rgba(100, 155, 240, 0.2) 91.5%,
+    rgba(80, 130, 225, 0.07) 95%,
+    rgba(70, 120, 220, 0) 100%
+  );
+  will-change: transform, opacity;
+  opacity: 0;
   pointer-events: none;
 }
 .map {
@@ -296,7 +323,7 @@ p {
   border-right: 1px solid var(--line);
   display: flex;
   flex-direction: column;
-  transition: transform 240ms var(--ease);
+  transition: transform var(--t) var(--ease);
 }
 .left > :not(.collapse-tab) {
   width: var(--lw);
@@ -385,7 +412,6 @@ p {
   cursor: pointer;
   color: var(--text);
   transition: background var(--t) var(--ease);
-  animation: feedIn 240ms var(--ease) both;
 }
 .feed-item:hover {
   background: var(--panel-2);
@@ -552,7 +578,7 @@ p {
   border: 1px solid var(--line-2);
   border-radius: var(--r);
   padding: var(--s1) 0;
-  animation: menuIn 160ms var(--ease) both;
+  animation: fadeIn var(--t) var(--ease) both;
   max-height: calc(100vh - 80px);
   overflow-y: auto;
 }
@@ -712,7 +738,7 @@ p {
   scrollbar-color: #2a2d31 transparent;
 }
 .rp-body > * {
-  animation: fadeIn 220ms var(--ease) both;
+  animation: fadeIn var(--t) var(--ease) both;
 }
 @keyframes fadeIn {
   from {
@@ -999,7 +1025,7 @@ p {
   display: block;
   height: 100%;
   background: var(--seq-3);
-  transition: width 400ms var(--ease);
+  transition: width var(--t) var(--ease);
 }
 .bar-row.on {
   color: var(--text);
@@ -1123,7 +1149,6 @@ table.t tr.total td {
   border: 1px solid var(--line);
   border-radius: var(--r);
   padding: 12px var(--s2);
-  transition: left 240ms var(--ease);
   font-size: 12px;
 }
 
@@ -1195,7 +1220,6 @@ table.t tr.total td {
   border-radius: var(--r) var(--r) 0 0;
   color: var(--text-2);
   font-size: 10px;
-  transition: right 240ms var(--ease);
   text-align: right;
   max-width: 50vw;
   pointer-events: auto;
@@ -1206,7 +1230,6 @@ table.t tr.total td {
 }
 .maplibregl-ctrl-bottom-left {
   left: 300px !important;
-  transition: left 240ms var(--ease);
 }
 
 .maplibregl-ctrl-scale {
@@ -1228,7 +1251,7 @@ table.t tr.total td {
   color: var(--text);
   font-size: 12px;
   white-space: nowrap;
-  transition: opacity 250ms var(--ease);
+  transition: opacity var(--t) var(--ease);
 }
 .rm .d {
   width: 7px;
@@ -1343,7 +1366,7 @@ table.t tr.total td {
   border-radius: var(--r);
   padding: 8px var(--s2);
   font-size: 12px;
-  animation: menuIn 200ms var(--ease) both;
+  animation: fadeIn var(--t) var(--ease) both;
 }
 
 /* ---------------------------------------------------------------- bottom bars (drift player, check, tour) */
@@ -1359,8 +1382,7 @@ table.t tr.total td {
   border: 1px solid var(--line-2);
   border-radius: var(--r);
   padding: 12px var(--s2);
-  transition: right 240ms var(--ease), left 240ms var(--ease);
-  animation: menuIn 220ms var(--ease) both;
+  animation: fadeIn var(--t) var(--ease) both;
 }
 
 .dp-row {
@@ -1433,7 +1455,7 @@ input[type='range'].slider::-webkit-slider-thumb {
   border: 1px solid var(--line-2);
   border-radius: var(--r);
   padding: 12px var(--s2) 12px;
-  animation: menuIn 220ms var(--ease) both;
+  animation: fadeIn var(--t) var(--ease) both;
 }
 .tour-cap .tc-top {
   display: flex;
@@ -1456,7 +1478,7 @@ input[type='range'].slider::-webkit-slider-thumb {
   display: block;
   height: 1px;
   background: var(--text);
-  transition: width 400ms var(--ease);
+  transition: width var(--t) var(--ease);
 }
 
 /* ---------------------------------------------------------------- full views (compare, review) */
@@ -1470,7 +1492,7 @@ input[type='range'].slider::-webkit-slider-thumb {
   background: var(--bg);
   display: flex;
   flex-direction: column;
-  animation: fadeIn 220ms var(--ease) both;
+  animation: fadeIn var(--t) var(--ease) both;
 }
 
 .view-head {
@@ -1671,4 +1693,180 @@ select.sel {
   .tour-cap {
     top: 112px !important;
   }
+}
+
+/* ---------------------------------------------------------------- L55: less text, «i» for details */
+.info {
+  position: relative;
+  display: inline-flex;
+  vertical-align: 1px;
+  margin-left: 6px;
+}
+.info-btn {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid var(--text-3);
+  background: transparent;
+  color: var(--text-2);
+  font: 600 10px/1 Inter, system-ui, sans-serif;
+  font-style: italic;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  cursor: pointer;
+  transition: color var(--t) var(--ease), border-color var(--t) var(--ease);
+}
+.info-btn:hover,
+.info-btn.on {
+  color: var(--text);
+  border-color: var(--text-2);
+}
+.info-pop {
+  position: absolute;
+  z-index: 30;
+  top: 22px;
+  left: -8px;
+  width: 300px;
+  padding: 12px 14px;
+  background: var(--panel-2);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r);
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  white-space: normal;
+  text-align: left;
+  animation: fadeIn var(--t) var(--ease) both;
+}
+.info-pop.r {
+  left: auto;
+  right: -8px;
+}
+.legend .info-pop {
+  top: auto;
+  bottom: 22px;
+}
+.big-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 12px;
+  font-size: 14px;
+}
+.big-stat b {
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.big-line {
+  font-size: 14px;
+  color: var(--text);
+}
+.list-head {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-3);
+  font-size: 11px;
+  padding: 0 0 6px;
+}
+.rank.ring {
+  background: transparent !important;
+  border: 1.5px solid var(--accent);
+  color: var(--text);
+  border-radius: 50%;
+}
+.btn.icon {
+  width: 32px;
+  padding: 0;
+  justify-content: center;
+}
+.lg-honest {
+  border-top: 0 !important;
+  margin-top: 4px !important;
+  padding-top: 0 !important;
+}
+.legend {
+  width: auto;
+  max-width: 300px;
+  padding-right: 36px;
+}
+.legend .lg-honest {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  margin: 0 !important;
+}
+.warn-t {
+  color: var(--warn);
+}
+.reg-fold {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--line);
+  padding: 10px var(--s3);
+  color: var(--text-3);
+  font-size: 12px;
+  cursor: pointer;
+  transition: color var(--t) var(--ease);
+}
+.reg-fold:hover {
+  color: var(--text-2);
+}
+.reg-item .ri-val {
+  font-size: 12px;
+  color: var(--text-2);
+}
+.brand {
+  align-items: center;
+  padding-bottom: 4px;
+}
+.brand-name {
+  display: flex;
+  align-items: center;
+}
+.l-val.conf {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+}
+.c-low {
+  color: var(--text-2);
+}
+.c-mid {
+  color: var(--text);
+}
+.c-high {
+  color: var(--accent);
+}
+.two-models {
+  font-size: 11px;
+  color: var(--text-2);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r);
+  padding: 0 5px;
+  line-height: 18px;
+}
+.dp-cap {
+  display: flex;
+  align-items: center;
+}
+.scene-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.scene-line .cloud {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
 }

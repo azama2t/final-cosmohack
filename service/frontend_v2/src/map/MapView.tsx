@@ -3,15 +3,36 @@ import maplibregl from 'maplibre-gl';
 import { MapboxOverlay } from '@deck.gl/mapbox';
 import type { Basemap, Camera, Projection, Region, Zone } from '../types';
 import { buildLayers, type LayerCtx } from './layers';
-import { anim, angDist, ctl, darkStyle, fitOverview, offlineStyle, satelliteStyle, withProjection } from './controller';
+import { anim, angDist, ctl, darkStyle, ESRI_TILES, CARTO_DARK, fitOverview, offlineStyle, satelliteStyle, withProjection } from './controller';
 import { fmtKm } from '../lib/route';
 import { fmtPermille, rankColor, rgbStr } from '../lib/style';
 import { rankRegions, regionReliability, shortName } from '../lib/data';
 import { attachStars } from './stars';
 
+/** style of the effective basemap; «dark» needs a fetch (CARTO GL style) — null here */
+function syncStyle(b: Basemap, proj: Projection): any | null {
+  if (b === 'satellite') return satelliteStyle(proj);
+  if (b === 'none') return offlineStyle(proj);
+  return null;
+}
+
+/** one cheap request to the online basemap: resolves true when the network is back */
+function probeOnline(b: Basemap): Promise<boolean> {
+  if (b === 'dark') return fetch(CARTO_DARK, { cache: 'no-store' }).then((r) => r.ok, () => false);
+  return new Promise((res) => {
+    const img = new Image();
+    img.onload = () => res(true);
+    img.onerror = () => res(false);
+    img.src = ESRI_TILES.replace('{z}', '0').replace('{y}', '0').replace('{x}', '0') + `?probe=${Date.now()}`;
+  });
+}
+
 export interface MapViewProps extends Omit<LayerCtx, 'hour' | 'zoom' | 'spread'> {
+  /** the user's basemap (never changed by the map itself) */
   basemap: Basemap;
-  onBasemapFailed: (b: Basemap) => void;
+  /** temporary offline fallback: online tiles do not load (does not touch the user's choice) */
+  offline: boolean;
+  onOffline: (on: boolean) => void;
   projection: Projection;
   initialCamera?: Camera;
   zones: Zone[] | null;
@@ -38,6 +59,9 @@ export default function MapView(p: MapViewProps) {
   const zoneMarkers = useRef<maplibregl.Marker[]>([]);
   const routeMarkers = useRef<maplibregl.Marker[]>([]);
   const loaded = useRef(false);
+  const halo = useRef<HTMLDivElement>(null);
+  const eff: Basemap = p.offline ? 'none' : p.basemap;
+  const appliedStyle = useRef<Basemap | null>(null);
 
   // ---- init once ----
   useEffect(() => {
@@ -45,7 +69,7 @@ export default function MapView(p: MapViewProps) {
     ctl.projection = p.projection;
     const map = new maplibregl.Map({
       container: el.current!,
-      style: offlineStyle(p.projection),
+      style: syncStyle(eff, p.projection) ?? offlineStyle(p.projection),
       center: init ? [init.lon, init.lat] : [-40, 12],
       zoom: init ? init.zoom : 1.6,
       pitch: init?.pitch ?? 0,
@@ -72,12 +96,35 @@ export default function MapView(p: MapViewProps) {
     });
     map.addControl(overlay as any);
     ctl.overlay = overlay;
-    // tile / style network errors: shown in the UI (fallback to the offline basemap), not as console spam
-    let tileErrors = 0;
-    map.on('error', () => {
-      tileErrors++;
-      if (tileErrors === 8 && props.current.basemap === 'satellite') props.current.onBasemapFailed('satellite');
+    appliedStyle.current = syncStyle(eff, p.projection) ? eff : null;
+    // Offline detector: ONLY consecutive failures of the online basemap tiles (a successful tile resets the count),
+    // or no tile at all within 12 s. Errors of our own data never switch the basemap. The listener also keeps
+    // network errors out of the console.
+    let streak = 0;
+    let lastOk = 0;
+    let styleAt = performance.now();
+    const isOnlineTile = (e: any) => e?.sourceId === 'esri' || /arcgisonline|cartocdn|carto\.com/.test(String(e?.error?.url ?? e?.error?.message ?? ''));
+    map.on('error', (e: any) => {
+      if (!isOnlineTile(e) || props.current.offline || props.current.basemap === 'none') return;
+      streak++;
+      if (streak >= 4) props.current.onOffline(true);
     });
+    map.on('sourcedata', (e: any) => {
+      if (e.tile && e.sourceId === 'esri') {
+        streak = 0;
+        lastOk = performance.now();
+      }
+    });
+    const watchdog = setInterval(() => {
+      const cur = props.current;
+      if (cur.offline || cur.basemap !== 'satellite' || appliedStyle.current !== 'satellite') return;
+      if (!lastOk && streak > 0 && performance.now() - styleAt > 12000) cur.onOffline(true);
+    }, 3000);
+    (map as any).__resetStyleClock = () => {
+      styleAt = performance.now();
+      lastOk = 0;
+      streak = 0;
+    };
     let fadeBucket = -1;
     map.on('zoom', () => {
       const z = map.getZoom();
@@ -97,8 +144,9 @@ export default function MapView(p: MapViewProps) {
       loaded.current = true;
       ctl.render();
     });
-    const detachStars = attachStars(stars.current!);
+    const detachStars = attachStars(stars.current!, halo.current!);
     return () => {
+      clearInterval(watchdog);
       detachStars();
       regionMarkers.current.forEach((m) => m.remove());
       zoneMarkers.current.forEach((m) => m.remove());
@@ -110,20 +158,40 @@ export default function MapView(p: MapViewProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ---- basemap: online CARTO dark / Esri; offline outline when there is no network ----
+  // ---- basemap: the user's choice (default Esri satellite); the offline outline only while tiles do not load ----
   useEffect(() => {
     const map = ctl.map!;
     let cancelled = false;
-    if (p.basemap === 'none') map.setStyle(offlineStyle(ctl.projection), { diff: false });
-    else if (p.basemap === 'satellite') map.setStyle(satelliteStyle(ctl.projection), { diff: false });
+    if (appliedStyle.current === eff) return; // the initial style already is this one: no second setStyle (no flash)
+    const apply = (st: any) => {
+      appliedStyle.current = eff;
+      (map as any).__resetStyleClock?.();
+      map.setStyle(st, { diff: false });
+    };
+    const st = syncStyle(eff, ctl.projection);
+    if (st) apply(st);
     else
       darkStyle()
-        .then((st) => !cancelled && map.setStyle(withProjection(st, ctl.projection), { diff: false }))
-        .catch(() => !cancelled && props.current.onBasemapFailed('dark'));
+        .then((s) => !cancelled && apply(withProjection(s, ctl.projection)))
+        .catch(() => !cancelled && props.current.onOffline(true));
     return () => {
       cancelled = true;
     };
-  }, [p.basemap]);
+  }, [eff]);
+
+  // ---- offline: quietly probe the network, return to the user's basemap when it is back ----
+  useEffect(() => {
+    if (!p.offline || p.basemap === 'none') return;
+    let alive = true;
+    const probe = () => probeOnline(props.current.basemap).then((ok) => alive && ok && props.current.onOffline(false));
+    const t = setInterval(probe, 20000);
+    window.addEventListener('online', probe);
+    return () => {
+      alive = false;
+      clearInterval(t);
+      window.removeEventListener('online', probe);
+    };
+  }, [p.offline, p.basemap]);
 
   // ---- projection (map ⇄ globe) ----
   const firstProj = useRef(true);
@@ -174,7 +242,7 @@ export default function MapView(p: MapViewProps) {
       d.setAttribute('data-testid', `region-marker-${r.id}`);
       const idx = r.summary?.index_permille;
       d.title = `${r.name} — индекс ${fmtPermille(idx)} ‰${unrel ? ` · ненадёжный снимок: ${regionReliability(r).why}` : ''}`;
-      d.innerHTML = `<span class="d"></span><span class="n">${esc(shortName(r.name))} <span class="v">${fmtPermille(idx)} ‰</span></span>`;
+      d.innerHTML = `<span class="d"></span><span class="n">${esc(shortName(r.name))}</span>`;
       d.onclick = (e) => {
         e.stopPropagation();
         props.current.onClickRegion(r.id);
@@ -281,7 +349,10 @@ export default function MapView(p: MapViewProps) {
 
   return (
     <>
-      <div ref={stars} className="stars" aria-hidden />
+      <div className="space" aria-hidden>
+        <div ref={stars} className="stars" />
+        <div ref={halo} className="halo" />
+      </div>
       <div ref={el} className="map" data-testid="map" />
     </>
   );

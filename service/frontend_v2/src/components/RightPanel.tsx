@@ -61,7 +61,7 @@ export interface RightProps {
   check: CheckProps;
 }
 
-const VIEW_RU: Record<string, string> = { findings: 'Находки', zones: 'Зоны обследования', history: 'История', drift: 'Дрейф' };
+const VIEW_RU: Record<string, string> = { findings: 'Находки', zones: 'Зоны', history: 'История', drift: 'Дрейф' };
 
 export default function RightPanel(p: RightProps) {
   const r = p.region;
@@ -72,32 +72,24 @@ export default function RightPanel(p: RightProps) {
   let onBack: (() => void) | null = null;
   let backLabel = '';
   if (p.mode === 'check') {
-    kicker = 'Дрейф · эксперимент';
+    kicker = 'эксперимент';
     title = 'Проверка прогноза дрейфа';
-    sub = 'следующим снимком того же района';
   } else if (r && p.mode) {
     const name = shortName(r.name);
     if (p.mode in VIEW_RU) {
-      kicker = VIEW_RU[p.mode];
       title = name;
-      sub = [r.country, r.tile ? `тайл ${r.tile}` : ''].filter(Boolean).join(' · ');
     } else if (p.mode === 'det' && p.selected) {
       const art = artifactOf(p.selected.properties);
-      kicker = 'Карточка доказательств';
       title = art ? 'Исключено: не находка' : 'Признаки плавающего материала';
-      sub = art ? `${name} · ${fmtDate(p.selected.properties.date)}` : `приоритет проверки · ${name} · ${fmtDate(p.selected.properties.date)}`;
+      sub = `${name} · ${fmtDate(p.selected.properties.date)}`;
       onBack = p.onCloseDet;
       backLabel = p.zone ? `Зона №${p.zone.rank}` : 'Находки';
     } else if (p.mode === 'zone' && p.zone) {
-      kicker = 'Зона обследования';
-      title = `Зона №${p.zone.rank}`;
-      sub = `${name} · снимок ${p.dateEntry ? fmtDate(p.dateEntry.date) : ''}`;
+      title = `Зона обследования №${p.zone.rank}`;
       onBack = p.onCloseZone;
       backLabel = 'Все зоны';
     } else if (p.mode === 'place' && p.place) {
-      kicker = 'Место · ячейка H3';
       title = 'История места';
-      sub = `${name} · все даты снимков`;
       onBack = p.onClosePlace;
       backLabel = p.place.fromZone && p.zone ? `Зона №${p.zone.rank}` : 'Назад';
     }
@@ -109,7 +101,7 @@ export default function RightPanel(p: RightProps) {
         <div className="right-inner">
           <div className="rp-head">
             <div className="rp-titles">
-              <div className="rp-kicker">
+              <div className="rp-kicker" style={onBack || kicker ? undefined : { display: 'none' }}>
                 {onBack && (
                   <>
                     <button className="back" onClick={onBack} data-testid="panel-back">

@@ -152,7 +152,7 @@ export function buildLayers(c: LayerCtx): Layer[] {
         pickable: true,
         autoHighlight: true,
         highlightColor: [255, 255, 255, 50],
-        transitions: { getElevation: { duration: 700 } } as any,
+        transitions: { getElevation: { duration: 200 } } as any,
         onHover: (info: PickingInfo) =>
           c.onHover(info.object ? { x: info.x, y: info.y, kind: 'h3', props: (info.object as any).properties } : null),
         onClick: (info: PickingInfo) => {
@@ -290,7 +290,8 @@ export function buildLayers(c: LayerCtx): Layer[] {
         updateTriggers: { getFillColor: hot },
       }),
     );
-    const conf = feats.filter((f) => f.properties.confirmed === true);
+    // second-model agreement is shown in the evidence card, not as an extra ring on the map (one mark per finding)
+    const conf: Feature<DetProps>[] = [];
     if (conf.length)
       out.push(
         new ScatterplotLayer<Feature<DetProps>>({

@@ -12,23 +12,12 @@ export const ctl = {
   overviewFocus: undefined as [number, number] | undefined,
 };
 
-/** Hardware WebGL → globe; software renderers (SwiftShader / llvmpipe) → flat map (the globe would stutter). */
-export function defaultProjection(): Projection {
-  try {
-    const gl = document.createElement('canvas').getContext('webgl2') as WebGL2RenderingContext | null;
-    if (!gl) return 'mercator';
-    const ext = gl.getExtension('WEBGL_debug_renderer_info');
-    const r = String(ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER));
-    gl.getExtension('WEBGL_lose_context')?.loseContext();
-    return /swiftshader|llvmpipe|software|basic render/i.test(r) ? 'mercator' : 'globe';
-  } catch {
-    return 'mercator';
-  }
-}
 
 /** Space background colour (also behind the globe, see Stars) */
 export const SPACE = '#07080a';
 export const OCEAN = '#101113';
+/** background of the satellite style: Esri deep-ocean tone */
+export const SAT_OCEAN = '#0b1a2b';
 
 /** Projection + a thin, calm atmosphere at the limb of the globe (fades out when zooming into a region). */
 export function withProjection(s: any, proj: Projection = 'mercator'): any {
@@ -83,6 +72,7 @@ export function flyToBounds(
     { padding: { top: pad.top + e, bottom: pad.bottom + e, left: pad.left + e, right: pad.right + e } },
   );
   if (!cam) return;
+  map.stop();
   map.flyTo({
     center: cam.center,
     zoom: Math.min(cam.zoom ?? 11, 15),
@@ -90,12 +80,13 @@ export function flyToBounds(
     bearing: opts.bearing ?? 0,
     duration: opts.duration ?? 2600,
     essential: true,
-    curve: 1.42,
+    curve: 1.3,
     easing: easeInOut,
   });
 }
 
-export const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+/** camera easing: gentle start and a long soft landing (no hard cubic snap) */
+export const easeInOut = (t: number) => 0.5 - Math.cos(Math.PI * t) / 2;
 
 export function panelWidth() {
   const v = getComputedStyle(document.documentElement).getPropertyValue('--rw');
@@ -106,6 +97,7 @@ export function panelWidth() {
 export function flyToPoint(lon: number, lat: number, zoom = 14, duration = 1800) {
   const map = ctl.map;
   if (!map) return;
+  map.stop();
   map.flyTo({ center: [lon, lat], zoom, duration, essential: true, pitch: map.getPitch(), easing: easeInOut });
 }
 
@@ -196,8 +188,10 @@ export function satelliteStyle(proj: Projection): any {
       name: 'satellite',
       sources: { esri: { type: 'raster', tiles: [ESRI_TILES], tileSize: 256, maxzoom: 18, attribution: ATTRIBUTION.satellite } },
       layers: [
-        { id: 'bg', type: 'background', paint: { 'background-color': OCEAN } },
-        { id: 'esri', type: 'raster', source: 'esri', paint: { 'raster-brightness-max': 0.78, 'raster-saturation': -0.3, 'raster-fade-duration': 200 } },
+        // deep-ocean navy while tiles load (never a black hole); imagery at natural brightness — deep water in Esri
+        // imagery is dark by itself, dimming it further made the open sea look black
+        { id: 'bg', type: 'background', paint: { 'background-color': SAT_OCEAN } },
+        { id: 'esri', type: 'raster', source: 'esri', paint: { 'raster-brightness-max': 0.96, 'raster-saturation': -0.05, 'raster-contrast': 0.04, 'raster-fade-duration': 200 } },
       ],
     },
     proj,

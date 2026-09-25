@@ -59,7 +59,8 @@ export function readUrl(): UrlState {
     if ([lon, lat, zoom].every((v) => Number.isFinite(v))) s.camera = { lon, lat, zoom, pitch: pitch || 0, bearing: bearing || 0 };
   }
   const b = q.get('b');
-  if (b === 'dark' || b === 'satellite' || b === 'none') s.basemap = b;
+  // «none» in old links was written by the automatic offline fallback: it is not a user choice, ignore it
+  if (b === 'dark' || b === 'satellite') s.basemap = b;
   const pr = q.get('pr');
   if (pr === 'globe' || pr === 'map') s.projection = pr === 'globe' ? 'globe' : 'mercator';
   if (q.get('route') === '1') s.route = true;

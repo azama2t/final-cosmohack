@@ -3,11 +3,12 @@ import type { DetProps, Feature, Region } from '../types';
 import type { RightProps } from './RightPanel';
 import { apiGet } from '../lib/api';
 import { apiAvailable, dataUrl, isFlagged, modelPath, regionReliability } from '../lib/data';
-import { fmtArea, fmtDate, fmtDateShort, fmtNum, fmtPct, fmtPermille, fmtProb, isUnknownDate, modelLabel, rankColor, rgbStr } from '../lib/style';
+import { confWord, fmtM2, fmtArea, fmtDate, fmtDateShort, fmtNum, fmtPct, fmtPermille, fmtProb, isUnknownDate, modelLabel, rankColor, rgbStr } from '../lib/style';
 import { centroid } from '../map/layers';
 import { fmtKm } from '../lib/route';
 import TsChart from './TsChart';
 import Calendar from './Calendar';
+import Info from './Info';
 
 type P = RightProps & { region: Region };
 
@@ -47,13 +48,18 @@ function SceneLine({ p }: { p: P }) {
   const t = sceneTime(de.scene_id);
   return (
     <>
-      <div className="lead" data-testid="scene-line">
-        Снимок {sensorOf(de.scene_id, de.source).name} · <b>{fmtDate(de.date)}</b>
-        {t ? `, ${t}` : ''} <span className="faint">· облачность {fmtPct(de.cloud_frac)}</span>
+      <div className="lead scene-line" data-testid="scene-line" title={`Снимок ${sensorOf(de.scene_id, de.source).name}${t ? `, ${t}` : ''} · облачность ${fmtPct(de.cloud_frac)} · ${de.scene_id ?? ''}`}>
+        <b>{fmtDate(de.date)}</b>
+        <span className="faint cloud" aria-label={`облачность ${fmtPct(de.cloud_frac)}`}>
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden>
+            <path d="M4.5 12.5h7a3 3 0 0 0 .4-6 4 4 0 0 0-7.6-.9A3.5 3.5 0 0 0 4.5 12.5Z" />
+          </svg>
+          {fmtPct(de.cloud_frac)}
+        </span>
       </div>
       {isFlagged(de) && (
-        <div className="warnline" style={{ marginTop: 8 }}>
-          Дымка или блик на снимке — признаки могут быть завышены
+        <div className="warnline" style={{ marginTop: 8 }} title="Дымка или блик на снимке — признаки могут быть завышены">
+          Дымка или блик на снимке
         </div>
       )}
       {!regionReliability(p.region).ok && !isFlagged(de) && (
@@ -87,58 +93,62 @@ export function FindingsView(p: P) {
           </p>
         ) : feats.length ? (
           <>
-            <p style={{ marginTop: 12 }} data-testid="findings-summary">
-              Модель {modelLabel(p.model)} отметила <b className="accent">{feats.length}</b> {plural(feats.length, 'участок', 'участка', 'участков')} с признаками
-              плавающего материала, всего {av} {au}. Это <b>приоритет проверки</b>, а не подтверждённый мусор.
-            </p>
+            <div className="big-stat" data-testid="findings-summary">
+              <b className="accent">{feats.length}</b>
+              <span>
+                к проверке
+                <Info label="Что это значит" testid="info-findings">
+                  Модель {modelLabel(p.model)} отметила {feats.length} {plural(feats.length, 'участок', 'участка', 'участков')} с признаками плавающего
+                  материала, всего {av} {au}. Это приоритет проверки, а не подтверждённый мусор и не масса пластика: пена, водоросли и следы судов
+                  бывают похожи. Согласие двух моделей — сигнал, не подтверждение.
+                  {p.nArtifacts > 0 ? ` Ещё ${p.nArtifacts} объектов исключены как артефакты (шов, след судна, судно) — «Слои» → «Исключённые артефакты».` : ''}
+                </Info>
+              </span>
+            </div>
             <p className="hint-line" data-testid="findings-reviewed">
-              Проверено человеком: {reviewed} из {feats.length}
-              {nConfirmedHuman ? ` · подтверждено оператором ${nConfirmedHuman}` : ''}.
+              {reviewed}/{feats.length} проверено
+              {nConfirmedHuman ? ` · подтверждено ${nConfirmedHuman}` : ''}
             </p>
-            <p className="hint-line">Нажмите на жёлтое кольцо на карте или на строку ниже — откроется карточка доказательств.</p>
           </>
         ) : (
-          <p style={{ marginTop: 12 }}>
-            На этом снимке модель не отметила признаков плавающего материала. Другие даты — в «Истории».
-          </p>
+          <p style={{ marginTop: 12 }}>Находок нет. Другие даты — в «Истории».</p>
         )}
       </section>
 
       {list.length > 0 && (
         <section className="sec" data-testid="findings-list">
-          <div className="sec-h">
-            <h3>Находки снимка</h3>
-            <span className="aside">по приоритету проверки</span>
+          <div className="list-head">
+            <span />
+            <span>уверенность</span>
           </div>
           <div className="list">
-            {(all ? list : list.slice(0, 8)).map((f, i) => {
+            {(all || list.length <= 10 ? list : list.slice(0, 8)).map((f, i) => {
               const pr = f.properties;
               const [a, u] = fmtArea(pr.area_m2);
               const inc = p.incidents?.get(pr.id);
               const st = inc?.status ?? 'detected';
               return (
                 <button key={pr.id} className="li" onClick={() => p.onDetection(f)} data-testid={`finding-row-${i}`}>
-                  <span className="rank" style={{ background: 'transparent', border: '1.5px solid var(--accent)', color: 'var(--text)', borderRadius: '50%' }}>
-                    {i + 1}
-                  </span>
+                  <span className="rank ring">{i + 1}</span>
                   <span className="l-main">
-                    <span>
-                      {a} {u} · уверенность {fmtProb(pr.mean_prob)}
-                    </span>
-                    <span className="l-sub" style={{ display: 'block' }}>
-                      <span className={`status ${STATUS_CLS[st] ?? ''}`} style={{ fontSize: 12 }}>
-                        {STATUS_RU[st] ?? st}
-                      </span>
-                      {typeof pr.confirmed === 'boolean' ? (pr.confirmed ? ' · вторая модель тоже видит' : ' · вторая модель не видит') : ''}
-                      {inc?.priority ? ` · в зоне №${inc.priority}` : ''}
+                    <span>{fmtM2(pr.area_m2)}</span>
+                    <span className={`l-sub status ${STATUS_CLS[st] ?? ''}`} style={{ display: 'block' }}>
+                      {STATUS_RU[st] ?? st}
                     </span>
                   </span>
-                  <span className="l-val">›</span>
+                  <span className="l-val conf" title={`уверенность ${fmtProb(pr.mean_prob)} при пороге ${p.threshold ?? '—'}`}>
+                    {pr.confirmed === true && (
+                      <span className="two-models" title="Вторая модель тоже видит этот участок — сигнал, не подтверждение">
+                        2 модели
+                      </span>
+                    )}
+                    <span className={confWord(pr.mean_prob, p.threshold).cls}>{confWord(pr.mean_prob, p.threshold).word}</span>
+                  </span>
                 </button>
               );
             })}
           </div>
-          {list.length > 8 && (
+          {list.length > 10 && (
             <button className="link small" style={{ marginTop: 12 }} onClick={() => setAll((v) => !v)}>
               {all ? 'Свернуть' : `Все ${list.length}`}
             </button>
@@ -146,15 +156,6 @@ export function FindingsView(p: P) {
         </section>
       )}
 
-      {p.nArtifacts > 0 && (
-        <section className="sec">
-          <p className="note" data-testid="artifacts-note">
-            Ещё {p.nArtifacts} объектов модель выделила, но сборка исключила их как артефакты (шов детекторов, след судна, судно). В счёт не
-            входят. Показать на карте — «Настройки карты» → «Исключённые артефакты».
-          </p>
-        </section>
-      )}
-      <HonestNote p={p} />
     </>
   );
 }
@@ -166,16 +167,19 @@ export function ZonesView(p: P) {
     <>
       <section className="sec">
         <SceneLine p={p} />
-        <p style={{ marginTop: 12 }}>
-          Зоны обследования — ячейки сетки H3 (~0,7 км²), где больше всего воды с признаками материала, с учётом повторяемости по датам,
-          уверенности и согласия моделей. <b>Порядок проверки, не измеренная опасность.</b>
+        <p className="big-line" style={{ marginTop: 8 }}>
+          Куда ехать первым
+          <Info label="Как считаются зоны" testid="info-zones">
+            Зоны — ячейки сетки H3 (~0,7 км²), где больше всего воды с признаками материала, с учётом повторяемости по датам, уверенности и
+            согласия моделей. Это порядок проверки, не измеренная опасность. Цвет и высота сетки H3 — доля наблюдаемой воды с признаками, ‰.
+          </Info>
         </p>
       </section>
       {zones.length > 0 ? (
         <section className="sec" data-testid="zones-list">
-          <div className="sec-h">
-            <h3>Зоны по приоритету</h3>
-            <span className="aside">{zones.length}</span>
+          <div className="list-head">
+            <span>по приоритету</span>
+            <span>индекс, ‰</span>
           </div>
           <div className="list">
             {(all ? zones : zones.slice(0, 6)).map((z) => {
@@ -186,15 +190,13 @@ export function ZonesView(p: P) {
                     {z.rank}
                   </span>
                   <span className="l-main">
-                    <span>
-                      индекс {fmtPermille(z.index)} ‰ · {a} {u}
-                    </span>
+                    <span>{fmtM2(z.area_m2)}</span>
                     <span className="l-sub" style={{ display: 'block' }}>
                       {z.n_detections ?? '—'} {plural(z.n_detections ?? 0, 'участок', 'участка', 'участков')}
-                      {(z.repeat_dates ?? 1) > 1 ? ` · повтор на ${z.repeat_dates} датах` : ''}
+                      {(z.repeat_dates ?? 1) > 1 ? ` · ${z.repeat_dates} даты` : ''}
                     </span>
                   </span>
-                  <span className="l-val">почему ›</span>
+                  <span className="l-val">{fmtPermille(z.index)}</span>
                 </button>
               );
             })}
@@ -213,9 +215,8 @@ export function ZonesView(p: P) {
             </button>
           </div>
           {p.route && (
-            <p className="note" style={{ marginTop: 8 }} data-testid="route-summary">
-              От «{p.route.port.name}»: {p.route.legs.map((l) => l.zone.rank).join(' → ')}, ≈ {fmtKm(p.route.totalKm)} км по прямой. Черновой
-              порядок, не навигационный маршрут.
+            <p className="note" style={{ marginTop: 8 }} data-testid="route-summary" title="Черновой порядок по прямой, не навигационный маршрут">
+              От «{p.route.port.name}»: {p.route.legs.map((l) => l.zone.rank).join(' → ')}, ≈ {fmtKm(p.route.totalKm)} км
             </p>
           )}
         </section>
@@ -223,22 +224,15 @@ export function ZonesView(p: P) {
         <section className="sec note">На этой дате зон нет.</section>
       )}
       <section className="sec">
-        <div className="sec-h">
-          <h3>Сетка индекса H3</h3>
-        </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button className={`btn sm ${p.layers.h3 ? 'on' : ''}`} onClick={() => p.onLayer('h3')} data-testid="zones-h3">
-            Показать сетку
+            Сетка H3
           </button>
           <button className={`btn sm ${p.layers.h3_3d ? 'on' : ''}`} onClick={() => p.onLayer('h3_3d')} data-testid="zones-h3-3d">
-            В объёме (3D)
+            3D
           </button>
         </div>
-        <p className="note" style={{ marginTop: 8 }}>
-          Цвет и высота — доля наблюдаемой воды с признаками материала в ячейке, ‰.
-        </p>
       </section>
-      <HonestNote p={p} />
     </>
   );
 }
@@ -254,7 +248,7 @@ export function HistoryView(p: P) {
       <section className="sec">
         <div className="sec-h">
           <h3>Даты снимков</h3>
-          <span className="aside">точка — дымка или блик</span>
+          <span className="aside" title="точка — дымка или блик">•</span>
         </div>
         <div className="dates" data-testid="date-strip">
           {r.dates.map((d) => (
@@ -277,12 +271,10 @@ export function HistoryView(p: P) {
               {fmtPermille(ts?.mean_index ?? null)}
               <small>‰</small>
             </div>
-            <div className="h">доля воды с признаками</div>
           </div>
           <div>
             <div className="k">Находки</div>
             <div className="v accent">{nDet === null ? '…' : fmtNum(nDet)}</div>
-            <div className="h">{p.nConfirmed !== null ? `с согласием моделей ${p.nConfirmed}` : 'участков'}</div>
           </div>
           <div>
             <div className="k">Площадь</div>
@@ -290,7 +282,6 @@ export function HistoryView(p: P) {
               {av}
               <small>{au}</small>
             </div>
-            <div className="h">пикселей ≥ порога</div>
           </div>
         </div>
       </section>
@@ -298,7 +289,7 @@ export function HistoryView(p: P) {
         <section className="sec">
           <div className="sec-h">
             <h3>Индекс по датам</h3>
-            <span className="aside">сплошная — {modelLabel(p.model)}, пунктир — другая модель</span>
+            <span className="aside">пунктир — другая модель</span>
           </div>
           <TsChart rows={p.timeseries} model={p.model} date={de.date} models={p.manifest.models} onDate={p.onDate} />
         </section>
@@ -312,7 +303,6 @@ export function HistoryView(p: P) {
         </div>
       </section>
       {de && <Export region={r.id} date={de.date} model={p.model} p={p} />}
-      <HonestNote p={p} />
     </>
   );
 }
@@ -361,65 +351,64 @@ export function DriftView(p: P) {
       <section className="sec" data-testid="drift-panel">
         <SceneLine p={p} />
         {de?.drift ? (
-          <p style={{ marginTop: 12 }}>
-            Куда течения и ветер могут унести материал за 72 часа после снимка. Частицы стартуют от находок; светлые линии — их пути, серое облако —
-            разброс при другом ветровом коэффициенте. <b>Демонстрационный прогноз, не валидирован.</b>
+          <p className="big-line" style={{ marginTop: 8 }}>
+            Демо-прогноз, не валидирован
+            <Info label="Как читать дрейф" testid="info-drift">
+              Куда течения и ветер могут унести материал за 72 часа после снимка. Частицы стартуют от находок; светлые линии — их пути, серое
+              облако — разброс при другом ветровом коэффициенте. Модель {f.model ?? 'OpenDrift'}; течения — {short(f.currents)}; ветер —{' '}
+              {short(f.wind)}; ветровой коэффициент {f.wind_drift_factor ?? '—'}.
+            </Info>
           </p>
         ) : null}
         {de?.drift && sum ? (
           <p className="lead" style={{ marginTop: 12 }} data-testid="drift-summary">
-            За {Math.round(sum.h)} ч центр облака частиц смещается примерно на {fmtNum(sum.km, sum.km < 10 ? 1 : 0)} км на {sum.dir}.
+            За {Math.round(sum.h)} ч — ≈ {fmtNum(sum.km, sum.km < 10 ? 1 : 0)} км на {sum.dir}
           </p>
         ) : null}
         {de?.drift ? null : (
-          <p style={{ marginTop: 12 }}>Для этой даты прогноза дрейфа нет. Прогнозы есть только для свежих снимков — выберите другую дату в «Истории».</p>
+          <p style={{ marginTop: 12 }}>Для этой даты прогноза нет. Другие даты — в «Истории».</p>
         )}
       </section>
       {de?.drift && (
         <section className="sec">
           <div className="sec-h">
-            <h3>Что двигает частицы</h3>
+            <h3>Частицы</h3>
           </div>
           <button className="menu-row" style={{ padding: '4px 0' }} disabled={!p.flowAvail.includes('currents')} onClick={() => p.onLayer('currents')} data-testid="drift-currents">
             <span className={`check ${p.layers.currents ? 'on' : ''}`} aria-hidden />
-            <span>Поверхностные течения</span>
+            <span>Течения</span>
           </button>
           <button className="menu-row" style={{ padding: '4px 0' }} disabled={!p.flowAvail.includes('wind')} onClick={() => p.onLayer('wind')} data-testid="drift-wind">
             <span className={`check ${p.layers.wind ? 'on' : ''}`} aria-hidden />
-            <span>Ветер 10 м</span>
+            <span>Ветер</span>
           </button>
-          <dl className="rows" style={{ marginTop: 12 }}>
-            <dt>Модель дрейфа</dt>
-            <dd>{f.model ?? 'OpenDrift'}</dd>
-            <dt>Течения</dt>
-            <dd>{short(f.currents)}</dd>
-            <dt>Ветер</dt>
-            <dd>{short(f.wind)}</dd>
-            <dt>Ветровой коэффициент</dt>
-            <dd>{f.wind_drift_factor ?? '—'}</dd>
-          </dl>
         </section>
       )}
       {near && near.length > 0 && (
         <section className="sec" data-testid="drift-osm">
           <div className="sec-h">
             <h3>Рядом с путями частиц</h3>
-            <span className="aside">демо-прогноз, не валидирован</span>
+            <Info label="Что это" testid="info-osm" align="right">
+              Объекты OpenStreetMap, которые задевает облако частиц демо-прогноза. Это не предупреждение и не оценка ущерба. На карте — «Слои» →
+              «Объекты OSM». © OpenStreetMap contributors (ODbL).
+            </Info>
           </div>
-          <p className="note" style={{ color: 'var(--text-2)' }}>
-            {near.slice(0, 6).map((t, i) => (
-              <span key={t.object_id ?? i}>
-                {i ? '; ' : ''}
-                {t.kind_ru}
-                {t.name ? ` «${t.name}»` : ''}
-              </span>
-            ))}
-            {near.length > 6 ? ` и ещё ${near.length - 6}` : ''}.
-          </p>
-          <p className="note" style={{ marginTop: 8 }}>
-            Объекты OpenStreetMap, которые задевает облако частиц демо-прогноза. Это не предупреждение и не оценка ущерба. Показать на карте —
-            «Настройки карты» → «Объекты OSM». © OpenStreetMap contributors (ODbL).
-          </p>
+          <details className="near">
+            <summary className="note" style={{ color: 'var(--text-2)', cursor: 'pointer' }}>
+              {[...new Set(near.map((t) => t.kind_ru))].slice(0, 3).join(', ')}
+              {near.length > 1 ? ` (${near.length})` : ''}
+            </summary>
+            <p className="note" style={{ marginTop: 6 }}>
+              {near.slice(0, 8).map((t, i) => (
+                <span key={t.object_id ?? i}>
+                  {i ? '; ' : ''}
+                  {t.kind_ru}
+                  {t.name ? ` «${t.name}»` : ''}
+                </span>
+              ))}
+              {near.length > 8 ? ` и ещё ${near.length - 8}` : ''}.
+            </p>
+          </details>
         </section>
       )}
       {p.paths.has('/api/drift_check') && (
@@ -429,24 +418,12 @@ export function DriftView(p: P) {
               Проверка прогноза<span className="exp-tag">эксперимент</span>
             </h3>
           </div>
-          <p className="note">Сопоставление прогноза со следующим снимком того же района и с базовой линией «материал остался на месте».</p>
-          <button className="btn sm" style={{ marginTop: 8 }} onClick={p.onCheck} data-testid="check-open">
-            Открыть эксперимент
+          <button className="btn sm" onClick={p.onCheck} data-testid="check-open" title="Прогноз против следующего снимка и базовой линии «материал остался на месте»">
+            Открыть
           </button>
         </section>
       )}
     </>
-  );
-}
-
-function HonestNote({ p }: { p: P }) {
-  return (
-    <section className="sec">
-      <p className="note">
-        <b>Индекс по снимку, не масса пластика.</b> «Признаки плавающего материала» — это пиксели, где модель видит сходство с мусором; пена,
-        водоросли и следы судов тоже бывают похожи. Согласие двух моделей — сигнал, не подтверждение. Сцена {p.dateEntry?.scene_id ?? '—'}.
-      </p>
-    </section>
   );
 }
 
@@ -502,7 +479,6 @@ function Export({ region, date, model, p }: { region: string; date: string; mode
     <section className="sec" data-testid="export">
       <div className="sec-h">
         <h3>Выгрузка</h3>
-        <span className="aside">{api ? 'через API' : 'из файлов данных'}</span>
       </div>
       <table className="t">
         <tbody>

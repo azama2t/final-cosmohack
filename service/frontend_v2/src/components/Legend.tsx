@@ -1,6 +1,7 @@
 import type { Layers, Manifest } from '../types';
 import type { FlowField } from '../map/flow';
 import { fmtPermille, fmtThr, rankColor, rgbStr, type H3Scale } from '../lib/style';
+import Info from './Info';
 
 interface Props {
   manifest: Manifest;
@@ -21,25 +22,20 @@ export default function Legend(p: Props) {
       {p.check ? (
         <>
           <div className="lg-row">
-            <span className="lg-sw" style={{ background: 'var(--accent)' }} /> находка 2-го снимка внутри облака
+            <span className="lg-sw" style={{ background: 'var(--accent)' }} /> внутри облака
           </div>
           <div className="lg-row">
-            <span className="lg-sw" /> находка вне облака
+            <span className="lg-sw" /> вне облака
           </div>
           <div className="lg-row">
-            <span className="lg-sw art" style={{ width: 6, height: 6, background: '#a8b0ba', border: 0 }} /> частицы прогноза на момент 2-го снимка
+            <span className="lg-sw art" style={{ width: 6, height: 6, background: '#a8b0ba', border: 0 }} /> частицы
           </div>
         </>
       ) : (
         <>
           {L.detections && (
-            <div className="lg-row">
-              <span className="lg-sw" /> признаки плавающего материала (порог {fmtThr(p.threshold)})
-            </div>
-          )}
-          {L.detections && p.confAvail && (
-            <div className="lg-row">
-              <span className="lg-sw conf" /> вторая модель согласна (сигнал)
+            <div className="lg-row" title={`порог модели ${fmtThr(p.threshold)}`}>
+              <span className="lg-sw" /> признаки плавающего материала
             </div>
           )}
           {L.detections && L.artifacts && p.nArtifacts > 0 && (
@@ -85,12 +81,7 @@ export default function Legend(p: Props) {
               <span className="lg-sw" style={{ borderColor: '#eceef0', background: 'transparent', width: 14, height: 2, borderRadius: 0, borderWidth: '1px 0 0' }} /> дрейф частиц, 0–72 ч
             </div>
           )}
-          {p.flow.map((f) => (
-            <div className="lg-row" key={f.kind} style={{ marginTop: 6 }}>
-              <span className="lg-sw" style={{ borderColor: f.kind === 'wind' ? '#c8ccd2' : '#6eb4e1', background: 'transparent', width: 14, height: 2, borderRadius: 0, borderWidth: '1px 0 0' }} />
-              {f.kind === 'wind' ? 'ветер 10 м' : 'поверхностные течения'}, до {fmtPermille(f.maxSpeed)} м/с
-            </div>
-          ))}
+
           {L.osm && (
             <div className="lg-row" style={{ marginTop: 6 }}>
               <span className="lg-sw" style={{ borderColor: '#a8b0ba', background: 'transparent', width: 8, height: 8 }} /> объекты OSM (фермы, пляжи, порты)
@@ -99,8 +90,11 @@ export default function Legend(p: Props) {
         </>
       )}
       <div className="lg-honest" data-testid="legend-honest">
-        {p.manifest.index?.note ? p.manifest.index.note[0].toUpperCase() + p.manifest.index.note.slice(1) : 'Индекс по снимку, не масса пластика'}.
-        {L.drift || p.check ? ' Дрейф — демонстрационный прогноз, не валидирован.' : ''}
+        <Info label="Как читать карту" testid="info-legend">
+          {p.manifest.index?.note ? p.manifest.index.note[0].toUpperCase() + p.manifest.index.note.slice(1) : 'Индекс по снимку, не масса пластика'}. Кольцо — участок, где
+          модель видит признаки плавающего материала (порог {fmtThr(p.threshold)}); это приоритет проверки, не подтверждение.
+          {L.drift || p.check ? ' Дрейф — демонстрационный прогноз, не валидирован.' : ''}
+        </Info>
       </div>
     </div>
   );

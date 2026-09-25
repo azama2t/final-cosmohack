@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Info from './Info';
 import type { Manifest } from '../types';
 import { apiGet, apiPaths, apiPost, type LabelRec, type RetrainJob, type ReviewItem, type ReviewQueue } from '../lib/api';
 import { shortName } from '../lib/data';
@@ -401,6 +402,8 @@ export default function ReviewView({ manifest, initialRegion, onToast, onShowOnM
                 </div>
               </div>
               <p className="note" style={{ marginTop: 8 }}>
+                Кто в очереди
+                <Info label="Кто попадает в очередь" testid="info-queue">
                 В очередь попадают сомнительные находки: уверенность модели близка к порогу, две модели не согласны, или находку отправили на
                 проверку с карты.
                 {queue?.n_artifacts_excluded ? (
@@ -409,6 +412,7 @@ export default function ReviewView({ manifest, initialRegion, onToast, onShowOnM
                     отмеченных «ложное?» и тех, что подтверждает вторая модель.
                   </span>
                 ) : null}
+                </Info>
               </p>
             </section>
             <div data-testid="review-list">
@@ -536,8 +540,8 @@ export default function ReviewView({ manifest, initialRegion, onToast, onShowOnM
                     <span className="kbd">→</span>пропустить
                   </button>
                 </div>
-                <p className="note" style={{ marginTop: 'var(--s1)' }}>
-                  Клавиши 1–6 — метка, → или пробел — пропустить, ← — назад. Метка записывается в журнал: кто, когда, по какому снимку.
+                <p className="note" style={{ marginTop: 'var(--s1)' }} title="Метка записывается в журнал: кто, когда, по какому снимку">
+                  Клавиши 1–6, → пропустить, ← назад
                 </p>
               </div>
             ) : (
@@ -578,12 +582,15 @@ export default function ReviewView({ manifest, initialRegion, onToast, onShowOnM
             </section>
             <section className="sec">
               <div className="sec-h">
-                <h3>Дообучение LightGBM</h3>
+                <h3>
+                  Дообучение LightGBM
+                  <Info label="Как работает дообучение" align="right">
+                    Ваши метки можно использовать, чтобы дообучить вторую модель. Качество сравнивается до и после на отложенной разметке; новая
+                    модель принимается, только если стала заметно лучше. Модель сервиса сама не заменяется: новая версия сохраняется отдельно,
+                    заменяет её человек.
+                  </Info>
+                </h3>
               </div>
-              <p className="note">
-                Ваши метки можно использовать, чтобы дообучить вторую модель. Качество сравнивается до и после на отложенной разметке; новая
-                модель принимается, только если стала заметно лучше.
-              </p>
               <button
                 className="btn"
                 style={{ marginTop: 'var(--s1)', width: '100%', justifyContent: 'center' }}
@@ -647,9 +654,6 @@ export default function ReviewView({ manifest, initialRegion, onToast, onShowOnM
                   )}
                 </div>
               )}
-              <p className="note" style={{ marginTop: 'var(--s1)' }}>
-                Модель сервиса сама не заменяется: новая версия сохраняется отдельно, заменяет её человек.
-              </p>
             </section>
           </aside>
         </div>
@@ -819,7 +823,7 @@ function IncidentsTab({
             ))}
           </select>
           <p className="note" style={{ marginTop: 8 }}>
-            Путь инцидента: обнаружено → на проверке → подтверждено / ложное → убрано.
+            обнаружено → на проверке → подтверждено / ложное
           </p>
         </section>
         <div data-testid="incidents-list">
@@ -990,8 +994,11 @@ function IncidentsTab({
             </tbody>
           </table>
           <p className="note" style={{ marginTop: 8 }}>
-            «Исключено» ставит сборка (артефакт), это не вердикт человека и в «проверенные» не входит. Подтверждение — решение оператора по
-            снимку, не проверка на месте.
+            Что значат статусы
+            <Info label="Статусы" align="right">
+              «Исключено» ставит сборка (артефакт), это не вердикт человека и в «проверенные» не входит. Подтверждение — решение оператора по
+              снимку, не проверка на месте.
+            </Info>
           </p>
         </section>
       </aside>

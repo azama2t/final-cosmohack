@@ -1,5 +1,5 @@
 import type { MutableRefObject } from 'react';
-import type { Basemap, DateEntry, DetProps, Feature, FC, LayerKey, Layers, Manifest, Region, Zone, ZonesFile } from './types';
+import type { DateEntry, DetProps, Feature, FC, LayerKey, Layers, Manifest, Region, Zone, ZonesFile } from './types';
 import type { FeedEvent } from './lib/feed';
 import type { CheckPair } from './App';
 import { bestRegion, shortName, summaryDate } from './lib/data';
@@ -37,7 +37,6 @@ export interface TourApi {
   openCheck: (on: boolean) => void;
   selectCheckPair: (p: CheckPair) => void;
   setTab: (t: 'map' | 'review') => void;
-  setBasemap: (b: Basemap) => void;
   showToast: (t: string) => void;
 }
 
@@ -48,7 +47,8 @@ const scrollTo = (testid: string) =>
 
 /**
  * ≈ 90 s scripted demo (L48): globe → feed → region & scene → finding card → H3 2D/3D → zones «why first» →
- * drift + particles → forecast check → compare → calendar → PDF → review tab → offline basemap.
+ * drift + particles → forecast check → compare → calendar → PDF → review tab. The basemap and projection are the
+ * user's choice: the tour never switches them.
  * Steps without data are skipped; numbering follows the actual plan.
  */
 export async function runTour(apiRef: MutableRefObject<TourApi>, signal: AbortSignal) {
@@ -80,7 +80,7 @@ export async function runTour(apiRef: MutableRefObject<TourApi>, signal: AbortSi
     const hasCheck = paths.has('/api/drift_check');
     const hasReview = paths.has('/api/review/queue');
     const hasPdf = paths.has('/api/place_report.pdf');
-    const TOTAL = 10 + (hasDrift ? 1 : 0) + (hasCheck ? 1 : 0) + (hasReview ? 1 : 0) + (hasPdf ? 1 : 0) - 1;
+    const TOTAL = 8 + (hasDrift ? 1 : 0) + (hasCheck ? 1 : 0) + (hasReview ? 1 : 0) + (hasPdf ? 1 : 0);
     let step = 0;
     const cap = (t: string) => api().caption(++step, TOTAL, t);
     const name = shortName(best.name);
@@ -89,20 +89,19 @@ export async function runTour(apiRef: MutableRefObject<TourApi>, signal: AbortSi
     api().setTab('map');
     api().closeCompare();
     api().openCheck(false);
-    api().setBasemap('dark');
     api().setLayers({ rgb: true, detections: true, prob: false, h3: false, h3_3d: false, zones: false, drift: false, currents: false, wind: false, osm: false, sources: false, artifacts: false });
     api().ensureGlobe();
     api().setLeftTab('regions');
     api().selectRegion(null);
     await wait(300);
-    cap(`${m.regions.length} районов наблюдения. Число у метки — индекс по последнему надёжному снимку: доля наблюдаемой воды с признаками плавающего материала, ‰.`);
+    cap(`${m.regions.length} районов. Число у метки — индекс, ‰ воды с признаками плавающего материала.`);
     await wait(5000);
 
     // 2. feed of findings (with the image date)
     api().setLeftTab('feed');
     const items = api().get().feed?.items ?? [];
     const ev = items.find((e) => e.region === best.id && e.date === de?.date && e.kind === 'new') ?? items.find((e) => e.region === best.id) ?? null;
-    cap('Лента находок: у каждой записи — дата снимка, что отмечено и статус проверки. «Подтверждено» появляется только после решения человека.');
+    cap('Лента находок: дата снимка и статус. «Подтверждено» — только решение человека.');
     if (ev) api().highlightFeed(ev.key);
     await wait(5000);
 
@@ -110,7 +109,7 @@ export async function runTour(apiRef: MutableRefObject<TourApi>, signal: AbortSi
     api().setLeftTab('regions');
     const turn = turnGlobeTo(best.center[0], best.center[1], 1800);
     if (turn) await wait(turn + 200);
-    cap(`${name}: снимок Sentinel-2 от ${de?.date.split('-').reverse().join('.')}. Справа — где и когда снимок, что модель отметила и куда нажать дальше.`);
+    cap(`${name}, снимок ${de?.date.split('-').reverse().join('.')}. Справа — находки по приоритету проверки.`);
     api().selectRegion(best.id, { date: de?.date, model: 'mdd' });
     await wait(700);
     await api().waitIdle(6000);
@@ -121,7 +120,7 @@ export async function runTour(apiRef: MutableRefObject<TourApi>, signal: AbortSi
     const det = api().get().detections;
     if (det?.features.length) {
       const f = [...det.features].sort((a, b) => b.properties.area_m2 - a.properties.area_m2)[0];
-      cap('Карточка доказательств: исходная вырезка снимка, дата и время съёмки, координаты, обе модели, качество снимка, возможные альтернативы и кнопка «Отправить на проверку».');
+      cap('Карточка доказательств: вырезка снимка, дата, координаты, обе модели, альтернативы.');
       api().openDetection(f);
       await wait(7500);
       api().closeDetection();
@@ -130,7 +129,7 @@ export async function runTour(apiRef: MutableRefObject<TourApi>, signal: AbortSi
 
     // 5. H3 2D → 3D (zones view)
     api().setView('zones');
-    cap('Индекс по сетке H3 (~0,7 км²): доля наблюдаемой воды с признаками материала. Затем — в объёме.');
+    cap('Индекс по сетке H3 (~0,7 км²), затем в объёме.');
     api().toggleLayer('h3', true);
     await wait(3000);
     api().toggleLayer('h3_3d', true);
@@ -142,7 +141,7 @@ export async function runTour(apiRef: MutableRefObject<TourApi>, signal: AbortSi
     const zones = api().get().zones?.zones ?? [];
     const vz = verdictZone(zones);
     if (vz) {
-      cap('Зоны обследования и «почему это место первое»: пиксели × уверенность × повторяемость × согласие моделей. Порядок проверки, не измеренная опасность.');
+      cap('Зоны обследования: куда ехать первым и почему.');
       api().openZone(vz.zone);
       await wait(1200);
       scrollTo('zone-why');
@@ -152,7 +151,7 @@ export async function runTour(apiRef: MutableRefObject<TourApi>, signal: AbortSi
 
     // 7. drift + particles
     if (hasDrift) {
-      cap('Дрейф 0–72 ч и частицы течений — демонстрационный прогноз, не валидирован. Серое облако — разброс при другом ветровом коэффициенте.');
+      cap('Дрейф 0–72 ч — демонстрационный прогноз, не валидирован.');
       anim.spread = true;
       api().setView('drift');
       await until(() => !!(window as any).__app?.driftReady && !!(window as any).__driftPlay, 5000);
@@ -166,7 +165,7 @@ export async function runTour(apiRef: MutableRefObject<TourApi>, signal: AbortSi
 
     // 8. forecast check (experiment)
     if (hasCheck) {
-      cap('Эксперимент: прогноз против следующего снимка того же района и против базовой линии «материал остался на месте». Это не оценка точности.');
+      cap('Эксперимент: прогноз против следующего снимка и базовой линии «на месте».');
       api().openCheck(true);
       await until(() => !!api().get().checkSummary, 4000);
       const pairs: CheckPair[] = api().get().checkSummary?.pairs ?? [];
@@ -178,7 +177,7 @@ export async function runTour(apiRef: MutableRefObject<TourApi>, signal: AbortSi
 
     // 9. compare
     api().selectRegion(best.id, { date: de?.date, model: 'mdd', fly: true });
-    cap('Сравнение районов: снимки рядом и таблица различий.');
+    cap('Сравнение двух снимков рядом.');
     await wait(900);
     api().openCompare();
     await wait(5500);
@@ -186,14 +185,14 @@ export async function runTour(apiRef: MutableRefObject<TourApi>, signal: AbortSi
 
     // 10. calendar (history)
     api().setView('history');
-    cap('История: календарь реальных снимков — только даты съёмки, без интерполяции; ненадёжные даты помечены.');
+    cap('История: календарь реальных снимков района.');
     await wait(600);
     scrollTo('obs-calendar');
     await wait(5000);
 
     // 11. PDF
     if (hasPdf && vz) {
-      cap('Справка PDF по месту: координаты, вырезки, история дат, формула и ограничения — для выезда на проверку.');
+      cap('Справка PDF по месту — для выезда на проверку.');
       api().openZone(vz.zone);
       await wait(900);
       document.querySelector('[data-testid="zone-pdf"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -204,18 +203,13 @@ export async function runTour(apiRef: MutableRefObject<TourApi>, signal: AbortSi
 
     // 12. review tab
     if (hasReview) {
-      cap('«Проверка»: очередь сомнительных находок, метки клавишами 1–6, инциденты со статусами и журналом «кто и когда».');
+      cap('«Проверка»: решение человека — подтвердить или отклонить.');
       api().setTab('review');
       await wait(6000);
       api().setTab('map');
     }
 
-    // 13. offline basemap: our Sentinel-2 crops + a free coastline
     api().setView('findings');
-    cap('Без сети карта работает на наших снимках Sentinel-2 и свободной береговой линии Natural Earth. Онлайн-подложки — CARTO и Esri, атрибуция внизу справа.');
-    api().setBasemap('none');
-    await wait(4500);
-    api().setBasemap('dark');
     api().caption(TOTAL, TOTAL, null);
   } catch (e) {
     if (!(e instanceof Aborted)) console.warn('tour', e);

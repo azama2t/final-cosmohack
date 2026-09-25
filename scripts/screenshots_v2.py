@@ -13,6 +13,10 @@ Frames (1920×1080 unless noted): 01_globe 02_region 03_detection 04_layers_menu
 09_place 10_drift 11_particles 12_check 13_compare 14_calendar 15_review 16_incidents 17_satellite_offline
 18_overview_1366 19_region_1366 20_detection_1366 21_zone_1366.
 result.json: console errors (external tile hosts separate), fps idle / flyTo / drift / particles, bundle size (gzip).
+L55 additions: frame-time probes (`perf`: fps, frames > 50 ms, p95 frame time) while panning the globe / the region by
+mouse drag and during flyTo; `words_first_screen` (visible words outside the map: prose vs data rows); `prefs` (default
+basemap = satellite + globe and stable for 10 s; the user's basemap / projection / model survive a reload; offline:
+the fallback is temporary and the chosen basemap is kept). Frame groups: perf, prefs (run by default).
 Steps whose feature has no data in the served set (no drift forecast, no current/wind fields, no drift-check pairs,
 no zones / H3) are recorded as «пропущено (нет данных)» (`skipped` in result.json), not as failures.
 Smoke passes (smoke_ok) when: no step failed, 0 console errors. fps ≥ 50 (with --gl gpu) is checked by eye.
@@ -62,6 +66,67 @@ def fps_while_moving(page: Page, max_ms: int = 6000) -> float:
             requestAnimationFrame(f); })""",
         max_ms,
     )
+
+
+REC_START = """() => { const r = { on: true, d: [], last: performance.now() }; window.__rec = r;
+    const f = (t) => { if (!r.on) return; r.d.push(t - r.last); r.last = t; requestAnimationFrame(f); }; requestAnimationFrame(f); }"""
+REC_STOP = """() => { const r = window.__rec; if (!r) return null; r.on = false; const d = r.d.slice(1); if (!d.length) return null;
+    const sum = d.reduce((a, b) => a + b, 0); const s = [...d].sort((a, b) => a - b);
+    return { fps: Math.round(d.length * 1000 / sum * 10) / 10, frames: d.length, long50: d.filter(x => x > 50).length,
+             long33: d.filter(x => x > 33.4).length, p95_ms: Math.round(s[Math.floor(s.length * 0.95)] * 10) / 10,
+             max_ms: Math.round(s[s.length - 1] * 10) / 10 }; }"""
+
+
+def rec_start(page: Page):
+    page.evaluate(REC_START)
+
+
+def rec_stop(page: Page) -> dict | None:
+    return page.evaluate(REC_STOP)
+
+
+def drag_pan(page: Page, cx: float, cy: float, dx: float, dy: float, steps: int = 90, back: bool = True):
+    """A human-like drag: ~16 ms per step (and back), measured by the caller with rec_start / rec_stop."""
+    page.mouse.move(cx, cy)
+    page.mouse.down()
+    for i in range(1, steps + 1):
+        page.mouse.move(cx + dx * i / steps, cy + dy * i / steps)
+        page.wait_for_timeout(16)
+    if back:
+        for i in range(steps - 1, -1, -1):
+            page.mouse.move(cx + dx * i / steps, cy + dy * i / steps)
+            page.wait_for_timeout(16)
+    page.mouse.up()
+
+
+WORDS_JS = r"""() => {
+  const skip = '[data-testid=map], .maplibregl-marker, [data-testid=attribution], .maplibregl-ctrl, .info-btn';
+  const dataSel = '.reg-item, .li, .feed-item, .dates, table, .rp-title';
+  const legendSel = '[data-testid=legend]';
+  let prose = 0, data = 0, legend = 0, nums = 0; const texts = [];
+  const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  let n;
+  while ((n = w.nextNode())) {
+    const t = n.textContent.trim(); if (!t) continue;
+    const el = n.parentElement; if (!el || el.closest(skip)) continue;
+    const cs = getComputedStyle(el); if (cs.visibility === 'hidden' || cs.display === 'none' || +cs.opacity === 0) continue;
+    const rg = document.createRange(); rg.selectNodeContents(n); const r = rg.getBoundingClientRect();
+    if (r.width < 1 || r.height < 1 || r.bottom < 0 || r.top > innerHeight || r.right < 0 || r.left > innerWidth) continue;
+    // clipped by a scrolling ancestor?
+    let a = el.parentElement, clipped = false;
+    while (a && a !== document.body) { const cs2 = getComputedStyle(a);
+      if (/(auto|scroll|hidden)/.test(cs2.overflowY)) { const ar = a.getBoundingClientRect(); if (r.top >= ar.bottom || r.bottom <= ar.top) { clipped = true; break; } }
+      a = a.parentElement; }
+    if (clipped) continue;
+    const toks = t.split(/\s+/);
+    const words = toks.filter(x => /\p{L}/u.test(x)).length;   // words = tokens with letters; numbers are data
+    nums += toks.filter(x => !/\p{L}/u.test(x) && /\p{N}/u.test(x)).length;
+    if (!words) continue;
+    if (el.closest(legendSel)) legend += words;
+    else if (el.closest(dataSel)) data += words; else { prose += words; texts.push(t.slice(0, 60)); }
+  }
+  return { prose, legend_on_map: legend, data_rows: data, numbers: nums, total_words: prose + data + legend, prose_texts: texts };
+}"""
 
 
 def wait_idle(page: Page, extra_ms: int = 600, timeout: int = 15000):
@@ -203,7 +268,8 @@ def run(args) -> dict:
         res["fps"]["first_flyin"] = fps_while_moving(page, 6000)
         page.wait_for_function("window.__app && window.__app.sceneReady", timeout=20000)
         wait_idle(page, 1500)
-        res["first_screen"] = page.evaluate("({region: window.__app.region, date: window.__app.date, right: window.__app.rightMode})")
+        res["first_screen"] = page.evaluate("({region: window.__app.region, date: window.__app.date, right: window.__app.rightMode, basemap: window.__app.basemap, projection: window.__app.projection, offline: window.__app.offline})")
+        res["words_first_screen"] = page.evaluate(WORDS_JS)
         shot(page, "00_first_screen")
         res["projection"] = page.evaluate("window.__app.projection")
         res["local_tiles"] = page.evaluate("window.__app.localTiles")
@@ -213,12 +279,23 @@ def run(args) -> dict:
 
         if want("globe"):
             def s_globe():
+                rec_start(page)
                 click(page, "world")
                 page.wait_for_timeout(600)
                 res["fps"]["flyto_region_to_globe"] = fps_while_moving(page, 6000)
+                res.setdefault("perf", {})["flyto_region_to_globe"] = rec_stop(page)
                 wait_idle(page, 1200)
                 res["fps"]["idle_globe"] = measure_fps(page, 1500)
+                res["words_globe"] = page.evaluate(WORDS_JS)
                 shot(page, "01_globe")
+                if want("perf") or only is None:
+                    box = page.locator("[data-testid='main']").bounding_box()
+                    cx, cy = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
+                    rec_start(page)
+                    drag_pan(page, cx, cy, 420, 120)
+                    res["perf"]["pan_globe"] = rec_stop(page)
+                    res["fps"]["pan_globe"] = res["perf"]["pan_globe"]["fps"] if res["perf"]["pan_globe"] else None
+                    wait_idle(page, 600)
             step("globe", s_globe)
 
         def feed_idx():
@@ -232,8 +309,10 @@ def run(args) -> dict:
             if page.evaluate("window.__app.region") == best:
                 click(page, "world")
                 page.wait_for_timeout(2600)
+            rec_start(page)
             click(page, f"region-{best}")
             res["fps"]["flyto_globe_to_region"] = fps_while_moving(page, 9000)
+            res.setdefault("perf", {})["flyto_globe_to_region"] = rec_stop(page)
             page.wait_for_function("window.__app && window.__app.sceneReady", timeout=20000)
             click(page, "tab-feed")
             wait_idle(page, 1500)
@@ -242,6 +321,13 @@ def run(args) -> dict:
             def s_region():
                 open_region()
                 shot(page, "02_region")
+                box = page.locator("[data-testid='main']").bounding_box()
+                cx, cy = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2 + 60
+                rec_start(page)
+                drag_pan(page, cx, cy, 360, 140)
+                res.setdefault("perf", {})["pan_region"] = rec_stop(page)
+                res["fps"]["pan_region"] = res["perf"]["pan_region"]["fps"] if res["perf"]["pan_region"] else None
+                wait_idle(page, 800)
             step("region", s_region)
 
         if want("det"):
@@ -400,7 +486,7 @@ def run(args) -> dict:
                     page.wait_for_timeout(500)
                     raise Skip("в этом наборе данных пар для проверки нет")
                 idx = page.evaluate("""(() => { const els = [...document.querySelectorAll('[data-testid^=check-pair-]')];
-                    return Math.max(0, els.findIndex(e => e.textContent.includes('попал'))); })()""")
+                    return Math.max(0, els.findIndex(e => /попал|да,/.test(e.textContent))); })()""")
                 click(page, f"check-pair-{idx}")
                 page.wait_for_function("window.__app.check && window.__app.check.loaded", timeout=15000)
                 wait_idle(page, 2000)
@@ -450,13 +536,15 @@ def run(args) -> dict:
         if want("basemap"):
             def s_base():
                 page.evaluate("window.__layersMenu(true)")
-                click(page, "basemap-satellite")
-                click(page, "layers-menu")
-                page.wait_for_timeout(3500)
-                shot(page, "17_satellite_offline")
-                page.evaluate("window.__layersMenu(true)")
                 click(page, "basemap-dark")
                 click(page, "layers-menu")
+                page.wait_for_timeout(3000)
+                shot(page, "17_dark_by_user")
+                page.evaluate("window.__layersMenu(true)")
+                click(page, "basemap-satellite")
+                click(page, "layers-menu")
+                page.wait_for_timeout(2500)
+                shot(page, "17b_satellite")
             step("basemap", s_base)
 
         res["app_state_end"] = page.evaluate("JSON.parse(JSON.stringify({region: window.__app.region, date: window.__app.date, layers: window.__app.layers}))")
@@ -493,6 +581,22 @@ def run(args) -> dict:
                 wait_idle(p2, 1500)
                 p2.screenshot(path=str(out / "21_zone_1366.png"))
                 res["shots"].append("21_zone_1366")
+                if p2.locator("[data-testid='act-drift']").count():
+                    p2.locator("[data-testid='act-drift']").click()
+                    p2.wait_for_function("window.__app.driftReady", timeout=15000)
+                    wait_idle(p2, 2500)
+                    p2.screenshot(path=str(out / "22_drift_1366.png"))
+                    res["shots"].append("22_drift_1366")
+                    p2.locator("[data-testid='act-findings']").click()
+                    p2.wait_for_timeout(600)
+                if p2.locator("[data-testid='act-review']").count():
+                    p2.locator("[data-testid='act-review']").click()
+                    p2.wait_for_selector("[data-testid='review-view']", timeout=8000)
+                    p2.wait_for_timeout(2500)
+                    p2.screenshot(path=str(out / "23_review_1366.png"))
+                    res["shots"].append("23_review_1366")
+                    p2.locator("[data-testid='review-close']").click()
+                    p2.wait_for_timeout(400)
                 # layout sanity: panels do not overlap, nothing wider than the viewport
                 res["layout_1366"] = p2.evaluate("""(() => {
                     const r = (s) => { const e = document.querySelector(s); return e ? e.getBoundingClientRect() : null; };
@@ -501,6 +605,59 @@ def run(args) -> dict:
                              hscroll: document.documentElement.scrollWidth > innerWidth }; })()""")
                 c2.close()
             step("small", s_small)
+
+        if want("prefs"):
+            def s_prefs():
+                c4, p4 = new_page(1920, 1080)
+                st = lambda: p4.evaluate("({basemap: window.__app.basemap, projection: window.__app.projection, model: window.__app.model, offline: window.__app.offline, prob: window.__app.layers.prob})")  # noqa: E731
+                p4.goto(base + "/", wait_until="domcontentloaded")
+                p4.wait_for_function("window.__mapReady === true && window.__app.sceneReady", timeout=30000)
+                d0 = st()
+                p4.wait_for_timeout(10000)
+                d1 = st()
+                pr = {"default": d0, "after_10s": d1,
+                      "default_ok": d0["basemap"] == "satellite" and d0["projection"] == "globe",
+                      "stable_10s": d1["basemap"] == d0["basemap"] and d1["projection"] == d0["projection"]}
+                if args.offline:
+                    pr["offline_fallback_on"] = bool(d1["offline"])
+                    pr["choice_kept_offline"] = d1["basemap"] == "satellite"
+                else:
+                    pr["offline_flag_online"] = bool(d1["offline"])
+                # user's choice → reload (no query string) → restored
+                p4.evaluate("window.__layersMenu(true)")
+                p4.locator("[data-testid='basemap-dark']").click()
+                p4.locator("[data-testid='proj-mercator']").click()
+                other = p4.evaluate("(() => { const b = [...document.querySelectorAll('[data-testid^=model-]')].find(e => !e.disabled && !e.querySelector('.radio.on')); return b ? b.dataset.testid.slice(6) : null; })()")
+                if other:
+                    p4.locator(f"[data-testid='model-{other}']").click()
+                p4.evaluate("window.__layersMenu(true)")
+                p4.locator("[data-testid='layer-prob']").click()
+                p4.wait_for_timeout(800)
+                chosen = st()
+                p4.goto(base + "/", wait_until="domcontentloaded")
+                p4.wait_for_function("window.__mapReady === true && window.__app.sceneReady", timeout=30000)
+                p4.wait_for_timeout(1500)
+                after = st()
+                pr["chosen"] = chosen
+                pr["after_reload"] = after
+                pr["restored_after_reload"] = all(after[k] == chosen[k] for k in ("basemap", "projection", "model", "prob"))
+                p4.screenshot(path=str(out / "24_prefs_after_reload.png"))
+                res["shots"].append("24_prefs_after_reload")
+                # region change keeps the choice
+                reg2 = p4.evaluate("(() => { const els = [...document.querySelectorAll('[data-testid^=region-]')].filter(e => !e.classList.contains('on')); return els.length ? els[0].dataset.testid.slice(7) : null; })()")
+                if reg2:
+                    p4.locator(f"[data-testid='region-{reg2}']").click()
+                    p4.wait_for_timeout(3500)
+                    a2 = st()
+                    pr["after_region_change"] = a2
+                    pr["kept_after_region_change"] = a2["basemap"] == chosen["basemap"] and a2["projection"] == chosen["projection"]
+                # restore defaults for the next runs of this profile (fresh context anyway)
+                p4.evaluate("localStorage.clear()")
+                c4.close()
+                res["prefs"] = pr
+                if not (pr["default_ok"] and pr["stable_10s"] and pr["restored_after_reload"]):
+                    raise RuntimeError(f"prefs check failed: {json.dumps(pr, ensure_ascii=False)[:280]}")
+            step("prefs", s_prefs)
 
         if args.video or want("tour") and only is not None:
             def s_tour():
@@ -539,6 +696,12 @@ def run(args) -> dict:
     res["console_warnings"] = con.warnings[:20]
     res["nonlocal_requests"] = sorted(con.nonlocal_requests)[:30]
     res["bundle"] = bundle_size()
+    perf = res.get("perf") or {}
+    res["perf_summary"] = {
+        "min_fps_pan_fly": min([v["fps"] for v in perf.values() if v] or [None]) if perf else None,
+        "long50_total": sum(v["long50"] for v in perf.values() if v) if perf else None,
+        "frames_total": sum(v["frames"] for v in perf.values() if v) if perf else None,
+    }
     fps_vals = [v for v in res["fps"].values() if isinstance(v, (int, float))]
     res["fps_min"] = min(fps_vals) if fps_vals else None
     res["skipped"] = {k: s["skipped"] for k, s in res["steps"].items() if s.get("skipped")}
@@ -561,7 +724,7 @@ def main():
     if not out.is_absolute():
         out = ROOT / out
     (out / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(json.dumps({k: res.get(k) for k in ("smoke_ok", "skipped", "fps", "fps_min", "console_errors", "bundle", "steps", "layout_1366", "tour_seconds")}, ensure_ascii=False, indent=1))
+    print(json.dumps({k: res.get(k) for k in ("smoke_ok", "skipped", "fps", "fps_min", "perf", "perf_summary", "words_first_screen", "prefs", "first_screen", "console_errors", "external_errors", "bundle", "steps", "layout_1366", "tour_seconds")}, ensure_ascii=False, indent=1))
 
 
 if __name__ == "__main__":
