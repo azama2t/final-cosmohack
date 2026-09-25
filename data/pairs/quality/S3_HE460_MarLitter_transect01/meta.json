@@ -88,12 +88,12 @@
   "strip_px": 5109,
   "strip_area_km2": 0.5109,
   "coverage": 1.0,
-  "valid_water_frac": 0.1002,
+  "valid_water_frac": 0.0233,
   "cloud_frac": 0.8939,
   "scl_cloud_frac": 0.8252,
   "spectral_cloud_frac": 0.0687,
   "land_frac": 0.0,
-  "glint_frac": 0.0,
+  "glint_frac": 0.0769,
   "glint_scene": false,
   "nodata_frac": 0.0,
   "glint_b11_median": 0.0225,
@@ -128,7 +128,7 @@
    -0.045099999755620956,
    -0.054749999195337296
   ],
-  "runtime_s": 6.4
+  "runtime_s": 6.6
  },
  "files": [
   "rgb.png",
@@ -137,6 +137,6 @@
   "prob.tif",
   "mask.png"
  ],
- "elapsed_s": 14.8,
- "created": "2026-09-25T19:46:12"
+ "elapsed_s": 14.3,
+ "created": "2026-09-25T21:10:28"
 }

@@ -295,8 +295,8 @@ export default function CaseMap(p: CaseMapProps) {
       paint: { 'circle-radius': 11, 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 2 },
     });
     // suspicious detector pixels: object contours (signal colour), inside the strip solid, outside faint
-    add({ id: 'c-det-fill', type: 'fill', source: 'c-det', paint: { 'fill-color': ACCENT, 'fill-opacity': ['case', ['==', ['get', 'in_strip'], true], 0.55, 0.12] } });
-    add({ id: 'c-det-line', type: 'line', source: 'c-det', paint: { 'line-color': ACCENT, 'line-width': 1.2, 'line-opacity': ['case', ['==', ['get', 'in_strip'], true], 1, 0.45] } });
+    add({ id: 'c-det-fill', type: 'fill', source: 'c-det', paint: { 'fill-color': ['case', ['==', ['get', 'qr'], true], '#9aa0a8', ACCENT], 'fill-opacity': ['case', ['==', ['get', 'in_strip'], true], 0.55, 0.12] } });
+    add({ id: 'c-det-line', type: 'line', source: 'c-det', paint: { 'line-color': ['case', ['==', ['get', 'qr'], true], '#9aa0a8', ACCENT], 'line-width': 1.2, 'line-opacity': ['case', ['==', ['get', 'in_strip'], true], 1, 0.45] } });
     add({ id: 'c-pair-scene', type: 'line', source: 'c-pair-scene', paint: { 'line-color': ACCENT, 'line-width': 2 } });
     add({ id: 'c-pair', type: 'line', source: 'c-pair', filter: ['in', ['geometry-type'], ['literal', ['LineString', 'MultiLineString']]], paint: { 'line-color': ACCENT, 'line-width': 3 } });
     add({

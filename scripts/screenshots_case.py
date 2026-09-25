@@ -470,6 +470,11 @@ def run(args) -> dict:
             p7.wait_for_selector("[data-testid='obs-card'] [data-testid='obs-pairs']", timeout=15000)
             wait_idle(p7, 2000)
             shot(p7, "22_obs_list")
+            if p7.locator("[data-testid='obs-research-estimate'] summary").count():
+                p7.locator("[data-testid='obs-research-estimate'] summary").click()
+                p7.wait_for_timeout(300)
+                shot(p7, "22b_research_estimate")
+            res["obs_field_estimate"] = p7.evaluate("document.querySelector('[data-testid=obs-field-estimate]')?.textContent")
             res["obs_list_first"] = p7.evaluate("document.querySelector('[data-testid=obs-item]')?.innerText")
             p7.context.close()
 
@@ -520,6 +525,26 @@ def run(args) -> dict:
             p9.context.close()
 
         step("geometry_pairfinder", s_geom)
+
+        def s_qr():
+            # a strip whose scene was rejected by the quality masks: its pixels are grey, «вероятно ложные»
+            p10 = new_page()
+            p10.goto(base + "/", wait_until="domcontentloaded")
+            wait_ready(p10)
+            p10.locator("[data-testid='f-source']").select_option("S4_BLACK_SEA_DOORS3")
+            p10.wait_for_function("window.__app.q.source === 'S4_BLACK_SEA_DOORS3' && window.__app.ready")
+            p10.evaluate("window.__app.selectZone('Z-S4_DOORS3_T14')")
+            p10.wait_for_selector("[data-testid='zone-suspicious']", timeout=15000)
+            wait_idle(p10, 2500)
+            shot(p10, "27_quality_rejected_pixels")
+            res["qr_text"] = p10.evaluate("document.querySelector('[data-testid=zone-suspicious]')?.textContent")
+            tid(p10, "tab-metrics").click()
+            p10.wait_for_function("window.__app.metricsReady", timeout=15000)
+            p10.wait_for_timeout(400)
+            res["metrics_det_cols"] = p10.evaluate("[...document.querySelectorAll('[data-testid=metrics-panel] .sec:first-child th')].map(x => x.textContent).filter(Boolean)")
+            p10.context.close()
+
+        step("quality_rejected", s_qr)
         browser.close()
 
     # never leave test queries in the shared saved-queries file

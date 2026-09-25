@@ -164,6 +164,13 @@ export default function CaseApp() {
   );
   const selZoneId = sel?.kind === 'zone' ? sel.id : null;
   const zoneDetail = useLoad<ZoneDetail>(selZoneId ? (sg) => get(`/api/v3/zones/${encodeURIComponent(selZoneId)}`, {}, sg) : null, selZoneId ? 'zd' + selZoneId : '');
+  // detector objects of the selected strip; a quality-rejected scene (glint / clouds) → grey, «вероятно ложные»
+  const detFC = useMemo(() => {
+    const fc = zoneDetail.data?.detections;
+    if (!fc) return null;
+    const qr = !!zoneDetail.data?.properties?.suspicious_pixels?.quality_rejected;
+    return { ...fc, features: fc.features.map((f) => ({ ...f, properties: { ...f.properties, qr } })) };
+  }, [zoneDetail.data]);
   const metrics = useLoad<any>(meta && leftTab === 'metrics' ? (s) => get('/api/v3/metrics', {}, s) : null, meta && leftTab === 'metrics' ? 'm' : '');
 
   const sceneList = scenes.data?.scenes ?? [];
@@ -359,7 +366,7 @@ export default function CaseApp() {
       version: 'v2-case',
       mode: 'case',
       mock: MOCK,
-      ready: !!meta && !!obs.data && !!zones.data && !!scenes.data && mapReady,
+      ready: !!meta && !!obs.data && !!zones.data && !!scenes.data && !obs.loading && !zones.loading && !scenes.loading && mapReady,
       metaError: metaS.err?.message ?? null,
       counts: { obs: obs.data?.count ?? null, zones: zones.data?.count ?? null, scenes: scenes.data?.count ?? null, pairs: pairs.data?.count ?? null },
       errors: [obs.err, zones.err, scenes.err, pairs.err].filter(Boolean),
@@ -616,7 +623,7 @@ export default function CaseApp() {
                       </span>
                     </span>
                     <span className="c-zi-v">
-                      {(p.suspicious_pixels?.n_objects ?? p.detector?.n_objects ?? 0) > 0 ? (
+                      {!p.suspicious_pixels?.quality_rejected && (p.suspicious_pixels?.n_objects ?? p.detector?.n_objects ?? 0) > 0 ? (
                         <span className="c-px-n" title="подозрительные пиксели детектора в полосе">
                           <i style={{ background: ACCENT }} />
                           {p.suspicious_pixels?.n_objects ?? p.detector?.n_objects}
@@ -657,7 +664,7 @@ export default function CaseApp() {
           }}
           onHover={setHover}
           onReady={() => setMapReady(true)}
-          detections={zoneDetail.data?.detections ?? null}
+          detections={detFC}
           onCamera={(c) => {
             cam.current = c;
             writeCaseUrl({

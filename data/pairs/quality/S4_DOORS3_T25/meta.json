@@ -7,6 +7,8 @@
  "transect_width_m": null,
  "transect_length_km": null,
  "has_line": false,
+ "geometry_source": "samples_csv",
+ "geometry_status": null,
  "obs_datetime": "2024-06-11 12:00:00+00:00",
  "time_known": false,
  "dt_hours": 20.14,
@@ -57,6 +59,10 @@
     "buffer_km": 3.0,
     "default_width_m": 10
    }
+  },
+  "geometry": {
+   "use": true,
+   "allow_approx": true
   }
  },
  "scene_id": "S2B_37TGG_20240612_0_L2A",
@@ -131,6 +137,6 @@
   "prob.tif",
   "mask.png"
  ],
- "elapsed_s": 24.7,
- "created": "2026-09-25T18:13:22"
+ "elapsed_s": 46.8,
+ "created": "2026-09-25T21:17:09"
 }

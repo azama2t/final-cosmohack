@@ -228,18 +228,21 @@ def process_s2(row, g: dict, cfg: dict, pred, outdir: Path) -> dict:
     qa[scl_cloud & valid] = Q_CLOUD
     qa[spc & ~scl_cloud] = Q_SPCLOUD
     qa[glint & ~scl_cloud] = Q_GLINT
+    # pixel glint (L75b, detector_review 7.3): same threshold as the reject rule (decision.glint_b11); such water is not
+    # counted as usable. Decision rule, b11w median, detector input (water_ok) and quality.tif codes are unchanged.
+    glint_px = water_ok & (np.nan_to_num(bands[10]) > gc["glint_b11"])
 
     ns = int(strip.sum())
     nsv = max(int((strip & valid).sum()), 1)
     b11w = bands[10][strip & water_ok]
     q = dict(strip_px=ns, strip_area_km2=round(ns * 100 / 1e6, 4),
              coverage=round(float((strip & valid).sum() / max(ns, 1)), 4),
-             valid_water_frac=round(float((strip & water_ok).sum() / max(ns, 1)), 4),
+             valid_water_frac=round(float((strip & water_ok & ~glint_px).sum() / max(ns, 1)), 4),
              cloud_frac=round(float((strip & cloud).sum() / nsv), 4),
              scl_cloud_frac=round(float((strip & scl_cloud & valid).sum() / nsv), 4),
              spectral_cloud_frac=round(float((strip & spc).sum() / nsv), 4),
              land_frac=round(float((strip & land).sum() / nsv), 4),
-             glint_frac=round(float((strip & glint).sum() / nsv), 4), glint_scene=glint_scene,
+             glint_frac=round(float((strip & (glint | glint_px)).sum() / nsv), 4), glint_scene=glint_scene,
              nodata_frac=round(float((strip & ~valid).sum() / max(ns, 1)), 4),
              glint_b11_median=round(float(np.nanmedian(b11w)), 4) if b11w.size >= 20 else None,
              crop_valid_frac=round(float(valid.mean()), 4),

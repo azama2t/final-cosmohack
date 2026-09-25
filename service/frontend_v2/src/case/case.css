@@ -948,3 +948,17 @@
 .c-mtable td .faint {
   white-space: nowrap;
 }
+
+.c-sp.qr .c-kind.px {
+  border-color: #9aa0a8;
+  background: rgba(154, 160, 168, 0.3);
+}
+.c-research {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+.c-research summary {
+  cursor: pointer;
+  color: var(--text-3);
+}

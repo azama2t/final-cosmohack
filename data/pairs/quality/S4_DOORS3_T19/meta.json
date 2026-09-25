@@ -7,6 +7,8 @@
  "transect_width_m": null,
  "transect_length_km": null,
  "has_line": false,
+ "geometry_source": "samples_csv",
+ "geometry_status": null,
  "obs_datetime": "2024-06-05 12:00:00+00:00",
  "time_known": false,
  "dt_hours": -3.69,
@@ -35,6 +37,32 @@
   "network": {
    "workers": 4,
    "retries": 4
+  },
+  "drift": {
+   "scenarios": {
+    "low": {
+     "current_ms": 0.05,
+     "windage": 0.01
+    },
+    "typical": {
+     "current_ms": 0.2,
+     "windage": 0.02
+    },
+    "high": {
+     "current_ms": 0.5,
+     "windage": 0.03
+    }
+   },
+   "accept_scenario": "typical",
+   "unknown_time_extra_h": 12,
+   "tolerance": {
+    "buffer_km": 3.0,
+    "default_width_m": 10
+   }
+  },
+  "geometry": {
+   "use": true,
+   "allow_approx": true
   }
  },
  "scene_id": "S2B_37TFG_20240605_0_L2A",
@@ -100,7 +128,7 @@
    0.0066999997943639755,
    0.0038499999791383743
   ],
-  "runtime_s": 0.9
+  "runtime_s": 1.2
  },
  "files": [
   "rgb.png",
@@ -109,6 +137,6 @@
   "prob.tif",
   "mask.png"
  ],
- "elapsed_s": 7.0,
- "created": "2026-09-25T17:33:24"
+ "elapsed_s": 12.6,
+ "created": "2026-09-25T21:11:06"
 }

@@ -7,6 +7,8 @@
  "transect_width_m": null,
  "transect_length_km": null,
  "has_line": false,
+ "geometry_source": "samples_csv",
+ "geometry_status": null,
  "obs_datetime": "2024-06-07 12:00:00+00:00",
  "time_known": false,
  "dt_hours": -3.86,
@@ -57,6 +59,10 @@
     "buffer_km": 3.0,
     "default_width_m": 10
    }
+  },
+  "geometry": {
+   "use": true,
+   "allow_approx": true
   }
  },
  "scene_id": "S2A_37TGG_20240607_0_L2A",
@@ -82,12 +88,12 @@
   "strip_px": 8040,
   "strip_area_km2": 0.804,
   "coverage": 1.0,
-  "valid_water_frac": 1.0,
+  "valid_water_frac": 0.0,
   "cloud_frac": 0.0,
   "scl_cloud_frac": 0.0,
   "spectral_cloud_frac": 0.0,
   "land_frac": 0.0,
-  "glint_frac": 0.0,
+  "glint_frac": 1.0,
   "glint_scene": false,
   "nodata_frac": 0.0,
   "glint_b11_median": 0.0165,
@@ -122,7 +128,7 @@
    -0.006399999838322401,
    -0.0056500001810491085
   ],
-  "runtime_s": 1.2
+  "runtime_s": 1.1
  },
  "files": [
   "rgb.png",
@@ -131,6 +137,6 @@
   "prob.tif",
   "mask.png"
  ],
- "elapsed_s": 9.2,
- "created": "2026-09-25T18:12:58"
+ "elapsed_s": 9.7,
+ "created": "2026-09-25T21:06:47"
 }

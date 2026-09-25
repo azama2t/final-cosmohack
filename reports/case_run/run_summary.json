@@ -70,7 +70,7 @@
  },
  "command": "run_all.py all --offline",
  "last_subcommand": "all",
- "finished": "2026-09-25T20:53:29",
+ "finished": "2026-09-25T21:25:52",
  "offline": true,
  "force": false,
  "workdir": null,
@@ -85,7 +85,7 @@
   "shapely": "2.1.2",
   "fastapi": "0.141.1",
   "yaml": "6.0.3",
-  "git_commit": "4c3a6dd13f3b56d919da1df884bedb83b0f40233"
+  "git_commit": "3057786210f4e7c8fc47f371532eb1d929f297a2"
  },
  "inputs": {
   "task/macroplastic_marine_samples.csv": "30ce0a65e3880b833b5dfe3bc6f528ee5f5af14a0d22f25995f4ef8af585a764",
@@ -103,7 +103,7 @@
   "data/pairs/events.csv": "adf102a44ed29df914c936c896781bb45ee1e1fe82150a70eaba56221da699c5",
   "data/pairs/candidates.csv": "1799265e31cbf3f58282b015feaf61244f4117f258d30c031548099d97806c01",
   "data/pairs/best_per_event.csv": "6661b3dd12464acf38a01c428a9dc5a0cf1ae88a7efd86bffef1b90b4ebbe305",
-  "data/pairs/pair_quality.csv": "a883f746a874ea1ebba045283de16e67eaaaac71e61dfd48bb10e5b507f7d7e2",
+  "data/pairs/pair_quality.csv": "40b7b2797e6ae2096e60c7acaadc0c9de8e7a2a6ba8b7b09cf9ac2488d73d385",
   "reports/case_conc/predictions.csv": "1e9b3d8a2ac056edbc6fc20ac95adf5280076ca8c94f923ce80c796b5c5a6fa7",
   "reports/case_conc/metrics_by_fold.csv": "cf385c7505bcb67966d71de7f0caa83fdae0a3016bb62d884d394cb5270ebd74",
   "reports/case_conc/consistency.csv": "8ce619025128c25384b37f17ffbf9c9037fdc8419e823c0a725a3b93cf9af86d",
@@ -111,15 +111,15 @@
   "reports/case_run/detector_recomputed.json": "1caae3772b8822b04b4876e7243a9e4c4afd3c4976af8699cfce677d7cbf0b1c",
   "out/case_export/observations.geojson": "726f36c060041ab1abc3c8204886f666ba41009b63a0f17762972121d3ccebfe",
   "out/case_export/observations.csv": "5b7d4d4d38761b44d0ed90b68048a5be12caa6adb36770785e0a8a6c452a9c44",
-  "out/case_export/pairs.geojson": "5c07d32641b5836116968850923b951fc8d9f320825c708eb2100fe9ffd9cfa7",
-  "out/case_export/pairs.csv": "b67b2d27e0df46caa7fea797d52377036d48c71c94179064239d6a6f07e066dd",
-  "out/case_export/zones.geojson": "69bec0fdaf62bea0c8637d22c11f0b0d9da4c22050e0b616b53bb5c1d2b3bc9c",
-  "out/case_export/zones.csv": "6d00ca51cd6095fd4091e8d4831690cee2925bd38071cc1d51e701270a50bf7e",
-  "out/case_export/example_pairs_black_sea_24h.csv": "58191fc37a639f79a8197a02e4deabc75bafefe3e3aca8187d11b1fda13f6cc3",
+  "out/case_export/pairs.geojson": "628db7fa26cbf43fe6f81e6f34713d41dfb17f8ed8ce52fb5deee504069d5812",
+  "out/case_export/pairs.csv": "507024a241b80fff91104dd20a2de9659fe4a3f176b40b779966cdccdb8eb6f2",
+  "out/case_export/zones.geojson": "621da66dd02877a937e2e7dcfcba490f60f8ac6f9055f245b08767ce1c0480d4",
+  "out/case_export/zones.csv": "2f87350187d93acbaa38da4e110b79a44e78545401a5bac3d15df6a23a4093bb",
+  "out/case_export/example_pairs_black_sea_24h.csv": "d19ca108880f26760d2a86ef18f35ef23f2fbfd5570d87f560cf32b6e0a5eef5",
   "out/case_export/example_pairs_accepted.csv": "c98dfb6d693c97b031d7abb94751e54b4baf7972f9f493e0a2b997bffcae2dbe",
   "out/case_export/example_zones_detected.geojson": "58fd0941b152a511fe654ad736dec6fc78e45ec37dc7e9b29cab9792fe7ca0c6"
  },
- "outputs_fingerprint": "95dc41db12d029dc7f1b5041f7fdfe90dc51e25ee393e195f2d8215cc1eb9f47",
+ "outputs_fingerprint": "bb30422a48ba318513a2b03abe91bc56cbb2de5390853343aac89c8205a60053",
  "steps": {
   "1_selection": {
    "step": "1_selection",
@@ -131,19 +131,19 @@
    "step": "2_pairs",
    "ok": true,
    "note": "строк 1774, запросов мимо кэша 0, ошибок 0",
-   "seconds": 2.0
+   "seconds": 1.9
   },
   "3_quality_detector": {
    "step": "3_quality_detector",
    "ok": true,
    "note": "только готовые meta.json; пар с результатом 29",
-   "seconds": 0.2
+   "seconds": 0.6
   },
   "3b_registry": {
    "step": "3b_registry",
    "ok": true,
    "note": "событий 318: {'reject': 318}, без учёта дрейфа {'accept': 12, 'reject': 306}",
-   "seconds": 1.0
+   "seconds": 0.7
   },
   "total_prepare": {
    "step": "total_prepare",
@@ -154,7 +154,7 @@
    "step": "4_concentration",
    "ok": true,
    "note": "S2_visual_total_plastic: median MAE 35.9 vs knn5 31.3; S1_trawl_total_plastic: median MAE 456.4 vs knn5 448.9",
-   "seconds": 3.4
+   "seconds": 2.9
   },
   "total_eval": {
    "step": "total_eval",
@@ -165,23 +165,23 @@
    "step": "5_detector_marida",
    "ok": true,
    "note": "test F1 lgbm 0.8713; пересчёт из npz совпал: test=True, val=True",
-   "seconds": 1.1
+   "seconds": 3.0
   },
   "6_export_api_v3": {
    "step": "6_export_api_v3",
    "ok": true,
    "note": "observations.geojson: 935, observations.csv: 935, pairs.geojson: 4436, pairs.csv: 4436, zones.geojson: 29, zones.csv: 29",
-   "seconds": 2.2
+   "seconds": 1.2
   },
   "total_export": {
    "step": "total_export",
    "ok": true,
-   "seconds": 1.2
+   "seconds": 0.9
   },
   "total_all": {
    "step": "total_all",
    "ok": true,
-   "seconds": 9.9
+   "seconds": 10.3
   }
  },
  "concentration": {

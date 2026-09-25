@@ -7,6 +7,8 @@
  "transect_width_m": 10.0,
  "transect_length_km": 22.93,
  "has_line": true,
+ "geometry_source": "pangaea_track",
+ "geometry_status": "single",
  "obs_datetime": "2016-04-10 16:46:30+00:00",
  "time_known": true,
  "dt_hours": 18.06,
@@ -35,6 +37,32 @@
   "network": {
    "workers": 4,
    "retries": 4
+  },
+  "drift": {
+   "scenarios": {
+    "low": {
+     "current_ms": 0.05,
+     "windage": 0.01
+    },
+    "typical": {
+     "current_ms": 0.2,
+     "windage": 0.02
+    },
+    "high": {
+     "current_ms": 0.5,
+     "windage": 0.03
+    }
+   },
+   "accept_scenario": "typical",
+   "unknown_time_extra_h": 12,
+   "tolerance": {
+    "buffer_km": 3.0,
+    "default_width_m": 10
+   }
+  },
+  "geometry": {
+   "use": true,
+   "allow_approx": true
   }
  },
  "scene_id": "S2A_MSIL2A_20160411T105022_R051_T32ULF_20210211T031140",
@@ -53,7 +81,7 @@
  ],
  "width": 1542,
  "height": 2712,
- "strip_rule": "transect line + buffer 10 m (width 10.0 m / 2, min 10 m)",
+ "strip_rule": "transect line (PANGAEA track, single) + buffer 10 m (width 10.0 m / 2, min 10 m)",
  "substitution_note": "",
  "scale_offset_note": "reflectance = DN*scale + offset per asset from STAC metadata (product-metadata BOA_ADD_OFFSET); offset check: PC: offset from product metadata; scale/offset used: {\"B1\": [0.0001, 0.0], \"B2\": [0.0001, 0.0], \"B3\": [0.0001, 0.0], \"B4\": [0.0001, 0.0], \"B5\": [0.0001, 0.0], \"B6\": [0.0001, 0.0], \"B7\": [0.0001, 0.0], \"B8\": [0.0001, 0.0], \"B8A\": [0.0001, 0.0], \"B9\": [0.0001, 0.0], \"B11\": [0.0001, 0.0], \"B12\": [0.0001, 0.0]}; no date-based -1000 DN rule; no clipping (values as computed); DN==0 -> NaN; 20/60 m bands resampled to 10 m by nearest (SCL always nearest)",
  "quality": {
@@ -109,6 +137,6 @@
   "prob.tif",
   "mask.png"
  ],
- "elapsed_s": 15.6,
- "created": "2026-09-25T17:33:56"
+ "elapsed_s": 17.8,
+ "created": "2026-09-25T21:16:22"
 }

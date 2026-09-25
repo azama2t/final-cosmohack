@@ -3,7 +3,7 @@
 // field_estimate separately («оценка по полевым данным, не по снимку»); zone area separately from concentration.
 import { useEffect, useState, type ReactNode } from 'react';
 import Info from '../components/Info';
-import { get, send, API_BASE, ApiErr, type Feat, type Meta, type ObsProps, type Pair, type Scene, type ZoneDetail, type ZoneProps } from './api3';
+import { get, send, API_BASE, ApiErr, type Feat, type Interval, type Meta, type ObsProps, type Pair, type Scene, type ZoneDetail, type ZoneProps } from './api3';
 import { plural, color, dateRu, dateTimeRu, driftTitle, driftTxt, dtTitle, dtTxt, eventRu, flagRu, label, missionShort, num, pairDecision, pairReasons, pct, poissonCI, profileRu, reasonRu, scopeRu, sourceShort, unitRu, zoneFlagRu } from './fmt';
 
 function useFetch<T>(fn: (() => Promise<T>) | null, deps: unknown[]): { data: T | null; err: string | null; loading: boolean } {
@@ -172,7 +172,7 @@ export function ZoneCard({
               )}
             </div>
           )}
-          <div className="c-sp" data-testid="zone-suspicious">
+          <div className={`c-sp ${p.suspicious_pixels?.quality_rejected ? 'qr' : ''}`} data-testid="zone-suspicious">
             <span className="c-kind px" aria-hidden />
             <span>{sp}</span>
           </div>
@@ -564,31 +564,47 @@ function obsInterval(p: ObsProps): string {
   return 'интервал: нет данных N';
 }
 
-/** the concentration model's out-of-fold estimate for this observation (a model estimate, not a measurement) */
+/** «оценка по полевым данным, не по снимку» (field_estimate = profile median, interval coverage on the held-out test)
+ *  and, folded, the research model (ridge / kNN): on the held-out test it was not better than the median */
 function ModelEstimate({ meta, p }: { meta: Meta; p: ObsProps }) {
-  const m = p.model_estimate;
-  if (m === null || m === undefined) return null;
-  const o = typeof m === 'number' ? { value: m, lo: null, hi: null, unit: 'items/km2', model: null, measurement_profile: p.measurement_profile } : m;
-  if (o.value === null || o.value === undefined) return null;
+  const fe = (p as any).field_estimate as (Interval & { note?: string | null }) | null | undefined;
+  const reRaw = (p as any).research_estimate ?? p.model_estimate;
+  const re = typeof reRaw === 'number' ? { value: reRaw, lo: null, hi: null, unit: 'items/km2', model: null } : reRaw;
+  if ((!fe || fe.value === null || fe.value === undefined) && (!re || re.value === null || re.value === undefined)) return null;
   return (
     <div className="sec" data-testid="obs-model-estimate">
       <div className="sec-h">
         <h3>
-          <span className="c-kind est" aria-hidden /> Оценка модели по полевым данным
+          <span className="c-kind est" aria-hidden /> Оценка по полевым данным, не по снимку
         </h3>
         <Info label="Что это" align="right">
-          Прогноз основной модели концентрации для этой точки, посчитанный без её участка маршрута (кросс-валидация). Это оценка, не измерение.
-          {'note' in o && o.note ? ` ${o.note}` : ''}
+          {fe?.note ?? 'Оценка по полевым данным для профиля.'} {fe?.model ? `Модель: ${fe.model === 'median_train' ? 'медиана профиля (train)' : fe.model}.` : ''} Это не
+          измерение.
         </Info>
       </div>
-      <div className="c-big c-est">
-        {num(o.value)} <small>{unitRu(o.unit || 'items/km2')}</small>
-      </div>
-      <div className="c-line">
-        {o.lo !== null && o.lo !== undefined && o.hi !== null && o.hi !== undefined ? `интервал [${num(o.lo)}; ${num(o.hi)}] · ` : ''}
-        {profileRu(meta, o.measurement_profile ?? p.measurement_profile)}
-        {o.model ? ` · ${o.model}` : ''}
-      </div>
+      {fe && fe.value !== null && fe.value !== undefined ? (
+        <>
+          <div className="c-big c-est" data-testid="obs-field-estimate">
+            {num(fe.value)} <small>{unitRu(fe.unit || 'items/km2')}</small>
+          </div>
+          <div className="c-line" title={fe.interval ?? undefined}>
+            {fe.lo !== null && fe.lo !== undefined && fe.hi !== null && fe.hi !== undefined ? `[${num(fe.lo)}; ${num(fe.hi)}]` : 'интервал не рассчитан'}
+            {fe.interval ? ` · покрытие ${fe.interval}` : ''}
+          </div>
+        </>
+      ) : (
+        <div className="c-line">нет оценки для профиля этой записи</div>
+      )}
+      {re && re.value !== null && re.value !== undefined && (
+        <details className="c-research" data-testid="obs-research-estimate">
+          <summary>Исследовательская модель: на отложенном test не лучше медианы</summary>
+          <div className="c-line">
+            {re.model ?? 'модель'}: {num(re.value)} {unitRu(re.unit || 'items/km2')}
+            {re.lo !== null && re.lo !== undefined && re.hi !== null && re.hi !== undefined ? ` [${num(re.lo)}; ${num(re.hi)}]` : ''} · прогноз вне обучающего участка
+          </div>
+        </details>
+      )}
+      <span hidden>{profileRu(meta, p.measurement_profile)}</span>
     </div>
   );
 }
@@ -620,6 +636,7 @@ function suspicious(p: ZoneProps, d: ZoneDetail | null): string {
   const n = s?.n_objects ?? p.detector?.n_objects ?? null;
   const a = s?.area_m2 ?? p.detected_area_m2 ?? null;
   const tail = p.pair_status === 'accepted' ? '' : ', без полевого подтверждения';
+  if (s?.quality_rejected) return n ? `пиксели на снимке, отклонённом по качеству, — вероятно ложные: ${plural(n, 'объект', 'объекта', 'объектов')}` : 'снимок отклонён по качеству (блик / облака) — пиксели не рассматриваются';
   if (n === null && a === null) return `детектор: ${reasonRu(p.status_reason) ?? 'нет результата'}`;
   if (!n && !a) return 'подозрительных пикселей в полосе нет';
   const nOut = d?.detections?.features?.filter((f) => f.properties.in_strip === false).length ?? 0;

@@ -7,6 +7,8 @@
  "transect_width_m": null,
  "transect_length_km": null,
  "has_line": false,
+ "geometry_source": "samples_csv",
+ "geometry_status": null,
  "obs_datetime": "2024-06-04 12:00:00+00:00",
  "time_known": false,
  "dt_hours": -27.53,
@@ -35,6 +37,32 @@
   "network": {
    "workers": 4,
    "retries": 4
+  },
+  "drift": {
+   "scenarios": {
+    "low": {
+     "current_ms": 0.05,
+     "windage": 0.01
+    },
+    "typical": {
+     "current_ms": 0.2,
+     "windage": 0.02
+    },
+    "high": {
+     "current_ms": 0.5,
+     "windage": 0.03
+    }
+   },
+   "accept_scenario": "typical",
+   "unknown_time_extra_h": 12,
+   "tolerance": {
+    "buffer_km": 3.0,
+    "default_width_m": 10
+   }
+  },
+  "geometry": {
+   "use": true,
+   "allow_approx": true
   }
  },
  "scene_id": "S2A_37TCH_20240603_0_L2A",
@@ -60,12 +88,12 @@
   "strip_px": 8045,
   "strip_area_km2": 0.8045,
   "coverage": 1.0,
-  "valid_water_frac": 1.0,
+  "valid_water_frac": 0.0,
   "cloud_frac": 0.0,
   "scl_cloud_frac": 0.0,
   "spectral_cloud_frac": 0.0,
   "land_frac": 0.0,
-  "glint_frac": 0.0,
+  "glint_frac": 1.0,
   "glint_scene": false,
   "nodata_frac": 0.0,
   "glint_b11_median": 0.0155,
@@ -100,7 +128,7 @@
    -0.006000000052154064,
    -0.007849999703466892
   ],
-  "runtime_s": 1.0
+  "runtime_s": 1.1
  },
  "files": [
   "rgb.png",
@@ -109,6 +137,6 @@
   "prob.tif",
   "mask.png"
  ],
- "elapsed_s": 6.7,
- "created": "2026-09-25T17:32:12"
+ "elapsed_s": 43.1,
+ "created": "2026-09-25T21:08:53"
 }

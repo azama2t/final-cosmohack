@@ -11,6 +11,14 @@ function pick(o: any, ...keys: string[]) {
   for (const k of keys) if (o && typeof o[k] === 'number') return o[k];
   return null;
 }
+/** short column names that match README / deck */
+function detName(n: string): string {
+  if (/random\s*forest/i.test(n)) return 'RF (MARIDA)';
+  if (/ndvi/i.test(n)) return 'окно FDI×NDVI';
+  if (/fdi/i.test(n)) return 'один порог FDI';
+  if (/lightgbm/i.test(n)) return 'LightGBM';
+  return n.split(/[ (]/)[0];
+}
 const isModel = (o: any) => o && typeof o === 'object' && !Array.isArray(o) && typeof o.name === 'string';
 
 /** detector models: main first, then every other named object (baseline, rf, …) and a `baselines` array */
@@ -74,7 +82,7 @@ export default function MetricsPanel({ m, err }: { m: any | null; err: string | 
               <th />
               {models.map((x) => (
                 <th key={x.name} className="r" title={x.name + (x.setting ? ` · ${x.setting}` : '')}>
-                  {x.name.split(/[ (]/)[0]}
+                  {detName(x.name)}
                 </th>
               ))}
             </tr>
