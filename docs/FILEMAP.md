@@ -96,3 +96,5 @@
 | `tests/test_robustness.py`, `scripts/robustness_report.py`, `reports/robustness.md` | устойчивость инференса: пустые/NaN чипы, облака, блик, шум, размеры, dtype, каналы, битые файлы, пути | pytest / отчёт |
 | `scripts/offline_check.py`, `reports/offline_check.md` | проверка карты без интернета (4 режима подложки) | перед показом |
 | `docs/DEMO.md` | сценарий демо на 4 минуты и план Б (нет интернета / сервис не стартует / видео) | выступление |
+| `scripts/experiments/l23_*.py`, `reports/l23_channels_speed.{md,json}` | модели на подмножествах каналов (RGB, RGB+NIR, 10+20 м) и лёгкая быстрая модель | отчёт / завтра |
+| `docs/CRITERIA.md` | самопроверка по рубрике: критерий → максимум → доказательство → самооценка → дыры | приёмка |

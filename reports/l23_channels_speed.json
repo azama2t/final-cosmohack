@@ -1,0 +1,407 @@
+{
+ "subsets": [
+  {
+   "name": "a_rgb_strict",
+   "label": "(a) RGB, only the project features computable from RGB (B2,B3,B4,SI)",
+   "channels": [
+    "B2",
+    "B3",
+    "B4"
+   ],
+   "rgb_extra_features": false,
+   "n_features": 4,
+   "f1": 0.1653,
+   "iou": 0.0901,
+   "precision": 0.1171,
+   "recall": 0.2809,
+   "threshold": 0.31,
+   "delta_vs_full": -0.7573,
+   "seeds": [
+    0
+   ],
+   "f1_seeds": [
+    0.1653
+   ],
+   "iou_seeds": [
+    0.0901
+   ],
+   "f1_mean": 0.1653,
+   "f1_sd": null,
+   "delta_vs_full_mean": null,
+   "weights": "weights_exp/l23/a_rgb_strict_s0"
+  },
+  {
+   "name": "a_rgb",
+   "label": "(a) RGB + RGB windows (BRI/NDGR/NDBG mean/std/contrast)",
+   "channels": [
+    "B2",
+    "B3",
+    "B4"
+   ],
+   "rgb_extra_features": true,
+   "n_features": 30,
+   "f1": 0.754,
+   "iou": 0.6052,
+   "precision": 0.7261,
+   "recall": 0.7842,
+   "threshold": 0.61,
+   "delta_vs_full": -0.1686,
+   "seeds": [
+    0,
+    1,
+    2
+   ],
+   "f1_seeds": [
+    0.754,
+    0.7578,
+    0.7476
+   ],
+   "iou_seeds": [
+    0.6052,
+    0.61,
+    0.597
+   ],
+   "f1_mean": 0.7531,
+   "f1_sd": 0.0052,
+   "delta_vs_full_mean": -0.1697,
+   "weights": "weights_exp/l23/a_rgb_s0"
+  },
+  {
+   "name": "b_rgbnir",
+   "label": "(b)=(c) RGB+NIR = all 10 m bands",
+   "channels": [
+    "B2",
+    "B3",
+    "B4",
+    "B8"
+   ],
+   "rgb_extra_features": false,
+   "n_features": 29,
+   "f1": 0.8375,
+   "iou": 0.7205,
+   "precision": 0.8584,
+   "recall": 0.8177,
+   "threshold": 0.87,
+   "delta_vs_full": -0.0851,
+   "seeds": [
+    0,
+    1,
+    2
+   ],
+   "f1_seeds": [
+    0.8375,
+    0.838,
+    0.8433
+   ],
+   "iou_seeds": [
+    0.7205,
+    0.7212,
+    0.7291
+   ],
+   "f1_mean": 0.8396,
+   "f1_sd": 0.0032,
+   "delta_vs_full_mean": -0.0832,
+   "weights": "weights_exp/l23/b_rgbnir_s0"
+  },
+  {
+   "name": "b_rgbnir_x",
+   "label": "(b)=(c) RGB+NIR + RGB windows",
+   "channels": [
+    "B2",
+    "B3",
+    "B4",
+    "B8"
+   ],
+   "rgb_extra_features": true,
+   "n_features": 55,
+   "f1": 0.859,
+   "iou": 0.7528,
+   "precision": 0.8511,
+   "recall": 0.867,
+   "threshold": 0.77,
+   "delta_vs_full": -0.0636,
+   "seeds": [
+    0,
+    1,
+    2
+   ],
+   "f1_seeds": [
+    0.859,
+    0.8734,
+    0.8713
+   ],
+   "iou_seeds": [
+    0.7528,
+    0.7752,
+    0.7719
+   ],
+   "f1_mean": 0.8679,
+   "f1_sd": 0.0078,
+   "delta_vs_full_mean": -0.0549,
+   "weights": "weights_exp/l23/b_rgbnir_x_s0"
+  },
+  {
+   "name": "f_10m_swir",
+   "label": "(extra) 10 m + B11,B12 (no FDI: needs B6)",
+   "channels": [
+    "B2",
+    "B3",
+    "B4",
+    "B8",
+    "B11",
+    "B12"
+   ],
+   "rgb_extra_features": false,
+   "n_features": 34,
+   "f1": 0.917,
+   "iou": 0.8467,
+   "precision": 0.9042,
+   "recall": 0.9302,
+   "threshold": 0.44,
+   "delta_vs_full": -0.0056,
+   "seeds": [
+    0,
+    1,
+    2
+   ],
+   "f1_seeds": [
+    0.917,
+    0.9199,
+    0.9209
+   ],
+   "iou_seeds": [
+    0.8467,
+    0.8517,
+    0.8534
+   ],
+   "f1_mean": 0.9193,
+   "f1_sd": 0.002,
+   "delta_vs_full_mean": -0.0035,
+   "weights": "weights_exp/l23/f_10m_swir_s0"
+  },
+  {
+   "name": "d_10m_20m",
+   "label": "(d) 10 m + 20 m (no B1)",
+   "channels": [
+    "B2",
+    "B3",
+    "B4",
+    "B5",
+    "B6",
+    "B7",
+    "B8",
+    "B8A",
+    "B11",
+    "B12"
+   ],
+   "rgb_extra_features": false,
+   "n_features": 47,
+   "f1": 0.9229,
+   "iou": 0.8569,
+   "precision": 0.9158,
+   "recall": 0.9302,
+   "threshold": 0.37,
+   "delta_vs_full": 0.0003,
+   "seeds": [
+    0,
+    1,
+    2
+   ],
+   "f1_seeds": [
+    0.9229,
+    0.9236,
+    0.9236
+   ],
+   "iou_seeds": [
+    0.8569,
+    0.8581,
+    0.8581
+   ],
+   "f1_mean": 0.9234,
+   "f1_sd": 0.0004,
+   "delta_vs_full_mean": 0.0006,
+   "weights": "weights_exp/l23/d_10m_20m_s0"
+  },
+  {
+   "name": "e_full",
+   "label": "(e) all 11 bands = final recipe",
+   "channels": [
+    "B1",
+    "B2",
+    "B3",
+    "B4",
+    "B5",
+    "B6",
+    "B7",
+    "B8",
+    "B8A",
+    "B11",
+    "B12"
+   ],
+   "rgb_extra_features": false,
+   "n_features": 48,
+   "f1": 0.9226,
+   "iou": 0.8564,
+   "precision": 0.9301,
+   "recall": 0.9153,
+   "threshold": 0.63,
+   "delta_vs_full": 0.0,
+   "seeds": [
+    0,
+    1,
+    2
+   ],
+   "f1_seeds": [
+    0.9226,
+    0.9224,
+    0.9234
+   ],
+   "iou_seeds": [
+    0.8564,
+    0.8559,
+    0.8578
+   ],
+   "f1_mean": 0.9228,
+   "f1_sd": 0.0005,
+   "delta_vs_full_mean": 0.0,
+   "weights": "weights_exp/l23/e_full_s0"
+  }
+ ],
+ "light": {
+  "name": "light_k20_t200_l31",
+  "f1": 0.9213,
+  "iou": 0.8541,
+  "threshold": 0.45,
+  "f1_seeds": [
+   0.9213,
+   0.9255,
+   0.9252
+  ],
+  "f1_mean": 0.924,
+  "delta_vs_full": -0.0013,
+  "cold_s_300": 16.781,
+  "warm_chips_per_s": 19.0,
+  "n_features": 20,
+  "n_trees": 200,
+  "num_leaves": 31,
+  "features": [
+   "B1",
+   "B2",
+   "B12",
+   "FAI",
+   "NDVI",
+   "NDWI",
+   "NDMI",
+   "BSI",
+   "NRD",
+   "B8_mean15",
+   "B8_std15",
+   "FDI_mean7",
+   "FDI_mean15",
+   "NDVI_mean3",
+   "NDVI_std7",
+   "NDVI_std15",
+   "NDWI_std7",
+   "B8_dmed15",
+   "FDI_dmed15",
+   "FDI_dmed31"
+  ],
+  "weights": "weights_exp/l23/light_k20_t200_l31_s0",
+  "final_same_harness": {
+   "f1": 0.9226,
+   "cold_s_300": 50.616,
+   "warm_chips_per_s": 6.9,
+   "n_features": 48,
+   "n_trees": 400
+  }
+ },
+ "speed_all_models": {
+  "weights/lgbm": {
+   "n_features": 48,
+   "n_trees": 400,
+   "cold_s_median": 50.616,
+   "cold_s_runs": [
+    44.899,
+    50.616
+   ],
+   "warm_chips_per_s": 6.9
+  },
+  "weights_exp/l23/light_k20_t200_l31_s0": {
+   "n_features": 20,
+   "n_trees": 200,
+   "cold_s_median": 16.781,
+   "cold_s_runs": [
+    13.886,
+    16.781
+   ],
+   "warm_chips_per_s": 19.0
+  },
+  "weights_exp/l23/light_k20_t100_l15_s0": {
+   "n_features": 20,
+   "n_trees": 100,
+   "cold_s_median": 14.569,
+   "cold_s_runs": [
+    8.801,
+    14.569
+   ],
+   "warm_chips_per_s": 20.9
+  },
+  "weights_exp/l23/light_k48_t100_l15_s0": {
+   "n_features": 48,
+   "n_trees": 100,
+   "cold_s_median": 23.781,
+   "cold_s_runs": [
+    19.388,
+    23.781
+   ],
+   "warm_chips_per_s": 19.7
+  }
+ },
+ "speed_anchor_inference_py_cpu_cold_s": [
+  25.723,
+  26.997
+ ],
+ "speed_setup": {
+  "threads": 10,
+  "chips": 300,
+  "harness": "scripts/experiments/l23_speed.py (read+features+LightGBM CPU+write, new process)",
+  "features_bit_identical": true,
+  "note": "CPU shared with other lanes during the measurement; compare models within this run; cold_s_300 = worse of 2 cold runs"
+ },
+ "speed_product_predictor_warm": {
+  "weights/lgbm": {
+   "features_1thread_s": 8.88,
+   "model_10threads_s": 24.44,
+   "model_chips_per_s": 12.3
+  },
+  "weights_exp/l23/light_k20_t200_l31_s0": {
+   "features_1thread_s": 8.39,
+   "model_10threads_s": 8.97,
+   "model_chips_per_s": 33.5
+  },
+  "weights_exp/l23/light_k20_t100_l15_s0": {
+   "features_1thread_s": 8.44,
+   "model_10threads_s": 3.68,
+   "model_chips_per_s": 81.6
+  }
+ },
+ "adapter_zero_fill_check": {
+  "b_rgbnir_s0": {
+   "max_abs_prob_diff": 0.0,
+   "mask_diff_px": 0,
+   "chips": 20
+  },
+  "f_10m_swir_s0": {
+   "max_abs_prob_diff": 0.0,
+   "mask_diff_px": 0,
+   "chips": 20
+  },
+  "d_10m_20m_s0": {
+   "max_abs_prob_diff": 0.0,
+   "mask_diff_px": 0,
+   "chips": 20
+  }
+ },
+ "val": "MARIDA val, all labelled px pooled, threshold chosen on val (grid 0.02..0.98 step 0.01); test never read",
+ "recipe": "weights/lgbm/meta.json config (MARIDA train + MADOS train+val, excl. same-place-val scenes)"
+}
