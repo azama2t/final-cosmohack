@@ -15,7 +15,7 @@ from fastapi import FastAPI, Query, Request
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from starlette.middleware.gzip import GZipMiddleware
 
-from . import core
+from . import core, pdf, place, review
 
 STATIC = core.SERVICE_DIR / "static"
 VERSION = "0.1.0"
@@ -32,6 +32,16 @@ code{background:#13263a;padding:2px 6px;border-radius:4px}a{color:#5fd0ff}</styl
 <p>Соберите интерфейс: <code>cd service\\frontend &amp;&amp; npm ci &amp;&amp; npm run build</code> — сборка ляжет в <code>service\\static</code>.</p>
 <p>API уже работает: <a href="/health">/health</a>, <a href="/api/regions">/api/regions</a>, <a href="/docs">/docs</a>.</p>
 </body></html>"""
+
+
+async def _json_body(request: Request) -> dict:
+    try:
+        body = await request.json()
+    except Exception:
+        raise core.BadRequest("ожидается JSON-объект") from None
+    if not isinstance(body, dict):
+        raise core.BadRequest("ожидается JSON-объект")
+    return body
 
 
 def create_app(data_root: Optional[str | Path] = None) -> FastAPI:
@@ -131,6 +141,64 @@ def create_app(data_root: Optional[str | Path] = None) -> FastAPI:
             obj = core.zones_geojson(obj)
         return Response(json.dumps(obj, ensure_ascii=False).encode("utf-8"), media_type="application/geo+json",
                         headers={"Content-Disposition": f'attachment; filename="{stem}.geojson"'})
+
+    # ------------------------------------------------------------ L19: zones, place, calendar, review
+    jobs = review.Jobs()
+
+    @app.get("/api/zone", tags=["analysis"], summary="Зона приоритета обследования + «почему» (формула)")
+    def zone(region: str, h3: str, date: Optional[str] = None, model: Optional[str] = "mdd"):
+        return place.zone_info(store(), region, date, model, h3)
+
+    @app.get("/api/crop", tags=["analysis"], summary="PNG-вырезка снимка вокруг точки с контурами пятен")
+    def crop(region: str, lon: float, lat: float, date: Optional[str] = None,
+             size_m: float = Query(1500, ge=200, le=10000), highlight: int = Query(1, ge=0, le=1),
+             bands: str = Query("rgb", pattern="^(rgb|false|swir)$"), model: Optional[str] = None,
+             px: int = Query(480, ge=128, le=1024), src: str = Query("auto", pattern="^(auto|bands|png)$"),
+             h3: Optional[str] = None):
+        body = place.crop_png(store(), region, date, lon, lat, size_m, bool(highlight), bands, model, px, src, h3)
+        return Response(body, media_type="image/png", headers={"Cache-Control": "public, max-age=3600"})
+
+    @app.get("/api/place", tags=["analysis"], summary="Карточка места (ячейка H3): история по всем датам")
+    def place_card(region: str, h3: str, model: Optional[str] = None):
+        return place.place_info(store(), region, h3, model)
+
+    @app.get("/api/place_report.pdf", tags=["export"], summary="Справка по месту, PDF (2 стр.)")
+    def place_report(region: str, h3: str, model: Optional[str] = None, date: Optional[str] = None):
+        body = pdf.build_place_pdf(store(), region, h3, model, date, VERSION)
+        name = f"place_{region}_{h3}.pdf"
+        return Response(body, media_type="application/pdf",
+                        headers={"Content-Disposition": f'attachment; filename="{name}"'})
+
+    @app.get("/api/calendar", tags=["analysis"], summary="Календарь реальных наблюдений района")
+    def calendar(region: str, model: Optional[str] = None):
+        return place.calendar(store(), region, model)
+
+    @app.get("/api/review/queue", tags=["review"], summary="Очередь сомнительных находок")
+    def review_queue(region: str, model: Optional[str] = None, limit: int = Query(50, ge=1, le=1000),
+                     include_labeled: int = Query(0, ge=0, le=1)):
+        return review.queue(store(), region, model, limit, bool(include_labeled))
+
+    @app.post("/api/review/label", tags=["review"], summary="Сохранить метку человека")
+    async def review_label(request: Request):
+        body = await _json_body(request)
+        return review.add_record(store(), body, "label", VERSION)
+
+    @app.post("/api/review/flag", tags=["review"], summary="Отметить находку «ложное» (в очередь проверки)")
+    async def review_flag(request: Request):
+        body = await _json_body(request)
+        return review.add_record(store(), body, "flag_false", VERSION)
+
+    @app.get("/api/review/labels", tags=["review"], summary="Все метки (jsonl как список)")
+    def review_labels():
+        return {"path": str(review.labels_path()), "items": review.read_labels()}
+
+    @app.post("/api/review/retrain", tags=["review"], summary="Дообучить LightGBM на метках (фон)")
+    def review_retrain():
+        return jobs.start()
+
+    @app.get("/api/review/retrain/{job}", tags=["review"], summary="Статус дообучения")
+    def review_retrain_status(job: str):
+        return jobs.get(job)
 
     @app.get("/api/{rest:path}", include_in_schema=False)
     def api_404(rest: str):

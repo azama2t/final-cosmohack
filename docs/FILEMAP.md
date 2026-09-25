@@ -82,3 +82,9 @@
 | `scripts/run_drift.py`, `tests/test_drift.py`, `reports/drift.md`, `reports/drift_*.png` | CLI дрейфа (`--region/--date`, `--all-fresh`); офлайн-тест контракта; метод и ограничения; превью треков | вручную / отчёт |
 | `scripts/model_agreement.py`, `reports/model_agreement.{md,json}`, `reports/figures/` | согласие MDD и LightGBM на живых сценах, калибровка LightGBM на val, карты согласия | отчёт |
 | `src/macroplastic/grid/confirm.py` | «уверенная находка»: объект одной модели, подтверждённый пикселем другой модели ≥ порога в радиусе 20 м (поля confirmed/confirmed_by, n_confirmed) | build_service_data |
+| `scripts/experiments/l16_*.py`, `reports/l16_metric_audit.{md,json}` | независимая перепроверка метрики, «то же место», leave-region-out, что помогает на новом регионе | отчёт |
+| `service/app.py` (+ модули place/review/pdf) | эндпоинты `/api/zone`, `/api/crop`, `/api/place`, `/api/place_report.pdf` (2 стр., ~1 с, DejaVu Sans), `/api/calendar`, `/api/review/{queue,label,labels,flag,retrain}` | фронт |
+| `scripts/retrain_with_labels.py` | дообучение LightGBM с метками проверки человеком → F1 val до/после → решение по правилу; веса не подменяет | /api/review/retrain |
+| `tests/test_api_review.py` | тесты новых эндпоинтов | pytest |
+| `src/macroplastic/ingest/` | `python -m macroplastic.ingest <архив|папка>`: безопасная распаковка, HTML-отчёт с «Сомнениями», распознавание 3 форматов, `--convert` во внутренний формат | первые минуты хакатона |
+| `scripts/train_lgbm_ingest.py`, `scripts/make_ingest_testsets.py`, `tests/test_ingest.py` | обучение на результате ingest; 3 искусственных набора; тесты (в т.ч. zip-slip) | хакатон / pytest |

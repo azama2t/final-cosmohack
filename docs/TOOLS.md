@@ -1,6 +1,6 @@
 # TOOLS — первые 60 минут с датасетом организаторов
 
-Четыре инструмента (дорожка L5). Все команды — **PowerShell из корня репозитория**, копипастой. Вместо `D:\org\train`
+Четыре инструмента. Все команды — **PowerShell из корня репозитория**, копипастой. Вместо `D:\org\train`
 подставьте папку организаторов, вместо `org` — короткое имя. Все инструменты только читают исходные данные.
 
 ```powershell
@@ -77,11 +77,11 @@ SHA-1 файлов, перцептивный хеш и корреляция пр
 ```powershell
 copy configs\adapter_example.yaml configs\adapter_org.yaml
 notepad configs\adapter_org.yaml     # root, image_glob, mask_glob/id_regex, bands, scale/offset, resolution, classes.map
-.venv\Scripts\python.exe -m macroplastic.organizer_adapter --config configs\adapter_org.yaml --dry-run
-.venv\Scripts\python.exe -m macroplastic.organizer_adapter --config configs\adapter_org.yaml --out data\organizer --limit 20
-.venv\Scripts\python.exe -m macroplastic.organizer_adapter --config configs\adapter_org.yaml --out data\organizer
+.venv\Scripts\python.exe scripts\tools\adapter.py --config configs\adapter_org.yaml --dry-run
+.venv\Scripts\python.exe scripts\tools\adapter.py --config configs\adapter_org.yaml --out data\organizer --limit 20
+.venv\Scripts\python.exe scripts\tools\adapter.py --config configs\adapter_org.yaml --out data\organizer
 # самопроверка на MARIDA: вывод адаптера == прямое чтение marida.load_patch
-.venv\Scripts\python.exe -m macroplastic.organizer_adapter --config configs\adapter_marida.yaml --out data\organizer --verify-marida 60
+.venv\Scripts\python.exe scripts\tools\adapter.py --config configs\adapter_marida.yaml --out data\organizer --verify-marida 60
 ```
 Внутренний формат: `data\organizer\<name>\images\<id>.tif` — (C,H,W) float32 отражательная способность, NaN = nodata,
 descriptions = наши имена каналов (B1…B12, B8A); `masks\<id>.tif` — uint8 в нашей схеме (1 = Marine Debris,
@@ -99,3 +99,7 @@ L2A после 25.01.2022 в сыром DN — `offset: -0.1` (DN×1e-4 − 0.1)
 ```powershell
 .venv\Scripts\python.exe -m pytest tests\test_tools.py -q
 ```
+
+## 5. ingest: архив → отчёт → автоконфиг → внутренний формат → LightGBM (L18)
+
+`.venv\Scripts\python.exe -m macroplastic.ingest D:\org\train.zip --out data\ingest\org` (безопасная распаковка, `report\index.html` с разделом «Сомнения», `adapter.yaml`) → то же с `--convert` → `scripts\train_lgbm_ingest.py --data-root data\ingest\org`. Подробно: раздел «Как подать датасет» в `TOMORROW.md`; тесты `tests\test_ingest.py`.

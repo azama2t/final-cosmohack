@@ -63,14 +63,12 @@ start reports\tools\org_inspect\index.html
 copy configs\adapter_example.yaml configs\adapter_organizer.yaml
 # править по отчёту inspect: root, layout.image_glob / mask_glob / id_regex, bands.source / rename / output,
 # radiometry.scale / offset (DN*1e-4; L2A baseline >= 04.00 без гармонизации -> offset -0.1), resolution.target, классы
-cd src
-..\.venv\Scripts\python.exe -m macroplastic.organizer_adapter --config ..\configs\adapter_organizer.yaml --out ..\$O --dry-run
-..\.venv\Scripts\python.exe -m macroplastic.organizer_adapter --config ..\configs\adapter_organizer.yaml --out ..\$O --limit 20
-..\.venv\Scripts\python.exe -m macroplastic.organizer_adapter --config ..\configs\adapter_organizer.yaml --out ..\$O
-cd ..
+.venv\Scripts\python.exe scripts\tools\adapter.py --config configs\adapter_organizer.yaml --out $O --dry-run
+.venv\Scripts\python.exe scripts\tools\adapter.py --config configs\adapter_organizer.yaml --out $O --limit 20
+.venv\Scripts\python.exe scripts\tools\adapter.py --config configs\adapter_organizer.yaml --out $O
 ```
 
-(Модуль запускается из `src`, либо из корня с `$env:PYTHONPATH="src"`.)
+(`scripts\tools\adapter.py` — обёртка над `macroplastic.organizer_adapter`, запускается из корня без `PYTHONPATH`.)
 
 Проверка после `--dry-run`: чистая вода в B8 должна быть около 0.00–0.03, маска содержит ожидаемые коды классов, форма (C,H,W) правильная. Недостающие каналы: `bands.missing: nan` (деревья с этим справляются).
 
@@ -126,3 +124,30 @@ cd ..
 - **L2A (Sen2Cor), как живые сцены**: сдвиг домена от MARIDA (ACOLITE rhorc) есть. Сравнить на их val вариант (а) с (б) и взять лучший по правилу принятия. marinedebrisdetector (обучен на L2A) — кандидат, если внешние модели разрешены.
 - **Другое разрешение или меньше каналов**: `resolution.target`, `bands.missing: nan`; индексы, которым не хватает каналов, выпадают. Переобучить.
 - **Внешние данные запрещены**: только их train; наши веса MARIDA — только для сравнения, в сабмит не идут.
+
+---
+
+## Как подать датасет (L18: ingest → convert → train)
+
+Архив (zip / tar / tar.gz; 7z — только если стоит 7-Zip или py7zr) или папка организаторов. PowerShell из корня:
+
+```powershell
+$env:PYTHONPATH = "src"; $env:CUDA_VISIBLE_DEVICES = ""
+.venv\Scripts\python.exe -m macroplastic.ingest D:\org\train.zip --out data\ingest\org
+start data\ingest\org\report\index.html      # прочитать «Сомнения», поправить data\ingest\org\adapter.yaml (строки «ПРОВЕРЬ ЭТО»)
+.venv\Scripts\python.exe -m macroplastic.ingest D:\org\train.zip --out data\ingest\org --convert
+.venv\Scripts\python.exe scripts\train_lgbm_ingest.py --data-root data\ingest\org
+```
+
+Что смотреть в `report\index.html` (сверху вниз):
+- **Итог**: какой формат распознан (`suffix` — маска рядом с суффиксом `_mask/_label/_cl/_gt`; `dirs` — `images/` + `masks/`;
+  `chip_csv` — CSV «чип → класс»; `ids` — пары только по числовому id). Если кандидаты близки, выбрать нужный: `--format dirs`.
+- **Сомнения**: БЛОКЕР и «важно» сначала — порядок каналов без имён, масштаб DN ×1e-4 и смещение L2A −0.1, что значит 0 в маске
+  (фон или «не размечено»), какой класс целевой, нет официального сплита. Для каждого указан ключ YAML, который править.
+- **Превью**: RGB и маска после маппинга (красный = цель 1, синий = фон 7). Если RGB странный — неверный порядок каналов;
+  если маска вся синяя/красная — неверный `classes.map`.
+- **Значения после конвертации**: медиана B8 на фоне-воде должна быть ≈ 0.00–0.03.
+- Правленый вручную `adapter.yaml` повторный запуск не перезапишет (свежий автоконфиг ляжет в `adapter.auto.yaml`).
+
+Обучение: сплит официальный, если в папках есть train/val, иначе групповой по сцене из имени (`--group-regex` для своего правила).
+Модель и метрики val: `weights_exp\lgbm_ingest\<name>_s0\{model.txt, meta.json}`; `weights\lgbm` не трогается.
