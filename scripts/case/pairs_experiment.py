@@ -1,4 +1,4 @@
-"""Research experiment L64: image features on event<->scene pairs vs field all_litter density (case, INBOX 8.3).
+"""Research experiment: image features on event<->scene pairs vs field all_litter density (case).
 
   CUDA_VISIBLE_DEVICES="" .venv/Scripts/python.exe -W ignore scripts/case/pairs_experiment.py            # fetch FDI (cached) + stats
   .venv/Scripts/python.exe scripts/case/pairs_experiment.py --no-fetch                                     # stats from cache only
@@ -7,16 +7,16 @@ Question: does anything the image shows in the observation strip rank-correlate 
 litter (S3 North Sea / S4 Black Sea: total floating macro-litter, all materials; NOT plastic) of the same event?
 This is NOT a calibration: no items/km2 is ever predicted from the image.
 
-Inputs (read-only): outputs of scripts/case/pair_quality.py (L61) -- data/pairs/quality/<dir>/{meta.json, quality.tif,
+Inputs (read-only): outputs of scripts/case/pair_quality.py -- data/pairs/quality/<dir>/{meta.json, quality.tif,
 prob.tif}; geometry from task/macroplastic_marine_samples.csv via pair_quality.event_geometry/strip_polygon (same strip
-as L61). FDI (Biermann 2020, macroplastic.indices.fdi, variant 'paper') needs the bands: the S2 L2A crop is re-read with
-stac.read_crop on the same bounds as L61 and FDI is cached to data/pairs/experiment/<dir>/fdi.npy.
+as pair_quality.py). FDI (Biermann 2020, macroplastic.indices.fdi, variant 'paper') needs the bands: the S2 L2A crop is re-read with
+stac.read_crop on the same bounds as pair_quality.py and FDI is cached to data/pairs/experiment/<dir>/fdi.npy.
 
 Features (image only, no field columns), on valid water (quality code 1) of the strip "s_" and of the context
 (crop water outside the strip) "c_":
-  frac_p_thr  share of water px with P(debris) >= 0.63 (L61 detector threshold, fixed)
+  frac_p_thr  share of water px with P(debris) >= 0.63 (pair_quality.py detector threshold, fixed)
   p_mean, p_p95  mean / 95th percentile of P (prob.tif, P*255 quantised)
-  spots_km2   detector spots in strip (L61 meta n_det, after cloud/shadow filters) per km2 of strip water
+  spots_km2   detector spots in strip (pair_quality.py meta n_det, after cloud/shadow filters) per km2 of strip water
   fdi_p95_anom  FDI p95 in strip minus FDI median of context water (removes scene offset)
   fdi_med_anom  FDI median in strip minus context median
   fdi_frac_hi   share of strip water with FDI > ctx median + 3 * 1.4826 * MAD(ctx)  (k=3 fixed a priori)
@@ -57,7 +57,7 @@ OUTQ = PAIRS / "quality"
 CACHE = PAIRS / "experiment"
 REP = ROOT / "reports" / "case_pairs"
 
-THR = 0.63           # L61 detector threshold (configs / weights/lgbm), not tuned here
+THR = 0.63           # pair_quality.py detector threshold (configs / weights/lgbm), not tuned here
 K_MAD = 3.0          # FDI "high" = ctx median + 3 robust sigma, fixed a priori
 SEED = 64
 N_BOOT = 5000
@@ -407,7 +407,7 @@ def plot_scatter(df, res_acc, path):
             ax.set_title(f"прошедшие маски: ρ = {v['spearman']:+.2f} [{ci[0]:+.2f}; {ci[1]:+.2f}], p_perm = {v['p_perm_spearman']:.2f}, n = {v['n']}",
                          fontsize=9, color=INK, loc="left")
         ax.legend(fontsize=8, frameon=False, labelcolor=INK)
-    fig.suptitle("Признак снимка в полосе наблюдения vs полевая плотность all_litter (L64, исследовательский)", fontsize=11, color=INK, x=0.01, ha="left")
+    fig.suptitle("Признак снимка в полосе наблюдения vs полевая плотность all_litter (исследовательский)", fontsize=11, color=INK, x=0.01, ha="left")
     fig.tight_layout()
     fig.savefig(path, dpi=130, facecolor=SURF)
     plt.close(fig)
@@ -468,19 +468,19 @@ def conclusion(results, pw):
             f"1. Пар с чистой полосой S2: {n} (плюс 1 Landsat без детектора), независимых групп «район × день» — {k}. Эталон — плотность всего плавающего мусора (all_litter), не пластика; калибровки шт./км² нет.",
             f"2. Детектор в полосе: на 10 чёрноморских парах P ≥ {THR} — 0 пикселей (признаки постоянны, корреляция не определена). На 11 парах {rs(a['s_p_mean'])} — ненулевая только одна пара Северного моря (низкая плотность), т. е. это контраст районов, а не связь; ДИ условный: в {a['s_p_mean'].get('boot_share_undefined', float('nan')):.0%} бутстрэп-выборок признак постоянен.",
             f"3. FDI (предрегистрированный `s_fdi_p95_anom`): {rs(a['s_fdi_p95_anom'])}, но {nl(a['s_fdi_p95_anom'])}; тот же признак только из контекста (без полосы): ρ = {a['c_fdi_p95'].get('spearman', float('nan')):+.2f}. Основная часть связи — уровень сцены/дня, а не полосы.",
-            f"4. Остаток, специфичный для полосы (полоса − медиана случайных мест той же сцены): {rs(a['x_fdi_p95_anom'])}; по средним групп ρ = {a['x_fdi_p95_anom']['group_means']['rho']:+.2f} (p = {a['x_fdi_p95_anom']['group_means']['p_exact']:.2f}, k = {k}); без одной группы ρ от {a['x_fdi_p95_anom']['logo_min_max'][0]:+.2f} до {a['x_fdi_p95_anom']['logo_min_max'][1]:+.2f}; на всех 19 S2-парах {al['x_fdi_p95_anom'].get('spearman', float('nan')):+.2f}. Поправку на множественность (13 признаков × 3 набора) и групповой уровень не проходит, знак отрицательный (мусор должен поднимать FDI, а не снижать) — сигналом мусора не считаем. Причина не установлена: у S4 «полоса» — круг 500 м вокруг центра трансекты при оценке дрейфа 11–28 км против допуска 3 км (L59, сценарий typical), т. е. фактически случайная вода; при 6 группах такой ρ достижим случайно; волнение/ветер проверить нельзя (sea_state_beaufort и ветер у S3/S4 в реестре пустые).",
+            f"4. Остаток, специфичный для полосы (полоса − медиана случайных мест той же сцены): {rs(a['x_fdi_p95_anom'])}; по средним групп ρ = {a['x_fdi_p95_anom']['group_means']['rho']:+.2f} (p = {a['x_fdi_p95_anom']['group_means']['p_exact']:.2f}, k = {k}); без одной группы ρ от {a['x_fdi_p95_anom']['logo_min_max'][0]:+.2f} до {a['x_fdi_p95_anom']['logo_min_max'][1]:+.2f}; на всех 19 S2-парах {al['x_fdi_p95_anom'].get('spearman', float('nan')):+.2f}. Поправку на множественность (13 признаков × 3 набора) и групповой уровень не проходит, знак отрицательный (мусор должен поднимать FDI, а не снижать) — сигналом мусора не считаем. Причина не установлена: у S4 «полоса» — круг 500 м вокруг центра трансекты при оценке дрейфа 11–28 км против допуска 3 км (реестр пар `find_pairs.py`, сценарий typical), т. е. фактически случайная вода; при 6 группах такой ρ достижим случайно; волнение/ветер проверить нельзя (sea_state_beaufort и ветер у S3/S4 в реестре пустые).",
             f"5. Мощность: при n = {n} обнаружим только |ρ| ≥ {pa:.2f} (α 0.05, мощность 0.8), при {k} независимых группах — |ρ| ≥ {pk:.2f}. Поэтому вывод — «сильной связи, специфичной для полосы, не видно», а не «связи нет».",
             "6. Для переноса нужно: ≥ 33 независимых (разнесённых по дням) пар для ρ = 0.5 и ≈ 89 для ρ = 0.3; известное время наблюдения (у S4 только дата → дрейф 10+ км); пары для профиля пластика — их в реестре 0 (S1/S2 без сцен в окне ±1 сут).",
             "7. Итог для сдачи: детектор проверяется по разметке MARIDA, концентрация — по полю (C = N/A с ДИ); связь «снимок → шт./км²» на имеющихся парах не установлена.", ""]
 
 
 def write_md(df, results, pw, need, path):
-    L = ["# Детектор на парах vs полевой all_litter (L64, исследовательский эксперимент)", "",
-         "Скрипт `scripts/case/pairs_experiment.py`. Вход: выходы L61 (`data/pairs/quality/*/{meta.json,quality.tif,prob.tif}`), "
+    L = ["# Детектор на парах vs полевой all_litter (исследовательский эксперимент)", "",
+         "Скрипт `scripts/case/pairs_experiment.py`. Вход: выходы `scripts/case/pair_quality.py` (`data/pairs/quality/*/{meta.json,quality.tif,prob.tif}`), "
          "FDI пересчитан из тех же вырезок S2 L2A (кэш `data/pairs/experiment/<dir>/fdi.npy`). Числа: `experiment.json`.", "",
          "**Эталон — плотность ВСЕГО плавающего мусора (all_litter, все материалы), не пластика.** Калибровки в шт./км² по снимку нет: "
          "проверяется только, упорядочивает ли признак снимка события так же, как полевая плотность.", "",
-         f"Признаки только из снимка (P — LightGBM L61, порог {THR}; FDI Biermann 2020). Предрегистрированные основные: "
+         f"Признаки только из снимка (P — LightGBM из pair_quality.py, порог {THR}; FDI Biermann 2020). Предрегистрированные основные: "
          f"`{PRIMARY[0]}`, `{PRIMARY[1]}`; остальные — разведочные (поправка Холма). Группа для бутстрэпа = район × день наблюдения.", ""]
     L += ["## Пары", "", "| событие | статус | группа | поле, предм./км² | основа | вода полосы, px | P≥0.63 в полосе | P ср. | пятен/км² | FDI p95−ctx | FDI доля выс. |",
           "|---|---|---|---:|---|---:|---:|---:|---:|---:|---:|"]
@@ -556,7 +556,7 @@ def main():
     cols = ["event_id", "status", "region", "group", "obs_date", "time_known", "dt_hours", "scene_id", "field_items_km2", "field_basis",
             "has_detector", "s_n_water", "null_draws"] + [f for f in FEATURES if f in df]
     table = df[[c for c in cols if c in df]].replace({np.nan: None}).to_dict(orient="records")
-    out = dict(task="L64", created=time.strftime("%Y-%m-%dT%H:%M:%S"), threshold_p=THR, k_mad=K_MAD, seed=SEED,
+    out = dict(task="scripts/case/pairs_experiment.py", created=time.strftime("%Y-%m-%dT%H:%M:%S"), threshold_p=THR, k_mad=K_MAD, seed=SEED,
                n_boot=N_BOOT, n_perm=N_PERM, k_null=K_NULL, primary=PRIMARY,
                reference="field all_litter density (total floating macro-litter, all materials; NOT plastic), items/km2",
                n_pairs_total=int(len(df)), n_accept=int((df.status == "accept").sum()),

@@ -1,7 +1,7 @@
-# Модель концентрации шт./км² (L68). protocol записан ДО первого запуска CV (предрегистрация);
+# Модель концентрации шт./км² (scripts/case/conc_model_cv.py). protocol записан ДО первого запуска CV (предрегистрация);
 # selected — результат scripts/case/conc_model_cv.py (CV на dev). Финальный test — scripts/case/final_test_conc.py (однократно, после 26.09 12:00).
 protocol:
-  written_before_cv: 2026-09-25T17:52 (файл протокола создан до первого запуска CV; время 18:25 в первой версии было опечаткой)
+  written_before_cv: 2026-09-25T17:52 (протокол зафиксирован до первого запуска CV)
   profiles:
   - S2_visual_total_plastic
   - S1_trawl_total_plastic

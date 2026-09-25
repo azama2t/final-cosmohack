@@ -1,4 +1,4 @@
-"""Фиксация отложенного финального test концентрации ДО моделей (L68).
+"""Фиксация отложенного финального test концентрации ДО моделей (scripts/case/conc_model_cv.py).
 
 Правило (configs/case_selection.yaml: final_test): для каждого профиля дни рейса по порядку режутся
 на k_blocks = 5 непрерывных участков маршрута с примерно равным числом событий (splits.route_block_groups);
@@ -72,11 +72,11 @@ def main():
     if frozen:
         print("final_test уже зафиксирован в configs/case_selection.yaml, составы совпадают — ничего не меняю.")
         return
-    lines = ["", "# Отложенный финальный test концентрации (L68) — зафиксирован ДО моделей концентрации L68,",
+    lines = ["", "# Отложенный финальный test концентрации — зафиксирован ДО моделей концентрации (scripts/case/conc_model_cv.py),",
              "# метки test не читаются до приёмки 26.09 12:00: единственный читатель — scripts/case/final_test_conc.py",
              "# (однократно, отказ при существующем reports/case_conc/final_test.json). Модели и интервалы",
-             "# выбираются только на dev (CV route_buf1 внутри dev). Честная оговорка: L60 смотрел CV по всем",
-             "# событиям профиля (в т.ч. будущему test) — но только бейзлайны median/mean/kNN/wind_lin.",
+             "# выбираются только на dev (CV route_buf1 внутри dev). Оговорка: до фиксации test CV по всем",
+             "# событиям профиля (в т.ч. будущему test) считалась только для бейзлайнов median/mean/kNN/wind_lin (baseline_concentration.py).",
              "final_test:",
              f"  frozen_at: \"{datetime.now().isoformat(timespec='seconds')}\"",
              f"  seed: {SEED}",

@@ -35,3 +35,16 @@ S2_29-11-15_16PEC (2015-11-29), S2_17-7-16_51PTS (2016-07-17), S2_4-9-16_16PCC (
 - Сцена `S2_23-9-20_16PCC`: по имеющимся сведениям авторы MARIDA её исключили (плохая атмосферная коррекция). **В архиве v1.0.0 она есть** (56 патчей, все в train, 77 MD px). В README GitHub и на странице Zenodo упоминания об исключении не найдено — источник утверждения не подтверждён; помечаем `excluded=True` и не используем как «подтверждённую» для демо.
 - Разметка MARIDA частичная (размечено 0.93 % пикселей) — площадь/массу пластика по маскам не считаем.
 - marinedebrisdetector обучался в том числе на MARIDA → его метрики на MARIDA не независимы.
+
+## Первоисточники PANGAEA для геометрии трансект S2/S3 
+
+Скачаны 25.09.2026 (UTC 15:53–15:54) скриптом `scripts/case/fetch_pangaea.py` (последовательно, ретраи), сырьё — `data/case/pangaea/`, контрольные суммы и дата — `data/case/pangaea/manifest.json`. Используются модулем `src/macroplastic/case/geometry.py` (выход `data/case/geometry/`).
+
+| PANGAEA | Что берём | Файл, размер | sha256 | Лицензия |
+|---|---|---|---|---|
+| [931834](https://doi.org/10.1594/PANGAEA.931834) — Gutow et al. 2021, метаданные трансект MSM41 | сегменты S2 (в т.ч. прерванные T18/T22/T35/T49), время сегментов, итоговая площадь автора | `PANGAEA_931834.xlsx`, 27 936 Б (по ссылке `?format=textfile` отдаётся исходный xlsx) | `ca964c5bf14878c750b54cc40bba1f368831e70d9abbfaf341138bcdf3d3b3ca` | CC BY 4.0 |
+| [931833](https://doi.org/10.1594/PANGAEA.931833) — Gutow et al. 2021, объекты MSM41 | позиции наблюдателя у предметов (проверка «предмет на пути») | `PANGAEA_931833.tab`, 85 446 Б | `9ba6c0b5faa2233e331f3f12d06897c29a1978ed0e90579a4980dc604a5262b1` | CC BY 4.0 |
+| [890782](https://doi.org/10.1594/PANGAEA.890782) — Gutow 2018, трансекты SE North Sea | начало/конец/время/длина трансект S3 | `PANGAEA_890782.tab`, 35 568 Б | `c8abc219113135dea5ce924b63f636aadaf495ad3281dc5d049451d8c51f1cb2` | CC BY 3.0 |
+| [890781](https://doi.org/10.1594/PANGAEA.890781) — Gutow 2018, объекты SE North Sea | позиции предметов (направление пути HE460_MarLitter_transect01, проверка) | `PANGAEA_890781.tab`, 104 125 Б | `830636a3714e17bd15d2620deb687e37dcd265682ba421eed2d43fa25393af8f` | CC BY 3.0 |
+
+Цитирование: Gutow L., Petersen I., Giménez L., Thiel M., Rivedeneira M.M. (2021; написание по цитате PANGAEA) Natural and anthropogenic flotsam in the Sargasso Sea [dataset], PANGAEA, https://doi.org/10.1594/PANGAEA.931833 (и 931834); Gutow L. (2018) Transect descriptions / Marine litter at the sea surface of the SE North Sea [dataset], PANGAEA, https://doi.org/10.1594/PANGAEA.890782 , https://doi.org/10.1594/PANGAEA.890781 ; к публикации Gutow et al. (2018) Mar. Pollut. Bull. 131: 763–772.

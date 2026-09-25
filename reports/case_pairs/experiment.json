@@ -1,5 +1,5 @@
 {
- "task": "L64",
+ "task": "scripts/case/pairs_experiment.py",
  "created": "2026-09-25T18:51:59",
  "threshold_p": 0.63,
  "k_mad": 3.0,

@@ -68,9 +68,9 @@
    "reject": 306
   }
  },
- "command": "run_all.py export --offline",
- "last_subcommand": "export",
- "finished": "2026-09-25T18:42:09",
+ "command": "run_all.py all --offline",
+ "last_subcommand": "all",
+ "finished": "2026-09-25T19:01:32",
  "offline": true,
  "force": false,
  "workdir": null,
@@ -85,12 +85,12 @@
   "shapely": "2.1.2",
   "fastapi": "0.141.1",
   "yaml": "6.0.3",
-  "git_commit": "6e601c2086de32e07d3a9d0060455558a7ab8b97"
+  "git_commit": "a93e80bf89efdcb6713c5d9440c5382aab38692e"
  },
  "inputs": {
   "task/macroplastic_marine_samples.csv": "30ce0a65e3880b833b5dfe3bc6f528ee5f5af14a0d22f25995f4ef8af585a764",
-  "configs/case_selection.yaml": "2a6989800c3a55bbdbea45f57b4a12f40d72b573133b963e02fec74a428d41f9",
-  "configs/case_pairs.yaml": "c390c5e685dc07064de45e99ee05bbff947f466574764e56bca0d9deb4a65603",
+  "configs/case_selection.yaml": "e1421d2115b2a831973ec765f385dcf6853408b9f76f51838de5c758c7b6a750",
+  "configs/case_pairs.yaml": "d2001925b3863cbacd434e8f5f306e45f0a6bb6867371f1525b8668502ee4f5a",
   "weights/lgbm/meta.json": "97db8f94afb5b46b89f45f08562519b0b6a1ee91dc0e2aa5716b5926c4a1da07"
  },
  "outputs_sha256": {
@@ -137,13 +137,13 @@
    "step": "3_quality_detector",
    "ok": true,
    "note": "только готовые meta.json; пар с результатом 29",
-   "seconds": 0.1
+   "seconds": 0.2
   },
   "3b_registry": {
    "step": "3b_registry",
    "ok": true,
    "note": "событий 318: {'reject': 318}, без учёта дрейфа {'accept': 12, 'reject': 306}",
-   "seconds": 0.7
+   "seconds": 0.6
   },
   "total_prepare": {
    "step": "total_prepare",
@@ -154,7 +154,7 @@
    "step": "4_concentration",
    "ok": true,
    "note": "S2_visual_total_plastic: median MAE 35.9 vs knn5 31.3; S1_trawl_total_plastic: median MAE 456.4 vs knn5 448.9",
-   "seconds": 2.4
+   "seconds": 2.3
   },
   "total_eval": {
    "step": "total_eval",
@@ -171,7 +171,7 @@
    "step": "6_export_api_v3",
    "ok": true,
    "note": "observations.geojson: 935, observations.csv: 935, pairs.geojson: 4436, pairs.csv: 4436, zones.geojson: 29, zones.csv: 29",
-   "seconds": 1.1
+   "seconds": 1.0
   },
   "total_export": {
    "step": "total_export",

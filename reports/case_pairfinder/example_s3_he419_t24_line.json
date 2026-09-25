@@ -1,0 +1,231 @@
+{
+ "version": "3.1",
+ "kind": "pairfinder",
+ "generated_at": "2026-09-25T15:56:14Z",
+ "query": {
+  "geometry": {
+   "type": "LineString",
+   "coordinates": [
+    [
+     6.3718,
+     55.1489
+    ],
+    [
+     6.2648,
+     55.209
+    ]
+   ]
+  },
+  "center": [
+   6.3183,
+   55.17895
+  ],
+  "obs_datetime": "2014-04-10T12:34:00Z",
+  "time_known": true,
+  "window_days": 2.0,
+  "search_half_window_days": 2.0,
+  "mode": "archive",
+  "offline": false,
+  "max_cloud": 60.0,
+  "width_m": 10.0,
+  "wind_ms": null
+ },
+ "sync_window": {
+  "scenario": "typical",
+  "speed_ms": 0.2,
+  "tolerance_km": 3.005,
+  "tolerance_rule": "ширина полосы 10 м / 2 + буфер 3.0 км (configs/case_pairs.yaml, drift.tolerance)",
+  "max_abs_dt_hours": 4.17,
+  "max_abs_dt_hours_by_scenario": {
+   "low": 16.69,
+   "typical": 4.17,
+   "high": 1.67
+  },
+  "unknown_time_extra_hours": 0,
+  "rule": "drift_shift_km = speed_ms × 3.6 × (|dt| [+12 ч, если время не задано]); синхронно, если drift_shift_km ≤ tolerance_km, т. е. |dt| ≤ tolerance_km / (3.6 × speed_ms)"
+ },
+ "count": 2,
+ "n_synchronous": 2,
+ "n_synchronous_if_time_in_window": 0,
+ "best": "LC08_L2SP_198022_20140410_02_T1",
+ "candidates": [
+  {
+   "scene_id": "LC08_L2SP_198022_20140410_02_T1",
+   "mission": "L8",
+   "collection": "landsat-c2-l2",
+   "level": "L2SP",
+   "endpoint": "planetary-computer",
+   "scene_datetime": "2014-04-10T10:33:08Z",
+   "dt_hours": -2.01,
+   "scene_cloud_cover": 68.1,
+   "tile": "198/022",
+   "footprint": {
+    "intersects": true,
+    "geometry_fraction_inside": 1.0
+   },
+   "drift": {
+    "dt_drift_hours": 2.01,
+    "time_worst_case": false,
+    "shift_km": {
+     "low": 0.36,
+     "typical": 1.45,
+     "high": 3.63
+    },
+    "shift_km_selected": 1.45,
+    "scenario": "typical"
+   },
+   "tolerance_km": 3.005,
+   "sync_time_window": {
+    "from": "2014-04-10T06:23:00Z",
+    "to": "2014-04-10T14:43:00Z",
+    "max_abs_dt_hours": 4.17
+   },
+   "decision": "synchronous",
+   "synchronous": true,
+   "reasons": [
+    "scene_cloud_cover>60"
+   ],
+   "reason": "|dt| ≤ 4.2 ч: вода смещается на 1.45 км ≤ допуска 3.005 км (сценарий typical, 0.2 м/с)",
+   "predicted": false,
+   "quality": {
+    "status": "ok",
+    "decision": "reject",
+    "reason": "cloud",
+    "scene_id_read": "LC08_L2SP_198022_20140410_02_T1",
+    "strip_rule": "transect line + buffer 10 m (width 10.0 m / 2, min 10 m); 30 m QA_PIXEL grid",
+    "coverage": 1.0,
+    "valid_water_frac": 0.0,
+    "cloud_frac": 1.0,
+    "glint_frac": null,
+    "land_frac": 0.0,
+    "nodata_frac": 0.0,
+    "glint_b11_median": null,
+    "strip_area_km2": 0.5967,
+    "substitution_note": "Landsat: QA_PIXEL mask only (bits 0 fill, 1-4 dilated cloud/cirrus/cloud/shadow, 6 clear, 7 water); detector not run (trained on S2 bands)",
+    "files": [
+     "data/pairs/pairfinder/43aa88f4d95c02f9/quality.png"
+    ],
+    "thresholds": {
+     "min_coverage": 0.8,
+     "max_cloud_frac": 0.2,
+     "max_land_frac": 0.5,
+     "min_valid_water_frac": 0.5,
+     "glint_b11": 0.01,
+     "glint_scene_spc_frac": 0.5,
+     "glint_scene_max_scl_cloud": 0.01
+    }
+   },
+   "also_available": []
+  },
+  {
+   "scene_id": "LC08_L2SP_198021_20140410_02_T2",
+   "mission": "L8",
+   "collection": "landsat-c2-l2",
+   "level": "L2SP",
+   "endpoint": "planetary-computer",
+   "scene_datetime": "2014-04-10T10:32:44Z",
+   "dt_hours": -2.02,
+   "scene_cloud_cover": 99.36,
+   "tile": "198/021",
+   "footprint": {
+    "intersects": true,
+    "geometry_fraction_inside": 1.0
+   },
+   "drift": {
+    "dt_drift_hours": 2.02,
+    "time_worst_case": false,
+    "shift_km": {
+     "low": 0.36,
+     "typical": 1.46,
+     "high": 3.64
+    },
+    "shift_km_selected": 1.46,
+    "scenario": "typical"
+   },
+   "tolerance_km": 3.005,
+   "sync_time_window": {
+    "from": "2014-04-10T06:23:00Z",
+    "to": "2014-04-10T14:43:00Z",
+    "max_abs_dt_hours": 4.17
+   },
+   "decision": "synchronous",
+   "synchronous": true,
+   "reasons": [
+    "scene_cloud_cover>60"
+   ],
+   "reason": "|dt| ≤ 4.2 ч: вода смещается на 1.46 км ≤ допуска 3.005 км (сценарий typical, 0.2 м/с)",
+   "predicted": false,
+   "quality": {
+    "status": "ok",
+    "decision": "reject",
+    "reason": "cloud",
+    "scene_id_read": "LC08_L2SP_198021_20140410_02_T2",
+    "strip_rule": "transect line + buffer 10 m (width 10.0 m / 2, min 10 m); 30 m QA_PIXEL grid",
+    "coverage": 1.0,
+    "valid_water_frac": 0.0,
+    "cloud_frac": 1.0,
+    "glint_frac": null,
+    "land_frac": 0.0,
+    "nodata_frac": 0.0,
+    "glint_b11_median": null,
+    "strip_area_km2": 0.5967,
+    "substitution_note": "Landsat: QA_PIXEL mask only (bits 0 fill, 1-4 dilated cloud/cirrus/cloud/shadow, 6 clear, 7 water); detector not run (trained on S2 bands)",
+    "files": [
+     "data/pairs/pairfinder/7a4158ce5963b7a5/quality.png"
+    ],
+    "thresholds": {
+     "min_coverage": 0.8,
+     "max_cloud_frac": 0.2,
+     "max_land_frac": 0.5,
+     "min_valid_water_frac": 0.5,
+     "glint_b11": 0.01,
+     "glint_scene_spc_frac": 0.5,
+     "glint_scene_max_scl_cloud": 0.01
+    }
+   },
+   "also_available": []
+  }
+ ],
+ "empty_reason": null,
+ "search": {
+  "sources": [
+   {
+    "endpoint": "earth-search",
+    "collection": "sentinel-2-l2a",
+    "status": "network",
+    "n": 0,
+    "datetime": "2014-04-08T12:34:00Z/2014-04-12T12:34:00Z"
+   },
+   {
+    "endpoint": "earth-search",
+    "collection": "sentinel-2-l1c",
+    "status": "network",
+    "n": 0,
+    "datetime": "2014-04-08T12:34:00Z/2014-04-12T12:34:00Z"
+   },
+   {
+    "endpoint": "planetary-computer",
+    "collection": "sentinel-2-l2a",
+    "status": "network",
+    "n": 0,
+    "datetime": "2014-04-08T12:34:00Z/2014-04-12T12:34:00Z"
+   },
+   {
+    "endpoint": "planetary-computer",
+    "collection": "landsat-c2-l2",
+    "status": "network",
+    "n": 2,
+    "datetime": "2014-04-08T12:34:00Z/2014-04-12T12:34:00Z"
+   }
+  ],
+  "network_calls": 4,
+  "cache": "data/pairs/cache"
+ },
+ "notes": [],
+ "units": {
+  "dt_hours": "hours",
+  "shift_km": "km",
+  "tolerance_km": "km",
+  "scene_cloud_cover": "%"
+ }
+}

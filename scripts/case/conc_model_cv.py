@@ -1,4 +1,4 @@
-"""L68: кандидаты основной модели концентрации против бейзлайна «медиана обучающего профиля» на dev.
+"""Кандидаты основной модели концентрации против бейзлайна «медиана обучающего профиля» на dev.
 
 Только dev-часть (configs/case_selection.yaml: final_test, role=dev, sha256 проверяется); отложенный
 test и буфер не читаются. CV по участкам маршрута внутри dev (route, 5 блоков, буфер 1 сут, как
@@ -115,7 +115,7 @@ def main():
         ["profile", "sample_id", "event_id", "cruise_day", "fold", "n_train", "y_true", "y_pred", "lo", "hi",
          "q_lo", "q_hi", "model"]].to_csv(OUT / "dev_predictions.csv", index=False, encoding="utf-8")
 
-    lines = ["# Основная модель концентрации против бейзлайна на dev (L68)", "",
+    lines = ["# Основная модель концентрации против бейзлайна на dev", "",
              "Только dev-часть (отложенный test и буфер не читаются, sha256 состава сверен с "
              "configs/case_selection.yaml: final_test). CV: 5 участков маршрута внутри dev, из train убраны "
              "записи ближе 1 сут к test-участку (route_buf1). Интервал 90 %: q05/q95 лог-остатков из вложенной "
@@ -182,7 +182,7 @@ def main():
                              "baseline_mae": round(float(base.mae), 2)}}
     cfg["selected"] = sel
     cfg["selected_at"] = datetime.now().isoformat(timespec="seconds")
-    header = ("# Модель концентрации шт./км² (L68). protocol записан ДО первого запуска CV (предрегистрация);\n"
+    header = ("# Модель концентрации шт./км² (scripts/case/conc_model_cv.py). protocol записан ДО первого запуска CV (предрегистрация);\n"
               "# selected — результат scripts/case/conc_model_cv.py (CV на dev). Финальный test — "
               "scripts/case/final_test_conc.py (однократно, после 26.09 12:00).\n")
     CFG.write_text(header + yaml.safe_dump(cfg, allow_unicode=True, sort_keys=False, width=200), encoding="utf-8")

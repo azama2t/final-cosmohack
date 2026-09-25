@@ -1,7 +1,7 @@
 # Основной детектор и базовые детекторы на одной проверочной выборке (MARIDA test)
 
 Скрипт: `scripts/case/detector_compare.py` (запущен один раз, детерминированно, CPU, 12 потоков, 130 с).
-Числа: `reports/case_detector/metrics.json`. Предсказания: `data/case/detector_preds/{test,val}_preds.npz` (в git не входят).
+Числа: `reports/case_detector/metrics.json`. Предсказания: `data/case/detector_preds/{test,val}_preds.npz` (в git).
 
 ## Выборка, эталон, классы
 - **Проверочная выборка:** официальный сплит MARIDA test: 359 патчей 256×256 (Sentinel-2 L2A, 10 м), 15 сцен, список в `data/MARIDA/splits/test_X.txt`.

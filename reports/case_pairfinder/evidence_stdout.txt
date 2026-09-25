@@ -1,0 +1,122 @@
+{
+ "events": 318,
+ "cache_misses": 0,
+ "any_scene_pm5d": 68,
+ "any_scene_pm5d_by_source": {
+  "S2_SARGASSO_MSM41": 1,
+  "S3_SE_NORTH_SEA": 34,
+  "S4_BLACK_SEA_DOORS3": 33
+ },
+ "naive_pm1d_meta_accept": 29,
+ "naive_pm1d_meta_accept_by_source": {
+  "S3_SE_NORTH_SEA": 5,
+  "S4_BLACK_SEA_DOORS3": 24
+ },
+ "naive_pm1d_with_drift": 0,
+ "pairfinder_synchronous_time_known": 2,
+ "pairfinder_conditional_date_only": 12,
+ "pairfinder_conditional_by_source": {
+  "S4_BLACK_SEA_DOORS3": 12
+ },
+ "same_day_scene": 19,
+ "same_day_scene_by_source": {
+  "S3_SE_NORTH_SEA": 7,
+  "S4_BLACK_SEA_DOORS3": 12
+ },
+ "same_day_scene_cloud_le60": 11,
+ "same_day_scene_cloud_le60_by_source": {
+  "S3_SE_NORTH_SEA": 1,
+  "S4_BLACK_SEA_DOORS3": 10
+ },
+ "time_known_with_scene": 35,
+ "time_known_shift_needed_h": {
+  "count": 35.0,
+  "mean": 39.1,
+  "std": 31.6,
+  "min": 0.0,
+  "25%": 13.5,
+  "50%": 41.7,
+  "75%": 64.4,
+  "max": 94.3
+ },
+ "time_known_shift_le_4h": 6,
+ "time_known_shift_le_12h": 8,
+ "max_abs_dt_h_typical_3km": 4.17,
+ "conditional_with_l61_quality": {
+  "accept": 8,
+  "reject glint": 2,
+  "—": 2
+ },
+ "forecast_hindcast": {
+  "predictions_checked": 88,
+  "hit_within_5min": 82,
+  "hit_share": 0.932,
+  "by_collection": {
+   "landsat-c2-l2": {
+    "n": 10,
+    "hit_5min": 10
+   },
+   "sentinel-2-l1c": {
+    "n": 26,
+    "hit_5min": 24
+   },
+   "sentinel-2-l2a": {
+    "n": 52,
+    "hit_5min": 48
+   }
+  },
+  "misses_by_tile": {
+   "37TFG": 6
+  },
+  "median_error_min_hits": 0.01
+ }
+}
+          event_id                   obs  n_scenes  nearest_dt_h  nearest_cloud                    same_day_best same_day_window l61_quality l61_reason
+285   S4:DOORS3:T2  2024-06-02T12:00:00Z         6         -3.03           0.00         S2A_35TQJ_20240602_0_L2A     04:48–13:08      accept        NaN
+286   S4:DOORS3:T1  2024-06-02T12:00:00Z         6         -3.03           0.00         S2A_35TQJ_20240602_0_L2A     04:48–13:08      accept        NaN
+302  S4:DOORS3:T19  2024-06-05T12:00:00Z         5         -3.69           1.41         S2B_37TFG_20240605_0_L2A     04:08–12:28      accept        NaN
+303  S4:DOORS3:T18  2024-06-05T12:00:00Z         6         -3.69           1.41         S2B_37TFG_20240605_0_L2A     04:08–12:28      accept        NaN
+304  S4:DOORS3:T21  2024-06-07T12:00:00Z        12         -3.86          30.83         S2A_37TGG_20240607_0_L2A     03:59–12:18      reject      glint
+305  S4:DOORS3:T20  2024-06-07T12:00:00Z        12         -3.86          30.83         S2A_37TGG_20240607_0_L2A     03:59–12:18      reject      glint
+307  S4:DOORS3:T24  2024-06-10T12:00:00Z        11         -3.69          94.06         S2A_38TKM_20240610_0_L2A     04:08–12:28         NaN        NaN
+308  S4:DOORS3:T23  2024-06-10T12:00:00Z        17         -3.69          94.06         S2A_38TKM_20240610_0_L2A     04:08–12:28         NaN        NaN
+314  S4:DOORS3:T32  2024-06-17T12:00:00Z         5         -3.03           3.52         S2B_36TUN_20240617_0_L2A     04:49–13:08      accept        NaN
+315  S4:DOORS3:T31  2024-06-17T12:00:00Z         6         -3.03           3.52         S2B_36TUN_20240617_0_L2A     04:49–13:08      accept        NaN
+316  S4:DOORS3:T30  2024-06-17T12:00:00Z        10         -3.03           3.52         S2B_36TUN_20240617_0_L2A     04:49–13:08      accept        NaN
+317  S4:DOORS3:T33  2024-06-18T12:00:00Z         5         -3.26           0.01  LC09_L2SP_180030_20240618_02_T1     04:34–12:54      accept        NaN
+                          event_id                   obs                                           nearest_scene  nearest_dt_h  nearest_cloud  shift_needed_h  meta_accept
+23   S3:HE419_MarLitter_transect24  2014-04-10T12:34:00Z                         LC08_L2SP_198022_20140410_02_T1         -2.01          68.10            0.00        False
+22   S3:HE419_MarLitter_transect23  2014-04-10T09:42:30Z                         LC08_L2SP_198022_20140410_02_T1          0.84          68.10            0.00        False
+24   S3:HE419_MarLitter_transect25  2014-04-10T14:50:00Z                         LC08_L2SP_198022_20140410_02_T1         -4.28          68.10            0.11        False
+0    S3:HE419_MarLitter_transect01  2014-04-03T15:19:30Z                         LC08_L2SP_197022_20140403_02_T1         -4.87          72.89            0.70        False
+25   S3:HE419_MarLitter_transect26  2014-04-10T16:28:30Z                         LC08_L2SP_198022_20140410_02_T1         -5.92          68.10            1.75        False
+251  S3:HE460_MarLitter_transect01  2016-04-08T16:38:30Z  S2A_MSIL2A_20160408T104022_R008_T32UMF_20210211T022918         -5.97          36.70            1.80         True
+26   S3:HE419_MarLitter_transect27  2014-04-10T18:49:30Z                         LC08_L2SP_198022_20140410_02_T1         -8.27          68.10            4.10        False
+27   S3:HE419_MarLitter_transect32  2014-04-11T18:34:00Z                         LC08_L2SP_196022_20140412_02_T1         15.78          45.59           11.61         True
+21   S3:HE419_MarLitter_transect22  2014-04-09T17:18:00Z                         LC08_L2SP_198022_20140410_02_T1         17.25          68.10           13.08        False
+253  S3:HE460_MarLitter_transect03  2016-04-10T16:46:30Z  S2A_MSIL2A_20160411T105022_R051_T32ULF_20210211T031140         18.06           0.16           13.89         True
+20   S3:HE419_MarLitter_transect21  2014-04-09T15:27:00Z                         LC08_L2SP_198022_20140410_02_T1         19.10          68.10           14.93        False
+18   S3:HE419_MarLitter_transect20  2014-04-09T14:56:30Z                         LC08_L2SP_198022_20140410_02_T1         19.61          68.10           15.44        False
+29   S3:HE419_MarLitter_transect30  2014-04-11T13:07:30Z                         LC08_L2SP_196022_20140412_02_T1         21.22          45.59           17.05         True
+64             S2:MSM41_litter-T29  2015-04-11T15:32:00Z                         LC08_L2SP_006038_20150412_02_T2         23.34          76.19           19.17        False
+30   S3:HE419_MarLitter_transect29  2014-04-11T10:41:30Z                         LC08_L2SP_196022_20140412_02_T1         23.65          45.59           19.48         True
+28   S3:HE419_MarLitter_transect31  2014-04-11T14:49:00Z                         LC08_L2SP_198022_20140410_02_T1        -28.26          68.10           24.09        False
+252  S3:HE460_MarLitter_transect02  2016-04-09T15:28:00Z  S2A_MSIL2A_20160408T104022_R008_T32ULF_20210211T022943        -28.79          10.48           24.62        False
+37   S3:HE419_MarLitter_transect33  2014-04-12T08:26:00Z                         LC08_L2SP_198022_20140410_02_T1        -45.88          68.10           41.71        False
+35   S3:HE419_MarLitter_transect34  2014-04-12T10:00:00Z                         LC08_L2SP_198022_20140410_02_T1        -47.45          68.10           43.28        False
+34   S3:HE419_MarLitter_transect35  2014-04-12T12:21:00Z                         LC08_L2SP_198022_20140410_02_T1        -49.80          68.10           45.63        False
+36   S3:HE419_MarLitter_transect36  2014-04-12T13:56:30Z                         LC08_L2SP_198022_20140410_02_T1        -51.39          68.10           47.22        False
+1    S3:HE419_MarLitter_transect02  2014-04-05T15:46:00Z                         LC08_L2SP_197022_20140403_02_T1        -53.32          72.89           49.15        False
+33   S3:HE419_MarLitter_transect37  2014-04-12T16:08:30Z                         LC08_L2SP_198023_20140410_02_T2        -53.58          90.48           49.41        False
+32   S3:HE419_MarLitter_transect38  2014-04-12T17:35:30Z                         LC08_L2SP_198023_20140410_02_T2        -55.03          90.48           50.86        False
+9    S3:HE419_MarLitter_transect13  2014-04-07T16:39:30Z                         LC08_L2SP_198022_20140410_02_T1         65.89          68.10           61.72        False
+11   S3:HE419_MarLitter_transect12  2014-04-07T15:06:30Z                         LC08_L2SP_198022_20140410_02_T1         67.44          68.10           63.27        False
+13   S3:HE419_MarLitter_transect11  2014-04-07T12:47:30Z                         LC08_L2SP_198022_20140410_02_T1         69.76          68.10           65.59        False
+12   S3:HE419_MarLitter_transect10  2014-04-07T10:18:00Z                         LC08_L2SP_198022_20140410_02_T1         72.25          68.10           68.08        False
+10   S3:HE419_MarLitter_transect09  2014-04-07T08:17:00Z                         LC08_L2SP_198022_20140410_02_T1         74.27          68.10           70.10        False
+6    S3:HE419_MarLitter_transect08  2014-04-06T19:19:30Z                         LC08_L2SP_198022_20140410_02_T1         87.23          68.10           83.06        False
+7    S3:HE419_MarLitter_transect07  2014-04-06T16:45:30Z                         LC08_L2SP_198022_20140410_02_T1         89.79          68.10           85.62        False
+5    S3:HE419_MarLitter_transect06  2014-04-06T15:02:30Z                         LC08_L2SP_198022_20140410_02_T1         91.51          68.10           87.34        False
+4    S3:HE419_MarLitter_transect05  2014-04-06T12:53:00Z                         LC08_L2SP_198022_20140410_02_T1         93.67          68.10           89.50        False
+2    S3:HE419_MarLitter_transect04  2014-04-06T10:04:00Z                         LC08_L2SP_198022_20140410_02_T1         96.49          68.10           92.32        False
+3    S3:HE419_MarLitter_transect03  2014-04-06T08:05:30Z                         LC08_L2SP_198022_20140410_02_T1         98.46          68.10           94.29        False

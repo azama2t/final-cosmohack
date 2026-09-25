@@ -1,0 +1,73 @@
+{
+ "events": 318,
+ "cache_misses": 0,
+ "any_scene_pm5d": 68,
+ "any_scene_pm5d_by_source": {
+  "S2_SARGASSO_MSM41": 1,
+  "S3_SE_NORTH_SEA": 34,
+  "S4_BLACK_SEA_DOORS3": 33
+ },
+ "naive_pm1d_meta_accept": 29,
+ "naive_pm1d_meta_accept_by_source": {
+  "S3_SE_NORTH_SEA": 5,
+  "S4_BLACK_SEA_DOORS3": 24
+ },
+ "naive_pm1d_with_drift": 0,
+ "pairfinder_synchronous_time_known": 2,
+ "pairfinder_conditional_date_only": 12,
+ "pairfinder_conditional_by_source": {
+  "S4_BLACK_SEA_DOORS3": 12
+ },
+ "same_day_scene": 19,
+ "same_day_scene_by_source": {
+  "S3_SE_NORTH_SEA": 7,
+  "S4_BLACK_SEA_DOORS3": 12
+ },
+ "same_day_scene_cloud_le60": 11,
+ "same_day_scene_cloud_le60_by_source": {
+  "S3_SE_NORTH_SEA": 1,
+  "S4_BLACK_SEA_DOORS3": 10
+ },
+ "time_known_with_scene": 35,
+ "time_known_shift_needed_h": {
+  "count": 35.0,
+  "mean": 39.1,
+  "std": 31.6,
+  "min": 0.0,
+  "25%": 13.5,
+  "50%": 41.7,
+  "75%": 64.4,
+  "max": 94.3
+ },
+ "time_known_shift_le_4h": 6,
+ "time_known_shift_le_12h": 8,
+ "max_abs_dt_h_typical_3km": 4.17,
+ "conditional_with_l61_quality": {
+  "accept": 8,
+  "reject glint": 2,
+  "—": 2
+ },
+ "forecast_hindcast": {
+  "predictions_checked": 88,
+  "hit_within_5min": 82,
+  "hit_share": 0.932,
+  "by_collection": {
+   "landsat-c2-l2": {
+    "n": 10,
+    "hit_5min": 10
+   },
+   "sentinel-2-l1c": {
+    "n": 26,
+    "hit_5min": 24
+   },
+   "sentinel-2-l2a": {
+    "n": 52,
+    "hit_5min": 48
+   }
+  },
+  "misses_by_tile": {
+   "37TFG": 6
+  },
+  "median_error_min_hits": 0.01
+ }
+}

@@ -1,0 +1,242 @@
+{
+ "version": "3.1",
+ "kind": "pairfinder",
+ "generated_at": "2026-09-25T15:55:32Z",
+ "query": {
+  "geometry": {
+   "type": "Point",
+   "coordinates": [
+    29.6227,
+    43.60877
+   ]
+  },
+  "center": [
+   29.6227,
+   43.60877
+  ],
+  "obs_datetime": "2026-10-06T12:00:00Z",
+  "time_known": false,
+  "window_days": 3.0,
+  "search_half_window_days": 3.5,
+  "mode": "forecast",
+  "offline": false,
+  "max_cloud": 60.0,
+  "width_m": null,
+  "wind_ms": null
+ },
+ "sync_window": {
+  "scenario": "typical",
+  "speed_ms": 0.2,
+  "tolerance_km": 3.005,
+  "tolerance_rule": "ширина полосы 10 м / 2 + буфер 3.0 км (configs/case_pairs.yaml, drift.tolerance)",
+  "max_abs_dt_hours": 4.17,
+  "max_abs_dt_hours_by_scenario": {
+   "low": 16.69,
+   "typical": 4.17,
+   "high": 1.67
+  },
+  "unknown_time_extra_hours": 12,
+  "rule": "drift_shift_km = speed_ms × 3.6 × (|dt| [+12 ч, если время не задано]); синхронно, если drift_shift_km ≤ tolerance_km, т. е. |dt| ≤ tolerance_km / (3.6 × speed_ms)"
+ },
+ "count": 3,
+ "n_synchronous": 0,
+ "n_synchronous_if_time_in_window": 0,
+ "best": null,
+ "candidates": [
+  {
+   "scene_id": "predicted:S2A_35TQJ_20260905_1_L2A+30d",
+   "mission": "S2A",
+   "collection": "sentinel-2-l2a",
+   "level": "L2A",
+   "endpoint": "earth-search",
+   "scene_datetime": "2026-10-05T09:08:23Z",
+   "dt_hours": -26.86,
+   "scene_cloud_cover": null,
+   "tile": "35TQJ",
+   "footprint": {
+    "intersects": true,
+    "geometry_fraction_inside": 1.0
+   },
+   "drift": {
+    "dt_drift_hours": 38.86,
+    "time_worst_case": true,
+    "shift_km": {
+     "low": 6.99,
+     "typical": 27.98,
+     "high": 69.95
+    },
+    "shift_km_selected": 27.98,
+    "scenario": "typical"
+   },
+   "tolerance_km": 3.005,
+   "sync_time_window": {
+    "from": "2026-10-05T04:58:00Z",
+    "to": "2026-10-05T13:18:00Z",
+    "max_abs_dt_hours": 4.17
+   },
+   "decision": "not_synchronous",
+   "synchronous": false,
+   "reasons": [
+    "time_unknown",
+    "drift_too_large(day_outside_sync_window)",
+    "scene_cloud_unknown",
+    "predicted_overpass"
+   ],
+   "reason": "окно синхронизации пролёта (2026-10-05 04:58 – 2026-10-05 13:18 UTC) не пересекает сутки наблюдения: синхронной пары быть не может",
+   "predicted": true,
+   "quality": null,
+   "also_available": [
+    "earth-search/sentinel-2-l2a:predicted:S2A_35TQJ_20260915_1_L2A+20d",
+    "planetary-computer/sentinel-2-l2a:predicted:S2A_MSIL2A_20260905T085721_R007_T35TQJ_20260905T142110+30d",
+    "planetary-computer/sentinel-2-l2a:predicted:S2A_MSIL2A_20260915T090411_R007_T35TQJ_20260915T140411+20d",
+    "earth-search/sentinel-2-l1c:predicted:S2A_35TQJ_20260905_1_L1C+30d",
+    "earth-search/sentinel-2-l1c:predicted:S2A_35TQJ_20260915_1_L1C+20d"
+   ]
+  },
+  {
+   "scene_id": "predicted:S2B_35TQJ_20260905_0_L2A+30d",
+   "mission": "S2B",
+   "collection": "sentinel-2-l2a",
+   "level": "L2A",
+   "endpoint": "earth-search",
+   "scene_datetime": "2026-10-05T08:58:09Z",
+   "dt_hours": -27.03,
+   "scene_cloud_cover": null,
+   "tile": "35TQJ",
+   "footprint": {
+    "intersects": true,
+    "geometry_fraction_inside": 1.0
+   },
+   "drift": {
+    "dt_drift_hours": 39.03,
+    "time_worst_case": true,
+    "shift_km": {
+     "low": 7.03,
+     "typical": 28.1,
+     "high": 70.26
+    },
+    "shift_km_selected": 28.1,
+    "scenario": "typical"
+   },
+   "tolerance_km": 3.005,
+   "sync_time_window": {
+    "from": "2026-10-05T04:48:00Z",
+    "to": "2026-10-05T13:08:00Z",
+    "max_abs_dt_hours": 4.17
+   },
+   "decision": "not_synchronous",
+   "synchronous": false,
+   "reasons": [
+    "time_unknown",
+    "drift_too_large(day_outside_sync_window)",
+    "scene_cloud_unknown",
+    "predicted_overpass"
+   ],
+   "reason": "окно синхронизации пролёта (2026-10-05 04:48 – 2026-10-05 13:08 UTC) не пересекает сутки наблюдения: синхронной пары быть не может",
+   "predicted": true,
+   "quality": null,
+   "also_available": [
+    "earth-search/sentinel-2-l2a:predicted:S2B_35TQJ_20260915_0_L2A+20d",
+    "planetary-computer/sentinel-2-l2a:predicted:S2B_MSIL2A_20260905T084559_R107_T35TQJ_20260905T124708+30d",
+    "planetary-computer/sentinel-2-l2a:predicted:S2B_MSIL2A_20260915T084559_R107_T35TQJ_20260915T124524+20d",
+    "earth-search/sentinel-2-l1c:predicted:S2B_35TQJ_20260905_0_L1C+30d",
+    "earth-search/sentinel-2-l1c:predicted:S2B_35TQJ_20260915_0_L1C+20d"
+   ]
+  },
+  {
+   "scene_id": "predicted:S2B_35TQJ_20260908_0_L2A+30d",
+   "mission": "S2B",
+   "collection": "sentinel-2-l2a",
+   "level": "L2A",
+   "endpoint": "earth-search",
+   "scene_datetime": "2026-10-08T09:08:05Z",
+   "dt_hours": 45.13,
+   "scene_cloud_cover": null,
+   "tile": "35TQJ",
+   "footprint": {
+    "intersects": true,
+    "geometry_fraction_inside": 1.0
+   },
+   "drift": {
+    "dt_drift_hours": 57.13,
+    "time_worst_case": true,
+    "shift_km": {
+     "low": 10.28,
+     "typical": 41.14,
+     "high": 102.84
+    },
+    "shift_km_selected": 41.14,
+    "scenario": "typical"
+   },
+   "tolerance_km": 3.005,
+   "sync_time_window": {
+    "from": "2026-10-08T04:58:00Z",
+    "to": "2026-10-08T13:18:00Z",
+    "max_abs_dt_hours": 4.17
+   },
+   "decision": "not_synchronous",
+   "synchronous": false,
+   "reasons": [
+    "time_unknown",
+    "drift_too_large(day_outside_sync_window)",
+    "scene_cloud_unknown",
+    "predicted_overpass"
+   ],
+   "reason": "окно синхронизации пролёта (2026-10-08 04:58 – 2026-10-08 13:18 UTC) не пересекает сутки наблюдения: синхронной пары быть не может",
+   "predicted": true,
+   "quality": null,
+   "also_available": [
+    "earth-search/sentinel-2-l2a:predicted:S2B_35TQJ_20260918_0_L2A+20d",
+    "planetary-computer/sentinel-2-l2a:predicted:S2B_MSIL2A_20260908T085549_R007_T35TQJ_20260908T125637+30d",
+    "planetary-computer/sentinel-2-l2a:predicted:S2B_MSIL2A_20260918T085559_R007_T35TQJ_20260918T125815+20d",
+    "earth-search/sentinel-2-l1c:predicted:S2B_35TQJ_20260908_0_L1C+30d",
+    "earth-search/sentinel-2-l1c:predicted:S2B_35TQJ_20260918_0_L1C+20d"
+   ]
+  }
+ ],
+ "empty_reason": null,
+ "search": {
+  "sources": [
+   {
+    "endpoint": "earth-search",
+    "collection": "sentinel-2-l2a",
+    "status": "cache",
+    "n": 12,
+    "datetime": "2026-09-05T00:00:00Z/2026-09-25T00:00:00Z"
+   },
+   {
+    "endpoint": "earth-search",
+    "collection": "sentinel-2-l1c",
+    "status": "cache",
+    "n": 12,
+    "datetime": "2026-09-05T00:00:00Z/2026-09-25T00:00:00Z"
+   },
+   {
+    "endpoint": "planetary-computer",
+    "collection": "sentinel-2-l2a",
+    "status": "cache",
+    "n": 12,
+    "datetime": "2026-09-05T00:00:00Z/2026-09-25T00:00:00Z"
+   },
+   {
+    "endpoint": "planetary-computer",
+    "collection": "landsat-c2-l2",
+    "status": "cache",
+    "n": 1,
+    "datetime": "2026-09-05T00:00:00Z/2026-09-25T00:00:00Z"
+   }
+  ],
+  "network_calls": 0,
+  "cache": "data/pairs/cache"
+ },
+ "notes": [
+  "Дата в будущем: пролёты предсказаны по архиву за 20 сут до сегодняшнего дня с периодом повторения орбиты (S2 — 10 сут на спутник, Landsat 8/9 — 16 сут). Облачность будущей сцены неизвестна.",
+  "Сцены есть, но ни одна не синхронна: нужно |dt| ≤ 4.2 ч при 0.2 м/с и допуске 3.005 км. Ближайший пролёт: 2026-10-05T09:08:23Z (dt -26.9 ч) — сдвиньте наблюдение в его окно синхронизации."
+ ],
+ "units": {
+  "dt_hours": "hours",
+  "shift_km": "km",
+  "tolerance_km": "km",
+  "scene_cloud_cover": "%"
+ }
+}

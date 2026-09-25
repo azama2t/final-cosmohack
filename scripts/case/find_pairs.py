@@ -218,7 +218,7 @@ def add_drift(cand: pd.DataFrame, ev: pd.DataFrame, dc: dict) -> pd.DataFrame:
 
 def drift_section(cand: pd.DataFrame, dc: dict) -> list[str]:
     m = cand[cand.accept_meta]
-    L = ["## Допуск по дрейфу (L59b)", "",
+    L = ["## Допуск по дрейфу", "",
          "drift_shift_km = (скорость течения + windage × ветер) × |dt|; при неизвестном времени |dt| + "
          f"{dc['unknown_time_extra_h']} ч (худший случай, флаг drift_time_worst_case). Ветер есть в реестре только у S1 (у которого нет сцен), "
          "поэтому для всех пар действует только течение. tolerance_km = ширина полосы / 2 + буфер "

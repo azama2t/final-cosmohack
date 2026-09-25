@@ -1,0 +1,4229 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -64.63548333333334,
+      32.291066666666666
+     ],
+     [
+      -64.79316666666666,
+      32.17455
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T1",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 19.68,
+    "area_author_km2": 0.1968,
+    "area_from_segments_km2": 0.1968,
+    "window_start_utc": "2015-04-01T16:17:00Z",
+    "window_end_utc": "2015-04-01T17:17:00Z",
+    "effort_mid_utc": "2015-04-01T16:47:00Z",
+    "segment_windows": [
+     [
+      "2015-04-01T16:17:00Z",
+      "2015-04-01T17:17:00Z"
+     ]
+    ],
+    "track_center": [
+     -64.714325,
+     32.232808
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 2",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -67.827,
+      30.871283333333334
+     ],
+     [
+      -68.04355,
+      30.784566666666667
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T2",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 22.799,
+    "area_author_km2": 0.22799,
+    "area_from_segments_km2": 0.22799,
+    "window_start_utc": "2015-04-02T08:18:00Z",
+    "window_end_utc": "2015-04-02T09:18:00Z",
+    "effort_mid_utc": "2015-04-02T08:48:00Z",
+    "segment_windows": [
+     [
+      "2015-04-02T08:18:00Z",
+      "2015-04-02T09:18:00Z"
+     ]
+    ],
+    "track_center": [
+     -67.935275,
+     30.827925
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 3",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -68.3287,
+      30.671533333333333
+     ],
+     [
+      -68.51116666666667,
+      30.59765
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T3",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 19.281,
+    "area_author_km2": 0.19280999999999998,
+    "area_from_segments_km2": 0.19281,
+    "window_start_utc": "2015-04-02T10:36:00Z",
+    "window_end_utc": "2015-04-02T11:26:00Z",
+    "effort_mid_utc": "2015-04-02T11:01:00Z",
+    "segment_windows": [
+     [
+      "2015-04-02T10:36:00Z",
+      "2015-04-02T11:26:00Z"
+     ]
+    ],
+    "track_center": [
+     -68.419933,
+     30.634592
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 4",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -68.79778333333333,
+      30.482616666666665
+     ],
+     [
+      -69.0293,
+      30.389733333333332
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T4",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 24.465,
+    "area_author_km2": 0.24465,
+    "area_from_segments_km2": 0.24465,
+    "window_start_utc": "2015-04-02T12:43:00Z",
+    "window_end_utc": "2015-04-02T13:43:00Z",
+    "effort_mid_utc": "2015-04-02T13:13:00Z",
+    "segment_windows": [
+     [
+      "2015-04-02T12:43:00Z",
+      "2015-04-02T13:43:00Z"
+     ]
+    ],
+    "track_center": [
+     -68.913542,
+     30.436175
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 5",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -69.76866666666666,
+      30.092966666666666
+     ],
+     [
+      -69.89,
+      30.044016666666668
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T5",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 12.874,
+    "area_author_km2": 0.12874000000000002,
+    "area_from_segments_km2": 0.12874,
+    "window_start_utc": "2015-04-02T16:56:00Z",
+    "window_end_utc": "2015-04-02T17:29:00Z",
+    "effort_mid_utc": "2015-04-02T17:12:30Z",
+    "segment_windows": [
+     [
+      "2015-04-02T16:56:00Z",
+      "2015-04-02T17:29:00Z"
+     ]
+    ],
+    "track_center": [
+     -69.829333,
+     30.068492
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 6",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -69.86508333333333,
+      29.954633333333334
+     ],
+     [
+      -69.8968,
+      29.739833333333333
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T6",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 24.064,
+    "area_author_km2": 0.24064,
+    "area_from_segments_km2": 0.24064,
+    "window_start_utc": "2015-04-03T08:13:00Z",
+    "window_end_utc": "2015-04-03T09:13:00Z",
+    "effort_mid_utc": "2015-04-03T08:43:00Z",
+    "segment_windows": [
+     [
+      "2015-04-03T08:13:00Z",
+      "2015-04-03T09:13:00Z"
+     ]
+    ],
+    "track_center": [
+     -69.880942,
+     29.847233
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 7",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -69.92693333333334,
+      29.534416666666665
+     ],
+     [
+      -69.95823333333334,
+      29.322383333333335
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T7",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 23.755,
+    "area_author_km2": 0.23754999999999998,
+    "area_from_segments_km2": 0.23755,
+    "window_start_utc": "2015-04-03T10:11:00Z",
+    "window_end_utc": "2015-04-03T11:12:00Z",
+    "effort_mid_utc": "2015-04-03T10:41:30Z",
+    "segment_windows": [
+     [
+      "2015-04-03T10:11:00Z",
+      "2015-04-03T11:12:00Z"
+     ]
+    ],
+    "track_center": [
+     -69.942583,
+     29.4284
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 8",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -69.97863333333333,
+      29.18215
+     ],
+     [
+      -70.00775,
+      29.008416666666665
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T8",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 19.511,
+    "area_author_km2": 0.19511,
+    "area_from_segments_km2": 0.19511,
+    "window_start_utc": "2015-04-03T11:51:00Z",
+    "window_end_utc": "2015-04-03T12:40:00Z",
+    "effort_mid_utc": "2015-04-03T12:15:30Z",
+    "segment_windows": [
+     [
+      "2015-04-03T11:51:00Z",
+      "2015-04-03T12:40:00Z"
+     ]
+    ],
+    "track_center": [
+     -69.993192,
+     29.095283
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 9",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -69.79491666666667,
+      27.548566666666666
+     ],
+     [
+      -69.87566666666666,
+      27.345916666666668
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T10",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 23.885,
+    "area_author_km2": 0.23885,
+    "area_from_segments_km2": 0.23885,
+    "window_start_utc": "2015-04-04T16:08:00Z",
+    "window_end_utc": "2015-04-04T17:08:00Z",
+    "effort_mid_utc": "2015-04-04T16:38:00Z",
+    "segment_windows": [
+     [
+      "2015-04-04T16:08:00Z",
+      "2015-04-04T17:08:00Z"
+     ]
+    ],
+    "track_center": [
+     -69.835292,
+     27.447242
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 11",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -69.99438333333333,
+      26.105733333333333
+     ],
+     [
+      -70.00913333333334,
+      26.013583333333333
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T11",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 10.345,
+    "area_author_km2": 0.10345000000000001,
+    "area_from_segments_km2": 0.10345,
+    "window_start_utc": "2015-04-05T08:17:00Z",
+    "window_end_utc": "2015-04-05T08:44:00Z",
+    "effort_mid_utc": "2015-04-05T08:30:30Z",
+    "segment_windows": [
+     [
+      "2015-04-05T08:17:00Z",
+      "2015-04-05T08:44:00Z"
+     ]
+    ],
+    "track_center": [
+     -70.001758,
+     26.059658
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 12",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -69.94351666666667,
+      25.931
+     ],
+     [
+      -69.95526666666666,
+      25.84925
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T12",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 9.169,
+    "area_author_km2": 0.09169000000000001,
+    "area_from_segments_km2": 0.09169,
+    "window_start_utc": "2015-04-05T14:27:00Z",
+    "window_end_utc": "2015-04-05T15:27:00Z",
+    "effort_mid_utc": "2015-04-05T14:57:00Z",
+    "segment_windows": [
+     [
+      "2015-04-05T14:27:00Z",
+      "2015-04-05T15:27:00Z"
+     ]
+    ],
+    "track_center": [
+     -69.949392,
+     25.890125
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 13",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -69.96885,
+      24.922433333333334
+     ],
+     [
+      -69.98658333333333,
+      24.7177
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T13",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 22.82,
+    "area_author_km2": 0.22820000000000001,
+    "area_from_segments_km2": 0.2282,
+    "window_start_utc": "2015-04-06T08:16:00Z",
+    "window_end_utc": "2015-04-06T09:16:00Z",
+    "effort_mid_utc": "2015-04-06T08:46:00Z",
+    "segment_windows": [
+     [
+      "2015-04-06T08:16:00Z",
+      "2015-04-06T09:16:00Z"
+     ]
+    ],
+    "track_center": [
+     -69.977717,
+     24.820067
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 14",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -69.92786666666666,
+      24.52885
+     ],
+     [
+      -69.79413333333333,
+      24.488216666666666
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T14",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 14.255,
+    "area_author_km2": 0.14255,
+    "area_from_segments_km2": 0.14255,
+    "window_start_utc": "2015-04-06T13:50:00Z",
+    "window_end_utc": "2015-04-06T14:50:00Z",
+    "effort_mid_utc": "2015-04-06T14:20:00Z",
+    "segment_windows": [
+     [
+      "2015-04-06T13:50:00Z",
+      "2015-04-06T14:50:00Z"
+     ]
+    ],
+    "track_center": [
+     -69.861,
+     24.508533
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 15",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -69.54533333333333,
+      24.413433333333334
+     ],
+     [
+      -69.32928333333334,
+      24.348566666666667
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T15",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 23.024,
+    "area_author_km2": 0.23024,
+    "area_from_segments_km2": 0.23024,
+    "window_start_utc": "2015-04-06T15:47:00Z",
+    "window_end_utc": "2015-04-06T16:47:00Z",
+    "effort_mid_utc": "2015-04-06T16:17:00Z",
+    "segment_windows": [
+     [
+      "2015-04-06T15:47:00Z",
+      "2015-04-06T16:47:00Z"
+     ]
+    ],
+    "track_center": [
+     -69.437308,
+     24.381
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 16",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -69.03145,
+      24.258866666666666
+     ],
+     [
+      -68.81451666666666,
+      24.193433333333335
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T16",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 23.154,
+    "area_author_km2": 0.23154,
+    "area_from_segments_km2": 0.23154,
+    "window_start_utc": "2015-04-06T18:12:00Z",
+    "window_end_utc": "2015-04-06T19:12:00Z",
+    "effort_mid_utc": "2015-04-06T18:42:00Z",
+    "segment_windows": [
+     [
+      "2015-04-06T18:12:00Z",
+      "2015-04-06T19:12:00Z"
+     ]
+    ],
+    "track_center": [
+     -68.922983,
+     24.22615
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 17",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -67.0049,
+      23.5283
+     ],
+     [
+      -67.0049,
+      23.733883333333335
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T17",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 22.844,
+    "area_author_km2": 0.22844,
+    "area_from_segments_km2": 0.22844,
+    "window_start_utc": "2015-04-07T09:51:00Z",
+    "window_end_utc": "2015-04-07T10:51:00Z",
+    "effort_mid_utc": "2015-04-07T10:21:00Z",
+    "segment_windows": [
+     [
+      "2015-04-07T09:51:00Z",
+      "2015-04-07T10:51:00Z"
+     ]
+    ],
+    "track_center": [
+     -67.0049,
+     23.631092
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 18",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "MultiLineString",
+    "coordinates": [
+     [
+      [
+       -66.954,
+       24.085716666666666
+      ],
+      [
+       -66.94935,
+       24.127066666666668
+      ]
+     ],
+     [
+      [
+       -66.96811666666666,
+       24.108283333333333
+      ],
+      [
+       -66.97556666666667,
+       24.2581
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T18",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 2,
+    "geometry_status": "segment",
+    "length_km": 21.284,
+    "area_author_km2": 0.22,
+    "area_from_segments_km2": 0.21284,
+    "window_start_utc": "2015-04-07T16:12:00Z",
+    "window_end_utc": "2015-04-07T17:24:00Z",
+    "effort_mid_utc": "2015-04-07T16:54:00Z",
+    "segment_windows": [
+     [
+      "2015-04-07T16:12:00Z",
+      "2015-04-07T16:26:00Z"
+     ],
+     [
+      "2015-04-07T16:38:00Z",
+      "2015-04-07T17:24:00Z"
+     ]
+    ],
+    "track_center": [
+     -66.970809,
+     24.162429
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 19; summary row 21; PANGAEA.931834 'Transect meta data'!row 20; summary row 21",
+    "note": "Transect 18 interrupted due to ship manoeuvre | continued; Continuation of interrupted Transect 18"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -66.89295,
+      25.216933333333333
+     ],
+     [
+      -66.92221666666667,
+      25.424333333333333
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T19",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 23.233,
+    "area_author_km2": 0.23233,
+    "area_from_segments_km2": 0.23233,
+    "window_start_utc": "2015-04-08T08:15:00Z",
+    "window_end_utc": "2015-04-08T09:15:00Z",
+    "effort_mid_utc": "2015-04-08T08:45:00Z",
+    "segment_windows": [
+     [
+      "2015-04-08T08:15:00Z",
+      "2015-04-08T09:15:00Z"
+     ]
+    ],
+    "track_center": [
+     -66.907583,
+     25.320633
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 22",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -66.95011666666667,
+      25.61695
+     ],
+     [
+      -66.97978333333333,
+      25.820383333333332
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T20",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 22.78,
+    "area_author_km2": 0.2278,
+    "area_from_segments_km2": 0.2278,
+    "window_start_utc": "2015-04-08T10:11:00Z",
+    "window_end_utc": "2015-04-08T11:11:00Z",
+    "effort_mid_utc": "2015-04-08T10:41:00Z",
+    "segment_windows": [
+     [
+      "2015-04-08T10:11:00Z",
+      "2015-04-08T11:11:00Z"
+     ]
+    ],
+    "track_center": [
+     -66.96495,
+     25.718667
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 23",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -66.93115,
+      26.013583333333333
+     ],
+     [
+      -66.9473,
+      26.231066666666667
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T21",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 24.22,
+    "area_author_km2": 0.2422,
+    "area_from_segments_km2": 0.2422,
+    "window_start_utc": "2015-04-08T17:54:00Z",
+    "window_end_utc": "2015-04-08T18:54:00Z",
+    "effort_mid_utc": "2015-04-08T18:24:00Z",
+    "segment_windows": [
+     [
+      "2015-04-08T17:54:00Z",
+      "2015-04-08T18:54:00Z"
+     ]
+    ],
+    "track_center": [
+     -66.939225,
+     26.122325
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 24",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "MultiLineString",
+    "coordinates": [
+     [
+      [
+       -66.96646666666666,
+       27.6019
+      ],
+      [
+       -66.98,
+       27.741683333333334
+      ]
+     ],
+     [
+      [
+       -66.98178333333334,
+       27.75735
+      ],
+      [
+       -66.98888333333333,
+       27.82956666666667
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T22",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 2,
+    "geometry_status": "segment",
+    "length_km": 23.645,
+    "area_author_km2": 0.24,
+    "area_from_segments_km2": 0.23645,
+    "window_start_utc": "2015-04-09T08:05:00Z",
+    "window_end_utc": "2015-04-09T09:11:00Z",
+    "effort_mid_utc": "2015-04-09T08:35:00Z",
+    "segment_windows": [
+     [
+      "2015-04-09T08:05:00Z",
+      "2015-04-09T08:45:00Z"
+     ],
+     [
+      "2015-04-09T08:51:00Z",
+      "2015-04-09T09:11:00Z"
+     ]
+    ],
+    "track_center": [
+     -66.97673,
+     27.707904
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 25; summary row 27; PANGAEA.931834 'Transect meta data'!row 26; summary row 27",
+    "note": "Transect 22 interrupted | continued; Continuation of interrupted transect 22"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -66.90953333333333,
+      28.090316666666666
+     ],
+     [
+      -66.93238333333333,
+      28.3098
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T23",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 24.491,
+    "area_author_km2": 0.24491,
+    "area_from_segments_km2": 0.24491,
+    "window_start_utc": "2015-04-09T15:36:00Z",
+    "window_end_utc": "2015-04-09T16:36:00Z",
+    "effort_mid_utc": "2015-04-09T16:06:00Z",
+    "segment_windows": [
+     [
+      "2015-04-09T15:36:00Z",
+      "2015-04-09T16:36:00Z"
+     ]
+    ],
+    "track_center": [
+     -66.920958,
+     28.200058
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 28",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -66.97493333333334,
+      28.708666666666666
+     ],
+     [
+      -66.99715,
+      28.91925
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T24",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 23.5,
+    "area_author_km2": 0.23500000000000001,
+    "area_from_segments_km2": 0.235,
+    "window_start_utc": "2015-04-09T18:27:00Z",
+    "window_end_utc": "2015-04-09T19:27:00Z",
+    "effort_mid_utc": "2015-04-09T18:57:00Z",
+    "segment_windows": [
+     [
+      "2015-04-09T18:27:00Z",
+      "2015-04-09T19:27:00Z"
+     ]
+    ],
+    "track_center": [
+     -66.986042,
+     28.813958
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 29",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -66.89988333333334,
+      30.238383333333335
+     ],
+     [
+      -66.92848333333333,
+      30.452583333333333
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T25",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 23.959,
+    "area_author_km2": 0.23959,
+    "area_from_segments_km2": 0.23959,
+    "window_start_utc": "2015-04-10T14:44:00Z",
+    "window_end_utc": "2015-04-10T15:44:00Z",
+    "effort_mid_utc": "2015-04-10T15:14:00Z",
+    "segment_windows": [
+     [
+      "2015-04-10T14:44:00Z",
+      "2015-04-10T15:44:00Z"
+     ]
+    ],
+    "track_center": [
+     -66.914183,
+     30.345483
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 30",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -66.98761666666667,
+      30.872166666666665
+     ],
+     [
+      -67.0041,
+      30.981366666666666
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T26",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 12.235,
+    "area_author_km2": 0.12235,
+    "area_from_segments_km2": 0.12235,
+    "window_start_utc": "2015-04-10T18:37:00Z",
+    "window_end_utc": "2015-04-10T19:05:00Z",
+    "effort_mid_utc": "2015-04-10T18:51:00Z",
+    "segment_windows": [
+     [
+      "2015-04-10T18:37:00Z",
+      "2015-04-10T19:05:00Z"
+     ]
+    ],
+    "track_center": [
+     -66.995858,
+     30.926767
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 31",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -66.71535,
+      30.99726666666667
+     ],
+     [
+      -66.47466666666666,
+      30.9971
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T27",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 22.925,
+    "area_author_km2": 0.22925,
+    "area_from_segments_km2": 0.22925,
+    "window_start_utc": "2015-04-11T08:01:00Z",
+    "window_end_utc": "2015-04-11T09:02:00Z",
+    "effort_mid_utc": "2015-04-11T08:31:30Z",
+    "segment_windows": [
+     [
+      "2015-04-11T08:01:00Z",
+      "2015-04-11T09:02:00Z"
+     ]
+    ],
+    "track_center": [
+     -66.595008,
+     30.997183
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 32",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -66.10423333333334,
+      30.997316666666666
+     ],
+     [
+      -65.85455,
+      30.99725
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T28",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 23.783,
+    "area_author_km2": 0.23783,
+    "area_from_segments_km2": 0.23783,
+    "window_start_utc": "2015-04-11T10:35:00Z",
+    "window_end_utc": "2015-04-11T11:35:00Z",
+    "effort_mid_utc": "2015-04-11T11:05:00Z",
+    "segment_windows": [
+     [
+      "2015-04-11T10:35:00Z",
+      "2015-04-11T11:35:00Z"
+     ]
+    ],
+    "track_center": [
+     -65.979392,
+     30.997283
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 33",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -65.00505,
+      30.997166666666665
+     ],
+     [
+      -64.76095,
+      30.9972
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T29",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 23.251,
+    "area_author_km2": 0.23251000000000002,
+    "area_from_segments_km2": 0.23251,
+    "window_start_utc": "2015-04-11T15:03:00Z",
+    "window_end_utc": "2015-04-11T16:01:00Z",
+    "effort_mid_utc": "2015-04-11T15:32:00Z",
+    "segment_windows": [
+     [
+      "2015-04-11T15:03:00Z",
+      "2015-04-11T16:01:00Z"
+     ]
+    ],
+    "track_center": [
+     -64.883,
+     30.997183
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 34",
+    "note": "source comment refers to T26, not T29 (misplaced in 931834): Transect 26 terminated because of station works"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -64.0867,
+      30.660616666666666
+     ],
+     [
+      -64.06266666666667,
+      30.464333333333332
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T30",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 21.932,
+    "area_author_km2": 0.21932,
+    "area_from_segments_km2": 0.21932,
+    "window_start_utc": "2015-04-12T07:59:00Z",
+    "window_end_utc": "2015-04-12T08:59:00Z",
+    "effort_mid_utc": "2015-04-12T08:29:00Z",
+    "segment_windows": [
+     [
+      "2015-04-12T07:59:00Z",
+      "2015-04-12T08:59:00Z"
+     ]
+    ],
+    "track_center": [
+     -64.074683,
+     30.562475
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 35",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -64.0396,
+      30.276233333333334
+     ],
+     [
+      -64.0156,
+      30.078883333333334
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T31",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 22.05,
+    "area_author_km2": 0.2205,
+    "area_from_segments_km2": 0.2205,
+    "window_start_utc": "2015-04-12T09:58:00Z",
+    "window_end_utc": "2015-04-12T10:58:00Z",
+    "effort_mid_utc": "2015-04-12T10:28:00Z",
+    "segment_windows": [
+     [
+      "2015-04-12T09:58:00Z",
+      "2015-04-12T10:58:00Z"
+     ]
+    ],
+    "track_center": [
+     -64.0276,
+     30.177558
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 36",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -64.06378333333333,
+      29.92965
+     ],
+     [
+      -64.05008333333333,
+      29.72155
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T32",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 23.162,
+    "area_author_km2": 0.23162,
+    "area_from_segments_km2": 0.23162,
+    "window_start_utc": "2015-04-12T16:31:00Z",
+    "window_end_utc": "2015-04-12T17:31:00Z",
+    "effort_mid_utc": "2015-04-12T17:01:00Z",
+    "segment_windows": [
+     [
+      "2015-04-12T16:31:00Z",
+      "2015-04-12T17:31:00Z"
+     ]
+    ],
+    "track_center": [
+     -64.056933,
+     29.8256
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 37",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -63.91211666666667,
+      27.831066666666665
+     ],
+     [
+      -63.93455,
+      27.6309
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T33",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 22.352,
+    "area_author_km2": 0.22352,
+    "area_from_segments_km2": 0.22352,
+    "window_start_utc": "2015-04-13T14:19:00Z",
+    "window_end_utc": "2015-04-13T15:19:00Z",
+    "effort_mid_utc": "2015-04-13T14:49:00Z",
+    "segment_windows": [
+     [
+      "2015-04-13T14:19:00Z",
+      "2015-04-13T15:19:00Z"
+     ]
+    ],
+    "track_center": [
+     -63.923333,
+     27.730983
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 38",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -63.96475,
+      27.362
+     ],
+     [
+      -63.98791666666666,
+      27.157083333333333
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T34",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 22.885,
+    "area_author_km2": 0.22885000000000003,
+    "area_from_segments_km2": 0.22885,
+    "window_start_utc": "2015-04-13T16:38:00Z",
+    "window_end_utc": "2015-04-13T17:38:00Z",
+    "effort_mid_utc": "2015-04-13T17:08:00Z",
+    "segment_windows": [
+     [
+      "2015-04-13T16:38:00Z",
+      "2015-04-13T17:38:00Z"
+     ]
+    ],
+    "track_center": [
+     -63.976333,
+     27.259542
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 39",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "MultiLineString",
+    "coordinates": [
+     [
+      [
+       -63.871316666666665,
+       25.93865
+      ],
+      [
+       -63.88141666666667,
+       25.852483333333332
+      ]
+     ],
+     [
+      [
+       -63.882466666666666,
+       25.839016666666666
+      ],
+      [
+       -63.891666666666666,
+       25.763766666666665
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T35",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 2,
+    "geometry_status": "segment",
+    "length_km": 18.04,
+    "area_author_km2": 0.18,
+    "area_from_segments_km2": 0.1804,
+    "window_start_utc": "2015-04-14T12:11:00Z",
+    "window_end_utc": "2015-04-14T13:16:00Z",
+    "effort_mid_utc": "2015-04-14T12:41:00Z",
+    "segment_windows": [
+     [
+      "2015-04-14T12:11:00Z",
+      "2015-04-14T12:44:00Z"
+     ],
+     [
+      "2015-04-14T12:49:00Z",
+      "2015-04-14T13:16:00Z"
+     ]
+    ],
+    "track_center": [
+     -63.880779,
+     25.857923
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 40; summary row 42; PANGAEA.931834 'Transect meta data'!row 41; summary row 42",
+    "note": "Transect 35 interrupted | continued; Continuation of interrupted Transect 35"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -63.96638333333333,
+      25.268633333333334
+     ],
+     [
+      -63.99608333333333,
+      25.063
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T37",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 23.044,
+    "area_author_km2": 0.23044,
+    "area_from_segments_km2": 0.23044,
+    "window_start_utc": "2015-04-14T17:53:00Z",
+    "window_end_utc": "2015-04-14T18:53:00Z",
+    "effort_mid_utc": "2015-04-14T18:23:00Z",
+    "segment_windows": [
+     [
+      "2015-04-14T17:53:00Z",
+      "2015-04-14T18:53:00Z"
+     ]
+    ],
+    "track_center": [
+     -63.981233,
+     25.165817
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 44",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -63.94365,
+      23.857333333333333
+     ],
+     [
+      -63.974866666666664,
+      23.676433333333332
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T38",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 20.351,
+    "area_author_km2": 0.20351,
+    "area_from_segments_km2": 0.20351,
+    "window_start_utc": "2015-04-15T13:34:00Z",
+    "window_end_utc": "2015-04-15T14:28:00Z",
+    "effort_mid_utc": "2015-04-15T14:01:00Z",
+    "segment_windows": [
+     [
+      "2015-04-15T13:34:00Z",
+      "2015-04-15T14:28:00Z"
+     ]
+    ],
+    "track_center": [
+     -63.959258,
+     23.766883
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 45",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -63.94871666666667,
+      22.905583333333333
+     ],
+     [
+      -64.00621666666666,
+      22.995616666666667
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T39",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 11.606,
+    "area_author_km2": 0.11606,
+    "area_from_segments_km2": 0.11606,
+    "window_start_utc": "2015-04-16T07:57:00Z",
+    "window_end_utc": "2015-04-16T08:28:00Z",
+    "effort_mid_utc": "2015-04-16T08:12:30Z",
+    "segment_windows": [
+     [
+      "2015-04-16T07:57:00Z",
+      "2015-04-16T08:28:00Z"
+     ]
+    ],
+    "track_center": [
+     -63.977467,
+     22.9506
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 46",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -63.8931,
+      22.981933333333334
+     ],
+     [
+      -63.94555,
+      22.7576
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T40",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 25.5,
+    "area_author_km2": 0.255,
+    "area_from_segments_km2": 0.255,
+    "window_start_utc": "2015-04-16T11:56:00Z",
+    "window_end_utc": "2015-04-16T12:56:00Z",
+    "effort_mid_utc": "2015-04-16T12:26:00Z",
+    "segment_windows": [
+     [
+      "2015-04-16T11:56:00Z",
+      "2015-04-16T12:56:00Z"
+     ]
+    ],
+    "track_center": [
+     -63.919325,
+     22.869767
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 47",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -60.910833333333336,
+      22.5161
+     ],
+     [
+      -60.933366666666664,
+      22.63308333333333
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T41",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 13.203,
+    "area_author_km2": 0.13203,
+    "area_from_segments_km2": 0.13203,
+    "window_start_utc": "2015-04-17T13:45:00Z",
+    "window_end_utc": "2015-04-17T14:45:00Z",
+    "effort_mid_utc": "2015-04-17T14:15:00Z",
+    "segment_windows": [
+     [
+      "2015-04-17T13:45:00Z",
+      "2015-04-17T14:45:00Z"
+     ]
+    ],
+    "track_center": [
+     -60.9221,
+     22.574592
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 48",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -60.955816666666664,
+      22.74525
+     ],
+     [
+      -60.977916666666665,
+      22.861933333333333
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T42",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 13.162,
+    "area_author_km2": 0.13162000000000001,
+    "area_from_segments_km2": 0.13162,
+    "window_start_utc": "2015-04-17T15:45:00Z",
+    "window_end_utc": "2015-04-17T16:45:00Z",
+    "effort_mid_utc": "2015-04-17T16:15:00Z",
+    "segment_windows": [
+     [
+      "2015-04-17T15:45:00Z",
+      "2015-04-17T16:45:00Z"
+     ]
+    ],
+    "track_center": [
+     -60.966867,
+     22.803592
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 49",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -60.971,
+      23.699783333333333
+     ],
+     [
+      -60.9928,
+      23.8891
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T43",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 21.153,
+    "area_author_km2": 0.21153,
+    "area_from_segments_km2": 0.21153,
+    "window_start_utc": "2015-04-18T08:00:00Z",
+    "window_end_utc": "2015-04-18T09:00:00Z",
+    "effort_mid_utc": "2015-04-18T08:30:00Z",
+    "segment_windows": [
+     [
+      "2015-04-18T08:00:00Z",
+      "2015-04-18T09:00:00Z"
+     ]
+    ],
+    "track_center": [
+     -60.9819,
+     23.794442
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 50",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -60.99563333333333,
+      24.13615
+     ],
+     [
+      -60.98426666666667,
+      24.330366666666666
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T44",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 21.612,
+    "area_author_km2": 0.21611999999999998,
+    "area_from_segments_km2": 0.21612,
+    "window_start_utc": "2015-04-18T15:30:00Z",
+    "window_end_utc": "2015-04-18T16:30:00Z",
+    "effort_mid_utc": "2015-04-18T16:00:00Z",
+    "segment_windows": [
+     [
+      "2015-04-18T15:30:00Z",
+      "2015-04-18T16:30:00Z"
+     ]
+    ],
+    "track_center": [
+     -60.98995,
+     24.233258
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 51",
+    "note": "source comment refers to T39, not T44 (misplaced in 931834): Transect 39 terminated because of station works"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -60.98148333333334,
+      24.54371666666667
+     ],
+     [
+      -60.98656666666667,
+      24.744233333333334
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T45",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 22.287,
+    "area_author_km2": 0.22286999999999998,
+    "area_from_segments_km2": 0.22287,
+    "window_start_utc": "2015-04-18T17:55:00Z",
+    "window_end_utc": "2015-04-18T18:55:00Z",
+    "effort_mid_utc": "2015-04-18T18:25:00Z",
+    "segment_windows": [
+     [
+      "2015-04-18T17:55:00Z",
+      "2015-04-18T18:55:00Z"
+     ]
+    ],
+    "track_center": [
+     -60.984025,
+     24.643975
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 52",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -60.99791666666667,
+      26.110666666666667
+     ],
+     [
+      -61.0,
+      26.313666666666666
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T46",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 22.558,
+    "area_author_km2": 0.22558,
+    "area_from_segments_km2": 0.22558,
+    "window_start_utc": "2015-04-19T12:41:00Z",
+    "window_end_utc": "2015-04-19T13:41:00Z",
+    "effort_mid_utc": "2015-04-19T13:11:00Z",
+    "segment_windows": [
+     [
+      "2015-04-19T12:41:00Z",
+      "2015-04-19T13:41:00Z"
+     ]
+    ],
+    "track_center": [
+     -60.998958,
+     26.212167
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 53",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -61.001416666666664,
+      26.500933333333332
+     ],
+     [
+      -61.0013,
+      26.599116666666667
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T47",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 10.91,
+    "area_author_km2": 0.1091,
+    "area_from_segments_km2": 0.1091,
+    "window_start_utc": "2015-04-19T14:37:00Z",
+    "window_end_utc": "2015-04-19T15:07:00Z",
+    "effort_mid_utc": "2015-04-19T14:52:00Z",
+    "segment_windows": [
+     [
+      "2015-04-19T14:37:00Z",
+      "2015-04-19T15:07:00Z"
+     ]
+    ],
+    "track_center": [
+     -61.001358,
+     26.550025
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 54",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -60.996766666666666,
+      27.828666666666667
+     ],
+     [
+      -61.00456666666667,
+      27.980816666666666
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T48",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 16.924,
+    "area_author_km2": 0.16924,
+    "area_from_segments_km2": 0.16924,
+    "window_start_utc": "2015-04-20T07:51:00Z",
+    "window_end_utc": "2015-04-20T08:36:00Z",
+    "effort_mid_utc": "2015-04-20T08:13:30Z",
+    "segment_windows": [
+     [
+      "2015-04-20T07:51:00Z",
+      "2015-04-20T08:36:00Z"
+     ]
+    ],
+    "track_center": [
+     -61.000667,
+     27.904742
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 55",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "MultiLineString",
+    "coordinates": [
+     [
+      [
+       -60.860083333333336,
+       28.073816666666666
+      ],
+      [
+       -60.87008333333333,
+       28.137066666666666
+      ]
+     ],
+     [
+      [
+       -60.861866666666664,
+       28.140233333333335
+      ],
+      [
+       -60.87088333333333,
+       28.28465
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T49",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 2,
+    "geometry_status": "segment",
+    "length_km": 23.168,
+    "area_author_km2": 0.23,
+    "area_from_segments_km2": 0.23168,
+    "window_start_utc": "2015-04-20T14:42:00Z",
+    "window_end_utc": "2015-04-20T16:33:00Z",
+    "effort_mid_utc": "2015-04-20T16:03:00Z",
+    "segment_windows": [
+     [
+      "2015-04-20T14:42:00Z",
+      "2015-04-20T14:59:00Z"
+     ],
+     [
+      "2015-04-20T15:50:00Z",
+      "2015-04-20T16:33:00Z"
+     ]
+    ],
+    "track_center": [
+     -60.864384,
+     28.180559
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 56; summary row 58; PANGAEA.931834 'Transect meta data'!row 57; summary row 58",
+    "note": "Transect 49 interrupted for Zodiak operation | continued; Continuation of interrupted Transect 49"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -60.925466666666665,
+      28.574316666666668
+     ],
+     [
+      -60.96605,
+      28.791516666666666
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T50",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 24.457,
+    "area_author_km2": 0.24457,
+    "area_from_segments_km2": 0.24457,
+    "window_start_utc": "2015-04-20T17:56:00Z",
+    "window_end_utc": "2015-04-20T18:56:00Z",
+    "effort_mid_utc": "2015-04-20T18:26:00Z",
+    "segment_windows": [
+     [
+      "2015-04-20T17:56:00Z",
+      "2015-04-20T18:56:00Z"
+     ]
+    ],
+    "track_center": [
+     -60.945758,
+     28.682917
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 59",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -60.93425,
+      29.912266666666667
+     ],
+     [
+      -60.947766666666666,
+      30.121083333333335
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T51",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 23.24,
+    "area_author_km2": 0.2324,
+    "area_from_segments_km2": 0.2324,
+    "window_start_utc": "2015-04-21T12:47:00Z",
+    "window_end_utc": "2015-04-21T13:47:00Z",
+    "effort_mid_utc": "2015-04-21T13:17:00Z",
+    "segment_windows": [
+     [
+      "2015-04-21T12:47:00Z",
+      "2015-04-21T13:47:00Z"
+     ]
+    ],
+    "track_center": [
+     -60.941008,
+     30.016675
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 60",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -60.96586666666666,
+      30.3961
+     ],
+     [
+      -60.97925,
+      30.600383333333333
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T52",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 22.736,
+    "area_author_km2": 0.22736,
+    "area_from_segments_km2": 0.22736,
+    "window_start_utc": "2015-04-21T15:06:00Z",
+    "window_end_utc": "2015-04-21T16:06:00Z",
+    "effort_mid_utc": "2015-04-21T15:36:00Z",
+    "segment_windows": [
+     [
+      "2015-04-21T15:06:00Z",
+      "2015-04-21T16:06:00Z"
+     ]
+    ],
+    "track_center": [
+     -60.972558,
+     30.498242
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 61",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -59.93953333333333,
+      30.9027
+     ],
+     [
+      -59.69445,
+      30.915016666666666
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T53",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 23.406,
+    "area_author_km2": 0.23406,
+    "area_from_segments_km2": 0.23406,
+    "window_start_utc": "2015-04-22T08:02:00Z",
+    "window_end_utc": "2015-04-22T09:02:00Z",
+    "effort_mid_utc": "2015-04-22T08:32:00Z",
+    "segment_windows": [
+     [
+      "2015-04-22T08:02:00Z",
+      "2015-04-22T09:02:00Z"
+     ]
+    ],
+    "track_center": [
+     -59.816992,
+     30.908858
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 62",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -59.49101666666667,
+      30.9251
+     ],
+     [
+      -59.30018333333334,
+      30.937733333333334
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T54",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 18.244,
+    "area_author_km2": 0.18244,
+    "area_from_segments_km2": 0.18244,
+    "window_start_utc": "2015-04-22T10:02:00Z",
+    "window_end_utc": "2015-04-22T11:02:00Z",
+    "effort_mid_utc": "2015-04-22T10:32:00Z",
+    "segment_windows": [
+     [
+      "2015-04-22T10:02:00Z",
+      "2015-04-22T11:02:00Z"
+     ]
+    ],
+    "track_center": [
+     -59.3956,
+     30.931417
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 63",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -59.10706666666667,
+      30.943816666666667
+     ],
+     [
+      -58.93281666666667,
+      30.95231666666667
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T55",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 16.633,
+    "area_author_km2": 0.16633,
+    "area_from_segments_km2": 0.16633,
+    "window_start_utc": "2015-04-22T12:02:00Z",
+    "window_end_utc": "2015-04-22T12:56:00Z",
+    "effort_mid_utc": "2015-04-22T12:29:00Z",
+    "segment_windows": [
+     [
+      "2015-04-22T12:02:00Z",
+      "2015-04-22T12:56:00Z"
+     ]
+    ],
+    "track_center": [
+     -59.019942,
+     30.948067
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 64",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -58.525483333333334,
+      30.972083333333334
+     ],
+     [
+      -58.42425,
+      30.97736666666667
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T56",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 9.663,
+    "area_author_km2": 0.09663000000000001,
+    "area_from_segments_km2": 0.09663,
+    "window_start_utc": "2015-04-22T15:05:00Z",
+    "window_end_utc": "2015-04-22T15:37:00Z",
+    "effort_mid_utc": "2015-04-22T15:21:00Z",
+    "segment_windows": [
+     [
+      "2015-04-22T15:05:00Z",
+      "2015-04-22T15:37:00Z"
+     ]
+    ],
+    "track_center": [
+     -58.474867,
+     30.974725
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 65",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -58.13773333333334,
+      29.88605
+     ],
+     [
+      -58.10543333333333,
+      29.668733333333332
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T57",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 24.348,
+    "area_author_km2": 0.24348,
+    "area_from_segments_km2": 0.24348,
+    "window_start_utc": "2015-04-23T14:55:00Z",
+    "window_end_utc": "2015-04-23T15:56:00Z",
+    "effort_mid_utc": "2015-04-23T15:25:30Z",
+    "segment_windows": [
+     [
+      "2015-04-23T14:55:00Z",
+      "2015-04-23T15:56:00Z"
+     ]
+    ],
+    "track_center": [
+     -58.121583,
+     29.777392
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 66",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -58.04301666666667,
+      29.251416666666668
+     ],
+     [
+      -58.0102,
+      29.031016666666666
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T58",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 24.697,
+    "area_author_km2": 0.24697,
+    "area_from_segments_km2": 0.24697,
+    "window_start_utc": "2015-04-23T17:52:00Z",
+    "window_end_utc": "2015-04-23T18:52:00Z",
+    "effort_mid_utc": "2015-04-23T18:22:00Z",
+    "segment_windows": [
+     [
+      "2015-04-23T17:52:00Z",
+      "2015-04-23T18:52:00Z"
+     ]
+    ],
+    "track_center": [
+     -58.026608,
+     29.141217
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 67",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -58.15938333333333,
+      27.95355
+     ],
+     [
+      -58.1242,
+      27.7352
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T59",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 24.508,
+    "area_author_km2": 0.24508,
+    "area_from_segments_km2": 0.24508,
+    "window_start_utc": "2015-04-24T11:58:00Z",
+    "window_end_utc": "2015-04-24T13:01:00Z",
+    "effort_mid_utc": "2015-04-24T12:29:30Z",
+    "segment_windows": [
+     [
+      "2015-04-24T11:58:00Z",
+      "2015-04-24T13:01:00Z"
+     ]
+    ],
+    "track_center": [
+     -58.141792,
+     27.844375
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 68",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -58.08971666666667,
+      27.504483333333333
+     ],
+     [
+      -58.055,
+      27.29221666666667
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T60",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 23.834,
+    "area_author_km2": 0.23834,
+    "area_from_segments_km2": 0.23834,
+    "window_start_utc": "2015-04-24T15:33:00Z",
+    "window_end_utc": "2015-04-24T16:33:00Z",
+    "effort_mid_utc": "2015-04-24T16:03:00Z",
+    "segment_windows": [
+     [
+      "2015-04-24T15:33:00Z",
+      "2015-04-24T16:33:00Z"
+     ]
+    ],
+    "track_center": [
+     -58.072358,
+     27.39835
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 69",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -58.087583333333335,
+      25.928833333333333
+     ],
+     [
+      -58.069183333333335,
+      25.721833333333333
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T61",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 23.075,
+    "area_author_km2": 0.23075,
+    "area_from_segments_km2": 0.23075,
+    "window_start_utc": "2015-04-25T10:16:00Z",
+    "window_end_utc": "2015-04-25T11:16:00Z",
+    "effort_mid_utc": "2015-04-25T10:46:00Z",
+    "segment_windows": [
+     [
+      "2015-04-25T10:16:00Z",
+      "2015-04-25T11:16:00Z"
+     ]
+    ],
+    "track_center": [
+     -58.078383,
+     25.825333
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 70",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -58.047216666666664,
+      25.51935
+     ],
+     [
+      -58.03225,
+      25.305316666666666
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T62",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 23.831,
+    "area_author_km2": 0.23831,
+    "area_from_segments_km2": 0.23831,
+    "window_start_utc": "2015-04-25T12:14:00Z",
+    "window_end_utc": "2015-04-25T13:14:00Z",
+    "effort_mid_utc": "2015-04-25T12:44:00Z",
+    "segment_windows": [
+     [
+      "2015-04-25T12:14:00Z",
+      "2015-04-25T13:14:00Z"
+     ]
+    ],
+    "track_center": [
+     -58.039733,
+     25.412333
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 71",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -58.08705,
+      23.853866666666665
+     ],
+     [
+      -58.0728,
+      23.704833333333333
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T63",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 16.624,
+    "area_author_km2": 0.16624,
+    "area_from_segments_km2": 0.16624,
+    "window_start_utc": "2015-04-26T10:10:00Z",
+    "window_end_utc": "2015-04-26T11:10:00Z",
+    "effort_mid_utc": "2015-04-26T10:40:00Z",
+    "segment_windows": [
+     [
+      "2015-04-26T10:10:00Z",
+      "2015-04-26T11:10:00Z"
+     ]
+    ],
+    "track_center": [
+     -58.079925,
+     23.77935
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 72",
+    "note": "source comment refers to T56, not T63 (misplaced in 931834): Transect 56 terminated for sampling of flotsam (-> Sample 78)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -58.05083333333334,
+      23.481
+     ],
+     [
+      -58.03653333333333,
+      23.335466666666665
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T64",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 16.237,
+    "area_author_km2": 0.16237,
+    "area_from_segments_km2": 0.16237,
+    "window_start_utc": "2015-04-26T12:43:00Z",
+    "window_end_utc": "2015-04-26T13:43:00Z",
+    "effort_mid_utc": "2015-04-26T13:13:00Z",
+    "segment_windows": [
+     [
+      "2015-04-26T12:43:00Z",
+      "2015-04-26T13:43:00Z"
+     ]
+    ],
+    "track_center": [
+     -58.043683,
+     23.408233
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 73",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -58.01936666666667,
+      23.175
+     ],
+     [
+      -58.00418333333333,
+      23.028933333333335
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S2:MSM41_litter-T65",
+    "source_id": "S2_SARGASSO_MSM41",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 16.305,
+    "area_author_km2": 0.16305,
+    "area_from_segments_km2": 0.16305,
+    "window_start_utc": "2015-04-26T14:49:00Z",
+    "window_end_utc": "2015-04-26T15:49:00Z",
+    "effort_mid_utc": "2015-04-26T15:19:00Z",
+    "segment_windows": [
+     [
+      "2015-04-26T14:49:00Z",
+      "2015-04-26T15:49:00Z"
+     ]
+    ],
+    "track_center": [
+     -58.011775,
+     23.101967
+    ],
+    "source": "PANGAEA.931834 'Transect meta data'!row 74",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      7.8357,
+      54.1292
+     ],
+     [
+      7.4821,
+      54.039
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect01",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 25.143,
+    "area_author_km2": 0.251,
+    "area_from_segments_km2": 0.25143,
+    "window_start_utc": "2014-04-03T14:39:00Z",
+    "window_end_utc": "2014-04-03T16:00:00Z",
+    "effort_mid_utc": "2014-04-03T15:19:30Z",
+    "segment_windows": [
+     [
+      "2014-04-03T14:39:00Z",
+      "2014-04-03T16:00:00Z"
+     ]
+    ],
+    "track_center": [
+     7.6589,
+     54.0841
+    ],
+    "source": "PANGAEA.890782 data row 33",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      6.761,
+      54.8817
+     ],
+     [
+      7.0137,
+      54.9118
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect02",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 16.489,
+    "area_author_km2": 0.165,
+    "area_from_segments_km2": 0.16489,
+    "window_start_utc": "2014-04-05T15:23:00Z",
+    "window_end_utc": "2014-04-05T16:09:00Z",
+    "effort_mid_utc": "2014-04-05T15:46:00Z",
+    "segment_windows": [
+     [
+      "2014-04-05T15:23:00Z",
+      "2014-04-05T16:09:00Z"
+     ]
+    ],
+    "track_center": [
+     6.88735,
+     54.89675
+    ],
+    "source": "PANGAEA.890782 data row 34",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      5.5885,
+      54.6424
+     ],
+     [
+      5.4601,
+      54.5789
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect03",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 10.871,
+    "area_author_km2": 0.109,
+    "area_from_segments_km2": 0.10871,
+    "window_start_utc": "2014-04-06T07:47:00Z",
+    "window_end_utc": "2014-04-06T08:24:00Z",
+    "effort_mid_utc": "2014-04-06T08:05:30Z",
+    "segment_windows": [
+     [
+      "2014-04-06T07:47:00Z",
+      "2014-04-06T08:24:00Z"
+     ]
+    ],
+    "track_center": [
+     5.5243,
+     54.61065
+    ],
+    "source": "PANGAEA.890782 data row 35",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      5.4267,
+      54.5536
+     ],
+     [
+      5.5342,
+      54.6887
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect04",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 16.958,
+    "area_author_km2": 0.17,
+    "area_from_segments_km2": 0.16958,
+    "window_start_utc": "2014-04-06T09:37:00Z",
+    "window_end_utc": "2014-04-06T10:31:00Z",
+    "effort_mid_utc": "2014-04-06T10:04:00Z",
+    "segment_windows": [
+     [
+      "2014-04-06T09:37:00Z",
+      "2014-04-06T10:31:00Z"
+     ]
+    ],
+    "track_center": [
+     5.48045,
+     54.62115
+    ],
+    "source": "PANGAEA.890782 data row 36",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      5.5331,
+      54.6779
+     ],
+     [
+      5.7162,
+      54.8349
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect05",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 21.075,
+    "area_author_km2": 0.211,
+    "area_from_segments_km2": 0.21075,
+    "window_start_utc": "2014-04-06T12:23:00Z",
+    "window_end_utc": "2014-04-06T13:23:00Z",
+    "effort_mid_utc": "2014-04-06T12:53:00Z",
+    "segment_windows": [
+     [
+      "2014-04-06T12:23:00Z",
+      "2014-04-06T13:23:00Z"
+     ]
+    ],
+    "track_center": [
+     5.62465,
+     54.7564
+    ],
+    "source": "PANGAEA.890782 data row 37",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      5.7489,
+      54.8554
+     ],
+     [
+      5.9096,
+      54.971
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect06",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 16.525,
+    "area_author_km2": 0.165,
+    "area_from_segments_km2": 0.16525,
+    "window_start_utc": "2014-04-06T14:39:00Z",
+    "window_end_utc": "2014-04-06T15:26:00Z",
+    "effort_mid_utc": "2014-04-06T15:02:30Z",
+    "segment_windows": [
+     [
+      "2014-04-06T14:39:00Z",
+      "2014-04-06T15:26:00Z"
+     ]
+    ],
+    "track_center": [
+     5.82925,
+     54.9132
+    ],
+    "source": "PANGAEA.890782 data row 38",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      5.925,
+      54.984
+     ],
+     [
+      5.7218,
+      55.0031
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect07",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 13.13,
+    "area_author_km2": 0.131,
+    "area_from_segments_km2": 0.1313,
+    "window_start_utc": "2014-04-06T16:23:00Z",
+    "window_end_utc": "2014-04-06T17:08:00Z",
+    "effort_mid_utc": "2014-04-06T16:45:30Z",
+    "segment_windows": [
+     [
+      "2014-04-06T16:23:00Z",
+      "2014-04-06T17:08:00Z"
+     ]
+    ],
+    "track_center": [
+     5.8234,
+     54.99355
+    ],
+    "source": "PANGAEA.890782 data row 39",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      5.6958,
+      54.9746
+     ],
+     [
+      5.5365,
+      54.9331
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect08",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 11.462,
+    "area_author_km2": 0.115,
+    "area_from_segments_km2": 0.11462,
+    "window_start_utc": "2014-04-06T18:58:00Z",
+    "window_end_utc": "2014-04-06T19:41:00Z",
+    "effort_mid_utc": "2014-04-06T19:19:30Z",
+    "segment_windows": [
+     [
+      "2014-04-06T18:58:00Z",
+      "2014-04-06T19:41:00Z"
+     ]
+    ],
+    "track_center": [
+     5.61615,
+     54.95385
+    ],
+    "source": "PANGAEA.890782 data row 40",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      5.3511,
+      54.9608
+     ],
+     [
+      5.4744,
+      55.0779
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect09",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 15.205,
+    "area_author_km2": 0.152,
+    "area_from_segments_km2": 0.15205,
+    "window_start_utc": "2014-04-07T07:54:00Z",
+    "window_end_utc": "2014-04-07T08:40:00Z",
+    "effort_mid_utc": "2014-04-07T08:17:00Z",
+    "segment_windows": [
+     [
+      "2014-04-07T07:54:00Z",
+      "2014-04-07T08:40:00Z"
+     ]
+    ],
+    "track_center": [
+     5.41275,
+     55.01935
+    ],
+    "source": "PANGAEA.890782 data row 41",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      5.4783,
+      55.0765
+     ],
+     [
+      5.6894,
+      55.1319
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect10",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 14.98,
+    "area_author_km2": 0.15,
+    "area_from_segments_km2": 0.1498,
+    "window_start_utc": "2014-04-07T09:53:00Z",
+    "window_end_utc": "2014-04-07T10:43:00Z",
+    "effort_mid_utc": "2014-04-07T10:18:00Z",
+    "segment_windows": [
+     [
+      "2014-04-07T09:53:00Z",
+      "2014-04-07T10:43:00Z"
+     ]
+    ],
+    "track_center": [
+     5.58385,
+     55.1042
+    ],
+    "source": "PANGAEA.890782 data row 42",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      5.6711,
+      55.1139
+     ],
+     [
+      5.4181,
+      55.1086
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect11",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 16.095,
+    "area_author_km2": 0.161,
+    "area_from_segments_km2": 0.16095,
+    "window_start_utc": "2014-04-07T12:21:00Z",
+    "window_end_utc": "2014-04-07T13:14:00Z",
+    "effort_mid_utc": "2014-04-07T12:47:30Z",
+    "segment_windows": [
+     [
+      "2014-04-07T12:21:00Z",
+      "2014-04-07T13:14:00Z"
+     ]
+    ],
+    "track_center": [
+     5.5446,
+     55.11125
+    ],
+    "source": "PANGAEA.890782 data row 43",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      5.3657,
+      55.0833
+     ],
+     [
+      5.2009,
+      55.0223
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect12",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 12.491,
+    "area_author_km2": 0.125,
+    "area_from_segments_km2": 0.12491,
+    "window_start_utc": "2014-04-07T14:45:00Z",
+    "window_end_utc": "2014-04-07T15:28:00Z",
+    "effort_mid_utc": "2014-04-07T15:06:30Z",
+    "segment_windows": [
+     [
+      "2014-04-07T14:45:00Z",
+      "2014-04-07T15:28:00Z"
+     ]
+    ],
+    "track_center": [
+     5.2833,
+     55.0528
+    ],
+    "source": "PANGAEA.890782 data row 44",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      5.1862,
+      55.0054
+     ],
+     [
+      5.0767,
+      54.9361
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect13",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 10.401,
+    "area_author_km2": 0.104,
+    "area_from_segments_km2": 0.10401,
+    "window_start_utc": "2014-04-07T16:21:00Z",
+    "window_end_utc": "2014-04-07T16:58:00Z",
+    "effort_mid_utc": "2014-04-07T16:39:30Z",
+    "segment_windows": [
+     [
+      "2014-04-07T16:21:00Z",
+      "2014-04-07T16:58:00Z"
+     ]
+    ],
+    "track_center": [
+     5.13145,
+     54.97075
+    ],
+    "source": "PANGAEA.890782 data row 45",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      5.0713,
+      54.9245
+     ],
+     [
+      4.9323,
+      55.085
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect14",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 20.445,
+    "area_author_km2": 0.204,
+    "area_from_segments_km2": 0.20445,
+    "window_start_utc": "2014-04-07T18:23:00Z",
+    "window_end_utc": "2014-04-07T19:27:00Z",
+    "effort_mid_utc": "2014-04-07T18:55:00Z",
+    "segment_windows": [
+     [
+      "2014-04-07T18:23:00Z",
+      "2014-04-07T19:27:00Z"
+     ]
+    ],
+    "track_center": [
+     5.0018,
+     55.00475
+    ],
+    "source": "PANGAEA.890782 data row 46",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      3.4593,
+      55.7547
+     ],
+     [
+      3.4031,
+      55.7888
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect15",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 5.222,
+    "area_author_km2": 0.052,
+    "area_from_segments_km2": 0.05222,
+    "window_start_utc": "2014-04-08T08:50:00Z",
+    "window_end_utc": "2014-04-08T09:18:00Z",
+    "effort_mid_utc": "2014-04-08T09:04:00Z",
+    "segment_windows": [
+     [
+      "2014-04-08T08:50:00Z",
+      "2014-04-08T09:18:00Z"
+     ]
+    ],
+    "track_center": [
+     3.4312,
+     55.77175
+    ],
+    "source": "PANGAEA.890782 data row 47",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      3.4212,
+      55.8511
+     ],
+     [
+      3.4177,
+      55.9045
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect16",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 5.943,
+    "area_author_km2": 0.059,
+    "area_from_segments_km2": 0.05943,
+    "window_start_utc": "2014-04-08T12:16:00Z",
+    "window_end_utc": "2014-04-08T12:44:00Z",
+    "effort_mid_utc": "2014-04-08T12:30:00Z",
+    "segment_windows": [
+     [
+      "2014-04-08T12:16:00Z",
+      "2014-04-08T12:44:00Z"
+     ]
+    ],
+    "track_center": [
+     3.41945,
+     55.8778
+    ],
+    "source": "PANGAEA.890782 data row 48",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      3.4487,
+      55.8938
+     ],
+     [
+      3.6341,
+      55.8614
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect17",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 12.104,
+    "area_author_km2": 0.121,
+    "area_from_segments_km2": 0.12104,
+    "window_start_utc": "2014-04-08T13:36:00Z",
+    "window_end_utc": "2014-04-08T14:05:00Z",
+    "effort_mid_utc": "2014-04-08T13:50:30Z",
+    "segment_windows": [
+     [
+      "2014-04-08T13:36:00Z",
+      "2014-04-08T14:05:00Z"
+     ]
+    ],
+    "track_center": [
+     3.5414,
+     55.8776
+    ],
+    "source": "PANGAEA.890782 data row 49",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      3.6361,
+      55.8023
+     ],
+     [
+      3.802,
+      55.7312
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect18",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 13.161,
+    "area_author_km2": 0.132,
+    "area_from_segments_km2": 0.13161,
+    "window_start_utc": "2014-04-08T15:06:00Z",
+    "window_end_utc": "2014-04-08T15:52:00Z",
+    "effort_mid_utc": "2014-04-08T15:29:00Z",
+    "segment_windows": [
+     [
+      "2014-04-08T15:06:00Z",
+      "2014-04-08T15:52:00Z"
+     ]
+    ],
+    "track_center": [
+     3.71905,
+     55.76675
+    ],
+    "source": "PANGAEA.890782 data row 50",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      4.9008,
+      55.2711
+     ],
+     [
+      5.094,
+      55.2575
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect19",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 12.323,
+    "area_author_km2": 0.123,
+    "area_from_segments_km2": 0.12323,
+    "window_start_utc": "2014-04-09T08:47:00Z",
+    "window_end_utc": "2014-04-09T09:24:00Z",
+    "effort_mid_utc": "2014-04-09T09:05:30Z",
+    "segment_windows": [
+     [
+      "2014-04-09T08:47:00Z",
+      "2014-04-09T09:24:00Z"
+     ]
+    ],
+    "track_center": [
+     4.9974,
+     55.2643
+    ],
+    "source": "PANGAEA.890782 data row 51",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      5.3346,
+      55.2206
+     ],
+     [
+      5.5991,
+      55.2433
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect20",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 16.959,
+    "area_author_km2": 0.17,
+    "area_from_segments_km2": 0.16959,
+    "window_start_utc": "2014-04-09T13:01:00Z",
+    "window_end_utc": "2014-04-09T16:52:00Z",
+    "effort_mid_utc": "2014-04-09T14:56:30Z",
+    "segment_windows": [
+     [
+      "2014-04-09T13:01:00Z",
+      "2014-04-09T16:52:00Z"
+     ]
+    ],
+    "track_center": [
+     5.46685,
+     55.23195
+    ],
+    "source": "PANGAEA.890782 data row 52",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      5.6354,
+      55.2639
+     ],
+     [
+      5.6369,
+      55.3926
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect21",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 14.32,
+    "area_author_km2": 0.143,
+    "area_from_segments_km2": 0.1432,
+    "window_start_utc": "2014-04-09T15:03:00Z",
+    "window_end_utc": "2014-04-09T15:51:00Z",
+    "effort_mid_utc": "2014-04-09T15:27:00Z",
+    "segment_windows": [
+     [
+      "2014-04-09T15:03:00Z",
+      "2014-04-09T15:51:00Z"
+     ]
+    ],
+    "track_center": [
+     5.63615,
+     55.32825
+    ],
+    "source": "PANGAEA.890782 data row 53",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      5.6466,
+      55.4029
+     ],
+     [
+      5.7274,
+      55.4572
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect22",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 7.897,
+    "area_author_km2": 0.079,
+    "area_from_segments_km2": 0.07897,
+    "window_start_utc": "2014-04-09T17:06:00Z",
+    "window_end_utc": "2014-04-09T17:30:00Z",
+    "effort_mid_utc": "2014-04-09T17:18:00Z",
+    "segment_windows": [
+     [
+      "2014-04-09T17:06:00Z",
+      "2014-04-09T17:30:00Z"
+     ]
+    ],
+    "track_center": [
+     5.687,
+     55.43005
+    ],
+    "source": "PANGAEA.890782 data row 54",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      6.4045,
+      55.0765
+     ],
+     [
+      6.4012,
+      55.1444
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect23",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 7.549,
+    "area_author_km2": 0.075,
+    "area_from_segments_km2": 0.07549,
+    "window_start_utc": "2014-04-10T09:31:00Z",
+    "window_end_utc": "2014-04-10T09:54:00Z",
+    "effort_mid_utc": "2014-04-10T09:42:30Z",
+    "segment_windows": [
+     [
+      "2014-04-10T09:31:00Z",
+      "2014-04-10T09:54:00Z"
+     ]
+    ],
+    "track_center": [
+     6.40285,
+     55.11045
+    ],
+    "source": "PANGAEA.890782 data row 55",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      6.3718,
+      55.1489
+     ],
+     [
+      6.2648,
+      55.209
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect24",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 9.63,
+    "area_author_km2": 0.096,
+    "area_from_segments_km2": 0.0963,
+    "window_start_utc": "2014-04-10T12:15:00Z",
+    "window_end_utc": "2014-04-10T12:53:00Z",
+    "effort_mid_utc": "2014-04-10T12:34:00Z",
+    "segment_windows": [
+     [
+      "2014-04-10T12:15:00Z",
+      "2014-04-10T12:53:00Z"
+     ]
+    ],
+    "track_center": [
+     6.3183,
+     55.17895
+    ],
+    "source": "PANGAEA.890782 data row 56",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      6.251,
+      55.2325
+     ],
+     [
+      6.4115,
+      55.2926
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect25",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 12.288,
+    "area_author_km2": 0.123,
+    "area_from_segments_km2": 0.12288,
+    "window_start_utc": "2014-04-10T14:27:00Z",
+    "window_end_utc": "2014-04-10T15:13:00Z",
+    "effort_mid_utc": "2014-04-10T14:50:00Z",
+    "segment_windows": [
+     [
+      "2014-04-10T14:27:00Z",
+      "2014-04-10T15:13:00Z"
+     ]
+    ],
+    "track_center": [
+     6.33125,
+     55.26255
+    ],
+    "source": "PANGAEA.890782 data row 57",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      6.3938,
+      55.2819
+     ],
+     [
+      6.3814,
+      55.3674
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect26",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 9.549,
+    "area_author_km2": 0.095,
+    "area_from_segments_km2": 0.09549,
+    "window_start_utc": "2014-04-10T16:07:00Z",
+    "window_end_utc": "2014-04-10T16:50:00Z",
+    "effort_mid_utc": "2014-04-10T16:28:30Z",
+    "segment_windows": [
+     [
+      "2014-04-10T16:07:00Z",
+      "2014-04-10T16:50:00Z"
+     ]
+    ],
+    "track_center": [
+     6.3876,
+     55.32465
+    ],
+    "source": "PANGAEA.890782 data row 58",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      6.3812,
+      55.3679
+     ],
+     [
+      6.5845,
+      55.3293
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect27",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 14.376,
+    "area_author_km2": 0.144,
+    "area_from_segments_km2": 0.14376,
+    "window_start_utc": "2014-04-10T18:19:00Z",
+    "window_end_utc": "2014-04-10T19:20:00Z",
+    "effort_mid_utc": "2014-04-10T18:49:30Z",
+    "segment_windows": [
+     [
+      "2014-04-10T18:19:00Z",
+      "2014-04-10T19:20:00Z"
+     ]
+    ],
+    "track_center": [
+     6.48285,
+     55.3486
+    ],
+    "source": "PANGAEA.890782 data row 59",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      8.1349,
+      55.0073
+     ],
+     [
+      8.1459,
+      54.9031
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect28",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 11.602,
+    "area_author_km2": 0.116,
+    "area_from_segments_km2": 0.11602,
+    "window_start_utc": "2014-04-11T08:31:00Z",
+    "window_end_utc": "2014-04-11T09:10:00Z",
+    "effort_mid_utc": "2014-04-11T08:50:30Z",
+    "segment_windows": [
+     [
+      "2014-04-11T08:31:00Z",
+      "2014-04-11T09:10:00Z"
+     ]
+    ],
+    "track_center": [
+     8.1404,
+     54.9552
+    ],
+    "source": "PANGAEA.890782 data row 60",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      8.1453,
+      54.8892
+     ],
+     [
+      8.1272,
+      54.6818
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect29",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 23.093,
+    "area_author_km2": 0.231,
+    "area_from_segments_km2": 0.23093,
+    "window_start_utc": "2014-04-11T10:06:00Z",
+    "window_end_utc": "2014-04-11T11:17:00Z",
+    "effort_mid_utc": "2014-04-11T10:41:30Z",
+    "segment_windows": [
+     [
+      "2014-04-11T10:06:00Z",
+      "2014-04-11T11:17:00Z"
+     ]
+    ],
+    "track_center": [
+     8.13625,
+     54.7855
+    ],
+    "source": "PANGAEA.890782 data row 61",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      8.0914,
+      54.6052
+     ],
+     [
+      7.9362,
+      54.5023
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect30",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 15.379,
+    "area_author_km2": 0.154,
+    "area_from_segments_km2": 0.15379,
+    "window_start_utc": "2014-04-11T12:45:00Z",
+    "window_end_utc": "2014-04-11T13:30:00Z",
+    "effort_mid_utc": "2014-04-11T13:07:30Z",
+    "segment_windows": [
+     [
+      "2014-04-11T12:45:00Z",
+      "2014-04-11T13:30:00Z"
+     ]
+    ],
+    "track_center": [
+     8.0138,
+     54.55375
+    ],
+    "source": "PANGAEA.890782 data row 62",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      7.8791,
+      54.4665
+     ],
+     [
+      7.7169,
+      54.3535
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect31",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 16.517,
+    "area_author_km2": 0.165,
+    "area_from_segments_km2": 0.16517,
+    "window_start_utc": "2014-04-11T14:26:00Z",
+    "window_end_utc": "2014-04-11T15:12:00Z",
+    "effort_mid_utc": "2014-04-11T14:49:00Z",
+    "segment_windows": [
+     [
+      "2014-04-11T14:26:00Z",
+      "2014-04-11T15:12:00Z"
+     ]
+    ],
+    "track_center": [
+     7.798,
+     54.41
+    ],
+    "source": "PANGAEA.890782 data row 63",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      7.7125,
+      54.4021
+     ],
+     [
+      8.1771,
+      54.4156
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect32",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 30.463,
+    "area_author_km2": 0.305,
+    "area_from_segments_km2": 0.30463,
+    "window_start_utc": "2014-04-11T18:12:00Z",
+    "window_end_utc": "2014-04-11T18:56:00Z",
+    "effort_mid_utc": "2014-04-11T18:34:00Z",
+    "segment_windows": [
+     [
+      "2014-04-11T18:12:00Z",
+      "2014-04-11T18:56:00Z"
+     ]
+    ],
+    "track_center": [
+     7.9448,
+     54.40885
+    ],
+    "source": "PANGAEA.890782 data row 64",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      7.5324,
+      53.872
+     ],
+     [
+      7.364,
+      53.8567
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect33",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 11.172,
+    "area_author_km2": 0.112,
+    "area_from_segments_km2": 0.11172,
+    "window_start_utc": "2014-04-12T08:06:00Z",
+    "window_end_utc": "2014-04-12T08:46:00Z",
+    "effort_mid_utc": "2014-04-12T08:26:00Z",
+    "segment_windows": [
+     [
+      "2014-04-12T08:06:00Z",
+      "2014-04-12T08:46:00Z"
+     ]
+    ],
+    "track_center": [
+     7.4482,
+     53.86435
+    ],
+    "source": "PANGAEA.890782 data row 65",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      7.3339,
+      53.8582
+     ],
+     [
+      7.1042,
+      53.8228
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect34",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 15.602,
+    "area_author_km2": 0.156,
+    "area_from_segments_km2": 0.15602,
+    "window_start_utc": "2014-04-12T09:32:00Z",
+    "window_end_utc": "2014-04-12T10:28:00Z",
+    "effort_mid_utc": "2014-04-12T10:00:00Z",
+    "segment_windows": [
+     [
+      "2014-04-12T09:32:00Z",
+      "2014-04-12T10:28:00Z"
+     ]
+    ],
+    "track_center": [
+     7.21905,
+     53.8405
+    ],
+    "source": "PANGAEA.890782 data row 66",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      7.0701,
+      53.8133
+     ],
+     [
+      6.911,
+      53.8704
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect35",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 12.309,
+    "area_author_km2": 0.123,
+    "area_from_segments_km2": 0.12309,
+    "window_start_utc": "2014-04-12T12:00:00Z",
+    "window_end_utc": "2014-04-12T12:42:00Z",
+    "effort_mid_utc": "2014-04-12T12:21:00Z",
+    "segment_windows": [
+     [
+      "2014-04-12T12:00:00Z",
+      "2014-04-12T12:42:00Z"
+     ]
+    ],
+    "track_center": [
+     6.99055,
+     53.84185
+    ],
+    "source": "PANGAEA.890782 data row 67",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      6.8613,
+      53.8576
+     ],
+     [
+      6.7093,
+      53.8433
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect36",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 10.086,
+    "area_author_km2": 0.101,
+    "area_from_segments_km2": 0.10086,
+    "window_start_utc": "2014-04-12T13:42:00Z",
+    "window_end_utc": "2014-04-12T14:11:00Z",
+    "effort_mid_utc": "2014-04-12T13:56:30Z",
+    "segment_windows": [
+     [
+      "2014-04-12T13:42:00Z",
+      "2014-04-12T14:11:00Z"
+     ]
+    ],
+    "track_center": [
+     6.7853,
+     53.85045
+    ],
+    "source": "PANGAEA.890782 data row 68",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      6.5888,
+      53.8101
+     ],
+     [
+      6.4895,
+      53.7302
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect37",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 11.037,
+    "area_author_km2": 0.11,
+    "area_from_segments_km2": 0.11037,
+    "window_start_utc": "2014-04-12T15:46:00Z",
+    "window_end_utc": "2014-04-12T16:31:00Z",
+    "effort_mid_utc": "2014-04-12T16:08:30Z",
+    "segment_windows": [
+     [
+      "2014-04-12T15:46:00Z",
+      "2014-04-12T16:31:00Z"
+     ]
+    ],
+    "track_center": [
+     6.53915,
+     53.77015
+    ],
+    "source": "PANGAEA.890782 data row 69",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      6.4934,
+      53.7163
+     ],
+     [
+      6.4199,
+      53.6839
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE419_MarLitter_transect38",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 6.235,
+    "area_author_km2": 0.062,
+    "area_from_segments_km2": 0.06235,
+    "window_start_utc": "2014-04-12T17:21:00Z",
+    "window_end_utc": "2014-04-12T17:50:00Z",
+    "effort_mid_utc": "2014-04-12T17:35:30Z",
+    "segment_windows": [
+     [
+      "2014-04-12T17:21:00Z",
+      "2014-04-12T17:50:00Z"
+     ]
+    ],
+    "track_center": [
+     6.45665,
+     53.7001
+    ],
+    "source": "PANGAEA.890782 data row 70",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      7.9198,
+      54.2381
+     ],
+     [
+      7.71908,
+      54.30672
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE460_MarLitter_transect01",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "reconstructed_approx",
+    "length_km": 15.102,
+    "area_author_km2": 0.151,
+    "area_from_segments_km2": 0.15102,
+    "window_start_utc": "2016-04-08T16:17:00Z",
+    "window_end_utc": "2016-04-08T17:00:00Z",
+    "effort_mid_utc": "2016-04-08T16:38:30Z",
+    "segment_windows": [
+     [
+      "2016-04-08T16:17:00Z",
+      "2016-04-08T17:00:00Z"
+     ]
+    ],
+    "track_center": [
+     7.81944,
+     54.27241
+    ],
+    "source": "PANGAEA.890782 (start, length) + PANGAEA.890781 (3 object positions, direction)",
+    "note": "start == end in PANGAEA.890782 (and in organisers' CSV); end = start + 15.102 km at bearing 300.4 deg towards farthest object (14.28 km from start); objects max 0.074 km off the reconstructed line; straight-course assumption"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      7.5161,
+      54.3924
+     ],
+     [
+      7.193,
+      54.4415
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE460_MarLitter_transect02",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 21.663,
+    "area_author_km2": 0.217,
+    "area_from_segments_km2": 0.21663,
+    "window_start_utc": "2016-04-09T14:58:00Z",
+    "window_end_utc": "2016-04-09T15:58:00Z",
+    "effort_mid_utc": "2016-04-09T15:28:00Z",
+    "segment_windows": [
+     [
+      "2016-04-09T14:58:00Z",
+      "2016-04-09T15:58:00Z"
+     ]
+    ],
+    "track_center": [
+     7.35455,
+     54.41695
+    ],
+    "source": "PANGAEA.890782 data row 72",
+    "note": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      6.7159,
+      54.7483
+     ],
+     [
+      6.56,
+      54.9341
+     ]
+    ]
+   },
+   "properties": {
+    "event_id": "S3:HE460_MarLitter_transect03",
+    "source_id": "S3_SE_NORTH_SEA",
+    "n_segments": 1,
+    "geometry_status": "single",
+    "length_km": 22.93,
+    "area_author_km2": 0.229,
+    "area_from_segments_km2": 0.2293,
+    "window_start_utc": "2016-04-10T16:15:00Z",
+    "window_end_utc": "2016-04-10T17:18:00Z",
+    "effort_mid_utc": "2016-04-10T16:46:30Z",
+    "segment_windows": [
+     [
+      "2016-04-10T16:15:00Z",
+      "2016-04-10T17:18:00Z"
+     ]
+    ],
+    "track_center": [
+     6.63795,
+     54.8412
+    ],
+    "source": "PANGAEA.890782 data row 73",
+    "note": ""
+   }
+  }
+ ]
+}

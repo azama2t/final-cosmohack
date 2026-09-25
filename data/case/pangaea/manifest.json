@@ -1,0 +1,42 @@
+{
+  "931834": {
+    "downloaded_utc": "2026-09-25T15:53:55Z",
+    "file": "data/case/pangaea/PANGAEA_931834.xlsx",
+    "url": "https://doi.pangaea.de/10.1594/PANGAEA.931834?format=textfile",
+    "doi": "10.1594/PANGAEA.931834",
+    "license": "CC BY 4.0",
+    "title": "S2 MSM41 transect metadata (Gutow et al. 2021)",
+    "bytes": 27936,
+    "sha256": "ca964c5bf14878c750b54cc40bba1f368831e70d9abbfaf341138bcdf3d3b3ca"
+  },
+  "931833": {
+    "downloaded_utc": "2026-09-25T15:53:57Z",
+    "file": "data/case/pangaea/PANGAEA_931833.tab",
+    "url": "https://doi.pangaea.de/10.1594/PANGAEA.931833?format=textfile",
+    "doi": "10.1594/PANGAEA.931833",
+    "license": "CC BY 4.0",
+    "title": "S2 MSM41 floating litter objects (Gutow et al. 2021)",
+    "bytes": 85446,
+    "sha256": "9ba6c0b5faa2233e331f3f12d06897c29a1978ed0e90579a4980dc604a5262b1"
+  },
+  "890782": {
+    "downloaded_utc": "2026-09-25T15:53:58Z",
+    "file": "data/case/pangaea/PANGAEA_890782.tab",
+    "url": "https://doi.pangaea.de/10.1594/PANGAEA.890782?format=textfile",
+    "doi": "10.1594/PANGAEA.890782",
+    "license": "CC BY 3.0",
+    "title": "S3 HE419/HE460 transects (Gutow et al. 2018)",
+    "bytes": 35568,
+    "sha256": "c8abc219113135dea5ce924b63f636aadaf495ad3281dc5d049451d8c51f1cb2"
+  },
+  "890781": {
+    "downloaded_utc": "2026-09-25T15:54:00Z",
+    "file": "data/case/pangaea/PANGAEA_890781.tab",
+    "url": "https://doi.pangaea.de/10.1594/PANGAEA.890781?format=textfile",
+    "doi": "10.1594/PANGAEA.890781",
+    "license": "CC BY 3.0",
+    "title": "S3 floating litter objects (Gutow et al. 2018)",
+    "bytes": 104125,
+    "sha256": "830636a3714e17bd15d2620deb687e37dcd265682ba421eed2d43fa25393af8f"
+  }
+}

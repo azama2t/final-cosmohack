@@ -1,4 +1,4 @@
-r"""L63: main detector (weights/lgbm) vs baselines on ONE check sample (MARIDA test) + error analysis by background class.
+r"""Main detector (weights/lgbm) vs baselines on ONE check sample (MARIDA test) + error analysis by background class.
 
 All settings are chosen on MARIDA val only (or fixed by the method), then applied once to MARIDA test:
   lgbm          weights/lgbm, P(MD) >= 0.63 (threshold from weights/lgbm/meta.json, chosen on val)

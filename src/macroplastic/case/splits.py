@@ -11,7 +11,7 @@
 - route   — «участок маршрута»: дни рейса по порядку режутся на k непрерывных блоков, фолд = блок
             (blocked CV по времени); buffered_train_mask() дополнительно убирает из train записи
             ближе buffer_days к test. route + буфер 1 сут — основной сплит (configs/case_selection.yaml),
-            т.к. kNN на st/event/daycell выигрывает за счёт соседей того же дня рейса (L60b).
+            т.к. kNN на st/event/daycell выигрывает за счёт соседей того же дня рейса (reports/case_conc/metrics_by_fold.csv).
 Все схемы дополнительно объединяются с event_id (union-find), так что событие никогда
 не разрезается. Фолды — жадная балансировка групп по размеру с фиксированным seed.
 
@@ -295,7 +295,7 @@ def assert_no_overlap(split: pd.DataFrame, cruise_day: bool = False) -> None:
         raise AssertionError(f"пересечение групп между фолдами:\n{bad}")
 
 
-# ---------------------------------------------------------------- отложенный финальный test (L68)
+# ---------------------------------------------------------------- отложенный финальный test
 def final_test_block_index(profile: str, seed: int = 42, k_blocks: int = 5) -> int:
     """Какой участок маршрута уходит в отложенный test: sha256("<seed>|<profile>") mod k_blocks.
     Правило не зависит от значений C (выбор до моделей, без просмотра меток)."""

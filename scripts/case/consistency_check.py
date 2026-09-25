@@ -1,4 +1,4 @@
-r"""L67 — самопроверка согласованности и скорости API v3 (критерий Т5).
+r"""Самопроверка согласованности и скорости API v3 (критерий Т5).
 
 Сверяет по id: алгоритм (исходные таблицы) = /api/v3 JSON = экспорт CSV = экспорт GeoJSON; повтор сохранённого
 запроса (GET /queries/{id}/run дважды) = тот же SHA-256; некорректные входы -> 4xx с сообщением; пустой результат ->
@@ -397,7 +397,7 @@ def check_query(c, ck: Checker, spec: dict, src: dict, qrec: dict) -> dict:
     for z in zones:
         p, e = z["properties"], exp_z.get(z["id"])
         if e:
-            # L62e: area_km2 = geodesic area of the polygon (checked in zones.area_km2_vs_polygon);
+            # area_km2 = geodesic area of the polygon (checked in zones.area_km2_vs_polygon);
             # the raster strip area of pair_quality lives in strip_area_raster_km2
             for fld, efld, tol in (("strip_area_raster_km2", "area_km2", 1e-4), ("detected_area_m2", "detected_area_m2", 0.1)):
                 api_v = p.get(fld, p["area_km2"] if fld == "strip_area_raster_km2" else None)
@@ -606,7 +606,7 @@ def check_metrics(c, ck: Checker, src: dict) -> dict:
     conc = m.get("concentration") or {}
     bad = []
     for prof, d in (conc.get("profiles") or {}).items():
-        if "main_split" in d:  # 3.1c format: metrics.json (L60b)
+        if "main_split" in d:  # format of scripts/case/baseline_concentration.py: reports/case_conc/metrics.json
             rows = {(r["split"], r["model"]): r for r in cm[prof]["overall"]}
             ms = cm[prof].get("main_split")
             if d["main_split"] != ms:
@@ -619,7 +619,7 @@ def check_metrics(c, ck: Checker, src: dict) -> dict:
             if r and not near(mm.get("mae"), round(r["mae"], 4), 1e-4):
                 bad.append({"profile": prof, "main.mae": mm.get("mae"), "metrics.json": r["mae"]})
             continue
-        # L68 format: reports/case_conc/dev_cv.json + configs/case_conc_model.yaml
+        # format of scripts/case/conc_model_cv.py: reports/case_conc/dev_cv.json + configs/case_conc_model.yaml
         tab = {r["model"]: r for r in (dcv.get(prof) or {}).get("table") or []}
         want_main = (sel.get(prof) or {}).get("model") or (dcv.get(prof) or {}).get("primary")
         mm, bb = d.get("main") or {}, d.get("baseline") or {}
@@ -791,7 +791,7 @@ def pct(xs: list[float], p: float) -> float:
 def time_endpoints(call, ids: dict, n: int) -> list[dict]:
     """call(method, url, json_body) -> (status, bytes). Returns rows with p50/p95 in ms (1 warm-up excluded)."""
     out = []
-    body = {"name": "L67 speed", "query": {"sources": ["S4_BLACK_SEA_DOORS3"]}}
+    body = {"name": "selfcheck speed", "query": {"sources": ["S4_BLACK_SEA_DOORS3"]}}
     for name, method, url in endpoints(ids):
         ts, codes, size, cold = [], Counter(), 0, None
         for i in range(n + 1):
@@ -851,7 +851,7 @@ def run_live(port: int, data_root: str, qfile: Path, ids_fn, n: int, log: Path) 
         else:
             return {"error": "живой экземпляр не поднялся за 90 с", "log": str(log)}
         startup = time.time() - t0
-        st, b = call("POST", "/api/v3/queries", {"name": "L67 live", "query": {"sources": ["S4_BLACK_SEA_DOORS3"]}})
+        st, b = call("POST", "/api/v3/queries", {"name": "selfcheck live", "query": {"sources": ["S4_BLACK_SEA_DOORS3"]}})
         ids = ids_fn(json.loads(b)["query_id"])
         rows = time_endpoints(call, ids, n)
         # live = TestClient on the same query (numbers identical)
@@ -868,21 +868,21 @@ def run_live(port: int, data_root: str, qfile: Path, ids_fn, n: int, log: Path) 
         lf.close()
 
 
-# ------------------------------------------------------------------ UI (placeholder, L66)
+# ------------------------------------------------------------------ UI (placeholder)
 def ui_compare(ui_url: Optional[str], zone_ids: list[str], api_zones: dict) -> dict:
     """Сравнение карточки зоны в UI с /api/v3/zones/{id} (Playwright). ЗАГОТОВКА.
 
-    TODO(L66): когда фронт получит режим кейса —
+    TODO: сравнение через Playwright —
       1) playwright.sync_api: открыть f"{ui_url}/?mode=case&zone={zid}" для каждого zid;
       2) прочитать из карточки data-атрибуты (data-zone-id, data-area-km2, data-detection-status,
-         data-concentration-status, data-unit) — договориться с L66 о селекторах;
+         data-concentration-status, data-unit) — селекторы согласовать с фронтом v2;
       3) сравнить с api_zones[zid]["properties"] теми же допусками, что и экспорт (near(), статусы строго);
       4) скриншот карточки в reports/selfcheck/ui_<zid>.png.
-    Пакет playwright в .venv не ставим сами — через оркестратора."""
+    Пакет playwright в зависимости проекта не входит."""
     if not ui_url:
         return {"status": "skipped", "reason": "--ui-url не задан"}
     return {"status": "not_implemented", "ui_url": ui_url, "zones": zone_ids[:3],
-            "reason": "режим кейса фронта (L66) ещё не готов; см. TODO в ui_compare()"}
+            "reason": "сравнение UI через Playwright не реализовано; см. TODO в ui_compare()"}
 
 
 # ------------------------------------------------------------------ main
@@ -912,7 +912,7 @@ def run_all(n_speed: int = 20, live: bool = True, port: int = 8091, data_root: s
     from service.app import create_app
 
     real_sha = file_sha(REAL_QUERIES)
-    tmp = Path(tempfile.mkdtemp(prefix="l67_"))
+    tmp = Path(tempfile.mkdtemp(prefix="selfcheck_"))
     old_q = cs.PATHS["queries"]
     cs.PATHS["queries"] = tmp / "queries.jsonl"  # isolation: saved queries never touch service/labels
     ck = Checker()
@@ -1011,7 +1011,7 @@ def findings(rows: list[dict]) -> list[dict]:
 
 
 def to_md(res: dict) -> str:
-    L = [f"# L67 — согласованность API v3 ({res['when']})", "",
+    L = [f"# Самопроверка согласованности API v3 ({res['when']})", "",
          f"Проверок: {sum(res['stats'].values())}; " + ", ".join(f"{k}: {v}" for k, v in sorted(res["stats"].items()))
          + f"; {res['seconds']} с. Изоляция: {res['isolation']}.", "",
          "## Запросы", "", "| запрос | query_id | набл. | зон | сцен | пар (принято) | ok | fail | SHA-256 run |",
@@ -1060,7 +1060,7 @@ def main(argv=None):
     ap.add_argument("--no-live", action="store_true", help="не поднимать живой экземпляр")
     ap.add_argument("--port", type=int, default=8091)
     ap.add_argument("--data-root", default="service/data")
-    ap.add_argument("--ui-url", default=None, help="URL фронта для сравнения карточки зоны (заготовка, TODO L66)")
+    ap.add_argument("--ui-url", default=None, help="URL фронта для сравнения карточки зоны (заготовка, не реализовано)")
     a = ap.parse_args(argv)
     res = run_all(a.n, not a.no_live, a.port, a.data_root, a.ui_url)
     print(json.dumps({"stats": res["stats"], "findings": [f["check"] for f in res["findings"]], "out": res.get("out"),

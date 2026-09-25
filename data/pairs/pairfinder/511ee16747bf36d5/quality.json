@@ -1,0 +1,28 @@
+{
+ "status": "ok",
+ "decision": "reject",
+ "reason": "insufficient_coverage",
+ "scene_id_read": "LC08_L2SP_198021_20140410_02_T2",
+ "strip_rule": "transect line + buffer 10 m (width 10.0 m / 2, min 10 m); 30 m QA_PIXEL grid",
+ "coverage": 0.4893,
+ "valid_water_frac": 0.0,
+ "cloud_frac": 1.0,
+ "glint_frac": null,
+ "land_frac": 0.0,
+ "nodata_frac": 0.5107,
+ "glint_b11_median": null,
+ "strip_area_km2": 0.3771,
+ "substitution_note": "Landsat: QA_PIXEL mask only (bits 0 fill, 1-4 dilated cloud/cirrus/cloud/shadow, 6 clear, 7 water); detector not run (trained on S2 bands)",
+ "files": [
+  "data/pairs/pairfinder/511ee16747bf36d5/quality.png"
+ ],
+ "thresholds": {
+  "min_coverage": 0.8,
+  "max_cloud_frac": 0.2,
+  "max_land_frac": 0.5,
+  "min_valid_water_frac": 0.5,
+  "glint_b11": 0.01,
+  "glint_scene_spc_frac": 0.5,
+  "glint_scene_max_scl_cloud": 0.01
+ }
+}

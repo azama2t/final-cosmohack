@@ -1,4 +1,4 @@
-"""Однократная финальная проверка модели концентрации на отложенном test (L68, критерий Т3).
+"""Однократная финальная проверка модели концентрации на отложенном test (критерий Т3).
 
 НЕ ЗАПУСКАТЬ до приёмки 26.09 12:00 (configs/case_selection.yaml: final_test.not_before).
 Единственное место, где читаются метки отложенного test (role=test в data/case/splits/final_test_<profile>.csv).
@@ -92,7 +92,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=str(OUT))
     ap.add_argument("--allow-early", action="store_true",
-                    help="запуск до final_test.not_before — только по решению оркестратора")
+                    help="запуск до final_test.not_before (только осознанно: test читается один раз)")
     a = ap.parse_args(argv)
     out = Path(a.out)
     if out.exists():

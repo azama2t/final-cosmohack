@@ -1,0 +1,29 @@
+{
+ "status": "ok",
+ "decision": "reject",
+ "reason": "glint",
+ "scene_id_read": "S2A_37TGG_20240607_0_L2A",
+ "strip_rule": "point (no transect geometry in samples) + buffer 500 m",
+ "coverage": 1.0,
+ "valid_water_frac": 1.0,
+ "cloud_frac": 0.0,
+ "glint_frac": 0.0,
+ "land_frac": 0.0,
+ "nodata_frac": 0.0,
+ "glint_b11_median": 0.0165,
+ "strip_area_km2": 0.804,
+ "substitution_note": null,
+ "files": [
+  "data/pairs/pairfinder/3d86c266397e2d3b/quality.png",
+  "data/pairs/pairfinder/3d86c266397e2d3b/rgb.png"
+ ],
+ "thresholds": {
+  "min_coverage": 0.8,
+  "max_cloud_frac": 0.2,
+  "max_land_frac": 0.5,
+  "min_valid_water_frac": 0.5,
+  "glint_b11": 0.01,
+  "glint_scene_spc_frac": 0.5,
+  "glint_scene_max_scl_cloud": 0.01
+ }
+}

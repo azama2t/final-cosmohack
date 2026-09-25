@@ -92,7 +92,7 @@ REJECT_REASONS = [
 ]
 # Quality mask legend (contract 3.1). /api/v3/scenes/{id}/quality.png is rendered from quality.tif of
 # scripts/case/pair_quality.py with exactly these RGBA colours (codes: 0 nodata, 1 water, 2 land, 3 SCL cloud/shadow/
-# cirrus, 4 spectral cloud, 5 other = water-edge buffer/dark/defect, 6 glint (L61: spectral cloud test fired on
+# cirrus, 4 spectral cloud, 5 other = water-edge buffer/dark/defect, 6 glint (pair_quality.py: spectral cloud test fired on
 # sunglint water -> glint). SCL cloud shadow is merged into code 3, so "shadow" has "present": false.
 QUALITY_CLASSES = [
     {"id": "valid", "label": "Пригодная вода", "color": "#00000000", "codes": [1], "present": True},
@@ -101,7 +101,7 @@ QUALITY_CLASSES = [
     {"id": "shadow", "label": "Тень облака", "color": "#74c0fc99", "codes": [], "present": False,
      "note": "отдельно не выделяется: тень входит в класс «Облако»"},
     {"id": "glint", "label": "Блики", "color": "#ffd43b99", "codes": [6], "present": True,
-     "note": "код 6 маски L61: вода, на которой облачный тест сработал от солнечного блика"},
+     "note": "код 6 маски качества (scripts/case/pair_quality.py): вода, на которой облачный тест сработал от солнечного блика"},
     {"id": "land", "label": "Суша", "color": "#495057cc", "codes": [2], "present": True},
     {"id": "nodata", "label": "Нет данных / непригодно", "color": "#00000066", "codes": [0, 5], "present": True},
 ]
@@ -535,7 +535,7 @@ def field_poisson_ci(r: dict) -> dict:
 
 
 def _dev_predictions() -> dict:
-    """reports/case_conc/dev_predictions.csv (L68, out-of-fold dev CV) rows of the MAIN model of each profile."""
+    """reports/case_conc/dev_predictions.csv (scripts/case/conc_model_cv.py, out-of-fold dev CV) rows of the MAIN model of each profile."""
     rows = _cached("dev_predictions", PATHS["dev_cv"].parent / "dev_predictions.csv", _read_csv) or []
     key = ("devpred_idx", id(rows), tuple(sorted((k, v.get("model")) for k, v in selected_models().items())))
     with _lock:
@@ -678,7 +678,7 @@ def _pairs_build(cands, pq_rows, samples) -> list[dict]:
         q = pq.get((ev, item or ""))
         cloud_local = valid_local = None
         quality_decision = None
-        # L59b: accept_meta = all metadata rules except drift sync; accept = accept_meta and drift ok
+        # find_pairs.py: accept_meta = all metadata rules except drift sync; accept = accept_meta and drift ok
         accept_meta = _truthy(c.get("accept_meta")) if (c.get("accept_meta") or "") != "" else accept
         if q:
             cloud_local = _r(fnum(q.get("cloud_frac")) * 100, 2) if fnum(q.get("cloud_frac")) is not None else None
@@ -783,7 +783,7 @@ def predictions_raw() -> list[dict]:
     return _cached("predictions", PATHS["conc_metrics"].parent / "predictions.csv", _read_csv) or []
 
 
-# ------------------------------------------------------------------ field concentration model (L68)
+# ------------------------------------------------------------------ field concentration model
 # Source of truth (read only): configs/case_conc_model.yaml (selected model per profile, interval quantiles),
 # weights/case_conc/<profile>.json (fitted model), reports/case_conc/dev_cv.json (dev CV vs median baseline,
 # route segments + 1 day buffer), reports/case_conc/final_test.json (held-out test, computed once at acceptance).
@@ -866,7 +866,7 @@ def _predict_log1p(w: dict, lon: float, lat: float, when: str) -> Optional[float
 
 
 def field_estimate_at(lon, lat, when) -> Optional[dict]:
-    """Prediction of the MAIN field model (L68) for a point, if it lies in a profile's area of applicability.
+    """Prediction of the MAIN field model (conc_model_cv.py) for a point, if it lies in a profile's area of applicability.
 
     Not a satellite estimate; None outside every profile's area / without model files."""
     import math as _m
@@ -983,7 +983,7 @@ def zones_all() -> list[dict]:
             width = fnum(rows[0].get("transect_width_m"))
             radius = max(width / 2.0 if width else 10.0, 10.0)
         geom = strip_polygon(lon, lat, line, radius) if lon is not None and lat is not None else None
-        # the field density row behind field_items_km2: meta.field_sample_id (L61), else first transect_density row
+        # the field density row behind field_items_km2: meta.field_sample_id (pair_quality.py), else first transect_density row
         frow = sample_row(meta.get("field_sample_id") or "") or next(
             (r for r in rows if r.get("record_type") == "transect_density"), None) or {}
         decision = q.get("decision") or ""
@@ -1047,7 +1047,7 @@ def geodesic_area_km2(geom) -> Optional[float]:
 
 
 def registry_pairs() -> dict[str, dict]:
-    """data/case/run/registry_pairs.csv (L65 run_all): per event status / stage / status_without_drift."""
+    """data/case/run/registry_pairs.csv (scripts/case/run_all.py): per event status / stage / status_without_drift."""
     rows = _cached("registry_pairs", PATHS["registry_pairs"], _read_csv) or []
     return {r.get("event_id", ""): r for r in rows}
 
@@ -1287,7 +1287,7 @@ def _det_row(name: str, d: dict, split: str) -> Optional[dict]:
 
 def detector_metrics_block(test: dict, val: dict, tmd: dict, fdi_val: dict) -> dict:
     """Detector: main (LightGBM) vs baseline RF (MARIDA code) vs FDI threshold on the SAME MARIDA test
-    (reports/case_detector/metrics.json, L63; scene bootstrap CI). Fallback: lgbm_final_test + val FDI (old)."""
+    (reports/case_detector/metrics.json from detector_compare.py; scene bootstrap CI). Fallback: lgbm_final_test + val FDI (old)."""
     det = _cached("det_metrics", PATHS["det_metrics"], _read_json) or {}
     dt_ = det.get("test") or {}
     st = det.get("settings") or {}
@@ -1307,7 +1307,7 @@ def detector_metrics_block(test: dict, val: dict, tmd: dict, fdi_val: dict) -> d
         return {"split": f"MARIDA test ({(dt_['lgbm'].get('n_scenes'))} сцен), один прогон после заморозки; "
                          "ДИ — бутстреп по сценам", "metric": det.get("metric"),
                 "main": main, "baseline": base, "fdi": fdi, "rows": rows}
-    return {  # fallback when L63 file is absent
+    return {  # fallback when reports/case_detector/metrics.json is absent
         "split": "MARIDA val (сплит по сценам); test — один прогон после заморозки",
         "baseline": {"name": "FDI threshold", "f1": _r(fdi_val.get("f1_md")), "iou": _r(fdi_val.get("iou_md")),
                      "split": "val", "note": fdi_val.get("note")} if fdi_val else None,
@@ -1543,7 +1543,7 @@ DET_COLS = ["det_id", "zone_id", "scene_id", "datetime", "n_pixels", "area_m2", 
 
 def _detections_dir(d: str) -> list[dict]:
     """Detector objects of a pair_quality crop: connected pixels of prob.tif >= threshold that are in the final
-    detector mask of L61 (mask.png red, drawn dilated by 2 px; cloud/shadow-filtered objects are not red),
+    detector mask of pair_quality.py (mask.png red, drawn dilated by 2 px; cloud/shadow-filtered objects are not red),
     vectorised in the crop CRS and reprojected to EPSG:4326. Cached by prob.tif mtime."""
     base = PATHS["pairs_dir"] / "quality" / d
     tif = base / "prob.tif"

@@ -1,15 +1,15 @@
-"""Quality masks + LightGBM detector on accepted event<->scene pairs (task L61, case criteria T1/T2).
+"""Quality masks + LightGBM detector on accepted event<->scene pairs (case criteria T1/T2).
 
   CUDA_VISIBLE_DEVICES="" .venv/Scripts/python.exe scripts/case/pair_quality.py            # all, resumable
   CUDA_VISIBLE_DEVICES="" .venv/Scripts/python.exe scripts/case/pair_quality.py --only S4:DOORS3:T1 --force
   .venv/Scripts/python.exe scripts/case/pair_quality.py --summary-only                      # csv + md from meta.json
 
-Input: data/pairs/best_per_event.csv (L59), task/macroplastic_marine_samples.csv (geometry), configs/case_pairs.yaml.
+Input: data/pairs/best_per_event.csv (scripts/case/find_pairs.py), task/macroplastic_marine_samples.csv (geometry), configs/case_pairs.yaml.
 Per pair: data/pairs/quality/<event_id>/{rgb.png, quality.tif, quality.png, prob.tif, mask.png, meta.json}
 (meta.json written last -> a pair with meta.json is done; rerun skips it). Table data/pairs/pair_quality.csv and
 report reports/case_pairs/quality.md are rebuilt from all meta.json files.
 
-Scenes: S2 L2A read with macroplastic.live.stac.read_crop (10 m grid, 20/60 m bands nearest). L1C pairs of L59 are
+Scenes: S2 L2A read with macroplastic.live.stac.read_crop (10 m grid, 20/60 m bands nearest). L1C pairs from find_pairs.py are
 replaced by the Earth Search L2A item of the same tile/date (ES L1C COGs are jp2 in a requester-pays bucket; the
 L2A of the same acquisition is the same geometry and time). Landsat C2 L2: QA_PIXEL only (no detector).
 """
@@ -370,9 +370,9 @@ def build_table() -> pd.DataFrame:
 
 def write_report(t: pd.DataFrame, n_total: int, cfg: dict):
     REPORT.parent.mkdir(parents=True, exist_ok=True)
-    L = ["# Маски качества и детектор на принятых парах «событие ↔ сцена» (L61)", "",
+    L = ["# Маски качества и детектор на принятых парах «событие ↔ сцена»", "",
          f"Скрипт `scripts/case/pair_quality.py`, пороги `configs/case_pairs.yaml`. Вход: `data/pairs/best_per_event.csv` "
-         f"(L59, {n_total} событий с принятой парой). Таблица: `data/pairs/pair_quality.csv`. Картинки: "
+         f"(реестр пар `scripts/case/find_pairs.py`, {n_total} событий с принятой парой). Таблица: `data/pairs/pair_quality.csv`. Картинки: "
          "`data/pairs/quality/<event_id>/` (двоеточия в id заменены на `_`).", ""]
     if not len(t):
         REPORT.write_text("\n".join(L + ["Пока ни одна пара не обработана."]), encoding="utf-8")

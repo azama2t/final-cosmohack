@@ -1,6 +1,6 @@
-# Маски качества и детектор на принятых парах «событие ↔ сцена» (L61)
+# Маски качества и детектор на принятых парах «событие ↔ сцена»
 
-Скрипт `scripts/case/pair_quality.py`, пороги `configs/case_pairs.yaml`. Вход: `data/pairs/best_per_event.csv` (L59, 29 событий с принятой парой). Таблица: `data/pairs/pair_quality.csv`. Картинки: `data/pairs/quality/<event_id>/` (двоеточия в id заменены на `_`).
+Скрипт `scripts/case/pair_quality.py`, пороги `configs/case_pairs.yaml`. Вход: `data/pairs/best_per_event.csv` (реестр пар `scripts/case/find_pairs.py`, 29 событий с принятой парой). Таблица: `data/pairs/pair_quality.csv`. Картинки: `data/pairs/quality/<event_id>/` (двоеточия в id заменены на `_`).
 
 **Обработано 29 из 29 пар; прошли маски: 12; отклонены: 17; ошибки чтения: 0.**
 

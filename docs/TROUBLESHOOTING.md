@@ -9,7 +9,7 @@
 | pandas groupby.apply | KeyError 'tile' | `include_groups=False` убирает колонку группы | группировать по копии колонки | — |
 | Кириллица в консоли Windows | кракозябры | cp1251/cp866 | `sys.stdout.reconfigure(encoding="utf-8")` | в каждом CLI |
 | .ps1 с кириллицей | PowerShell 5.1: «Missing closing '}'» | UTF-8 без BOM читается как ANSI | сохранять .ps1 в UTF-8 с BOM | всегда BOM для .ps1 |
-| `python - <<EOF` в Git Bash | правки кириллических строк молча не срабатывают | stdin не в UTF-8 | правка через Edit/sed | — |
+| `python - <<EOF` в Git Bash | правки кириллических строк молча не срабатывают | stdin не в UTF-8 | правка через редактор или sed | — |
 | LibreOffice → PNG | конвертирует только первый слайд | ограничение `--convert-to png` | один pptx на слайд | — |
 | Локальная медиана окна 15 | тайл 2500² считался 36 с | median_filter на полном разрешении | медиана на прореженной сетке → 6 с | тяжёлые оконные статистики — на сетке с шагом |
 | ProcessPool + LightGBM | модель грузится на каждый патч | нет initializer | загрузка один раз в initializer | — |

@@ -54,6 +54,9 @@ powershell -ExecutionPolicy Bypass -File run.ps1 -Case all -Offline
 Детектор на MARIDA не переобучается и не перезапускается. Если нет npz или меток MARIDA, берутся числа из `metrics.json`,
 а в сводку пишется его sha256. Полный прогон сравнения детекторов делает `scripts/case/detector_compare.py`
 (около 130 с, 12 процессов, читает MARIDA test). В `run_all` он не входит, чтобы test не читался повторно.
+Веса RandomForest `data/case/detector_preds/rf_seed5.joblib` (32 МБ) в git не входят. Если файла нет,
+`detector_compare.py` обучает RF заново (параметры статьи MARIDA, seed 5, 12 потоков, ≈ 16 с) на признаках MARIDA train
+из кэша `out/l3_cache/train_win.npz`; этот кэш строит `scripts/train_lgbm.py` из снимков MARIDA.
 
 ## Время на этой машине
 
@@ -62,7 +65,7 @@ powershell -ExecutionPolicy Bypass -File run.ps1 -Case all -Offline
 | Шаг | С кэшем / готовыми meta.json | Без кэша (холодный запуск) |
 |---|---:|---:|
 | 1 отбор | 0.1 с | 0.1 с |
-| 2 пары (318 событий × 4 коллекции = 1272 запроса STAC) | 0.9–1.0 с | ≈ 2–3 мин: замер 2.6 с на 5 событиях (24 запроса); L59 для полного прогона дал ≈ 2 мин |
+| 2 пары (318 событий × 4 коллекции = 1272 запроса STAC) | 0.9–1.0 с | ≈ 2–3 мин: замер 2.6 с на 5 событиях (24 запроса); полный поиск пар `scripts/case/find_pairs.py` без кэша — ≈ 2 мин |
 | 3 качество + детектор (29 пар) | 0.1–0.2 с | ≈ 4–5 мин: сумма `elapsed_s` в meta.json 222 с (1–17 с на пару) плюс загрузка модели. С `--force` здесь не перезамерялось |
 | 3b реестр пар | 0.7 с | 0.7 с |
 | 4 концентрация (2 профиля, 6 схем сплита, бутстреп 2000) | 2.3–3.3 с | то же |
@@ -72,8 +75,16 @@ powershell -ExecutionPolicy Bypass -File run.ps1 -Case all -Offline
 
 ## Ресурсы
 
-- Диск: кэш STAC `data/pairs/cache` 2.5 МБ, вырезки качества `data/pairs/quality` 31 МБ, предсказания детектора
-  `data/case/detector_preds` 57 МБ, MARIDA 4.5 ГБ (для шага 5 нужны только метки `*_cl.tif`), экспорт `out/case_export` ≈ 7 МБ.
+- Диск: MARIDA 4.5 ГБ (для шага 5 нужны только метки `*_cl.tif`), экспорт `out/case_export` ≈ 7 МБ.
+- Данные кейса в git (≈ 60 МБ): реестр пар и кандидаты `data/pairs/*.csv|parquet` (0.6 МБ), кэш STAC `data/pairs/cache/`
+  (1272 ответа, 0.3 МБ), маски качества и вырезки `data/pairs/quality/` (31 МБ), предсказания детектора на MARIDA
+  `data/case/detector_preds/*.npz` + `*_meta.json` (26 МБ), сплиты и реестры `data/case/splits/`, `data/case/run/` (0.7 МБ).
+  Не в git: `rf_seed5.joblib` (см. выше), разметка MARIDA, экспорт `out/`.
+- Копия репозитория через `git archive` без сети проходит `run_all.py all --offline`: тот же реестр пар, 29 зон, та же выгрузка;
+  sha256 всех выходных таблиц совпадают с рабочей копией, кроме `reports/case_run/detector_recomputed.json` (без MARIDA он не пересчитывается).
+  Пересчёт метрик детектора из npz на шаге 5 требует разметку MARIDA: https://zenodo.org/records/5151941/files/MARIDA.zip
+  (sha256 архива `e19227596018348169b11a78d033890adb97d4b4f4c069f061cfcfab21d48d08`), распаковать в `data/MARIDA/`.
+  Без неё шаг 5 берёт сохранённые `reports/case_detector/metrics.json` и пишет их sha256.
 - Память: меньше 2 ГБ, пик на шаге 5 (маски 7 моделей в packbits).
 - Сеть нужна только при промахах кэша STAC и для `--force` или новых пар в шаге 3 (Planetary Computer, Earth Search).
   С `--offline` сеть не нужна.
@@ -83,8 +94,8 @@ powershell -ExecutionPolicy Bypass -File run.ps1 -Case all -Offline
 ## Повторяемость
 
 При тех же входах два подряд прогона `all --offline` дают одинаковые sha256 всех 24 выходных таблиц. Отпечаток —
-`outputs_fingerprint` в `run_summary.json`. Выходы шагов 1–4 побайтно совпали с файлами до запуска, которые построили
-исполнители L58–L61. Время в `run_summary.json` в таблицы не попадает.
+`outputs_fingerprint` в `run_summary.json`. Выходы шагов 1–4 побайтно совпали с файлами, построенными отдельными запусками
+`selection.py`, `find_pairs.py`, `pair_quality.py` и `baseline_concentration.py`. Время в `run_summary.json` в таблицы не попадает.
 
 Ограничение повторяемости: в реестре кандидатов есть 301 строка с одинаковыми `(событие, коллекция, endpoint, dt_hours)`.
 Это соседние тайлы одной съёмки и повторная обработка одной сцены. Порядок таких строк, а значит и выбор «лучшей» сцены

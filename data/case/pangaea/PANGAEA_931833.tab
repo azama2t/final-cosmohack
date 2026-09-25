@@ -1,0 +1,797 @@
+/* DATA DESCRIPTION:
+Citation:	Gutow, Lars; Petersen, Imke; Giménez, Luis; Thiel, Martin; Rivedeneira, Marcelo M (2021): Natural and anthropogenic flotsam in the Sargasso Sea [dataset]. PANGAEA, https://doi.org/10.1594/PANGAEA.931833, 
+	In: Gutow, L et al. (2021): Rafting communities on pelagic Sargassum and floating marine debris in the Sargasso Sea [dataset bundled publication]. PANGAEA, https://doi.org/10.1594/PANGAEA.931845
+Abstract:	During cruise MSM41 of the German research vessel Maria S. Merian in April 2015 a visual ship based survey was conducted on the composition and density of natural and anthropogenic flotsam in the Sargasso Sea (subtropical NW Atlantic). On transits between the regular stations of the cruise, flotsam was quantified on transects of 10 m width and lengths of 9.1 - 25.5 km. Floating marine debris items passing through the transect was recorded and specified (item type, size and color) when possible. The position of each floating item was determined as the position of the observer at the moment the item was registered using a handheld GPS. Clumps of pelagic Sargassum were too numerous to be counted individually throughout an entire transect. Instead, numbers of clumps passing through the transect area were counted within time intervals of 30 seconds, interrupted by breaks of 30 seconds. In extremely dense accumulations or windrows of pelagic Sargassum, the number of clumps was estimated in broader but less accurate entities (i.e., tens or hundreds of clumps). The estimated minimum size of items identifiable from the moving ship was 2 cm. Each flotsam item was assigned to a material category (e.g., plastics, Styrofoam, metal).
+Keyword(s):	epibiota; floating marine debris; pollution; rafting; Sargasso Sea; Sargassum community
+Related to:	Gutow, Lars; Petersen, Imke; Giménez, Luis; Thiel, Martin; Rivedeneira, Marcelo M (2021): Metadata of transects of visual ship based flotsam survey in the Sargasso Sea [dataset]. PANGAEA, https://doi.org/10.1594/PANGAEA.931834
+Coverage:	MEDIAN LATITUDE: 28.264345 * MEDIAN LONGITUDE: -62.867631 * SOUTH-BOUND LATITUDE: 22.531133 * WEST-BOUND LONGITUDE: -70.007000 * NORTH-BOUND LATITUDE: 32.235117 * EAST-BOUND LONGITUDE: -58.006967
+	DATE/TIME START: 2015-04-01T16:17:00 * DATE/TIME END: 2015-04-26T15:49:00
+Event(s):	MSM41_litter-T1 * LATITUDE START: 32.291067 * LONGITUDE START: -64.635483 * LATITUDE END: 32.174550 * LONGITUDE END: -64.793167 * DATE/TIME START: 2015-04-01T16:17:00 * DATE/TIME END: 2015-04-01T17:17:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T2 * LATITUDE START: 30.871283 * LONGITUDE START: -67.827000 * LATITUDE END: 30.784567 * LONGITUDE END: -68.043550 * DATE/TIME START: 2015-04-02T08:18:00 * DATE/TIME END: 2015-04-02T09:18:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T3 * LATITUDE START: 30.671533 * LONGITUDE START: -68.328700 * LATITUDE END: 30.597650 * LONGITUDE END: -68.511167 * DATE/TIME START: 2015-04-02T10:36:00 * DATE/TIME END: 2015-04-02T11:26:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T4 * LATITUDE START: 30.482617 * LONGITUDE START: -68.797783 * LATITUDE END: 30.389733 * LONGITUDE END: -69.029300 * DATE/TIME START: 2015-04-02T12:43:00 * DATE/TIME END: 2015-04-02T13:43:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T5 * LATITUDE START: 30.092967 * LONGITUDE START: -69.768667 * LATITUDE END: 30.044017 * LONGITUDE END: -69.890000 * DATE/TIME START: 2015-04-02T16:56:00 * DATE/TIME END: 2015-04-02T17:29:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T6 * LATITUDE START: 29.954633 * LONGITUDE START: -69.865083 * LATITUDE END: 29.739833 * LONGITUDE END: -69.896800 * DATE/TIME START: 2015-04-03T08:13:00 * DATE/TIME END: 2015-04-03T09:13:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T7 * LATITUDE START: 29.534417 * LONGITUDE START: -69.926933 * LATITUDE END: 29.322383 * LONGITUDE END: -69.958233 * DATE/TIME START: 2015-04-03T10:11:00 * DATE/TIME END: 2015-04-03T11:12:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T8 * LATITUDE START: 29.182150 * LONGITUDE START: -69.978633 * LATITUDE END: 29.008417 * LONGITUDE END: -70.007750 * DATE/TIME START: 2015-04-03T11:51:00 * DATE/TIME END: 2015-04-03T12:40:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T10 * LATITUDE START: 27.548567 * LONGITUDE START: -69.794917 * LATITUDE END: 27.345917 * LONGITUDE END: -69.875667 * DATE/TIME START: 2015-04-04T16:08:00 * DATE/TIME END: 2015-04-04T17:08:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T11 * LATITUDE START: 26.105733 * LONGITUDE START: -69.994383 * LATITUDE END: 26.013583 * LONGITUDE END: -70.009133 * DATE/TIME START: 2015-04-05T08:17:00 * DATE/TIME END: 2015-04-05T08:44:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T12 * LATITUDE START: 25.931000 * LONGITUDE START: -69.943517 * LATITUDE END: 25.849250 * LONGITUDE END: -69.955267 * DATE/TIME START: 2015-04-05T14:27:00 * DATE/TIME END: 2015-04-05T15:27:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T13 * LATITUDE START: 24.922433 * LONGITUDE START: -69.968850 * LATITUDE END: 24.717700 * LONGITUDE END: -69.986583 * DATE/TIME START: 2015-04-06T08:16:00 * DATE/TIME END: 2015-04-06T09:16:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T14 * LATITUDE START: 24.528850 * LONGITUDE START: -69.927867 * LATITUDE END: 24.488217 * LONGITUDE END: -69.794133 * DATE/TIME START: 2015-04-06T13:50:00 * DATE/TIME END: 2015-04-06T14:50:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T15 * LATITUDE START: 24.413433 * LONGITUDE START: -69.545333 * LATITUDE END: 24.348567 * LONGITUDE END: -69.329283 * DATE/TIME START: 2015-04-06T15:47:00 * DATE/TIME END: 2015-04-06T16:47:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T16 * LATITUDE START: 24.258867 * LONGITUDE START: -69.031450 * LATITUDE END: 24.193433 * LONGITUDE END: -68.814517 * DATE/TIME START: 2015-04-06T18:12:00 * DATE/TIME END: 2015-04-06T19:12:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T17 * LATITUDE START: 23.528300 * LONGITUDE START: -67.004900 * LATITUDE END: 23.733883 * LONGITUDE END: -67.004900 * DATE/TIME START: 2015-04-07T09:51:00 * DATE/TIME END: 2015-04-07T10:51:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T18 * LATITUDE START: 24.085717 * LONGITUDE START: -66.954000 * LATITUDE END: 24.258100 * LONGITUDE END: -66.975567 * DATE/TIME START: 2015-04-07T16:12:00 * DATE/TIME END: 2015-04-07T17:24:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER) * COMMENT: Transect 18 interrupted due to ship manoeuvre
+	MSM41_litter-T19 * LATITUDE START: 25.216933 * LONGITUDE START: -66.892950 * LATITUDE END: 25.424333 * LONGITUDE END: -66.922217 * DATE/TIME START: 2015-04-08T08:15:00 * DATE/TIME END: 2015-04-08T09:15:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T20 * LATITUDE START: 25.616950 * LONGITUDE START: -66.950117 * LATITUDE END: 25.820383 * LONGITUDE END: -66.979783 * DATE/TIME START: 2015-04-08T10:11:00 * DATE/TIME END: 2015-04-08T11:11:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T21 * LATITUDE START: 26.013583 * LONGITUDE START: -66.931150 * LATITUDE END: 26.231067 * LONGITUDE END: -66.947300 * DATE/TIME START: 2015-04-08T17:54:00 * DATE/TIME END: 2015-04-08T18:54:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T22 * LATITUDE START: 27.601900 * LONGITUDE START: -66.966467 * LATITUDE END: 27.829567 * LONGITUDE END: -66.988883 * DATE/TIME START: 2015-04-09T08:05:00 * DATE/TIME END: 2015-04-09T09:11:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER) * COMMENT: Transect 22 interrupted
+	MSM41_litter-T23 * LATITUDE START: 28.090317 * LONGITUDE START: -66.909533 * LATITUDE END: 28.309800 * LONGITUDE END: -66.932383 * DATE/TIME START: 2015-04-09T15:36:00 * DATE/TIME END: 2015-04-09T16:36:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T24 * LATITUDE START: 28.708667 * LONGITUDE START: -66.974933 * LATITUDE END: 28.919250 * LONGITUDE END: -66.997150 * DATE/TIME START: 2015-04-09T18:27:00 * DATE/TIME END: 2015-04-09T19:27:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T25 * LATITUDE START: 30.238383 * LONGITUDE START: -66.899883 * LATITUDE END: 30.452583 * LONGITUDE END: -66.928483 * DATE/TIME START: 2015-04-10T14:44:00 * DATE/TIME END: 2015-04-10T15:44:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T26 * LATITUDE START: 30.872167 * LONGITUDE START: -66.987617 * LATITUDE END: 30.981367 * LONGITUDE END: -67.004100 * DATE/TIME START: 2015-04-10T18:37:00 * DATE/TIME END: 2015-04-10T19:05:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T27 * LATITUDE START: 30.997267 * LONGITUDE START: -66.715350 * LATITUDE END: 30.997100 * LONGITUDE END: -66.474667 * DATE/TIME START: 2015-04-11T08:01:00 * DATE/TIME END: 2015-04-11T09:02:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T28 * LATITUDE START: 30.997317 * LONGITUDE START: -66.104233 * LATITUDE END: 30.997250 * LONGITUDE END: -65.854550 * DATE/TIME START: 2015-04-11T10:35:00 * DATE/TIME END: 2015-04-11T11:35:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T29 * LATITUDE START: 30.997167 * LONGITUDE START: -65.005050 * LATITUDE END: 30.997200 * LONGITUDE END: -64.760950 * DATE/TIME START: 2015-04-11T15:03:00 * DATE/TIME END: 2015-04-11T16:01:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER) * COMMENT: Transect 26 terminated because of station works
+	MSM41_litter-T30 * LATITUDE START: 30.660617 * LONGITUDE START: -64.086700 * LATITUDE END: 30.464333 * LONGITUDE END: -64.062667 * DATE/TIME START: 2015-04-12T07:59:00 * DATE/TIME END: 2015-04-12T08:59:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T31 * LATITUDE START: 30.276233 * LONGITUDE START: -64.039600 * LATITUDE END: 30.078883 * LONGITUDE END: -64.015600 * DATE/TIME START: 2015-04-12T09:58:00 * DATE/TIME END: 2015-04-12T10:58:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T32 * LATITUDE START: 29.929650 * LONGITUDE START: -64.063783 * LATITUDE END: 29.721550 * LONGITUDE END: -64.050083 * DATE/TIME START: 2015-04-12T16:31:00 * DATE/TIME END: 2015-04-12T17:31:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T33 * LATITUDE START: 27.831067 * LONGITUDE START: -63.912117 * LATITUDE END: 27.630900 * LONGITUDE END: -63.934550 * DATE/TIME START: 2015-04-13T14:19:00 * DATE/TIME END: 2015-04-13T15:19:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T34 * LATITUDE START: 27.362000 * LONGITUDE START: -63.964750 * LATITUDE END: 27.157083 * LONGITUDE END: -63.987917 * DATE/TIME START: 2015-04-13T16:38:00 * DATE/TIME END: 2015-04-13T17:38:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T35 * LATITUDE START: 25.938650 * LONGITUDE START: -63.871317 * LATITUDE END: 25.763767 * LONGITUDE END: -63.891667 * DATE/TIME START: 2015-04-14T12:11:00 * DATE/TIME END: 2015-04-14T13:16:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER) * COMMENT: Transect 35 interrupted
+	MSM41_litter-T37 * LATITUDE START: 25.268633 * LONGITUDE START: -63.966383 * LATITUDE END: 25.063000 * LONGITUDE END: -63.996083 * DATE/TIME START: 2015-04-14T17:53:00 * DATE/TIME END: 2015-04-14T18:53:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T38 * LATITUDE START: 23.857333 * LONGITUDE START: -63.943650 * LATITUDE END: 23.676433 * LONGITUDE END: -63.974867 * DATE/TIME START: 2015-04-15T13:34:00 * DATE/TIME END: 2015-04-15T14:28:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T39 * LATITUDE START: 22.905583 * LONGITUDE START: -63.948717 * LATITUDE END: 22.995617 * LONGITUDE END: -64.006217 * DATE/TIME START: 2015-04-16T07:57:00 * DATE/TIME END: 2015-04-16T08:28:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T40 * LATITUDE START: 22.981933 * LONGITUDE START: -63.893100 * LATITUDE END: 22.757600 * LONGITUDE END: -63.945550 * DATE/TIME START: 2015-04-16T11:56:00 * DATE/TIME END: 2015-04-16T12:56:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T41 * LATITUDE START: 22.516100 * LONGITUDE START: -60.910833 * LATITUDE END: 22.633083 * LONGITUDE END: -60.933367 * DATE/TIME START: 2015-04-17T13:45:00 * DATE/TIME END: 2015-04-17T14:45:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T42 * LATITUDE START: 22.745250 * LONGITUDE START: -60.955817 * LATITUDE END: 22.861933 * LONGITUDE END: -60.977917 * DATE/TIME START: 2015-04-17T15:45:00 * DATE/TIME END: 2015-04-17T16:45:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T43 * LATITUDE START: 23.699783 * LONGITUDE START: -60.971000 * LATITUDE END: 23.889100 * LONGITUDE END: -60.992800 * DATE/TIME START: 2015-04-18T08:00:00 * DATE/TIME END: 2015-04-18T09:00:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T44 * LATITUDE START: 24.136150 * LONGITUDE START: -60.995633 * LATITUDE END: 24.330367 * LONGITUDE END: -60.984267 * DATE/TIME START: 2015-04-18T15:30:00 * DATE/TIME END: 2015-04-18T16:30:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER) * COMMENT: Transect 39 terminated because of station works
+	MSM41_litter-T45 * LATITUDE START: 24.543717 * LONGITUDE START: -60.981483 * LATITUDE END: 24.744233 * LONGITUDE END: -60.986567 * DATE/TIME START: 2015-04-18T17:55:00 * DATE/TIME END: 2015-04-18T18:55:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T46 * LATITUDE START: 26.110667 * LONGITUDE START: -60.997917 * LATITUDE END: 26.313667 * LONGITUDE END: -61.000000 * DATE/TIME START: 2015-04-19T12:41:00 * DATE/TIME END: 2015-04-19T13:41:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T47 * LATITUDE START: 26.500933 * LONGITUDE START: -61.001417 * LATITUDE END: 26.599117 * LONGITUDE END: -61.001300 * DATE/TIME START: 2015-04-19T14:37:00 * DATE/TIME END: 2015-04-19T15:07:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T48 * LATITUDE START: 27.828667 * LONGITUDE START: -60.996767 * LATITUDE END: 27.980817 * LONGITUDE END: -61.004567 * DATE/TIME START: 2015-04-20T07:51:00 * DATE/TIME END: 2015-04-20T08:36:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T49 * LATITUDE START: 28.073817 * LONGITUDE START: -60.860083 * LATITUDE END: 28.284650 * LONGITUDE END: -60.870883 * DATE/TIME START: 2015-04-20T14:42:00 * DATE/TIME END: 2015-04-20T16:33:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER) * COMMENT: Transect 49 interrupted for Zodiak operation
+	MSM41_litter-T50 * LATITUDE START: 28.574317 * LONGITUDE START: -60.925467 * LATITUDE END: 28.791517 * LONGITUDE END: -60.966050 * DATE/TIME START: 2015-04-20T17:56:00 * DATE/TIME END: 2015-04-20T18:56:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T51 * LATITUDE START: 29.912267 * LONGITUDE START: -60.934250 * LATITUDE END: 30.121083 * LONGITUDE END: -60.947767 * DATE/TIME START: 2015-04-21T12:47:00 * DATE/TIME END: 2015-04-21T13:47:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T52 * LATITUDE START: 30.396100 * LONGITUDE START: -60.965867 * LATITUDE END: 30.600383 * LONGITUDE END: -60.979250 * DATE/TIME START: 2015-04-21T15:06:00 * DATE/TIME END: 2015-04-21T16:06:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T53 * LATITUDE START: 30.902700 * LONGITUDE START: -59.939533 * LATITUDE END: 30.915017 * LONGITUDE END: -59.694450 * DATE/TIME START: 2015-04-22T08:02:00 * DATE/TIME END: 2015-04-22T09:02:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T54 * LATITUDE START: 30.925100 * LONGITUDE START: -59.491017 * LATITUDE END: 30.937733 * LONGITUDE END: -59.300183 * DATE/TIME START: 2015-04-22T10:02:00 * DATE/TIME END: 2015-04-22T11:02:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T55 * LATITUDE START: 30.943817 * LONGITUDE START: -59.107067 * LATITUDE END: 30.952317 * LONGITUDE END: -58.932817 * DATE/TIME START: 2015-04-22T12:02:00 * DATE/TIME END: 2015-04-22T12:56:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T56 * LATITUDE START: 30.972083 * LONGITUDE START: -58.525483 * LATITUDE END: 30.977367 * LONGITUDE END: -58.424250 * DATE/TIME START: 2015-04-22T15:05:00 * DATE/TIME END: 2015-04-22T15:37:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T57 * LATITUDE START: 29.886050 * LONGITUDE START: -58.137733 * LATITUDE END: 29.668733 * LONGITUDE END: -58.105433 * DATE/TIME START: 2015-04-23T14:55:00 * DATE/TIME END: 2015-04-23T15:56:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T58 * LATITUDE START: 29.251417 * LONGITUDE START: -58.043017 * LATITUDE END: 29.031017 * LONGITUDE END: -58.010200 * DATE/TIME START: 2015-04-23T17:52:00 * DATE/TIME END: 2015-04-23T18:52:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T59 * LATITUDE START: 27.953550 * LONGITUDE START: -58.159383 * LATITUDE END: 27.735200 * LONGITUDE END: -58.124200 * DATE/TIME START: 2015-04-24T11:58:00 * DATE/TIME END: 2015-04-24T13:01:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T60 * LATITUDE START: 27.504483 * LONGITUDE START: -58.089717 * LATITUDE END: 27.292217 * LONGITUDE END: -58.055000 * DATE/TIME START: 2015-04-24T15:33:00 * DATE/TIME END: 2015-04-24T16:33:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T61 * LATITUDE START: 25.928833 * LONGITUDE START: -58.087583 * LATITUDE END: 25.721833 * LONGITUDE END: -58.069183 * DATE/TIME START: 2015-04-25T10:16:00 * DATE/TIME END: 2015-04-25T11:16:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T62 * LATITUDE START: 25.519350 * LONGITUDE START: -58.047217 * LATITUDE END: 25.305317 * LONGITUDE END: -58.032250 * DATE/TIME START: 2015-04-25T12:14:00 * DATE/TIME END: 2015-04-25T13:14:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T63 * LATITUDE START: 23.853867 * LONGITUDE START: -58.087050 * LATITUDE END: 23.704833 * LONGITUDE END: -58.072800 * DATE/TIME START: 2015-04-26T10:10:00 * DATE/TIME END: 2015-04-26T11:10:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER) * COMMENT: Transect 56 terminated for sampling of flotsam (-> Sample 78)
+	MSM41_litter-T64 * LATITUDE START: 23.481000 * LONGITUDE START: -58.050833 * LATITUDE END: 23.335467 * LONGITUDE END: -58.036533 * DATE/TIME START: 2015-04-26T12:43:00 * DATE/TIME END: 2015-04-26T13:43:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+	MSM41_litter-T65 * LATITUDE START: 23.175000 * LONGITUDE START: -58.019367 * LATITUDE END: 23.028933 * LONGITUDE END: -58.004183 * DATE/TIME START: 2015-04-26T14:49:00 * DATE/TIME END: 2015-04-26T15:49:00 * LOCATION: North Atlantic Ocean * CAMPAIGN: MSM41 * BASIS: Maria S. Merian (URI: https://en.wikipedia.org/wiki/RV_Maria_S._Merian) * METHOD/DEVICE: Litter Survey (LITTER)
+Parameter(s):	Event label (Event) * PI: Gutow, Lars (https://orcid.org/0000-0002-9017-0083, lars.gutow@awi.de, https://www.awi.de/en/about-us/organisation/staff/single-view/lars-gutow.html)
+	Transect (Transect) * PI: Gutow, Lars (https://orcid.org/0000-0002-9017-0083, lars.gutow@awi.de, https://www.awi.de/en/about-us/organisation/staff/single-view/lars-gutow.html)
+	LATITUDE (Latitude) * GEOCODE * PI: Gutow, Lars (https://orcid.org/0000-0002-9017-0083, lars.gutow@awi.de, https://www.awi.de/en/about-us/organisation/staff/single-view/lars-gutow.html)
+	LONGITUDE (Longitude) * GEOCODE * PI: Gutow, Lars (https://orcid.org/0000-0002-9017-0083, lars.gutow@awi.de, https://www.awi.de/en/about-us/organisation/staff/single-view/lars-gutow.html)
+	Comment (Comment) * PI: Gutow, Lars (https://orcid.org/0000-0002-9017-0083, lars.gutow@awi.de, https://www.awi.de/en/about-us/organisation/staff/single-view/lars-gutow.html) * COMMENT: position
+	Item (Item) * PI: Gutow, Lars (https://orcid.org/0000-0002-9017-0083, lars.gutow@awi.de, https://www.awi.de/en/about-us/organisation/staff/single-view/lars-gutow.html) * COMMENT: Item type
+	Material (Material) * PI: Gutow, Lars (https://orcid.org/0000-0002-9017-0083, lars.gutow@awi.de, https://www.awi.de/en/about-us/organisation/staff/single-view/lars-gutow.html) * COMMENT: Material category
+	Floating items [#] (Float items) * PI: Gutow, Lars (https://orcid.org/0000-0002-9017-0083, lars.gutow@awi.de, https://www.awi.de/en/about-us/organisation/staff/single-view/lars-gutow.html) * COMMENT: Number of items
+	Comment (Comment) * PI: Gutow, Lars (https://orcid.org/0000-0002-9017-0083, lars.gutow@awi.de, https://www.awi.de/en/about-us/organisation/staff/single-view/lars-gutow.html)
+License:	Creative Commons Attribution 4.0 International (CC-BY-4.0) (URI: https://creativecommons.org/licenses/by/4.0/)
+Status:	Curation Level: Enhanced curation (URI: https://wiki.pangaea.de/wiki/Curation_levels)
+Size:	3472 data points
+*/
+Event	Transect	Latitude	Longitude	Comment (position)	Item (Item type)	Material (Material category)	Float items [#] (Number of items)	Comment
+MSM41_litter-T1	1	32.235117	-64.711017		PET bottle	Plastic	1	transparent
+MSM41_litter-T1	1	32.218167	-64.734367		plastic	Plastic	1	green (piece of rope?)
+MSM41_litter-T1	1	32.203500	-64.753817		plastic blanket	Plastic	1	blue, big
+MSM41_litter-T1	1	32.186550	-64.776983		plastic fragment	Plastic	1	white
+MSM41_litter-T2	2	30.840333	-67.903150		plastic fragment	Plastic	1	white
+MSM41_litter-T2	2	30.830933	-67.926600		wood	Wood	1	small piece (""twig"")
+MSM41_litter-T2	2	30.827517	-67.934983		plastic spoon	Plastic	1	white
+MSM41_litter-T2	2	30.822600	-67.947000		plastic	Plastic	1	piece, green
+MSM41_litter-T2	2	30.818733	-67.957550		plastic fragment	Plastic	1	foile, white
+MSM41_litter-T2	2	30.809250	-67.981633		plastic	Plastic	1	white, fist-sized
+MSM41_litter-T2	2	30.801783	-68.000583		plastic	Plastic	1	piece, yellowish
+MSM41_litter-T2	2	30.798483	-68.006133		plastic bag	Plastic	1	yellow
+MSM41_litter-T2	2	30.798483	-68.006133		plastic	Plastic	1	block, orange
+MSM41_litter-T2	2	30.798267	-68.009350		Sargassum	Seaweed	1	
+MSM41_litter-T2	2	30.795233	-68.016967		line	Plastic	1	piece, white
+MSM41_litter-T2	2	30.788933	-68.032250		line	Plastic	1	piece, white
+MSM41_litter-T2	2	30.785483	-68.041700		Sargassum	Seaweed	1	
+MSM41_litter-T3	3	30.655683	-68.366033		plastic bag	Plastic	1	
+MSM41_litter-T3	3	30.646167	-68.389950		twig	Wood	1	
+MSM41_litter-T3	3	30.639617	-68.406317		twig	Wood	1	
+MSM41_litter-T3	3	30.629933	-68.430317		plastic fragment	Plastic	1	
+MSM41_litter-T3	3	30.621317	-68.451583		plastic	Plastic	1	white, ca. 20 x 20 cm
+MSM41_litter-T3	3	30.601050	-68.502567		plastic	Plastic	1	green, ca. 10 cm
+MSM41_litter-T3	3				Sargassum	Seaweed	962	
+MSM41_litter-T4	4	30.475333	-68.816867		styrofoam	Styrofoam	1	small fragment, white
+MSM41_litter-T4	4	30.473683	-68.820817		styrofoam	Styrofoam	1	small fragment, white
+MSM41_litter-T4	4	30.472400	-68.824067		plastic disc	Plastic	1	large, diameter: ca. 30-40 cm
+MSM41_litter-T4	4	30.472400	-68.824067		piece of plastic	Plastic	1	square, ca. 10 cm
+MSM41_litter-T4	4	30.461200	-68.851583		piece of plastic	Plastic	1	cover, size: ca. DIN-A 4
+MSM41_litter-T4	4	30.431283	-68.927783		plastic foil	Plastic	1	transparent-white
+MSM41_litter-T4	4	30.428517	-68.932967		n.d.	Others	1	red object, below surface
+MSM41_litter-T4	4	30.390933	-69.026617		rope	Plastic	1	ca. 1 m
+MSM41_litter-T4	4				Sargassum	Seaweed	240	
+MSM41_litter-T5	5	30.088933	-69.779183		n.d.	Others	1	grey, below surface
+MSM41_litter-T5	5	30.085333	-69.787350		plastic fragment	Plastic	1	white, ca. 5 x 10 cm
+MSM41_litter-T5	5	30.059367	-69.852000		plastic box	Plastic	1	grid box, broken
+MSM41_litter-T5	5				Sargassum	Seaweed	80	
+MSM41_litter-T6	6	29.886683	-69.875300		plastic fragment	Plastic	1	white
+MSM41_litter-T6	6	29.830917	-69.883500		pin-pong ball	Plastic	1	white
+MSM41_litter-T6	6	29.817600	-69.885500		plastic fragment	Plastic	1	white
+MSM41_litter-T6	6	29.799267	-69.888133		plastic lid	Plastic	1	round, ca. 2 cm, white
+MSM41_litter-T6	6	29.784067	-69.890333		plastic fragment	Plastic	1	white
+MSM41_litter-T6	6	29.779600	-69.890983		plastic fragment	Plastic	1	white
+MSM41_litter-T6	6	29.776767	-69.891467		plastic fragment	Plastic	1	white, small
+MSM41_litter-T6	6	29.765283	-69.893183		plastic box	Plastic	1	ca. 15 cm
+MSM41_litter-T6	6				Sargassum	Seaweed	62	
+MSM41_litter-T7	7	29.497717	-69.932350		plastic fragment	Plastic	1	white
+MSM41_litter-T7	7	29.491750	-69.933267		plastic fragment	Plastic	1	white, very small
+MSM41_litter-T7	7	29.486833	-69.934050		plastic	Plastic	1	piece of bucket, upper edge
+MSM41_litter-T7	7	29.479033	-69.935200		plastic fragment	Plastic	1	small, white
+MSM41_litter-T7	7	29.377500	-69.950233		plastic	Plastic	1	square, ca. 5 x 10 cm
+MSM41_litter-T7	7	29.373800	-69.950733		plastic fragment	Plastic	1	white, small
+MSM41_litter-T7	7	29.354483	-69.953483		net	Plastic	1	yellow, ca. 2 x 2 m
+MSM41_litter-T7	7	29.351983	-69.953900		plastic	Plastic	1	ca. 10 cm
+MSM41_litter-T7	7	29.349883	-69.954200		pipe	Plastic	1	length: ~30 cm, diameter: ~10 cm
+MSM41_litter-T7	7				Sargassum	Seaweed	159	
+MSM41_litter-T8	8	29.152283	-69.983367		plastic fragment	Plastic	1	white
+MSM41_litter-T8	8	29.099117	-69.991067		n.d.	Others	1	brown object, ca. 10 cm
+MSM41_litter-T8	8	29.047567	-69.999483		plastic	Plastic	1	white, ca. 15 cm
+MSM41_litter-T8	8	29.012950	-70.007000		plastic fragment	Plastic	1	white
+MSM41_litter-T8	8				Sargassum	Seaweed	364	
+MSM41_litter-T10	10	27.533783	-69.800483		plastic cup/bottle	Plastic	1	white
+MSM41_litter-T10	10	27.503517	-69.811933		plastic lid	Plastic	1	white, ca. 10 x 20 cm
+MSM41_litter-T10	10	27.393317	-69.856850		plastic barrel	Plastic	1	diameter: ca. 30-40 cm
+MSM41_litter-T10	10	27.380917	-69.862683		Sargassum patch	Seaweed	3	
+MSM41_litter-T10	10	27.366533	-69.867717		jerrycan	Plastic	1	white
+MSM41_litter-T10	10				Sargassum	Seaweed	8640	
+MSM41_litter-T11	11	26.102283	-69.994700		plastic foil	Plastic	1	piece of blue bin bag, 10-15 cm
+MSM41_litter-T11	11	26.051467	-70.001383		plastic fragment	Plastic	1	small, white
+MSM41_litter-T11	11				Sargassum	Seaweed	660	
+MSM41_litter-T12	12	25.865183	-69.953067		plastic spoon	Plastic	1	
+MSM41_litter-T12	12	25.857767	-69.954183		plastic fragment	Plastic	1	white
+MSM41_litter-T12	12				Sargassum	Seaweed	2325	
+MSM41_litter-T13	13	24.917950	-69.969433		plastic container	Plastic	1	black, 15 x 20 x 20 cm
+MSM41_litter-T13	13	24.889433	-69.971967		styrofoam	Styrofoam	1	
+MSM41_litter-T13	13	24.864800	-69.974000		plastic ring	Plastic	1	diameter: ca. 10-15 cm, pink-orange
+MSM41_litter-T13	13	24.844200	-69.975633		plastic fragment	Plastic	1	small, white
+MSM41_litter-T13	13				Sargassum	Seaweed	2046	
+MSM41_litter-T14	14	24.527083	-69.922800		plastic fragment	Plastic	1	small, light blue
+MSM41_litter-T14	14	24.523450	-69.911000		plastic ball	Plastic	1	
+MSM41_litter-T14	14	24.518100	-69.893000		plastic fragment	Plastic	1	small, white
+MSM41_litter-T14	14	24.509967	-69.866217		plastic fragment	Plastic	1	small, white
+MSM41_litter-T14	14	24.507483	-69.857617		plastic fragment	Plastic	1	small, white
+MSM41_litter-T14	14				n.d.	Others	1	small, beige-pink, no exact position
+MSM41_litter-T14	14				Sargassum-Patch	Seaweed	1	no exact position
+MSM41_litter-T14	14				plastic fragment	Plastic	1	small light green, no exact position
+MSM41_litter-T14	14				plastic object	Plastic	1	ca. 20 cm long, hell, no exact position
+MSM41_litter-T14	14				bucket	Plastic	1	damaged, diameter: ca. 20 cm, light, no exact position
+MSM41_litter-T14	14	24.486017	-69.787350		plastic fragment	Plastic	1	
+MSM41_litter-T14	14	24.483650	-69.779017		plastic fragment	Plastic	1	
+MSM41_litter-T14	14	24.480717	-69.769200		plastic fragment	Plastic	1	
+MSM41_litter-T14	14	24.478983	-69.764100		plastic fragment	Plastic	1	
+MSM41_litter-T14	14	24.475367	-69.751917		plastic fragment	Plastic	1	
+MSM41_litter-T14	14	24.470583	-69.736750		plastic fragment	Plastic	1	
+MSM41_litter-T14	14				Sargassum	Seaweed	19061	
+MSM41_litter-T15	15	24.379117	-69.431317		plastic fragment	Plastic	1	white
+MSM41_litter-T15	15	24.371950	-69.407833		plastic object	Plastic	1	white, ca. 10 cm
+MSM41_litter-T15	15	24.367617	-69.393917		rope	Plastic	1	plastic, orange
+MSM41_litter-T15	15	24.365417	-69.385983		plastic fragment	Plastic	1	green, ca. 5 cm
+MSM41_litter-T15	15	24.351917	-69.340967		plastic bag	Plastic	1	white
+MSM41_litter-T15	15				Sargassum	Seaweed	11983	
+MSM41_litter-T16	16	24.226883	-69.925817		plastic fragment	Plastic	1	green
+MSM41_litter-T16	16	24.225250	-69.920333		plastic cup	Plastic	1	white
+MSM41_litter-T16	16				Sargassum	Seaweed	1848	
+MSM41_litter-T17	17	23.605767	-67.289000		lid of jerrycan	Plastic	1	white
+MSM41_litter-T17	17	23.618150	-67.004750		plastic fragment	Plastic	1	white
+MSM41_litter-T17	17	23.697800	-67.004783		plastic fragment	Plastic	1	ca. 5 cm, white
+MSM41_litter-T17	17	23.701100	-67.004800		plastic fragment	Plastic	1	small, white
+MSM41_litter-T17	17	23.706900	-67.004850		plastic fragment	Plastic	2	small, white
+MSM41_litter-T17	17	23.708733	-67.004867		plastic fragment	Plastic	1	light blue
+MSM41_litter-T17	17				Sargassum	Seaweed	2391	
+MSM41_litter-T18	18	24.086933	-66.952750		plastic fragment	Plastic	1	white
+MSM41_litter-T18	18	24.097083	-66.951733		plastic fragment	Plastic	1	white
+MSM41_litter-T18	18	24.109433	-66.952183		piece of plastic foil	Plastic	1	ca. 15 cm, blue-green
+MSM41_litter-T18	18	24.113467	-66.952250		plastic fragment	Plastic	1	small, white
+MSM41_litter-T18	18	24.123267	-66.952550		plastic fragment	Plastic	1	white
+MSM41_litter-T18	18	24.137200	-66.970833		plastic container	Plastic	1	ca. 10 x 15 cm
+MSM41_litter-T18	18	24.137200	-66.970833		plastic fragment	Plastic	1	white
+MSM41_litter-T18	18	24.161633	-66.971750		plastic fragment	Plastic	1	white
+MSM41_litter-T18	18	24.168817	-66.972017		plastic fragment	Plastic	1	white, ca. 5 cm
+MSM41_litter-T18	18	24.171583	-66.972133		lid of plastic bucket	Plastic	1	white, diameter: ca. 20 cm
+MSM41_litter-T18	18	24.190500	-66.972917		plastic fragment	Plastic	1	white
+MSM41_litter-T18	18	24.196383	-66.973133		plastic fragment	Plastic	2	
+MSM41_litter-T18	18	24.196383	-66.973133		Sargassum patch	Seaweed	2	
+MSM41_litter-T18	18	24.210817	-66.973633		plastic lid	Plastic	1	ligt blue, ca. 10 x 10 cm
+MSM41_litter-T18	18				Sargassum	Seaweed	5129	
+MSM41_litter-T19	19	25.242650	-66.896033		piece of plastic	Plastic	1	ca. 5 cm, white
+MSM41_litter-T19	19	25.273950	-66.900483		plastic foil	Plastic	1	white, ca. 30 cm
+MSM41_litter-T19	19	25.376583	-66.915250		plastic bottle	Plastic	1	
+MSM41_litter-T19	19				Sargassum	Seaweed	1644	
+MSM41_litter-T20	20	25.620533	-66.950667		plastic fragment	Plastic	1	white
+MSM41_litter-T20	20	25.646183	-66.954333		plastic lid	Plastic	1	diameter: 2-3 cm
+MSM41_litter-T20	20	25.684550	-66.959850		plastic fragment	Plastic	1	small; white/light blue
+MSM41_litter-T20	20	25.691783	-66.960917		plastic fragment	Plastic	1	small, white
+MSM41_litter-T20	20	25.715100	-66.964250		plastic fragment	Plastic	1	small, white
+MSM41_litter-T20	20	25.726617	-66.965900		plastic fragment	Plastic	1	small, white
+MSM41_litter-T20	20	25.729100	-66.966333		plastic fragment	Plastic	1	small, white
+MSM41_litter-T20	20	25.761783	-66.971167		n.d.	Others	1	object, grey/green, ca. 30 cm, submerged
+MSM41_litter-T20	20				Sargassum	Seaweed	2781	
+MSM41_litter-T21	21	26.042050	-66.933317		plastic stick	Plastic	1	white, ca. 5 cm
+MSM41_litter-T21	21	26.065183	-66.935250		bottom of fish box	Plastic	1	ca. 50 cm, heavily damaged
+MSM41_litter-T21	21	26.090683	-66.937017		plastic fragment	Plastic	1	white
+MSM41_litter-T21	21	26.122583	-66.939283		plastic fragment	Plastic	1	white
+MSM41_litter-T21	21	26.199067	-66.944767		plastic fragment	Plastic	1	white, small
+MSM41_litter-T21	21	26.218283	-66.946183		plastic fragment	Plastic	1	light green
+MSM41_litter-T21	21	26.220350	-66.946383		plastic fragment	Plastic	1	small, white
+MSM41_litter-T21	21	26.221883	-66.936500		plastic fragment	Plastic	1	small, white
+MSM41_litter-T21	21				Sargassum	Seaweed	657	
+MSM41_litter-T22	22	27.611617	-66.967400		plastic fragment	Plastic	1	small, white
+MSM41_litter-T22	22	27.622500	-66.968450		fragment of plastic foil	Plastic	1	ca. 5 cm, white
+MSM41_litter-T22	22	27.638150	-66.969967		plastic fragment	Plastic	1	small, white
+MSM41_litter-T22	22	27.692350	-66.975233		plastic fragment	Plastic	1	small, white
+MSM41_litter-T22	22	27.706200	-66.976567		n.d.	Others	1	greenish, ca. 8 cm
+MSM41_litter-T22	22	27.706200	-66.976567		PET bottle	Plastic	1	heavily fouled
+MSM41_litter-T22	22	27.708650	-66.976767		plastic fragment	Plastic	1	white
+MSM41_litter-T22	22	27.710383	-66.976917		bottom of barrel	Plastic	1	black, diameter: ca. 20 cm
+MSM41_litter-T22	22	27.717633	-66.977700		plastic fragment	Plastic	1	white, ca. 5 cm, fouled
+MSM41_litter-T22	22	27.735467	-66.979483		plastic object	Plastic	1	ca. 15 x 10 cm,fouled
+MSM41_litter-T22	22	27.784983	-66.984567		fish box	Plastic	1	ca. 40 x 50 cm, fouled
+MSM41_litter-T22	22				Sargassum	Seaweed	10791	
+MSM41_litter-T23	23	28.093617	-66.909833		plastic fragment	Plastic	1	ca. 7 cm, fouled
+MSM41_litter-T23	23	28.107967	-66.911217		plastic fragment	Plastic	1	small, white
+MSM41_litter-T23	23	28.128833	-66.913417		plastic fragment	Plastic	1	white, ca. 5 cm
+MSM41_litter-T23	23	28.132867	-66.913733		plastic fragment	Plastic	1	small, white
+MSM41_litter-T23	23	28.136133	-66.914050		PET bottle	Plastic	1	
+MSM41_litter-T23	23	28.136133	-66.914050		can	Plastic	1	heavily fouled
+MSM41_litter-T23	23	28.147083	-66.915300		plastic fragment	Plastic	1	small, white
+MSM41_litter-T23	23	28.183633	-66.919133		lid	Plastic	1	fouled, ca. 10 cm (lid like from spray can)
+MSM41_litter-T23	23	28.193067	-66.920067		plastic fragment	Plastic	1	small, white
+MSM41_litter-T23	23			no coordinates - GPS without contact to satellites	plastic object	Plastic	1	fouled, ca. 40 cm
+MSM41_litter-T23	23			no coordinates - GPS without contact to satellites	plastic fragment	Plastic	1	small, white
+MSM41_litter-T23	23			no coordinates - GPS without contact to satellites	plastic fragment	Plastic	1	white, ca. 10 cm
+MSM41_litter-T23	23	28.239717	-66.924967		plastic object	Plastic	1	ca. 10 x 10 cm
+MSM41_litter-T23	23	28.267600	-66.927717		line	Plastic	1	green
+MSM41_litter-T23	23	28.268817	-66.927883		plastic fragment	Plastic	1	ca. 15-20 cm
+MSM41_litter-T23	23	28.272483	-66.928133		plastic object	Plastic	1	red, ca. 20 cm
+MSM41_litter-T23	23	28.275333	-66.928633		line	Plastic	1	piece
+MSM41_litter-T23	23	28.275333	-66.928633		Sargassum patch	Seaweed	1	
+MSM41_litter-T23	23	28.279350	-66.929183		plastic object	Plastic	1	ca. 15 cm
+MSM41_litter-T23	23				Sargassum	Seaweed	7709	
+MSM41_litter-T24	24	28.772550	-66.969517		plastic fragment	Plastic	1	small, white
+MSM41_litter-T24	24	28.786000	-66.982600		plastic fragment	Plastic	1	light blue, ca. 5 cm
+MSM41_litter-T24	24	28.787050	-66.982717		plastic fragment	Plastic	1	small, white
+MSM41_litter-T24	24	28.802317	-66.984417		plastic foil	Plastic	1	small, white
+MSM41_litter-T24	24	28.805117	-66.984683		plastic object	Plastic	1	white, ca. 5 x 10 cm
+MSM41_litter-T24	24	28.809283	-66.985267		plastic fragment	Plastic	1	elongate, white, ca. 5 x 1 cm
+MSM41_litter-T24	24	28.813200	-66.985667		plastic fragment	Plastic	1	elongate, white, ca. 3 x 1 cm
+MSM41_litter-T24	24	28.817783	-66.986133		barrel	Plastic	1	diameter: ca. 40 cm, length: ca. 50 cm
+MSM41_litter-T24	24	28.838400	-66.988383		plastic fragment	Plastic	1	small, white
+MSM41_litter-T24	24	28.840300	-66.988650		plastic object	Plastic	1	ca. 15 x 20 cm, black, fouled
+MSM41_litter-T24	24	28.841567	-66.988800		plastic object	Plastic	1	white, ca. 20 x 10 cm
+MSM41_litter-T24	24	28.846550	-66.989417		plastic fragment	Plastic	1	small, white
+MSM41_litter-T24	24	28.855883	-66.990333		plastic foil	Plastic	1	small piece, white
+MSM41_litter-T24	24	28.858967	-66.990600		plastic object	Plastic	1	white, 15 x 10 cm
+MSM41_litter-T24	24	28.858967	-66.990600		plastic fragment	Plastic	1	piece of foil, small, white
+MSM41_litter-T24	24	28.861367	-66.990850		plastic foil	Plastic	1	5 cm, white
+MSM41_litter-T24	24	28.903267	-66.995383		plastic foil	Plastic	1	white, ca. 10 x 5 cm
+MSM41_litter-T24	24	28.906917	-66.995783		plastic fragment	Plastic	3	small, white
+MSM41_litter-T24	24	28.908900	-66.996000		plastic fragment	Plastic	1	small, white
+MSM41_litter-T24	24	28.910317	-66.996167		plastic fragment	Plastic	1	small, white
+MSM41_litter-T24	24	28.915617	-66.996767		plastic fragment	Plastic	1	small, white
+MSM41_litter-T24	24				Sargassum	Seaweed	2930	
+MSM41_litter-T25	25	30.246633	-66.901050		stick	Plastic	1	white, ca. 7 cm
+MSM41_litter-T25	25	30.255183	-66.902300		plastic fragment	Plastic	2	small, white
+MSM41_litter-T25	25	30.341200	-66.914000		plastic fragment	Plastic	1	ca. 5 cm
+MSM41_litter-T25	25	30.344450	-66.914417		plastic fragment	Plastic	2	small, white
+MSM41_litter-T25	25	30.348750	-66.914950		plastic fragment	Plastic	1	small, white
+MSM41_litter-T25	25	30.358150	-66.916233		plastic fragment	Plastic	1	small, white
+MSM41_litter-T25	25	30.366033	-66.917167		plastic fragment	Plastic	3	small, white
+MSM41_litter-T25	25	30.373000	-66.918117		plastic fragment	Plastic	1	small, white
+MSM41_litter-T25	25	30.377483	-66.918683		plastic lid	Plastic	1	
+MSM41_litter-T25	25	30.377483	-66.918683		plastic fragment	Plastic	1	small, white
+MSM41_litter-T25	25	30.388217	-66.920100		rope	Plastic	1	light green
+MSM41_litter-T25	25	30.394450	-66.921100		plastic fragment	Plastic	1	ca. 4 cm
+MSM41_litter-T25	25	30.400667	-66.921900		plastic fragment	Plastic	4	white
+MSM41_litter-T25	25	30.443600	-66.927250		plastic object	Plastic	1	ca. 5 x 5 cm
+MSM41_litter-T25	25	30.443600	-66.927250		plastic fragment	Plastic	1	
+MSM41_litter-T25	25				Sargassum	Seaweed	2713	
+MSM41_litter-T26	26	30.922067	-66.994600		plastic can	Plastic	1	diameter: ca. 5 cm; length: ca. 5 cm
+MSM41_litter-T26	26	30.956700	-66.999767		plastic fragment	Plastic	1	small, white
+MSM41_litter-T26	26	30.977267	-67.003050		plastic fragment	Plastic	1	ca. 5 cm, white
+MSM41_litter-T26	26	30.980117	-67.003550		plastic fragment	Plastic	1	white, ca. 3 cm
+MSM41_litter-T26	26				Sargassum	Seaweed	9	
+MSM41_litter-T27	27	30.997283	-66.704000		plastic fragment	Plastic	1	small, white
+MSM41_litter-T27	27	30.997550	-66.682950		object	Others	1	white, ca. 10 cm
+MSM41_litter-T27	27	30.997933	-66.672867		plastic fragment	Plastic	1	small, white
+MSM41_litter-T27	27	30.998317	-66.655483		plastic fragment	Plastic	1	white, ca. 5 cm
+MSM41_litter-T27	27	30.998617	-66.642500		feather	Others	1	
+MSM41_litter-T27	27	30.998883	-66.635650		barrel	Plastic	1	white, ca. 70 cm, fouled
+MSM41_litter-T27	27	30.997050	-66.610200		fragment of plastic foil	Plastic	1	transparent, ca. 5 cm
+MSM41_litter-T27	27	30.997167	-66.575850		plastic fragment	Plastic	1	small, white
+MSM41_litter-T27	27	30.997050	-66.561567		stick	Plastic	1	white, ca. 15 cm
+MSM41_litter-T27	27	30.997067	-66.556100		plastic object	Plastic	1	white, ca. 10 cm
+MSM41_litter-T27	27	30.996967	-66.550533		plastic fragment	Plastic	1	white, ca. 5 cm
+MSM41_litter-T27	27	30.997117	-66.504033		piece of rope	Plastic	1	ca. 30 cm, thin
+MSM41_litter-T27	27	30.997117	-66.495800		lid	Plastic	1	red, ca. 15 cm
+MSM41_litter-T27	27	30.997117	-66.495800		box	Plastic	1	ca. 50 x 40 x 40 cm, grey
+MSM41_litter-T27	27	30.997067	-66.490533		bottle lid	Plastic	1	green
+MSM41_litter-T27	27	30.997200	-66.485167		plastic fragment	Plastic	1	red, ca. 6 cm
+MSM41_litter-T27	27				Sargassum	Seaweed	70	
+MSM41_litter-T28	28	30.997250	-66.079533		plastic fragment	Plastic	1	small, white
+MSM41_litter-T28	28	30.997283	-66.042083		block of styrofoam	Styrofoam	1	ca. 10 x 10 cm
+MSM41_litter-T28	28	30.997283	-66.035417		plastic fragment	Plastic	1	white, ca. 5 cm
+MSM41_litter-T28	28	30.997283	-66.006033		plastic bag	Plastic	1	white, ca. 20 cm
+MSM41_litter-T28	28	30.997267	-65.997267		plastic bottle	Plastic	1	white
+MSM41_litter-T28	28	30.997267	-65.997267		plastic foil	Plastic	1	ca. 20 cm
+MSM41_litter-T28	28	30.997283	-65.945650		plastic fragment	Plastic	1	white, ca. 5 cm
+MSM41_litter-T28	28	30.997317	-65.935750		plastic object	Plastic	1	squared, ca. 20 x 20 cm, heavily fouled
+MSM41_litter-T28	28	30.997317	-65.935750		pipe	Plastic	1	length: ~30 cm, diameter: ~15 cm
+MSM41_litter-T28	28	30.997300	-65.916383		tube	Plastic	1	length: ~30 cm
+MSM41_litter-T28	28	30.997300	-65.874667		plastic object	Plastic	1	~10 cm, light blue/white
+MSM41_litter-T28	28	30.997300	-65.870217		plastic object	Plastic	1	~10 cm, white
+MSM41_litter-T28	28	30.997317	-65.864767		plastic fragment	Plastic	1	white, ~6 cm
+MSM41_litter-T28	28				Sargassum	Seaweed	386	
+MSM41_litter-T29	29	30.997317	-65.954683		plastic stick	Plastic	1	white, 10 x 2 cm
+MSM41_litter-T29	29	30.997233	-65.951633		plastic stick	Plastic	1	ca. 3 cm long, green
+MSM41_litter-T29	29	30.997233	-65.947333		plastic fragment	Plastic	1	ca. 5 cm, white
+MSM41_litter-T29	29	30.997200	-65.946083		plastic fragment	Plastic	1	ca. 4 cm, yellowish
+MSM41_litter-T29	29	30.997217	-65.943117		plastic fragment	Plastic	1	ca. 7 cm, foil (?)
+MSM41_litter-T29	29	30.997183	-65.940717		styrofoam plate	Styrofoam	1	ca. 10 x 20 cm
+MSM41_litter-T29	29	30.997067	-65.892233		object	Plastic	1	ca. 10 cm, blue/white
+MSM41_litter-T29	29	30.997133	-65.879133		line	Plastic	1	green, ca. 50 cm long
+MSM41_litter-T29	29	30.997167	-65.873717		plastic line	Plastic	1	green, ring ca. 15 cm diameter
+MSM41_litter-T29	29	30.997233	-65.859067		plastic line	Plastic	1	orange, ca. 30 cm
+MSM41_litter-T29	29	30.997117	-65.823050		plastic fragment	Plastic	1	small, white
+MSM41_litter-T29	29	30.997150	-65.809350		plastic box	Plastic	1	diameter: ca. 7 cm; length: ca. 20 cm
+MSM41_litter-T29	29	30.997200	-65.791683		plastic fragment	Plastic	1	small, white
+MSM41_litter-T29	29	30.997183	-65.789317		plastic stick	Plastic	1	ca. 10 cm, white
+MSM41_litter-T29	29				Sargassum	Seaweed	1364	
+MSM41_litter-T30	30	30.636233	-64.083483		piece of plastic foil	Plastic	1	white, torn apart, 15 x 15 cm
+MSM41_litter-T30	30	30.623550	-64.081950		plastic fragment	Plastic	1	foil, white, ca. 3 cm long
+MSM41_litter-T30	30	30.619600	-64.081333		plastic object	Plastic	1	white-yellowish, 15 x 4 cm
+MSM41_litter-T30	30	30.534983	-64.071200		piece of plastic	Plastic	1	white-yellowish, fouled, ca. 15 x 10 cm
+MSM41_litter-T30	30	30.512217	-64.068283		plastic fragment	Plastic	1	white, ca. 4 cm
+MSM41_litter-T30	30				Sargassum	Seaweed	1395	
+MSM41_litter-T31	31	30.251433	-64.038033		plastic object	Plastic	1	white, ca. 10 cm
+MSM41_litter-T31	31	30.251433	-64.038033		plastic object	Plastic	1	white, 6 cm
+MSM41_litter-T31	31	30.247133	-64.036183		plastic fragment	Plastic	1	small, white
+MSM41_litter-T31	31	30.243633	-64.035717		plastic fragment	Plastic	1	small, white
+MSM41_litter-T31	31	30.234833	-64.034550		plastic fragment	Plastic	1	light green, ca. 3 cm
+MSM41_litter-T31	31	30.228333	-64.033750		bucket	Plastic	1	white, fouled
+MSM41_litter-T31	31	30.224000	-64.033233		lid	Plastic	1	green, ca. 6 cm
+MSM41_litter-T31	31	30.211450	-64.031700		stick	Plastic	1	white, ca. 8 cm
+MSM41_litter-T31	31	30.202583	-64.030533		plastic fragment	Plastic	1	white, ca. 5 cm
+MSM41_litter-T31	31	30.197000	-64.029850		plastic fragment	Plastic	1	white, ca. 7 cm
+MSM41_litter-T31	31	30.191567	-64.029133		plastic fragment	Plastic	1	white, ca. 7 cm
+MSM41_litter-T31	31	30.164717	-64.025783		plastic fragment	Plastic	1	small, white
+MSM41_litter-T31	31	30.108383	-64.019450		plastic object	Plastic	1	white, ca. 30 cm
+MSM41_litter-T31	31	30.097433	-64.017883		plastic fragment	Plastic	1	white, ca. 5 cm
+MSM41_litter-T31	31	30.093850	-64.017433		plastic fragment	Plastic	1	white, ca. 6 cm
+MSM41_litter-T31	31	30.090200	-64.016983		plastic fragment	Plastic	1	white, ca. 4 cm
+MSM41_litter-T31	31	30.087150	-64.016633		plastic object	Plastic	1	squared, white, ca. 3 x 3 cm
+MSM41_litter-T31	31				Sargassum	Seaweed	5285	
+MSM41_litter-T32	32	29.922500	-64.063367		plastic fragment	Plastic	1	blue, ca. 4 cm
+MSM41_litter-T32	32	29.922500	-64.063367		plastic object	Plastic	1	white, ca. 10 x 15 cm
+MSM41_litter-T32	32	29.917967	-64.063033		plastic fragment	Plastic	1	yellowish, ca. 5 cm
+MSM41_litter-T32	32	29.906567	-64.062283		plastic object	Plastic	1	white, 20 x 15 cm
+MSM41_litter-T32	32	29.869583	-64.059800		plastic fragment	Plastic	1	elongate, small, ca. 3 cm
+MSM41_litter-T32	32	29.849083	-64.058417		plastic fragment	Plastic	1	small, white
+MSM41_litter-T32	32	29.846533	-64.058250		plastic fragment	Plastic	1	white, ca. 5 cm
+MSM41_litter-T32	32	29.804283	-64.055417		block of styrofoam	Styrofoam	1	10 x 10 x 20 cm
+MSM41_litter-T32	32	29.791583	-64.054583		piece of plastic foil	Plastic	1	white, ca. 10 cm
+MSM41_litter-T32	32	29.786833	-64.054267		plastic fragment	Plastic	1	small, white
+MSM41_litter-T32	32	29.786833	-64.054267		plastic fragment	Plastic	1	white, ca. 3 cm
+MSM41_litter-T32	32	29.780950	-64.053833		plastic fragment	Plastic	1	small, white
+MSM41_litter-T32	32	29.769417	-64.053233		plastic fragment	Plastic	1	small, white
+MSM41_litter-T32	32	29.758000	-64.058533		plastic fragment	Plastic	1	white, ca. 5 cm
+MSM41_litter-T32	32	29.757000	-64.052433		plastic fragment	Plastic	1	white, ca. 7 cm
+MSM41_litter-T32	32	29.728183	-64.050633		plastic object	Plastic	1	white, ca. 10 x 15 cm
+MSM41_litter-T32	32				Sargassum	Seaweed	3081	
+MSM41_litter-T33	33	27.826117	-63.912667		plastic cup	Plastic	1	white
+MSM41_litter-T33	33	27.752000	-63.921083		plastic bracket	Plastic	1	ca. 40 cm, white
+MSM41_litter-T33	33	27.680017	-63.929167		half fish box	Plastic	1	yellow, fouled
+MSM41_litter-T33	33	27.659167	-63.931367		plastic object	Plastic	1	heavily fouled, 30 x 40 cm
+MSM41_litter-T33	33	27.650717	-63.932367		piece of plastik pipe	Plastic	1	ca. 70 cm, ""Terracotta-red""
+MSM41_litter-T33	33				Sargassum	Seaweed	6973	
+MSM41_litter-T34	34	27.353250	-63.965633		plastic fragment	Plastic	1	ca. 5 cm
+MSM41_litter-T34	34	27.349100	-63.966100		plastic fragment	Plastic	1	small, white
+MSM41_litter-T34	34	27.347167	-63.966317		plastic fragment	Plastic	1	small, white
+MSM41_litter-T34	34	27.341733	-63.966800		plastic object	Plastic	1	white, ca. 10 cm
+MSM41_litter-T34	34	27.338267	-63.967217		plastic fragment	Plastic	1	small, white
+MSM41_litter-T34	34	27.337100	-63.967450		plastic fragment	Plastic	6	small, white
+MSM41_litter-T34	34	27.333417	-63.967800		glass bottle	Glas	1	
+MSM41_litter-T34	34	27.297433	-63.972033		plastic object	Plastic	1	green, ca. 10 x 10 cm
+MSM41_litter-T34	34	27.285883	-63.973417		plastik band	Plastic	1	green, ca. 20 cm
+MSM41_litter-T34	34	27.185617	-63.984733		jerrycan	Plastic	1	white, ca. 40 x 40 x 10 cm
+MSM41_litter-T34	34	27.175950	-63.985750		plastic fragment	Plastic	1	small, white
+MSM41_litter-T34	34				Sargassum	Seaweed	1985	
+MSM41_litter-T35	35	25.913933	-63.873683		plastic fragment	Plastic	1	white, ca. 6 cm
+MSM41_litter-T35	35	25.890383	-63.876600		plastic fragment	Plastic	1	klein, wei
+MSM41_litter-T35	35	25.810850	-63.886217		plastic object	Plastic	1	white, ca. 10 cm
+MSM41_litter-T35	35	25.805517	-63.886867		foil fragment	Plastic	1	white, ca. 10 cm
+MSM41_litter-T35	35	25.795500	-63.887967		plastic fragment	Plastic	1	small, white
+MSM41_litter-T35	35	25.789367	-63.888933		plastic fragment	Plastic	2	small, white
+MSM41_litter-T35	35	25.767200	-63.891333		plastic fragment	Plastic	1	white, ca. 6 cm
+MSM41_litter-T35	35	25.764833	-63.891517		plastic fragment	Plastic	1	white, ca. 5 cm
+MSM41_litter-T35	35				Sargassum	Seaweed	3238	
+MSM41_litter-T37	37	25.243000	-63.970117		bunch of lines	Plastic	1	green, ca. 50 cm
+MSM41_litter-T37	37				Sargassum	Seaweed	1855	
+MSM41_litter-T38	38	23.819033	-63.950350		plastic object	Plastic	1	ca. 5 cm, white
+MSM41_litter-T38	38	23.811950	-63.951583		plastic fragment	Plastic	1	elongate, white, ca. 3 cm
+MSM41_litter-T38	38				Sargassum	Seaweed	2430	
+MSM41_litter-T39	39	22.965583	-63.985400		(dead?) squid	Animal	1	
+MSM41_litter-T39	39	22.974583	-63.991217		plastic ring	Plastic	1	white, diameter: ca. 10 cm
+MSM41_litter-T39	39	22.977433	-63.993283		plastic foil	Plastic	1	transparent, ca. 40 cm
+MSM41_litter-T39	39				Sargassum	Seaweed	4209	
+MSM41_litter-T40	40	22.886750	-63.915333		plastic fragment	Plastic	1	small, white
+MSM41_litter-T40	40	22.822317	-63.930250		plastic fragment	Plastic	1	ca. 10 cm, white
+MSM41_litter-T40	40	22.802183	-63.934817		plastic object	Plastic	1	white, ca. 5 cm
+MSM41_litter-T40	40				Sargassum	Seaweed	989	
+MSM41_litter-T41	41	22.531133	-60.913600		plastic fragment	Plastic	1	small, white
+MSM41_litter-T41	41	22.552967	-60.917733		n.d.	Others	1	
+MSM41_litter-T41	41	22.555550	-60.918283		plastic fragment	Plastic	1	small, white
+MSM41_litter-T41	41	22.557150	-60.918567		piece of line	Plastic	1	ca. 20 cm, white
+MSM41_litter-T41	41	22.559450	-60.919050		plastic bag	Plastic	1	transparent
+MSM41_litter-T41	41	22.561750	-60.919517		piece of clothesline	Plastic	1	greenish, ca. 15 cm
+MSM41_litter-T41	41	22.568133	-60.920767		piece of clothesline	Plastic	1	ca. 15 cm, white
+MSM41_litter-T41	41	22.596500	-60.926350		plastic fragment	Plastic	1	small, white
+MSM41_litter-T41	41	22.612283	-60.929433		plastic fragment	Plastic	1	white, 10-15 cm, fouled
+MSM41_litter-T41	41	22.621833	-60.931217		plastic fragment	Plastic	1	small, white
+MSM41_litter-T41	41	22.630033	-60.932750		plastic fragment	Plastic	1	small, white
+MSM41_litter-T41	41				Sargassum	Seaweed	414	
+MSM41_litter-T42	42	22.778367	-60.945083		piece of plastic	Plastic	1	ca. 30 cm, heavily fouled, black, bite marks
+MSM41_litter-T42	42	22.807333	-60.967217		piece of plastic	Plastic	1	small, white
+MSM41_litter-T42	42	22.822300	-60.970483		piece of plastic	Plastic	1	small, white
+MSM41_litter-T42	42				Sargassum	Seaweed	381	
+MSM41_litter-T43	43	23.747133	-60.976783		plastic fragment	Plastic	1	10-15 cm, white
+MSM41_litter-T43	43	23.760967	-60.978550		plastic fragment	Plastic	1	small, white
+MSM41_litter-T43	43	23.772667	-60.979600		object	Plastic	1	white, ca. 5 cm
+MSM41_litter-T43	43	23.815650	-60.984367		plastic fragment	Plastic	1	light blue, ca. 5 cm
+MSM41_litter-T43	43				Sargassum	Seaweed	1307	
+MSM41_litter-T44	44	24.172500	-60.995033		plastic fragment	Plastic	1	small, white
+MSM41_litter-T44	44	24.179567	-60.995067		sneaker	Plastic	1	
+MSM41_litter-T44	44	24.205467	-60.995417		PE-foam	Plastic	1	diameter: ca. 5 cm; length: ca. 30 cm, grey
+MSM41_litter-T44	44	24.213250	-60.995417		plastic fragment	Plastic	1	small, white
+MSM41_litter-T44	44	24.258767	-60.995383		plastic box	Plastic	1	damaged, 40 x 40 x 40 cm, heavily fouled
+MSM41_litter-T44	44	24.304500	-60.996850		foil fragment	Plastic	1	white, ca. 7 cm
+MSM41_litter-T44	44				Sargassum	Seaweed	1193	
+MSM41_litter-T45	45	24.615150	-60.984317		plastic fragment	Plastic	1	small, white
+MSM41_litter-T45	45	24.670917	-60.987450		piece of plastic	Plastic	1	30 x 30 cm, heavily fouled
+MSM41_litter-T45	45	24.672367	-60.987483		plastic lid	Plastic	1	diameter: ca. 4 cm, white
+MSM41_litter-T45	45	24.679433	-60.988067		n.d.	Others	1	
+MSM41_litter-T45	45				Sargassum	Seaweed	5168	
+MSM41_litter-T46	46	26.160283	-60.998917		plastic fragment	Plastic	1	white, ca. 5 cm
+MSM41_litter-T46	46	26.185133	-60.999050		plastic fragment	Plastic	1	white, ca. 3 cm
+MSM41_litter-T46	46	26.199500	-61.599200		piece of plastic	Plastic	1	white, ca. 20 cm
+MSM41_litter-T46	46	26.199500	-61.599200		plastic fragment	Plastic	1	small, white
+MSM41_litter-T46	46	26.217317	-60.999350		plastic fragment	Plastic	1	small, white
+MSM41_litter-T46	46	26.222933	-60.999333		plastic fragment	Plastic	1	small, white
+MSM41_litter-T46	46	26.230250	-60.999400		half bucket	Plastic	1	heavily fouled
+MSM41_litter-T46	46	26.233233	-60.999417		plastic fragment	Plastic	1	small, white
+MSM41_litter-T46	46	26.238000	-60.999433		plastic fragment	Plastic	1	small, white
+MSM41_litter-T46	46	26.239617	-60.999433		plastic fragment	Plastic	1	small, white
+MSM41_litter-T46	46	26.239617	-60.999433		bottom of jerrycan	Plastic	1	white, ca. 20 cm
+MSM41_litter-T46	46	26.239617	-60.999433		piece of plastic	Plastic	1	heavily fouled, ca. 20 cm
+MSM41_litter-T46	46	26.239617	-60.999433		plastic fragment	Plastic	1	small, white
+MSM41_litter-T46	46	26.248067	-60.999483		plastic fragment	Plastic	1	small, white
+MSM41_litter-T46	46	26.267367	-60.999550		plastic fragment	Plastic	1	white, ca. 6 cm
+MSM41_litter-T46	46	26.270767	-60.999550		plastic foil	Plastic	1	ca. 50 cm, heavily fouled
+MSM41_litter-T46	46	26.272767	-60.999583		plastic fragment	Plastic	1	white, ca. 7 cm
+MSM41_litter-T46	46	26.277267	-60.999633		plastic fragment	Plastic	1	light blue, ca. 5 cm
+MSM41_litter-T46	46	26.282983	-60.999667		plastic fragment	Plastic	1	white, ca. 3 cm
+MSM41_litter-T46	46	26.285433	-60.999733		piece of plastic cup	Plastic	1	white
+MSM41_litter-T46	46	26.309350	-61.000000		piece of net rope	Plastic	1	green
+MSM41_litter-T46	46				Sargassum	Seaweed	6506	
+MSM41_litter-T47	47	26.521900	-61.001433		plastic fragment	Plastic	1	light blue, ca. 4 cm
+MSM41_litter-T47	47	26.533567	-61.001417		plastic fragment	Plastic	1	white, ca. 5 cm
+MSM41_litter-T47	47	26.537333	-61.001333		plastic fragment	Plastic	1	white, ca. 5 cm
+MSM41_litter-T47	47				Sargassum	Seaweed	321	
+MSM41_litter-T48	48	27.830233	-60.996850		plastic fragment	Plastic	5	small, white
+MSM41_litter-T48	48	27.839600	-60.997333		plastic fragment	Plastic	1	ca. 3 cm, white
+MSM41_litter-T48	48	27.851667	-60.997917		plastic fragment	Plastic	1	elongate, thin, white, ca. 3 cm
+MSM41_litter-T48	48	27.856850	-60.998150		plastik pipe	Plastic	1	black, diameter: ca. 8 cm, length: ca. 15 m
+MSM41_litter-T48	48	27.903583	-61.000617		styrofoam	Styrofoam	1	ca. 10 cm
+MSM41_litter-T48	48	27.907667	-61.000817		plastic fragment	Plastic	1	white, 3 cm
+MSM41_litter-T48	48	27.912600	-61.001000		plastic fragment	Plastic	1	small, white
+MSM41_litter-T48	48	27.926250	-61.001650		piece of plastic foil	Plastic	1	light, ca. 10 cm
+MSM41_litter-T48	48	27.926250	-61.001650		plastic fragment	Plastic	5	light blue, small
+MSM41_litter-T48	48	27.937250	-61.002317		plastic fragment	Plastic	1	small, white
+MSM41_litter-T48	48	27.939733	-61.002450		plastic fragment	Plastic	1	small, white
+MSM41_litter-T48	48	27.961300	-61.003550		piece of fish box	Plastic	1	beige, ca. 15 cm
+MSM41_litter-T48	48	27.970667	-61.004000		plastic fragment	Plastic	1	small, white
+MSM41_litter-T48	48				Sargassum	Seaweed	1100	
+MSM41_litter-T49	49	28.083133	-60.861633		plastic fragment	Plastic	1	small, white
+MSM41_litter-T49	49	28.088467	-60.862550		plastic fragment	Plastic	1	small, white
+MSM41_litter-T49	49	28.096750	-60.863833		piece of net line	Plastic	1	green, ca. 8 cm
+MSM41_litter-T49	49	28.108317	-60.865633		piece of plastic	Plastic	1	white, ca. 6 cm
+MSM41_litter-T49	49	28.140817	-60.851850		plastic fragment	Plastic	1	small, white
+MSM41_litter-T49	49	28.146650	-60.845783		plastic fragment	Plastic	1	light blue, ca. 5 cm
+MSM41_litter-T49	49	28.152800	-60.846117		half fish box	Plastic	1	orange
+MSM41_litter-T49	49	28.161817	-60.847617		piece of plastic	Plastic	1	green, ca. 3 cm
+MSM41_litter-T49	49	28.175967	-60.850417		plastic fragment	Plastic	1	small, white
+MSM41_litter-T49	49	28.233567	-60.861267		plastic fragment	Plastic	1	white, ca. 6 cm
+MSM41_litter-T49	49	28.244100	-60.896583		plastic fragment	Plastic	3	white, small max. 10 cm
+MSM41_litter-T49	49	28.264000	-60.866933		plastic foil	Plastic	1	min. 1,5 m2, fouled
+MSM41_litter-T49	49	28.272167	-60.868583		dish detergent bottle	Plastic	1	blue
+MSM41_litter-T49	49	28.273667	-60.868850		piece of net line	Plastic	1	green
+MSM41_litter-T49	49				Sargassum	Seaweed	8719	
+MSM41_litter-T50	50	28.594950	-60.929150		plastic fragment	Plastic	2	small, white
+MSM41_litter-T50	50	28.598717	-60.929800		plastic fragment	Plastic	1	small, white
+MSM41_litter-T50	50	28.612683	-60.932300		piece of plastic	Plastic	1	white, ca. 10 cm
+MSM41_litter-T50	50	28.616317	-60.932883		plastic fragment	Plastic	1	small, white
+MSM41_litter-T50	50	28.618617	-60.933300		plastic fragment	Plastic	1	yellowish, ca. 20 cm
+MSM41_litter-T50	50	28.620967	-60.933800		plastic fragment	Plastic	1	yellowish, ca. 10 cm
+MSM41_litter-T50	50	28.620967	-60.933800		plastic fragment	Plastic	1	white, ca. 7 cm
+MSM41_litter-T50	50	28.628750	-60.935250		plastic fragment	Plastic	1	white, ca. 20 cm
+MSM41_litter-T50	50	28.631500	-60.935783		plastic fragment	Plastic	1	small, white
+MSM41_litter-T50	50	28.641183	-60.937700		piece of plastic grid	Plastic	1	damaged, blue-green, ca. 10 cm
+MSM41_litter-T50	50	28.651750	-60.939750		piece of plastic grid	Plastic	1	light blue, ca. 7 cm
+MSM41_litter-T50	50	28.659833	-60.941300		plastic fragment	Plastic	1	small, white
+MSM41_litter-T50	50	28.671433	-60.943467		plastic fragment	Plastic	1	small, white
+MSM41_litter-T50	50	28.671433	-60.943467		plastic object	Plastic	1	white, heavily fouled, ca. 5x10 cm
+MSM41_litter-T50	50	28.682033	-60.945550		plastic fragment	Plastic	1	light green, ca. 4 cm
+MSM41_litter-T50	50	28.733000	-60.955167		plastic fragment	Plastic	1	small, white
+MSM41_litter-T50	50	28.733000	-60.955167		wooden frame	Wood	1	>1x1 m
+MSM41_litter-T50	50	28.736333	-60.955633		plastic fragment	Plastic	1	small, white
+MSM41_litter-T50	50	28.740283	-60.956600		plastic fragment	Plastic	1	small, white
+MSM41_litter-T50	50	28.791517	-60.966050		plastic fragment	Plastic	1	small, white
+MSM41_litter-T50	50				Sargassum	Seaweed	5074	
+MSM41_litter-T51	51	29.988167	-60.938967		plastic fragment	Plastic	1	small, white
+MSM41_litter-T51	51	30.004533	-60.940150		plastic fragment	Plastic	1	small, white
+MSM41_litter-T51	51	30.121083	-60.947767		plastic fragment	Plastic	1	small, white
+MSM41_litter-T51	51				Sargassum	Seaweed	116	
+MSM41_litter-T52	52	30.402033	-60.966200		plastic fragment	Plastic	1	small, white
+MSM41_litter-T52	52	30.411950	-60.967167		plastic jerrycan	Plastic	1	fouled
+MSM41_litter-T52	52	30.427350	-60.968083		piece of plastic	Plastic	1	white, ca. 2-3 cm
+MSM41_litter-T52	52	30.436150	-60.968683		plastic fragment	Plastic	1	small, white
+MSM41_litter-T52	52	30.502917	-60.972817		plastic fragment	Plastic	1	yellow, ca. 30 cm, fouled
+MSM41_litter-T52	52	30.537450	-60.974967		plastic fragment	Plastic	1	yellow, ca. 5 cm
+MSM41_litter-T52	52	30.592383	-60.978200		plastic fragment	Plastic	1	small, white
+MSM41_litter-T52	52				Sargassum	Seaweed	4	
+MSM41_litter-T53	53	30.903533	-59.928383		plastic fragment	Plastic	1	small, white
+MSM41_litter-T53	53	30.903667	-59.925650		plastic fragment	Plastic	1	light, ca. 4 cm
+MSM41_litter-T53	53	30.903833	-59.923033		piece of plastic box	Plastic	1	red, ca. 10 cm
+MSM41_litter-T53	53	30.904267	-59.914383		plastic fragment	Plastic	1	green, small
+MSM41_litter-T53	53	30.904617	-59.908233		plastic fragment	Plastic	1	small, white
+MSM41_litter-T53	53	30.905233	-59.896800		plastic fragment	Plastic	1	small, white
+MSM41_litter-T53	53	30.907250	-59.888767		plastic fragment	Plastic	1	white, ca. 2 cm
+MSM41_litter-T53	53	30.908067	-59.839183		plastic fragment	Plastic	1	small, white
+MSM41_litter-T53	53	30.908933	-59.820983		net line	Plastic	1	light green, ca. 20 cm
+MSM41_litter-T53	53	30.909083	-59.818350		piece of plastic foil	Plastic	1	light, ca. 10 cm
+MSM41_litter-T53	53	30.909183	-59.816283		dish detergent bottle	Plastic	1	white
+MSM41_litter-T53	53	30.909500	-59.811850		plastic fragment	Plastic	1	small, white
+MSM41_litter-T53	53	30.909750	-59.807633		plastic fragment	Plastic	1	small, white
+MSM41_litter-T53	53	30.909950	-59.803150		plastic fragment	Plastic	1	small, white
+MSM41_litter-T53	53	30.910950	-59.777450		plastic fragment	Plastic	1	small, white
+MSM41_litter-T53	53	30.911300	-59.771817		plastic fragment	Plastic	1	light green, triangular, ca. 4 cm
+MSM41_litter-T53	53	30.911467	-59.767683		plastic fragment	Plastic	1	white, ca. 3 cm
+MSM41_litter-T53	53	30.911800	-59.761567		plastic fragment	Plastic	1	light, elongate, ca. 5 cm
+MSM41_litter-T53	53	30.913317	-59.729583		plastic fragment	Plastic	1	white (reflecting), small
+MSM41_litter-T53	53	30.913450	-59.726683		plastic fragment	Plastic	1	white, ca. 5 cm
+MSM41_litter-T53	53	30.913533	-59.725567		plastic fragment	Plastic	1	white, fouled, ca. 25 cm
+MSM41_litter-T53	53	30.913700	-59.722533		plastic stick	Plastic	1	ca. 10 cm long, white
+MSM41_litter-T53	53	30.913700	-59.722533		plastic fragment	Plastic	1	ca. 3 cm, light green
+MSM41_litter-T53	53	30.914100	-59.714967		plastic lid	Plastic	1	white, diameter: ca. 4 cm
+MSM41_litter-T53	53	30.914133	-59.713483		plastic fragment	Plastic	1	ca. 10 cm, white, fouled
+MSM41_litter-T53	53	30.914267	-59.711400		plastic fragment	Plastic	1	yellow, ca. 4 cm long
+MSM41_litter-T53	53	30.914267	-59.711400		plastic fragment	Plastic	1	light green, ca. 3 cm long
+MSM41_litter-T53	53	30.914567	-59.704867		styrofoam	Styrofoam	1	10 x 10 cm, with 15 cm of green line
+MSM41_litter-T53	53	30.914900	-59.697817		plastic rope	Plastic	1	green, ca. 10 cm
+MSM41_litter-T53	53	30.914900	-59.697817		plastic fragment	Plastic	1	small, white
+MSM41_litter-T53	53				Sargassum	Seaweed	598	
+MSM41_litter-T54	54	30.925783	-59.476233		plastic fragment	Plastic	1	white, ca. 20 cm
+MSM41_litter-T54	54	30.926467	-59.463117		plastic fragment	Plastic	1	small, white
+MSM41_litter-T54	54	30.927783	-59.434750		plastic fragment	Plastic	1	light blue, ca. 3 cm
+MSM41_litter-T54	54	30.928600	-59.418667		plastic fragment	Plastic	1	small, white
+MSM41_litter-T54	54	30.928683	-59.416200		plastic fragment	Plastic	1	small, white
+MSM41_litter-T54	54	30.930983	-59.386583		plastic fragment	Plastic	1	small, white
+MSM41_litter-T54	54	30.930983	-59.386583		plastic object	Plastic	1	white, elongate, ca. 50 cm
+MSM41_litter-T54	54	30.931267	-59.364067		broken plastic barrel	Plastic	1	white, ca. 50 cm
+MSM41_litter-T54	54	30.931500	-59.358217		piece of plastic	Plastic	1	round, white, ca. 2-3 cm (lid?)
+MSM41_litter-T54	54	30.931883	-59.350850		broken bucket	Plastic	1	light blue, fouled
+MSM41_litter-T54	54	30.932767	-59.333750		plastic fragment	Plastic	1	small, white
+MSM41_litter-T54	54	30.933350	-59.320917		plastic stick	Plastic	1	white, ca. 6 cm
+MSM41_litter-T54	54	30.933483	-59.318917		plastic fragment	Plastic	1	white, ca. 5 cm
+MSM41_litter-T54	54	30.933817	-59.304950		plastic ring	Plastic	1	white, ca. 10 cm long, 2 cm high
+MSM41_litter-T54	54	30.933817	-59.304950		plastic object	Plastic	1	blue, ca. 8 cm
+MSM41_litter-T54	54	30.934033	-59.308583		plastic fragment	Plastic	2	small, white
+MSM41_litter-T54	54	30.934167	-59.305867		plastic fragment	Plastic	1	small, white
+MSM41_litter-T54	54				Sargassum	Seaweed	73	
+MSM41_litter-T55	55	30.944067	-59.099083		plastic lid	Plastic	1	white, 5 cm
+MSM41_litter-T55	55	30.944217	-59.096383		plastic lid	Plastic	1	cyan, 5 cm
+MSM41_litter-T55	55	30.944317	-59.094183		dead fish	Animal	1	
+MSM41_litter-T55	55	30.944317	-59.094183		plastic fragment	Plastic	1	small, white
+MSM41_litter-T55	55	30.944700	-59.087133		plastic fragment	Plastic	1	small, white
+MSM41_litter-T55	55	30.944733	-59.086217		plastic fragment	Plastic	1	small, white
+MSM41_litter-T55	55	30.944933	-59.083067		plastic fragment	Plastic	1	small, white
+MSM41_litter-T55	55	30.945050	-59.081033		plastic fragment	Plastic	1	small, white
+MSM41_litter-T55	55	30.945200	-59.079000		plastic fragment	Plastic	1	white, ca. 10 cm
+MSM41_litter-T55	55	30.945533	-59.071417		plastic fragment	Plastic	1	small, white
+MSM41_litter-T55	55	30.945533	-59.071417		net line	Plastic	1	green
+MSM41_litter-T55	55	30.945750	-59.065517		lid	Plastic	1	pink, ca. 2 cm
+MSM41_litter-T55	55	30.945917	-59.061500		plastic fragment	Plastic	1	pink, ca. 4 cm
+MSM41_litter-T55	55	30.946150	-59.058100		plastic fragment	Plastic	1	small, white
+MSM41_litter-T55	55	30.946200	-59.057433		plastik line	Plastic	1	green
+MSM41_litter-T55	55	30.946200	-59.057433		plastic fragment	Plastic	1	blue, ca. 4 cm
+MSM41_litter-T55	55	30.946267	-59.055867		plastic fragment	Plastic	1	small, white
+MSM41_litter-T55	55	30.946283	-59.053567		plastic fragment	Plastic	1	transparent/white, ca. 6 cm
+MSM41_litter-T55	55	30.946367	-59.052700		plastic stick	Plastic	1	ca. 4 cm long
+MSM41_litter-T55	55	30.946533	-59.048733		plastic fragment	Plastic	1	small, white
+MSM41_litter-T55	55	30.947533	-59.045767		plastic line	Plastic	1	green, ca. 20 cm
+MSM41_litter-T55	55	30.946767	-59.043783		plastic fragment	Plastic	1	small, white
+MSM41_litter-T55	55	30.946850	-59.042467		plastic fragment	Plastic	1	ca. 20 x 15 cm, fouled
+MSM41_litter-T55	55	30.947617	-59.032183		plastic fragment	Plastic	1	small, white
+MSM41_litter-T55	55	30.948217	-59.028050		line	Plastic	1	orange, ca. 40 cm
+MSM41_litter-T55	55	30.948250	-59.025817		plastic stick	Plastic	1	white, ca. 5 cm
+MSM41_litter-T55	55	30.948350	-59.011167		plastic fragment	Plastic	1	light, ca. 7 cm
+MSM41_litter-T55	55	30.951567	-58.948383		plastic fragment	Plastic	1	small, white
+MSM41_litter-T55	55				Sargassum	Seaweed	287	
+MSM41_litter-T56	56	30.972083	-58.525483		plastic fragment	Plastic	1	small, white
+MSM41_litter-T56	56	30.972267	-58.523300		plastic fragment	Plastic	2	small, white
+MSM41_litter-T56	56	30.972267	-58.510917		plastic object	Plastic	1	blue, diameter: 5 cm, circular
+MSM41_litter-T56	56	30.973533	-58.492450		plastic object	Plastic	1	light green, ca. 5 cm
+MSM41_litter-T56	56	30.973950	-58.485050		plastic object	Plastic	1	green, ca. 5 cm
+MSM41_litter-T56	56	30.974217	-58.480483		rope	Plastic	1	orange, ca. 10 cm, knotted
+MSM41_litter-T56	56	30.974750	-58.469617		plastic fragment	Plastic	1	small, white
+MSM41_litter-T56	56	30.974750	-58.469617		plastic object	Plastic	1	green, ca. 5 cm
+MSM41_litter-T56	56	30.974967	-58.464850		plastic fragment	Plastic	1	small, white
+MSM41_litter-T56	56	30.975200	-58.458117		plastic fragment	Plastic	1	small, white
+MSM41_litter-T56	56	30.976817	-58.428467		plastic fragment	Plastic	1	small, white
+MSM41_litter-T56	56				Sargassum	Seaweed	82	
+MSM41_litter-T57	57	29.889833	-58.135800		plastic fragment	Plastic	1	small, white
+MSM41_litter-T57	57	29.852383	-58.132717		plastic fragment	Plastic	1	pink, ca. 6 cm
+MSM41_litter-T57	57	29.849383	-58.132250		plastic fragment	Plastic	1	light green, ca. 3 cm
+MSM41_litter-T57	57	29.847933	-58.132000		plastic lid	Plastic	1	ca. 7 cm, fouled
+MSM41_litter-T57	57	29.839067	-58.130683		plastic object	Plastic	1	white, ca. 4 cm, circular
+MSM41_litter-T57	57	29.826500	-58.128883		plastic lid	Plastic	1	yellow, ca. 3 cm
+MSM41_litter-T57	57	29.812450	-58.126683		plastic fragment	Plastic	3	white, small, max. 10 cm
+MSM41_litter-T57	57	29.808917	-58.126133		plastic lid	Plastic	1	green, ca. 3 cm
+MSM41_litter-T57	57	29.802817	-58.125150		plastic fragment	Plastic	1	small, white
+MSM41_litter-T57	57	29.784283	-58.122417		plastic fragment	Plastic	1	white, ca. 10 cm
+MSM41_litter-T57	57	29.775817	-58.121017		plastic fragment	Plastic	5	white, small, max. 10 cm
+MSM41_litter-T57	57	29.758700	-58.118533		plastic fragment	Plastic	1	small, white
+MSM41_litter-T57	57	29.758700	-58.118533		plastic foil	Plastic	1	dark, ca. 40 cm
+MSM41_litter-T57	57	29.746983	-58.116817		plastic fragment	Plastic	2	small, white
+MSM41_litter-T57	57	29.741833	-58.116067		construction foam	Plastic	1	15 cm, light yellow
+MSM41_litter-T57	57	29.734083	-58.114867		plastic fragment	Plastic	1	small, white
+MSM41_litter-T57	57	29.730950	-58.114450		plastic fragment	Plastic	1	small, white
+MSM41_litter-T57	57	29.712250	-58.111600		plastic fragment	Plastic	1	small, white
+MSM41_litter-T57	57	29.710633	-58.111367		bucket	Plastic	1	white, damaged
+MSM41_litter-T57	57	29.699833	-58.109783		plastic cup	Plastic	1	white
+MSM41_litter-T57	57	29.697233	-58.109350		plastic foil	Plastic	1	dark, ca. 30 cm
+MSM41_litter-T57	57	29.680083	-58.106867		plastic object	Plastic	1	circular, ca. 8 cm, fouled
+MSM41_litter-T57	57	29.680083	-58.106867		plastic fragment	Plastic	1	light green, ca. 3 cm
+MSM41_litter-T57	57	29.676700	-58.106417		dish detergent bottle	Plastic	1	white
+MSM41_litter-T57	57	29.672783	-58.105783		plastic ring	Plastic	1	white, ca. 4 cm
+MSM41_litter-T57	57	29.672783	-58.105783		plastic fragment	Plastic	1	white, small, max. 5 cm
+MSM41_litter-T57	57				Sargassum	Seaweed	1713	
+MSM41_litter-T58	58	29.230250	-58.039817		plastic fragment	Plastic	1	pink, 3 cm
+MSM41_litter-T58	58	29.226567	-58.039300		plastic fragment	Plastic	1	white, ca. 5 cm
+MSM41_litter-T58	58	29.221433	-58.038517		plastic object	Plastic	1	light, ca. 20 cm
+MSM41_litter-T58	58	29.209867	-58.036767		plastic fragment	Plastic	1	small, white
+MSM41_litter-T58	58	29.204667	-58.036017		plastic stick	Plastic	1	white, ca. 10 cm long
+MSM41_litter-T58	58	29.169800	-58.030733		plastic fragment	Plastic	2	small, white
+MSM41_litter-T58	58	29.168233	-58.030517		plastic fragment	Plastic	2	small, white
+MSM41_litter-T58	58	29.166883	-58.030300		plastic fragment	Plastic	3	small, white
+MSM41_litter-T58	58	29.158467	-58.029050		plastic band	Plastic	1	white, ca. 10 cm
+MSM41_litter-T58	58	29.158467	-58.029050		plastic fragment	Plastic	2	small, white
+MSM41_litter-T58	58	29.153467	-58.028367		plastic fragment	Plastic	1	small, white
+MSM41_litter-T58	58	29.151050	-58.027983		plastic fragment	Plastic	1	small, white
+MSM41_litter-T58	58	29.148367	-58.027583		plastic fragment	Plastic	2	small, white
+MSM41_litter-T58	58	29.143417	-58.026867		plastic fragment	Plastic	1	small, white
+MSM41_litter-T58	58	29.141567	-58.026583		plastic fragment	Plastic	1	small, white
+MSM41_litter-T58	58	29.140400	-58.026400		plastic fragment	Plastic	1	small, white
+MSM41_litter-T58	58	29.139050	-58.026200		plastic fragment	Plastic	1	small, white
+MSM41_litter-T58	58	29.138067	-58.026083		plastic fragment	Plastic	1	small, white
+MSM41_litter-T58	58	29.137017	-58.025933		plastic fragment	Plastic	3	small, white
+MSM41_litter-T58	58	29.134617	-58.025617		plastic fragment	Plastic	1	small, white
+MSM41_litter-T58	58	29.132583	-58.025333		plastic fragment	Plastic	1	small, white
+MSM41_litter-T58	58	29.117567	-58.025083		plastic fragment	Plastic	1	small, white
+MSM41_litter-T58	58	29.128750	-58.024800		plastic fragment	Plastic	1	small, white
+MSM41_litter-T58	58	29.128000	-58.024683		plastic fragment	Plastic	1	white, ca. 3 cm
+MSM41_litter-T58	58	29.126600	-58.024467		plastic fragment	Plastic	1	small, white
+MSM41_litter-T58	58	29.125333	-58.024267		plastic fragment	Plastic	1	small, white
+MSM41_litter-T58	58	29.124467	-58.024150		plastic fragment	Plastic	2	small, white
+MSM41_litter-T58	58	29.120917	-58.023567		plastic fragment	Plastic	3	small, white
+MSM41_litter-T58	58	29.118850	-58.023200		plastic fragment	Plastic	1	small, white
+MSM41_litter-T58	58	29.115783	-58.022750		plastic fragment	Plastic	1	small, white
+MSM41_litter-T58	58	29.111167	-58.022083		plastic fragment	Plastic	1	small, white
+MSM41_litter-T58	58	29.105183	-58.021217		plastic fragment	Plastic	3	small, white
+MSM41_litter-T58	58	29.099517	-58.020383		plastic fragment	Plastic	1	light blue, ca. 10 x 5 cm
+MSM41_litter-T58	58	29.097783	-58.020167		plastic fragment	Plastic	2	small, white
+MSM41_litter-T58	58	29.095083	-58.019767		plastic lid	Plastic	1	light blue, ca. 5 cm
+MSM41_litter-T58	58	29.092567	-58.019400		plastic fragment	Plastic	1	small, white
+MSM41_litter-T58	58	29.091317	-58.019233		plastic fragment	Plastic	1	small, white
+MSM41_litter-T58	58	29.090200	-58.019083		plastic fragment	Plastic	1	white, ca. 3 cm
+MSM41_litter-T58	58	29.088100	-58.018717		plastic fragment	Plastic	1	small, white
+MSM41_litter-T58	58	29.078683	-58.017250		plastic fragment	Plastic	1	small, white
+MSM41_litter-T58	58	29.032250	-58.010383		plastic fragment	Plastic	1	small, white
+MSM41_litter-T58	58				Sargassum	Seaweed	566	
+MSM41_litter-T59	59	27.948417	-58.158683		plastic fragment	Plastic	1	small, white
+MSM41_litter-T59	59	27.889150	-58.149050		plastic container	Plastic	1	ca. 10 cm, fouled
+MSM41_litter-T59	59	27.889150	-58.149050		plastic fragment	Plastic	1	small, white
+MSM41_litter-T59	59	27.885050	-58.148383		plastic fragment	Plastic	4	small, white
+MSM41_litter-T59	59	27.885050	-58.148383		plastic fragment	Plastic	1	white, ca. 10 cm
+MSM41_litter-T59	59	27.885050	-58.148383		plastic object	Plastic	1	square, ca. 10 x 15 cm, grey (device cover?)
+MSM41_litter-T59	59	27.881517	-58.147833		plastic fragment	Plastic	1	s
+MSM41_litter-T59	59	27.843017	-58.141617		line	Plastic	1	grey, ca. 30 cm
+MSM41_litter-T59	59	27.761250	-58.128283		plastic fragment	Plastic	9	small, white
+MSM41_litter-T59	59				Sargassum	Seaweed	218	
+MSM41_litter-T60	60	27.977350	-58.085400		plastic fragment	Plastic	1	white, ca. 5 cm
+MSM41_litter-T60	60	27.472817	-58.084600		plastic fragment	Plastic	1	white, ca. 3 cm
+MSM41_litter-T60	60	27.453717	-58.081417		plastic fragment	Plastic	1	light blue, ca. 5 cm
+MSM41_litter-T60	60	27.398817	-58.072267		plastic fragment	Plastic	1	small, white
+MSM41_litter-T60	60	27.398817	-58.072267		piece of plastic	Plastic	1	grey, ""cover"", 20 x 30 cm
+MSM41_litter-T60	60	27.398817	-58.072267		Safety bag	Plastic	1	yellow, 50 x 40 cm
+MSM41_litter-T60	60	27.386583	-58.070283		plastic fragment	Plastic	1	white, ca. 20 x 30 cm
+MSM41_litter-T60	60	27.384150	-58.069900		plastic fragment	Plastic	1	small, white
+MSM41_litter-T60	60	27.382750	-58.069667		plastic fragment	Plastic	1	white, 10 x 30 cm, fouled
+MSM41_litter-T60	60	27.367300	-58.067067		plastic stick	Plastic	1	white, ca. 30 cm long
+MSM41_litter-T60	60	27.365433	-58.066733		plastic fragment	Plastic	1	small, white
+MSM41_litter-T60	60	27.347883	-58.063867		plastic fragment	Plastic	1	small, white
+MSM41_litter-T60	60	27.329717	-58.060900		plastic fragment	Plastic	1	light blue, ca. 3 x 8 cm
+MSM41_litter-T60	60	27.325717	-58.060267		piece of plastic	Plastic	1	white, 10 x 20 cm
+MSM41_litter-T60	60	27.319867	-58.059283		plastic fragment	Plastic	1	small, white
+MSM41_litter-T60	60	27.318517	-58.059100		plastic fragment	Plastic	1	white, ca. 2 x 6 cm
+MSM41_litter-T60	60	27.315250	-58.058600		plastic fragment	Plastic	1	small, white
+MSM41_litter-T60	60	27.312150	-58.058050		plastic fragment	Plastic	1	small, white
+MSM41_litter-T60	60	27.304367	-58.056933		plastic fragment	Plastic	1	light blue, small
+MSM41_litter-T60	60	27.301417	-58.056433		plastic fragment	Plastic	1	small, white
+MSM41_litter-T60	60	27.298917	-58.056100		plastic fragment	Plastic	3	small, white
+MSM41_litter-T60	60	27.298917	-58.056100		wood	Wood	1	30 cm, manufactured
+MSM41_litter-T60	60	27.297433	-58.055850		plastic fragment	Plastic	1	small, white
+MSM41_litter-T60	60				Sargassum	Seaweed	614	
+MSM41_litter-T61	61	25.924650	-58.087200		plastic fragment	Plastic	1	small, white
+MSM41_litter-T61	61	25.909533	-58.085833		plastic fragment	Plastic	1	small, white
+MSM41_litter-T61	61	25.901300	-58.085083		plastic fragment	Plastic	3	small, white
+MSM41_litter-T61	61	25.901300	-58.085083		plastic fragment	Plastic	1	white, 3 cm
+MSM41_litter-T61	61	25.901300	-58.085083		plastic object	Plastic	1	white, diameter: ca. 6 cm
+MSM41_litter-T61	61	25.894650	-58.084517		plastic fragment	Plastic	2	small, white
+MSM41_litter-T61	61	25.876817	-58.082833		plastic fragment	Plastic	1	small, white
+MSM41_litter-T61	61	25.872100	-58.082267		plastic fragment	Plastic	2	small, white
+MSM41_litter-T61	61	25.872100	-58.082267		plastic object	Plastic	1	white, ca. 3 cm
+MSM41_litter-T61	61	25.859233	-58.081317		plastic fragment	Plastic	1	small, white
+MSM41_litter-T61	61	25.853833	-58.080867		plastic fragment	Plastic	3	small, white
+MSM41_litter-T61	61	25.845750	-58.080133		plastic fragment	Plastic	1	small, white
+MSM41_litter-T61	61	25.795717	-58.075683		plastic object	Plastic	1	""cover"", ca. 70-80 cm, heavily fouled
+MSM41_litter-T61	61	25.795717	-58.075683		piece of plastic	Plastic	1	green, 8 x 5 cm
+MSM41_litter-T61	61	25.769300	-58.073350		plastic fragment	Plastic	1	yellow, ca. 2 cm
+MSM41_litter-T61	61	25.729133	-58.069783		plastic fragment	Plastic	1	small, white
+MSM41_litter-T61	61				Sargassum	Seaweed	751	
+MSM41_litter-T62	62	25.413167	-58.041683		plastic line	Plastic	1	green, ca. 15 cm
+MSM41_litter-T62	62	25.397817	-58.040300		plastic stick	Plastic	1	white, ca. 15 cm
+MSM41_litter-T62	62	25.392133	-58.039733		piece of plastic	Plastic	1	ca. 30 x 30 cm, white, fouled
+MSM41_litter-T62	62	25.375467	-58.038317		plastic blanket	Plastic	1	black, 1 m2, partly torn
+MSM41_litter-T62	62				Sargassum	Seaweed	627	
+MSM41_litter-T63	63	23.839117	-58.085583		plastic fragment	Plastic	1	white, ca. 2 cm
+MSM41_litter-T63	63	23.838150	-58.085500		plastic fragment	Plastic	1	white, 10 x 2 cm
+MSM41_litter-T63	63	23.808017	-58.082733		plastic fragment	Plastic	1	small, white
+MSM41_litter-T63	63	23.773217	-58.079417		net rope	Plastic	1	green, ca. 10 cm
+MSM41_litter-T63	63	23.733167	-58.075533		plastic object	Plastic	1	green, ca. 3 cm
+MSM41_litter-T63	63	23.719283	-58.074233		jerrycan	Plastic	1	heavily fouled, damaged, ca. 50 x 30 cm
+MSM41_litter-T63	63				Sargassum	Seaweed	2393	
+MSM41_litter-T64	64	23.470367	-58.049950		rope	Plastic	1	black, ca. 40 cm
+MSM41_litter-T64	64	23.464800	-58.049433		rope	Plastic	1	green, ca. 15 cm
+MSM41_litter-T64	64	23.452467	-58.048183		plastic fragment	Plastic	1	white, ca. 3 cm
+MSM41_litter-T64	64	23.447767	-58.047567		plastic fragment	Plastic	1	small, white
+MSM41_litter-T64	64	23.445850	-58.047450		plastic fragment	Plastic	1	small, white
+MSM41_litter-T64	64	23.433167	-58.046100		plastic fragment	Plastic	1	light blue, ca. 5 cm
+MSM41_litter-T64	64	23.433167	-58.046100		plastic fragment	Plastic	1	white, 6 x 6 cm
+MSM41_litter-T64	64	23.371650	-58.040133		plastic fragment	Plastic	1	white, ca. 15 x 10 cm
+MSM41_litter-T64	64	23.358583	-58.038917		plastic fragment	Plastic	1	small, white
+MSM41_litter-T64	64	23.352950	-58.038417		plastic fragment	Plastic	1	elongate, ca. 3 cm
+MSM41_litter-T64	64				Sargassum	Seaweed	1196	
+MSM41_litter-T65	65	23.168633	-58.019000		plastic fragment	Plastic	1	small, white
+MSM41_litter-T65	65	23.168633	-58.019000		plastic fragment	Plastic	1	pink, small
+MSM41_litter-T65	65	23.141517	-58.015917		plastic fragment	Plastic	1	green, small
+MSM41_litter-T65	65	23.117700	-58.013483		plastic fragment	Plastic	1	blue, small
+MSM41_litter-T65	65	23.071183	-58.008767		plastic	Plastic	1	light green, 2 x 6 cm
+MSM41_litter-T65	65	23.059200	-58.007433		plastic fragment	Plastic	1	small, white
+MSM41_litter-T65	65	23.054450	-58.006967		plastic fragment	Plastic	1	small, white
+MSM41_litter-T65	65				Sargassum	Seaweed	2863	
