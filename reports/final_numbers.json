@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-25T20:53:30+03:00",
+ "generated": "2026-09-25T21:05:47+03:00",
  "note": "генерируется scripts/final_numbers.py; руками не править; null = ещё не посчитано",
  "l3_lgbm": {
   "available": true,
@@ -5366,6 +5366,15 @@
     "fdi_p_holm": 0.15,
     "fdi_null_median": -0.54,
     "verdict": "связь не установлена"
+   },
+   "sat_detector_review": {
+    "source": "reports/case_pairs/detector_review.json (разбор: reports/case_pairs/detector_review.md)",
+    "protocol": "22 вырезки Sentinel-2 L2A пар; объекты пересобраны как в pair_quality.py; типы назначены правилами (grid.artifacts, край облака, мелкое облако по B11, блик по B11, берег), без ручной разметки",
+    "n_crops": 22,
+    "n_obj": 975,
+    "n_in_strip": 6,
+    "wo_he460_false_share_pct": 55.0,
+    "no_harmonize_n_obj": 5
    }
   },
   "clean_clone": {
@@ -5383,7 +5392,37 @@
    "full_tests_time": "10 мин 53 с",
    "numpy_clone": "2.5.3"
   },
+  "detector_review": {
+   "available": true,
+   "source": "reports/case_pairs/detector_review.json (разбор: reports/case_pairs/detector_review.md)",
+   "protocol": "22 вырезки Sentinel-2 L2A пар; объекты пересобраны как в pair_quality.py; типы назначены правилами (grid.artifacts, край облака, мелкое облако по B11, блик по B11, берег), без ручной разметки",
+   "n_crops": 22,
+   "n_obj": 975,
+   "n_in_strip": 6,
+   "false_share_pct": 14.4,
+   "wo_he460_n_obj": 251,
+   "wo_he460_false_share_pct": 55.0,
+   "wo_he460_glint_pct": 26.7,
+   "wo_he460_cloud_pct": 25.1,
+   "accept_n_obj": 755,
+   "accept_n_in_strip": 3,
+   "glint_rejected_n_crops": 10,
+   "glint_rejected_n_obj": 172,
+   "glint_rejected_n_in_strip": 3,
+   "glint_rejected_in_strip_false": 3,
+   "glint_rejected_false_share_pct": 48.3,
+   "he460_n_obj": 724,
+   "he460_n_in_strip": 3,
+   "he460_n_out_strip": 721,
+   "he460_single_px": 575,
+   "he460_white_flat": 691,
+   "he460_other": 722,
+   "no_harmonize_n_obj": 5,
+   "no_harmonize_n_in_strip": 0,
+   "t25_wake_lost_without_harmonize": true,
+   "marida_test_f1": 0.871
+  },
   "splits_files": 17,
-  "n_tests": 127
+  "n_tests": 129
  }
 }

@@ -1139,6 +1139,51 @@ def _case_selfcheck() -> dict:
             "p95_max_ms": _r(max(p95), 0) if p95 else None}
 
 
+def _case_detector_review() -> dict:
+    """reports/case_pairs/detector_review.json: the detector on the real L2A crops of the pairs (types of objects by rules,
+    effect of the water_median harmonisation). Rules-based typing, no manual labels."""
+    d = _load_json(ROOT / "reports" / "case_pairs" / "detector_review.json")
+    if not isinstance(d, dict):
+        return {"available": False}
+    s = d.get("summary") or {}
+    tot, grp = s.get("totals") or {}, s.get("by_group") or {}
+    he, wo = s.get("he460_t03") or {}, s.get("without_he460_t03") or {}
+    rg = grp.get("reject_glint") or {}
+    crops = d.get("crops") or []
+
+    def pct(x):
+        return _r(100 * x, 1) if x is not None else None
+    sh_wo = wo.get("share_n") or {}
+    he_objs = (d.get("objects") or {}).get("S3_HE460_MarLitter_transect03") or []
+    noh = [((c.get("no_harmonize") or {}).get("None") or {}) for c in crops]
+    rg_in = {k: (v or {}).get("n_in", 0) for k, v in (rg.get("by_type") or {}).items()}
+    false_types = ("ship", "wake", "seam", "cloud_edge", "cloud_small", "glint")
+    t25 = next((c for c in crops if str(c.get("dir", "")).endswith("DOORS3_T25")), {})
+    return {"available": True, "source": "reports/case_pairs/detector_review.json (разбор: reports/case_pairs/detector_review.md)",
+            "protocol": "22 вырезки Sentinel-2 L2A пар; объекты пересобраны как в pair_quality.py; типы назначены правилами "
+                        "(grid.artifacts, край облака, мелкое облако по B11, блик по B11, берег), без ручной разметки",
+            "n_crops": tot.get("n_crops"), "n_obj": tot.get("n_obj"), "n_in_strip": tot.get("n_in_strip"),
+            "false_share_pct": pct(tot.get("false_share_n")),
+            "wo_he460_n_obj": wo.get("n_obj"), "wo_he460_false_share_pct": pct(wo.get("false_share_n")),
+            "wo_he460_glint_pct": pct(sh_wo.get("glint")),
+            "wo_he460_cloud_pct": pct((sh_wo.get("cloud_edge") or 0) + (sh_wo.get("cloud_small") or 0)),
+            "accept_n_obj": (grp.get("accept") or {}).get("n_obj"), "accept_n_in_strip": (grp.get("accept") or {}).get("n_in_strip"),
+            "glint_rejected_n_crops": rg.get("n_crops"), "glint_rejected_n_obj": rg.get("n_obj"),
+            "glint_rejected_n_in_strip": rg.get("n_in_strip"),
+            "glint_rejected_in_strip_false": sum(rg_in.get(k, 0) for k in false_types),
+            "glint_rejected_false_share_pct": pct(rg.get("false_share_n")),
+            "he460_n_obj": he.get("n_obj"), "he460_n_in_strip": he.get("n_in_strip"), "he460_n_out_strip": he.get("n_out_strip"),
+            "he460_single_px": sum(1 for o in he_objs if o.get("n_px") == 1) or None,
+            "he460_white_flat": ((he.get("other_spectrum") or {}).get("white_flat")),
+            "he460_other": ((he.get("by_type") or {}).get("other_single") or {}).get("n", 0)
+            + ((he.get("by_type") or {}).get("other_multi") or {}).get("n", 0),
+            "no_harmonize_n_obj": sum(int(x.get("n_obj") or 0) for x in noh) if noh else None,
+            "no_harmonize_n_in_strip": sum(int(x.get("n_in_strip") or 0) for x in noh) if noh else None,
+            "t25_wake_lost_without_harmonize": bool(t25) and (((t25.get("no_harmonize") or {}).get("None") or {}).get("n_obj") == 0)
+            and ((t25.get("no_harmonize") or {}).get("water_median") or {}).get("n_obj", 0) > 0,
+            "marida_test_f1": None}
+
+
 def _case_clean_clone() -> dict:
     """Latest reports/selfcheck/clean_clone_*.md: a real `git clone` run by README (timings, tests, numbers)."""
     files = sorted(glob.glob(str(ROOT / "reports" / "selfcheck" / "clean_clone_*.md")))
@@ -1297,6 +1342,11 @@ def collect_case() -> dict:
                   "detector_recomputed": ((rs.get("detector") or {}).get("recomputed_from_preds") or {}).get("test")}
     out["sections"] = _case_sections(out)
     out["clean_clone"] = _case_clean_clone()
+    out["detector_review"] = _case_detector_review()
+    out["detector_review"]["marida_test_f1"] = (((out.get("detector") or {}).get("test") or {}).get("lgbm") or {}).get("f1")
+    out["sections"]["sat_detector_review"] = {k: out["detector_review"].get(k) for k in
+                                              ("source", "protocol", "n_crops", "n_obj", "n_in_strip", "wo_he460_false_share_pct",
+                                               "no_harmonize_n_obj")}
     out["splits_files"] = len(glob.glob(str(ROOT / "reports" / "case_splits" / "*.csv"))) or None
     tests = 0
     for p in glob.glob(str(ROOT / "tests" / "test_case_*.py")) + [str(ROOT / "tests" / "test_api_v3.py")]:

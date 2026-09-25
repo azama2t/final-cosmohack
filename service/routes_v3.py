@@ -39,7 +39,8 @@ def api(fn):
         @functools.wraps(fn)
         async def wrapper(*a, **kw):
             try:
-                return await fn(*a, **kw)
+                with cs.request_scope():  # files are stat()-ed once per request
+                    return await fn(*a, **kw)
             except ApiError as e:
                 return _err(e)
             except Exception as e:
@@ -49,7 +50,8 @@ def api(fn):
         @functools.wraps(fn)
         def wrapper(*a, **kw):
             try:
-                return fn(*a, **kw)
+                with cs.request_scope():
+                    return fn(*a, **kw)
             except ApiError as e:
                 return _err(e)
             except Exception as e:

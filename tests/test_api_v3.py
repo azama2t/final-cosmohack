@@ -653,7 +653,8 @@ def test_candidate_strips_semantics(client):
             assert p["detection_reason"].startswith("связь снимка с полевым измерением не подтверждена")
         sp = p["suspicious_pixels"]
         if sp is not None:
-            assert sp["note"] == "подозрительные пиксели на снимке-кандидате, без полевого подтверждения"
+            assert sp["note"] == (cs.QREJ_NOTE if sp["quality_rejected"] else
+                                  "подозрительные пиксели на снимке-кандидате, без полевого подтверждения")
         assert p["detector_verdict"] in ("detected", "not_detected", "insufficient_data")
     rows = list(csv.DictReader(io.StringIO(client.get("/api/v3/export", params={"layer": "zones", "format": "csv"})
                                            .content.decode("utf-8-sig"))))
@@ -763,3 +764,41 @@ def test_metrics_median_interval_coverage(client):
         mf = pr["map_field_estimate"]
         assert mf["model"] == "median_train" and "на отложенном test" in mf["interval"]
         assert mf["interval_coverage_test"] == pr["final_test"]["baseline"]["coverage"] or             abs(mf["interval_coverage_test"] - pr["final_test"]["baseline"]["coverage"]) < 1e-4
+
+
+# ------------------------------------------------------------------ 3.4 (detector_review.md §7)
+@pytest.mark.skipif(not (cs.PATHS["pairs_dir"] / "quality").is_dir(), reason="нет data/pairs/quality")
+def test_detections_match_pair_quality(client):
+    zones = client.get("/api/v3/zones").json()["features"]
+    fc = client.get("/api/v3/export", params={"layer": "detections", "format": "geojson"}).json()
+    n_crop = 0
+    for z in zones:
+        meta = cs.quality_meta(z["properties"]["quality_dir"]) or {}
+        n_crop += int((meta.get("detector") or {}).get("n_det_crop") or 0)
+    assert fc["count"] == n_crop  # the same final mask as pair_quality (quality.tif == 1, cloud buffer)
+    by_zone = {}
+    for f in fc["features"]:
+        if f["properties"]["in_strip"]:
+            by_zone[f["properties"]["zone_id"]] = by_zone.get(f["properties"]["zone_id"], 0) + 1
+    for z in zones:  # one rule "in strip": raster strip, all_touched
+        sp = z["properties"]["suspicious_pixels"]
+        if sp is not None:
+            assert by_zone.get(z["id"], 0) == sp["n_objects"], z["id"]
+            assert sp["quality_rejected"] == (z["properties"]["quality_decision"] != "accept")
+            if sp["quality_rejected"]:
+                assert sp["note"] == cs.QREJ_NOTE
+    for f in fc["features"]:
+        assert f["properties"]["quality_rejected"] in (True, False)
+
+
+@pytest.mark.skipif(not (cs.PATHS["pairs_dir"] / "pair_quality.csv").is_file(), reason="нет pair_quality.csv")
+def test_glint_fraction_and_summary(client):
+    pq = {r["event_id"]: r for r in csv.DictReader(open(cs.PATHS["pairs_dir"] / "pair_quality.csv",
+                                                         encoding="utf-8-sig"))}
+    for z in client.get("/api/v3/zones").json()["features"]:
+        p = z["properties"]
+        g = pq[p["event_id"]].get("glint_frac")
+        assert p["quality"]["glint_fraction"] == (round(float(g), 4) if g not in (None, "") else None)
+    s = client.get("/api/v3/meta").json()["summary"]
+    assert s["text"].endswith(f"подозрительные пиксели в полосах пар, прошедших маски качества: "
+                              f"{s['n_suspicious_in_quality_ok_strips']}")

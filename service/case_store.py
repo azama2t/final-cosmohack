@@ -170,9 +170,32 @@ class ApiError(Exception):
 # ------------------------------------------------------------------ small helpers
 _cache: dict[str, tuple] = {}
 _lock = threading.Lock()
+import contextvars as _cv  # noqa: E402
+_REQ_MEMO: "_cv.ContextVar[Optional[dict]]" = _cv.ContextVar("case_store_req_memo", default=None)
+
+
+class request_scope:
+    """Within one API response the files are stat()-ed once: `with request_scope(): ...` (speed of /observations)."""
+    def __enter__(self):
+        self._tok = _REQ_MEMO.set({})
+        return self
+
+    def __exit__(self, *a):
+        _REQ_MEMO.reset(self._tok)
 
 
 def _cached(key: str, path: Path, loader):
+    memo = _REQ_MEMO.get()
+    mk = (key, str(path))
+    if memo is not None and mk in memo:
+        return memo[mk]
+    val = _cached_stat(key, path, loader)
+    if memo is not None:
+        memo[mk] = val
+    return val
+
+
+def _cached_stat(key: str, path: Path, loader):
     try:
         st = path.stat()
         sig = (st.st_mtime_ns, st.st_size)
@@ -564,6 +587,16 @@ def _obs_feature(r: dict, linked: list[str], geometry: str = "point") -> dict:
     return {"type": "Feature", "id": r.get("sample_id"), "geometry": geom, "properties": props}
 
 
+_POISSON_MEMO: dict = {}
+
+
+def _poisson_ci_cached(fn, n, a):
+    k = (n, a)
+    if k not in _POISSON_MEMO:
+        _POISSON_MEMO[k] = fn(n, a)
+    return _POISSON_MEMO[k]
+
+
 def field_poisson_ci(r: dict) -> dict:
     """Reference field value and its counting uncertainty: C = N/A with a 95 % Poisson CI
     (src/macroplastic/case/concentration.py). N = density_numerator_items, A = sampled_area_km2.
@@ -580,7 +613,7 @@ def field_poisson_ci(r: dict) -> dict:
         return out
     try:
         from src.macroplastic.case.concentration import concentration as conc_fn
-        res = conc_fn(n, a)
+        res = _poisson_ci_cached(conc_fn, n, a)
     except Exception:
         out["ci95_reason"] = "расчёт интервала недоступен"
         return out
@@ -763,6 +796,11 @@ def filter_samples(bbox=None, date_from=None, date_to=None, sources=None, profil
 
 
 def observations_fc(rows: list[dict], geometry: str = "point", limit: Optional[int] = None) -> dict:
+    with request_scope():
+        return _observations_fc(rows, geometry, limit)
+
+
+def _observations_fc(rows: list[dict], geometry: str = "point", limit: Optional[int] = None) -> dict:
     total = len(rows)
     if limit is not None:
         rows = rows[:limit]
@@ -1265,7 +1303,7 @@ def _zones_all_build() -> list[dict]:
             "field_estimate": field_estimate_at(lon, lat, iso_dt(q.get("scene_datetime"))),
             "concentration": None,
             "quality": {"valid_fraction": _r(q.get("valid_water_frac")), "cloud_fraction": _r(q.get("cloud_frac")),
-                        "glint_fraction": None, "land_fraction": _r(q.get("land_frac")),
+                        "glint_fraction": _r(q.get("glint_frac")), "land_fraction": _r(q.get("land_frac")),
                         "coverage": _r(q.get("coverage")), "glint_b11_median": _r(q.get("glint_b11_median")),
                         "flags": []},
             "support": {"n_linked_samples": len(sids), "linked_sample_ids": sids, "nearest_measurement_km": 0.0,
@@ -1273,7 +1311,8 @@ def _zones_all_build() -> list[dict]:
                         "field_sample_id": frow.get("sample_id") or None,
                         "field_target_scope": frow.get("target_scope") or None,
                         "field_scope_label": scope_label(frow.get("target_scope") or "")},
-            "event_id": q.get("event_id"), "quality_dir": d,
+            "event_id": q.get("event_id"), "quality_dir": d, "quality_decision": decision or None,
+            "quality_reason": q.get("reason") or None,
         }})
     labels = {r["id"]: r["label"] for r in REJECT_REASONS}
     for f in feats:
@@ -1284,9 +1323,11 @@ def _zones_all_build() -> list[dict]:
         verdict = pr["detection_status"]
         pr["detector_verdict"] = verdict  # raw result of the detector on the strip (pair_quality)
         det = pr.get("detector") or {}
+        qrej = pr.get("quality_decision") not in (None, "accept")
         pr["suspicious_pixels"] = ({"n_objects": det.get("n_objects"), "area_m2": pr.get("detected_area_m2"),
-                                    "prob_max": det.get("prob_max"),
-                                    "note": "подозрительные пиксели на снимке-кандидате, без полевого подтверждения"}
+                                    "prob_max": det.get("prob_max"), "quality_rejected": qrej,
+                                    "note": QREJ_NOTE if qrej else
+                                    "подозрительные пиксели на снимке-кандидате, без полевого подтверждения"}
                                    if det.get("n_objects") is not None else None)
         pr["detection_reason"] = None
         if pr.get("pair_status") != "accepted":
@@ -1511,15 +1552,25 @@ def scenes_empty_reason(n: int) -> Optional[str]:
 
 
 # ------------------------------------------------------------------ meta
+QREJ_NOTE = "на снимке, отклонённом по качеству (блик/облака) — вероятно ложные, не кандидаты"
+
+
 def map_summary() -> dict:
     zones = zones_all()
     confirmed = {(p["event_id"], p["scene_id"]) for p in pairs_all() if p["status"] == "accepted" and p["scene_id"]}
     plastic = {z["properties"]["scene_id"] for z in zones if z["properties"].get("pair_status") == "accepted"
                and z["properties"]["support"].get("field_target_scope") in PLASTIC_SCOPES}
     n, c, pl = len(zones), len(confirmed), len(plastic)
+    ok_q = [z["properties"] for z in zones if z["properties"].get("quality_decision") == "accept"]
+    n_susp = sum(int((p.get("suspicious_pixels") or {}).get("n_objects") or 0) for p in ok_q)
+    n_susp_rej = sum(int((p.get("suspicious_pixels") or {}).get("n_objects") or 0) for p in
+                     (z["properties"] for z in zones) if p.get("quality_decision") not in (None, "accept"))
     return {"n_strips": n, "n_confirmed_pairs": c, "plastic_scenes": pl,
+            "n_strips_quality_ok": len(ok_q), "n_suspicious_in_quality_ok_strips": n_susp,
+            "n_suspicious_in_quality_rejected_strips": n_susp_rej,
             "text": (f"{n} обследованных участков со снимками-кандидатами; {c} подтверждённых пар; "
-                     + ("для пластика снимков нет" if pl == 0 else f"снимков для пластика: {pl}"))}
+                     + ("для пластика снимков нет" if pl == 0 else f"снимков для пластика: {pl}")
+                     + f"; подозрительные пиксели в полосах пар, прошедших маски качества: {n_susp}")}
 
 
 def meta() -> dict:
@@ -1844,10 +1895,12 @@ DET_COLS = ["det_id", "zone_id", "scene_id", "datetime", "n_pixels", "area_m2", 
             "threshold", "centroid_lon", "centroid_lat", "kind"]
 
 
-def _detections_dir(d: str) -> list[dict]:
-    """Detector objects of a pair_quality crop: connected pixels of prob.tif >= threshold that are in the final
-    detector mask of pair_quality.py (mask.png red, drawn dilated by 2 px; cloud/shadow-filtered objects are not red),
-    vectorised in the crop CRS and reprojected to EPSG:4326. Cached by prob.tif mtime."""
+def _detections_dir(d: str, zone_geom: Optional[dict] = None) -> list[dict]:
+    """Detector objects of a pair_quality crop = the final detector mask of pair_quality.py: prob.tif >= threshold
+    on valid water (quality.tif == 1), components within cloud_buffer_px of cloud codes (3, 4) dropped
+    (grid.cloudmask, as pair_quality). Vectorised in the crop CRS, reprojected to EPSG:4326.
+    in_strip: at least one pixel in the RASTER strip (zone polygon rasterised all_touched on the crop grid) — the
+    same rule as pair_quality n_det (reports/case_pairs/detector_review.md §7.1–7.2). Cached by prob.tif mtime."""
     base = PATHS["pairs_dir"] / "quality" / d
     tif = base / "prob.tif"
 
@@ -1869,14 +1922,28 @@ def _detections_dir(d: str) -> list[dict]:
                 prob = prob / 255.0
             tr, crs = ds.transform, ds.crs
         det = np.nan_to_num(prob, nan=0.0) >= thr
-        mp = base / "mask.png"
-        if mp.is_file():
-            a = np.asarray(Image.open(mp).convert("RGB"))
-            if a.shape[:2] == det.shape:
-                det &= (a[..., 0] == 255) & (a[..., 1] == 40) & (a[..., 2] == 40)
+        from scipy import ndimage
+        qp = base / "quality.tif"
+        if qp.is_file():  # final mask of pair_quality: P >= thr on valid water, no objects near clouds
+            from src.macroplastic.grid import cloudmask
+            with rasterio.open(qp) as qs:
+                qa = qs.read(1)
+            if qa.shape == det.shape:
+                det &= qa == 1
+                lab0, n0 = ndimage.label(det, structure=np.ones((3, 3)))
+                buf = int(((meta.get("config") or {}).get("detector") or {}).get("cloud_buffer_px") or 5)
+                near = cloudmask.near_cloud_components(lab0, n0, np.isin(qa, (3, 4)), buf)
+                det = cloudmask.drop_components(lab0, n0, near)[0] > 0
         if not det.any():
             return []
-        from scipy import ndimage
+        strip = None
+        if zone_geom:  # one rule "in strip" with pair_quality: raster strip all_touched on the crop grid
+            from rasterio.warp import transform_geom
+            try:
+                strip = features.rasterize([(transform_geom("EPSG:4326", crs, zone_geom), 1)], out_shape=det.shape,
+                                           transform=tr, all_touched=True, fill=0, dtype="uint8").astype(bool)
+            except Exception:
+                strip = None
         lab, n = ndimage.label(det, structure=np.ones((3, 3)))
         inv = Transformer.from_crs(crs, "EPSG:4326", always_xy=True).transform
         out = []
@@ -1887,36 +1954,29 @@ def _detections_dir(d: str) -> list[dict]:
             gj = json.loads(json.dumps(mapping(g)), parse_float=lambda x: round(float(x), 7))
             gj = {"type": gj["type"], "coordinates": gj["coordinates"]}
             out.append({"k": k, "geometry": gj, "n_pixels": int(px.sum()),
+                        "in_strip": None if strip is None else bool(strip[px].any()),
                         "prob_max": round(float(prob[px].max()), 4), "prob_mean": round(float(prob[px].mean()), 4),
                         "area_m2": round((geodesic_area_km2(gj) or 0.0) * 1e6, 1), "threshold": thr})
         out.sort(key=lambda x: x["k"])
         return out
-    return _cached(f"dets:{d}", tif, load) or []
+    return _cached(f"dets:{d}", tif, load) or []  # one zone geometry per crop -> cache key by dir is enough
 
 
 def zone_detections(zone: dict) -> list[dict]:
     p = zone["properties"]
     d = p.get("quality_dir") or ""
-    try:
-        from shapely.geometry import shape
-        zg = shape(zone["geometry"]) if zone.get("geometry") else None
-    except Exception:
-        zg = None
+    qrej = p.get("quality_decision") not in (None, "accept")
     feats = []
-    for i, x in enumerate(_detections_dir(d), 1):
-        in_strip = None
-        if zg is not None:
-            try:
-                in_strip = bool(zg.intersects(shape(x["geometry"])))
-            except Exception:
-                in_strip = None
+    for i, x in enumerate(_detections_dir(d, zone.get("geometry")), 1):
+        in_strip = x.get("in_strip")
         did = f"D-{d}-{i:04d}"
         feats.append({"type": "Feature", "id": did, "geometry": x["geometry"], "properties": {
             "kind": "detection", "label": "Подозрительные пиксели детектора", "det_id": did, "zone_id": zone["id"], "scene_id": p.get("scene_id"),
             "datetime": p.get("datetime"), "n_pixels": x["n_pixels"], "area_m2": x["area_m2"],
             "prob_max": x["prob_max"], "prob_mean": x["prob_mean"], "threshold": x["threshold"],
-            "in_strip": in_strip,
-            "note": "объект детектора (пиксели P ≥ порога), не концентрация; в полосе наблюдения — in_strip"}})
+            "in_strip": in_strip, "quality_rejected": qrej,
+            "note": (QREJ_NOTE if qrej else
+                     "объект детектора (пиксели P ≥ порога), не концентрация; в полосе наблюдения — in_strip")}})
     return feats
 
 
