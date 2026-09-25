@@ -2,7 +2,7 @@
 # Список в фильтре = допустимые значения; null = не фильтровать.
 # Каждая строка CSV получает либо «принята», либо первую причину отказа (data/case/selection_<profile>_rejected.csv).
 #
-# Почему по умолчанию S2_visual_total_plastic (согласовано с docs/CASE_ANALYSIS.md, L58):
+# Почему по умолчанию S2_visual_total_plastic (согласовано с разбором кейса docs/CASE_ANALYSIS.md):
 #  - это «суммарный пластик» одного метода и размерного класса: судовая визуальная полоса 10 м,
 #    предметы > 2 см, plastic (all polymers); одна строка = одно событие (63 события, 63 строки);
 #  - у всех 63 строк есть N (density_numerator_items) и A (sampled_area_km2) → формулу C = N/A
@@ -31,7 +31,7 @@ team_rules:
   - when: {target_scope: [plastic_category]}
     reason: "plastic_category: категория пластика, не суммарный пластик (категории не суммируются: пусто ≠ 0)"
 
-# Основной сплит для всех моделей концентрации — фиксируется ДО моделей (L60b, reports/tasklog/60_concentration.md):
+# Основной сплит для всех моделей концентрации — фиксируется ДО моделей (сравнение схем сплита — reports/case_conc/metrics.json, metrics_by_fold.csv):
 # участки маршрута (5 непрерывных блоков дней рейса, фолд = блок) + буфер 1 сут: из train убраны записи
 # ближе 1 сут к test-блоку. Самая строгая из честных схем: нет общих событий, дней рейса и соседних дней.
 main_split:
@@ -83,18 +83,24 @@ consistency:
   rel_tol: 0.02     # 2 %: округление площади/концентрации в источнике
   abs_tol: 0.05     # шт./км²
 
-# Отложенный финальный test концентрации (L68) — зафиксирован ДО моделей концентрации L68,
+# Отложенный финальный test концентрации — зафиксирован ДО моделей концентрации (scripts/case/conc_model_cv.py),
 # метки test не читаются до приёмки 26.09 12:00: единственный читатель — scripts/case/final_test_conc.py
 # (однократно, отказ при существующем reports/case_conc/final_test.json). Модели и интервалы
-# выбираются только на dev (CV route_buf1 внутри dev). Честная оговорка: L60 смотрел CV по всем
-# событиям профиля (в т.ч. будущему test) — но только бейзлайны median/mean/kNN/wind_lin.
+# выбираются только на dev (CV route_buf1 внутри dev). Оговорка: до фиксации test CV по всем
+# событиям профиля (в т.ч. будущему test) считалась только для бейзлайнов median/mean/kNN/wind_lin (baseline_concentration.py).
 final_test:
   frozen_at: "2026-09-25T17:51:00"
   seed: 42
   k_blocks: 5
   buffer_days: 1
   rule: "дни рейса по порядку → k_blocks непрерывных участков с ~равным числом событий (splits.route_block_groups); test = участок sha256('<seed>|<profile>') mod k_blocks; буфер = дни рейса в пределах buffer_days кал. суток от test-дней (не test и не dev); sha256 = sha256 отсортированных строк 'sample_id,event_id'"
-  not_before: "2026-09-26T12:00"
+  not_before: "2026-09-25T19:15"   # перенесено решением команды 25.09 ~19:05: test открывается сегодня, один раз
+  decision_before_opening:          # записано и закоммичено ДО запуска scripts/case/final_test_conc.py
+    recorded_at: "2026-09-25T19:12"
+    S2_visual_total_plastic: {main: ridge_log, main_status: "исследовательская модель", baseline: median}
+    S1_trawl_total_plastic: {main: knn5_log, main_status: "исследовательская модель", baseline: median}
+    rule: "после результата модель не подбирается; если основная на test не лучше медианы (ДИ разности MAE содержит 0) — на карте field_estimate = медиана обучающего профиля, так и пишется"
+    limitation: "ранняя разведка бейзлайнов (baseline_concentration.py, run_all шаг 4: median/mean/kNN) видела все события профиля, включая будущий test; test не абсолютно нетронутый — указывается как ограничение"
   result: reports/case_conc/final_test.json
   profiles:
     S2_visual_total_plastic:
