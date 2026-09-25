@@ -35,3 +35,5 @@ __pycache__/
 /reports/deck_preview/
 /service/labels/
 /.playwright-mcp/
+/service/tiles/
+/service/static_v2/assets/*.map
