@@ -11,7 +11,9 @@ Sources (all optional; a missing source gives null, never an error):
   weights/lgbm_live/meta.json            LightGBM variant used as the map layer on live L2A scenes
   reports/l16_metric_audit.json          metric recheck, scene bootstrap, leave-region-out
   reports/model_agreement.json           agreement of the two models on live scenes
-  reports/speed.json                     inference speed (any structure; numeric leaves are shown)
+  reports/speed.json                     inference speed (cold start by device, warm throughput; optional cold_s_by_threads)
+  reports/baselines.json                 simple baselines on val MARIDA (scripts/baselines.py)
+  reports/l23_channels_speed.json        models on channel subsets and the light model
   data/live/<region>/<date>/drift.json   drift forecasts (0-72 h)
   reports/marida_scenes.csv, reports/eda/eda.md   data numbers (patches, scenes, MD pixels by split)
   data/live/<region>/<date>/scene.json   live Sentinel-2 L2A scenes
@@ -215,6 +217,12 @@ def collect_metric_audit() -> dict:
     ci = fin.get("scene_bootstrap_ci95")
     res["scene_bootstrap_ci95"] = [_r(x, 3) for x in ci] if isinstance(ci, list) else None
     res["threshold_optimism"] = _r((fin.get("thr_split_half") or {}).get("optimism_mean"))
+    bk = rc.get("backup_marida_only") or {}
+    bkr = bk.get("recount") or {}
+    bci = bk.get("scene_bootstrap_ci95")
+    res["marida_only"] = {"f1": _r(bkr.get("f1")), "iou": _r(bkr.get("iou")), "precision": _r(bkr.get("precision")),
+                          "recall": _r(bkr.get("recall")), "threshold": _r(bk.get("threshold")),
+                          "scene_bootstrap_ci95": [_r(x, 3) for x in bci] if isinstance(bci, list) else None} if bkr else None
     g = rc.get("mados_gain_paired_scene_bootstrap") or {}
     gci = g.get("delta_ci95")
     res["mados_gain"], res["mados_gain_ci95"] = _r(g.get("delta_point")), ([_r(x, 3) for x in gci] if isinstance(gci, list) else None)
@@ -268,9 +276,94 @@ def collect_drift() -> dict:
 def collect_speed() -> dict:
     d = _load_json(ROOT / "reports" / "speed.json")
     if d is None:
-        return {"available": False, "summary": None, "raw": None}
+        return {"available": False, "summary": None, "raw": None, "rows": None}
     summ = d.get("summary") if isinstance(d, dict) and isinstance(d.get("summary"), str) else None
-    return {"available": True, "summary": summ, "raw": d}
+    rows = []
+    if isinstance(d, dict):
+        chips = d.get("chips")
+        cold, runs, base = d.get("cold_s") or {}, d.get("cold_s_runs") or {}, d.get("baseline_cold_s") or {}
+        warm = d.get("warm") or {}
+        hw = str(d.get("hardware") or "")
+        gpu = re.search(r"NVIDIA ([^(;]+)", hw)
+        cpu_thr = re.search(r"(\d+) threads", hw)
+        labels = {"cuda": f"GPU ({gpu.group(1).strip()})" if gpu else "GPU (CUDA)",
+                  "cpu": f"CPU, {cpu_thr.group(1)} потоков" if cpu_thr else "CPU"}
+        for dev in ("cuda", "cpu"):
+            if cold.get(dev) is None:
+                continue
+            rr = [x for x in (runs.get(dev) or []) if isinstance(x, (int, float))]
+            rows.append({"mode": labels[dev], "device": dev, "threads": None, "cold_s": _r(cold.get(dev), 2),
+                         "cold_s_min": _r(min(rr), 2) if rr else None, "cold_s_max": _r(max(rr), 2) if rr else None,
+                         "n_runs": len(rr) or None,
+                         "warm_chips_per_s": _r((warm.get(dev) or {}).get("e2e_chips_per_s"), 1),
+                         "before_cold_s": _r(base.get(dev), 2)})
+        # optional: cold start with a limited number of CPU threads, e.g. {"8": 37.3, "4": 74.7}
+        for thr, v in sorted((d.get("cold_s_by_threads") or {}).items(), key=lambda kv: -int(kv[0])):
+            rows.append({"mode": f"CPU, {thr} потоков", "device": "cpu", "threads": int(thr), "cold_s": _r(v, 2),
+                         "cold_s_min": None, "cold_s_max": None, "n_runs": None, "warm_chips_per_s": None,
+                         "before_cold_s": None})
+        if summ is None and rows:
+            summ = f"{chips} чипов 256×256, холодный старт: " + "; ".join(
+                f"{r['mode']} {r['cold_s']:.1f} с" for r in rows if r["cold_s"] is not None)
+    return {"available": True, "summary": summ, "raw": d, "rows": rows or None,
+            "chips": d.get("chips") if isinstance(d, dict) else None,
+            "hardware": d.get("hardware") if isinstance(d, dict) else None,
+            "command": d.get("command") if isinstance(d, dict) else None}
+
+
+def collect_baselines() -> dict:
+    """reports/baselines.json (scripts/baselines.py): simple baselines on val MARIDA, same metric."""
+    d = _load_json(ROOT / "reports" / "baselines.json")
+    if not isinstance(d, dict):
+        return {"available": False, "rows": None}
+    rows = {}
+    for k, v in d.items():
+        if k.startswith("_") or not isinstance(v, dict):
+            continue
+        rows[k] = {kk: v.get(kk) for kk in ("f1_md", "iou_md", "precision", "recall", "threshold", "note", "f1_mean",
+                                            "f1_std", "n_seeds", "scene_ci95_f1", "f1_md_threshold_from_train",
+                                            "index", "bounds")}
+    meta = d.get("_meta") or {}
+    return {"available": True, "rows": rows, "split": meta.get("split"), "generated": meta.get("generated"),
+            "scene_ci": meta.get("scene_ci"), "source": "reports/baselines.json"}
+
+
+def collect_l23() -> dict:
+    """reports/l23_channels_speed.json: models on channel subsets and the light model."""
+    d = _load_json(ROOT / "reports" / "l23_channels_speed.json")
+    if not isinstance(d, dict):
+        return {"available": False, "subsets": None, "light": None}
+    subs = []
+    for s in d.get("subsets") or []:
+        if not isinstance(s, dict):
+            continue
+        subs.append({"name": s.get("name"), "label": s.get("label"), "channels": s.get("channels"),
+                     "n_features": s.get("n_features"), "f1": _r(s.get("f1")), "iou": _r(s.get("iou")),
+                     "f1_mean": _r(s.get("f1_mean")), "f1_sd": _r(s.get("f1_sd")),
+                     "n_seeds": len(s.get("seeds") or []) or None, "delta_vs_full": _r(s.get("delta_vs_full")),
+                     "delta_vs_full_mean": _r(s.get("delta_vs_full_mean"))})
+    lt = d.get("light") or {}
+    fin = lt.get("final_same_harness") or {}
+    seeds = [x for x in (lt.get("f1_seeds") or []) if isinstance(x, (int, float))]
+    sd = None
+    if len(seeds) > 1:
+        m = sum(seeds) / len(seeds)
+        sd = _r((sum((x - m) ** 2 for x in seeds) / (len(seeds) - 1)) ** 0.5)
+    prod = d.get("speed_product_predictor_warm") or {}
+    anchor = [x for x in (d.get("speed_anchor_inference_py_cpu_cold_s") or []) if isinstance(x, (int, float))]
+    light = None if not lt else {
+        "name": lt.get("name"), "n_features": lt.get("n_features"), "n_trees": lt.get("n_trees"),
+        "num_leaves": lt.get("num_leaves"), "f1_s0": _r(lt.get("f1")), "iou_s0": _r(lt.get("iou")),
+        "f1_mean": _r(lt.get("f1_mean")), "f1_sd": sd, "n_seeds": len(seeds) or None,
+        "threshold": _r(lt.get("threshold")), "cold_s_300": _r(lt.get("cold_s_300"), 1),
+        "warm_chips_per_s": _r(lt.get("warm_chips_per_s"), 1),
+        "final_cold_s_300": _r(fin.get("cold_s_300"), 1), "final_warm_chips_per_s": _r(fin.get("warm_chips_per_s"), 1),
+        "final_f1": _r(fin.get("f1")), "final_n_features": fin.get("n_features"), "final_n_trees": fin.get("n_trees"),
+        "model_stage_s_product": _r((prod.get(lt.get("weights") or "") or {}).get("model_10threads_s"), 1),
+        "final_model_stage_s_product": _r((prod.get("weights/lgbm") or {}).get("model_10threads_s"), 1),
+        "product_cold_s_final": _r(max(anchor), 1) if anchor else None}
+    return {"available": True, "subsets": subs, "light": light, "threads": (d.get("speed_setup") or {}).get("threads"),
+            "chips": (d.get("speed_setup") or {}).get("chips"), "source": "reports/l23_channels_speed.json"}
 
 
 def collect_test_status(l3: dict) -> dict:
@@ -481,6 +574,10 @@ def main(argv=None) -> int:
     ap.add_argument("--out", default=str(ROOT / "reports" / "final_numbers.json"))
     ap.add_argument("--quiet", action="store_true")
     a = ap.parse_args(argv)
+    try:  # a cp1251 console must not crash the summary print (the JSON is written before it)
+        sys.stdout.reconfigure(errors="replace")
+    except Exception:  # noqa: BLE001
+        pass
 
     fn = {
         "generated": dt.datetime.now().astimezone().isoformat(timespec="seconds"),
@@ -501,6 +598,8 @@ def main(argv=None) -> int:
     fn["drift"] = collect_drift()
     fn["speed"] = collect_speed()
     fn["test"] = collect_test_status(fn["l3_lgbm"])
+    fn["baselines"] = collect_baselines()
+    fn["l23"] = collect_l23()
     out = Path(a.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
@@ -527,6 +626,12 @@ def main(argv=None) -> int:
         print(f"  drift scenes={fn['drift']['n_scenes']} | agreement objects={fn['agreement']['confirmed_objects']} | "
               f"confirmed(total)={sv['n_confirmed_total']} | speed={fn['speed']['available']} | "
               f"audit={fn['metric_audit']['available']} | test computed={fn['test']['computed']}")
+        bl = fn["baselines"]["rows"] or {}
+        print("  baselines: " + "; ".join(f"{k}={r.get('f1_md')}" for k, r in bl.items()))
+        lt = fn["l23"]["light"] or {}
+        print(f"  l23: subsets={len(fn['l23']['subsets'] or [])} light F1={lt.get('f1_mean')} cold={lt.get('cold_s_300')}s "
+              f"(final {lt.get('final_cold_s_300')}s)")
+        print(f"  speed: {fn['speed']['summary']}")
         missing = [k for k, v in fn["artifacts"].items() if v is False]
         if missing:
             print(f"  not yet present: {', '.join(missing)}")

@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-25T06:00:23+03:00",
+ "generated": "2026-09-25T06:29:49+03:00",
  "note": "генерируется scripts/final_numbers.py; руками не править; null = ещё не посчитано",
  "l3_lgbm": {
   "available": true,
@@ -954,12 +954,12 @@
  },
  "ui_perf": {
   "available": true,
-  "last_line": "**Итерация L15 (05:29–05:40, `reports/screens/iter6`, `--gl gpu`).** «Уверенные находки»: переключатель «Только подтверждённые обеими моделями», двойное кольцо, строка «Согласие моделей» в карточке и подсказке, «из них подтверждено: k» в KPI, пустое состояние. GPU RTX 4070, реальные данные (:8000, 12 районов, 29 дат): load 1.14–1.19 с, flyTo 55.1–56.1 fps, дрейф 60.2 fps. Ошибок консоли 0 (основной прогон и доп. кадры 11–14 `out/l15_shots.py`, в т.ч. старые данные без поля `confirmed`). Бандл JS+CSS gzip 1.07 МБ (лимит 3 МБ).",
-  "load_s": 1.19,
-  "flyto_fps": 55.1,
+  "last_line": "**Итерация L20 (06:10–06:20, `reports/screens/iter7`, `--gl gpu --extra --l20 --video`).** Карточка зоны «почему первая», карточка места + PDF, календарь наблюдений, вкладка «Проверка». :8000, реальные данные, RTX 4070: load 1.16 с (прогон 06:08 — 1.84 с при параллельной нагрузке; отдельный замер 4 холодных загрузок: 1.29 / 0.34 / 0.31 / 0.35 с), flyTo 53–54.6 fps, дрейф 60.2 fps, тур 57.7 с, ошибок консоли 0 (31 кадр + кадры без L19-API через подмену /openapi.json). PDF справки: 200, application/pdf, 0.3 МБ. Дообучение из UI на :8030 (метки в out/l20_labels): 18–50 с, «не принято» (+0.0005…+0.0023 < 0.01). Бандл JS+CSS gzip 1.084 МБ (лимит 3 МБ); новый lazy-чанк ReviewView 4.3 КБ, основной index 66 → 80 КБ.",
+  "load_s": 1.16,
+  "flyto_fps": 53.0,
   "drift_fps": 60.2,
-  "bundle_gzip_mb": 1.07,
-  "console_errors": 0
+  "bundle_gzip_mb": 1.084,
+  "console_errors": null
  },
  "artifacts": {
   "tools_doc": true,
@@ -1143,6 +1143,17 @@
      "f1_marida_only": 0.6479
     }
    ]
+  },
+  "marida_only": {
+   "f1": 0.9078,
+   "iou": 0.8312,
+   "precision": 0.9041,
+   "recall": 0.9116,
+   "threshold": 0.37,
+   "scene_bootstrap_ci95": [
+    0.853,
+    0.959
+   ]
   }
  },
  "agreement": {
@@ -1315,7 +1326,7 @@
  },
  "speed": {
   "available": true,
-  "summary": null,
+  "summary": "300 чипов 256×256, холодный старт: GPU (GeForce RTX 4070) 5.7 с; CPU, 20 потоков 21.4 с",
   "raw": {
    "chips": 300,
    "cold_s": {
@@ -1381,10 +1392,385 @@
    "command": "python inference.py --data-dir out/speed_chips --output out/speed_out --device {cpu|cuda}",
    "chip_source": "MARIDA val split, first 300 patches (splits/val_X.txt), 256x256x11 float32",
    "cold_definition": "new process, wall from start to exit, 3 runs, median; OS file cache not flushed"
-  }
+  },
+  "rows": [
+   {
+    "mode": "GPU (GeForce RTX 4070)",
+    "device": "cuda",
+    "threads": null,
+    "cold_s": 5.65,
+    "cold_s_min": 5.58,
+    "cold_s_max": 5.66,
+    "n_runs": 3,
+    "warm_chips_per_s": 64.3,
+    "before_cold_s": 44.86
+   },
+   {
+    "mode": "CPU, 20 потоков",
+    "device": "cpu",
+    "threads": null,
+    "cold_s": 21.43,
+    "cold_s_min": 20.98,
+    "cold_s_max": 21.76,
+    "n_runs": 3,
+    "warm_chips_per_s": 13.6,
+    "before_cold_s": 40.23
+   }
+  ],
+  "chips": 300,
+  "hardware": "13th Gen Intel(R) Core(TM) i5-13600KF, 32 GB RAM, 20 threads; NVIDIA GeForce RTX 4070 (driver 581.80); Windows 10, Python 3.12.7",
+  "command": "python inference.py --data-dir out/speed_chips --output out/speed_out --device {cpu|cuda}"
  },
  "test": {
   "computed": false,
   "text": "Test MARIDA будет посчитан один раз на итоговой модели; до этого все решения принимались только по val."
+ },
+ "baselines": {
+  "available": true,
+  "rows": {
+   "fdi_threshold": {
+    "f1_md": 0.0205,
+    "iou_md": 0.0103,
+    "precision": 0.0103,
+    "recall": 0.8688,
+    "threshold": 0.08186,
+    "note": "MD = FDI <= порог; порог подобран на val (оптимистично). Порог, подобранный на train: F1 на val 0.014",
+    "f1_mean": null,
+    "f1_std": null,
+    "n_seeds": null,
+    "scene_ci95_f1": [
+     0.007,
+     0.044
+    ],
+    "f1_md_threshold_from_train": 0.0142,
+    "index": null,
+    "bounds": null
+   },
+   "fdi_interval": {
+    "f1_md": 0.3231,
+    "iou_md": 0.1927,
+    "precision": 0.2431,
+    "recall": 0.4819,
+    "threshold": null,
+    "note": "MD = нижний <= FDI < верхний (два порога, подобраны на val). Одиночный порог FDI не работает: у Sediment-Laden Water и Sargassum FDI выше, чем у мусора. Пороги с train: F1 на val 0.203",
+    "f1_mean": null,
+    "f1_std": null,
+    "n_seeds": null,
+    "scene_ci95_f1": [
+     0.151,
+     0.494
+    ],
+    "f1_md_threshold_from_train": 0.2028,
+    "index": null,
+    "bounds": {
+     "FDI": [
+      0.03027,
+      0.05919
+     ]
+    }
+   },
+   "fdi_ndvi_box": {
+    "f1_md": 0.4152,
+    "iou_md": 0.262,
+    "precision": 0.2864,
+    "recall": 0.7544,
+    "threshold": null,
+    "note": "MD = FDI в интервале И NDVI в интервале (4 порога, подобраны на val; идея Biermann 2020: FDI + NDVI). Пороги с train: F1 на val 0.351",
+    "f1_mean": null,
+    "f1_std": null,
+    "n_seeds": null,
+    "scene_ci95_f1": [
+     0.148,
+     0.693
+    ],
+    "f1_md_threshold_from_train": 0.3515,
+    "index": null,
+    "bounds": {
+     "FDI": [
+      0.0234,
+      0.11202
+     ],
+     "NDVI": [
+      -0.06544,
+      Infinity
+     ]
+    }
+   },
+   "single_index_threshold": {
+    "f1_md": 0.1679,
+    "iou_md": 0.0916,
+    "precision": 0.1041,
+    "recall": 0.4335,
+    "threshold": 0.02161,
+    "note": "лучший из NDVI/FAI: NDVI; порог подобран на val. Порог с train: F1 0.126",
+    "f1_mean": null,
+    "f1_std": null,
+    "n_seeds": null,
+    "scene_ci95_f1": [
+     0.055,
+     0.34
+    ],
+    "f1_md_threshold_from_train": 0.1262,
+    "index": "NDVI",
+    "bounds": null
+   },
+   "best_any_index_threshold": {
+    "f1_md": 0.1679,
+    "iou_md": 0.0916,
+    "precision": 0.1041,
+    "recall": 0.4335,
+    "threshold": 0.02161,
+    "note": "лучший из всех 8 индексов, B8 и FDI в варианте кода MARIDA: NDVI; порог подобран на val",
+    "f1_mean": null,
+    "f1_std": null,
+    "n_seeds": null,
+    "scene_ci95_f1": [
+     0.055,
+     0.34
+    ],
+    "f1_md_threshold_from_train": 0.1262,
+    "index": "NDVI",
+    "bounds": null
+   },
+   "random_forest_marida": {
+    "f1_md": 0.8647,
+    "iou_md": 0.7616,
+    "precision": 0.8898,
+    "recall": 0.8409,
+    "threshold": null,
+    "note": "RandomForest с параметрами кода MARIDA (125 деревьев, глубина 20, balanced_subsample, вес 1/уверенность, 12–15 → Marine Water), 11 каналов + 8 индексов, без окон и GLCM; мультикласс, MD = argmax (без подбора порога), обучен на всех размеченных пикселях MARIDA train; seed 5",
+    "f1_mean": 0.8606,
+    "f1_std": 0.0038,
+    "n_seeds": 3,
+    "scene_ci95_f1": [
+     0.772,
+     0.949
+    ],
+    "f1_md_threshold_from_train": null,
+    "index": null,
+    "bounds": null
+   },
+   "random_forest_marida_prob_threshold": {
+    "f1_md": 0.8596,
+    "iou_md": 0.7538,
+    "precision": 0.8864,
+    "recall": 0.8344,
+    "threshold": 0.36,
+    "note": "тот же RF, MD = P(MD) >= порог, порог подобран на val",
+    "f1_mean": 0.8576,
+    "f1_std": 0.0022,
+    "n_seeds": 3,
+    "scene_ci95_f1": [
+     0.763,
+     0.947
+    ],
+    "f1_md_threshold_from_train": null,
+    "index": null,
+    "bounds": null
+   },
+   "lgbm_no_windows": {
+    "f1_md": 0.8926,
+    "iou_md": 0.806,
+    "precision": 0.8863,
+    "recall": 0.8995,
+    "threshold": 0.27,
+    "note": "наш LightGBM (400 деревьев) на 11 каналах + 8 индексах без окон, только MARIDA train; F1/IoU — среднее по 3 seed, P/R — seed 0; порог подобран на val (из журнала эксперимента H0, не переобучался)",
+    "f1_mean": null,
+    "f1_std": 0.0004,
+    "n_seeds": 3,
+    "scene_ci95_f1": null,
+    "f1_md_threshold_from_train": null,
+    "index": null,
+    "bounds": null
+   },
+   "final_lgbm_reference": {
+    "f1_md": 0.9226,
+    "iou_md": 0.8564,
+    "precision": 0.9301,
+    "recall": 0.9153,
+    "threshold": 0.63,
+    "note": "итоговая модель (для сравнения): LightGBM + оконные признаки, MARIDA train + MADOS",
+    "f1_mean": null,
+    "f1_std": null,
+    "n_seeds": null,
+    "scene_ci95_f1": null,
+    "f1_md_threshold_from_train": null,
+    "index": null,
+    "bounds": null
+   }
+  },
+  "split": "MARIDA val (official), all labelled pixels pooled, ignore=0; test never read",
+  "generated": "2026-09-25T06:26:04+03:00",
+  "scene_ci": "95 % bootstrap over 12 val scenes, 2000 reps, threshold fixed",
+  "source": "reports/baselines.json"
+ },
+ "l23": {
+  "available": true,
+  "subsets": [
+   {
+    "name": "a_rgb_strict",
+    "label": "(a) RGB, only the project features computable from RGB (B2,B3,B4,SI)",
+    "channels": [
+     "B2",
+     "B3",
+     "B4"
+    ],
+    "n_features": 4,
+    "f1": 0.1653,
+    "iou": 0.0901,
+    "f1_mean": 0.1653,
+    "f1_sd": null,
+    "n_seeds": 1,
+    "delta_vs_full": -0.7573,
+    "delta_vs_full_mean": null
+   },
+   {
+    "name": "a_rgb",
+    "label": "(a) RGB + RGB windows (BRI/NDGR/NDBG mean/std/contrast)",
+    "channels": [
+     "B2",
+     "B3",
+     "B4"
+    ],
+    "n_features": 30,
+    "f1": 0.754,
+    "iou": 0.6052,
+    "f1_mean": 0.7531,
+    "f1_sd": 0.0052,
+    "n_seeds": 3,
+    "delta_vs_full": -0.1686,
+    "delta_vs_full_mean": -0.1697
+   },
+   {
+    "name": "b_rgbnir",
+    "label": "(b)=(c) RGB+NIR = all 10 m bands",
+    "channels": [
+     "B2",
+     "B3",
+     "B4",
+     "B8"
+    ],
+    "n_features": 29,
+    "f1": 0.8375,
+    "iou": 0.7205,
+    "f1_mean": 0.8396,
+    "f1_sd": 0.0032,
+    "n_seeds": 3,
+    "delta_vs_full": -0.0851,
+    "delta_vs_full_mean": -0.0832
+   },
+   {
+    "name": "b_rgbnir_x",
+    "label": "(b)=(c) RGB+NIR + RGB windows",
+    "channels": [
+     "B2",
+     "B3",
+     "B4",
+     "B8"
+    ],
+    "n_features": 55,
+    "f1": 0.859,
+    "iou": 0.7528,
+    "f1_mean": 0.8679,
+    "f1_sd": 0.0078,
+    "n_seeds": 3,
+    "delta_vs_full": -0.0636,
+    "delta_vs_full_mean": -0.0549
+   },
+   {
+    "name": "f_10m_swir",
+    "label": "(extra) 10 m + B11,B12 (no FDI: needs B6)",
+    "channels": [
+     "B2",
+     "B3",
+     "B4",
+     "B8",
+     "B11",
+     "B12"
+    ],
+    "n_features": 34,
+    "f1": 0.917,
+    "iou": 0.8467,
+    "f1_mean": 0.9193,
+    "f1_sd": 0.002,
+    "n_seeds": 3,
+    "delta_vs_full": -0.0056,
+    "delta_vs_full_mean": -0.0035
+   },
+   {
+    "name": "d_10m_20m",
+    "label": "(d) 10 m + 20 m (no B1)",
+    "channels": [
+     "B2",
+     "B3",
+     "B4",
+     "B5",
+     "B6",
+     "B7",
+     "B8",
+     "B8A",
+     "B11",
+     "B12"
+    ],
+    "n_features": 47,
+    "f1": 0.9229,
+    "iou": 0.8569,
+    "f1_mean": 0.9234,
+    "f1_sd": 0.0004,
+    "n_seeds": 3,
+    "delta_vs_full": 0.0003,
+    "delta_vs_full_mean": 0.0006
+   },
+   {
+    "name": "e_full",
+    "label": "(e) all 11 bands = final recipe",
+    "channels": [
+     "B1",
+     "B2",
+     "B3",
+     "B4",
+     "B5",
+     "B6",
+     "B7",
+     "B8",
+     "B8A",
+     "B11",
+     "B12"
+    ],
+    "n_features": 48,
+    "f1": 0.9226,
+    "iou": 0.8564,
+    "f1_mean": 0.9228,
+    "f1_sd": 0.0005,
+    "n_seeds": 3,
+    "delta_vs_full": 0.0,
+    "delta_vs_full_mean": 0.0
+   }
+  ],
+  "light": {
+   "name": "light_k20_t200_l31",
+   "n_features": 20,
+   "n_trees": 200,
+   "num_leaves": 31,
+   "f1_s0": 0.9213,
+   "iou_s0": 0.8541,
+   "f1_mean": 0.924,
+   "f1_sd": 0.0023,
+   "n_seeds": 3,
+   "threshold": 0.45,
+   "cold_s_300": 16.8,
+   "warm_chips_per_s": 19.0,
+   "final_cold_s_300": 50.6,
+   "final_warm_chips_per_s": 6.9,
+   "final_f1": 0.9226,
+   "final_n_features": 48,
+   "final_n_trees": 400,
+   "model_stage_s_product": 9.0,
+   "final_model_stage_s_product": 24.4,
+   "product_cold_s_final": 27.0
+  },
+  "threads": 10,
+  "chips": 300,
+  "source": "reports/l23_channels_speed.json"
  }
 }

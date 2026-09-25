@@ -105,6 +105,124 @@ def _flat_numbers(d, prefix="", out=None, limit=16):
     return out
 
 
+def _s(x, unit=" с", nd=1) -> str:
+    """Seconds with a decimal comma for prose tables."""
+    if x is None:
+        return DASH
+    return f"{float(x):.{nd}f}".replace(".", ",") + unit
+
+
+def speed_table(fn: dict) -> str:
+    """Human-readable speed table from final_numbers speed.rows (+ light model from l23)."""
+    sp = fn.get("speed") or {}
+    if not sp.get("available"):
+        return "Замер скорости инференса ещё не записан (`reports/speed.json`)."
+    rows = sp.get("rows") or []
+    if not rows:
+        return str(sp.get("summary")) if sp.get("summary") else DASH
+    chips = sp.get("chips")
+    out = [f"`inference.py` на {fmt(chips, None)} чипах 256×256×11 (первые патчи val MARIDA), холодный старт — новый "
+           "процесс от запуска до выхода, медиана 3 запусков:", "",
+           "| Режим | Холодный старт | Разброс запусков | Тёплый режим, чипов/с | До оптимизации |",
+           "|---|---|---|---|---|"]
+    for r in rows:
+        rng = (f"{_s(r.get('cold_s_min'), '', 2)}–{_s(r.get('cold_s_max'), ' с', 2)}"
+               if r.get("cold_s_min") is not None else DASH)
+        warm = DASH if r.get("warm_chips_per_s") is None else f"{float(r['warm_chips_per_s']):.1f}".replace(".", ",")
+        out.append(f"| {r.get('mode')} | **{_s(r.get('cold_s'), ' с', 2)}** | {rng} | {warm} | {_s(r.get('before_cold_s'), ' с', 1)} |")
+    lt = (fn.get("l23") or {}).get("light") or {}
+    if lt.get("cold_s_300") is not None and lt.get("final_cold_s_300") is not None:
+        thr = (fn.get("l23") or {}).get("threads")
+        comb = ((fn.get("models") or {}).get("rows") or {}).get("combined") or {}
+        out += ["", f"Лёгкая модель ({fmt(lt.get('n_features'), None)} признаков, {fmt(lt.get('n_trees'), None)} деревьев, "
+                f"листьев в дереве до {fmt(lt.get('num_leaves'), None)}) замерена на отдельном стенде: пакет lightgbm, "
+                f"CPU {fmt(thr, None)} потоков, машина под чужой нагрузкой. Секунды сравнимы только внутри этой таблицы:", "",
+                "| Модель | F1 MD val (3 seed) | Холодный старт, 300 чипов | Тёплый режим, чипов/с |", "|---|---|---|---|",
+                f"| итоговая ({fmt(lt.get('final_n_features'), None)} признаков, {fmt(lt.get('final_n_trees'), None)} деревьев) | "
+                f"{_pm(comb.get('val_f1_mean'), comb.get('val_f1_std'), 3)} | "
+                f"{_s(lt.get('final_cold_s_300'))} | {fmt(lt.get('final_warm_chips_per_s'), 'f1').replace('.', ',')} |",
+                f"| лёгкая (кандидат, в `inference.py` не включена) | {_pm(lt.get('f1_mean'), lt.get('f1_sd'), 3)} | "
+                f"{_s(lt.get('cold_s_300'))} | {fmt(lt.get('warm_chips_per_s'), 'f1').replace('.', ',')} |"]
+    if sp.get("hardware"):
+        out += ["", f"Железо: {sp['hardware']}."]
+    return "\n".join(out)
+
+
+BASELINE_ROWS = [
+    ("fdi_threshold", "Порог FDI (одно правило)", "FDI", "подобран на val"),
+    ("fdi_interval", "Интервал FDI (два порога)", "FDI", "подобраны на val"),
+    ("single_index_threshold", "Порог лучшего из NDVI / FAI", None, "подобран на val"),
+    ("fdi_ndvi_box", "FDI и NDVI в интервалах (4 порога)", "FDI, NDVI", "подобраны на val"),
+    ("random_forest_marida", "RandomForest, параметры статьи MARIDA", "11 каналов + 8 индексов", "argmax, без подбора"),
+    ("lgbm_no_windows", "LightGBM без оконных признаков", "11 каналов + 8 индексов", "подобран на val"),
+]
+
+
+def baselines_table(fn: dict) -> str:
+    """Ladder: simple rules -> RF -> LightGBM -> + windows -> + MADOS (final). All on val MARIDA, same metric."""
+    bl = (fn.get("baselines") or {}).get("rows") or {}
+    if not bl:
+        return "Бейзлайны ещё не посчитаны (`scripts/baselines.py`)."
+    out = ["| Модель / правило | Признаки | Порог | F1 MD val | IoU MD | Precision | Recall | 95 % CI F1 по сценам | F1, порог с train |",
+           "|---|---|---|---|---|---|---|---|---|"]
+    for key, name, feats, thr in BASELINE_ROWS:
+        r = bl.get(key)
+        if not r:
+            continue
+        if key == "single_index_threshold" and r.get("index"):
+            name = f"Порог {r['index']} (лучший из NDVI / FAI)"
+            feats = r["index"]
+        f1 = fmt(r.get("f1_md"), "f3")
+        if r.get("f1_std") is not None and r.get("n_seeds"):
+            m = r.get("f1_mean") if r.get("f1_mean") is not None else r.get("f1_md")
+            f1 = f"{_pm(m, r.get('f1_std'), 3)} ({r['n_seeds']} seed)"
+        out.append(f"| {name} | {feats} | {thr} | {f1} | {fmt(r.get('iou_md'), 'f3')} | {fmt(r.get('precision'), 'f3')} | "
+                   f"{fmt(r.get('recall'), 'f3')} | {_ci(r.get('scene_ci95_f1'))} | {fmt(r.get('f1_md_threshold_from_train'), 'f3')} |")
+    mo = (fn.get("models") or {}).get("rows") or {}
+    mar, comb = mo.get("marida_only") or {}, mo.get("combined") or {}
+    au = fn.get("metric_audit") or {}
+    l3 = fn.get("l3_lgbm") or {}
+    v = l3.get("val") or {}
+    nf = (f"{l3['n_base_features']} + {l3['n_window_features']} оконных (3–31 px)"
+          if l3.get("n_base_features") and l3.get("n_window_features") else "с оконными признаками")
+    bk = au.get("marida_only") or {}
+    if mar.get("val_f1_mean") is not None:
+        out.append(f"| LightGBM + оконные признаки, только MARIDA | {nf} | подобран на val | "
+                   f"{_pm(mar.get('val_f1_mean'), mar.get('val_f1_std'), 3)} (3 seed) | {fmt(mar.get('val_iou_mean'), 'f3')} | "
+                   f"{fmt(bk.get('precision'), 'f3')} | {fmt(bk.get('recall'), 'f3')} | {_ci(bk.get('scene_bootstrap_ci95'))} | {DASH} |")
+    if comb.get("val_f1_mean") is not None:
+        out.append(f"| **LightGBM + окна, MARIDA + MADOS (итоговая)** | {nf} | подобран на val | "
+                   f"**{_pm(comb.get('val_f1_mean'), comb.get('val_f1_std'), 3)}** (3 seed) | {fmt(v.get('iou_md'), 'f3')} | "
+                   f"{fmt(v.get('precision_md'), 'f3')} | {fmt(v.get('recall_md'), 'f3')} | {_ci(au.get('scene_bootstrap_ci95'))} | {DASH} |")
+    return "\n".join(out)
+
+
+L23_LABELS = {"a_rgb_strict": "RGB, только общие признаки", "a_rgb": "RGB + оконные признаки RGB",
+              "b_rgbnir": "10 м (RGB + NIR)", "b_rgbnir_x": "10 м + оконные признаки RGB",
+              "f_10m_swir": "10 м + B11, B12", "d_10m_20m": "10 м + 20 м (без B1)", "e_full": "все 11 каналов (итоговая)"}
+
+
+def l23_channels_table(fn: dict) -> str:
+    l23 = fn.get("l23") or {}
+    subs = l23.get("subsets") or []
+    if not subs:
+        return DASH
+    out = ["| Каналы | Признаков | F1 MD val | Δ к итоговой |", "|---|---|---|---|"]
+    for sub in subs:
+        f1 = sub.get("f1_mean") if sub.get("f1_mean") is not None else sub.get("f1")
+        f1s = (_pm(sub.get("f1_mean"), sub.get("f1_sd"), 3) + f" ({sub.get('n_seeds')} seed)"
+               if sub.get("f1_sd") is not None else f"{fmt(f1, 'f3')} (1 seed)")
+        d = sub.get("delta_vs_full_mean") if sub.get("delta_vs_full_mean") is not None else sub.get("delta_vs_full")
+        ds = "0 (база)" if sub.get("name") == "e_full" else (DASH if d is None else f"{float(d):+.3f}")
+        out.append(f"| {L23_LABELS.get(sub.get('name'), sub.get('label') or sub.get('name'))} | {fmt(sub.get('n_features'), None)} | {f1s} | {ds} |")
+    lt = l23.get("light") or {}
+    if lt:
+        out.append(f"| все 11, лёгкая модель ({fmt(lt.get('n_features'), None)} признаков, {fmt(lt.get('n_trees'), None)} деревьев) | "
+                   f"{fmt(lt.get('n_features'), None)} | {_pm(lt.get('f1_mean'), lt.get('f1_sd'), 3)} ({fmt(lt.get('n_seeds'), None)} seed) | "
+                   f"{DASH} |")
+    return "\n".join(out)
+
+
 def derived(fn: dict) -> dict:
     l3, l4 = fn.get("l3_lgbm") or {}, fn.get("l4_unet") or {}
     test_done = bool(l3.get("test"))
@@ -189,17 +307,8 @@ def derived(fn: dict) -> dict:
     else:
         lro_txt = DASH
 
-    # --- speed (reports/speed.json, any layout)
-    sp = fn.get("speed") or {}
-    if sp.get("available"):
-        if sp.get("summary"):
-            speed_block = str(sp["summary"])
-        else:
-            pairs = _flat_numbers(sp.get("raw"))
-            speed_block = "\n".join(["| Замер | Значение |", "|---|---|"] + [f"| `{k}` | {fmt(v, None)} |" for k, v in pairs]) \
-                if pairs else DASH
-    else:
-        speed_block = "Замер скорости инференса ещё не записан (`reports/speed.json`)."
+    # --- speed (reports/speed.json via final_numbers speed.rows; human-readable table, never raw keys)
+    speed_block = speed_table(fn)
 
     ui = fn.get("ui_perf") or {}
     parts = []
@@ -217,12 +326,13 @@ def derived(fn: dict) -> dict:
 
     return {"metrics_table": metrics_table, "models_table": models_table, "regions_table": regions_table,
             "live_table": "\n".join(lr), "l3_noise": noise_txt, "test_sentence": test_txt, "lro_text": lro_txt,
-            "speed_block": speed_block, "ui_perf_text": ui_txt}
+            "speed_block": speed_block, "ui_perf_text": ui_txt, "baselines_table": baselines_table(fn),
+            "l23_channels_table": l23_channels_table(fn)}
 
 
 def render(text: str, ctx: dict, missing: list) -> str:
     roots = set(ctx) | {"l3_lgbm", "l4_unet", "data", "live", "service", "service_demo", "ui_perf", "artifacts", "models",
-                         "lgbm_live", "metric_audit", "agreement", "drift", "speed", "test", "derived"}
+                         "lgbm_live", "metric_audit", "agreement", "drift", "speed", "test", "derived", "baselines", "l23"}
 
     def sub(m):
         path, flt = m.group(1), m.group(2)

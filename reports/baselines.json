@@ -1,0 +1,709 @@
+{
+ "fdi_threshold": {
+  "f1_md": 0.0205,
+  "iou_md": 0.0103,
+  "precision": 0.0103,
+  "recall": 0.8688,
+  "threshold": 0.08186,
+  "note": "MD = FDI <= порог; порог подобран на val (оптимистично). Порог, подобранный на train: F1 на val 0.014",
+  "direction": "le",
+  "scene_ci95_f1": [
+   0.007,
+   0.044
+  ],
+  "f1_md_threshold_from_train": 0.0142
+ },
+ "fdi_interval": {
+  "f1_md": 0.3231,
+  "iou_md": 0.1927,
+  "precision": 0.2431,
+  "recall": 0.4819,
+  "threshold": null,
+  "note": "MD = нижний <= FDI < верхний (два порога, подобраны на val). Одиночный порог FDI не работает: у Sediment-Laden Water и Sargassum FDI выше, чем у мусора. Пороги с train: F1 на val 0.203",
+  "bounds": {
+   "FDI": [
+    0.03027,
+    0.05919
+   ]
+  },
+  "scene_ci95_f1": [
+   0.151,
+   0.494
+  ],
+  "f1_md_threshold_from_train": 0.2028
+ },
+ "fdi_ndvi_box": {
+  "f1_md": 0.4152,
+  "iou_md": 0.262,
+  "precision": 0.2864,
+  "recall": 0.7544,
+  "threshold": null,
+  "note": "MD = FDI в интервале И NDVI в интервале (4 порога, подобраны на val; идея Biermann 2020: FDI + NDVI). Пороги с train: F1 на val 0.351",
+  "bounds": {
+   "FDI": [
+    0.0234,
+    0.11202
+   ],
+   "NDVI": [
+    -0.06544,
+    Infinity
+   ]
+  },
+  "scene_ci95_f1": [
+   0.148,
+   0.693
+  ],
+  "f1_md_threshold_from_train": 0.3515
+ },
+ "single_index_threshold": {
+  "f1_md": 0.1679,
+  "iou_md": 0.0916,
+  "precision": 0.1041,
+  "recall": 0.4335,
+  "threshold": 0.02161,
+  "note": "лучший из NDVI/FAI: NDVI; порог подобран на val. Порог с train: F1 0.126",
+  "index": "NDVI",
+  "direction": "ge",
+  "scene_ci95_f1": [
+   0.055,
+   0.34
+  ],
+  "f1_md_threshold_from_train": 0.1262
+ },
+ "best_any_index_threshold": {
+  "f1_md": 0.1679,
+  "iou_md": 0.0916,
+  "precision": 0.1041,
+  "recall": 0.4335,
+  "threshold": 0.02161,
+  "note": "лучший из всех 8 индексов, B8 и FDI в варианте кода MARIDA: NDVI; порог подобран на val",
+  "index": "NDVI",
+  "direction": "ge",
+  "scene_ci95_f1": [
+   0.055,
+   0.34
+  ],
+  "f1_md_threshold_from_train": 0.1262
+ },
+ "random_forest_marida": {
+  "f1_md": 0.8647,
+  "iou_md": 0.7616,
+  "precision": 0.8898,
+  "recall": 0.8409,
+  "threshold": null,
+  "note": "RandomForest с параметрами кода MARIDA (125 деревьев, глубина 20, balanced_subsample, вес 1/уверенность, 12–15 → Marine Water), 11 каналов + 8 индексов, без окон и GLCM; мультикласс, MD = argmax (без подбора порога), обучен на всех размеченных пикселях MARIDA train; seed 5",
+  "f1_mean": 0.8606,
+  "f1_std": 0.0038,
+  "n_seeds": 3,
+  "scene_ci95_f1": [
+   0.772,
+   0.949
+  ]
+ },
+ "random_forest_marida_prob_threshold": {
+  "f1_md": 0.8596,
+  "iou_md": 0.7538,
+  "precision": 0.8864,
+  "recall": 0.8344,
+  "threshold": 0.36,
+  "note": "тот же RF, MD = P(MD) >= порог, порог подобран на val",
+  "f1_mean": 0.8576,
+  "f1_std": 0.0022,
+  "n_seeds": 3,
+  "scene_ci95_f1": [
+   0.763,
+   0.947
+  ]
+ },
+ "lgbm_no_windows": {
+  "f1_md": 0.8926,
+  "iou_md": 0.806,
+  "precision": 0.8863,
+  "recall": 0.8995,
+  "threshold": 0.27,
+  "f1_std": 0.0004,
+  "n_seeds": 3,
+  "f1_seeds": [
+   0.8929,
+   0.8926,
+   0.8922
+  ],
+  "note": "наш LightGBM (400 деревьев) на 11 каналах + 8 индексах без окон, только MARIDA train; F1/IoU — среднее по 3 seed, P/R — seed 0; порог подобран на val (из журнала эксперимента H0, не переобучался)"
+ },
+ "final_lgbm_reference": {
+  "f1_md": 0.9226,
+  "iou_md": 0.8564,
+  "precision": 0.9301,
+  "recall": 0.9153,
+  "threshold": 0.63,
+  "note": "итоговая модель (для сравнения): LightGBM + оконные признаки, MARIDA train + MADOS"
+ },
+ "_meta": {
+  "generated": "2026-09-25T06:26:04+03:00",
+  "split": "MARIDA val (official), all labelled pixels pooled, ignore=0; test never read",
+  "n_val_px": 213102,
+  "n_val_md": 1075,
+  "n_train_px": 429412,
+  "metric_code": "src/macroplastic/metrics.py binary_scores",
+  "scene_ci": "95 % bootstrap over 12 val scenes, 2000 reps, threshold fixed",
+  "rf_params_source": "github.com/marine-debris/marine-debris.github.io semantic_segmentation/random_forest",
+  "all_indices": {
+   "FDI": {
+    "val_tuned": {
+     "f1_md": 0.0205,
+     "iou_md": 0.0103,
+     "precision": 0.0103,
+     "recall": 0.8688,
+     "tp": 934,
+     "fp": 89315,
+     "fn": 141,
+     "threshold": 0.08186,
+     "direction": "le",
+     "scene_ci95_f1": [
+      0.007,
+      0.044
+     ]
+    },
+    "train_tuned": {
+     "f1_md": 0.0142,
+     "iou_md": 0.0071,
+     "precision": 0.0071,
+     "recall": 0.9088,
+     "tp": 977,
+     "fp": 135715,
+     "fn": 98,
+     "threshold": 0.02206,
+     "direction": "ge"
+    }
+   },
+   "FAI": {
+    "val_tuned": {
+     "f1_md": 0.0396,
+     "iou_md": 0.0202,
+     "precision": 0.0203,
+     "recall": 0.8288,
+     "tp": 891,
+     "fp": 43008,
+     "fn": 184,
+     "threshold": 0.00046,
+     "direction": "ge",
+     "scene_ci95_f1": [
+      0.014,
+      0.209
+     ]
+    },
+    "train_tuned": {
+     "f1_md": 0.0376,
+     "iou_md": 0.0191,
+     "precision": 0.0194,
+     "recall": 0.6251,
+     "tp": 672,
+     "fp": 34041,
+     "fn": 403,
+     "threshold": 0.00405,
+     "direction": "ge"
+    }
+   },
+   "NDVI": {
+    "val_tuned": {
+     "f1_md": 0.1679,
+     "iou_md": 0.0916,
+     "precision": 0.1041,
+     "recall": 0.4335,
+     "tp": 466,
+     "fp": 4010,
+     "fn": 609,
+     "threshold": 0.02161,
+     "direction": "ge",
+     "scene_ci95_f1": [
+      0.055,
+      0.34
+     ]
+    },
+    "train_tuned": {
+     "f1_md": 0.1262,
+     "iou_md": 0.0674,
+     "precision": 0.0714,
+     "recall": 0.5442,
+     "tp": 585,
+     "fp": 7608,
+     "fn": 490,
+     "threshold": 0.00505,
+     "direction": "ge"
+    }
+   },
+   "NDWI": {
+    "val_tuned": {
+     "f1_md": 0.0179,
+     "iou_md": 0.009,
+     "precision": 0.009,
+     "recall": 0.8856,
+     "tp": 952,
+     "fp": 104533,
+     "fn": 123,
+     "threshold": 0.10635,
+     "direction": "le",
+     "scene_ci95_f1": [
+      0.006,
+      0.086
+     ]
+    },
+    "train_tuned": {
+     "f1_md": 0.0126,
+     "iou_md": 0.0064,
+     "precision": 0.0064,
+     "recall": 0.4009,
+     "tp": 431,
+     "fp": 66778,
+     "fn": 644,
+     "threshold": -0.01846,
+     "direction": "le"
+    }
+   },
+   "NDMI": {
+    "val_tuned": {
+     "f1_md": 0.0238,
+     "iou_md": 0.012,
+     "precision": 0.0121,
+     "recall": 0.6819,
+     "tp": 733,
+     "fp": 59789,
+     "fn": 342,
+     "threshold": 0.56399,
+     "direction": "le",
+     "scene_ci95_f1": [
+      0.006,
+      0.059
+     ]
+    },
+    "train_tuned": {
+     "f1_md": 0.0101,
+     "iou_md": 0.0051,
+     "precision": 0.0051,
+     "recall": 0.7656,
+     "tp": 823,
+     "fp": 160991,
+     "fn": 252,
+     "threshold": 0.36945,
+     "direction": "ge"
+    }
+   },
+   "SI": {
+    "val_tuned": {
+     "f1_md": 0.0243,
+     "iou_md": 0.0123,
+     "precision": 0.0123,
+     "recall": 0.8633,
+     "tp": 928,
+     "fp": 74404,
+     "fn": 147,
+     "threshold": 0.92198,
+     "direction": "ge",
+     "scene_ci95_f1": [
+      0.008,
+      0.055
+     ]
+    },
+    "train_tuned": {
+     "f1_md": 0.0236,
+     "iou_md": 0.0119,
+     "precision": 0.0119,
+     "recall": 0.907,
+     "tp": 975,
+     "fp": 80707,
+     "fn": 100,
+     "threshold": 0.91303,
+     "direction": "ge"
+    }
+   },
+   "BSI": {
+    "val_tuned": {
+     "f1_md": 0.0342,
+     "iou_md": 0.0174,
+     "precision": 0.0176,
+     "recall": 0.5386,
+     "tp": 579,
+     "fp": 32239,
+     "fn": 496,
+     "threshold": -0.2262,
+     "direction": "le",
+     "scene_ci95_f1": [
+      0.008,
+      0.102
+     ]
+    },
+    "train_tuned": {
+     "f1_md": 0.025,
+     "iou_md": 0.0127,
+     "precision": 0.0127,
+     "recall": 0.893,
+     "tp": 960,
+     "fp": 74617,
+     "fn": 115,
+     "threshold": -0.14384,
+     "direction": "le"
+    }
+   },
+   "NRD": {
+    "val_tuned": {
+     "f1_md": 0.1327,
+     "iou_md": 0.071,
+     "precision": 0.0835,
+     "recall": 0.3228,
+     "tp": 347,
+     "fp": 3809,
+     "fn": 728,
+     "threshold": 0.00409,
+     "direction": "ge",
+     "scene_ci95_f1": [
+      0.042,
+      0.29
+     ]
+    },
+    "train_tuned": {
+     "f1_md": 0.1166,
+     "iou_md": 0.0619,
+     "precision": 0.0661,
+     "recall": 0.4921,
+     "tp": 529,
+     "fp": 7473,
+     "fn": 546,
+     "threshold": 0.00109,
+     "direction": "ge"
+    }
+   },
+   "B8": {
+    "val_tuned": {
+     "f1_md": 0.0169,
+     "iou_md": 0.0085,
+     "precision": 0.0085,
+     "recall": 0.7237,
+     "tp": 778,
+     "fp": 90436,
+     "fn": 297,
+     "threshold": 0.06008,
+     "direction": "le",
+     "scene_ci95_f1": [
+      0.006,
+      0.037
+     ]
+    },
+    "train_tuned": {
+     "f1_md": 0.0134,
+     "iou_md": 0.0068,
+     "precision": 0.0068,
+     "recall": 0.9786,
+     "tp": 1052,
+     "fp": 154424,
+     "fn": 23,
+     "threshold": 0.0211,
+     "direction": "ge"
+    }
+   },
+   "FDI_marida": {
+    "val_tuned": {
+     "f1_md": 0.0184,
+     "iou_md": 0.0093,
+     "precision": 0.0093,
+     "recall": 0.8112,
+     "tp": 872,
+     "fp": 92680,
+     "fn": 203,
+     "threshold": 0.04975,
+     "direction": "le",
+     "scene_ci95_f1": [
+      0.006,
+      0.04
+     ]
+    },
+    "train_tuned": {
+     "f1_md": 0.0154,
+     "iou_md": 0.0078,
+     "precision": 0.0078,
+     "recall": 0.9563,
+     "tp": 1028,
+     "fp": 131296,
+     "fn": 47,
+     "threshold": 0.01391,
+     "direction": "ge"
+    }
+   }
+  },
+  "interval_rules": {
+   "FDI_interval": {
+    "val_tuned": {
+     "f1_md": 0.3231,
+     "iou_md": 0.1927,
+     "precision": 0.2431,
+     "recall": 0.4819,
+     "tp": 518,
+     "fp": 1613,
+     "fn": 557,
+     "bounds": {
+      "FDI": [
+       0.03027,
+       0.05919
+      ]
+     },
+     "scene_ci95_f1": [
+      0.151,
+      0.494
+     ]
+    },
+    "train_tuned": {
+     "f1_md": 0.2028,
+     "iou_md": 0.1128,
+     "precision": 0.2486,
+     "recall": 0.1712,
+     "tp": 184,
+     "fp": 556,
+     "fn": 891,
+     "bounds": {
+      "FDI": [
+       0.04026,
+       0.05072
+      ]
+     }
+    }
+   },
+   "NDVI_interval": {
+    "val_tuned": {
+     "f1_md": 0.2564,
+     "iou_md": 0.147,
+     "precision": 0.1929,
+     "recall": 0.3823,
+     "tp": 411,
+     "fp": 1720,
+     "fn": 664,
+     "bounds": {
+      "NDVI": [
+       0.02436,
+       0.12519
+      ]
+     },
+     "scene_ci95_f1": [
+      0.107,
+      0.408
+     ]
+    },
+    "train_tuned": {
+     "f1_md": 0.2549,
+     "iou_md": 0.146,
+     "precision": 0.1864,
+     "recall": 0.4028,
+     "tp": 433,
+     "fp": 1890,
+     "fn": 642,
+     "bounds": {
+      "NDVI": [
+       0.0229,
+       0.13547
+      ]
+     }
+    }
+   },
+   "FAI_interval": {
+    "val_tuned": {
+     "f1_md": 0.0524,
+     "iou_md": 0.0269,
+     "precision": 0.0438,
+     "recall": 0.0651,
+     "tp": 70,
+     "fp": 1528,
+     "fn": 1005,
+     "bounds": {
+      "FAI": [
+       0.02412,
+       0.06482
+      ]
+     },
+     "scene_ci95_f1": [
+      0.015,
+      0.094
+     ]
+    },
+    "train_tuned": {
+     "f1_md": 0.0368,
+     "iou_md": 0.0187,
+     "precision": 0.019,
+     "recall": 0.5702,
+     "tp": 613,
+     "fp": 31632,
+     "fn": 462,
+     "bounds": {
+      "FAI": [
+       0.00443,
+       0.03844
+      ]
+     }
+    }
+   },
+   "FDI_NDVI_box": {
+    "val_tuned": {
+     "f1_md": 0.4152,
+     "iou_md": 0.262,
+     "precision": 0.2864,
+     "recall": 0.7544,
+     "tp": 811,
+     "fp": 2021,
+     "fn": 264,
+     "bounds": {
+      "FDI": [
+       0.0234,
+       0.11202
+      ],
+      "NDVI": [
+       -0.06544,
+       Infinity
+      ]
+     },
+     "scene_ci95_f1": [
+      0.148,
+      0.693
+     ]
+    },
+    "train_tuned": {
+     "f1_md": 0.3515,
+     "iou_md": 0.2132,
+     "precision": 0.2604,
+     "recall": 0.5405,
+     "tp": 581,
+     "fp": 1650,
+     "fn": 494,
+     "bounds": {
+      "FDI": [
+       0.02346,
+       0.1459
+      ],
+      "NDVI": [
+       0.00117,
+       Infinity
+      ]
+     }
+    }
+   }
+  },
+  "rf_runs": [
+   {
+    "seed": 5,
+    "fit_s": 20.0,
+    "argmax": {
+     "f1_md": 0.8647,
+     "iou_md": 0.7616,
+     "precision": 0.8898,
+     "recall": 0.8409,
+     "tp": 904,
+     "fp": 112,
+     "fn": 171,
+     "scene_ci95_f1": [
+      0.772,
+      0.949
+     ]
+    },
+    "prob_val_tuned": {
+     "f1_md": 0.8596,
+     "iou_md": 0.7538,
+     "precision": 0.8864,
+     "recall": 0.8344,
+     "tp": 897,
+     "fp": 115,
+     "fn": 178,
+     "threshold": 0.36,
+     "scene_ci95_f1": [
+      0.763,
+      0.947
+     ]
+    }
+   },
+   {
+    "seed": 0,
+    "fit_s": 20.7,
+    "argmax": {
+     "f1_md": 0.8597,
+     "iou_md": 0.754,
+     "precision": 0.8825,
+     "recall": 0.8381,
+     "tp": 901,
+     "fp": 120,
+     "fn": 174,
+     "scene_ci95_f1": [
+      0.758,
+      0.947
+     ]
+    },
+    "prob_val_tuned": {
+     "f1_md": 0.8552,
+     "iou_md": 0.747,
+     "precision": 0.8986,
+     "recall": 0.8158,
+     "tp": 877,
+     "fp": 99,
+     "fn": 198,
+     "threshold": 0.41,
+     "scene_ci95_f1": [
+      0.755,
+      0.947
+     ]
+    }
+   },
+   {
+    "seed": 1,
+    "fit_s": 26.7,
+    "argmax": {
+     "f1_md": 0.8573,
+     "iou_md": 0.7502,
+     "precision": 0.8804,
+     "recall": 0.8353,
+     "tp": 898,
+     "fp": 122,
+     "fn": 177,
+     "scene_ci95_f1": [
+      0.758,
+      0.946
+     ]
+    },
+    "prob_val_tuned": {
+     "f1_md": 0.858,
+     "iou_md": 0.7513,
+     "precision": 0.9059,
+     "recall": 0.8149,
+     "tp": 876,
+     "fp": 91,
+     "fn": 199,
+     "threshold": 0.43,
+     "scene_ci95_f1": [
+      0.759,
+      0.95
+     ]
+    }
+   }
+  ],
+  "lgbm_no_windows_runs": [
+   {
+    "seed": 0,
+    "threshold": 0.27,
+    "f1": 0.8929,
+    "iou": 0.8065,
+    "precision": 0.8863,
+    "recall": 0.8995
+   },
+   {
+    "seed": 1,
+    "threshold": 0.41,
+    "f1": 0.8926,
+    "iou": 0.8061,
+    "precision": 0.8998,
+    "recall": 0.8856
+   },
+   {
+    "seed": 2,
+    "threshold": 0.45,
+    "f1": 0.8922,
+    "iou": 0.8055,
+    "precision": 0.9068,
+    "recall": 0.8781
+   }
+  ],
+  "seconds": 71.5
+ }
+}
