@@ -1,11 +1,11 @@
-r"""Build the pitch deck reports/deck.pptx (10 slides, 16:9, dark theme) from reports/final_numbers.json.
+r"""Build the pitch deck reports/deck.pptx (12 slides, 16:9, dark theme) from reports/final_numbers.json.
 
 Usage (from repo root):
     .venv\Scripts\python.exe scripts\make_deck.py                 # -> reports\deck.pptx
     .venv\Scripts\python.exe scripts\make_deck.py --preview       # + PNG per slide in reports\deck_preview\ (LibreOffice)
 
-Numbers come only from reports/final_numbers.json (missing -> "—"). Screenshots: reports/screens/final/*.png
-(if absent, a framed placeholder with the expected file name is drawn).
+Numbers come only from reports/final_numbers.json (missing -> "—"). Screenshots: docs/img/*.jpg (in git), else
+reports/screens/iter6/*.png (if absent, a framed placeholder with the expected file name is drawn).
 Rules: the title states the conclusion; one big number per slide; <= 25 words of body text; captions on images.
 """
 from __future__ import annotations
@@ -25,7 +25,8 @@ from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
 from pptx.util import Emu, Inches, Pt
 
 ROOT = Path(__file__).resolve().parents[1]
-SCREENS = ROOT / "reports" / "screens" / "final"
+SCREEN_DIRS = [ROOT / "docs" / "img", ROOT / "reports" / "screens" / "iter6"]
+SCREENS = SCREEN_DIRS[0]
 
 BG = RGBColor(0x0A, 0x11, 0x1F)       # deep blue-black
 PANEL = RGBColor(0x12, 0x1C, 0x2E)
@@ -137,11 +138,14 @@ def big_number(slide, x, y, w, value, label, size=96):
 def picture(slide, x, y, w, h, name_hint, caption, placeholder_name):
     """Screenshot fitted into (x,y,w,h) with a caption bar; placeholder frame if no file."""
     img = None
-    if SCREENS.exists():
-        cands = sorted(SCREENS.glob("*.png"))
-        for c in cands:
-            if any(k in c.stem.lower() for k in name_hint):
-                img = c
+    for d in SCREEN_DIRS:
+        if img is not None or not d.exists():
+            continue
+        cands = sorted([*d.glob("*.jpg"), *d.glob("*.png")])
+        for k in name_hint:  # hints in priority order
+            hit = next((c for c in cands if k in c.stem.lower()), None)
+            if hit is not None:
+                img = hit
                 break
     if img is not None:
         try:
@@ -163,7 +167,7 @@ def picture(slide, x, y, w, h, name_hint, caption, placeholder_name):
             print(f"[deck] cannot place {img}: {e}", file=sys.stderr)
     rect(slide, x, y, w, h, fill=PANEL, line=LINE, dash=True)
     text(slide, x, y + h // 2 - Inches(0.4), w, Inches(0.4), caption, size=16, color=MUTED, align=PP_ALIGN.CENTER)
-    text(slide, x, y + h // 2 + Inches(0.1), w, Inches(0.4), f"reports/screens/final/{placeholder_name}",
+    text(slide, x, y + h // 2 + Inches(0.1), w, Inches(0.4), f"docs/img/{placeholder_name}",
          size=12, color=LINE, align=PP_ALIGN.CENTER)
     return False
 
@@ -189,6 +193,10 @@ def build(fn: dict, only: int | None = None) -> Presentation:
     test = l3.get("test") or {}
     mar = g(fn, "data.marida", {}) or {}
     sv = g(fn, "service", {}) or {}
+    models = (g(fn, "models.rows", {}) or {})
+    lro = g(fn, "metric_audit.lro", {}) or {}
+    agr = g(fn, "agreement", {}) or {}
+    drift = g(fn, "drift", {}) or {}
 
     # 1. Problem
     def s1(s, n, t):
@@ -218,9 +226,9 @@ def build(fn: dict, only: int | None = None) -> Presentation:
     def s3(s, n, t):
         header(s, n, t, "Пятна по 2 пикселя: решает спектр, поэтому пиксельный бустинг", "Метод")
         big_number(s, M, Inches(2.9), Inches(3.5), f(l3.get("n_features"), 0),
-                   "признаков на пиксель:\n11 каналов + FDI, FAI, NDVI…")
+                   f"признаков на пиксель:\n{f(l3.get('n_base_features'), 0)} спектр + {f(l3.get('n_window_features'), 0)} окно")
         chips(s, Inches(4.4), Inches(3.1), [
-            ("Снимок", "Sentinel-2"), ("Признаки", "каналы + индексы"), ("LightGBM", "мусор / не мусор"),
+            ("Данные", "MARIDA + MADOS"), ("Признаки", "каналы, индексы, окна"), ("LightGBM", "мусор / не мусор"),
             ("Порог", f"{f(l3.get('threshold'))} по val"), ("H3", "показатель, зоны"),
         ], Inches(1.55), gap=Inches(0.15), accent_idx=2, size=15)
         text(s, Inches(4.4), Inches(4.6), Inches(8.3), Inches(1.2),
@@ -248,40 +256,70 @@ def build(fn: dict, only: int | None = None) -> Presentation:
         k = DASH if rec is None else str(int(round(rec * 10)))
         kp = DASH if prec is None else str(int(round(prec * 10)))
         header(s, n, t, f"Модель находит {k} из 10 пикселей мусора, и {kp} из 10 её находок верны", "Качество (MARIDA)")
-        big_number(s, M, Inches(2.9), Inches(4.5), f(val.get("f1_md")), "F1 Marine Debris, val\n(выбор модели и порога)")
+        big_number(s, M, Inches(2.9), Inches(4.5), f(val.get("f1_md"), 3), "F1 Marine Debris, val\n(выбор модели и порога)")
         chips(s, Inches(5.6), Inches(3.0), [
-            (f(test.get("f1_md")), "F1 test — один раз"),
-            (f(val.get("iou_md")), "IoU val"),
+            (f(val.get("iou_md"), 3), "IoU val"),
+            (f(lro.get("mean_f1"), 3), "F1 на новом районе"),
             ("0.80", "RF из статьи MARIDA, test"),
-        ], Inches(2.2))
+        ], Inches(2.2), accent_idx=1)
+        test_txt = (f"F1 test (один раз): {f(test.get('f1_md'))}." if test.get("f1_md") is not None
+                    else "Test посчитаем один раз на итоговой модели.")
         text(s, Inches(5.6), Inches(4.5), Inches(7.1), Inches(1.4),
-             "Выбор только по val; test посчитан один раз. Шум — 3 seed.", size=16, color=MUTED, line_spacing=1.25)
+             f"Выбор только по val, шум — 3 seed. {test_txt}", size=16, color=MUTED, line_spacing=1.25)
     slides.append(s5)
+
+    # 5b. Model comparison
+    def s5b(s, n, t):
+        header(s, n, t, "MADOS принят, UNet и стек отклонены по одному правилу", "Сравнение моделей")
+        items = []
+        for key, label in (("marida_only", "только MARIDA"), ("combined", "MARIDA + MADOS"),
+                           ("unet", "UNet"), ("stack", "стек UNet + LGBM")):
+            r = models.get(key) or {}
+            m_, sd = r.get("val_f1_mean"), r.get("val_f1_std")
+            val_s = DASH if m_ is None else f"{m_:.3f}"
+            sub = label + ("" if sd is None else f" · ±{sd:.4f}")
+            items.append((val_s, sub))
+        chips(s, M, Inches(3.0), items, Inches(2.85), h=Inches(1.3), accent_idx=1, size=28)
+        text(s, M, Inches(4.7), W - 2 * M, Inches(1.2),
+             "F1 Marine Debris на val, 3 seed. Принимаем, если прирост ≥ max(0.01, 2×std).",
+             size=16, color=MUTED, line_spacing=1.25)
+    slides.append(s5b)
 
     # 6. Live map
     def s6(s, n, t):
         header(s, n, t, "Живая карта: снимок, находки и зоны на одном экране", "Демо")
-        picture(s, M, Inches(2.75), Inches(8.6), Inches(4.1), ["02_region", "region"], "Снимок + находки модели",
-                "02_region.png")
+        picture(s, M, Inches(2.75), Inches(8.6), Inches(4.1), ["region", "02_region"], "Снимок + находки модели",
+                "region.jpg")
         big_number(s, Inches(9.6), Inches(3.0), Inches(3.2), f(sv.get("n_regions"), 0),
-                   "района с реальными\nсценами Sentinel-2 L2A", size=88)
+                   f"районов, {f(sv.get('n_dates'), 0)} дат\nсцен Sentinel-2 L2A", size=88)
     slides.append(s6)
 
     # 7. Zones & compare
     def s7(s, n, t):
         header(s, n, t, "Топ ячеек H3 — готовый список точек для выхода судна", "Зоны и сравнение")
-        picture(s, M, Inches(2.75), Inches(8.6), Inches(4.1), ["zone", "compare", "03", "04"],
-                "Приоритет обследования и сравнение районов", "04_zones.png")
+        picture(s, M, Inches(2.75), Inches(8.6), Inches(4.1), ["07_zones", "zones", "compare"],
+                "Приоритет обследования и сравнение районов", "07_zones.png")
         big_number(s, Inches(9.6), Inches(3.0), Inches(3.2), "10",
                    "зон на район: ранг,\nкоординаты, причина", size=88)
     slides.append(s7)
+
+    # 7b. Confirmed detections
+    def s7b(s, n, t):
+        header(s, n, t, "Уверенная находка: две разные модели видят объект в пределах 20 м", "Согласие моделей")
+        picture(s, M, Inches(2.75), Inches(8.6), Inches(4.1), ["detection_card", "12_card_confirmed"],
+                "Карточка находки: вырезка снимка и согласие моделей", "detection_card.jpg")
+        big_number(s, Inches(9.6), Inches(3.0), Inches(3.2), f(agr.get("confirmed_objects"), 0),
+                   f"объектов в {f(agr.get('scenes_with_confirmed'), 0)} из {f(agr.get('n_scenes'), 0)}\nсцен; не проверка на месте",
+                   size=88)
+    slides.append(s7b)
 
     # 8. Drift
     def s8(s, n, t):
         header(s, n, t, "Дрейф на 72 часа: демонстрация направления, не прогноз", "Дрейф")
         picture(s, M, Inches(2.75), Inches(8.6), Inches(4.1), ["drift"], "Треки частиц 0–72 ч (без валидации)",
-                "06_drift.png")
-        big_number(s, Inches(9.6), Inches(3.0), Inches(3.2), "72 ч", "OpenDrift, открытые\nтечения и ветер", size=88)
+                "drift.jpg")
+        big_number(s, Inches(9.6), Inches(3.0), Inches(3.2), f(drift.get("n_scenes"), 0),
+                   "свежих сцен с дрейфом:\nOpenDrift, HYCOM, GFS", size=88)
     slides.append(s8)
 
     # 9. Tools
@@ -366,7 +404,7 @@ def main(argv=None) -> int:
     out.parent.mkdir(parents=True, exist_ok=True)
     prs.save(out)
     n = len(prs.slides)
-    shots = sorted(x.name for x in SCREENS.glob("*.png")) if SCREENS.exists() else []
+    shots = sorted(x.name for x in SCREENS.glob("*.jpg")) if SCREENS.exists() else []
     print(f"[deck] {n} slides -> {out}; screenshots used from {SCREENS}: {shots or 'none (placeholders)'}")
     if a.preview:
         preview(fn, ROOT / "reports" / "deck_preview", n)

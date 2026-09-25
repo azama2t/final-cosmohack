@@ -103,29 +103,64 @@ def _indices(b: dict) -> dict:
     return {k: v.astype(np.float32, copy=False) for k, v in out.items()}
 
 
-def _win_mean_std(x: np.ndarray, w: int):
+def _win_mean_std(x: np.ndarray, w: int, out_mean: np.ndarray | None = None, out_std: np.ndarray | None = None):
+    """NaN-aware window mean/std (float64 sums, float32 result).
+
+    Lane L17: same arithmetic as the first version (bit-identical output) with fewer temporaries -
+    buffers are reused and the count filter of an all-valid chip is cached per (shape, w)."""
     valid = ~np.isnan(x)
-    xv = np.where(valid, x, 0.0).astype(np.float64)
-    vf = valid.astype(np.float64)
-    cnt = ndimage.uniform_filter(vf, size=w, mode="reflect")
+    all_valid = bool(valid.all())
+    xv = x.astype(np.float64)
+    if not all_valid:
+        xv[~valid] = 0.0
+        cnt = ndimage.uniform_filter(valid.astype(np.float64), size=w, mode="reflect")
+    else:
+        cnt = _ones_count(x.shape, w)
     s1 = ndimage.uniform_filter(xv, size=w, mode="reflect")
-    s2 = ndimage.uniform_filter(xv * xv, size=w, mode="reflect")
+    np.multiply(xv, xv, out=xv)
+    s2 = ndimage.uniform_filter(xv, size=w, mode="reflect", output=xv)
     with np.errstate(invalid="ignore", divide="ignore"):
-        mean = s1 / cnt
-        var = s2 / cnt - mean * mean
-    var = np.maximum(var, 0.0)
+        mean = np.divide(s1, cnt, out=s1)
+        var = np.divide(s2, cnt, out=s2)
+        var -= mean * mean
+    np.maximum(var, 0.0, out=var)
     bad = cnt < 1e-6
-    mean[bad] = np.nan
-    var[bad] = np.nan
-    return mean.astype(np.float32), np.sqrt(var).astype(np.float32)
+    if bad.any():
+        mean[bad] = np.nan
+        var[bad] = np.nan
+    np.sqrt(var, out=var)
+    if out_mean is None:
+        return mean.astype(np.float32), var.astype(np.float32)
+    out_mean[...] = mean
+    out_std[...] = var
+    return out_mean, out_std
 
 
-def _local_median(x: np.ndarray, w: int) -> np.ndarray:
-    """Approximate median in a w x w window: subsample with stride f, median filter, upsample."""
+_ONES_COUNT: dict = {}
+
+
+def _ones_count(shape, w: int) -> np.ndarray:
+    """uniform_filter of an all-ones float64 image (count of valid pixels / w^2), cached, read-only."""
+    key = (tuple(shape), int(w))
+    c = _ONES_COUNT.get(key)
+    if c is None:
+        c = ndimage.uniform_filter(np.ones(shape, np.float64), size=w, mode="reflect")
+        c.setflags(write=False)
+        if len(_ONES_COUNT) > 64:
+            _ONES_COUNT.clear()
+        _ONES_COUNT[key] = c
+    return c
+
+
+def _local_median(x: np.ndarray, w: int, fill=None) -> np.ndarray:
+    """Approximate median in a w x w window: subsample with stride f, median filter, upsample.
+
+    `fill` (NaN replacement, default nanmedian of x) can be passed to reuse it across windows."""
     H, W = x.shape
     f = max(1, int(round(w / 5)))
     k = max(3, int(round(w / f)) | 1)
-    fill = np.nanmedian(x) if np.isfinite(x).any() else 0.0
+    if fill is None:
+        fill = _nan_fill(x)
     xs = x[f // 2::f, f // 2::f]
     xs = np.where(np.isnan(xs), fill, xs)
     med = ndimage.median_filter(xs, size=k, mode="reflect")
@@ -134,26 +169,46 @@ def _local_median(x: np.ndarray, w: int) -> np.ndarray:
     return med[np.ix_(iy, ix)].astype(np.float32)
 
 
+def _nan_fill(x: np.ndarray):
+    return np.nanmedian(x) if np.isfinite(x).any() else 0.0
+
+
 def compute_features(arr: np.ndarray, channel_names: Sequence[str], level: str = "win") -> np.ndarray:
-    """(C,H,W) reflectance -> (F,H,W) float32 features (names: feature_names(level))."""
+    """(C,H,W) reflectance -> (F,H,W) float32 features (names: feature_names(level)).
+
+    Features are written straight into the preallocated (F,H,W) output (lane L17: fewer copies;
+    values identical to stacking the per-feature arrays)."""
     x = select_bands(arr, channel_names)
-    x[~np.isfinite(x)] = np.nan
+    fin = np.isfinite(x)
+    if not fin.all():
+        x[~fin] = np.nan
+    if level not in ("win", "min"):
+        raise ValueError(level)
+    H, W = x.shape[1:]
+    nb, ni = len(BANDS11), len(INDICES)
+    F = nb + ni + (len(WIN_KEYS) * len(WIN_SIZES) * 2 + len(CONTRAST) if level == "win" else 0)
+    out = np.empty((F, H, W), np.float32)
+    out[:nb] = x
     b = {n: x[i] for i, n in enumerate(BANDS11)}
     ind = _indices(b)
-    feats = [x[i] for i in range(len(BANDS11))] + [ind[k] for k in INDICES]
+    for j, k in enumerate(INDICES):
+        out[nb + j] = ind[k]
+    j = nb + ni
     if level == "win":
         src = {"B8": b["B8"], **ind}
         for k in WIN_KEYS:
             for w in WIN_SIZES:
-                m, s = _win_mean_std(src[k], w)
-                feats += [m, s]
+                _win_mean_std(src[k], w, out[j], out[j + 1])
+                j += 2
+        fills: dict = {}
         for k, w in CONTRAST:
-            feats.append(src[k] - _local_median(src[k], w))
-    elif level != "min":
-        raise ValueError(level)
-    out = np.stack(feats, 0).astype(np.float32, copy=False)
+            if k not in fills:
+                fills[k] = _nan_fill(src[k])
+            np.subtract(src[k], _local_median(src[k], w, fills[k]), out=out[j])
+            j += 1
     nanpix = np.isnan(x).any(0)
-    out[:, nanpix] = np.nan
+    if nanpix.any():
+        out[:, nanpix] = np.nan
     return out
 
 

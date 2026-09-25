@@ -1,44 +1,78 @@
 # Макропластик: обнаружение плавающего мусора по снимкам Sentinel-2
 
-Система берёт снимок Sentinel-2, находит на воде пиксели с признаками плавающего мусора и считает по сетке H3 показатель «доля наблюдаемой воды с признаками мусора» (‰). По этому показателю она выделяет зоны «приоритет обследования» и позволяет сравнивать районы и даты на интерактивной карте. Это индекс по снимку, а не масса и не физическая концентрация пластика: он показывает, куда стоит направить обследование в первую очередь.
+Система берёт снимок Sentinel-2, находит на воде пиксели с признаками плавающего мусора и считает по сетке H3 показатель «доля наблюдаемой воды с признаками мусора» (‰). По нему она выделяет зоны «приоритет обследования», сравнивает районы и даты на интерактивной карте и строит демонстрационный прогноз дрейфа найденных пятен на 72 ч. Это индекс по снимку, а не масса и не физическая концентрация пластика: он показывает, куда стоит направить обследование в первую очередь.
 
-![Карта: регион, находки и зоны обследования](reports/screens/final/02_region.png)
+![Обзор: {{service.n_regions}} районов, индекс по последнему снимку](docs/img/overview.jpg)
+
+| Район с находками и зонами обследования | Дрейф 0–72 ч от найденных пятен |
+|---|---|
+| ![Район](docs/img/region.jpg) | ![Дрейф](docs/img/drift.jpg) |
+
+![Карточка находки: вырезка снимка, площадь, уверенность, согласие двух моделей](docs/img/detection_card.jpg)
+
+## Главное
+
+- **Модель**: пиксельный LightGBM, обученный на MARIDA train и MADOS. F1 класса Marine Debris на val MARIDA — **{{l3_lgbm.val.f1_md|f3}}** (IoU {{l3_lgbm.val.iou_md|f3}}, порог {{l3_lgbm.threshold|f2}}); разброс по seed {{derived.l3_noise}}.
+- **Сравнение моделей** шло по одному правилу: изменение принимается, если F1 на val вырос не меньше чем на max(0.01, 2 × std по seed). UNet и стек UNet + LightGBM это правило не прошли (таблица ниже).
+- {{derived.test_sentence}}
+- **Карта**: {{service.n_regions}} районов, {{service.n_dates}} дат живых сцен Sentinel-2 L2A, две модели (marinedebrisdetector и наша LightGBM). Дрейф посчитан для {{drift.n_scenes}} свежих сцен (2025–2026).
+- **Уверенные находки**: пятно одной модели, которое вторая модель видит в радиусе 20 м. На живых сценах таких объектов {{agreement.confirmed_objects}} в {{agreement.scenes_with_confirmed}} из {{agreement.n_scenes}} сцен. Это согласие двух моделей, а не проверка на месте.
 
 ## Быстрый старт
 
-Нужны Windows 10/11, Python 3.12 (`py -3.12`) и Node.js 18+. Все команды запускаются из корня репозитория:
+Нужны Windows 10/11, Python 3.12 (`py -3.12`) и Node.js 18+ (Node нужен, только если пересобирать фронтенд: собранный фронтенд уже лежит в `service\static`). Все команды запускаются из корня репозитория:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File run.ps1            # порт 8000
 powershell -ExecutionPolicy Bypass -File run.ps1 -Port 8080
 ```
 
-`run.ps1` при первом запуске создаёт `.venv` и ставит пакеты. Если фронтенд ещё не собран, он собирает его, затем поднимает сервис и открывает браузер на http://127.0.0.1:8000.
+`run.ps1` при первом запуске создаёт `.venv` и ставит пакеты. Если фронтенд не собран, собирает его, затем поднимает сервис и открывает браузер на http://127.0.0.1:8000.
 
 Те же шаги вручную:
 
 ```powershell
 py -3.12 -m venv .venv
 .venv\Scripts\python.exe -m pip install -r requirements.txt
-cd service\frontend; npm ci; npm run build; cd ..\..      # сборка кладётся в service\static
+cd service\frontend; npm ci; npm run build; cd ..\..      # только если меняли фронтенд; сборка кладётся в service\static
 .venv\Scripts\python.exe -m service                       # --port 8000 --data-root <папка с manifest.json>
 ```
 
-Сервис берёт данные из `service\data\`, а если там их нет, то из `service\demo\` (маленький демо-набор). Если нет ни того, ни другого, карта сообщает «нет данных» и показывает команду для их генерации (см. «Воспроизведение»). Проверка: http://127.0.0.1:8000/health, документация API — http://127.0.0.1:8000/docs.
+- `requirements.txt` ставит PyTorch с CUDA 12.8 (около 3 ГБ). Если GPU нет, удалите из файла строку `--extra-index-url`: поставится CPU-сборка, карта и LightGBM работают без GPU.
+- Прогноз дрейфа (`scripts\run_drift.py`) требует OpenDrift: `.venv\Scripts\python.exe -m pip install opendrift`. Для показа карты он не нужен: готовые треки лежат в данных сервиса.
+
+Сервис берёт данные из `service\data\`, а если их нет, то из `service\demo\`. В репозитории лежит демо-набор: {{service_demo.n_regions}} района, {{service_demo.n_dates}} даты с находками, зонами и дрейфом. Полный слой ({{service.n_regions}} районов, {{service.n_dates}} дат) весит около 200 МБ и собирается командами из раздела «Воспроизведение». Проверка: http://127.0.0.1:8000/health, документация API — http://127.0.0.1:8000/docs.
+
+### Живой слой: код и веса marinedebrisdetector
+
+Для показа карты ничего скачивать не нужно: сервис показывает готовые данные (демо-набор из репозитория или собранный `service\data`). Код и веса marinedebrisdetector (MDD) нужны только, чтобы посчитать находки на новых сценах (`scripts\run_mdd.py`):
+
+```powershell
+git clone https://github.com/MarcCoru/marinedebrisdetector data_cache\marinedebrisdetector
+# веса: по ссылке на Google Drive из README репозитория MDD (раздел о весах; хостинг автора закрыт, доступ к данным — по запросу автору)
+# скачать архив unet++1.zip и распаковать в models\mdd\, чтобы получился файл
+#   models\mdd\unet++1\epoch=54-val_loss=0.50-auroc=0.987.ckpt
+.venv\Scripts\python.exe scripts\run_mdd.py --all
+```
+
+Без `data_cache\marinedebrisdetector` и `models\mdd\` сервис, карта, выгрузки и наша LightGBM работают как обычно; не пересчитывается только слой MDD на новых сценах.
 
 ## Что показывает карта
 
 - **Снимок**: true-color вырезка Sentinel-2 L2A поверх спутниковой или тёмной подложки.
-- **Находки**: пятна, где вероятность мусора не ниже порога модели. По клику открывается карточка с площадью помеченной области, уверенностью модели, датой и качеством наблюдения (облачность, `observed_frac`).
+- **Находки**: пятна, где вероятность мусора не ниже порога модели. По клику открывается карточка: вырезка снимка, площадь помеченной области, уверенность модели, дата, облачность, `observed_frac` и строка «согласие моделей».
+- **Уверенные находки**: двойное кольцо и переключатель «Только подтверждённые обеими моделями». Находка считается подтверждённой, если вторая модель видит объект в радиусе 20 м.
 - **Сетка H3** (res 8, ячейка около 0,7 км²): показатель по ячейкам, в режиме 2D или 3D.
 - **Приоритет обследования**: топ ячеек с рангом и причиной выбора.
 - **Сравнение**: два района или две даты рядом плюс таблица различий.
-- **Ряд по датам** и, если есть, **дрейф 0–72 ч** (демонстрационный).
-- Выгрузка слоёв в GeoJSON/CSV, ссылка на текущее состояние карты.
+- **Ряд по датам** и **дрейф 0–72 ч**: частицы OpenDrift от найденных пятен с разбросом по коэффициенту ветрового сноса 1–3 %.
+- Выгрузка слоёв в GeoJSON/CSV, ссылка на текущее состояние карты, демо-тур.
 
-Регионы на карте сейчас:
+Районы в полном слое (последняя дата каждого района; таблица генерируется из данных сервиса):
 
 {{derived.regions_table}}
+
+Пятен на последних снимках: {{service.n_detections_total|int}} (модель MDD, порог {{service.mdd_threshold|f2}}), из них уверенных: {{service.n_confirmed_latest_total|int}}; уверенных находок по всем датам: {{service.n_confirmed_total|int}}.
 
 ## Показатель: доля наблюдаемой воды с признаками мусора
 
@@ -60,28 +94,44 @@ share (‰) = 1000 × flagged_water_px / observed_water_px
 
 | Модель | Что это | Где используется |
 |---|---|---|
-| **LightGBM (наша)** | пиксельный градиентный бустинг: {{l3_lgbm.n_features}} признаков (11 каналов Sentinel-2 и спектральные индексы FDI, FAI, NDVI, NDWI, NDMI, SI, BSI, NRD), бинарная задача «Marine Debris против всего остального», порог {{l3_lgbm.threshold|f2}} подобран на val | обучена и оценена на MARIDA, дополнительный слой на живых сценах |
-| **marinedebrisdetector** (Rußwurm et al., 2023) | сторонняя модель UNet++, лицензия MIT, вход — 12 каналов Sentinel-2 L2A | основной слой находок на живых сценах L2A |
+| **LightGBM (наша, итоговая)** | пиксельный градиентный бустинг: {{l3_lgbm.n_features}} признаков = {{l3_lgbm.n_base_features}} базовых (11 каналов Sentinel-2 и индексы FDI, FAI, NDVI, NDWI, NDMI, SI, BSI, NRD) + {{l3_lgbm.n_window_features}} оконных (среднее и std в окнах 3/7/15, контраст с локальной медианой); бинарная задача «Marine Debris против всего остального»; обучена на {{l3_lgbm.training_data}}; порог {{l3_lgbm.threshold|f2}} подобран на val | оценка на MARIDA, `inference.py` (веса `weights\lgbm`) |
+| LightGBM для живых сцен | та же схема признаков, обучена на MARIDA train с аугментацией под L2A (сдвиг и усиление отражения); порог {{lgbm_live.threshold|f2}} подобран на val MARIDA (F1 {{lgbm_live.val.f1_md|f3}}); вход гармонизируется по медиане воды | слой «Наша (LGBM)» на карте (веса `weights\lgbm_live`) |
+| **marinedebrisdetector** (Rußwurm et al., 2023) | сторонняя модель UNet++, лицензия MIT, вход — 12 каналов Sentinel-2 L2A; порог показа {{service.mdd_threshold|f2}} | основной слой находок на живых сценах L2A |
 
 marinedebrisdetector обучался в том числе на MARIDA, поэтому на MARIDA мы его **не оцениваем**: такая оценка не была бы независимой.
 
 ## Качество модели (MARIDA, класс Marine Debris)
 
-Модель, признаки и порог выбирались только по официальному val-сплиту. Test посчитан один раз для финальной модели, и после этого ничего не менялось. Метрики считаются по пулу всех размеченных пикселей (неразмеченные игнорируются).
+Модель, признаки, обучающие данные и порог выбирались только по официальному val-сплиту MARIDA. {{derived.test_sentence}} Метрики считаются по пулу всех размеченных пикселей (неразмеченные игнорируются).
 
 {{derived.metrics_table}}
 
-Разброс F1 на val по seed: {{derived.l3_noise}}. Строка RF взята из статьи MARIDA и приведена для ориентира: там другая модель и другой протокол.
+Сравнение вариантов (val, 3 seed; правило принятия: {{models.acceptance_rule}}):
+
+{{derived.models_table}}
+
+- MADOS принят: порог принятия {{models.mados_acceptance_threshold|f3}}, получено {{models.rows.combined.val_f1_mean|f3}}. Прирост идёт от меньшего числа ложных срабатываний при той же полноте. Сцены MADOS, снятые в тот же день или в том же месте, что и val MARIDA, из обучения исключены ({{l3_lgbm.mados.n_excluded_scenes}} сцен).
+- UNet и стек отклонены: порог принятия {{models.unet_acceptance_threshold|f3}} от модели только на MARIDA.
+- {{derived.lro_text}}
+
+Строка RF взята из статьи MARIDA и приведена для ориентира: там другая модель и другой протокол.
+
+## Скорость
+
+{{derived.speed_block}}
+
+Интерфейс (реальные данные, {{service.n_regions}} районов): {{derived.ui_perf_text}}.
 
 ## Данные и лицензии
 
 | Источник | Что берём | Лицензия |
 |---|---|---|
 | [MARIDA](https://doi.org/10.5281/zenodo.5151941) (Kikaki et al., 2022) | патчи 256×256 ({{data.marida.n_patches|int}} шт., сцен: {{data.marida.n_scenes}}), 11 каналов (ACOLITE rhorc), 15 классов и уверенность разметки; Marine Debris — {{data.marida.md_px|int}} px | CC BY 4.0 (данные), MIT (код) |
-| [MADOS](https://zenodo.org/records/10664073) (Kikaki et al., 2024) | дополнительный набор разметки (опционально) | CC BY 4.0 |
+| [MADOS](https://zenodo.org/records/10664073) (Kikaki et al., 2024) | дополнительная разметка для обучения: {{l3_lgbm.mados.n_patches|int}} патчей из {{l3_lgbm.mados.n_scenes}} сцен, {{l3_lgbm.mados.n_md_px|int}} px Marine Debris | CC BY 4.0 |
 | [marinedebrisdetector](https://github.com/MarcCoru/marinedebrisdetector) | предобученные веса UNet++ | MIT |
 | Sentinel-2 L2A через [Earth Search](https://earth-search.aws.element84.com/v1) (запасной канал — Planetary Computer) | живые сцены, COG | Copernicus Sentinel data, свободное использование с атрибуцией |
-| Подложка Esri World Imagery | фон карты | условия Esri, атрибуция на карте |
+| HYCOM ESPC-D-V02, NCEP GFS (через OPeNDAP) | течения и ветер для прогноза дрейфа | открытые данные |
+| Подложка CARTO / OpenStreetMap, Esri World Imagery | фон карты | условия поставщиков, атрибуция на карте |
 
 Атрибуция снимков: «Contains modified Copernicus Sentinel data 2015–2026». Полные ссылки и цитирование — в [reports/sources.md](reports/sources.md).
 
@@ -90,37 +140,48 @@ marinedebrisdetector обучался в том числе на MARIDA, поэт
 ## Структура репозитория
 
 ```
-src/macroplastic/      ядро: чтение данных, признаки, метрики, сплиты, модели, живые сцены, сетка H3, адаптер датасетов
-service/               FastAPI (API + статика) и фронтенд service/frontend (Vite, React, MapLibre, deck.gl)
+src/macroplastic/      ядро: чтение данных, признаки, метрики, сплиты, модели, живые сцены, сетка H3, дрейф, адаптер датасетов
+service/               FastAPI (API + статика) и фронтенд service/frontend (Vite, React, MapLibre, deck.gl); service/demo — демо-набор
 scripts/               обучение, загрузка сцен, инференс, сборка слоя данных, отчёты; scripts/tools — инструменты для нового датасета
 configs/               каналы, конфиг LightGBM, конфиги адаптера
+weights/               lgbm (итоговая модель), lgbm_live (слой на живых сценах)
 reports/               EDA, источники, отчёт, презентация, итоговые числа (final_numbers.json)
+docs/                  карта файлов, инструменты, картинки README
 tests/                 pytest
 inference.py           CLI: папка GeoTIFF -> вероятность и маска
 ```
 
-Полная карта файлов — [docs/FILEMAP.md](docs/FILEMAP.md).
+Полная карта файлов — [docs/FILEMAP.md](docs/FILEMAP.md). Все числа этого README берутся из [reports/final_numbers.json](reports/final_numbers.json); отчёт — [reports/report.md](reports/report.md), презентация — `reports/deck.pptx`.
 
 ## Инструменты для нового датасета
 
-Набор, чтобы за час подключить незнакомый датасет (описание — [docs/TOOLS.md](docs/TOOLS.md)):
+Набор, чтобы за час подключить незнакомый датасет (описание — [docs/TOOLS.md](docs/TOOLS.md)). Все команды — из корня репозитория:
 
-- `scripts/tools/inspect_dataset.py`: каналы, типы, nodata, CRS, разрешение, классы и баланс, результат в HTML;
-- `scripts/tools/label_forensics.py`: насколько разметку можно вывести из спектра (неглубокие деревья, пороги индексов);
-- `python -m macroplastic.organizer_adapter`: переводит чужие каналы, масштаб, разрешение и классы во внутренний формат по YAML-конфигу (примеры в `configs/adapter_*.yaml`);
-- `scripts/tools/provenance_check.py`: ищет пересечения тайлов, дат и хешей с нашими обучающими данными.
+```powershell
+.venv\Scripts\python.exe scripts\tools\inspect_dataset.py --help      # каналы, типы, nodata, CRS, разрешение, классы и баланс -> HTML
+.venv\Scripts\python.exe scripts\tools\label_forensics.py --help      # насколько разметку можно вывести из спектра
+.venv\Scripts\python.exe scripts\tools\adapter.py --config configs\adapter_marida.yaml --dry-run   # чужие каналы, масштаб, классы -> наш формат
+.venv\Scripts\python.exe scripts\tools\provenance_check.py --help     # пересечения тайлов, дат и хешей с нашими обучающими данными
+```
+
+`scripts\tools\adapter.py` — обёртка над `macroplastic.organizer_adapter`, конфиги — `configs\adapter_*.yaml`.
 
 ## Воспроизведение
 
 ```powershell
-# 1. Данные MARIDA -> data\MARIDA (zenodo 5151941), EDA
+# 1. Данные MARIDA -> data\MARIDA (zenodo 5151941), MADOS -> data\MADOS (zenodo 10664073), EDA
 .venv\Scripts\python.exe scripts\eda_marida.py
-# 2. Обучение LightGBM (только train/val), веса -> weights\lgbm
-.venv\Scripts\python.exe scripts\train_lgbm.py --exp bin_min --seed 0 --final --full-eval
+# 2. Итоговая LightGBM (MARIDA train + MADOS, только train/val): исключение пересечений MADOS с val MARIDA, обучение;
+#    веса -> weights_exp\mados\final, затем копируются в weights\lgbm (параметры и состав данных — в meta.json)
+.venv\Scripts\python.exe scripts\train_lgbm_mados.py overlap
+.venv\Scripts\python.exe scripts\train_lgbm_mados.py train --data combined --seed 0 --exp c_noextra_exclplace --set mados_extra=false exclude_same_place_val=true --final
+#    модель только на MARIDA (для сравнения)
+.venv\Scripts\python.exe scripts\train_lgbm.py --exp bin_win --seed 0
 # 3. Живые сцены Sentinel-2 L2A (STAC Earth Search) -> data\live\<region>\<date>
 .venv\Scripts\python.exe scripts\fetch_live.py --region honduras --n 1
-# 4. marinedebrisdetector по сценам (веса в models\mdd\, см. репозиторий модели)
+# 4. Модели по сценам: marinedebrisdetector (см. «Живой слой») и наша LightGBM
 .venv\Scripts\python.exe scripts\run_mdd.py --all
+.venv\Scripts\python.exe scripts\run_lgbm_live.py --all
 # 5. Слой данных сервиса (вероятность, пятна, H3, зоны, ряд по датам) и проверка по контрактам
 .venv\Scripts\python.exe scripts\build_service_data.py --live-dir data\live --out service\data
 .venv\Scripts\python.exe scripts\validate_service_data.py service\data
@@ -139,7 +200,9 @@ inference.py           CLI: папка GeoTIFF -> вероятность и ма
 ## Ограничения
 
 - **Частичная разметка.** В MARIDA размечено около 1 % пикселей, а пятна мусора маленькие (медиана 2 px), поэтому метрики относятся к размеченным пикселям, а площадь по маскам не считается.
-- **Сдвиг домена.** LightGBM обучена на ACOLITE rhorc (из L1C), а живые сцены приходят в L2A (Sen2Cor). Уровни отражения различаются, так что вероятность нашей модели на L2A не откалибрована. Поэтому основной слой на живых сценах — marinedebrisdetector, обученный на L2A.
-- **Ложные срабатывания.** Их дают пена, водоросли (Sargassum), суда и их следы, кромки облаков, мутные шлейфы рек. Часть отсекается масками облаков и суши и постобработкой, остальное остаётся на экспертную проверку.
-- **Дрейф демонстрационный.** Треки 0–72 ч (OpenDrift, течения и ветер из открытых источников) не валидированы и показывают только направление возможного переноса.
+- **Перенос на новые районы.** На официальном val F1 выше, чем при проверке на районе, которого не было в обучении (раздел «Качество модели»). Ориентироваться стоит на второе число.
+- **Сдвиг домена.** Итоговая LightGBM обучена на ACOLITE rhorc (из L1C), а живые сцены приходят в L2A (Sen2Cor). Поэтому на карте наш слой считается вариантом с аугментацией под L2A, а основной слой — marinedebrisdetector, обученный на L2A.
+- **Ложные срабатывания.** Их дают пена, водоросли (Sargassum), природная органика, суда и их следы, кромки облаков, мутные шлейфы рек. Часть отсекается масками облаков и суши, постобработкой и фильтром судов, остальное остаётся на экспертную проверку.
+- **Согласие моделей — не проверка.** «Уверенная находка» значит только, что две разные модели видят объект в одном месте; обе могут одинаково ошибаться, например на фронтах мутной воды.
+- **Дрейф демонстрационный.** Треки 0–72 ч (OpenDrift, течения HYCOM, ветер NCEP GFS) не валидированы и показывают только направление возможного переноса.
 - **Показатель — не масса.** Доля помеченной воды зависит от порога, облачности, волнения и разрешения 10 м. Сравнивать её корректно между датами и районами при одной модели и одном пороге.

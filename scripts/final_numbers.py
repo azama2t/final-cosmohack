@@ -4,9 +4,15 @@ Usage (from repo root):
     .venv\Scripts\python.exe scripts\final_numbers.py [--out reports\final_numbers.json] [--quiet]
 
 Sources (all optional; a missing source gives null, never an error):
-  weights/lgbm/meta.json                 our LightGBM: val metrics, threshold, (test / seed noise if present)
-  reports/l3_*.json, reports/lgbm_*.json extra L3 results (test run, seed noise) if written by training scripts
-  reports/l4_unet*.json                  UNet results (val, noise over seeds, decision)
+  weights/lgbm/meta.json                 final LightGBM (MARIDA train + MADOS): val metrics, threshold, features, (test if present)
+  reports/l13_mados.json                 seed noise of the final recipe and of the MARIDA-only recipe, acceptance rule
+  reports/l3_*.json, reports/lgbm_*.json extra results (test run, seed noise) if written by training / final-test scripts
+  reports/l4_unet*.json                  UNet and UNet+LightGBM stack (val, noise over seeds, decision)
+  weights/lgbm_live/meta.json            LightGBM variant used as the map layer on live L2A scenes
+  reports/l16_metric_audit.json          metric recheck, scene bootstrap, leave-region-out
+  reports/model_agreement.json           agreement of the two models on live scenes
+  reports/speed.json                     inference speed (any structure; numeric leaves are shown)
+  data/live/<region>/<date>/drift.json   drift forecasts (0-72 h)
   reports/marida_scenes.csv, reports/eda/eda.md   data numbers (patches, scenes, MD pixels by split)
   data/live/<region>/<date>/scene.json   live Sentinel-2 L2A scenes
   service/data/manifest.json (else service/demo/manifest.json)   regions, dates, detections on the map
@@ -70,11 +76,12 @@ def _md_block(d: dict | None, threshold=None) -> dict | None:
 
 # ----------------------------------------------------------------------------------------------- L3
 def collect_l3() -> dict:
-    res = {"available": False, "model": "LightGBM (пиксельная, MARIDA)", "val": None, "val_at_0_5": None,
+    res = {"available": False, "model": "LightGBM (пиксельная, MARIDA + MADOS)", "val": None, "val_at_0_5": None,
            "test": None, "noise": {"n_seeds": None, "f1_std": None, "f1_mean": None},
            "threshold": None, "n_features": None, "features": None, "n_train_px": None, "n_train_md": None,
            "model_size_mb": None, "train_seconds": None, "val_recall_by_conf": None,
-           "val_fp_by_class": None, "sources": []}
+           "val_fp_by_class": None, "training_data": None, "mados": None, "n_base_features": None,
+           "n_window_features": None, "sources": []}
     meta_p = ROOT / "weights" / "lgbm" / "meta.json"
     meta = _load_json(meta_p)
     if isinstance(meta, dict):
@@ -124,7 +131,153 @@ def collect_l3() -> dict:
                 n = d[k]
                 res["noise"] = {"n_seeds": n.get("n_seeds"), "f1_std": _r(n.get("f1_std", n.get("std"))),
                                 "f1_mean": _r(n.get("f1_mean", n.get("mean")))}
+    if isinstance(meta, dict):
+        cfg = meta.get("config") or {}
+        res["training_data"] = {"combined": "MARIDA train + MADOS", "marida": "MARIDA train"}.get(
+            cfg.get("data"), cfg.get("data") or "MARIDA train")
+        ts = meta.get("train_sources") or {}
+        mados = ts.get("mados") if isinstance(ts, dict) else None
+        res["mados"] = None if not isinstance(mados, dict) else {
+            "n_patches": mados.get("n_patches"), "n_scenes": mados.get("n_scenes"), "n_md_px": mados.get("n_md_px"),
+            "n_train_px": mados.get("n_px"), "n_excluded_scenes": len(mados.get("excluded_scenes") or [])}
+        res["n_base_features"] = sum(1 for f in (res["features"] or []) if "_" not in f) or None
+        res["n_window_features"] = (res["n_features"] - res["n_base_features"]) if res["n_features"] and res["n_base_features"] else None
+    l13 = _load_json(ROOT / "reports" / "l13_mados.json")
+    if isinstance(l13, dict) and res["noise"]["f1_std"] is None:
+        key = ((meta or {}).get("config") or {}).get("data") if isinstance(meta, dict) else None
+        key = key or "combined"
+        mean, std = (l13.get("val_f1") or {}).get(key), (l13.get("val_f1_std") or {}).get(key)
+        if std is not None:
+            res["noise"] = {"n_seeds": 3, "f1_std": _r(std), "f1_mean": _r(mean)}
+            res["sources"].append("reports/l13_mados.json")
     return res
+
+
+# ----------------------------------------------------------------------------------------------- models
+def collect_models(l3: dict, l4: dict) -> dict:
+    """Comparison table: MARIDA-only LightGBM, +MADOS (final), UNet, stack. val mean +- std over seeds."""
+    l13 = _load_json(ROOT / "reports" / "l13_mados.json") or {}
+    u = _load_json(ROOT / "reports" / "l4_unet.json") or {}
+    f1, sd, iou = l13.get("val_f1") or {}, l13.get("val_f1_std") or {}, l13.get("val_iou") or {}
+    stack = u.get("stack") if isinstance(u.get("stack"), dict) else {}
+    m = re.search(r"stack\s+(\d+\.\d+)\s*\+-\s*(\d+\.\d+)", str(u.get("reason") or ""))
+    stack_std = float(m.group(2)) if m else None
+    m2 = re.search(r"Acceptance bar = .*?= (\d+\.\d+)", str(u.get("reason") or ""))
+    unet_bar = float(m2.group(1)) if m2 else None
+    un = l4.get("noise") or {}
+    rejected = str(l4.get("decision") or "").lower().startswith("reject")
+    final_ok = str(l13.get("decision") or "").upper().startswith("ACCEPT")
+    rows = {
+        "marida_only": {"name": "LightGBM, только MARIDA", "n_seeds": 3 if f1.get("marida_only") is not None else None,
+                        "val_f1_mean": _r(f1.get("marida_only")), "val_f1_std": _r(sd.get("marida_only")),
+                        "val_iou_mean": _r(iou.get("marida_only")),
+                        "decision": "база для сравнения" if f1.get("marida_only") is not None else None},
+        "combined": {"name": "LightGBM, MARIDA + MADOS", "n_seeds": 3 if f1.get("combined") is not None else None,
+                     "val_f1_mean": _r(f1.get("combined")), "val_f1_std": _r(sd.get("combined")),
+                     "val_iou_mean": _r(iou.get("combined")),
+                     "decision": "принята, итоговая модель" if final_ok else None},
+        "unet": {"name": "UNet (ResNet-34, EMA)", "n_seeds": un.get("n_seeds"), "val_f1_mean": un.get("f1_mean"),
+                 "val_f1_std": un.get("f1_std"), "val_iou_mean": None,
+                 "decision": "отклонена" if rejected else l4.get("decision")},
+        "stack": {"name": "стек UNet + LightGBM (только MARIDA)", "n_seeds": 3 if stack else None,
+                  "val_f1_mean": _r(stack.get("f1_md")), "val_f1_std": _r(stack_std),
+                  "val_iou_mean": _r(stack.get("iou_md")),
+                  "decision": "отклонён" if (stack and rejected) else None},
+    }
+    return {"rows": rows,
+            "acceptance_rule": "прирост F1 MD на val не меньше max(0.01, 2 x std по seed)",
+            "mados_acceptance_threshold": _r(l13.get("acceptance_threshold")),
+            "unet_acceptance_threshold": _r(unet_bar),
+            "mados_gain_bootstrap_ci95": (l13.get("paired_scene_bootstrap_combined_minus_marida_seed0") or {}).get("ci95"),
+            "sources": [p for p in ("reports/l13_mados.json", "reports/l4_unet.json") if (ROOT / p).exists()]}
+
+
+def collect_lgbm_live() -> dict:
+    meta = _load_json(ROOT / "weights" / "lgbm_live" / "meta.json")
+    if not isinstance(meta, dict):
+        return {"available": False, "threshold": None, "val": None, "training_data": None}
+    return {"available": True, "threshold": _r(meta.get("threshold")),
+            "val": _md_block(meta.get("val_md"), meta.get("threshold")),
+            "training_data": "MARIDA train + аугментация под L2A" if (meta.get("config") or {}).get("augment")
+            else "MARIDA train"}
+
+
+def collect_metric_audit() -> dict:
+    a = _load_json(ROOT / "reports" / "l16_metric_audit.json")
+    res = {"available": False, "recount_matches_meta": None, "scene_bootstrap_ci95": None, "threshold_optimism": None,
+           "mados_gain": None, "mados_gain_ci95": None, "lro": None}
+    if not isinstance(a, dict):
+        return res
+    res["available"] = True
+    rc = a.get("recheck") or {}
+    fin = rc.get("final") or {}
+    res["recount_matches_meta"] = fin.get("match_3dp")
+    ci = fin.get("scene_bootstrap_ci95")
+    res["scene_bootstrap_ci95"] = [_r(x, 3) for x in ci] if isinstance(ci, list) else None
+    res["threshold_optimism"] = _r((fin.get("thr_split_half") or {}).get("optimism_mean"))
+    g = rc.get("mados_gain_paired_scene_bootstrap") or {}
+    gci = g.get("delta_ci95")
+    res["mados_gain"], res["mados_gain_ci95"] = _r(g.get("delta_point")), ([_r(x, 3) for x in gci] if isinstance(gci, list) else None)
+    lro = a.get("lro")
+    if isinstance(lro, dict):
+        res["lro"] = {"mean_f1": _r(lro.get("mean_f1")), "mean_f1_std_seeds": _r(lro.get("mean_f1_std_seeds")),
+                      "mean_iou": _r(lro.get("mean_iou")), "mean_f1_marida_only": _r(lro.get("mean_f1_marida_only")),
+                      "in_dist_f1": _r(lro.get("in_dist_f1")), "drop_vs_in_dist": _r(lro.get("drop_vs_in_dist")),
+                      "n_regions": len(lro.get("per_region") or []) or None,
+                      "per_region": [{"region": r.get("region"), "n_md_px": r.get("n_md_px"), "f1": _r(r.get("lro_f1")),
+                                      "f1_std": _r(r.get("lro_f1_std")), "f1_marida_only": _r(r.get("lro_f1_marida_only"))}
+                                     for r in (lro.get("per_region") or []) if isinstance(r, dict)]}
+    return res
+
+
+def collect_agreement() -> dict:
+    a = _load_json(ROOT / "reports" / "model_agreement.json")
+    res = {"available": False, "n_scenes": None, "mdd_threshold": None, "lgbm_threshold": None, "radius_m": 20,
+           "mdd_px": None, "lgbm_px": None, "mdd_px_confirmed": None, "lgbm_px_confirmed": None,
+           "confirmed_objects": None, "confirmed_px": None, "scenes_with_confirmed": None, "spearman_median": None}
+    if not isinstance(a, dict):
+        return res
+    p, t = a.get("pooled") or {}, a.get("thresholds") or {}
+    res.update({"available": True, "n_scenes": p.get("n") or len(a.get("scenes") or []) or None,
+                "mdd_threshold": _r(t.get("mdd_display")), "lgbm_threshold": _r((a.get("val") or {}).get("threshold")),
+                "mdd_px": p.get("m"), "lgbm_px": p.get("l"), "mdd_px_confirmed": p.get("b"),
+                "lgbm_px_confirmed": p.get("lconf"), "confirmed_objects": p.get("dobj"), "confirmed_px": p.get("d"),
+                "scenes_with_confirmed": p.get("sc_d"), "spearman_median": _r(p.get("spearman_median"), 3)})
+    return res
+
+
+def collect_drift() -> dict:
+    items = []
+    for p in sorted(glob.glob(str(ROOT / "data" / "live" / "*" / "*" / "drift.json"))):
+        d = _load_json(Path(p))
+        if not isinstance(d, dict):
+            continue
+        st = d.get("stats") or {}
+        hrs = d.get("hours") if isinstance(d.get("hours"), list) else []
+        items.append({"region": d.get("region"), "date": d.get("date"), "hours": max(hrs) if hrs else None,
+                      "n_particles": st.get("n_particles"),
+                      "mean_displacement_km": _r(st.get("mean_displacement_km"), 2),
+                      "stranded_pct": _r(st.get("stranded_pct"), 1),
+                      "wind_drift_factors": sorted({"0.02", *(d.get("ensemble_stats") or {}).keys()})})
+    return {"n_scenes": len(items) or None, "n_regions": len({i["region"] for i in items}) or None,
+            "hours": max((i["hours"] or 0) for i in items) if items else None,
+            "currents": "HYCOM ESPC-D-V02 1/12°" if items else None, "wind": "NCEP GFS 0.5°" if items else None,
+            "model": "OpenDrift OceanDrift" if items else None, "scenes": items}
+
+
+def collect_speed() -> dict:
+    d = _load_json(ROOT / "reports" / "speed.json")
+    if d is None:
+        return {"available": False, "summary": None, "raw": None}
+    summ = d.get("summary") if isinstance(d, dict) and isinstance(d.get("summary"), str) else None
+    return {"available": True, "summary": summ, "raw": d}
+
+
+def collect_test_status(l3: dict) -> dict:
+    done = bool(l3.get("test"))
+    return {"computed": done,
+            "text": ("Test MARIDA посчитан один раз на итоговой модели, после этого модель не менялась." if done
+                     else "Test MARIDA будет посчитан один раз на итоговой модели; до этого все решения принимались только по val.")}
 
 
 # ----------------------------------------------------------------------------------------------- L4
@@ -219,10 +372,11 @@ def collect_live() -> dict:
             "n_fresh_2025_2026": len(fresh), "scenes": scenes}
 
 
-def collect_service() -> dict:
+def collect_service(roots=None) -> dict:
     res = {"data_root": None, "kind": None, "n_regions": 0, "n_dates": 0, "n_detections_total": None,
-           "models": None, "mdd_threshold": None, "lgbm_threshold_map": None, "n_drift": 0, "regions": []}
-    for cand in (ROOT / "service" / "data", ROOT / "service" / "demo"):
+           "models": None, "mdd_threshold": None, "lgbm_threshold_map": None, "n_drift": 0,
+           "n_confirmed_total": None, "n_dates_with_confirmed": None, "n_confirmed_latest_total": None, "regions": []}
+    for cand in (roots or (ROOT / "service" / "data", ROOT / "service" / "demo")):
         man = _load_json(cand / "manifest.json")
         if isinstance(man, dict):
             res["data_root"] = str(cand.relative_to(ROOT)).replace("\\", "/")
@@ -236,6 +390,7 @@ def collect_service() -> dict:
     res["lgbm_threshold_map"] = _r((models.get("lgbm") or {}).get("threshold"))
     tot = 0
     any_det = False
+    conf_tot, conf_dates, conf_latest, any_conf = 0, 0, 0, False
     for r in man.get("regions") or []:
         dates = r.get("dates") or []
         summ = r.get("summary") or {}
@@ -244,17 +399,34 @@ def collect_service() -> dict:
         if summ.get("n_detections") is not None:
             tot += int(summ["n_detections"])
             any_det = True
+        model = summ.get("model") or "mdd"
+        latest_conf = None
+        for d in dates:
+            nc = d.get("n_confirmed")
+            if isinstance(nc, dict) and nc.get(model) is not None:
+                any_conf = True
+                conf_tot += int(nc[model])
+                conf_dates += 1 if int(nc[model]) > 0 else 0
+                if d.get("date") == summ.get("latest_date"):
+                    latest_conf = int(nc[model])
+        if latest_conf is not None:
+            conf_latest += latest_conf
         res["regions"].append({
             "id": r.get("id"), "name": r.get("name"), "country": r.get("country"), "tile": r.get("tile"),
             "dates": [d.get("date") for d in dates], "latest_date": summ.get("latest_date"),
-            "model": summ.get("model"), "index_permille": _r(summ.get("index_permille"), 3),
+            "model": summ.get("model"), "index_permille": _r(summ.get("index_permille"), 4),
             "n_detections": summ.get("n_detections"),
-            "total_debris_area_km2": _r((summ.get("total_debris_area_m2") or 0) / 1e6, 3)
+            "total_debris_area_km2": _r((summ.get("total_debris_area_m2") or 0) / 1e6, 6)
             if summ.get("total_debris_area_m2") is not None else None,
+            "n_dates": len(dates), "n_drift": sum(1 for d in dates if d.get("drift")),
+            "n_confirmed_latest": latest_conf,
             "n_zones": _count_zones(res["data_root"], r.get("id"), summ.get("latest_date"), summ.get("model")),
         })
     res["n_regions"] = len(res["regions"])
     res["n_detections_total"] = tot if any_det else None
+    if any_conf:
+        res["n_confirmed_total"], res["n_dates_with_confirmed"] = conf_tot, conf_dates
+        res["n_confirmed_latest_total"] = conf_latest
     return res
 
 
@@ -272,7 +444,22 @@ def collect_ui_perf() -> dict:
     if not p.exists():
         return {"available": False, "last_line": None}
     lines = [ln.strip() for ln in p.read_text(encoding="utf-8").splitlines() if ln.strip()]
-    return {"available": True, "last_line": lines[-1] if lines else None}
+    last = lines[-1] if lines else None
+    res = {"available": True, "last_line": last, "load_s": None, "flyto_fps": None, "drift_fps": None,
+           "bundle_gzip_mb": None, "console_errors": None}
+    if last:
+        num = r"(\d+(?:[.,]\d+)?)"
+        for key, pat in (("load_s", rf"load\s+{num}(?:\s*[–-]\s*{num})?\s*с"),
+                         ("flyto_fps", rf"flyTo\s+{num}(?:\s*[–-]\s*{num})?\s*fps"),
+                         ("drift_fps", rf"дрейф\s+{num}\s*fps"),
+                         ("bundle_gzip_mb", rf"gzip\s+{num}\s*МБ")):
+            m = re.search(pat, last)
+            if m:
+                vals = [float(g.replace(",", ".")) for g in m.groups() if g]
+                res[key] = vals[-1] if key == "load_s" else vals[0]  # worst load, lowest fps
+        m = re.search(r"Ошибок консоли\s+(\d+)", last)
+        res["console_errors"] = int(m.group(1)) if m else None
+    return res
 
 
 def collect_artifacts() -> dict:
@@ -284,7 +471,8 @@ def collect_artifacts() -> dict:
         "label_forensics": ex("scripts/tools/label_forensics.py"),
         "provenance_check": ex("scripts/tools/provenance_check.py"),
         "organizer_adapter": ex("src/macroplastic/organizer_adapter/__main__.py"),
-        "screens_final": sorted(Path(p).name for p in glob.glob(str(ROOT / "reports" / "screens" / "final" / "*.png"))),
+        "adapter_wrapper": ex("scripts/tools/adapter.py"),
+        "readme_images": sorted(Path(p).name for p in glob.glob(str(ROOT / "docs" / "img" / "*.*"))),
     }
 
 
@@ -305,6 +493,14 @@ def main(argv=None) -> int:
         "ui_perf": collect_ui_perf(),
         "artifacts": collect_artifacts(),
     }
+    fn["models"] = collect_models(fn["l3_lgbm"], fn["l4_unet"])
+    fn["service_demo"] = collect_service((ROOT / "service" / "demo",))
+    fn["lgbm_live"] = collect_lgbm_live()
+    fn["metric_audit"] = collect_metric_audit()
+    fn["agreement"] = collect_agreement()
+    fn["drift"] = collect_drift()
+    fn["speed"] = collect_speed()
+    fn["test"] = collect_test_status(fn["l3_lgbm"])
     out = Path(a.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
@@ -326,6 +522,11 @@ def main(argv=None) -> int:
         print(f"  service: root={sv['data_root']} kind={sv['kind']} regions={sv['n_regions']} dates={sv['n_dates']} "
               f"detections={sv['n_detections_total']} models={sv['models']}")
         print(f"  ui_perf: {fn['ui_perf']['last_line']}")
+        print("  models: " + "; ".join(f"{k}={r['val_f1_mean']}+-{r['val_f1_std']} ({r['decision']})"
+                                       for k, r in fn["models"]["rows"].items()))
+        print(f"  drift scenes={fn['drift']['n_scenes']} | agreement objects={fn['agreement']['confirmed_objects']} | "
+              f"confirmed(total)={sv['n_confirmed_total']} | speed={fn['speed']['available']} | "
+              f"audit={fn['metric_audit']['available']} | test computed={fn['test']['computed']}")
         missing = [k for k, v in fn["artifacts"].items() if v is False]
         if missing:
             print(f"  not yet present: {', '.join(missing)}")

@@ -1,7 +1,7 @@
-# Эксперименты L4 (UNet, MARIDA): только val
+# Эксперименты: UNet на MARIDA, только val
 
-Метрика та же, что в L3: F1/IoU класса Marine Debris по пулу всех 213 102 размеченных пикселей val (ignore=0, MD = 1 075 px). Порог MD в каждом прогоне подбирается по F1 на val (сетка 0.02..0.98, шаг 0.01). В отчёт идёт модель **последней эпохи**, ранней остановки по val нет. Каждая конфигурация обучена на seed 0/1/2, среднее ± std считается с ddof=1. Test не читался: кэш строится только из train/val.
-Правило принятия (SPEC §1.7 и задание L4): F1 MD val ≥ 0.9059 (L3, 3 seed) + max(0.01, 2×std), где std берётся наибольшим из шумов L3 (0.0025) и UNet.
+Метрика та же, что у LightGBM только на MARIDA (L3): F1/IoU класса Marine Debris по пулу всех 213 102 размеченных пикселей val (ignore=0, MD = 1 075 px). Порог MD в каждом прогоне подбирается по F1 на val (сетка 0.02..0.98, шаг 0.01). В отчёт идёт модель **последней эпохи**, ранней остановки по val нет. Каждая конфигурация обучена на seed 0/1/2, среднее ± std считается с ddof=1. Test не читался: кэш строится только из train/val.
+Правило принятия: F1 MD val ≥ 0.9059 (L3, 3 seed) + max(0.01, 2×std), где std берётся наибольшим из шумов L3 (0.0025) и UNet.
 Сырые результаты: `out/l4_unet/run_<exp>_s<seed>.json`, `out/l4_unet/stack_<exp>.json`, `out/l4_unet/evalpred_<exp>.json`. Логи: `out/gpu_queue/logs/*unet*`. Веса: `weights_exp/unet/<exp>_s<seed>/`.
 Запуск: `scripts/train_unet.py train --seed <s> --exp <exp> --set <override>` (через GPU-очередь), затем `scripts/train_unet.py stack --exp <exp>`.
 

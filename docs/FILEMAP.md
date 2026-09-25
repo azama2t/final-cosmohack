@@ -88,3 +88,7 @@
 | `tests/test_api_review.py` | тесты новых эндпоинтов | pytest |
 | `src/macroplastic/ingest/` | `python -m macroplastic.ingest <архив|папка>`: безопасная распаковка, HTML-отчёт с «Сомнениями», распознавание 3 форматов, `--convert` во внутренний формат | первые минуты хакатона |
 | `scripts/train_lgbm_ingest.py`, `scripts/make_ingest_testsets.py`, `tests/test_ingest.py` | обучение на результате ingest; 3 искусственных набора; тесты (в т.ч. zip-slip) | хакатон / pytest |
+| `scripts/measure_speed.py`, `reports/speed.{md,json}`, `tests/test_speed_equivalence.py` | замер холодного старта inference.py на 300 чипах (CPU/GPU, по этапам); проверка, что ускорение не меняет результат | отчёт / pytest |
+| `scripts/tools/adapter.py`, `scripts/tools/ingest.py` | обёртки для запуска адаптера и загрузчика из корня без PYTHONPATH | хакатон |
+| `docs/img/` | кадры интерфейса для README | README |
+| `reports/final_numbers.json`, `reports/deck.pptx` | единый источник чисел; дека (генерируются скриптами) | README, отчёт, выступление |

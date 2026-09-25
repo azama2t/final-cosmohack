@@ -39,3 +39,5 @@
 | HYCOM `tau` | xarray не декодирует | нестандартная переменная | чтение через netCDF4 по индексам | — |
 | NCEP время | fromisoformat падает на `hours since … .000 UTC` | формат единиц | cftime.num2date | — |
 | Обзор 1366 | подписи под боковыми панелями | минимальный зум 1.2 | минимальный зум 0.4, раскладка подписей без пересечений | проверять 1366 на всех экранах |
+| Холодный старт inference 45 с | импорт torch при `--device cuda` (2.7 с), pandas/sklearn из lightgbm (1–2.4 с), predict по чипам | модель LightGBM на CPU, лишние импорты | своё CUDA-ядро леса (NVRTC, без torch) + прямой вызов lib_lightgbm на CPU, батч всех чипов | GPU 5.7 с, CPU 21 с; результат бит в бит |
+| `python -m macroplastic.*` из корня | ModuleNotFoundError | пакет в src/ | обёртки `scripts/tools/adapter.py`, `scripts/tools/ingest.py` | в документации — только команды из корня |

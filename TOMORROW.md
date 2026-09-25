@@ -133,9 +133,9 @@ copy configs\adapter_example.yaml configs\adapter_organizer.yaml
 
 ```powershell
 $env:PYTHONPATH = "src"; $env:CUDA_VISIBLE_DEVICES = ""
-.venv\Scripts\python.exe -m macroplastic.ingest D:\org\train.zip --out data\ingest\org
+.venv\Scripts\python.exe scripts\tools\ingest.py D:\org\train.zip --out data\ingest\org
 start data\ingest\org\report\index.html      # прочитать «Сомнения», поправить data\ingest\org\adapter.yaml (строки «ПРОВЕРЬ ЭТО»)
-.venv\Scripts\python.exe -m macroplastic.ingest D:\org\train.zip --out data\ingest\org --convert
+.venv\Scripts\python.exe scripts\tools\ingest.py D:\org\train.zip --out data\ingest\org --convert
 .venv\Scripts\python.exe scripts\train_lgbm_ingest.py --data-root data\ingest\org
 ```
 

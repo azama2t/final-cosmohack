@@ -1,0 +1,66 @@
+{
+ "chips": 300,
+ "cold_s": {
+  "cpu": 21.43,
+  "cuda": 5.65
+ },
+ "cold_s_max": {
+  "cpu": 21.76,
+  "cuda": 5.66
+ },
+ "cold_s_runs": {
+  "cpu": [
+   20.983,
+   21.763,
+   21.425
+  ],
+  "cuda": [
+   5.657,
+   5.582,
+   5.651
+  ]
+ },
+ "backend": {
+  "cpu": "cpu",
+  "cuda": "cuda"
+ },
+ "warm_chips_per_s": 64.3,
+ "warm": {
+  "cpu": {
+   "backend": "cpu",
+   "e2e_s": 21.98,
+   "e2e_chips_per_s": 13.6,
+   "model_only_s": 30.002,
+   "model_only_chips_per_s": 10.0,
+   "note": "model_only = features + model on arrays in memory, 1 thread for features"
+  },
+  "cuda": {
+   "backend": "cuda",
+   "e2e_s": 4.663,
+   "e2e_chips_per_s": 64.3,
+   "model_only_s": 11.7,
+   "model_only_chips_per_s": 25.6,
+   "note": "model_only = features + model on arrays in memory, 1 thread for features"
+  }
+ },
+ "baseline_cold_s": {
+  "cpu": 40.23,
+  "cuda": 44.86
+ },
+ "equivalence": {
+  "cpu": {
+   "files": 300,
+   "max_abs_diff_u8": 0,
+   "mask_diff_px": 0
+  },
+  "cuda": {
+   "files": 300,
+   "max_abs_diff_u8": 0,
+   "mask_diff_px": 0
+  }
+ },
+ "hardware": "13th Gen Intel(R) Core(TM) i5-13600KF, 32 GB RAM, 20 threads; NVIDIA GeForce RTX 4070 (driver 581.80); Windows 10, Python 3.12.7",
+ "command": "python inference.py --data-dir out/speed_chips --output out/speed_out --device {cpu|cuda}",
+ "chip_source": "MARIDA val split, first 300 patches (splits/val_X.txt), 256x256x11 float32",
+ "cold_definition": "new process, wall from start to exit, 3 runs, median; OS file cache not flushed"
+}

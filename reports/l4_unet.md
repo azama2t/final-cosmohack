@@ -1,9 +1,9 @@
-# L4 — UNet (smp, resnet34) и стек с L3 для Marine Debris (MARIDA)
+# UNet (smp, resnet34) и стек с LightGBM для Marine Debris (MARIDA)
 
-Дата: 25.09.2026, ночь. Всё выбиралось **только по val** (официальный сплит, 328 патчей, 12 сцен). Test не читался. Числа в формате JSON лежат в `reports/l4_unet.json`, журнал экспериментов — в `reports/experiments_l4.md`.
+Дата: 25.09.2026. Всё выбиралось **только по val** (официальный сплит, 328 патчей, 12 сцен). Test не читался. Числа в формате JSON лежат в `reports/l4_unet.json`, журнал экспериментов — в `reports/experiments_l4.md`.
 
-## Решение: **UNet и стек НЕ приняты**. В финале остаётся L3 LightGBM (`weights/lgbm`)
-Правило (SPEC §1.7): F1 MD val ≥ 0.9059 (L3, 3 seed) + max(0.01, 2×std). Наибольший std по seed — у UNet, 0.0061, поэтому **бар равен 0.9181**.
+## Решение: **UNet и стек НЕ приняты**. Сравнение шло с LightGBM только на MARIDA (L3); итоговая модель — LightGBM на MARIDA + MADOS (`reports/l13_mados.md`)
+Правило принятия: F1 MD val ≥ 0.9059 (L3, 3 seed) + max(0.01, 2×std). Наибольший std по seed — у UNet, 0.0061, поэтому **бар равен 0.9181**.
 
 | модель (val, пул 213 102 px, MD 1 075) | F1 MD, 3 seed | IoU MD | прирост к L3 | итог |
 |---|---|---|---|---|

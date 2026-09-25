@@ -102,4 +102,4 @@ L2A после 25.01.2022 в сыром DN — `offset: -0.1` (DN×1e-4 − 0.1)
 
 ## 5. ingest: архив → отчёт → автоконфиг → внутренний формат → LightGBM (L18)
 
-`.venv\Scripts\python.exe -m macroplastic.ingest D:\org\train.zip --out data\ingest\org` (безопасная распаковка, `report\index.html` с разделом «Сомнения», `adapter.yaml`) → то же с `--convert` → `scripts\train_lgbm_ingest.py --data-root data\ingest\org`. Подробно: раздел «Как подать датасет» в `TOMORROW.md`; тесты `tests\test_ingest.py`.
+`.venv\Scripts\python.exe scripts\tools\ingest.py D:\org\train.zip --out data\ingest\org` (безопасная распаковка, `report\index.html` с разделом «Сомнения», `adapter.yaml`) → то же с `--convert` → `scripts\train_lgbm_ingest.py --data-root data\ingest\org`. Подробно: раздел «Как подать датасет» в `TOMORROW.md`; тесты `tests\test_ingest.py`.

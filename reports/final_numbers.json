@@ -1,0 +1,1390 @@
+{
+ "generated": "2026-09-25T06:00:23+03:00",
+ "note": "генерируется scripts/final_numbers.py; руками не править; null = ещё не посчитано",
+ "l3_lgbm": {
+  "available": true,
+  "model": "LightGBM (пиксельная, MARIDA + MADOS)",
+  "val": {
+   "f1_md": 0.9226,
+   "iou_md": 0.8564,
+   "precision_md": 0.9301,
+   "recall_md": 0.9153,
+   "threshold": 0.63,
+   "n_md_px": 1075
+  },
+  "val_at_0_5": null,
+  "test": null,
+  "noise": {
+   "n_seeds": 3,
+   "f1_std": 0.0005,
+   "f1_mean": 0.9228
+  },
+  "threshold": 0.63,
+  "n_features": 48,
+  "features": [
+   "B1",
+   "B2",
+   "B3",
+   "B4",
+   "B5",
+   "B6",
+   "B7",
+   "B8",
+   "B8A",
+   "B11",
+   "B12",
+   "FDI",
+   "FAI",
+   "NDVI",
+   "NDWI",
+   "NDMI",
+   "SI",
+   "BSI",
+   "NRD",
+   "B8_mean3",
+   "B8_std3",
+   "B8_mean7",
+   "B8_std7",
+   "B8_mean15",
+   "B8_std15",
+   "FDI_mean3",
+   "FDI_std3",
+   "FDI_mean7",
+   "FDI_std7",
+   "FDI_mean15",
+   "FDI_std15",
+   "NDVI_mean3",
+   "NDVI_std3",
+   "NDVI_mean7",
+   "NDVI_std7",
+   "NDVI_mean15",
+   "NDVI_std15",
+   "NDWI_mean3",
+   "NDWI_std3",
+   "NDWI_mean7",
+   "NDWI_std7",
+   "NDWI_mean15",
+   "NDWI_std15",
+   "B8_dmed15",
+   "B8_dmed31",
+   "FDI_dmed15",
+   "FDI_dmed31",
+   "NDVI_dmed31"
+  ],
+  "n_train_px": 362941,
+  "n_train_md": 4479,
+  "model_size_mb": 2.85,
+  "train_seconds": 4.5,
+  "val_recall_by_conf": {
+   "high": 0.9442,
+   "moderate": 0.9423,
+   "low": 0.7246
+  },
+  "val_fp_by_class": {
+   "2": {
+    "n": 1167,
+    "pred_md": 0
+   },
+   "3": {
+    "n": 385,
+    "pred_md": 6
+   },
+   "4": {
+    "n": 92,
+    "pred_md": 53
+   },
+   "5": {
+    "n": 1340,
+    "pred_md": 10
+   },
+   "6": {
+    "n": 19262,
+    "pred_md": 0
+   },
+   "7": {
+    "n": 18839,
+    "pred_md": 0
+   },
+   "8": {
+    "n": 125565,
+    "pred_md": 0
+   },
+   "9": {
+    "n": 369,
+    "pred_md": 0
+   },
+   "10": {
+    "n": 38566,
+    "pred_md": 0
+   },
+   "11": {
+    "n": 1011,
+    "pred_md": 0
+   },
+   "12": {
+    "n": 987,
+    "pred_md": 0
+   },
+   "13": {
+    "n": 2404,
+    "pred_md": 0
+   },
+   "14": {
+    "n": 1946,
+    "pred_md": 0
+   },
+   "15": {
+    "n": 94,
+    "pred_md": 5
+   }
+  },
+  "training_data": "MARIDA train + MADOS",
+  "mados": {
+   "n_patches": 1612,
+   "n_scenes": 118,
+   "n_md_px": 2536,
+   "n_train_px": 176856,
+   "n_excluded_scenes": 16
+  },
+  "n_base_features": 19,
+  "n_window_features": 29,
+  "sources": [
+   "weights/lgbm/meta.json",
+   "reports/l13_mados.json"
+  ]
+ },
+ "l4_unet": {
+  "available": true,
+  "val": {
+   "f1_md": 0.8935,
+   "iou_md": 0.8075,
+   "precision_md": 0.8821,
+   "recall_md": 0.9051,
+   "threshold": 0.34,
+   "n_md_px": null
+  },
+  "test": null,
+  "noise": {
+   "n_seeds": 3,
+   "f1_std": 0.0061,
+   "f1_mean": 0.8909
+  },
+  "decision": "rejected",
+  "sources": [
+   "reports/l4_unet.json"
+  ]
+ },
+ "data": {
+  "marida": {
+   "n_scenes": 63,
+   "n_patches": 1381,
+   "n_patches_train": 694,
+   "n_patches_val": 328,
+   "n_patches_test": 359,
+   "n_md_patches": 373,
+   "md_px": 3399,
+   "md_px_high": 1625,
+   "md_px_moderate": 1235,
+   "md_px_low": 539,
+   "n_tiles": 17,
+   "n_regions": 13,
+   "date_min": "2015-11-29",
+   "date_max": "2021-01-23",
+   "md_px_train": 1943,
+   "md_px_val": 1075,
+   "md_px_test": 381,
+   "labelled_pct": 0.93,
+   "md_components": 1330,
+   "md_component_median_px": 2.0,
+   "md_single_px_components": 521,
+   "md_single_px_pct": 39.0
+  }
+ },
+ "live": {
+  "n_scenes": 29,
+  "n_regions": 12,
+  "n_fresh_2025_2026": 17,
+  "scenes": [
+   {
+    "region": "accra",
+    "date": "2025-10-21",
+    "scene_id": "S2A_MSIL2A_20251021T102601_R022_T30NZM_20251021T134715",
+    "tile": "30NZM",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.1034,
+    "water_frac": 0.7818,
+    "size_px": [
+     2502,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "bali",
+    "date": "2018-02-27",
+    "scene_id": "S2A_50LLR_20180227_0_L2A",
+    "tile": "50LLR",
+    "source": "earth-search",
+    "crop_cloud_frac": 0.0675,
+    "water_frac": 0.9047,
+    "size_px": [
+     2508,
+     2502
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "bali",
+    "date": "2026-05-31",
+    "scene_id": "S2B_MSIL2A_20260531T021529_R003_T50LLR_20260531T060010",
+    "tile": "50LLR",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0,
+    "water_frac": 0.9864,
+    "size_px": [
+     2508,
+     2502
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "danang",
+    "date": "2018-10-25",
+    "scene_id": "S2B_48PZC_20181025_0_L2A",
+    "tile": "48PZC",
+    "source": "earth-search",
+    "crop_cloud_frac": 0.048,
+    "water_frac": 0.8311,
+    "size_px": [
+     2508,
+     2502
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "danang",
+    "date": "2025-09-15",
+    "scene_id": "S2A_MSIL2A_20250915T031151_R075_T48PZC_20250915T062421",
+    "tile": "48PZC",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.1659,
+    "water_frac": 0.7331,
+    "size_px": [
+     2508,
+     2502
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "durban",
+    "date": "2019-04-19",
+    "scene_id": "S2A_36JUN_20190419_0_L2A",
+    "tile": "36JUN",
+    "source": "earth-search",
+    "crop_cloud_frac": 0.0023,
+    "water_frac": 0.6302,
+    "size_px": [
+     3843,
+     3122
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "durban",
+    "date": "2019-04-24",
+    "scene_id": "S2B_36JUN_20190424_0_L2A",
+    "tile": "36JUN",
+    "source": "earth-search",
+    "crop_cloud_frac": 0.8745,
+    "water_frac": 0.0887,
+    "size_px": [
+     3843,
+     3122
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "durban",
+    "date": "2026-05-04",
+    "scene_id": "S2A_MSIL2A_20260504T074021_R092_T36JUN_20260504T132359",
+    "tile": "36JUN",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0001,
+    "water_frac": 0.5381,
+    "size_px": [
+     2502,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "durban",
+    "date": "2026-05-17",
+    "scene_id": "S2B_MSIL2A_20260517T073609_R092_T36JUN_20260517T112950",
+    "tile": "36JUN",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0003,
+    "water_frac": 0.3218,
+    "size_px": [
+     2502,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "durban",
+    "date": "2026-07-03",
+    "scene_id": "S2A_MSIL2A_20260703T074031_R092_T36JUN_20260703T130209",
+    "tile": "36JUN",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0002,
+    "water_frac": 0.5376,
+    "size_px": [
+     2502,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "haiti",
+    "date": "2020-12-19",
+    "scene_id": "S2B_18QYF_20201219_0_L2A",
+    "tile": "18QYF",
+    "source": "earth-search",
+    "crop_cloud_frac": 0.0014,
+    "water_frac": 0.8165,
+    "size_px": [
+     2508,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "haiti",
+    "date": "2021-01-03",
+    "scene_id": "S2A_18QYF_20210103_0_L2A",
+    "tile": "18QYF",
+    "source": "earth-search",
+    "crop_cloud_frac": 0.0003,
+    "water_frac": 0.8164,
+    "size_px": [
+     2508,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "haiti",
+    "date": "2025-01-27",
+    "scene_id": "S2B_MSIL2A_20250127T152659_R025_T18QYF_20250127T202440",
+    "tile": "18QYF",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0003,
+    "water_frac": 0.8159,
+    "size_px": [
+     2508,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "haiti",
+    "date": "2026-01-09",
+    "scene_id": "S2A_MSIL2A_20260109T152711_R025_T18QYF_20260109T201716",
+    "tile": "18QYF",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0005,
+    "water_frac": 0.816,
+    "size_px": [
+     2508,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "honduras",
+    "date": "2019-01-12",
+    "scene_id": "S2A_16PCC_20190112_0_L2A",
+    "tile": "16PCC",
+    "source": "earth-search",
+    "crop_cloud_frac": 0.0262,
+    "water_frac": 0.8314,
+    "size_px": [
+     2502,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "honduras",
+    "date": "2020-08-29",
+    "scene_id": "S2B_16PCC_20200829_0_L2A",
+    "tile": "16PCC",
+    "source": "earth-search",
+    "crop_cloud_frac": 0.0032,
+    "water_frac": 0.8289,
+    "size_px": [
+     2502,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "honduras",
+    "date": "2025-01-30",
+    "scene_id": "S2C_MSIL2A_20250130T161541_R140_T16PCC_20250130T190910",
+    "tile": "16PCC",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0032,
+    "water_frac": 0.8283,
+    "size_px": [
+     2502,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "honduras",
+    "date": "2025-02-19",
+    "scene_id": "S2C_MSIL2A_20250219T161341_R140_T16PCC_20250219T193154",
+    "tile": "16PCC",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0009,
+    "water_frac": 0.8306,
+    "size_px": [
+     2502,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "honduras",
+    "date": "2026-05-30",
+    "scene_id": "S2B_MSIL2A_20260530T160859_R140_T16PCC_20260530T212833",
+    "tile": "16PCC",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0135,
+    "water_frac": 0.8266,
+    "size_px": [
+     2502,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "jakarta",
+    "date": "2019-05-30",
+    "scene_id": "S2B_48MXU_20190530_0_L2A",
+    "tile": "48MXU",
+    "source": "earth-search",
+    "crop_cloud_frac": 0.0234,
+    "water_frac": 0.967,
+    "size_px": [
+     2508,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "jakarta",
+    "date": "2026-04-03",
+    "scene_id": "S2B_MSIL2A_20260403T025519_R032_T48MXU_20260403T081539",
+    "tile": "48MXU",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0001,
+    "water_frac": 0.9931,
+    "size_px": [
+     2508,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "lagos",
+    "date": "2025-11-10",
+    "scene_id": "S2B_MSIL2A_20251110T100139_R122_T31NEG_20251110T134828",
+    "tile": "31NEG",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.142,
+    "water_frac": 0.5315,
+    "size_px": [
+     2508,
+     2502
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "manila",
+    "date": "2019-05-13",
+    "scene_id": "S2A_51PTS_20190513_0_L2A",
+    "tile": "51PTS",
+    "source": "earth-search",
+    "crop_cloud_frac": 0.0209,
+    "water_frac": 0.9468,
+    "size_px": [
+     2508,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "manila",
+    "date": "2025-01-06",
+    "scene_id": "S2B_MSIL2A_20250106T022009_R003_T51PTS_20250106T041630",
+    "tile": "51PTS",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0026,
+    "water_frac": 0.9853,
+    "size_px": [
+     2508,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "santo_domingo",
+    "date": "2019-01-21",
+    "scene_id": "S2A_19QDA_20190121_0_L2A",
+    "tile": "19QDA",
+    "source": "earth-search",
+    "crop_cloud_frac": 0.0287,
+    "water_frac": 0.7578,
+    "size_px": [
+     2508,
+     2502
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "santo_domingo",
+    "date": "2025-12-30",
+    "scene_id": "S2B_MSIL2A_20251230T151719_R125_T19QDA_20251230T203016",
+    "tile": "19QDA",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0,
+    "water_frac": 0.7724,
+    "size_px": [
+     2508,
+     2502
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "scotland",
+    "date": "2018-03-26",
+    "scene_id": "S2B_30VWH_20180326_0_L2A",
+    "tile": "30VWH",
+    "source": "earth-search",
+    "crop_cloud_frac": 0.0038,
+    "water_frac": 0.9663,
+    "size_px": [
+     2508,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "scotland",
+    "date": "2026-07-19",
+    "scene_id": "S2A_MSIL2A_20260719T112131_R037_T30VWH_20260719T194158",
+    "tile": "30VWH",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0,
+    "water_frac": 0.685,
+    "size_px": [
+     2508,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "tiber",
+    "date": "2025-11-05",
+    "scene_id": "S2C_MSIL2A_20251105T100221_R122_T33TTG_20251105T135111",
+    "tile": "33TTG",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0,
+    "water_frac": 0.5805,
+    "size_px": [
+     2508,
+     2502
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   }
+  ]
+ },
+ "service": {
+  "data_root": "service/data",
+  "kind": "real",
+  "n_regions": 12,
+  "n_dates": 29,
+  "n_detections_total": 82,
+  "models": [
+   "lgbm",
+   "mdd"
+  ],
+  "mdd_threshold": 0.5,
+  "lgbm_threshold_map": 0.64,
+  "n_drift": 11,
+  "n_confirmed_total": 165,
+  "n_dates_with_confirmed": 15,
+  "n_confirmed_latest_total": 13,
+  "regions": [
+   {
+    "id": "accra",
+    "name": "Аккра (лагуна Корле, порт Тема)",
+    "country": "Гана",
+    "tile": "30NZM",
+    "dates": [
+     "2025-10-21"
+    ],
+    "latest_date": "2025-10-21",
+    "model": "mdd",
+    "index_permille": 0.0198,
+    "n_detections": 7,
+    "total_debris_area_km2": 0.0094,
+    "n_dates": 1,
+    "n_drift": 1,
+    "n_confirmed_latest": 0,
+    "n_zones": 6
+   },
+   {
+    "id": "bali",
+    "name": "Бали (пролив Бадунг)",
+    "country": "Индонезия",
+    "tile": "50LLR",
+    "dates": [
+     "2018-02-27",
+     "2026-05-31"
+    ],
+    "latest_date": "2026-05-31",
+    "model": "mdd",
+    "index_permille": 0.0,
+    "n_detections": 0,
+    "total_debris_area_km2": 0.0,
+    "n_dates": 2,
+    "n_drift": 0,
+    "n_confirmed_latest": 0,
+    "n_zones": 0
+   },
+   {
+    "id": "danang",
+    "name": "Дананг (устье Тхубон, Хойан)",
+    "country": "Вьетнам",
+    "tile": "48PZC",
+    "dates": [
+     "2018-10-25",
+     "2025-09-15"
+    ],
+    "latest_date": "2025-09-15",
+    "model": "mdd",
+    "index_permille": 0.014,
+    "n_detections": 2,
+    "total_debris_area_km2": 0.0061,
+    "n_dates": 2,
+    "n_drift": 1,
+    "n_confirmed_latest": 0,
+    "n_zones": 2
+   },
+   {
+    "id": "durban",
+    "name": "Дурбан",
+    "country": "ЮАР",
+    "tile": "36JUN",
+    "dates": [
+     "2019-04-19",
+     "2019-04-24",
+     "2026-05-04",
+     "2026-05-17",
+     "2026-07-03"
+    ],
+    "latest_date": "2026-07-03",
+    "model": "mdd",
+    "index_permille": 0.0,
+    "n_detections": 0,
+    "total_debris_area_km2": 0.0,
+    "n_dates": 5,
+    "n_drift": 1,
+    "n_confirmed_latest": 0,
+    "n_zones": 0
+   },
+   {
+    "id": "haiti",
+    "name": "Залив Порт-о-Пренс (Гаити)",
+    "country": "Гаити",
+    "tile": "18QYF",
+    "dates": [
+     "2020-12-19",
+     "2021-01-03",
+     "2025-01-27",
+     "2026-01-09"
+    ],
+    "latest_date": "2026-01-09",
+    "model": "mdd",
+    "index_permille": 0.0,
+    "n_detections": 0,
+    "total_debris_area_km2": 0.0,
+    "n_dates": 4,
+    "n_drift": 0,
+    "n_confirmed_latest": 0,
+    "n_zones": 0
+   },
+   {
+    "id": "honduras",
+    "name": "Гондурасский залив (Омоа – Пуэрто-Кортес – устье Мотагуа)",
+    "country": "Гондурас",
+    "tile": "16PCC",
+    "dates": [
+     "2019-01-12",
+     "2020-08-29",
+     "2025-01-30",
+     "2025-02-19",
+     "2026-05-30"
+    ],
+    "latest_date": "2026-05-30",
+    "model": "mdd",
+    "index_permille": 0.2032,
+    "n_detections": 9,
+    "total_debris_area_km2": 0.1043,
+    "n_dates": 5,
+    "n_drift": 3,
+    "n_confirmed_latest": 1,
+    "n_zones": 9
+   },
+   {
+    "id": "jakarta",
+    "name": "Джакартский залив",
+    "country": "Индонезия",
+    "tile": "48MXU",
+    "dates": [
+     "2019-05-30",
+     "2026-04-03"
+    ],
+    "latest_date": "2019-05-30",
+    "model": "mdd",
+    "index_permille": 0.2608,
+    "n_detections": 24,
+    "total_debris_area_km2": 0.1569,
+    "n_dates": 2,
+    "n_drift": 0,
+    "n_confirmed_latest": 9,
+    "n_zones": 10
+   },
+   {
+    "id": "lagos",
+    "name": "Лагос (вход в лагуну, порт Апапа)",
+    "country": "Нигерия",
+    "tile": "31NEG",
+    "dates": [
+     "2025-11-10"
+    ],
+    "latest_date": "2025-11-10",
+    "model": "mdd",
+    "index_permille": 0.0586,
+    "n_detections": 11,
+    "total_debris_area_km2": 0.019,
+    "n_dates": 1,
+    "n_drift": 1,
+    "n_confirmed_latest": 0,
+    "n_zones": 8
+   },
+   {
+    "id": "manila",
+    "name": "Манильский залив",
+    "country": "Филиппины",
+    "tile": "51PTS",
+    "dates": [
+     "2019-05-13",
+     "2025-01-06"
+    ],
+    "latest_date": "2025-01-06",
+    "model": "mdd",
+    "index_permille": 0.0185,
+    "n_detections": 17,
+    "total_debris_area_km2": 0.0115,
+    "n_dates": 2,
+    "n_drift": 1,
+    "n_confirmed_latest": 1,
+    "n_zones": 7
+   },
+   {
+    "id": "santo_domingo",
+    "name": "Санто-Доминго (устье Осамы)",
+    "country": "Доминиканская Республика",
+    "tile": "19QDA",
+    "dates": [
+     "2019-01-21",
+     "2025-12-30"
+    ],
+    "latest_date": "2025-12-30",
+    "model": "mdd",
+    "index_permille": 0.0004,
+    "n_detections": 1,
+    "total_debris_area_km2": 0.0002,
+    "n_dates": 2,
+    "n_drift": 1,
+    "n_confirmed_latest": 0,
+    "n_zones": 1
+   },
+   {
+    "id": "scotland",
+    "name": "Шотландия (Ферт-оф-Форт)",
+    "country": "Великобритания",
+    "tile": "30VWH",
+    "dates": [
+     "2018-03-26",
+     "2026-07-19"
+    ],
+    "latest_date": "2026-07-19",
+    "model": "mdd",
+    "index_permille": 0.002,
+    "n_detections": 2,
+    "total_debris_area_km2": 0.0008,
+    "n_dates": 2,
+    "n_drift": 1,
+    "n_confirmed_latest": 1,
+    "n_zones": 2
+   },
+   {
+    "id": "tiber",
+    "name": "Средиземное море: устье Тибра (Рим, Остия)",
+    "country": "Италия",
+    "tile": "33TTG",
+    "dates": [
+     "2025-11-05"
+    ],
+    "latest_date": "2025-11-05",
+    "model": "mdd",
+    "index_permille": 0.1039,
+    "n_detections": 9,
+    "total_debris_area_km2": 0.0276,
+    "n_dates": 1,
+    "n_drift": 1,
+    "n_confirmed_latest": 1,
+    "n_zones": 7
+   }
+  ]
+ },
+ "ui_perf": {
+  "available": true,
+  "last_line": "**Итерация L15 (05:29–05:40, `reports/screens/iter6`, `--gl gpu`).** «Уверенные находки»: переключатель «Только подтверждённые обеими моделями», двойное кольцо, строка «Согласие моделей» в карточке и подсказке, «из них подтверждено: k» в KPI, пустое состояние. GPU RTX 4070, реальные данные (:8000, 12 районов, 29 дат): load 1.14–1.19 с, flyTo 55.1–56.1 fps, дрейф 60.2 fps. Ошибок консоли 0 (основной прогон и доп. кадры 11–14 `out/l15_shots.py`, в т.ч. старые данные без поля `confirmed`). Бандл JS+CSS gzip 1.07 МБ (лимит 3 МБ).",
+  "load_s": 1.19,
+  "flyto_fps": 55.1,
+  "drift_fps": 60.2,
+  "bundle_gzip_mb": 1.07,
+  "console_errors": 0
+ },
+ "artifacts": {
+  "tools_doc": true,
+  "inspect_dataset": true,
+  "label_forensics": true,
+  "provenance_check": true,
+  "organizer_adapter": true,
+  "adapter_wrapper": true,
+  "readme_images": [
+   "detection_card.jpg",
+   "drift.jpg",
+   "overview.jpg",
+   "region.jpg"
+  ]
+ },
+ "models": {
+  "rows": {
+   "marida_only": {
+    "name": "LightGBM, только MARIDA",
+    "n_seeds": 3,
+    "val_f1_mean": 0.9059,
+    "val_f1_std": 0.0025,
+    "val_iou_mean": 0.828,
+    "decision": "база для сравнения"
+   },
+   "combined": {
+    "name": "LightGBM, MARIDA + MADOS",
+    "n_seeds": 3,
+    "val_f1_mean": 0.9228,
+    "val_f1_std": 0.0005,
+    "val_iou_mean": 0.8567,
+    "decision": "принята, итоговая модель"
+   },
+   "unet": {
+    "name": "UNet (ResNet-34, EMA)",
+    "n_seeds": 3,
+    "val_f1_mean": 0.8909,
+    "val_f1_std": 0.0061,
+    "val_iou_mean": null,
+    "decision": "отклонена"
+   },
+   "stack": {
+    "name": "стек UNet + LightGBM (только MARIDA)",
+    "n_seeds": 3,
+    "val_f1_mean": 0.9161,
+    "val_f1_std": 0.0015,
+    "val_iou_mean": 0.8452,
+    "decision": "отклонён"
+   }
+  },
+  "acceptance_rule": "прирост F1 MD на val не меньше max(0.01, 2 x std по seed)",
+  "mados_acceptance_threshold": 0.916,
+  "unet_acceptance_threshold": 0.9181,
+  "mados_gain_bootstrap_ci95": [
+   0.0073,
+   0.0392
+  ],
+  "sources": [
+   "reports/l13_mados.json",
+   "reports/l4_unet.json"
+  ]
+ },
+ "service_demo": {
+  "data_root": "service/demo",
+  "kind": "demo",
+  "n_regions": 2,
+  "n_dates": 4,
+  "n_detections_total": 9,
+  "models": [
+   "lgbm",
+   "mdd"
+  ],
+  "mdd_threshold": 0.5,
+  "lgbm_threshold_map": 0.64,
+  "n_drift": 3,
+  "n_confirmed_total": 9,
+  "n_dates_with_confirmed": 2,
+  "n_confirmed_latest_total": 1,
+  "regions": [
+   {
+    "id": "honduras",
+    "name": "Гондурасский залив (Омоа – Пуэрто-Кортес – устье Мотагуа)",
+    "country": "Гондурас",
+    "tile": "16PCC",
+    "dates": [
+     "2025-01-30",
+     "2026-05-30"
+    ],
+    "latest_date": "2026-05-30",
+    "model": "mdd",
+    "index_permille": 0.2032,
+    "n_detections": 9,
+    "total_debris_area_km2": 0.1043,
+    "n_dates": 2,
+    "n_drift": 2,
+    "n_confirmed_latest": 1,
+    "n_zones": 9
+   },
+   {
+    "id": "durban",
+    "name": "Дурбан",
+    "country": "ЮАР",
+    "tile": "36JUN",
+    "dates": [
+     "2026-05-04",
+     "2026-07-03"
+    ],
+    "latest_date": "2026-07-03",
+    "model": "mdd",
+    "index_permille": 0.0,
+    "n_detections": 0,
+    "total_debris_area_km2": 0.0,
+    "n_dates": 2,
+    "n_drift": 1,
+    "n_confirmed_latest": 0,
+    "n_zones": 0
+   }
+  ]
+ },
+ "lgbm_live": {
+  "available": true,
+  "threshold": 0.64,
+  "val": {
+   "f1_md": 0.9122,
+   "iou_md": 0.8386,
+   "precision_md": 0.9312,
+   "recall_md": 0.894,
+   "threshold": 0.64,
+   "n_md_px": 1075
+  },
+  "training_data": "MARIDA train + аугментация под L2A"
+ },
+ "metric_audit": {
+  "available": true,
+  "recount_matches_meta": true,
+  "scene_bootstrap_ci95": [
+   0.877,
+   0.97
+  ],
+  "threshold_optimism": 0.0065,
+  "mados_gain": 0.0148,
+  "mados_gain_ci95": [
+   0.007,
+   0.038
+  ],
+  "lro": {
+   "mean_f1": 0.8535,
+   "mean_f1_std_seeds": 0.0065,
+   "mean_iou": 0.7566,
+   "mean_f1_marida_only": 0.7547,
+   "in_dist_f1": 0.9226,
+   "drop_vs_in_dist": 0.0691,
+   "n_regions": 4,
+   "per_region": [
+    {
+     "region": "honduras_gulf",
+     "n_md_px": 1388,
+     "f1": 0.8276,
+     "f1_std": 0.0071,
+     "f1_marida_only": 0.5843
+    },
+    {
+     "region": "haiti_pap",
+     "n_md_px": 1172,
+     "f1": 0.9457,
+     "f1_std": 0.0027,
+     "f1_marida_only": 0.8248
+    },
+    {
+     "region": "jakarta",
+     "n_md_px": 232,
+     "f1": 0.9345,
+     "f1_std": 0.0099,
+     "f1_marida_only": 0.962
+    },
+    {
+     "region": "bay_islands",
+     "n_md_px": 121,
+     "f1": 0.706,
+     "f1_std": 0.0339,
+     "f1_marida_only": 0.6479
+    }
+   ]
+  }
+ },
+ "agreement": {
+  "available": true,
+  "n_scenes": 29,
+  "mdd_threshold": 0.5,
+  "lgbm_threshold": 0.64,
+  "radius_m": 20,
+  "mdd_px": 19153,
+  "lgbm_px": 7389,
+  "mdd_px_confirmed": 1627,
+  "lgbm_px_confirmed": 911,
+  "confirmed_objects": 200,
+  "confirmed_px": 8714,
+  "scenes_with_confirmed": 15,
+  "spearman_median": 0.068
+ },
+ "drift": {
+  "n_scenes": 11,
+  "n_regions": 9,
+  "hours": 72,
+  "currents": "HYCOM ESPC-D-V02 1/12°",
+  "wind": "NCEP GFS 0.5°",
+  "model": "OpenDrift OceanDrift",
+  "scenes": [
+   {
+    "region": "accra",
+    "date": "2025-10-21",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 4.34,
+    "stranded_pct": 99.7,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   },
+   {
+    "region": "danang",
+    "date": "2025-09-15",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 32.27,
+    "stranded_pct": 83.0,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   },
+   {
+    "region": "durban",
+    "date": "2026-05-04",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 30.37,
+    "stranded_pct": 0.3,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   },
+   {
+    "region": "honduras",
+    "date": "2025-01-30",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 23.26,
+    "stranded_pct": 0.0,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   },
+   {
+    "region": "honduras",
+    "date": "2025-02-19",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 31.72,
+    "stranded_pct": 0.0,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   },
+   {
+    "region": "honduras",
+    "date": "2026-05-30",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 9.62,
+    "stranded_pct": 19.3,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   },
+   {
+    "region": "lagos",
+    "date": "2025-11-10",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 16.39,
+    "stranded_pct": 99.7,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   },
+   {
+    "region": "manila",
+    "date": "2025-01-06",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 11.28,
+    "stranded_pct": 0.0,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   },
+   {
+    "region": "santo_domingo",
+    "date": "2025-12-30",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 9.05,
+    "stranded_pct": 48.7,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   },
+   {
+    "region": "scotland",
+    "date": "2026-07-19",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 6.33,
+    "stranded_pct": 61.7,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   },
+   {
+    "region": "tiber",
+    "date": "2025-11-05",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 3.59,
+    "stranded_pct": 99.7,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   }
+  ]
+ },
+ "speed": {
+  "available": true,
+  "summary": null,
+  "raw": {
+   "chips": 300,
+   "cold_s": {
+    "cpu": 21.43,
+    "cuda": 5.65
+   },
+   "cold_s_max": {
+    "cpu": 21.76,
+    "cuda": 5.66
+   },
+   "cold_s_runs": {
+    "cpu": [
+     20.983,
+     21.763,
+     21.425
+    ],
+    "cuda": [
+     5.657,
+     5.582,
+     5.651
+    ]
+   },
+   "backend": {
+    "cpu": "cpu",
+    "cuda": "cuda"
+   },
+   "warm_chips_per_s": 64.3,
+   "warm": {
+    "cpu": {
+     "backend": "cpu",
+     "e2e_s": 21.98,
+     "e2e_chips_per_s": 13.6,
+     "model_only_s": 30.002,
+     "model_only_chips_per_s": 10.0,
+     "note": "model_only = features + model on arrays in memory, 1 thread for features"
+    },
+    "cuda": {
+     "backend": "cuda",
+     "e2e_s": 4.663,
+     "e2e_chips_per_s": 64.3,
+     "model_only_s": 11.7,
+     "model_only_chips_per_s": 25.6,
+     "note": "model_only = features + model on arrays in memory, 1 thread for features"
+    }
+   },
+   "baseline_cold_s": {
+    "cpu": 40.23,
+    "cuda": 44.86
+   },
+   "equivalence": {
+    "cpu": {
+     "files": 300,
+     "max_abs_diff_u8": 0,
+     "mask_diff_px": 0
+    },
+    "cuda": {
+     "files": 300,
+     "max_abs_diff_u8": 0,
+     "mask_diff_px": 0
+    }
+   },
+   "hardware": "13th Gen Intel(R) Core(TM) i5-13600KF, 32 GB RAM, 20 threads; NVIDIA GeForce RTX 4070 (driver 581.80); Windows 10, Python 3.12.7",
+   "command": "python inference.py --data-dir out/speed_chips --output out/speed_out --device {cpu|cuda}",
+   "chip_source": "MARIDA val split, first 300 patches (splits/val_X.txt), 256x256x11 float32",
+   "cold_definition": "new process, wall from start to exit, 3 runs, median; OS file cache not flushed"
+  }
+ },
+ "test": {
+  "computed": false,
+  "text": "Test MARIDA будет посчитан один раз на итоговой модели; до этого все решения принимались только по val."
+ }
+}
