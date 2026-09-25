@@ -214,3 +214,20 @@ def test_dn_precheck_matches_median():
         fin = a[np.isfinite(a)]
         expect = bool(fin.size and float(np.median(fin)) > 2.0)
         assert inference._median_finite_gt2(np, a) == expect
+
+
+def test_feature_subset_bit_identical(chips):
+    """Lane L26: compute_features(features=subset) (used by models trained on a feature subset, e.g. the light
+    top-20 L23 model) == the full stack indexed by name, bit for bit (NaN/inf chip included)."""
+    from macroplastic.features.pixel import BANDS11, compute_features, feature_names
+
+    names = feature_names("win")
+    rng = np.random.default_rng(0)
+    light = ["B1", "B2", "B12", "FAI", "NDVI", "NDWI", "NDMI", "BSI", "NRD", "B8_mean15", "B8_std15", "FDI_mean7",
+             "FDI_mean15", "NDVI_mean3", "NDVI_std7", "NDVI_std15", "NDWI_std7", "B8_dmed15", "FDI_dmed15", "FDI_dmed31"]
+    subsets = [light, ["FDI_dmed31"], ["NDVI_std15", "B1"], list(rng.permutation(names)[:15]), names]
+    for a in chips[:4] + chips[-1:]:
+        full = compute_features(a, BANDS11)
+        for s in subsets:
+            idx = [names.index(n) for n in s]
+            assert np.array_equal(compute_features(a, BANDS11, features=s), full[idx], equal_nan=True), s

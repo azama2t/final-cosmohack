@@ -231,3 +231,61 @@ def test_confirmed_components_radius_2px():
     partner[21, 52] = True                  # dy=1, dx=1 -> confirmed
     assert confirmed_components(labels, n, partner, 2)[labels[20, 51] - 1]
     assert not confirmed_components(labels, n, np.zeros_like(partner), 2).any()
+
+
+# ---------------------------------------------------------------- L28 cloud guards (synthetic)
+from macroplastic.grid.cloudmask import (drop_components, near_cloud_components,  # noqa: E402
+                                         shadow_components, spectral_cloud)
+
+
+def _labels(shape, boxes):
+    lab = np.zeros(shape, np.int32)
+    for k, (r0, r1, c0, c1) in enumerate(boxes, 1):
+        lab[r0:r1, c0:c1] = k
+    return lab
+
+
+def test_cloud_buffer_drops_only_components_within_5px():
+    cloud = np.zeros((60, 60), bool)
+    cloud[:, :10] = True  # cloud occupies columns 0..9; distance from column c to cloud = c - 9
+    lab = _labels(cloud.shape, [(20, 23, 14, 17),   # nearest column 14 -> 5 px: dropped (<= 5)
+                                (30, 33, 15, 18),   # 6 px: kept
+                                (40, 43, 40, 43)])  # far: kept
+    near = near_cloud_components(lab, 3, cloud, 5)
+    assert near.tolist() == [True, False, False]
+    assert near_cloud_components(lab, 3, cloud, 0).tolist() == [False, False, False]
+    assert near_cloud_components(lab, 3, np.zeros_like(cloud), 5).tolist() == [False, False, False]
+    lab2, n2 = drop_components(lab, 3, near)
+    assert n2 == 2 and set(np.unique(lab2)) == {0, 1, 2} and lab2[20, 14] == 0 and lab2[30, 15] == 1
+
+
+def test_spectral_cloud_bright_swir_blob_only():
+    shape = (80, 80)
+    water = np.ones(shape, bool)
+    b2, b11 = np.full(shape, 0.02, np.float32), np.full(shape, 0.002, np.float32)
+    b2[5:25, 5:25], b11[5:25, 5:25] = 0.09, 0.08    # 400 px cloud missed by SCL -> masked
+    b2[50:53, 50:53], b11[50:53, 50:53] = 0.09, 0.08  # 9 px bright object (boat / debris) -> not a cloud
+    b2[60:75, 5:20] = 0.09                           # bright in visible only (turbid/glint), dark SWIR -> not cloud
+    c = spectral_cloud(b2, b11, water)
+    assert c[15, 15] and not c[51, 51] and not c[67, 12]
+    assert 300 <= c.sum() <= 400
+
+
+def test_shadow_component_dark_ring_no_nir_excess():
+    shape = (120, 120)
+    water = np.ones(shape, bool)
+    b2 = np.full(shape, 0.03, np.float32)
+    b3, b4 = np.full(shape, 0.02, np.float32), np.full(shape, 0.01, np.float32)
+    b8 = np.full(shape, 0.004, np.float32)
+    # shadow region: all bands darker; the "detection" inside it is even darker in NIR
+    for b, k in ((b2, 0.5), (b3, 0.5), (b4, 0.5), (b8, 0.5)):
+        b[10:50, 10:50] *= k
+    b8[25:30, 25:30] = 0.001
+    # real floating patch on normal water: NIR excess
+    b8[80:84, 80:84] = 0.02
+    lab = _labels(shape, [(25, 30, 25, 30), (80, 84, 80, 84)])
+    sh = shadow_components(lab, 2, b2, b3, b4, b8, water)
+    assert sh.tolist() == [True, False]
+    # a dark patch on bright (non-shadowed) water is not called shadow (ring not darkened)
+    b2[10:50, 10:50], b3[10:50, 10:50], b4[10:50, 10:50] = 0.03, 0.02, 0.01
+    assert shadow_components(lab, 2, b2, b3, b4, b8, water).tolist() == [False, False]

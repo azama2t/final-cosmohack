@@ -1,0 +1,29 @@
+{
+ "region": "scotland",
+ "date": "2018-03-26",
+ "model": "mdd",
+ "threshold": 0.5,
+ "quality": {
+  "glint_or_haze": false,
+  "haze": false,
+  "note": ""
+ },
+ "zones": [
+  {
+   "rank": 1,
+   "h3": "881972a001fffff",
+   "index": 0.3161,
+   "area_m2": 200.0,
+   "reason": "2 пикс. с признаками мусора (~200 м²); 1 пятно; только на этой дате; ср. уверенность 0.52",
+   "lon": -2.455189,
+   "lat": 56.077505,
+   "repeat_dates": 1,
+   "mean_prob": 0.5157,
+   "flagged_water_px": 2,
+   "observed_frac": 1.0,
+   "n_detections": 1,
+   "score": 1.031,
+   "n_confirmed": 1
+  }
+ ]
+}

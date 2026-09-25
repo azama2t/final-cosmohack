@@ -443,6 +443,7 @@ class LGBMPredictor:
             raise FileNotFoundError(str(self.model_file))
         self.meta = json.loads((wd / "meta.json").read_text(encoding="utf-8"))
         self.name = "lgbm"
+        self.required_bands = list(BANDS11)  # inference.py checks these per file before featurizing
         self.threshold = float(self.meta["threshold"])
         self.task = self.meta["task"]
         self.classes = list(self.meta["classes"])
@@ -455,6 +456,9 @@ class LGBMPredictor:
             self.level = "win"
         self.fidx = [all_names.index(n) for n in self.features]
         self._fidx_identity = self.fidx == list(range(len(all_names)))
+        # lane L26: a model on a feature subset (e.g. the light top-20 model) computes ONLY its features
+        # (pixel._compute_subset: same code per feature -> same values as the full stack indexed by fidx)
+        self._subset = None if self._fidx_identity else list(self.features)
         self.min_px = int(self.meta.get("postprocess_min_px", 0))
         self.block = int(block)
         self.num_threads = num_threads or _threads()
@@ -548,8 +552,8 @@ class LGBMPredictor:
         arr, channel_names = self._harmonized(arr, channel_names, water_mask)
         H, W = arr.shape[1:]
         out = np.zeros((H, W), np.float32)
-        for (y0, y1, x0, x1), f in compute_features_blocked(arr, channel_names, self.level, block=self.block):
-            f = f[self.fidx]
+        for (y0, y1, x0, x1), f in compute_features_blocked(arr, channel_names, self.level, block=self.block,
+                                                            features=self._subset):
             F, h, w = f.shape
             X = f.reshape(F, -1).T
             ok = ~np.isnan(X).all(1)  # compute_features sets every feature to NaN where the input is NaN
@@ -576,9 +580,7 @@ class LGBMPredictor:
         if arr.ndim != 3:
             raise ValueError(f"expected (C,H,W), got {arr.shape}")
         arr, channel_names = self._harmonized(arr, channel_names, water_mask)
-        f = compute_features(arr, channel_names, self.level)
-        if not self._fidx_identity:
-            f = f[self.fidx]
+        f = compute_features(arr, channel_names, self.level, features=self._subset)
         F, h, w = f.shape
         X = f.reshape(F, -1).T
         ok = ~np.isnan(f).all(0).ravel()  # == ~isnan(X).all(1), without the strided pass

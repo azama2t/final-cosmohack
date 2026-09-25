@@ -60,7 +60,7 @@
   {
    "rank": 4,
    "h3": "88bc1b661dfffff",
-   "index": 2.0502,
+   "index": 2.0839,
    "area_m2": 1600.0,
    "reason": "16 пикс. с признаками мусора (~1600 м²); 3 пятна; повторяется на 3 из 5 дат; ср. уверенность 0.85",
    "lon": 31.023043,
@@ -68,7 +68,7 @@
    "repeat_dates": 3,
    "mean_prob": 0.8517,
    "flagged_water_px": 16,
-   "observed_frac": 0.999,
+   "observed_frac": 0.9828,
    "n_detections": 3,
    "score": 27.254,
    "n_confirmed": 0

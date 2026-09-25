@@ -1,10 +1,10 @@
 # Устойчивость инференса (L24)
 
-Сгенерировано `scripts/robustness_report.py` за 70 с. Модели: `lgbm` (weights/lgbm, порог 0.63), `fdi_rule` (порог 0.5). Устройство: CPU.
+Сгенерировано `scripts/robustness_report.py` за 39 с. Модели: `lgbm` (weights/lgbm, порог 0.63), `fdi_rule` (порог 0.5). Устройство: CPU.
 
 Данные: 8 патчей MARIDA **val** с разметкой Marine Debris (14-3-20_18QYF_3, 14-3-20_18QYF_4, 18-9-20_16PCC_15, 18-9-20_16PCC_27, 18-9-20_16PCC_39, 29-12-20_18QYF_1, 29-12-20_18QYF_3, 29-12-20_18QYF_8); вырезка 512×512 живой сцены `data/live/manila/2019-05-13` (y=0, x=0, доля воды 100%). Test MARIDA не читается.
 
-**Итог: 64 проверок — PASS 47, WARN 7, FAIL 10.**
+**Итог: 64 проверок — PASS 58, WARN 6, FAIL 0.**
 
 Пороги оценки: доля *новых* срабатываний на возмущённых пикселях ≤ 0.1% — PASS, ≤ 1% — WARN, иначе FAIL; изменение F1 на размеченных пикселях val |ΔF1| ≤ 0.05 — PASS, ≤ 0.15 — WARN (и WARN при изменении числа находок > ±50%). F1 — Marine Debris против остальных размеченных классов, по порогу модели. Облако: непрозрачная часть (96 столбцов) + полупрозрачный край (32 столбца), текстура 0.25–0.55, SWIR ниже. Блик: полосы по 32 строки через одну, прибавка к B8 и B11 (+0.01 / +0.03); вариант «только B8» — справочный (это и есть сигнатура FDI). Оговорка: на вырезке живой сцены у lgbm 0 находок и до возмущения, поэтому «live 0 → 0» — слабое свидетельство; основная оценка — по val-патчам.
 
@@ -63,11 +63,11 @@
 | `5.fdi_rule.700x300.direct` | no exception, prob shape == (H,W) | shape (700, 300) | **PASS** |
 | `5.lgbm.513x40.direct` | no exception, prob shape == (H,W) | shape (513, 40); tiled vs untiled max\|dp\| 0.00e+00, mask diff 0 px | **PASS** |
 | `5.fdi_rule.513x40.direct` | no exception, prob shape == (H,W) | shape (513, 40) | **PASS** |
-| `5.lgbm.1x1.direct` | no exception, prob shape == (H,W) | IndexError: index -1 is out of bounds for axis 0 with size 0 | **FAIL** |
+| `5.lgbm.1x1.direct` | no exception, prob shape == (H,W) | shape (1, 1) | **PASS** |
 | `5.fdi_rule.1x1.direct` | no exception, prob shape == (H,W) | shape (1, 1) | **PASS** |
-| `5.lgbm.5x3.direct` | no exception, prob shape == (H,W) | IndexError: index -1 is out of bounds for axis 1 with size 0 | **FAIL** |
+| `5.lgbm.5x3.direct` | no exception, prob shape == (H,W) | shape (5, 3) | **PASS** |
 | `5.fdi_rule.5x3.direct` | no exception, prob shape == (H,W) | shape (5, 3) | **PASS** |
-| `5.cli` | exit 0, outputs of every size with the input's H,W | exit 2; missing ['100x100', '300x700', '700x300', '513x40', '1x1', '5x3']; wrong shape -; ERROR: model 'lgbm' failed on s1x1.tif: IndexError: index -1 is out of bounds for axis 0 with size 0 | **FAIL** |
+| `5.cli` | exit 0, outputs of every size with the input's H,W | exit 0; missing -; wrong shape -; - | **PASS** |
 
 ## 6. Другие dtype
 
@@ -76,9 +76,9 @@
 | `6.val_f64` | same mask as val_f32 (<=0.1% px differ; 1e-4 DN quantisation and clipping of negative rhorc to 0 allowed) | max\|d prob_u8\| 0, mask differs in 0 px, detections 232 -> 232 | **PASS** |
 | `6.val_u16dn` | same mask as val_f32 (<=0.1% px differ; 1e-4 DN quantisation and clipping of negative rhorc to 0 allowed) | max\|d prob_u8\| 54, mask differs in 3 px, detections 232 -> 233 | **PASS** |
 | `6.live_u16dn` | same mask as live_f32 (<=0.1% px differ; 1e-4 DN quantisation and clipping of negative rhorc to 0 allowed) | max\|d prob_u8\| 0, mask differs in 0 px, detections 0 -> 0 | **PASS** |
-| `6.val_u16dn_off1000` | L2A baseline>=04.00 DN (+1000 offset): same mask as reflectance (or a clear error) | max\|d prob_u8\| 255, mask differs in 232 px, detections 232 -> 0 (auto-scale multiplies by 1e-4 but does not subtract the 1000 offset -> +0.1 on every band) | **FAIL** |
-| `6.live_u16dn_off1000` | L2A baseline>=04.00 DN (+1000 offset): same mask as reflectance (or a clear error) | max\|d prob_u8\| 20, mask differs in 0 px, detections 0 -> 0 (auto-scale multiplies by 1e-4 but does not subtract the 1000 offset -> +0.1 on every band) | **WARN** |
-| `6.cli` | exit 0, DN detected and scaled with a warning | exit 0; 06:08:24 WARNING inference: live_u16dn.tif looks like DN (median > 2) -> multiplying by 1e-4 \| 06:08:25 WARNING inference: live_u16dn_off1000.tif looks like DN (median > 2) -> multiplying by 1e-4 \| 06:08:25 WARNING inference: val_u16dn.tif looks like DN (median > 2) -> multiplying by 1e-4 \| 06:08:25 | **PASS** |
+| `6.val_u16dn_off1000` | L2A baseline>=04.00 DN (+1000 offset): same mask as reflectance (or a clear error) | max\|d prob_u8\| 54, mask differs in 3 px, detections 232 -> 233 | **PASS** |
+| `6.live_u16dn_off1000` | L2A baseline>=04.00 DN (+1000 offset): same mask as reflectance (or a clear error) | max\|d prob_u8\| 0, mask differs in 0 px, detections 0 -> 0 (identical to reflectance: offset removed by --scale auto) | **WARN** |
+| `6.cli` | exit 0, DN detected and scaled with a warning | exit 0; 06:41:21 WARNING inference: live_u16dn.tif looks like DN (median > 2) -> multiplying by 1e-4; dark-pixel B12 median DN=37 < 1000 -> no BOA offset \| 06:41:21 WARNING inference: val_u16dn.tif looks like DN (median > 2) -> multiplying by 1e-4; dark-pixel B12 median DN=39 < 1000 -> no BOA offset \| 06:41 | **PASS** |
 
 ## 7. Каналы: лишние / переставленные / отсутствующие
 
@@ -87,11 +87,11 @@
 | `7.perm_desc` | same result as ordered (mapped by band descriptions) | exit 0; max\|d prob_u8\| 0 | **PASS** |
 | `7.desc_b0x_lower` | 'b08'/'b8a' descriptions normalised -> same result | exit 0; max\|d prob_u8\| 0 | **PASS** |
 | `7.extra_b10_desc` | extra band B10 ignored -> same result | exit 0; max\|d prob_u8\| 0 | **PASS** |
-| `7.perm_nodesc` | cannot be detected from data; ideally a warning (no descriptions -> order assumed) | exit 0, silently processed with the assumed s2_l2a_12 order; max\|d prob_u8\| 20, detections 0 vs 0; warning printed: False | **WARN** |
-| `7.extra_nodesc` | exit 1 (data error), message names the problem, no output | exit 1; ERROR: extra_nodesc.tif: 13 bands, cannot map to channels (use --channels) | **PASS** |
-| `7.missing_nodesc_10` | exit 1 (data error), message names the problem, no output | exit 1; ERROR: missing_nodesc_10.tif: 10 bands, cannot map to channels (use --channels) | **PASS** |
-| `7.missing_b8_desc` | exit 1 (data error), message names the problem, no output | exit 2; ERROR: model 'lgbm' failed on missing_b8_desc.tif: ValueError: missing bands ['B8']; got ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8A', 'B9', 'B11', 'B12'] | **FAIL** |
-| `7.channels_flag_mismatch` | --channels marida on 12-band file -> exit 1 with message | exit 1; ERROR: ref.tif: 12 bands, cannot map to channels (set marida has 11) | **PASS** |
+| `7.perm_nodesc` | cannot be detected from data; ideally a warning (no descriptions -> order assumed) | exit 0, processed with the assumed s2_l2a_12 order; max\|d prob_u8\| 20, detections 0 vs 0; warning printed: True | **WARN** |
+| `7.extra_nodesc` | exit 1 (data error), message names the problem, no output | exit 1; ERROR: extra_nodesc.tif: 13 bands, cannot map to channels (use --channels) \| ERROR: 1 of 1 file(s) failed: extra_nodesc.tif | **PASS** |
+| `7.missing_nodesc_10` | exit 1 (data error), message names the problem, no output | exit 1; ERROR: missing_nodesc_10.tif: 10 bands, cannot map to channels (use --channels) \| ERROR: 1 of 1 file(s) failed: missing_nodesc_10.tif | **PASS** |
+| `7.missing_b8_desc` | exit 1 (data error), message names the problem, no output | exit 1; ERROR: missing_b8_desc.tif: missing bands ['B8'] required by model 'lgbm'; got ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8A', 'B9', 'B11', 'B12'] \| ERROR: 1 of 1 file(s) failed: missing_b8_desc.tif | **PASS** |
+| `7.channels_flag_mismatch` | --channels marida on 12-band file -> exit 1 with message | exit 1; ERROR: ref.tif: 12 bands, cannot map to channels (set marida has 11) \| ERROR: 1 of 1 file(s) failed: ref.tif | **PASS** |
 
 ## 8. Битые tif / не-tif в папке
 
@@ -101,21 +101,21 @@
 | `8.truncated` | truncated tif -> read error, skipped | skipped with error | **PASS** |
 | `8.no_images` | exit 1 'no input *.tif' | exit 1; ERROR: no input *.tif in C:\Users\User\Documents\GitHub\final-cosmohack\out\robustness\8_broken\only_txt (files ending with _cl/_conf/_prob/_mask are skipped) | **PASS** |
 | `8.missing_dir` | exit 1 'data directory not found' | exit 1; ERROR: data directory not found: C:\Users\User\Documents\GitHub\final-cosmohack\out\robustness\8_broken\does_not_exist | **PASS** |
-| `8.only_broken` | exit 1, error names x.tif | exit 1; ERROR: cannot read C:\Users\User\Documents\GitHub\final-cosmohack\out\robustness\8_broken\only_broken\x.tif: RasterioIOError: '\\?\C:\Users\User\Documents\GitHub\final-cosmohack\out\robustness\8_broken\only_broken\x.tif' not recognized as being in a supported file format. | **PASS** |
+| `8.only_broken` | exit 1, error names x.tif | exit 1; ERROR: cannot read C:\Users\User\Documents\GitHub\final-cosmohack\out\robustness\8_broken\only_broken\x.tif: RasterioIOError: '\\?\C:\Users\User\Documents\GitHub\final-cosmohack\out\robustness\8_broken\only_broken\x.tif' not recognized as being in a supported file format. \| ERROR: 1 of 1 file(s) fai | **PASS** |
 | `8.output_is_file` | exit 1 with a message, no traceback | exit 1; ERROR: cannot write outputs to C:\Users\User\Documents\GitHub\final-cosmohack\out\robustness\8_broken\out_is_file: FileExistsError: [WinError 183] Невозможно создать файл, так как он уже существует: '\\\\?\\C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\out\\robustness\\8_broken\\out_is_file' | **PASS** |
-| `8.live_scene_folder` | data/live/<region>/<date> layout: bands.tif processed; 1-band helper rasters (scl, prob_lgbm) ideally ignored | exit 1; bands processed True; ERROR: prob_lgbm.tif: 1 bands, cannot map to channels (use --channels) \| ERROR: scl.tif: 1 bands, cannot map to channels (use --channels) | **WARN** |
+| `8.live_scene_folder` | data/live/<region>/<date> layout: bands.tif processed; 1-band helper rasters (scl, prob_lgbm) ideally ignored | exit 0; bands processed True; 06:41:32 WARNING inference: skipped prob_lgbm.tif: 1 band: not a multispectral S2 image (mask / SCL / probability raster) \| 06:41:32 WARNING inference: skipped scl.tif: 1 band: not a multispectral S2 image (mask / SCL / probability raster) | **PASS** |
 
 ## 9. Пути: пробелы, кириллица, aux.tif
 
 | Случай | Ожидание | Результат | Статус |
 |---|---|---|---|
 | `9.снимок 1` | 'снимок 1.tif' in a dir with spaces+Cyrillic -> outputs снимок 1_prob/_mask.tif | exit 0; outputs ok | **PASS** |
-| `9.aux` | 'aux.tif' in a dir with spaces+Cyrillic -> outputs aux_prob/_mask.tif | exit 0; outputs MISSING | **FAIL** |
-| `9.con` | 'con.tif' in a dir with spaces+Cyrillic -> outputs con_prob/_mask.tif | exit 0; outputs MISSING | **FAIL** |
-| `9.nul` | 'nul.tif' in a dir with spaces+Cyrillic -> outputs nul_prob/_mask.tif | exit 0; outputs MISSING | **FAIL** |
-| `9.com1` | 'com1.tif' in a dir with spaces+Cyrillic -> outputs com1_prob/_mask.tif | exit 0; outputs MISSING | **FAIL** |
+| `9.aux` | 'aux.tif' in a dir with spaces+Cyrillic -> outputs aux_prob/_mask.tif | exit 0; outputs ok | **PASS** |
+| `9.con` | 'con.tif' in a dir with spaces+Cyrillic -> outputs con_prob/_mask.tif | exit 0; outputs ok | **PASS** |
+| `9.nul` | 'nul.tif' in a dir with spaces+Cyrillic -> outputs nul_prob/_mask.tif | exit 0; outputs ok | **PASS** |
+| `9.com1` | 'com1.tif' in a dir with spaces+Cyrillic -> outputs com1_prob/_mask.tif | exit 0; outputs ok | **PASS** |
 | `9.a b.c` | 'a b.c.tif' in a dir with spaces+Cyrillic -> outputs a b.c_prob/_mask.tif | exit 0; outputs ok | **PASS** |
-| `9.cli` | exit 0 and all 6 input files counted (files=6) | exit 0; inference.py saw files=2; - | **FAIL** |
+| `9.cli` | exit 0 and all 6 input files counted (files=6) | exit 0; inference.py saw files=6; - | **PASS** |
 
 ## Предлагаемые правки
 
@@ -123,16 +123,5 @@
 - `3.fdi_rule.B8` (WARN): glint mask (e.g. B11 > 0.02-0.03 over open water / SCL + sun-view geometry) or glint-augmented negatives in training
 - `4.lgbm.noise_s0.002` (WARN): noise augmentation in training / denoised (window-mean) features; sigma 0.002 is ~10% of open-water reflectance
 - `4.fdi_rule.noise_s0.002` (WARN): noise augmentation in training / denoised (window-mean) features; sigma 0.002 is ~10% of open-water reflectance
-- `5.lgbm.1x1.direct` (FAIL): see 5.cli
-- `5.lgbm.5x3.direct` (FAIL): see 5.cli
-- `5.cli` (FAIL): inference.py: a per-file predictor error must skip that file (exit 1 at the end), not return EXIT_MODEL and drop the pending batch; pixel._local_median: clamp the subsample start (x[min(f//2, H-1)::f, min(f//2, W-1)::f]) or reflect-pad tiny chips
-- `6.val_u16dn_off1000` (FAIL): in --scale auto read BOA_ADD_OFFSET/processing baseline from metadata or add --offset; at least warn when min(DN) >= 1000 over water
-- `6.live_u16dn_off1000` (WARN): in --scale auto read BOA_ADD_OFFSET/processing baseline from metadata or add --offset; at least warn when min(DN) >= 1000 over water
+- `6.live_u16dn_off1000` (WARN): inconclusive: no detections on this crop (output identical)
 - `7.perm_nodesc` (WARN): log a warning when bands have no descriptions and the order is assumed by count
-- `7.missing_b8_desc` (FAIL): inference.py load(): check select_bands()/required bands right after guess_channel_names and return EXIT_DATA per file (skip it) instead of EXIT_MODEL + abort of the whole run
-- `8.live_scene_folder` (WARN): skip 1-band rasters / known names (scl, prob_*) with a WARNING instead of counting them as failed files (exit 1)
-- `9.aux` (FAIL): see 9.cli
-- `9.con` (FAIL): see 9.cli
-- `9.nul` (FAIL): see 9.cli
-- `9.com1` (FAIL): see 9.cli
-- `9.cli` (FAIL): io.list_images(): Path.is_file() is False for 'aux.tif'/'con.tif'/'nul.tif'/'com1.tif' on Windows -> the files are dropped silently; use os.path.isfile(win_path(p)) (or p.suffix check + DirEntry.is_file()) there

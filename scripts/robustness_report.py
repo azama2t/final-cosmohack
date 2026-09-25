@@ -445,10 +445,13 @@ def check_dtypes(ctx: Ctx) -> list[dict]:
                 st = "WARN"  # no detections to lose on this crop: inconclusive
             out.append(_case(6, f"6.{other}",
                              "L2A baseline>=04.00 DN (+1000 offset): same mask as reflectance (or a clear error)",
-                             res + " (auto-scale multiplies by 1e-4 but does not subtract the 1000 offset -> "
-                             "+0.1 on every band)", st,
-                             "" if st == "PASS" else "in --scale auto read BOA_ADD_OFFSET/processing baseline "
-                             "from metadata or add --offset; at least warn when min(DN) >= 1000 over water"))
+                             res + (" (identical to reflectance: offset removed by --scale auto)" if dp == 0 else
+                                    "" if st == "PASS" else " (auto-scale multiplies by 1e-4 but the 1000 offset "
+                                    "is not removed -> +0.1 on every band)"), st,
+                             "" if st == "PASS" else ("inconclusive: no detections on this crop (output identical)"
+                                                      if dp == 0 else "in --scale auto read BOA_ADD_OFFSET/processing "
+                                                      "baseline from metadata or add --offset; at least warn when "
+                                                      "min(DN) >= 1000 over water")))
     out.append(_case(6, "6.cli", "exit 0, DN detected and scaled with a warning", f"exit {code}; {_last_err(txt)}",
                      "PASS" if code == 0 and "looks like DN" in txt else "FAIL"))
     return out
@@ -496,7 +499,7 @@ def check_channels(ctx: Ctx) -> list[dict]:
     dmax = same("perm_nodesc")
     nm = int(read_out(o / "perm_nodesc_mask.tif").sum()) if (o / "perm_nodesc_mask.tif").exists() else None
     out.append(_case(7, "7.perm_nodesc", "cannot be detected from data; ideally a warning (no descriptions -> "
-                     "order assumed)", f"exit {code}, silently processed with the assumed s2_l2a_12 order; "
+                     "order assumed)", f"exit {code}, processed with the assumed s2_l2a_12 order; "
                      f"max|d prob_u8| {dmax}, detections {nm} vs {int(read_out(runs['ref'][2] / 'ref_mask.tif').sum())}; "
                      f"warning printed: {'order' in txt.lower() or 'description' in txt.lower()}", "WARN",
                      "log a warning when bands have no descriptions and the order is assumed by count"))

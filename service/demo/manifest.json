@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generated": "2026-09-25T02:27:41+00:00",
+ "generated": "2026-09-25T03:45:20+00:00",
  "kind": "demo",
  "index": {
   "name": "доля наблюдаемой воды с признаками мусора",
@@ -8,7 +8,7 @@
   "h3_res": 8,
   "formula": "flagged_water_px / observed_water_px",
   "note": "индекс по снимку, не масса пластика",
-  "flagged": "пиксели prob ≥ порога на наблюдаемой воде после постобработки (компоненты ≥ 2 px, не касаются облаков/суши в буфере 1 px)",
+  "flagged": "пиксели prob ≥ порога на наблюдаемой воде после постобработки (компоненты ≥ 2 px, не касаются облаков/суши в буфере 1 px, не ближе 5 px к облаку/тени, не тень облака — L28)",
   "min_observed_frac": 0.5
  },
  "models": {
@@ -47,9 +47,9 @@
     "latest_date": "2026-05-30",
     "model": "mdd",
     "haze": false,
-    "index_permille": 0.2032,
-    "n_detections": 9,
-    "total_debris_area_m2": 104300.0
+    "index_permille": 0.0251,
+    "n_detections": 7,
+    "total_debris_area_m2": 12800.0
    },
    "dates": [
     {
@@ -194,6 +194,261 @@
      }
     }
    ]
+  },
+  {
+   "id": "scotland",
+   "name": "Шотландия (Ферт-оф-Форт)",
+   "name_en": "Firth of Forth, Scotland",
+   "country": "Великобритания",
+   "tile": "30VWH",
+   "center": [
+    -2.459415,
+    56.17999
+   ],
+   "bounds": [
+    -2.663014,
+    56.06646,
+    -2.255817,
+    56.29352
+   ],
+   "zoom": 11,
+   "default_date": "2026-07-19",
+   "summary": {
+    "latest_date": "2026-07-19",
+    "model": "mdd",
+    "haze": false,
+    "index_permille": 0.002,
+    "n_detections": 2,
+    "total_debris_area_m2": 800.0
+   },
+   "dates": [
+    {
+     "date": "2018-03-26",
+     "scene_id": "S2B_30VWH_20180326_0_L2A",
+     "source": "earth-search",
+     "cloud_frac": 0.0043,
+     "bounds": [
+      -2.663014,
+      56.06646,
+      -2.255817,
+      56.29352
+     ],
+     "rgb": "scotland/2018-03-26/rgb.png",
+     "thumb": "scotland/2018-03-26/thumb.jpg",
+     "models": [
+      "lgbm",
+      "mdd"
+     ],
+     "drift": null,
+     "quality": {
+      "glint_or_haze": false,
+      "haze": false,
+      "note": ""
+     },
+     "n_confirmed": {
+      "lgbm": 1,
+      "mdd": 1
+     }
+    },
+    {
+     "date": "2026-07-19",
+     "scene_id": "S2A_MSIL2A_20260719T112131_R037_T30VWH_20260719T194158",
+     "source": "planetary-computer",
+     "cloud_frac": 0.0,
+     "bounds": [
+      -2.663014,
+      56.06646,
+      -2.255817,
+      56.29352
+     ],
+     "rgb": "scotland/2026-07-19/rgb.png",
+     "thumb": "scotland/2026-07-19/thumb.jpg",
+     "models": [
+      "lgbm",
+      "mdd"
+     ],
+     "drift": "scotland/2026-07-19/drift.json",
+     "quality": {
+      "glint_or_haze": false,
+      "haze": false,
+      "note": ""
+     },
+     "n_confirmed": {
+      "lgbm": 1,
+      "mdd": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "manila",
+   "name": "Манильский залив",
+   "name_en": "Manila Bay, Philippines",
+   "country": "Филиппины",
+   "tile": "51PTS",
+   "center": [
+    120.819828,
+    14.599823
+   ],
+   "bounds": [
+    120.702351,
+    14.485386,
+    120.937304,
+    14.714259
+   ],
+   "zoom": 11,
+   "default_date": "2025-01-06",
+   "summary": {
+    "latest_date": "2025-01-06",
+    "model": "mdd",
+    "haze": false,
+    "index_permille": 0.0185,
+    "n_detections": 17,
+    "total_debris_area_m2": 11500.0
+   },
+   "dates": [
+    {
+     "date": "2019-05-13",
+     "scene_id": "S2A_51PTS_20190513_0_L2A",
+     "source": "earth-search",
+     "cloud_frac": 0.0208,
+     "bounds": [
+      120.702351,
+      14.485386,
+      120.937304,
+      14.714259
+     ],
+     "rgb": "manila/2019-05-13/rgb.png",
+     "thumb": "manila/2019-05-13/thumb.jpg",
+     "models": [
+      "lgbm",
+      "mdd"
+     ],
+     "drift": null,
+     "quality": {
+      "glint_or_haze": false,
+      "haze": true,
+      "note": "дымка/блик — находки могут быть завышены (медиана B8 воды 0.0114)"
+     },
+     "n_confirmed": {
+      "lgbm": 9,
+      "mdd": 12
+     }
+    },
+    {
+     "date": "2025-01-06",
+     "scene_id": "S2B_MSIL2A_20250106T022009_R003_T51PTS_20250106T041630",
+     "source": "planetary-computer",
+     "cloud_frac": 0.0026,
+     "bounds": [
+      120.702351,
+      14.485386,
+      120.937304,
+      14.714259
+     ],
+     "rgb": "manila/2025-01-06/rgb.png",
+     "thumb": "manila/2025-01-06/thumb.jpg",
+     "models": [
+      "lgbm",
+      "mdd"
+     ],
+     "drift": "manila/2025-01-06/drift.json",
+     "quality": {
+      "glint_or_haze": false,
+      "haze": false,
+      "note": ""
+     },
+     "n_confirmed": {
+      "lgbm": 2,
+      "mdd": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "santo_domingo",
+   "name": "Санто-Доминго (устье Осамы)",
+   "name_en": "Santo Domingo (Ozama mouth)",
+   "country": "Доминиканская Республика",
+   "tile": "19QDA",
+   "center": [
+    -69.819981,
+    18.399833
+   ],
+   "bounds": [
+    -69.939213,
+    18.286191,
+    -69.70075,
+    18.513476
+   ],
+   "zoom": 11,
+   "default_date": "2025-12-30",
+   "summary": {
+    "latest_date": "2025-12-30",
+    "model": "mdd",
+    "haze": false,
+    "index_permille": 0.0004,
+    "n_detections": 1,
+    "total_debris_area_m2": 200.0
+   },
+   "dates": [
+    {
+     "date": "2019-01-21",
+     "scene_id": "S2A_19QDA_20190121_0_L2A",
+     "source": "earth-search",
+     "cloud_frac": 0.0463,
+     "bounds": [
+      -69.939213,
+      18.286191,
+      -69.70075,
+      18.513476
+     ],
+     "rgb": "santo_domingo/2019-01-21/rgb.png",
+     "thumb": "santo_domingo/2019-01-21/thumb.jpg",
+     "models": [
+      "lgbm",
+      "mdd"
+     ],
+     "drift": null,
+     "quality": {
+      "glint_or_haze": false,
+      "haze": false,
+      "note": ""
+     },
+     "n_confirmed": {
+      "lgbm": 16,
+      "mdd": 25
+     }
+    },
+    {
+     "date": "2025-12-30",
+     "scene_id": "S2B_MSIL2A_20251230T151719_R125_T19QDA_20251230T203016",
+     "source": "planetary-computer",
+     "cloud_frac": 0.0,
+     "bounds": [
+      -69.939213,
+      18.286191,
+      -69.70075,
+      18.513476
+     ],
+     "rgb": "santo_domingo/2025-12-30/rgb.png",
+     "thumb": "santo_domingo/2025-12-30/thumb.jpg",
+     "models": [
+      "lgbm",
+      "mdd"
+     ],
+     "drift": "santo_domingo/2025-12-30/drift.json",
+     "quality": {
+      "glint_or_haze": false,
+      "haze": false,
+      "note": ""
+     },
+     "n_confirmed": {
+      "lgbm": 0,
+      "mdd": 0
+     }
+    }
+   ]
   }
  ],
  "sources": [
@@ -223,5 +478,5 @@
    "license": "Apache-2.0"
   }
  ],
- "demo_note": "подмножество service/data: 2 регион(а), ≤ 2 даты, PNG ≤ 1024 px"
+ "demo_note": "подмножество service/data: 5 регион(а), ≤ 2 даты, PNG ≤ 1024 px"
 }

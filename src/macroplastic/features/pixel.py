@@ -84,22 +84,32 @@ def _ratio(a, b):
     return out
 
 
-def _indices(b: dict) -> dict:
+def _indices(b: dict, need=None) -> dict:
+    """Spectral indices; `need` (iterable of INDICES names) limits the computation (same formulas, same bits)."""
+    need = set(INDICES) if need is None else set(need)
     B2, B3, B4, B6, B8, B11 = b["B2"], b["B3"], b["B4"], b["B6"], b["B8"], b["B11"]
     out = {}
-    out["FDI"] = B8 - (B6 + (B11 - B6) * ((L8 - L4) / (L11 - L4)) * 10.0)
-    out["FAI"] = B8 - (B4 + (B11 - B4) * ((833.0 - 665.0) / (1614.0 - 665.0)))
-    out["NDVI"] = _ratio(B8, B4)
-    out["NDWI"] = _ratio(B3, B8)
-    out["NDMI"] = _ratio(B8, B11)
-    out["SI"] = np.cbrt((1.0 - B2) * (1.0 - B3) * (1.0 - B4))
-    num = (B11 + B4) - (B8 + B2)
-    den = (B11 + B4) + (B8 + B2)
-    bsi = np.full(B2.shape, np.nan, dtype=np.float32)
-    np.divide(num, den, out=bsi, where=np.abs(den) > 1e-6)
-    bsi[np.isnan(num)] = np.nan
-    out["BSI"] = bsi
-    out["NRD"] = B8 - B4
+    if "FDI" in need:
+        out["FDI"] = B8 - (B6 + (B11 - B6) * ((L8 - L4) / (L11 - L4)) * 10.0)
+    if "FAI" in need:
+        out["FAI"] = B8 - (B4 + (B11 - B4) * ((833.0 - 665.0) / (1614.0 - 665.0)))
+    if "NDVI" in need:
+        out["NDVI"] = _ratio(B8, B4)
+    if "NDWI" in need:
+        out["NDWI"] = _ratio(B3, B8)
+    if "NDMI" in need:
+        out["NDMI"] = _ratio(B8, B11)
+    if "SI" in need:
+        out["SI"] = np.cbrt((1.0 - B2) * (1.0 - B3) * (1.0 - B4))
+    if "BSI" in need:
+        num = (B11 + B4) - (B8 + B2)
+        den = (B11 + B4) + (B8 + B2)
+        bsi = np.full(B2.shape, np.nan, dtype=np.float32)
+        np.divide(num, den, out=bsi, where=np.abs(den) > 1e-6)
+        bsi[np.isnan(num)] = np.nan
+        out["BSI"] = bsi
+    if "NRD" in need:
+        out["NRD"] = B8 - B4
     return {k: v.astype(np.float32, copy=False) for k, v in out.items()}
 
 
@@ -161,7 +171,9 @@ def _local_median(x: np.ndarray, w: int, fill=None) -> np.ndarray:
     k = max(3, int(round(w / f)) | 1)
     if fill is None:
         fill = _nan_fill(x)
-    xs = x[f // 2::f, f // 2::f]
+    # lane L26: clamp the subsample start so chips with a side <= f//2 (1..3 px) keep >= 1 sample
+    # (same start f//2 as before whenever the side is larger -> bit-identical on normal chips)
+    xs = x[min(f // 2, H - 1)::f, min(f // 2, W - 1)::f]
     xs = np.where(np.isnan(xs), fill, xs)
     med = ndimage.median_filter(xs, size=k, mode="reflect")
     iy = np.minimum(np.arange(H) // f, med.shape[0] - 1)
@@ -173,15 +185,70 @@ def _nan_fill(x: np.ndarray):
     return np.nanmedian(x) if np.isfinite(x).any() else 0.0
 
 
-def compute_features(arr: np.ndarray, channel_names: Sequence[str], level: str = "win") -> np.ndarray:
+def _compute_subset(x: np.ndarray, feats: Sequence[str]) -> np.ndarray:
+    """Only the named features (any subset of feature_names('win'), in that order) of band stack x (11,H,W).
+
+    Lane L26 (light model): windows / contrasts / indices that no requested feature needs are not computed.
+    Every feature uses exactly the code of the full path -> bit-identical to compute_features(...)[idx]."""
+    allowed = set(feature_names("win"))
+    unknown = [n for n in feats if n not in allowed]
+    if unknown:
+        raise ValueError(f"unknown features {unknown}")
+    H, W = x.shape[1:]
+    pos = {n: i for i, n in enumerate(feats)}
+    out = np.empty((len(feats), H, W), np.float32)
+    b = {n: x[i] for i, n in enumerate(BANDS11)}
+    need = {n for n in feats if n in INDICES}
+    for k in WIN_KEYS:
+        if k in INDICES and any(f"{k}_{s}{w}" in pos for s in ("mean", "std") for w in WIN_SIZES):
+            need.add(k)
+    for k, w in CONTRAST:
+        if k in INDICES and f"{k}_dmed{w}" in pos:
+            need.add(k)
+    ind = _indices(b, need)
+    for n, i in pos.items():
+        if n in b:
+            out[i] = b[n]
+        elif n in ind and n in INDICES:
+            out[i] = ind[n]
+    src = {"B8": b["B8"], **ind}
+    for k in WIN_KEYS:
+        for w in WIN_SIZES:
+            mn, sd = f"{k}_mean{w}", f"{k}_std{w}"
+            if mn in pos and sd in pos:
+                _win_mean_std(src[k], w, out[pos[mn]], out[pos[sd]])
+            elif mn in pos or sd in pos:
+                m, s = _win_mean_std(src[k], w)
+                if mn in pos:
+                    out[pos[mn]] = m
+                if sd in pos:
+                    out[pos[sd]] = s
+    fills: dict = {}
+    for k, w in CONTRAST:
+        n = f"{k}_dmed{w}"
+        if n in pos:
+            if k not in fills:
+                fills[k] = _nan_fill(src[k])
+            np.subtract(src[k], _local_median(src[k], w, fills[k]), out=out[pos[n]])
+    nanpix = np.isnan(x).any(0)
+    if nanpix.any():
+        out[:, nanpix] = np.nan
+    return out
+
+
+def compute_features(arr: np.ndarray, channel_names: Sequence[str], level: str = "win",
+                     features: Sequence[str] | None = None) -> np.ndarray:
     """(C,H,W) reflectance -> (F,H,W) float32 features (names: feature_names(level)).
 
-    Features are written straight into the preallocated (F,H,W) output (lane L17: fewer copies;
-    values identical to stacking the per-feature arrays)."""
+    features: optional subset of feature_names('win') -> only those are computed, in that order (lane L26;
+    identical values to the full stack indexed by name). Features are written straight into the
+    preallocated (F,H,W) output (lane L17: fewer copies; values identical to stacking the per-feature arrays)."""
     x = select_bands(arr, channel_names)
     fin = np.isfinite(x)
     if not fin.all():
         x[~fin] = np.nan
+    if features is not None:
+        return _compute_subset(x, list(features))
     if level not in ("win", "min"):
         raise ValueError(level)
     H, W = x.shape[1:]
@@ -222,12 +289,13 @@ def iter_blocks(H: int, W: int, block: int = 512, halo: int = MAX_HALO):
 
 
 def compute_features_blocked(arr: np.ndarray, channel_names: Sequence[str], level: str = "win",
-                             block: int = 512, halo: int = MAX_HALO) -> Iterator[tuple]:
+                             block: int = 512, halo: int = MAX_HALO,
+                             features: Sequence[str] | None = None) -> Iterator[tuple]:
     """Yield ((y0, y1, x0, x1), feats (F, y1-y0, x1-x0)) block by block (bounded memory)."""
     H, W = arr.shape[-2:]
     if H <= block and W <= block:
-        yield (0, H, 0, W), compute_features(arr, channel_names, level)
+        yield (0, H, 0, W), compute_features(arr, channel_names, level, features)
         return
     for y0, y1, x0, x1, hy0, hy1, hx0, hx1 in iter_blocks(H, W, block, halo):
-        f = compute_features(arr[:, hy0:hy1, hx0:hx1], channel_names, level)
+        f = compute_features(arr[:, hy0:hy1, hx0:hx1], channel_names, level, features)
         yield (y0, y1, x0, x1), f[:, y0 - hy0:y1 - hy0, x0 - hx0:x1 - hx0]

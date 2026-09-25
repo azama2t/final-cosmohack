@@ -14,6 +14,10 @@ rgb.png / prob.png are warped to a regular lon/lat grid over `bounds` (so the ma
 L15 "confirmed" detections: on dates with >= 2 models every detection gets `confirmed` (bool) and `confirmed_by`
 (partner model or null): the other model has a pixel >= its threshold on observed water within 2 px (20 m) of the
 object (macroplastic.grid.confirm). Also manifest dates[].n_confirmed {model: k} and zones[].n_confirmed.
+L28 cloud guards (macroplastic.grid.cloudmask, reports/cloud_edge.md), same for all scenes: bright+SWIR-bright
+water pixels missed by SCL (B2 >= 0.06 & B11 >= 0.03, blobs >= 100 px) are not observed; components within 5 px
+(Euclidean) of a cloud/shadow (SCL 3, 8, 9, 10 or spectral cloud) are dropped; cloud-shadow artefacts (no NIR
+excess over the 3..10 px water ring AND ring visible brightness < 0.8 x scene water median) are dropped.
 Idempotent: region folders being built are recreated; with --regions, other regions of an existing
 manifest are kept.
 """
@@ -39,6 +43,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from macroplastic.grid import H3_RES  # noqa: E402
+from macroplastic.grid.cloudmask import (CLOUD_BUFFER_PX, drop_components, near_cloud_components,  # noqa: E402
+                                         shadow_components, spectral_cloud)
 from macroplastic.grid.confirm import CONFIRM_RADIUS_PX, confirmed_components, label_of_records  # noqa: E402
 from macroplastic.grid.h3index import cell_raster, h3_feature_collection, h3_stats, raster_bounds  # noqa: E402
 from macroplastic.grid.timeseries import sort_rows, timeseries_row  # noqa: E402
@@ -227,6 +233,24 @@ def process_scene(region: str, date: str, sdir: Path, models: list[str], out: Pa
         scl, *_ = read_band(sdir / "scl.tif")
         if scl.shape == shape:
             water &= ~np.isin(scl, (4, 5))
+    cloud_px = np.zeros(shape, bool)
+    if (sdir / "scl.tif").exists():
+        scl, *_ = read_band(sdir / "scl.tif")
+        if scl.shape == shape:
+            cloud_px |= np.isin(scl, CLOUD_SCL)
+    bands = None
+    if (sdir / "bands.tif").exists():  # L28: B2, B3, B4, B8, B11 for the spectral cloud mask and the shadow test
+        with rasterio.open(sdir / "bands.tif") as ds:
+            names = list(ds.descriptions)
+            want = ("B2", "B3", "B4", "B8", "B11")
+            if ds.shape == shape and all(b in names for b in want):
+                bands = {b: ds.read(names.index(b) + 1) for b in want}
+    n_spec = 0
+    if bands is not None:
+        spec = spectral_cloud(bands["B2"], bands["B11"], water)
+        n_spec = int(spec.sum())
+        water &= ~spec
+        cloud_px |= spec
     rgba, bounds, d_transform = rgb_display(sdir, s_transform, s_crs, shape)
     H, W = rgba.shape[:2]
     odir = out / region / date
@@ -265,6 +289,16 @@ def process_scene(region: str, date: str, sdir: Path, models: list[str], out: Pa
         Image.fromarray(prob_palette(pd.astype(np.float32) / 255.0, thr), "RGBA").save(mdir / "prob.png", optimize=True)
         # detections (detections.geojson is written after all models: `confirmed` needs the other model)
         labels, n, raw = clean_mask(prob, water, thr, min_px=2, buffer_px=1)
+        n0 = n
+        near = near_cloud_components(labels, n, cloud_px, CLOUD_BUFFER_PX)
+        shadow = (shadow_components(labels, n, bands["B2"], bands["B3"], bands["B4"], bands["B8"], water)
+                  if bands is not None else np.zeros(n, bool))
+        guard = {"spectral_cloud_px": n_spec, "near_cloud": int(near.sum()), "shadow": int((shadow & ~near).sum()),
+                 "near_cloud_px": int(np.isin(labels, np.flatnonzero(near) + 1).sum()) if near.any() else 0,
+                 "shadow_px": int(np.isin(labels, np.flatnonzero(shadow & ~near) + 1).sum()) if (shadow & ~near).any() else 0}
+        labels, n = drop_components(labels, n, near | shadow)
+        if n0 != n:
+            log(f"  {region}/{date}/{m}: cloud guard dropped {n0 - n} of {n0} components {guard}")
         recs = vectorize_detections(labels, n, prob, s_transform, s_crs, region, date, m)
         masks[m] = (labels, n, raw)
         # H3 index (flagged = pixels of kept components, i.e. after SPEC §5.4 post-processing)
@@ -274,7 +308,7 @@ def process_scene(region: str, date: str, sdir: Path, models: list[str], out: Pa
                                                               date, m, thr), compact=True)
         res["models"][m] = {"threshold": thr, "stats": stats, "recs": recs,
                             "raw_flagged": int(raw.sum()), "clean_flagged": int((labels > 0).sum()),
-                            "ts": timeseries_row(date, m, recs, stats, cloud), "meta": pj}
+                            "ts": timeseries_row(date, m, recs, stats, cloud), "meta": pj, "cloud_guard": guard}
     # L15: cross-model confirmation (rule D, reports/model_agreement.md) — only when >= 2 models on this date
     done = list(res["models"])
     for m in done:
@@ -424,7 +458,7 @@ def main(argv=None):
     out.mkdir(parents=True, exist_ok=True)
     old = read_json(out / "manifest.json") if (out / "manifest.json").exists() else None
     model_meta: dict = {}
-    man_regions, summary_rows = [], []
+    man_regions, summary_rows, guard_rows = [], [], []
     for region, items in sorted(found.items()):
         rdir = out / region
         if rdir.exists() and rdir.resolve().parent == out.resolve():
@@ -450,6 +484,7 @@ def main(argv=None):
         for sc in scenes:
             for m, r in sc["models"].items():
                 z = r["zones"][0] if r["zones"] else None
+                guard_rows.append((region, sc["date"], m, r.get("cloud_guard", {})))
                 summary_rows.append((region, sc["date"], m, r["ts"]["n_detections"], r.get("n_confirmed", "-"),
                                      r["ts"]["total_debris_area_m2"],
                                      r["ts"]["mean_index"], (z["h3"], z["index"]) if z else None, sc["seconds"]))
@@ -463,13 +498,20 @@ def main(argv=None):
         "index": {"name": "доля наблюдаемой воды с признаками мусора", "unit": "‰", "h3_res": H3_RES,
                   "formula": "flagged_water_px / observed_water_px", "note": "индекс по снимку, не масса пластика",
                   "flagged": "пиксели prob ≥ порога на наблюдаемой воде после постобработки (компоненты ≥ 2 px, "
-                             "не касаются облаков/суши в буфере 1 px)",
+                             "не касаются облаков/суши в буфере 1 px, не ближе 5 px к облаку/тени, "
+                             "не тень облака — L28)",
                   "min_observed_frac": 0.5},
         "models": model_meta, "regions": man_regions, "sources": SOURCES}
     write_json(out / "manifest.json", manifest)
     print("\nregion | date | model | n_det | n_confirmed | area_m2 | mean_index | top zone | s")
     for row in summary_rows:
         print(" | ".join(str(x) for x in row))
+    tot: dict = {}
+    for reg, date, m, g in guard_rows:
+        for k, v in g.items():
+            tot.setdefault(m, {}).setdefault(k, 0)
+            tot[m][k] += v
+    print(f"\ncloud guard (L28), totals per model over {len({r[:2] for r in guard_rows})} scenes: {tot}")
     print(f"\nbuilt {out} in {time.time() - t_all:.1f} s")
     return 0
 

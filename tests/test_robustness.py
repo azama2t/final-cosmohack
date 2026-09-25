@@ -24,23 +24,10 @@ def _load_script():
     return mod
 
 
-_TINY = ("lgbm features crash on inputs with a side <= 3 px: pixel._local_median subsamples x[f//2::f] "
-         "(f = 6 for the 31-px window) -> empty array -> IndexError")
-KNOWN_FAIL = {
-    "5.lgbm.1x1.direct": _TINY,
-    "5.lgbm.5x3.direct": _TINY,
-    "5.cli": "one tiny (<= 3 px) chip makes inference.py exit 2 and abort the whole run: the other files "
-             "(also already featurized ones) get no outputs",
-    "6.val_u16dn_off1000": "--scale auto multiplies DN by 1e-4 but does not remove the L2A BOA_ADD_OFFSET "
-                           "(-1000, baseline >= 04.00): +0.1 on every band, all detections lost",
-    "7.missing_b8_desc": "missing band named by descriptions -> ValueError in prepare_rows -> exit 2 (model error) "
-                         "and abort, instead of exit 1 + skipping the file",
-    "9.aux": "io.list_images uses Path.is_file(), False for Windows reserved names -> file silently ignored",
-    "9.con": "io.list_images uses Path.is_file(), False for Windows reserved names -> file silently ignored",
-    "9.nul": "io.list_images uses Path.is_file(), False for Windows reserved names -> file silently ignored",
-    "9.com1": "io.list_images uses Path.is_file(), False for Windows reserved names -> file silently ignored",
-    "9.cli": "reserved-name files are not counted (files=2 of 6) and exit code is 0",
-}
+# Known failures (xfail with the reason). Lane L26 fixed all 10 FAILs of L24: tiny chips (pixel._local_median),
+# per-file error isolation in inference.py (5.cli, 7.missing_b8_desc), L2A BOA offset in --scale auto
+# (6.val_u16dn_off1000), Windows reserved names in io.list_images (9.*). Remaining WARNs are allowed by test_case.
+KNOWN_FAIL: dict[str, str] = {}
 
 CASES = [
     # 1 empty chip
@@ -96,3 +83,144 @@ def test_case(robustness_results, case):
     if r is None:
         pytest.skip(f"case {case} not produced (setup, see test_all_cases_covered)")
     assert r["status"] != "FAIL", f"expect: {r['expect']} | result: {r['result']}"
+
+
+# ---------------------------------------------------------------- lane L26: unit checks of inference.py behaviour
+# (in-process, fake predictors: fast, and they cover paths the report cannot trigger with the real models)
+
+L26_WORK = REPO / "out" / "robustness_pytest" / "l26"
+
+
+def _inference_module():
+    spec = importlib.util.spec_from_file_location("inference_l26", REPO / "inference.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _fresh_dir(name: str) -> Path:
+    import shutil
+
+    d = L26_WORK / name
+    shutil.rmtree(d, ignore_errors=True)
+    d.mkdir(parents=True)
+    return d
+
+
+def _chip(h=16, w=16, value=0.03):
+    import numpy as np
+
+    return np.full((11, h, w), value, np.float32)
+
+
+class _FakeB1:
+    """prob = B1 * 10 (so the written prob encodes the reflectance the model saw); raises on 9-px-high chips."""
+    name, threshold, device = "fake", 0.5, "cpu"
+
+    def predict_proba(self, arr, names):
+        import numpy as np
+
+        if arr.shape[1] == 9:
+            raise RuntimeError("boom on purpose")
+        return np.clip(np.nan_to_num(arr[0], nan=0.0) * 10.0, 0, 1).astype(np.float32)
+
+
+class _FakeBatched(_FakeB1):
+    """Batched API like LGBMPredictor: the whole batch fails if it contains a 9-px-high chip."""
+
+    def is_small(self, arr):
+        return True
+
+    def prepare_rows(self, arr, names):
+        return {"X": arr[0].ravel(), "shape": arr.shape[1:]}
+
+    def predict_rows_many(self, rows_list):
+        import numpy as np
+
+        if any(r["shape"][0] == 9 for r in rows_list):
+            raise RuntimeError("batch boom on purpose")
+        return [np.clip(r["X"].reshape(r["shape"]) * 10.0, 0, 1).astype(np.float32) for r in rows_list]
+
+
+@pytest.mark.parametrize("fake", [_FakeB1, _FakeBatched], ids=["per_file", "batched"])
+def test_l26_model_error_isolated_per_file(monkeypatch, fake):
+    import json
+
+    import macroplastic.models as models
+
+    rr = _load_script()
+    d = _fresh_dir(f"iso_{fake.__name__}")
+    for n, h in (("a_good", 16), ("b_bad", 9), ("c_good", 16)):
+        rr.write_tif(d / "in" / f"{n}.tif", _chip(h))
+    monkeypatch.setattr(models, "get_predictor", lambda *a, **k: fake())
+    inf = _inference_module()
+    rep = d / "errors.json"
+    code = inf.main(["--data-dir", str(d / "in"), "--output", str(d / "out"), "--device", "cpu", "--report", str(rep)])
+    assert code == 1
+    assert (d / "out" / "a_good_prob.tif").exists() and (d / "out" / "c_good_mask.tif").exists()
+    assert not (d / "out" / "b_bad_prob.tif").exists()
+    r = json.loads(rep.read_text(encoding="utf-8"))
+    assert [Path(x["file"]).name for x in r["failed"]] == ["b_bad.tif"] and r["ok"] == 2 and r["exit_code"] == 1
+
+
+def test_l26_model_load_failure_exit_2():
+    inf = _inference_module()
+    rr = _load_script()
+    d = _fresh_dir("noload")
+    rr.write_tif(d / "in" / "x.tif", _chip())
+    assert inf.main(["--data-dir", str(d / "in"), "--output", str(d / "out"), "--model", "no_such_model",
+                     "--strict"]) == 2
+
+
+def test_l26_scale_offset_rules(monkeypatch):
+    """--scale auto on L2A DN with +1000 detects the offset; manual --scale 1e-4 --offset -1000 does the same;
+    manual --scale 1e-4 alone does not guess; DN without offset is left alone."""
+    import json
+
+    import numpy as np
+
+    import macroplastic.models as models
+
+    rr = _load_script()
+    monkeypatch.setattr(models, "get_predictor", lambda *a, **k: _FakeB1())
+    inf = _inference_module()
+    rho = np.random.default_rng(0).uniform(0.004, 0.06, (11, 32, 32)).astype(np.float32)
+    d = _fresh_dir("offset")
+    rr.write_tif(d / "in" / "dn_off.tif", np.rint(rho * 1e4) + 1000, dtype="uint16")
+    rr.write_tif(d / "in" / "dn.tif", np.rint(rho * 1e4), dtype="uint16")
+    expect = np.clip(np.rint(np.clip(np.rint(rho[0] * 1e4) * np.float32(1e-4) * 10, 0, 1) * 255), 0, 255)
+
+    def run(tag, *extra):
+        o = d / f"out_{tag}"
+        code = inf.main(["--data-dir", str(d / "in"), "--output", str(o), "--report", str(o / "r.json"), *extra])
+        assert code == 0
+        return {k: rr.read_out(o / f"{k}_prob.tif").astype(int) for k in ("dn_off", "dn")}, \
+            json.loads((o / "r.json").read_text(encoding="utf-8"))
+
+    auto, rep = run("auto")
+    assert np.abs(auto["dn_off"] - expect).max() <= 1 and np.abs(auto["dn"] - expect).max() <= 1
+    rules = {Path(x["file"]).name: x for x in rep["input_rules"]}
+    assert rules["dn_off.tif"]["offset"] == -1000 and "subtracting 1000" in rules["dn_off.tif"]["rule"]
+    assert rules["dn.tif"]["offset"] == 0 and "no BOA offset" in rules["dn.tif"]["rule"]
+    manual, _ = run("manual", "--scale", "1e-4", "--offset", "-1000")
+    assert np.abs(manual["dn_off"] - expect).max() <= 1
+    plain, _ = run("plain", "--scale", "1e-4")
+    assert np.abs(plain["dn"] - expect).max() <= 1 and plain["dn_off"].min() == 255  # +0.1 -> prob 1: no guessing
+
+
+def test_l26_tiny_chips_all_sizes():
+    import numpy as np
+
+    from macroplastic.io import channel_names
+    from macroplastic.models import get_predictor
+
+    try:
+        p = get_predictor("lgbm", fallback=False, device="cpu")
+    except Exception as e:  # noqa: BLE001
+        pytest.skip(f"lgbm not loadable: {e}")
+    names = channel_names("marida")
+    for h, w in ((1, 1), (1, 2), (2, 3), (3, 3), (3, 40), (40, 1), (4, 4)):
+        a = np.random.default_rng(h * 100 + w).uniform(0.005, 0.05, (11, h, w)).astype(np.float32)
+        q = p.predict_proba(a, names)
+        q2 = p.predict_rows_many([p.prepare_rows(a, names)])[0]
+        assert q.shape == (h, w) and np.isfinite(q).all() and np.array_equal(q, q2)

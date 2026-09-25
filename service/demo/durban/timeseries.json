@@ -3,7 +3,7 @@
   "date": "2026-05-04",
   "model": "lgbm",
   "total_debris_area_m2": 23300.0,
-  "mean_index": 0.095,
+  "mean_index": 0.0951,
   "n_detections": 27,
   "cloud_frac": 0.0001,
   "n_cells_valid": 429
@@ -21,10 +21,10 @@
   "date": "2026-07-03",
   "model": "lgbm",
   "total_debris_area_m2": 28800.0,
-  "mean_index": 0.0817,
+  "mean_index": 0.0824,
   "n_detections": 17,
   "cloud_frac": 0.0002,
-  "n_cells_valid": 430
+  "n_cells_valid": 429
  },
  {
   "date": "2026-07-03",
@@ -33,6 +33,6 @@
   "mean_index": 0.0,
   "n_detections": 0,
   "cloud_frac": 0.0002,
-  "n_cells_valid": 430
+  "n_cells_valid": 429
  }
 ]
