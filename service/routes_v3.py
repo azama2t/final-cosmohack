@@ -33,12 +33,60 @@ def _err(e: ApiError) -> JSONResponse:
                         status_code=e.status, headers=CORS)
 
 
+# Allowed query-string parameters per endpoint (contract names). Unknown -> 400 BAD_PARAM with the allowed list
+# (jury-4: `sources=` in export was silently ignored). Plural aliases (the names of the saved-query object) are
+# accepted explicitly and mapped to the contract names. Endpoints not listed here are not checked.
+_OBS_P = {"bbox", "date_from", "date_to", "source", "profile", "scope", "record_type", "geometry", "limit", "offset"}
+_PAIR_P = {"sample_id", "scene_id", "status", "max_dt_hours", "date_from", "date_to", "source", "limit", "offset"}
+_SCENE_P = {"bbox", "date_from", "date_to", "mission", "status", "limit", "offset"}
+_ZONE_P = {"bbox", "date_from", "date_to", "scene_id", "status", "profile", "min_area_km2", "source", "scope",
+           "detection_status", "concentration_status", "limit", "offset"}
+PARAMS: dict = {
+    "meta": set(), "observations": _OBS_P, "observation": {"geometry"}, "pairs": _PAIR_P, "scenes": _SCENE_P,
+    "scene": set(), "scene_rgb": set(), "scene_quality": set(), "scene_mask": set(), "zones": _ZONE_P,
+    "zone": set(), "metrics": set(), "query_list": set(), "query_get": set(), "query_run": set(),
+    "query_add": set(), "query_delete": set(),
+    "export": None,  # checked inside (depends on layer / query_id)
+}
+ALIASES = {"sources": "source", "profiles": "profile", "scopes": "scope", "statuses": "status", "missions": "mission"}
+
+
+def check_params(q: dict, allowed: set, where: str) -> dict:
+    """Map explicit plural aliases, reject unknown parameters (400) and alias + name given together."""
+    out = {}
+    for k, v in q.items():
+        name = ALIASES.get(k, k) if ALIASES.get(k) in allowed else k
+        if name != k and name in q:
+            raise ApiError(400, "BAD_PARAM", f"{k} и {name} — один и тот же параметр, укажите один",
+                           {"param": k, "alias_of": name})
+        out[name] = v
+    unknown = sorted(k for k in out if k not in allowed)
+    if unknown:
+        raise ApiError(400, "BAD_PARAM", f"{where}: неизвестные параметры {', '.join(unknown)}",
+                       {"unknown": unknown, "allowed": sorted(allowed),
+                        "aliases": {a: n for a, n in ALIASES.items() if n in allowed}})
+    return out
+
+
 def api(fn):
-    """ApiError -> contract error JSON; anything else -> 500 INTERNAL (never an HTML/stack trace)."""
+    """ApiError -> contract error JSON; anything else -> 500 INTERNAL (never an HTML/stack trace).
+    Query-string parameters are validated against PARAMS[fn.__name__] (a hidden Request argument is injected)."""
+    sig = inspect.signature(fn)
+    has_req = any(p.annotation is Request or p.annotation == "Request" for p in sig.parameters.values())
+    allowed = PARAMS.get(fn.__name__, None)
+    where = fn.__name__
+
+    def _pre(kw):
+        rq = kw.pop("_api_request", None) if not has_req else next(
+            (v for v in kw.values() if isinstance(v, Request)), None)
+        if rq is not None and allowed is not None:
+            check_params(dict(rq.query_params.items()), allowed, rq.url.path)
+
     if inspect.iscoroutinefunction(fn):
         @functools.wraps(fn)
         async def wrapper(*a, **kw):
             try:
+                _pre(kw)
                 with cs.request_scope():  # files are stat()-ed once per request
                     return await fn(*a, **kw)
             except ApiError as e:
@@ -50,6 +98,7 @@ def api(fn):
         @functools.wraps(fn)
         def wrapper(*a, **kw):
             try:
+                _pre(kw)
                 with cs.request_scope():
                     return fn(*a, **kw)
             except ApiError as e:
@@ -57,11 +106,22 @@ def api(fn):
             except Exception as e:
                 traceback.print_exc()
                 return _err(ApiError(500, "INTERNAL", "Внутренняя ошибка сервера", {"type": type(e).__name__}))
+    if not has_req:
+        params = list(sig.parameters.values()) + [
+            inspect.Parameter("_api_request", inspect.Parameter.KEYWORD_ONLY, annotation=Request)]
+        wrapper.__signature__ = sig.replace(parameters=params)
     return wrapper
 
 
 def _q(request: Request) -> dict:
-    return {k: v for k, v in request.query_params.items()}
+    """Query parameters with plural aliases mapped to contract names (validation is done in `api`)."""
+    q = {k: v for k, v in request.query_params.items()}
+    return {(ALIASES[k] if k in ALIASES and ALIASES[k] not in q else k): v for k, v in q.items()}
+
+
+def _page(q: dict, n_default: int = 100000) -> tuple:
+    return (cs.parse_int(q.get("limit"), "limit", 1, 100000, n_default),
+            cs.parse_int(q.get("offset"), "offset", 0, 10 ** 7, 0))
 
 
 # ------------------------------------------------------------------ filter parsing (shared by list + export)
@@ -125,8 +185,11 @@ def observations(request: Request):
     q = _q(request)
     f = _obs_filters(q)
     geom = _geometry(q)
-    limit = cs.parse_int(q.get("limit"), "limit", 1, 100000, 5000)
-    return _ok(cs.observations_fc(cs.filter_samples(**f), geom, limit))
+    limit, offset = _page(q, 5000)
+    rows = cs.filter_samples(**f)
+    fc = cs.observations_fc(rows[offset:], geom, limit)
+    fc["total"], fc["offset"], fc["limit"] = len(rows), offset, limit
+    return _ok(fc)
 
 
 @router.get("/observations/{sample_id}", summary="Одно наблюдение + пары")
@@ -144,15 +207,25 @@ def observation(sample_id: str, request: Request):
 @router.get("/pairs", summary="Реестр пар «наблюдение ↔ снимок»")
 @api
 def pairs(request: Request):
-    items = cs.filter_pairs(**_pair_filters(_q(request)))
-    return _ok({"count": len(items), "empty_reason": cs.pairs_empty_reason(len(items)), "pairs": items})
+    q = _q(request)
+    items = cs.filter_pairs(**_pair_filters(q))
+    limit, offset = _page(q)
+    page = items[offset:offset + limit]
+    return _ok({"count": len(page), "total": len(items), "offset": offset, "limit": limit,
+                "empty_reason": cs.pairs_empty_reason(len(page)) if page or not items
+                else "Нет пар на этой странице (offset больше числа пар)", "pairs": page})
 
 
 @router.get("/scenes", summary="Снимки из реестра пар")
 @api
 def scenes(request: Request):
-    items = cs.filter_scenes(**_scene_filters(_q(request)))
-    return _ok({"count": len(items), "empty_reason": cs.scenes_empty_reason(len(items)), "scenes": items})
+    q = _q(request)
+    items = cs.filter_scenes(**_scene_filters(q))
+    limit, offset = _page(q)
+    page = items[offset:offset + limit]
+    return _ok({"count": len(page), "total": len(items), "offset": offset, "limit": limit,
+                "empty_reason": cs.scenes_empty_reason(len(page)) if page or not items
+                else "Нет снимков на этой странице (offset больше числа снимков)", "scenes": page})
 
 
 @router.get("/scenes/{scene_id}", summary="Снимок + зоны + пары")
@@ -201,7 +274,12 @@ def scene_mask(scene_id: str):
 @router.get("/zones", summary="Зоны проверки снимком (оценки модели); концентрация недоступна")
 @api
 def zones(request: Request):
-    return _ok(cs.zones_fc(cs.filter_zones(**_zone_filters(_q(request)))))
+    q = _q(request)
+    feats = cs.filter_zones(**_zone_filters(q))
+    limit, offset = _page(q)
+    fc = cs.zones_fc(feats[offset:offset + limit])
+    fc["total"], fc["offset"], fc["limit"] = len(feats), offset, limit
+    return _ok(fc)
 
 
 @router.get("/zones/{zone_id}", summary="Зона + связанные наблюдения")
@@ -269,12 +347,22 @@ def export(request: Request):
         raise ApiError(400, "BAD_PARAM", "layer: обязателен, observations | pairs | zones | detections",
                        {"param": "layer"})
     fmt = cs.parse_choice(q.get("format"), "format", ["geojson", "csv"], "geojson")
+    base = {"layer", "format"}
+    if "query_id" in q:
+        if not (q.get("query_id") or "").strip():
+            raise ApiError(400, "BAD_PARAM", "query_id: пустое значение (уберите параметр или укажите id)",
+                           {"param": "query_id"})
+        check_params(dict(request.query_params.items()), base | {"query_id", "geometry"}, "export (query_id)")
+    else:
+        lay = {"observations": _OBS_P, "pairs": _PAIR_P, "zones": _ZONE_P, "detections": _ZONE_P}[layer]
+        check_params(dict(request.query_params.items()), base | (lay - {"limit", "offset"}),
+                     f"export (layer={layer})")
     ran = None
     if q.get("query_id"):
         qr = cs.get_query(q["query_id"])["query"]
         ran = cs.run_query_layers(qr)  # the same executor as /queries/{id}/run
         q = {**_query_to_params(qr, "zones" if layer == "detections" else layer),
-             **{k: v for k, v in q.items() if k in ("geometry", "limit")}}
+             **{k: v for k, v in q.items() if k in ("geometry",)}}
     stamp = dt.date.today().isoformat()
     if layer == "observations":
         rows = ran["obs_rows"] if ran is not None else cs.filter_samples(**_obs_filters(q))

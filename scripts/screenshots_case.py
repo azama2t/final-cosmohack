@@ -228,6 +228,7 @@ def run(args) -> dict:
             page.wait_for_selector("[data-testid='zone-pairs'], [data-testid='zone-card'] .c-err", timeout=15000)
             wait_idle(page, 1500)
             shot(page, "03_zone_detected")
+            shot(page, "he460_t03_card")  # for the deck generator: strip card «связь не подтверждена»
             res["zone_card"] = page.evaluate("""() => ({link: document.querySelector('[data-testid=zone-link-title]')?.textContent,
               why: document.querySelector('[data-testid=zone-link-why]')?.textContent, px: document.querySelector('[data-testid=zone-suspicious]')?.textContent,
               det: document.querySelector('[data-testid=zone-det-status]')?.textContent,

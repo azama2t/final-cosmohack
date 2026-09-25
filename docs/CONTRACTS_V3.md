@@ -511,3 +511,19 @@ GET /api/v3/export?layer=detections: + properties.quality_rejected.
 GET /api/v3/meta.summary: + n_strips_quality_ok, n_suspicious_in_quality_ok_strips, n_suspicious_in_quality_rejected_strips.
 GET /api/v3/metrics.concentration: + selected {profile: "median_train"}, profiles[p].selected, profiles[p].selected_reason;
   field_estimate.scenarios {p25, p50, p75, n, unit, note} — квартили обучающего профиля.
+3.6 (продолжение, 25.09 23:50) — строгие параметры (жюри-4, Т5)
+  Неизвестный query-параметр у любого GET /api/v3/* → 400 BAD_PARAM,
+    details {unknown: [...], allowed: [...], aliases: {...}}.
+  Допустимые имена:
+    /observations: bbox, date_from, date_to, source, profile, scope, record_type, geometry, limit, offset
+    /pairs:        sample_id, scene_id, status, max_dt_hours, date_from, date_to, source, limit, offset
+    /scenes:       bbox, date_from, date_to, mission, status, limit, offset
+    /zones:        bbox, date_from, date_to, scene_id, status, profile, min_area_km2, source, scope,
+                   detection_status, concentration_status, limit, offset
+    /observations/{id}: geometry
+    /meta, /metrics, /queries, /queries/{id}, /queries/{id}/run, /zones/{id}, /scenes/{id}[/*.png]: без параметров
+    /export: layer, format + фильтры своего слоя без limit/offset; при query_id — только layer, format, query_id, geometry
+  Явные алиасы (имена полей сохранённого запроса): sources→source, profiles→profile, scopes→scope,
+    statuses→status, missions→mission. Алиас и основное имя одновременно → 400.
+  limit/offset работают у /observations, /pairs, /scenes, /zones. Ответ: count (на странице), total (всего), offset, limit.
+  export?query_id= с пустым значением → 400 BAD_PARAM (раньше выгружалось всё).

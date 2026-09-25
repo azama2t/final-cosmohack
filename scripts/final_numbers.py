@@ -54,7 +54,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def _load_json(p: Path):
     try:
-        with open(p, encoding="utf-8") as f:
+        with open(p, encoding="utf-8-sig") as f:
             return json.load(f)
     except Exception:
         return None
@@ -1257,7 +1257,8 @@ def _case_detector_current() -> dict:
                                 "h_out_ci95_pct": [_r(100 * x, 1) for x in (ho.get("ci95_stratified_bootstrap") or [])] or None,
                                 "h_in_n": hi.get("n"), "h_in_k": hi.get("k_accumulation"),
                                 "n_none_n": nn.get("n"), "n_none_k": nn.get("k_accumulation"),
-                                "kappa": _r((vr.get("repeatability") or {}).get("kappa_7class"), 2)}
+                                "kappa": _r((vr.get("repeatability") or {}).get("kappa_7class"), 2),
+                                "kappa_n": (vr.get("repeatability") or {}).get("n")}
     return out
 
 
@@ -1421,7 +1422,7 @@ def collect_case() -> dict:
     out["clean_clone"] = _case_clean_clone()
     out["detector_review"] = _case_detector_review()
     out["detector_review"]["marida_test_f1"] = (((out.get("detector") or {}).get("test") or {}).get("lgbm") or {}).get("f1")
-    out["detector_review"]["mode"] = ("прежний режим с гармонизацией water_median (до решения 25.09 22:40); "
+    out["detector_review"]["mode"] = ("прежний режим с гармонизацией water_median (до решения об отказе от неё, docs/DECISIONS.md); "
                                       "основание для отказа от неё, не текущий результат")
     out["detector_current"] = _case_detector_current()
     dc = out["detector_current"]

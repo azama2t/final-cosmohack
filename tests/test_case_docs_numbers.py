@@ -125,6 +125,31 @@ def test_every_number_in_texts_is_sourced(gen):
     assert not bad, f"числа без источника в final_numbers.json: {bad}"
 
 
+def test_no_previous_detector_mode_numbers_out_of_context(gen, fn):
+    """Числа прежнего режима детектора (с гармонизацией: 975 объектов, 721/724 на HE460 т.03, 6 в полосах) допустимы
+    только в предложении, явно помеченном «прежний режим». Текущий режим — case.detector_current."""
+    m, S, texts, _ = gen
+    dr = fn["case"].get("detector_review") or {}
+    old = {str(dr[key]) for key in ("n_obj", "he460_n_obj", "he460_n_out_strip") if isinstance(dr.get(key), int)}
+    cur = fn["case"].get("detector_current") or {}
+    old -= {str(cur.get(key)) for key in ("n_obj", "n_in_strip", "n_crops")}
+    chunks = {f"slide {i}": "\n".join(m.slide_strings(s)) for i, s in enumerate(S, 1)}
+    chunks.update({p.name: t for p, t in texts.items()})
+    bad = []
+    # README: контекст — абзац вместе со своим списком (жирный заголовок «Прежний режим …» помечает весь список)
+    for block in (ROOT / "README.md").read_text(encoding="utf-8").split("\n\n"):
+        for tok in re.findall(r"\b\d+\b", block):
+            if tok in old and "прежн" not in block.lower():
+                bad.append(f"README.md: «{block.strip()[:120]}»")
+    # дека, речь, демо, вопросы: контекст — одно предложение
+    for name, txt in chunks.items():
+        for sent in re.split(r"(?<=[.;!?])\s+|\n", txt):
+            for tok in re.findall(r"\b\d+\b", sent):
+                if tok in old and "прежн" not in sent.lower():
+                    bad.append(f"{name}: «{sent.strip()[:120]}»")
+    assert not bad, "числа прежнего режима детектора без пометки «прежний режим»:\n" + "\n".join(bad)
+
+
 def test_md_files_are_fresh(gen):
     _, _, texts, _ = gen
     for p, t in texts.items():

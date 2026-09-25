@@ -533,10 +533,10 @@ def case_sections_table(fn: dict) -> str:
                     f"{dc.get('protocol') or DASH} | `{dc.get('source') or DASH}` |")
     dr = s.get("sat_detector_review") or {}
     if dr.get("n_obj") is not None:
-        rows.append(f"| 6. Прежний режим с гармонизацией (до решения 22:40) — основание для отказа | {fmt(dr.get('n_obj'), None)} объектов, "
+        rows.append(f"| 6. Прежний режим с гармонизацией (до решения об отказе от неё, docs/DECISIONS.md) — основание для отказа | {fmt(dr.get('n_obj'), None)} объектов, "
                     f"в полосах {fmt(dr.get('n_in_strip'), None)}; без HE460 t03 ложные типы (блик, облака) {fmt(dr.get('wo_he460_false_share_pct'), 'f1')} %; "
                     f"визуально «вероятное скопление» ≈ {fmt(dr.get('visual_precision_pct'), 'f1')} % | "
-                    f"{dr.get('protocol') or DASH}; визуальная разметка — один аннотатор по вырезкам, не полевая | "
+                    f"{dr.get('protocol') or DASH}; визуальная разметка — ИИ-агент, один аннотатор, по вырезкам, не полевая | "
                     f"`{dr.get('source') or DASH}`, `reports/case_pairs/visual_review.json` |")
     return "\n".join(rows)
 

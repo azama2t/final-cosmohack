@@ -12,7 +12,7 @@
 
 Все числа ниже подставляются из `reports/final_numbers.json`. Этот файл собирает `scripts/final_numbers.py` из отчётов и конфигов, путь к каждому источнику указан рядом с числом. Подробный отчёт — [reports/report.md](reports/report.md), порядок запуска и время — [docs/CASE_RUN.md](docs/CASE_RUN.md), контракт API — [docs/CONTRACTS_V3.md](docs/CONTRACTS_V3.md), разбор постановки — [docs/CASE_ANALYSIS.md](docs/CASE_ANALYSIS.md), подготовительный этап — [docs/PREP.md](docs/PREP.md), дополнительные функции (в том числе подбор снимка под наблюдение, `/api/v3/pairfinder`) — [docs/EXTRA_FEATURES.md](docs/EXTRA_FEATURES.md), геометрия трансект по первоисточникам PANGAEA — [reports/case_geometry/summary.md](reports/case_geometry/summary.md).
 
-Материалы защиты кейса: презентация [reports/case_deck.pptx](reports/case_deck.pptx), речь на 4 минуты [docs/SPEECH.md](docs/SPEECH.md), сценарий демо [docs/DEMO.md](docs/DEMO.md), вопросы жюри с ответами [docs/QA.md](docs/QA.md). Все четыре генерирует `scripts/make_deck_case.py` из того же `reports/final_numbers.json`; README, отчёт, деку и ответы пересобирает одна команда `scriptssebuild_docs.py`, а `tests/test_case_docs_numbers.py` проверяет, что числа в них совпадают. Материалы подготовительного этапа (прежняя презентация, речь, демо и вопросы про индекс ‰ по живым снимкам) — в [docs/prep/](docs/prep/).
+Материалы защиты кейса: презентация [reports/case_deck.pptx](reports/case_deck.pptx), речь на 4 минуты [docs/SPEECH.md](docs/SPEECH.md), сценарий демо [docs/DEMO.md](docs/DEMO.md), вопросы жюри с ответами [docs/QA.md](docs/QA.md). Все четыре генерирует `scripts/make_deck_case.py` из того же `reports/final_numbers.json`; README, отчёт, деку и ответы пересобирает одна команда `scripts\case\build_docs.py`, а `tests/test_case_docs_numbers.py` проверяет, что числа в них совпадают. Материалы подготовительного этапа (прежняя презентация, речь, демо и вопросы про индекс ‰ по живым снимкам) — в [docs/prep/](docs/prep/).
 
 Числа разбиты на шесть разделов, у каждого свой источник и протокол (в `final_numbers.json` — поля `source` и `protocol` блока `case.sections`):
 
@@ -23,7 +23,7 @@
 | 3. Полевой отложенный test | S2 (14): ridge_log 30.0 против медианы 25.2, ΔMAE [−1.6; +12.9] — основная модель не лучше медианы; S1 (19): knn5_log 370.0 против медианы 371.1, ΔMAE [−60.7; +49.2] — разницы с медианой нет | отложенный участок маршрута (+ буфер 1 сут), состав зафиксирован до моделей (sha256 в configs/case_selection.yaml), посчитан один раз; основная модель против медианы dev на тех же событиях; ДИ — бутстреп по дням рейса test. Ограничение: ранняя разведка бейзлайнов видела все события профиля | `reports/case_conc/final_test.json, reports/case_conc/final_test_predictions.csv` |
 | 4. Эксперимент на снимках | 11 пар S2 (6 групп), весь мусор, не пластик: FDI ρ -0.75, p Холма 0.12, случайная вода сцены -0.52 — связь не установлена | пары, прошедшие маски качества; эталон — полевая плотность всего мусора (all_litter), не пластика; ранговая связь Спирмена, бутстреп по группам «район × день», поправка Холма, нулевая модель — случайная вода той же сцены | `reports/case_pairs/experiment.json` |
 | 5. Детектор на снимках пар (L2A), текущий режим | 5 объектов на 22 вырезках, в полосах обследования 0; гармонизация выключена (выбор по MARIDA val) | текущий режим детектора на вырезках Sentinel-2 L2A пар: LightGBM weights/lgbm, порог P ≥ 0.63, harmonize = 'none'; объекты — 8-связные компоненты на пригодной воде без объектов у облаков; «в полосе» — пересечение с растровой полосой обследования | `reports/case_pairs/detector_current.json (из data/pairs/quality/*/meta.json)` |
-| 6. Прежний режим с гармонизацией (до решения 22:40) — основание для отказа | 975 объектов, в полосах 6; без HE460 t03 ложные типы (блик, облака) 55.0 %; визуально «вероятное скопление» ≈ 1.7 % | 22 вырезки Sentinel-2 L2A пар; объекты пересобраны как в pair_quality.py; типы назначены правилами (grid.artifacts, край облака, мелкое облако по B11, блик по B11, берег), без ручной разметки; визуальная разметка — один аннотатор по вырезкам, не полевая | `reports/case_pairs/detector_review.json (разбор: reports/case_pairs/detector_review.md)`, `reports/case_pairs/visual_review.json` |
+| 6. Прежний режим с гармонизацией (до решения об отказе от неё, docs/DECISIONS.md) — основание для отказа | 975 объектов, в полосах 6; без HE460 t03 ложные типы (блик, облака) 55.0 %; визуально «вероятное скопление» ≈ 1.7 % | 22 вырезки Sentinel-2 L2A пар; объекты пересобраны как в pair_quality.py; типы назначены правилами (grid.artifacts, край облака, мелкое облако по B11, блик по B11, берег), без ручной разметки; визуальная разметка — ИИ-агент, один аннотатор, по вырезкам, не полевая | `reports/case_pairs/detector_review.json (разбор: reports/case_pairs/detector_review.md)`, `reports/case_pairs/visual_review.json` |
 
 ## Главное
 
@@ -79,7 +79,7 @@ powershell -ExecutionPolicy Bypass -File run.ps1
 - Клонировать обычным `git clone`. Концы строк у файлов данных зафиксированы в `.gitattributes` (`-text` для `data/**`, `task/**`, `reports/case_splits/**`), поэтому sha256 входов не зависят от настройки `core.autocrlf`.
 - `run.ps1` при первом запуске создаёт `.venv` и ставит пакеты — **для этого нужен интернет** (на чистом клоне ≈ 3 мин, CPU-вариант `.venv` ≈ 1,53 ГБ). На машине без NVIDIA берётся `requirements-cpu.txt`, ключ `-Cpu` включает этот вариант принудительно. Сервис поднимается на http://127.0.0.1:8000, документация API — http://127.0.0.1:8000/docs. Если порт занят — `-Port 8080`; без открытия браузера — `-NoBrowser`. Подложка карты (Esri, OSM) грузится из интернета; без сети данные кейса и API работают, но подложки не будет.
 - **Проверено на настоящем чистом клоне** ([reports/selfcheck/clean_clone_1941.md](reports/selfcheck/clean_clone_1941.md)): от `git clone` до карты на экране ≈ 7,5 мин на CPU — клон 76 с, установка пакетов и маршрут `-Case all -Offline -Cpu` 3 мин 17 с (сам маршрут 6.9 с), загрузка карты 8,1 с. Числа совпали с основным репозиторием.
-- `-Case all -Offline` на этой машине выполняется за **7.0 с** по шагам (плюс около 1,5 с на запуск Python). Время каждого шага записано в `reports/case_run/run_summary.json`.
+- `-Case all -Offline` на этой машине выполняется за **6.9 с** по шагам (плюс около 1,5 с на запуск Python). Время каждого шага записано в `reports/case_run/run_summary.json`.
 - **Чистый клон работает без сети.** В репозитории лежат:
   - кэш STAC `data/pairs/cache` (ответы на все 1272 запроса);
   - реестр кандидатов `data/pairs/*.csv` и вырезки масок `data/pairs/quality/`;
@@ -224,16 +224,16 @@ powershell -ExecutionPolicy Bypass -File run.ps1
 - Пропуски сосредоточены: 21 из 29 приходятся на 3 сцены, где полосы мусора размечены отдельными точками.
 - Вырезки удачных и ошибочных случаев (саргассум, пена, судно, кильватер, взвесь, органика, пропуск) — в `reports/case_detector/examples/`. Предсказания по патчам — `per_patch.csv`, по сценам — `fn_by_scene.csv`, по классам — `fp_by_class.csv`.
 
-**На спутниковых парах** детектор запускается на вырезках Sentinel-2 L2A вокруг полосы наблюдения. **Текущий режим — без гармонизации** (решение 25.09 22:40, [docs/DECISIONS.md](docs/DECISIONS.md)): на MARIDA val сдвиг каналов к медиане воды снижает F1 с 0.923 до 0.897 (сдвиг на сцену, ΔF1 -0.025 [-0.072; -0.013]; test не использовался).
+**На спутниковых парах** детектор запускается на вырезках Sentinel-2 L2A вокруг полосы наблюдения. **Текущий режим — без гармонизации** (решение об отказе от гармонизации, [docs/DECISIONS.md](docs/DECISIONS.md)): на MARIDA val сдвиг каналов к медиане воды снижает F1 с 0.923 до 0.897 (сдвиг на сцену, ΔF1 -0.025 [-0.072; -0.013]; test не использовался).
 - Текущий результат ([reports/case_pairs/detector_current.json](reports/case_pairs/detector_current.json), из `data/pairs/quality/*/meta.json`): на 22 вырезках **5 объектов, в полосах обследования 0**. Все объекты на одной вырезке (S3 HE460 transect03), вне полосы: по правилам разбора 1 судно и 4 одиночных пикселя; максимум P по вырезкам 0.15.
 - Поэтому у участков на карте нет подозрительных пикселей. Полевая плотность всего мусора на принятых черноморских парах от 52 до 976 шт./км² пиксельного сигнала не даёт. Это согласуется с физикой: гораздо меньше одного предмета на пиксель 10 м.
 
-**Прежний режим с гармонизацией (до решения 22:40) — основание для отказа от неё.** Разбор по правилам ([reports/case_pairs/detector_review.md](reports/case_pairs/detector_review.md)) и визуальная разметка ([reports/case_pairs/visual_review.md](reports/case_pairs/visual_review.md)) сделаны на детекциях прогона с `water_median`; к текущему результату они не относятся:
+**Прежний режим с гармонизацией (до решения об отказе от гармонизации ([docs/DECISIONS.md](docs/DECISIONS.md))) — основание для отказа от неё.** Разбор по правилам ([reports/case_pairs/detector_review.md](reports/case_pairs/detector_review.md)) и визуальная разметка ([reports/case_pairs/visual_review.md](reports/case_pairs/visual_review.md)) сделаны на детекциях прогона с `water_median`; к текущему результату они не относятся:
 - С гармонизацией на тех же 22 вырезках было 975 объектов, в полосах 6; все объекты в полосах — ложные (блик, мелкие облака, пена).
 - **Главный сложный фон реальных сцен — блик и мелкие облака**, в отличие от MARIDA test. Без одной сцены HE460 t03 ложные типы дают 55.0 % объектов (251): блик 26.7 %, края облаков и мелкие облака вне маски 25.1 %.
 - HE460 t03: 724 объекта, 721 из них вне полосы. 575 — одиночные пиксели; у 691 плоский белый спектр без отклика в SWIR, объекты равномерно разбросаны по ветреному морю. Вероятно, это барашки и пена, а не предметы, которые считало поле.
 - Гармонизация давала почти все срабатывания: без неё 5 объектов вместо 975. Цена отказа — пропуск судна с кильватером на T25.
-- Визуальная разметка 111 мест (один аннотатор по вырезкам, не полевая проверка; повторяемость κ = 0.77): «вероятное скопление» — 1 из 100 объектов вне полос (≈ 1.7 %, ДИ 0.0–5.0 %), 0 из 6 в полосах.
+- Визуальная разметка 111 мест (разметка ИИ-агентом по вырезкам: один аннотатор, не полевая проверка; κ = 0.77 — согласие с его же слепым повтором 20 мест): «вероятное скопление» — 1 из 100 объектов вне полос (≈ 1.7 %, ДИ 0.0–5.0 %), 0 из 6 в полосах.
 - Итог: точность на MARIDA test (F1 0.871) на снимки пар не переносится. Поэтому выбор режима сделан по MARIDA val, а не по этим парам.
 
 ## 5. Концентрация шт./км²
@@ -357,7 +357,7 @@ MAPE не используется: в реестре есть нули. Осн�
 
 | Что | Команда | Выход | Время |
 |---|---|---|---|
-| весь маршрут | `scripts\case\run_all.py all --offline` | `reports/case_run/run_summary.json` | 7.0 с |
+| весь маршрут | `scripts\case\run_all.py all --offline` | `reports/case_run/run_summary.json` | 6.9 с |
 | отбор записей | `scripts\case\run_all.py prepare --offline` | `data/case/selection_*.csv`, `data/case/run/registry_*.csv` | 0.1 с |
 | реестр пар (поиск STAC) | `scripts\case\find_pairs.py --point-scl 6` | `data/pairs/{events,candidates,best_per_event}.csv`, `reports/case_pairs/summary.md` | ≈ 2 мин с сетью, секунды из кэша |
 | маски и детектор на парах | `scripts\case\pair_quality.py` (`--force` — заново) | `data/pairs/quality/<событие>/`, `data/pairs/pair_quality.csv`, `reports/case_pairs/quality.md` | ≈ 4–5 мин с сетью |
@@ -368,8 +368,8 @@ MAPE не используется: в реестре есть нули. Осн�
 | детектор: кэш признаков MARIDA train и val (нужен перед полным прогоном) | `-c "import sys; sys.path[:0]=['scripts','src']; import train_lgbm as T; T.load_split('val'); T.load_split('train')"` — та же функция `load_split`, что в `scripts\train_lgbm.py`; нужен MARIDA в `data/MARIDA` | `out/l3_cache/{val,train}_win.npz` (test не читается) | ≈ 8 с (замер: val 328 патчей 2,9 с, train 694 патча 4,3 с; результат побайтно равен кэшу, на котором получены числа) |
 | детектор: полный прогон 7 моделей на val и test MARIDA | `scripts\case\detector_compare.py` (нужны MARIDA и кэш из предыдущей строки; RandomForest переобучается из train-кэша, если нет `data/case/detector_preds/rf_seed5.joblib`) | `reports/case_detector/*` | ≈ 130 с |
 | эксперимент на парах | `scripts\case\pairs_experiment.py --no-fetch` | `reports/case_pairs/experiment.{md,json}` | ≈ 3 мин с чтением FDI по сети |
-| согласованность API и экспорта | `scripts\case\consistency_check.py` | `reports/selfcheck/consistency_latest.md\|json` (в git; копии с датой не коммитятся) | 4 с |
-| тесты кейса | `-m pytest -q tests\test_case_*.py tests\test_api_v3.py` | 211 passed, 2 skipped, 0 failed (прогон 25.09.2026 23:17, `reports/case_run/case_tests.json`) | 18 с; вся папка `tests` — 10 мин 53 с на CPU |
+| согласованность API и экспорта | `scripts\case\consistency_check.py` | `reports/selfcheck/consistency_latest.md\|json` (в git; копии с датой не коммитятся) | 26 с |
+| тесты кейса | `-m pytest -q tests\test_case_*.py tests\test_api_v3.py` | 225 passed, 2 skipped, 0 failed (прогон 25.09.2026 23:54, `reports/case_run/case_tests.json`) | 18 с; вся папка `tests` — 10 мин 53 с на CPU |
 | **все документы** (README, отчёт, PREP, дека, речь, демо, вопросы) | `scripts\case\build_docs.py` — маршрут → тесты → `final_numbers.py` → `render_docs.py` → `make_deck_case.py` → сверка чисел (`tests/test_case_docs_numbers.py`) | `README.md`, `reports/report.md`, `docs/PREP.md`, `reports/case_deck.pptx`, `docs/{SPEECH,DEMO,QA}.md` | ≈ 1–2 мин |
 
 - Предсказания детектора на MARIDA (`data/case/detector_preds/*.npz`: вероятности основной модели и RandomForest, маски 7 моделей по патчам) лежат в git. Для пересчёта TP/FP/FN из них нужна разметка MARIDA (`data/MARIDA/patches/*_cl.tif`, как скачать — раздел 2). Без разметки `run_all eval` берёт числа из `reports/case_detector/metrics.json` и записывает его sha256. Полный прогон детекторов заново делает `detector_compare.py` по MARIDA.
@@ -419,6 +419,15 @@ curl "http://127.0.0.1:8000/api/v3/queries/<id>/run"          # повтор д�
 curl -OJ "http://127.0.0.1:8000/api/v3/export?layer=zones&format=geojson&detection_status=detected"
 ```
 
+То же в Windows PowerShell 5.1 (там `curl` — псевдоним `Invoke-WebRequest` с другими ключами):
+
+```powershell
+$q = Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/api/v3/queries -ContentType 'application/json; charset=utf-8' `
+      -Body ([Text.Encoding]::UTF8.GetBytes('{"name":"Чёрное море","query":{"sources":["S4_BLACK_SEA_DOORS3"]}}'))
+Invoke-RestMethod "http://127.0.0.1:8000/api/v3/queries/$($q.id)/run"
+Invoke-WebRequest "http://127.0.0.1:8000/api/v3/export?layer=zones&format=geojson" -OutFile zones.geojson
+```
+
 Маршрут кейса сохраняет готовые выгрузки в `out/case_export/`, список запросов — в `requests.json`:
 - наблюдения — 935;
 - пары — 4436;
@@ -428,9 +437,9 @@ curl -OJ "http://127.0.0.1:8000/api/v3/export?layer=zones&format=geojson&detecti
 - участки со статусом детекции «обнаружено» — 0 (при 0 подтверждённых пар их и должно быть 0; подозрительные пиксели — отдельный слой `detections`).
 
 Самопроверка `scripts/case/consistency_check.py` сравнивает по id четыре представления: алгоритм, JSON, CSV и GeoJSON. Последний прогон (`reports/selfcheck/consistency_latest.json`):
-- проверок 259: ok 259, расхождений 0 (подробности — в самом отчёте);
+- проверок 284: ok 284, расхождений 0 (подробности — в самом отчёте);
 - некорректные и пустые входы: 46 из 46 с верным кодом;
-- p95 ответа не выше 66 мс.
+- p95 ответа не выше 81 мс.
 
 ## 9. Структура
 

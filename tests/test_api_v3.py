@@ -857,3 +857,51 @@ def test_zone_quality_decision(client):
             assert p["quality_reject_reason"] == (pq[p["event_id"]]["reason"] or "error")
         assert rows[z["id"]]["quality_decision"] == exp
         assert rows[z["id"]]["quality_reject_reason"] == (p["quality_reject_reason"] or "")
+
+
+# ------------------------------------------------------------------ L62o (jury-4, T5): strict query parameters
+@pytest.mark.parametrize("url", ["/api/v3/meta?x=1", "/api/v3/observations?foo=1", "/api/v3/pairs?limt=2",
+                                 "/api/v3/zones?region=x", "/api/v3/scenes?source=S1_GPGP2018", "/api/v3/metrics?a=b",
+                                 "/api/v3/queries?x=1", "/api/v3/export?layer=observations&foo=1",
+                                 "/api/v3/export?layer=observations&limit=3",
+                                 "/api/v3/export?layer=zones&query_id=q_x&source=S1_GPGP2018"])
+def test_unknown_params_400(client, url):
+    r = client.get(url)
+    _err(r, 400, "BAD_PARAM")
+    d = r.json()["error"]["details"]
+    assert d["unknown"] and isinstance(d["allowed"], list)
+
+
+@pytest.mark.skipif(not HAS_SAMPLES, reason="нет task/macroplastic_marine_samples.csv")
+def test_plural_aliases_and_conflict(client):
+    a = client.get("/api/v3/observations", params={"sources": "S4_BLACK_SEA_DOORS3"}).json()
+    b = client.get("/api/v3/observations", params={"source": "S4_BLACK_SEA_DOORS3"}).json()
+    assert a["count"] == b["count"] == 33
+    rows = list(csv.DictReader(io.StringIO(client.get("/api/v3/export", params={
+        "layer": "observations", "format": "csv", "sources": "S4_BLACK_SEA_DOORS3"}).content.decode("utf-8-sig"))))
+    assert len(rows) == 33 and {r["source_id"] for r in rows} == {"S4_BLACK_SEA_DOORS3"}
+    _err(client.get("/api/v3/observations", params={"sources": "S4_BLACK_SEA_DOORS3", "source": "S1_GPGP2018"}),
+         400, "BAD_PARAM")
+
+
+@pytest.mark.skipif(not (HAS_PAIRS and HAS_SAMPLES), reason="нет реестра пар")
+def test_pairs_scenes_zones_paging(client):
+    allp = client.get("/api/v3/pairs").json()
+    p = client.get("/api/v3/pairs", params={"limit": 2, "offset": 3}).json()
+    assert p["count"] == 2 and p["total"] == allp["total"] == allp["count"]
+    assert [x["pair_id"] for x in p["pairs"]] == [x["pair_id"] for x in allp["pairs"][3:5]]
+    s = client.get("/api/v3/scenes", params={"limit": 1, "offset": 1}).json()
+    assert s["count"] == 1 and s["scenes"][0]["scene_id"] == client.get("/api/v3/scenes").json()["scenes"][1]["scene_id"]
+    z = client.get("/api/v3/zones", params={"limit": 1}).json()
+    assert z["count"] == 1 and z["total"] >= 1
+    o = client.get("/api/v3/observations", params={"limit": 2, "offset": 10}).json()
+    assert [f["id"] for f in o["features"]] == [f["id"] for f in client.get("/api/v3/observations").json()["features"][10:12]]
+    far = client.get("/api/v3/pairs", params={"offset": 10 ** 6}).json()
+    assert far["count"] == 0 and far["empty_reason"]
+    _err(client.get("/api/v3/pairs", params={"limit": 0}), 400, "BAD_PARAM")
+    _err(client.get("/api/v3/pairs", params={"offset": -1}), 400, "BAD_PARAM")
+
+
+def test_export_empty_query_id_400(client):
+    _err(client.get("/api/v3/export", params={"layer": "zones", "query_id": ""}), 400, "BAD_PARAM")
+    _err(client.get("/api/v3/export?layer=observations&query_id=%20"), 400, "BAD_PARAM")
