@@ -1,0 +1,41 @@
+{
+ "model": "weights/lgbm",
+ "when": "2026-09-25T16:29:14",
+ "note": "MARIDA test evaluated once after freezing; threshold from val; nothing selected on test",
+ "test_md": {
+  "f1_md": 0.8712871287128713,
+  "iou_md": 0.7719298245614035,
+  "precision_md": 0.8243559718969555,
+  "recall_md": 0.9238845144356955,
+  "tp": 352,
+  "fp": 75,
+  "fn": 29,
+  "threshold": 0.63,
+  "n_patches": 359,
+  "n_scenes": 15,
+  "md_px": 381,
+  "ci95": [
+   0.8225,
+   0.9202
+  ]
+ },
+ "val_md": {
+  "f1_md": 0.9226441631504922,
+  "iou_md": 0.856396866840731,
+  "precision_md": 0.9300567107750473,
+  "recall_md": 0.9153488372093024,
+  "tp": 984,
+  "fp": 74,
+  "fn": 91,
+  "threshold": 0.63,
+  "n_patches": 328,
+  "n_scenes": 12,
+  "md_px": 1075,
+  "ci95": [
+   0.877,
+   0.9701
+  ]
+ },
+ "reference": {},
+ "seconds": 64.8
+}

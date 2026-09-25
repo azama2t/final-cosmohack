@@ -52,14 +52,14 @@ def _full(name):
 def evaluate(model_dir: Path, split: str):
     meta = json.loads((model_dir / "meta.json").read_text(encoding="utf-8"))
     thr = float(meta["threshold"])
-    names = C.split_names(split)
+    # the only place allowed to read the MARIDA test split (l16_common refuses it on purpose)
+    names = [ln.strip() for ln in (C.MARIDA / "splits" / f"{split}_X.txt").read_text().splitlines() if ln.strip()]
     with ProcessPoolExecutor(max_workers=C.THREADS, initializer=_init, initargs=(str(model_dir),)) as ex:
         res = list(ex.map(_full, names, chunksize=4))
     prob = np.concatenate([r[0] for r in res])
     y = np.concatenate([r[1] for r in res]) == 1
     pid = np.concatenate([np.full(len(r[1]), i) for i, r in enumerate(res)])
-    scene = np.array([C.parse(names[i])["scene"] if "scene" in C.parse(names[i]) else names[i].rsplit("_", 1)[0]
-                      for i in range(len(names))])[pid]
+    scene = np.array([n.rsplit("_", 1)[0] for n in names])[pid]
     pred = prob >= thr
     tp, fp, fn, _ = C.confusion(y, pred)
     sc = C.scores(tp, fp, fn)

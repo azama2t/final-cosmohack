@@ -329,12 +329,24 @@ def robustness_text(fn: dict) -> str:
             f"FAIL {fmt(r.get('fail'), None)}")
 
 
+def _test_sentence(t: dict) -> str:
+    f1, ci = t.get("f1_md"), t.get("ci95")
+    if ci is None:  # scene-bootstrap CI lives in the one-time final-test report
+        try:
+            import json
+            ci = json.loads((ROOT / "reports" / "lgbm_final_test.json").read_text(encoding="utf-8"))["test_md"]["ci95"]
+        except (OSError, KeyError, ValueError):
+            ci = None
+    ci_txt = f", 95 % интервал по сценам {ci[0]:.3f}–{ci[1]:.3f}" if isinstance(ci, (list, tuple)) and len(ci) == 2 else ""
+    num = f": F1 Marine Debris **{f1:.3f}**{ci_txt}" if isinstance(f1, (int, float)) else ""
+    return f"Test MARIDA посчитан один раз на итоговой модели{num}; порог взят с val, после этого модель не менялась."
+
+
 def derived(fn: dict) -> dict:
     l3, l4 = fn.get("l3_lgbm") or {}, fn.get("l4_unet") or {}
     test_done = bool(l3.get("test"))
-    test_txt = (fn.get("test") or {}).get("text") or (
-        "Test MARIDA посчитан один раз на итоговой модели, после этого модель не менялась." if test_done else
-        "Test MARIDA будет посчитан один раз на итоговой модели; до этого все решения принимались только по val.")
+    test_txt = _test_sentence(l3["test"]) if test_done else ((fn.get("test") or {}).get("text") or (
+        "Test MARIDA будет посчитан один раз на итоговой модели; до этого все решения принимались только по val."))
 
     # --- quality of the final model (val; test only when it exists)
     rows = ["| Модель | Сплит | F1 Marine Debris | IoU Marine Debris | Precision | Recall | Порог |",

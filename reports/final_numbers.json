@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-25T13:56:23+03:00",
+ "generated": "2026-09-25T16:30:29+03:00",
  "note": "генерируется scripts/final_numbers.py; руками не править; null = ещё не посчитано",
  "l3_lgbm": {
   "available": true,
@@ -13,7 +13,14 @@
    "n_md_px": 1075
   },
   "val_at_0_5": null,
-  "test": null,
+  "test": {
+   "f1_md": 0.8713,
+   "iou_md": 0.7719,
+   "precision_md": 0.8244,
+   "recall_md": 0.9239,
+   "threshold": 0.63,
+   "n_md_px": 381
+  },
   "noise": {
    "n_seeds": 3,
    "f1_std": 0.0005,
@@ -150,6 +157,7 @@
   "n_window_features": 29,
   "sources": [
    "weights/lgbm/meta.json",
+   "reports/lgbm_final_test.json",
    "reports/l13_mados.json"
   ]
  },
@@ -2698,8 +2706,8 @@
   "command": "python inference.py --data-dir out/speed_chips --output out/speed_out --device {cpu|cuda}"
  },
  "test": {
-  "computed": false,
-  "text": "Test MARIDA будет посчитан один раз на итоговой модели; до этого все решения принимались только по val."
+  "computed": true,
+  "text": "Test MARIDA посчитан один раз на итоговой модели, после этого модель не менялась."
  },
  "baselines": {
   "available": true,
@@ -3190,8 +3198,8 @@
   "confirmed_reviewed": 0,
   "confirmed_share_of_reviewed": null,
   "by_status": {
-   "detected": 6416,
-   "under_review": 0,
+   "detected": 6415,
+   "under_review": 1,
    "confirmed": 0,
    "false_alarm": 0,
    "resolved": 0,
