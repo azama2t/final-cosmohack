@@ -48,3 +48,11 @@
 | `service/static/` | собранный фронт (не править руками; в git для чистого клона) | FastAPI |
 | `scripts/screenshots.py` | Playwright: 10 кадров UI, load/fps/ошибки консоли → `reports/ui_perf.md`, `--video` — демо-тур; `--gl gpu` для реального fps | ревью UI |
 | `reports/ui_perf.md` | журнал замеров UI | отчёт |
+| `scripts/tools/inspect_dataset.py` | обзор незнакомого датасета: группы имён, каналы/dtype/CRS/nodata, статистика, маски, баланс, пары снимок↔маска → HTML + summary.json | первые минуты хакатона |
+| `scripts/tools/label_forensics.py` | выводимость маски из спектра: деревья 3/4/5, LightGBM, пороги индексов, геометрия разметки; групповой сплит | первые минуты хакатона |
+| `scripts/tools/provenance_check.py` | пересечения наших данных с данными организатора: тайл+дата, bbox, SHA-1, pHash превью | первые минуты хакатона |
+| `src/macroplastic/organizer_adapter/` | YAML-конфиг → (C,H,W) отражательная способность + маска в схеме MARIDA; `python -m macroplastic.organizer_adapter` | переобучение на данных организаторов |
+| `configs/adapter_marida.yaml`, `configs/adapter_example.yaml` | конфиг MARIDA (самопроверка) и шаблон для организаторов | адаптер |
+| `tests/test_tools.py` | 7 тестов инструментов | pytest |
+| `docs/TOOLS.md` | план первых 60 минут и команды всех инструментов | команда |
+| `reports/tools/` | прогоны инструментов на MARIDA и на пожарном датасете прошлого хакатона | отчёт |

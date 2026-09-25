@@ -1,0 +1,522 @@
+<html><head><meta charset='utf-8'><title>label forensics</title><style>body{font-family:Segoe UI,Arial,sans-serif;background:#fcfcfb;color:#0b0b0b;margin:24px;max-width:1500px}table{border-collapse:collapse;font-size:12px}td,th{border:1px solid #ddd;padding:3px 6px}th{background:#f0efec}pre{background:#f4f3f0;padding:8px;font-size:11px;overflow:auto}code{background:#f0efec}</style></head><body><h1>Label forensics — marida</h1>
+<p>Файлов: 1022, групп (сцены/события) 48, GroupKFold k=3, выборка пикселей 125,449 (≤300 на класс×файл, веса = count/taken → F1 на полной популяции). Время 84 с.</p>
+<p>Признаки (19): B1, B2, B3, B4, B5, B6, B7, B8, B8A, B11, B12, NDVI, NRD, NDWI, NBR, NDMI, FDI, FAI, BSI</p>
+<h2>Выводы (автоматически)</h2>
+<li><b>Marine Debris</b> (1): частично выводима из спектра пикселя (лучший CV F1 0.68) [дерево-3 0.07, дерево-5 0.15, LGBM 0.68, AUC 0.996]; лучший порог <code>NDVI &gt;= 0.0189</code> CV F1 0.1169</li>
+<li><b>Dense Sargassum</b> (2): хорошо выводима из спектра пикселя (лучший CV F1 0.81) [дерево-3 0.68, дерево-5 0.74, LGBM 0.81, AUC 0.999]; лучший порог <code>NDVI &gt;= 0.394</code> CV F1 0.7302</li>
+<li><b>Sparse Sargassum</b> (3): частично выводима из спектра пикселя (лучший CV F1 0.62) [дерево-3 0.21, дерево-5 0.13, LGBM 0.62, AUC 0.991]; лучший порог <code>NDVI &gt;= 0.2302</code> CV F1 0.318</li>
+<li><b>Natural Organic Material</b> (4): из спектра пикселя выводима слабо (лучший CV F1 0.29) [дерево-3 0.12, дерево-5 0.17, LGBM 0.29, AUC 0.945]; лучший порог <code>NDVI &gt;= 0.1251</code> CV F1 0.2198</li>
+<li><b>Ship</b> (5): из спектра пикселя выводима слабо (лучший CV F1 0.38) [дерево-3 0.17, дерево-5 0.17, LGBM 0.38, AUC 0.963]; лучший порог <code>B11 &gt;= 0.05556</code> CV F1 0.1402</li>
+<li><b>Clouds</b> (6): хорошо выводима из спектра пикселя (лучший CV F1 0.76) [дерево-3 0.63, дерево-5 0.66, LGBM 0.76, AUC 0.982]; лучший порог <code>B12 &gt;= 0.02305</code> CV F1 0.7404</li>
+<li><b>Marine Water</b> (7): хорошо выводима из спектра пикселя (лучший CV F1 0.79) [дерево-3 0.73, дерево-5 0.79, LGBM 0.73, AUC 0.951]; лучший порог <code>B3 &lt;= 0.03535</code> CV F1 0.7531; компоненты почти прямоугольные (полигоны/тайлы?)</li>
+<li><b>Sediment-Laden Water</b> (8): ОДИН ПОРОГ почти воспроизводит маску: <code>FDI &gt;= 0.05911</code> CV F1 0.94 [дерево-3 0.97, дерево-5 0.95, LGBM 0.98, AUC 0.992]</li>
+<li><b>Foam</b> (9): частично выводима из спектра пикселя (лучший CV F1 0.55) [дерево-3 0.23, дерево-5 0.14, LGBM 0.55, AUC 0.976]; лучший порог <code>FDI &gt;= 0.313</code> CV F1 0.1276; компоненты почти прямоугольные (полигоны/тайлы?)</li>
+<li><b>Turbid Water</b> (10): хорошо выводима из спектра пикселя (лучший CV F1 0.84) [дерево-3 0.67, дерево-5 0.84, LGBM 0.75, AUC 0.984]; лучший порог <code>B7 &lt;= 0.03155</code> CV F1 0.6261</li>
+<li><b>Shallow Water</b> (11): из спектра пикселя выводима слабо (лучший CV F1 0.25) [дерево-3 0.19, дерево-5 0.25, LGBM 0.22, AUC 0.900]; лучший порог <code>NDMI &lt;= 0.1597</code> CV F1 0.1614</li>
+<li><b>Waves</b> (12): из спектра пикселя выводима слабо (лучший CV F1 0.11) [дерево-3 0.04, дерево-5 0.03, LGBM 0.11, AUC 0.908]; лучший порог <code>NDVI &gt;= 0.04186</code> CV F1 0.0527</li>
+<li><b>Cloud Shadows</b> (13): из спектра пикселя выводима слабо (лучший CV F1 0.16) [дерево-3 0.08, дерево-5 0.13, LGBM 0.12, AUC 0.897]; лучший порог <code>B1 &lt;= 0.02562</code> CV F1 0.1631</li>
+<li><b>Wakes</b> (14): из спектра пикселя выводима слабо (лучший CV F1 0.12) [дерево-3 0.04, дерево-5 0.12, LGBM 0.06, AUC 0.846]; лучший порог <code>NBR &lt;= 0.2593</code> CV F1 0.0604</li>
+<li><b>Mixed Water</b> (15): из спектра пикселя выводима слабо (лучший CV F1 0.15) [дерево-3 0.00, дерево-5 0.01, LGBM 0.15, AUC 0.947]; лучший порог <code>NRD &gt;= -0.0008659</code> CV F1 0.0034; компоненты почти прямоугольные (полигоны/тайлы?)</li>
+<h2>Выводимость из спектра (one-vs-rest, CV F1 на полной популяции пикселей, порог подобран на ДРУГИХ фолдах)</h2>
+<p>AUC — ROC-AUC OOF-скоров (не зависит от доли класса; 0.5 = случайно, 1 = разделимо). F1 зависит от доли класса: для редких классов (MD) даже хороший AUC даёт низкий F1 из-за ложных срабатываний на больших классах.</p>
+<table>
+<tr><th>класс</th><th>px (полн.)</th><th>файлов</th><th>дерево3</th><th>дерево4</th><th>дерево5</th><th>AUC дерево5</th><th>LGBM (порог CV)</th><th>AUC LGBM</th><th>лучший порог</th><th>CV F1 порога</th></tr>
+<tr><td>1 Marine Debris</td><td>3,018</td><td>272</td><td>0.068±0.05</td><td>0.099±0.14</td><td>0.149±0.10</td><td>0.955</td><td>0.678</td><td>0.996</td><td><code>NDVI &gt;= 0.0189</code></td><td>0.117</td></tr>
+<tr><td>2 Dense Sargassum</td><td>2,037</td><td>36</td><td>0.678±0.14</td><td>0.725±0.14</td><td>0.740±0.18</td><td>0.965</td><td>0.806</td><td>0.999</td><td><code>NDVI &gt;= 0.394</code></td><td>0.730</td></tr>
+<tr><td>3 Sparse Sargassum</td><td>1,476</td><td>82</td><td>0.211±0.24</td><td>0.185±0.26</td><td>0.131±0.11</td><td>0.963</td><td>0.621</td><td>0.991</td><td><code>NDVI &gt;= 0.2302</code></td><td>0.318</td></tr>
+<tr><td>4 Natural Organic Material</td><td>815</td><td>55</td><td>0.118±0.10</td><td>0.038±0.05</td><td>0.174±0.17</td><td>0.793</td><td>0.286</td><td>0.945</td><td><code>NDVI &gt;= 0.1251</code></td><td>0.220</td></tr>
+<tr><td>5 Ship</td><td>4,629</td><td>131</td><td>0.172±0.21</td><td>0.150±0.16</td><td>0.170±0.18</td><td>0.920</td><td>0.376</td><td>0.963</td><td><code>B11 &gt;= 0.05556</code></td><td>0.140</td></tr>
+<tr><td>6 Clouds</td><td>84,557</td><td>136</td><td>0.629±0.15</td><td>0.701±0.11</td><td>0.656±0.13</td><td>0.968</td><td>0.759</td><td>0.982</td><td><code>B12 &gt;= 0.02305</code></td><td>0.740</td></tr>
+<tr><td>7 Marine Water</td><td>105,716</td><td>644</td><td>0.729±0.05</td><td>0.720±0.10</td><td>0.793±0.04</td><td>0.939</td><td>0.731</td><td>0.951</td><td><code>B3 &lt;= 0.03535</code></td><td>0.753</td></tr>
+<tr><td>8 Sediment-Laden Water</td><td>279,900</td><td>38</td><td>0.968±0.02</td><td>0.815±0.22</td><td>0.947±0.05</td><td>0.969</td><td>0.982</td><td>0.992</td><td><code>FDI &gt;= 0.05911</code></td><td>0.939</td></tr>
+<tr><td>9 Foam</td><td>838</td><td>44</td><td>0.227±0.16</td><td>0.124±0.16</td><td>0.141±0.18</td><td>0.907</td><td>0.548</td><td>0.976</td><td><code>FDI &gt;= 0.313</code></td><td>0.128</td></tr>
+<tr><td>10 Turbid Water</td><td>125,386</td><td>165</td><td>0.671±0.26</td><td>0.849±0.03</td><td>0.839±0.06</td><td>0.977</td><td>0.747</td><td>0.984</td><td><code>B7 &lt;= 0.03155</code></td><td>0.626</td></tr>
+<tr><td>11 Shallow Water</td><td>14,863</td><td>49</td><td>0.190±0.10</td><td>0.160±0.13</td><td>0.248±0.17</td><td>0.792</td><td>0.224</td><td>0.900</td><td><code>NDMI &lt;= 0.1597</code></td><td>0.161</td></tr>
+<tr><td>12 Waves</td><td>3,962</td><td>41</td><td>0.045±0.03</td><td>0.044±0.02</td><td>0.030±0.03</td><td>0.833</td><td>0.107</td><td>0.908</td><td><code>NDVI &gt;= 0.04186</code></td><td>0.053</td></tr>
+<tr><td>13 Cloud Shadows</td><td>8,079</td><td>58</td><td>0.083±0.12</td><td>0.082±0.07</td><td>0.128±0.13</td><td>0.815</td><td>0.121</td><td>0.897</td><td><code>B1 &lt;= 0.02562</code></td><td>0.163</td></tr>
+<tr><td>14 Wakes</td><td>6,920</td><td>77</td><td>0.044±0.05</td><td>0.032±0.03</td><td>0.115±0.09</td><td>0.829</td><td>0.060</td><td>0.846</td><td><code>NBR &lt;= 0.2593</code></td><td>0.060</td></tr>
+<tr><td>15 Mixed Water</td><td>318</td><td>104</td><td>0.003±0.00</td><td>0.006±0.01</td><td>0.009±0.00</td><td>0.862</td><td>0.147</td><td>0.947</td><td><code>NRD &gt;= -0.0008659</code></td><td>0.003</td></tr>
+</table>
+<h2>Мультиклассовые модели (CV F1 по классам: argmax и LGBM с порогом)</h2>
+<table>
+<tr><th>класс</th><th>tree5_argmax</th><th>lgbm_argmax</th><th>lgbm_thr</th></tr>
+<tr><td>1 Marine Debris</td><td>0.137</td><td>0.638</td><td>0.678</td></tr>
+<tr><td>2 Dense Sargassum</td><td>0.902</td><td>0.905</td><td>0.806</td></tr>
+<tr><td>3 Sparse Sargassum</td><td>0.533</td><td>0.630</td><td>0.621</td></tr>
+<tr><td>4 Natural Organic Material</td><td>0.316</td><td>0.470</td><td>0.286</td></tr>
+<tr><td>5 Ship</td><td>0.146</td><td>0.230</td><td>0.376</td></tr>
+<tr><td>6 Clouds</td><td>0.685</td><td>0.807</td><td>0.759</td></tr>
+<tr><td>7 Marine Water</td><td>0.346</td><td>0.409</td><td>0.731</td></tr>
+<tr><td>8 Sediment-Laden Water</td><td>0.825</td><td>0.969</td><td>0.982</td></tr>
+<tr><td>9 Foam</td><td>0.120</td><td>0.385</td><td>0.548</td></tr>
+<tr><td>10 Turbid Water</td><td>0.641</td><td>0.859</td><td>0.747</td></tr>
+<tr><td>11 Shallow Water</td><td>0.148</td><td>0.287</td><td>0.224</td></tr>
+<tr><td>12 Waves</td><td>0.028</td><td>0.047</td><td>0.107</td></tr>
+<tr><td>13 Cloud Shadows</td><td>0.022</td><td>0.163</td><td>0.121</td></tr>
+<tr><td>14 Wakes</td><td>0.000</td><td>0.063</td><td>0.060</td></tr>
+<tr><td>15 Mixed Water</td><td>0.000</td><td>0.082</td><td>0.147</td></tr>
+</table>
+<h2>Геометрия разметки</h2>
+<p>interior = доля пикселей класса, переживших эрозию 3×3; opening_keeps = доля, переживших открытие 3×3 (≈1 → гладкие полигоны/морфология; ≈0 → точки/линии толщиной 1–2 px); grad edge/int = медиана градиента яркости на границе метки / внутри (≫1 → край метки идёт по краю объекта; ≈1 → край нарисован не по спектру); recall edge/int — полнота дерева-5 на краевых/внутренних пикселях; border8 = доля пикселей класса в 8-px рамке тайла / ожидаемая (≫1 — метки у краёв, ≪1 — чипы вырезаны вокруг объектов); centroid = средний сдвиг центра масс класса от центра тайла (0..0.71).</p>
+<table>
+<tr><th>класс</th><th>компонент</th><th>медиана размера</th><th>p90</th><th>1-px доля</th><th>rect мед.</th><th>interior</th><th>opening_keeps</th><th>closing_adds</th><th>grad edge/int</th><th>grad edge/all</th><th>grad ring/all</th><th>recall edge</th><th>recall int</th><th>border1</th><th>border8</th><th>centroid</th></tr>
+<tr><td>1 Marine Debris</td><td>1107</td><td>2.0</td><td>5.0</td><td>0.37</td><td>0.70</td><td>0.01</td><td>0.06</td><td>0.00</td><td>1.00</td><td>1.32</td><td>1.16</td><td>0.57</td><td>0.09</td><td>1.18</td><td>1.04</td><td>0.38</td></tr>
+<tr><td>2 Dense Sargassum</td><td>59</td><td>10.0</td><td>90.6</td><td>0.05</td><td>0.82</td><td>0.48</td><td>0.87</td><td>0.00</td><td>1.93</td><td>1.12</td><td>0.95</td><td>0.91</td><td>0.96</td><td>1.32</td><td>1.04</td><td>0.35</td></tr>
+<tr><td>3 Sparse Sargassum</td><td>219</td><td>4.0</td><td>15.0</td><td>0.14</td><td>0.89</td><td>0.06</td><td>0.24</td><td>0.03</td><td>1.64</td><td>1.00</td><td>0.91</td><td>0.37</td><td>0.19</td><td>0.89</td><td>1.08</td><td>0.36</td></tr>
+<tr><td>4 Natural Organic Material</td><td>131</td><td>2.0</td><td>12.0</td><td>0.36</td><td>0.85</td><td>0.12</td><td>0.31</td><td>0.00</td><td>2.27</td><td>1.73</td><td>1.22</td><td>0.69</td><td>0.11</td><td>1.43</td><td>0.78</td><td>0.35</td></tr>
+<tr><td>5 Ship</td><td>148</td><td>15.5</td><td>86.3</td><td>0.00</td><td>0.80</td><td>0.28</td><td>0.79</td><td>0.00</td><td>1.78</td><td>3.26</td><td>0.95</td><td>0.42</td><td>0.46</td><td>0.70</td><td>1.13</td><td>0.39</td></tr>
+<tr><td>6 Clouds</td><td>248</td><td>109.5</td><td>794.3</td><td>0.00</td><td>0.75</td><td>0.80</td><td>0.99</td><td>0.00</td><td>1.00</td><td>1.08</td><td>0.06</td><td>0.68</td><td>0.81</td><td>1.03</td><td>1.00</td><td>0.38</td></tr>
+<tr><td>7 Marine Water</td><td>1855</td><td>2.0</td><td>26.6</td><td>0.32</td><td>1.00</td><td>0.82</td><td>0.96</td><td>0.00</td><td>1.00</td><td>0.48</td><td>1.83</td><td>0.88</td><td>0.95</td><td>0.95</td><td>0.98</td><td>0.36</td></tr>
+<tr><td>8 Sediment-Laden Water</td><td>38</td><td>2355.0</td><td>19801.2</td><td>0.00</td><td>0.69</td><td>0.96</td><td>1.00</td><td>0.00</td><td>0.92</td><td>0.98</td><td>nan</td><td>0.85</td><td>0.93</td><td>0.99</td><td>1.00</td><td>0.40</td></tr>
+<tr><td>9 Foam</td><td>71</td><td>6.0</td><td>23.0</td><td>0.13</td><td>0.91</td><td>0.15</td><td>0.48</td><td>0.00</td><td>1.81</td><td>1.03</td><td>1.03</td><td>0.14</td><td>0.06</td><td>1.02</td><td>1.05</td><td>0.41</td></tr>
+<tr><td>10 Turbid Water</td><td>290</td><td>4.0</td><td>870.4</td><td>0.02</td><td>0.73</td><td>0.89</td><td>0.99</td><td>0.00</td><td>0.95</td><td>0.93</td><td>1.60</td><td>0.72</td><td>0.85</td><td>1.02</td><td>1.01</td><td>0.43</td></tr>
+<tr><td>11 Shallow Water</td><td>64</td><td>50.5</td><td>357.6</td><td>0.00</td><td>0.73</td><td>0.79</td><td>0.99</td><td>0.00</td><td>1.07</td><td>1.02</td><td>nan</td><td>0.37</td><td>0.30</td><td>0.95</td><td>0.96</td><td>0.36</td></tr>
+<tr><td>12 Waves</td><td>124</td><td>26.0</td><td>68.0</td><td>0.00</td><td>0.60</td><td>0.17</td><td>0.64</td><td>0.00</td><td>1.07</td><td>1.00</td><td>0.61</td><td>0.12</td><td>0.29</td><td>0.99</td><td>0.91</td><td>0.38</td></tr>
+<tr><td>13 Cloud Shadows</td><td>81</td><td>31.0</td><td>195.0</td><td>0.00</td><td>0.75</td><td>0.66</td><td>0.96</td><td>0.00</td><td>1.24</td><td>0.08</td><td>0.53</td><td>0.48</td><td>0.36</td><td>0.87</td><td>1.02</td><td>0.38</td></tr>
+<tr><td>14 Wakes</td><td>96</td><td>28.0</td><td>189.0</td><td>0.01</td><td>0.47</td><td>0.18</td><td>0.53</td><td>0.00</td><td>0.98</td><td>1.05</td><td>1.27</td><td>0.29</td><td>0.42</td><td>1.22</td><td>1.03</td><td>0.39</td></tr>
+<tr><td>15 Mixed Water</td><td>172</td><td>1.5</td><td>3.0</td><td>0.50</td><td>1.00</td><td>0.00</td><td>0.00</td><td>0.02</td><td>nan</td><td>1.54</td><td>1.25</td><td>0.69</td><td>nan</td><td>0.51</td><td>0.55</td><td>0.38</td></tr>
+</table>
+<h2>Лучшие одиночные пороги (топ-3 признака на класс)</h2>
+<li>1 Marine Debris: <code>NDVI &gt;= 0.0189</code> — CV F1 0.1169, in-sample F1 0.1157</li>
+<li>1 Marine Debris: <code>NRD &gt;= 0.001101</code> — CV F1 0.1041, in-sample F1 0.1059</li>
+<li>1 Marine Debris: <code>FAI &gt;= 0.002344</code> — CV F1 0.0705, in-sample F1 0.0628</li>
+<li>2 Dense Sargassum: <code>NDVI &gt;= 0.394</code> — CV F1 0.7302, in-sample F1 0.8266</li>
+<li>2 Dense Sargassum: <code>NDWI &lt;= -0.3898</code> — CV F1 0.6626, in-sample F1 0.8137</li>
+<li>2 Dense Sargassum: <code>FAI &gt;= 0.06857</code> — CV F1 0.647, in-sample F1 0.7198</li>
+<li>3 Sparse Sargassum: <code>NDVI &gt;= 0.2302</code> — CV F1 0.318, in-sample F1 0.3668</li>
+<li>3 Sparse Sargassum: <code>NRD &gt;= 0.00999</code> — CV F1 0.1569, in-sample F1 0.1792</li>
+<li>3 Sparse Sargassum: <code>NDWI &lt;= -0.2858</code> — CV F1 0.1285, in-sample F1 0.222</li>
+<li>4 Natural Organic Material: <code>NDVI &gt;= 0.1251</code> — CV F1 0.2198, in-sample F1 0.1912</li>
+<li>4 Natural Organic Material: <code>NRD &gt;= 0.01399</code> — CV F1 0.2063, in-sample F1 0.1382</li>
+<li>4 Natural Organic Material: <code>FAI &gt;= 0.02619</code> — CV F1 0.1531, in-sample F1 0.1147</li>
+<li>5 Ship: <code>B11 &gt;= 0.05556</code> — CV F1 0.1402, in-sample F1 0.0978</li>
+<li>5 Ship: <code>BSI &gt;= 0.09619</code> — CV F1 0.1363, in-sample F1 0.139</li>
+<li>5 Ship: <code>B12 &gt;= 0.03098</code> — CV F1 0.1137, in-sample F1 0.0808</li>
+<li>6 Clouds: <code>B12 &gt;= 0.02305</code> — CV F1 0.7404, in-sample F1 0.8019</li>
+<li>6 Clouds: <code>B11 &gt;= 0.03803</code> — CV F1 0.738, in-sample F1 0.7966</li>
+<li>6 Clouds: <code>B1 &gt;= 0.08301</code> — CV F1 0.6719, in-sample F1 0.7622</li>
+<li>7 Marine Water: <code>B3 &lt;= 0.03535</code> — CV F1 0.7531, in-sample F1 0.7784</li>
+<li>7 Marine Water: <code>B4 &lt;= 0.02346</code> — CV F1 0.6541, in-sample F1 0.7214</li>
+<li>7 Marine Water: <code>NRD &gt;= -0.008248</code> — CV F1 0.6336, in-sample F1 0.6381</li>
+<li>8 Sediment-Laden Water: <code>FDI &gt;= 0.05911</code> — CV F1 0.9391, in-sample F1 0.9545</li>
+<li>8 Sediment-Laden Water: <code>B4 &gt;= 0.09584</code> — CV F1 0.8962, in-sample F1 0.9215</li>
+<li>8 Sediment-Laden Water: <code>B5 &gt;= 0.07745</code> — CV F1 0.8864, in-sample F1 0.9123</li>
+<li>9 Foam: <code>FDI &gt;= 0.313</code> — CV F1 0.1276, in-sample F1 0.2124</li>
+<li>9 Foam: <code>B4 &gt;= 0.169</code> — CV F1 0.0529, in-sample F1 0.0198</li>
+<li>9 Foam: <code>NRD &lt;= -0.08276</code> — CV F1 0.0404, in-sample F1 0.0708</li>
+<li>10 Turbid Water: <code>B7 &lt;= 0.03155</code> — CV F1 0.6261, in-sample F1 0.6468</li>
+<li>10 Turbid Water: <code>B5 &lt;= 0.03574</code> — CV F1 0.6073, in-sample F1 0.6177</li>
+<li>10 Turbid Water: <code>B8 &lt;= 0.02865</code> — CV F1 0.6025, in-sample F1 0.6587</li>
+<li>11 Shallow Water: <code>NDMI &lt;= 0.1597</code> — CV F1 0.1614, in-sample F1 0.1525</li>
+<li>11 Shallow Water: <code>NDWI &gt;= 0.7057</code> — CV F1 0.1184, in-sample F1 0.1364</li>
+<li>11 Shallow Water: <code>NBR &lt;= 0.2794</code> — CV F1 0.1108, in-sample F1 0.1527</li>
+<li>12 Waves: <code>NDVI &gt;= 0.04186</code> — CV F1 0.0527, in-sample F1 0.0736</li>
+<li>12 Waves: <code>B12 &gt;= 0.009554</code> — CV F1 0.0457, in-sample F1 0.0384</li>
+<li>12 Waves: <code>B11 &gt;= 0.01332</code> — CV F1 0.0449, in-sample F1 0.0383</li>
+<li>13 Cloud Shadows: <code>B1 &lt;= 0.02562</code> — CV F1 0.1631, in-sample F1 0.2227</li>
+<li>13 Cloud Shadows: <code>B2 &lt;= 0.02233</code> — CV F1 0.1213, in-sample F1 0.1471</li>
+<li>13 Cloud Shadows: <code>NBR &lt;= 0.3849</code> — CV F1 0.0775, in-sample F1 0.0796</li>
+<li>14 Wakes: <code>NBR &lt;= 0.2593</code> — CV F1 0.0604, in-sample F1 0.0703</li>
+<li>14 Wakes: <code>B3 &lt;= 0.04175</code> — CV F1 0.0576, in-sample F1 0.0574</li>
+<li>14 Wakes: <code>NDMI &lt;= 0.1308</code> — CV F1 0.0564, in-sample F1 0.0704</li>
+<li>15 Mixed Water: <code>NRD &gt;= -0.0008659</code> — CV F1 0.0034, in-sample F1 0.0044</li>
+<li>15 Mixed Water: <code>B3 &lt;= 0.04127</code> — CV F1 0.0031, in-sample F1 0.0036</li>
+<li>15 Mixed Water: <code>NDVI &gt;= 0.006312</code> — CV F1 0.0025, in-sample F1 0.0039</li>
+<h2>Правила деревьев глубины 3</h2>
+<h3>Мультикласс</h3>
+<pre>
+|--- NDVI &lt;= 0.0968
+|   |--- NDMI &lt;= 0.7593
+|   |   |--- NDWI &lt;= 0.4344
+|   |   |   |--- class: 6
+|   |   |--- NDWI &gt;  0.4344
+|   |   |   |--- class: 10
+|   |--- NDMI &gt;  0.7593
+|   |   |--- BSI &lt;= -0.2165
+|   |   |   |--- class: 1
+|   |   |--- BSI &gt;  -0.2165
+|   |   |   |--- class: 8
+|--- NDVI &gt;  0.0968
+|   |--- FDI &lt;= 0.1202
+|   |   |--- BSI &lt;= -0.2766
+|   |   |   |--- class: 3
+|   |   |--- BSI &gt;  -0.2766
+|   |   |   |--- class: 4
+|   |--- FDI &gt;  0.1202
+|   |   |--- B3 &lt;= 0.0322
+|   |   |   |--- class: 2
+|   |   |--- B3 &gt;  0.0322
+|   |   |   |--- class: 2
+</pre>
+<h3>1 Marine Debris (1 = класс)</h3>
+<pre>
+|--- FAI &lt;= -0.0011
+|   |--- NDVI &lt;= -0.1639
+|   |   |--- NDVI &lt;= -0.1980
+|   |   |   |--- class: False
+|   |   |--- NDVI &gt;  -0.1980
+|   |   |   |--- class: False
+|   |--- NDVI &gt;  -0.1639
+|   |   |--- NBR &lt;= 0.4521
+|   |   |   |--- class: False
+|   |   |--- NBR &gt;  0.4521
+|   |   |   |--- class: True
+|--- FAI &gt;  -0.0011
+|   |--- FDI &lt;= 0.1732
+|   |   |--- FDI &lt;= 0.0162
+|   |   |   |--- class: False
+|   |   |--- FDI &gt;  0.0162
+|   |   |   |--- class: True
+|   |--- FDI &gt;  0.1732
+|   |   |--- FAI &lt;= 0.0252
+|   |   |   |--- class: False
+|   |   |--- FAI &gt;  0.0252
+|   |   |   |--- class: True
+</pre>
+<h3>2 Dense Sargassum (1 = класс)</h3>
+<pre>
+|--- NDVI &lt;= 0.1910
+|   |--- NDVI &lt;= 0.0714
+|   |   |--- class: False
+|   |--- NDVI &gt;  0.0714
+|   |   |--- FDI &lt;= 0.0560
+|   |   |   |--- class: False
+|   |   |--- FDI &gt;  0.0560
+|   |   |   |--- class: True
+|--- NDVI &gt;  0.1910
+|   |--- FDI &lt;= 0.0513
+|   |   |--- B7 &lt;= 0.0175
+|   |   |   |--- class: True
+|   |   |--- B7 &gt;  0.0175
+|   |   |   |--- class: False
+|   |--- FDI &gt;  0.0513
+|   |   |--- B11 &lt;= 0.0499
+|   |   |   |--- class: True
+|   |   |--- B11 &gt;  0.0499
+|   |   |   |--- class: False
+</pre>
+<h3>3 Sparse Sargassum (1 = класс)</h3>
+<pre>
+|--- NDVI &lt;= 0.0182
+|   |--- NRD &lt;= -0.0019
+|   |   |--- B3 &lt;= 0.0263
+|   |   |   |--- class: False
+|   |   |--- B3 &gt;  0.0263
+|   |   |   |--- class: False
+|   |--- NRD &gt;  -0.0019
+|   |   |--- FDI &lt;= 0.0111
+|   |   |   |--- class: False
+|   |   |--- FDI &gt;  0.0111
+|   |   |   |--- class: True
+|--- NDVI &gt;  0.0182
+|   |--- B2 &lt;= 0.0842
+|   |   |--- BSI &lt;= -0.1496
+|   |   |   |--- class: True
+|   |   |--- BSI &gt;  -0.1496
+|   |   |   |--- class: False
+|   |--- B2 &gt;  0.0842
+|   |   |--- FAI &lt;= -0.0063
+|   |   |   |--- class: False
+|   |   |--- FAI &gt;  -0.0063
+|   |   |   |--- class: False
+</pre>
+<h3>4 Natural Organic Material (1 = класс)</h3>
+<pre>
+|--- NDVI &lt;= 0.0141
+|   |--- FAI &lt;= -0.0010
+|   |   |--- NDMI &lt;= -0.3255
+|   |   |   |--- class: True
+|   |   |--- NDMI &gt;  -0.3255
+|   |   |   |--- class: False
+|   |--- FAI &gt;  -0.0010
+|   |   |--- B5 &lt;= 0.0436
+|   |   |   |--- class: True
+|   |   |--- B5 &gt;  0.0436
+|   |   |   |--- class: False
+|--- NDVI &gt;  0.0141
+|   |--- B1 &lt;= 0.0646
+|   |   |--- BSI &lt;= -0.5056
+|   |   |   |--- class: False
+|   |   |--- BSI &gt;  -0.5056
+|   |   |   |--- class: True
+|   |--- B1 &gt;  0.0646
+|   |   |--- FAI &lt;= -0.0072
+|   |   |   |--- class: False
+|   |   |--- FAI &gt;  -0.0072
+|   |   |   |--- class: False
+</pre>
+<h3>5 Ship (1 = класс)</h3>
+<pre>
+|--- B11 &lt;= 0.0289
+|   |--- B2 &lt;= 0.0967
+|   |   |--- B11 &lt;= 0.0086
+|   |   |   |--- class: False
+|   |   |--- B11 &gt;  0.0086
+|   |   |   |--- class: False
+|   |--- B2 &gt;  0.0967
+|   |   |--- NDVI &lt;= -0.3261
+|   |   |   |--- class: False
+|   |   |--- NDVI &gt;  -0.3261
+|   |   |   |--- class: True
+|--- B11 &gt;  0.0289
+|   |--- B1 &lt;= 0.1157
+|   |   |--- B8A &lt;= 0.0500
+|   |   |   |--- class: True
+|   |   |--- B8A &gt;  0.0500
+|   |   |   |--- class: True
+|   |--- B1 &gt;  0.1157
+|   |   |--- NBR &lt;= 0.3641
+|   |   |   |--- class: False
+|   |   |--- NBR &gt;  0.3641
+|   |   |   |--- class: True
+</pre>
+<h3>6 Clouds (1 = класс)</h3>
+<pre>
+|--- B12 &lt;= 0.0184
+|   |--- B12 &lt;= 0.0097
+|   |   |--- NDMI &lt;= 0.1564
+|   |   |   |--- class: False
+|   |   |--- NDMI &gt;  0.1564
+|   |   |   |--- class: False
+|   |--- B12 &gt;  0.0097
+|   |   |--- NRD &lt;= -0.0178
+|   |   |   |--- class: False
+|   |   |--- NRD &gt;  -0.0178
+|   |   |   |--- class: True
+|--- B12 &gt;  0.0184
+|   |--- NDMI &lt;= 0.4657
+|   |   |--- B8 &lt;= 0.0412
+|   |   |   |--- class: True
+|   |   |--- B8 &gt;  0.0412
+|   |   |   |--- class: True
+|   |--- NDMI &gt;  0.4657
+|   |   |--- BSI &lt;= -0.2983
+|   |   |   |--- class: True
+|   |   |--- BSI &gt;  -0.2983
+|   |   |   |--- class: False
+</pre>
+<h3>7 Marine Water (1 = класс)</h3>
+<pre>
+|--- B3 &lt;= 0.0457
+|   |--- NRD &lt;= -0.0107
+|   |   |--- BSI &lt;= -0.2950
+|   |   |   |--- class: True
+|   |   |--- BSI &gt;  -0.2950
+|   |   |   |--- class: False
+|   |--- NRD &gt;  -0.0107
+|   |   |--- FAI &lt;= 0.0021
+|   |   |   |--- class: True
+|   |   |--- FAI &gt;  0.0021
+|   |   |   |--- class: False
+|--- B3 &gt;  0.0457
+|   |--- B3 &lt;= 0.0520
+|   |   |--- B1 &lt;= 0.0570
+|   |   |   |--- class: False
+|   |   |--- B1 &gt;  0.0570
+|   |   |   |--- class: True
+|   |--- B3 &gt;  0.0520
+|   |   |--- B4 &lt;= 0.0579
+|   |   |   |--- class: False
+|   |   |--- B4 &gt;  0.0579
+|   |   |   |--- class: False
+</pre>
+<h3>8 Sediment-Laden Water (1 = класс)</h3>
+<pre>
+|--- FDI &lt;= 0.0588
+|   |--- NRD &lt;= -0.0387
+|   |   |--- B2 &lt;= 0.0702
+|   |   |   |--- class: True
+|   |   |--- B2 &gt;  0.0702
+|   |   |   |--- class: False
+|   |--- NRD &gt;  -0.0387
+|   |   |--- NRD &lt;= -0.0355
+|   |   |   |--- class: False
+|   |   |--- NRD &gt;  -0.0355
+|   |   |   |--- class: False
+|--- FDI &gt;  0.0588
+|   |--- B2 &lt;= 0.1135
+|   |   |--- NDVI &lt;= 0.0257
+|   |   |   |--- class: True
+|   |   |--- NDVI &gt;  0.0257
+|   |   |   |--- class: False
+|   |--- B2 &gt;  0.1135
+|   |   |--- B2 &lt;= 0.1139
+|   |   |   |--- class: False
+|   |   |--- B2 &gt;  0.1139
+|   |   |   |--- class: False
+</pre>
+<h3>9 Foam (1 = класс)</h3>
+<pre>
+|--- B2 &lt;= 0.0922
+|   |--- B11 &lt;= 0.0104
+|   |   |--- B1 &lt;= 0.0267
+|   |   |   |--- class: False
+|   |   |--- B1 &gt;  0.0267
+|   |   |   |--- class: False
+|   |--- B11 &gt;  0.0104
+|   |   |--- NDWI &lt;= 0.1995
+|   |   |   |--- class: False
+|   |   |--- NDWI &gt;  0.1995
+|   |   |   |--- class: True
+|--- B2 &gt;  0.0922
+|   |--- NBR &lt;= 0.4516
+|   |   |--- NDVI &lt;= -0.2205
+|   |   |   |--- class: False
+|   |   |--- NDVI &gt;  -0.2205
+|   |   |   |--- class: False
+|   |--- NBR &gt;  0.4516
+|   |   |--- NDWI &lt;= 0.0203
+|   |   |   |--- class: False
+|   |   |--- NDWI &gt;  0.0203
+|   |   |   |--- class: True
+</pre>
+<h3>10 Turbid Water (1 = класс)</h3>
+<pre>
+|--- NDWI &lt;= 0.4068
+|   |--- NDWI &lt;= 0.3751
+|   |   |--- NDWI &lt;= 0.3234
+|   |   |   |--- class: False
+|   |   |--- NDWI &gt;  0.3234
+|   |   |   |--- class: False
+|   |--- NDWI &gt;  0.3751
+|   |   |--- B6 &lt;= 0.0330
+|   |   |   |--- class: True
+|   |   |--- B6 &gt;  0.0330
+|   |   |   |--- class: False
+|--- NDWI &gt;  0.4068
+|   |--- B3 &lt;= 0.0187
+|   |   |--- NDWI &lt;= 0.6917
+|   |   |   |--- class: False
+|   |   |--- NDWI &gt;  0.6917
+|   |   |   |--- class: True
+|   |--- B3 &gt;  0.0187
+|   |   |--- FDI &lt;= 0.0402
+|   |   |   |--- class: True
+|   |   |--- FDI &gt;  0.0402
+|   |   |   |--- class: False
+</pre>
+<h3>11 Shallow Water (1 = класс)</h3>
+<pre>
+|--- FDI &lt;= 0.0176
+|   |--- B2 &lt;= 0.0432
+|   |   |--- BSI &lt;= -0.5220
+|   |   |   |--- class: True
+|   |   |--- BSI &gt;  -0.5220
+|   |   |   |--- class: False
+|   |--- B2 &gt;  0.0432
+|   |   |--- NDWI &lt;= 0.1466
+|   |   |   |--- class: False
+|   |   |--- NDWI &gt;  0.1466
+|   |   |   |--- class: True
+|--- FDI &gt;  0.0176
+|   |--- FDI &lt;= 0.0455
+|   |   |--- B2 &lt;= 0.0674
+|   |   |   |--- class: False
+|   |   |--- B2 &gt;  0.0674
+|   |   |   |--- class: False
+|   |--- FDI &gt;  0.0455
+|   |   |--- NDWI &lt;= 0.4964
+|   |   |   |--- class: False
+|   |   |--- NDWI &gt;  0.4964
+|   |   |   |--- class: False
+</pre>
+<h3>12 Waves (1 = класс)</h3>
+<pre>
+|--- B11 &lt;= 0.0117
+|   |--- B11 &lt;= 0.0066
+|   |   |--- B11 &lt;= 0.0064
+|   |   |   |--- class: False
+|   |   |--- B11 &gt;  0.0064
+|   |   |   |--- class: False
+|   |--- B11 &gt;  0.0066
+|   |   |--- B5 &lt;= 0.0184
+|   |   |   |--- class: True
+|   |   |--- B5 &gt;  0.0184
+|   |   |   |--- class: False
+|--- B11 &gt;  0.0117
+|   |--- B5 &lt;= 0.0654
+|   |   |--- B1 &lt;= 0.0735
+|   |   |   |--- class: True
+|   |   |--- B1 &gt;  0.0735
+|   |   |   |--- class: False
+|   |--- B5 &gt;  0.0654
+|   |   |--- BSI &lt;= 0.1083
+|   |   |   |--- class: False
+|   |   |--- BSI &gt;  0.1083
+|   |   |   |--- class: False
+</pre>
+<h3>13 Cloud Shadows (1 = класс)</h3>
+<pre>
+|--- B3 &lt;= 0.0411
+|   |--- NDWI &lt;= 0.4741
+|   |   |--- NBR &lt;= 0.4075
+|   |   |   |--- class: True
+|   |   |--- NBR &gt;  0.4075
+|   |   |   |--- class: True
+|   |--- NDWI &gt;  0.4741
+|   |   |--- B1 &lt;= 0.0535
+|   |   |   |--- class: False
+|   |   |--- B1 &gt;  0.0535
+|   |   |   |--- class: True
+|--- B3 &gt;  0.0411
+|   |--- NRD &lt;= -0.0058
+|   |   |--- NRD &lt;= -0.0091
+|   |   |   |--- class: False
+|   |   |--- NRD &gt;  -0.0091
+|   |   |   |--- class: False
+|   |--- NRD &gt;  -0.0058
+|   |   |--- B8 &lt;= 0.0588
+|   |   |   |--- class: True
+|   |   |--- B8 &gt;  0.0588
+|   |   |   |--- class: False
+</pre>
+<h3>14 Wakes (1 = класс)</h3>
+<pre>
+|--- B5 &lt;= 0.0623
+|   |--- NDWI &lt;= 0.4695
+|   |   |--- B3 &lt;= 0.0185
+|   |   |   |--- class: False
+|   |   |--- B3 &gt;  0.0185
+|   |   |   |--- class: True
+|   |--- NDWI &gt;  0.4695
+|   |   |--- B1 &lt;= 0.0263
+|   |   |   |--- class: True
+|   |   |--- B1 &gt;  0.0263
+|   |   |   |--- class: False
+|--- B5 &gt;  0.0623
+|   |--- B5 &lt;= 0.0716
+|   |   |--- NDWI &lt;= 0.1330
+|   |   |   |--- class: False
+|   |   |--- NDWI &gt;  0.1330
+|   |   |   |--- class: True
+|   |--- B5 &gt;  0.0716
+|   |   |--- NRD &lt;= -0.0912
+|   |   |   |--- class: True
+|   |   |--- NRD &gt;  -0.0912
+|   |   |   |--- class: False
+</pre>
+<h3>15 Mixed Water (1 = класс)</h3>
+<pre>
+|--- NRD &lt;= -0.0111
+|   |--- B3 &lt;= 0.0379
+|   |   |--- FDI &lt;= 0.0233
+|   |   |   |--- class: False
+|   |   |--- FDI &gt;  0.0233
+|   |   |   |--- class: True
+|   |--- B3 &gt;  0.0379
+|   |   |--- NRD &lt;= -0.0128
+|   |   |   |--- class: False
+|   |   |--- NRD &gt;  -0.0128
+|   |   |   |--- class: False
+|--- NRD &gt;  -0.0111
+|   |--- NDWI &lt;= 0.4344
+|   |   |--- B3 &lt;= 0.0688
+|   |   |   |--- class: True
+|   |   |--- B3 &gt;  0.0688
+|   |   |   |--- class: False
+|   |--- NDWI &gt;  0.4344
+|   |   |--- B1 &lt;= 0.0250
+|   |   |   |--- class: True
+|   |   |--- B1 &gt;  0.0250
+|   |   |   |--- class: False
+</pre></body></html>

@@ -1,0 +1,28 @@
+# MARIDA through the organizer adapter (self-check: output must equal macroplastic.data.marida.load_patch).
+# python -m macroplastic.organizer_adapter --config configs/adapter_marida.yaml --out data/organizer --verify-marida 30
+name: marida
+root: data/MARIDA/patches            # relative to repo root (or absolute)
+layout:
+  image_glob: "**/S2_*.tif"
+  exclude_regex: '_(cl|conf)\.tif$'   # YAML single quotes: backslashes are literal
+  id_regex: '(S2_[^/]+?)\.tif$'     # sample id = file stem, e.g. S2_1-12-19_48MYU_0
+  mask_from_image: {regex: '\.tif$', replace: "_cl.tif"}
+  split_lists:                       # ids per line ("1-12-19_48MYU_0"; the S2_ prefix is added automatically)
+    train: data/MARIDA/splits/train_X.txt
+    val: data/MARIDA/splits/val_X.txt
+    test: data/MARIDA/splits/test_X.txt
+bands:
+  source: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B11, B12]   # file order (MARIDA tifs carry no descriptions)
+  output: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B11, B12]   # = configs/channels.yaml:marida
+radiometry:
+  scale: 1.0                          # ACOLITE rhorc, already reflectance
+  offset: 0.0
+nodata:
+  values: []                          # NaN stays NaN
+resolution:
+  target: null                        # already 10 m
+classes:
+  map: {}                             # MARIDA ids are our ids (1 = Marine Debris ... 15 = Mixed Water)
+  ignore_values: [0]                  # 0 = unlabelled
+output:
+  debris_class: 1

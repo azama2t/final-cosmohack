@@ -1,0 +1,173 @@
+<html><head><meta charset='utf-8'><title>label forensics</title><style>body{font-family:Segoe UI,Arial,sans-serif;background:#fcfcfb;color:#0b0b0b;margin:24px;max-width:1500px}table{border-collapse:collapse;font-size:12px}td,th{border:1px solid #ddd;padding:3px 6px}th{background:#f0efec}pre{background:#f4f3f0;padding:8px;font-size:11px;overflow:auto}code{background:#f0efec}</style></head><body><h1>Label forensics — fire BS (burn severity): S2 L2A pre+post -&gt; severity mask</h1>
+<p>Файлов: 224, групп (сцены/события) 224, GroupKFold k=3, выборка пикселей 251,961 (≤300 на класс×файл, веса = count/taken → F1 на полной популяции). Время 114 с.</p>
+<p>Признаки (42): pre_B2, pre_B3, pre_B4, pre_B5, pre_B6, pre_B7, pre_B8A, pre_B11, pre_B12, pre_NDVI, pre_NRD, pre_NDWI, pre_NBR, pre_NDMI, pre_FDI, pre_FAI, pre_BSI, post_B2, post_B3, post_B4, post_B5, post_B6, post_B7, post_B8A, post_B11, post_B12, post_NDVI, post_NRD, post_NDWI, post_NBR, post_NDMI, post_FDI, post_FAI, post_BSI, dNDVI(pre-post), dNRD(pre-post), dNDWI(pre-post), dNBR(pre-post), dNDMI(pre-post), dFDI(pre-post), dFAI(pre-post), dBSI(pre-post)</p>
+<h2>Выводы (автоматически)</h2>
+<li><b>0</b> (0): МАЖОРИТАРНЫЙ класс (90% размеченных пикселей) — высокий F1 тривиален, смотреть AUC 0.972 и F1 остальных классов [дерево-5 0.95, LGBM 0.97]</li>
+<li><b>1</b> (1): частично выводима из спектра пикселя (лучший CV F1 0.53) [дерево-3 0.37, дерево-5 0.42, LGBM 0.53, AUC 0.962]; лучший порог <code>dNBR(pre-post) &gt;= 0.06993</code> CV F1 0.2385</li>
+<li><b>2</b> (2): частично выводима из спектра пикселя (лучший CV F1 0.67) [дерево-3 0.35, дерево-5 0.59, LGBM 0.67, AUC 0.985]; лучший порог <code>dNBR(pre-post) &gt;= 0.1974</code> CV F1 0.432</li>
+<li><b>3</b> (3): хорошо выводима из спектра пикселя (лучший CV F1 0.80) [дерево-3 0.69, дерево-5 0.75, LGBM 0.80, AUC 0.997]; лучший порог <code>dNBR(pre-post) &gt;= 0.396</code> CV F1 0.7002</li>
+<h2>Выводимость из спектра (one-vs-rest, CV F1 на полной популяции пикселей, порог подобран на ДРУГИХ фолдах)</h2>
+<p>AUC — ROC-AUC OOF-скоров (не зависит от доли класса; 0.5 = случайно, 1 = разделимо). F1 зависит от доли класса: для редких классов (MD) даже хороший AUC даёт низкий F1 из-за ложных срабатываний на больших классах.</p>
+<table>
+<tr><th>класс</th><th>px (полн.)</th><th>файлов</th><th>дерево3</th><th>дерево4</th><th>дерево5</th><th>AUC дерево5</th><th>LGBM (порог CV)</th><th>AUC LGBM</th><th>лучший порог</th><th>CV F1 порога</th></tr>
+<tr><td>0 0</td><td>52,811,255</td><td>224</td><td>0.769±0.25</td><td>0.945±0.01</td><td>0.954±0.00</td><td>0.953</td><td>0.965</td><td>0.972</td><td><code>post_NBR &gt;= -0.3677</code></td><td>0.949</td></tr>
+<tr><td>1 1</td><td>2,362,871</td><td>224</td><td>0.374±0.05</td><td>0.264±0.19</td><td>0.425±0.02</td><td>0.937</td><td>0.526</td><td>0.962</td><td><code>dNBR(pre-post) &gt;= 0.06993</code></td><td>0.238</td></tr>
+<tr><td>2 2</td><td>2,192,271</td><td>222</td><td>0.353±0.25</td><td>0.371±0.26</td><td>0.591±0.01</td><td>0.973</td><td>0.671</td><td>0.985</td><td><code>dNBR(pre-post) &gt;= 0.1974</code></td><td>0.432</td></tr>
+<tr><td>3 3</td><td>1,353,859</td><td>202</td><td>0.694±0.01</td><td>0.717±0.02</td><td>0.750±0.02</td><td>0.992</td><td>0.800</td><td>0.997</td><td><code>dNBR(pre-post) &gt;= 0.396</code></td><td>0.700</td></tr>
+</table>
+<h2>Мультиклассовые модели (CV F1 по классам: argmax и LGBM с порогом)</h2>
+<table>
+<tr><th>класс</th><th>tree5_argmax</th><th>lgbm_argmax</th><th>lgbm_thr</th></tr>
+<tr><td>0 0</td><td>0.911</td><td>0.935</td><td>0.965</td></tr>
+<tr><td>1 1</td><td>0.426</td><td>0.472</td><td>0.526</td></tr>
+<tr><td>2 2</td><td>0.547</td><td>0.653</td><td>0.671</td></tr>
+<tr><td>3 3</td><td>0.751</td><td>0.788</td><td>0.800</td></tr>
+</table>
+<h2>Геометрия разметки</h2>
+<p>interior = доля пикселей класса, переживших эрозию 3×3; opening_keeps = доля, переживших открытие 3×3 (≈1 → гладкие полигоны/морфология; ≈0 → точки/линии толщиной 1–2 px); grad edge/int = медиана градиента яркости на границе метки / внутри (≫1 → край метки идёт по краю объекта; ≈1 → край нарисован не по спектру); recall edge/int — полнота дерева-5 на краевых/внутренних пикселях; border8 = доля пикселей класса в 8-px рамке тайла / ожидаемая (≫1 — метки у краёв, ≪1 — чипы вырезаны вокруг объектов); centroid = средний сдвиг центра масс класса от центра тайла (0..0.71).</p>
+<table>
+<tr><th>класс</th><th>компонент</th><th>медиана размера</th><th>p90</th><th>1-px доля</th><th>rect мед.</th><th>interior</th><th>opening_keeps</th><th>closing_adds</th><th>grad edge/int</th><th>grad edge/all</th><th>grad ring/all</th><th>recall edge</th><th>recall int</th><th>border1</th><th>border8</th><th>centroid</th></tr>
+<tr><td>0 0</td><td>2703</td><td>25.0</td><td>1703.8</td><td>0.20</td><td>0.56</td><td>0.97</td><td>1.00</td><td>0.00</td><td>1.28</td><td>1.30</td><td>1.16</td><td>0.88</td><td>0.93</td><td>1.05</td><td>1.05</td><td>0.03</td></tr>
+<tr><td>1 1</td><td>41187</td><td>3.0</td><td>50.0</td><td>0.34</td><td>0.48</td><td>0.57</td><td>0.81</td><td>0.09</td><td>1.74</td><td>1.58</td><td>1.22</td><td>0.91</td><td>0.95</td><td>0.52</td><td>0.58</td><td>0.29</td></tr>
+<tr><td>2 2</td><td>18816</td><td>5.0</td><td>85.0</td><td>0.16</td><td>0.57</td><td>0.63</td><td>0.89</td><td>0.06</td><td>1.51</td><td>1.48</td><td>1.24</td><td>0.88</td><td>0.96</td><td>0.53</td><td>0.57</td><td>0.31</td></tr>
+<tr><td>3 3</td><td>6815</td><td>10.0</td><td>209.6</td><td>0.08</td><td>0.65</td><td>0.72</td><td>0.94</td><td>0.04</td><td>1.33</td><td>1.29</td><td>1.40</td><td>0.92</td><td>0.99</td><td>0.49</td><td>0.49</td><td>0.34</td></tr>
+</table>
+<h2>Лучшие одиночные пороги (топ-3 признака на класс)</h2>
+<li>0 0: <code>post_NBR &gt;= -0.3677</code> — CV F1 0.9489, in-sample F1 0.951</li>
+<li>0 0: <code>post_B12 &lt;= 1.454e+04</code> — CV F1 0.947, in-sample F1 0.947</li>
+<li>0 0: <code>post_FDI &gt;= -6262</code> — CV F1 0.947, in-sample F1 0.947</li>
+<li>1 1: <code>dNBR(pre-post) &gt;= 0.06993</code> — CV F1 0.2385, in-sample F1 0.2385</li>
+<li>1 1: <code>dNDMI(pre-post) &gt;= 0.04406</code> — CV F1 0.1747, in-sample F1 0.1748</li>
+<li>1 1: <code>dFAI(pre-post) &gt;= 157.7</code> — CV F1 0.1463, in-sample F1 0.1484</li>
+<li>2 2: <code>dNBR(pre-post) &gt;= 0.1974</code> — CV F1 0.432, in-sample F1 0.4329</li>
+<li>2 2: <code>dNDMI(pre-post) &gt;= 0.1078</code> — CV F1 0.3012, in-sample F1 0.3013</li>
+<li>2 2: <code>post_NBR &lt;= -0.2569</code> — CV F1 0.2585, in-sample F1 0.262</li>
+<li>3 3: <code>dNBR(pre-post) &gt;= 0.396</code> — CV F1 0.7002, in-sample F1 0.7006</li>
+<li>3 3: <code>post_NBR &lt;= -0.3687</code> — CV F1 0.494, in-sample F1 0.4958</li>
+<li>3 3: <code>dNDMI(pre-post) &gt;= 0.2184</code> — CV F1 0.4515, in-sample F1 0.4523</li>
+<h2>Правила деревьев глубины 3</h2>
+<h3>Мультикласс</h3>
+<pre>
+|--- dNBR(pre-post) &lt;= 0.3808
+|   |--- dNBR(pre-post) &lt;= 0.1830
+|   |   |--- dNBR(pre-post) &lt;= 0.0620
+|   |   |   |--- class: 0
+|   |   |--- dNBR(pre-post) &gt;  0.0620
+|   |   |   |--- class: 1
+|   |--- dNBR(pre-post) &gt;  0.1830
+|   |   |--- dNBR(pre-post) &lt;= 0.2049
+|   |   |   |--- class: 2
+|   |   |--- dNBR(pre-post) &gt;  0.2049
+|   |   |   |--- class: 2
+|--- dNBR(pre-post) &gt;  0.3808
+|   |--- post_NBR &lt;= -0.1620
+|   |   |--- dNBR(pre-post) &lt;= 0.3989
+|   |   |   |--- class: 3
+|   |   |--- dNBR(pre-post) &gt;  0.3989
+|   |   |   |--- class: 3
+|   |--- post_NBR &gt;  -0.1620
+|   |   |--- pre_B5 &lt;= 1038.5000
+|   |   |   |--- class: 2
+|   |   |--- pre_B5 &gt;  1038.5000
+|   |   |   |--- class: 3
+</pre>
+<h3>0 0 (1 = класс)</h3>
+<pre>
+|--- dNBR(pre-post) &lt;= 0.0657
+|   |--- dNBR(pre-post) &lt;= 0.0620
+|   |   |--- dNBR(pre-post) &lt;= 0.0505
+|   |   |   |--- class: True
+|   |   |--- dNBR(pre-post) &gt;  0.0505
+|   |   |   |--- class: True
+|   |--- dNBR(pre-post) &gt;  0.0620
+|   |   |--- post_BSI &lt;= 0.0858
+|   |   |   |--- class: True
+|   |   |--- post_BSI &gt;  0.0858
+|   |   |   |--- class: True
+|--- dNBR(pre-post) &gt;  0.0657
+|   |--- post_NBR &lt;= 0.2200
+|   |   |--- pre_B11 &lt;= 1013.5000
+|   |   |   |--- class: True
+|   |   |--- pre_B11 &gt;  1013.5000
+|   |   |   |--- class: False
+|   |--- post_NBR &gt;  0.2200
+|   |   |--- post_NBR &lt;= 0.2685
+|   |   |   |--- class: True
+|   |   |--- post_NBR &gt;  0.2685
+|   |   |   |--- class: True
+</pre>
+<h3>1 1 (1 = класс)</h3>
+<pre>
+|--- dNBR(pre-post) &lt;= 0.0620
+|   |--- dNBR(pre-post) &lt;= 0.0504
+|   |   |--- dNBR(pre-post) &lt;= 0.0378
+|   |   |   |--- class: False
+|   |   |--- dNBR(pre-post) &gt;  0.0378
+|   |   |   |--- class: False
+|   |--- dNBR(pre-post) &gt;  0.0504
+|   |   |--- dFDI(pre-post) &lt;= -116.2292
+|   |   |   |--- class: False
+|   |   |--- dFDI(pre-post) &gt;  -116.2292
+|   |   |   |--- class: False
+|--- dNBR(pre-post) &gt;  0.0620
+|   |--- dNBR(pre-post) &lt;= 0.2235
+|   |   |--- post_NBR &lt;= 0.2217
+|   |   |   |--- class: True
+|   |   |--- post_NBR &gt;  0.2217
+|   |   |   |--- class: False
+|   |--- dNBR(pre-post) &gt;  0.2235
+|   |   |--- dNBR(pre-post) &lt;= 0.2995
+|   |   |   |--- class: False
+|   |   |--- dNBR(pre-post) &gt;  0.2995
+|   |   |   |--- class: False
+</pre>
+<h3>2 2 (1 = класс)</h3>
+<pre>
+|--- dNBR(pre-post) &lt;= 0.1688
+|   |--- dNBR(pre-post) &lt;= 0.1500
+|   |   |--- dNBR(pre-post) &lt;= 0.1241
+|   |   |   |--- class: False
+|   |   |--- dNBR(pre-post) &gt;  0.1241
+|   |   |   |--- class: False
+|   |--- dNBR(pre-post) &gt;  0.1500
+|   |   |--- pre_FDI &lt;= -307.6552
+|   |   |   |--- class: False
+|   |   |--- pre_FDI &gt;  -307.6552
+|   |   |   |--- class: False
+|--- dNBR(pre-post) &gt;  0.1688
+|   |--- pre_B12 &lt;= 873.5000
+|   |   |--- pre_B11 &lt;= 843.5000
+|   |   |   |--- class: False
+|   |   |--- pre_B11 &gt;  843.5000
+|   |   |   |--- class: True
+|   |--- pre_B12 &gt;  873.5000
+|   |   |--- dNBR(pre-post) &lt;= 0.4115
+|   |   |   |--- class: True
+|   |   |--- dNBR(pre-post) &gt;  0.4115
+|   |   |   |--- class: True
+</pre>
+<h3>3 3 (1 = класс)</h3>
+<pre>
+|--- dNBR(pre-post) &lt;= 0.3518
+|   |--- dNBR(pre-post) &lt;= 0.3227
+|   |   |--- dNBR(pre-post) &lt;= 0.2832
+|   |   |   |--- class: False
+|   |   |--- dNBR(pre-post) &gt;  0.2832
+|   |   |   |--- class: False
+|   |--- dNBR(pre-post) &gt;  0.3227
+|   |   |--- dNDMI(pre-post) &lt;= 0.1690
+|   |   |   |--- class: True
+|   |   |--- dNDMI(pre-post) &gt;  0.1690
+|   |   |   |--- class: False
+|--- dNBR(pre-post) &gt;  0.3518
+|   |--- post_FDI &lt;= -176.1449
+|   |   |--- pre_B2 &lt;= 4046.5000
+|   |   |   |--- class: True
+|   |   |--- pre_B2 &gt;  4046.5000
+|   |   |   |--- class: False
+|   |--- post_FDI &gt;  -176.1449
+|   |   |--- post_NDWI &lt;= -0.3664
+|   |   |   |--- class: True
+|   |   |--- post_NDWI &gt;  -0.3664
+|   |   |   |--- class: False
+</pre></body></html>

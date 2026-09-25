@@ -1,0 +1,8 @@
+[adapter] fire_bs_example: 224 samples, 224 with mask, splits={None: 224}, root=C:\Users\User\hack\fire-monitoring\data\train\bs
+[adapter] 1/20 BS_tr_000001
+[adapter] 20/20 BS_tr_000020
+[adapter] wrote data\organizer\fire_bs_example\manifest.csv in 7.1 s
+
+real	0m7.316s
+user	0m0.015s
+sys	0m0.000s

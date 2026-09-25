@@ -1,0 +1,60 @@
+# EXAMPLE organizer config, tested end-to-end on the fire dataset of the previous hackathon
+# (C:\Users\User\hack\fire-monitoring\data\train\bs, read-only): Sentinel-2 L2A DN uint16, 20 m, bands named
+# in GeoTIFF descriptions, SCL band inside, masks in a sibling folder with a different suffix.
+# Copy this file to configs/adapter_organizer.yaml tomorrow and change only what inspect_dataset.py tells you.
+#
+# python -m macroplastic.organizer_adapter --config configs/adapter_example.yaml --out data/organizer --dry-run
+# python -m macroplastic.organizer_adapter --config configs/adapter_example.yaml --out data/organizer --limit 20
+
+name: fire_bs_example
+root: C:/Users/User/hack/fire-monitoring/data/train/bs   # absolute, or relative to repo root
+
+layout:
+  # A) one multi-band file per sample:
+  image_glob: "sentinel2_post/*.tif"          # glob relative to root, ** allowed
+  exclude_regex: null                          # regex on the full path to skip (e.g. '_(cl|conf)\.tif$')
+  # regexes: ALWAYS in YAML single quotes (backslashes literal); "\d" in double quotes is a YAML error
+  id_regex: '(BS_tr_\d+)'                     # capture group 1 = sample id (shared by image and mask)
+  # B) OR one file per band (SAFE-like / per-band jp2) -- comment A) out:
+  # band_files: {B2: "**/{id}_B02.jp2", B3: "**/{id}_B03.jp2", B4: "**/{id}_B04.jp2", B8: "**/{id}_B08.jp2",
+  #              B11: "**/{id}_B11.jp2"}     # {id} is filled from the first entry's glob via id_regex
+  # masks: EITHER glob + id regex ...
+  mask_glob: "masks/*_MASK.tif"
+  mask_id_regex: '(BS_tr_\d+)'
+  # ... OR derived from the image path:
+  # mask_from_image: {regex: '\.tif$', replace: "_mask.png"}
+  split_regex: {}                              # e.g. {val: "/val/", train: "/train/"}; or split_lists: {train: ids.txt}
+  require_mask: true                           # drop images without mask
+
+bands:
+  source: descriptions        # names from GeoTIFF band descriptions; else explicit list in file order, e.g. [B2,B3,B4,B8]
+  rename: {}                  # organizer name -> ours, e.g. {blue: B2, green: B3, red: B4, nir: B8, swir1: B11}
+                              # (B02/b2/B8a/"B04_10m" are canonicalised automatically)
+  output: [B2, B3, B4, B5, B6, B7, B8A, B11, B12]   # our order; must exist in source unless missing: nan
+  missing: error              # or nan: fill absent bands with NaN (tree models cope; UNet needs imputation)
+  hwc: null                   # .npy only: true if (H,W,C)
+
+radiometry:                   # reflectance = DN * scale + offset   (scalar, or per-band dict with 'default')
+  scale: 0.0001
+  offset: 0.0                 # L2A baseline >= 04.00 (after 2022-01-25) with raw DN: offset -0.1 (= -1000 DN * 1e-4)
+                              # check: clear water B8 should be ~0.00-0.03 after conversion (inspect p5 values)
+  clip: null                  # e.g. [0, 1.5]
+
+nodata:
+  values: [0]                 # DN 0 = no data in S2 L2A
+  use_file_nodata: true
+  zero_all_bands_is_nodata: false
+
+resolution:
+  target: 10                  # metres (in the file CRS); null = keep native grid
+  resampling: bilinear        # image; masks always nearest
+
+classes:
+  mask_band: 1
+  map: {0: 7, 1: 1, 2: 1, 3: 1}   # organizer value -> our value (MARIDA ids: 1 = Marine Debris, 7 = Marine Water)
+  default: 0                  # value for classes not in map ("keep" = pass through); 0 = ignore
+  ignore_values: [255]        # organizer nodata / unlabelled -> our 0 (ignored in loss & metric)
+  # rgb_palette: {"255,0,0": 1, "0,0,255": 0}   # for colour-coded PNG masks: "r,g,b" -> organizer value
+
+output:
+  debris_class: 1

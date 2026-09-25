@@ -1,0 +1,2322 @@
+{
+ "data_dir": "C:\\Users\\User\\hack\\fire-monitoring\\data\\train",
+ "generated": "2026-09-25T02:42:22",
+ "n_rasters": 2604,
+ "n_rasters_scanned": 2604,
+ "n_tables": 2,
+ "other_ext": {},
+ "groups": [
+  {
+   "group": "af/aux/AF_tr_{n}_AUX.tif",
+   "n_files": 420,
+   "n_errors": 0,
+   "count": {
+    "5": 420
+   },
+   "dtype": {
+    "float32": 420
+   },
+   "crs": {
+    "EPSG:32637": 306,
+    "EPSG:32638": 114
+   },
+   "nodata": {
+    "None": 420
+   },
+   "driver": {
+    "GTiff": 420
+   },
+   "res": {
+    "[375.0, 375.0]": 420
+   },
+   "size_hw": {
+    "256x256": 420
+   },
+   "descriptions": [
+    "landcover",
+    "dem",
+    "t2m",
+    "rh2m",
+    "wind_speed"
+   ],
+   "example": "af/aux/AF_tr_000001_AUX.tif",
+   "bytes_total": 104010788,
+   "extent_wgs84": [
+    37.242715,
+    44.152255,
+    49.055388,
+    53.716676
+   ],
+   "mask_like": false,
+   "mask_reason": "5 bands",
+   "name_says_mask": false,
+   "band_stats": [
+    {
+     "band": 1,
+     "name": "landcover",
+     "nan_frac": 0.00445,
+     "zero_frac": 0.0,
+     "nodata_frac": 0.0,
+     "min": 10.0,
+     "p1": 10.0,
+     "p5": 10.0,
+     "p50": 40.0,
+     "p95": 80.0,
+     "p99": 90.0,
+     "max": 90.0,
+     "mean": 35.3656875,
+     "std": 17.33511674758332
+    },
+    {
+     "band": 2,
+     "name": "dem",
+     "nan_frac": 0.0,
+     "zero_frac": 0.04318,
+     "nodata_frac": 0.0,
+     "min": -178.81134033203125,
+     "p1": 0.0,
+     "p5": 0.0,
+     "p50": 137.83554077148438,
+     "p95": 213.11618041992188,
+     "p99": 292.2273330688577,
+     "max": 850.6235961914062,
+     "mean": 124.17920381215139,
+     "std": 71.78791420555332
+    },
+    {
+     "band": 3,
+     "name": "t2m",
+     "nan_frac": 0.02796,
+     "zero_frac": 0.0,
+     "nodata_frac": 0.0,
+     "min": 277.79547119140625,
+     "p1": 281.84234619140625,
+     "p5": 282.4539794921875,
+     "p50": 291.65521240234375,
+     "p95": 304.45404052734375,
+     "p99": 306.834716796875,
+     "max": 307.04840087890625,
+     "mean": 292.8412590637207,
+     "std": 6.7659145631166755
+    },
+    {
+     "band": 4,
+     "name": "rh2m",
+     "nan_frac": 0.02796,
+     "zero_frac": 0.0,
+     "nodata_frac": 0.0,
+     "min": 12.683046340942383,
+     "p1": 13.598509788513184,
+     "p5": 18.626693725585938,
+     "p50": 40.05215835571289,
+     "p95": 79.57528686523438,
+     "p99": 87.74500274658203,
+     "max": 90.6009521484375,
+     "mean": 44.0494917624712,
+     "std": 18.143384090363988
+    },
+    {
+     "band": 5,
+     "name": "wind_speed",
+     "nan_frac": 0.02796,
+     "zero_frac": 0.0,
+     "nodata_frac": 0.0,
+     "min": 0.17837244272232056,
+     "p1": 0.6915706396102905,
+     "p5": 1.2391929626464844,
+     "p50": 3.7164251804351807,
+     "p95": 8.066730499267578,
+     "p99": 8.287280082702637,
+     "max": 8.468195915222168,
+     "mean": 4.206187292476464,
+     "std": 2.0097524807002642
+    }
+   ],
+   "n_sampled": 40,
+   "hints": [
+    "values in hundreds..thousands -> looks like S2 DN (reflectance = DN * 1e-4 [+ offset])."
+   ],
+   "slug": "af_aux_AF_tr_n_AUX_tif",
+   "hist_png": "img/hist_af_aux_AF_tr_n_AUX_tif.png"
+  },
+  {
+   "group": "af/masks/AF_tr_{n}_MASK.tif",
+   "n_files": 420,
+   "n_errors": 0,
+   "count": {
+    "1": 420
+   },
+   "dtype": {
+    "uint8": 420
+   },
+   "crs": {
+    "EPSG:32637": 306,
+    "EPSG:32638": 114
+   },
+   "nodata": {
+    "255.0": 420
+   },
+   "driver": {
+    "GTiff": 420
+   },
+   "res": {
+    "[375.0, 375.0]": 420
+   },
+   "size_hw": {
+    "256x256": 420
+   },
+   "descriptions": [
+    "active_fire"
+   ],
+   "example": "af/masks/AF_tr_000001_MASK.tif",
+   "bytes_total": 434038,
+   "extent_wgs84": [
+    37.242715,
+    44.152255,
+    49.055388,
+    53.716676
+   ],
+   "mask_like": true,
+   "mask_reason": "1 unique integer values + name hint",
+   "name_says_mask": true,
+   "band_stats": [
+    {
+     "band": 1,
+     "name": "active_fire",
+     "nan_frac": 0.0,
+     "zero_frac": 0.99966,
+     "nodata_frac": 0.0,
+     "min": 0.0,
+     "p1": 0.0,
+     "p5": 0.0,
+     "p50": 0.0,
+     "p95": 0.0,
+     "p99": 0.0,
+     "max": 1.0,
+     "mean": 0.00031875,
+     "std": 0.017850725431687642
+    }
+   ],
+   "n_sampled": 40,
+   "hints": [],
+   "slug": "af_masks_AF_tr_n_MASK_tif",
+   "class_balance": [
+    {
+     "value": 0,
+     "pixels": 27515395,
+     "pixel_frac": 0.999647,
+     "files_with": 420,
+     "files_frac": 1.0
+    },
+    {
+     "value": 1,
+     "pixels": 9725,
+     "pixel_frac": 0.000353,
+     "files_with": 296,
+     "files_frac": 0.7048
+    }
+   ],
+   "n_mask_files_counted": 420,
+   "classes_png": "img/classes_af_masks_AF_tr_n_MASK_tif.png"
+  },
+  {
+   "group": "af/viirs/AF_tr_{n}_VIIRS_I1-I5.tif",
+   "n_files": 420,
+   "n_errors": 0,
+   "count": {
+    "8": 420
+   },
+   "dtype": {
+    "float32": 420
+   },
+   "crs": {
+    "EPSG:32637": 306,
+    "EPSG:32638": 114
+   },
+   "nodata": {
+    "nan": 420
+   },
+   "driver": {
+    "GTiff": 420
+   },
+   "res": {
+    "[375.0, 375.0]": 420
+   },
+   "size_hw": {
+    "256x256": 420
+   },
+   "descriptions": [
+    "I1",
+    "I2",
+    "I3",
+    "I4",
+    "I5",
+    "solar_zenith",
+    "sensor_zenith",
+    "valid"
+   ],
+   "example": "af/viirs/AF_tr_000001_VIIRS_I1-I5.tif",
+   "bytes_total": 325701192,
+   "extent_wgs84": [
+    37.242715,
+    44.152255,
+    49.055388,
+    53.716676
+   ],
+   "mask_like": false,
+   "mask_reason": "8 bands",
+   "name_says_mask": false,
+   "band_stats": [
+    {
+     "band": 1,
+     "name": "I1",
+     "nan_frac": 0.27859,
+     "zero_frac": 0.0,
+     "nodata_frac": 0.0,
+     "min": 0.020771436393260956,
+     "p1": 0.03278628118336201,
+     "p5": 0.04030338302254677,
+     "p50": 0.08260594308376312,
+     "p95": 0.4679500654339783,
+     "p99": 0.5916366612911221,
+     "max": 0.8646235466003418,
+     "mean": 0.1264488612476496,
+     "std": 0.12403699707116557
+    },
+    {
+     "band": 2,
+     "name": "I2",
+     "nan_frac": 0.27859,
+     "zero_frac": 0.0,
+     "nodata_frac": 0.0,
+     "min": 0.008776381611824036,
+     "p1": 0.017152927815914154,
+     "p5": 0.035425394773483276,
+     "p50": 0.15757504105567932,
+     "p95": 0.5262830257415771,
+     "p99": 0.6346785044670104,
+     "max": 0.9463698267936707,
+     "mean": 0.19296517728816628,
+     "std": 0.1369583846377513
+    },
+    {
+     "band": 3,
+     "name": "I3",
+     "nan_frac": 0.27859,
+     "zero_frac": 0.00033,
+     "nodata_frac": 0.0,
+     "min": 0.0,
+     "p1": 0.005377782974392176,
+     "p5": 0.014673950150609016,
+     "p50": 0.15781493484973907,
+     "p95": 0.2940997347235677,
+     "p99": 0.4361201822757721,
+     "max": 0.6623468995094299,
+     "mean": 0.16163852286238997,
+     "std": 0.07669875938122252
+    },
+    {
+     "band": 4,
+     "name": "I4",
+     "nan_frac": 0.06867,
+     "zero_frac": 0.0,
+     "nodata_frac": 0.0,
+     "min": 212.16317749023438,
+     "p1": 242.90899658203125,
+     "p5": 261.5947265625,
+     "p50": 297.0752868652344,
+     "p95": 317.5334167480469,
+     "p99": 323.63212493896486,
+     "max": 354.0872497558594,
+     "mean": 294.4969216094017,
+     "std": 16.325120123669915
+    },
+    {
+     "band": 5,
+     "name": "I5",
+     "nan_frac": 0.06867,
+     "zero_frac": 0.0,
+     "nodata_frac": 0.0,
+     "min": 206.5731964111328,
+     "p1": 217.11161712646484,
+     "p5": 231.71418991088868,
+     "p50": 288.9175720214844,
+     "p95": 307.3757019042969,
+     "p99": 313.0953369140625,
+     "max": 318.1432189941406,
+     "mean": 284.5445908678055,
+     "std": 19.87774648502564
+    },
+    {
+     "band": 6,
+     "name": "solar_zenith",
+     "nan_frac": 0.0,
+     "zero_frac": 0.0,
+     "nodata_frac": 0.0,
+     "min": 26.349998474121094,
+     "p1": 26.799999237060547,
+     "p5": 32.69999980926819,
+     "p50": 45.03999710083008,
+     "p95": 120.09200057982187,
+     "p99": 132.38999938964844,
+     "max": 132.87998962402344,
+     "mean": 60.48209868596792,
+     "std": 31.782285661612203
+    },
+    {
+     "band": 7,
+     "name": "sensor_zenith",
+     "nan_frac": 0.0,
+     "zero_frac": 0.0,
+     "nodata_frac": 0.0,
+     "min": 1.0499999523162842,
+     "p1": 3.990000009536743,
+     "p5": 7.579999923706055,
+     "p50": 30.34000015258789,
+     "p95": 67.22999572753906,
+     "p99": 68.91999816894531,
+     "max": 69.94999694824219,
+     "mean": 34.921552161093054,
+     "std": 19.27632744173561
+    },
+    {
+     "band": 8,
+     "name": "valid",
+     "nan_frac": 0.0,
+     "zero_frac": 0.0,
+     "nodata_frac": 0.0,
+     "min": 1.0,
+     "p1": 1.0,
+     "p5": 1.0,
+     "p50": 1.0,
+     "p95": 1.0,
+     "p99": 1.0,
+     "max": 1.0,
+     "mean": 1.0,
+     "std": 0.0
+    }
+   ],
+   "n_sampled": 40,
+   "hints": [
+    "values in hundreds..thousands -> looks like S2 DN (reflectance = DN * 1e-4 [+ offset])."
+   ],
+   "slug": "af_viirs_AF_tr_n_VIIRS_I1_I5_tif",
+   "hist_png": "img/hist_af_viirs_AF_tr_n_VIIRS_I1_I5_tif.png"
+  },
+  {
+   "group": "bs/aux/BS_tr_{n}_AUX.tif",
+   "n_files": 224,
+   "n_errors": 0,
+   "count": {
+    "3": 224
+   },
+   "dtype": {
+    "int16": 224
+   },
+   "crs": {
+    "EPSG:32638": 115,
+    "EPSG:32637": 109
+   },
+   "nodata": {
+    "None": 224
+   },
+   "driver": {
+    "GTiff": 224
+   },
+   "res": {
+    "[20.0, 20.0]": 224
+   },
+   "size_hw": {
+    "512x512": 224
+   },
+   "descriptions": [
+    "dem",
+    "slope",
+    "landcover"
+   ],
+   "example": "bs/aux/BS_tr_000001_AUX.tif",
+   "bytes_total": 22622096,
+   "extent_wgs84": [
+    38.615977,
+    45.663961,
+    48.035146,
+    51.845242
+   ],
+   "mask_like": false,
+   "mask_reason": "3 bands",
+   "name_says_mask": false,
+   "band_stats": [
+    {
+     "band": 1,
+     "name": "dem",
+     "nan_frac": 0.0,
+     "zero_frac": 0.03418,
+     "nodata_frac": 0.0,
+     "min": -2.0,
+     "p1": 0.0,
+     "p5": 3.0,
+     "p50": 85.0,
+     "p95": 175.0,
+     "p99": 203.0,
+     "max": 229.0,
+     "mean": 86.10426875,
+     "std": 54.97866958446497
+    },
+    {
+     "band": 2,
+     "name": "slope",
+     "nan_frac": 0.0,
+     "zero_frac": 0.25361,
+     "nodata_frac": 0.0,
+     "min": 0.0,
+     "p1": 0.0,
+     "p5": 0.0,
+     "p50": 3.0,
+     "p95": 6.0499999999883585,
+     "p99": 11.0,
+     "max": 11.0,
+     "mean": 2.81223125,
+     "std": 2.421853452734793
+    },
+    {
+     "band": 3,
+     "name": "landcover",
+     "nan_frac": 0.0,
+     "zero_frac": 0.0,
+     "nodata_frac": 0.0,
+     "min": 10.0,
+     "p1": 10.0,
+     "p5": 10.0,
+     "p50": 40.0,
+     "p95": 80.0,
+     "p99": 90.0,
+     "max": 90.0,
+     "mean": 38.2161875,
+     "std": 16.29570151803364
+    }
+   ],
+   "n_sampled": 40,
+   "hints": [
+    "values in hundreds..thousands -> looks like S2 DN (reflectance = DN * 1e-4 [+ offset])."
+   ],
+   "slug": "bs_aux_BS_tr_n_AUX_tif",
+   "hist_png": "img/hist_bs_aux_BS_tr_n_AUX_tif.png"
+  },
+  {
+   "group": "bs/masks/BS_tr_{n}_MASK.tif",
+   "n_files": 224,
+   "n_errors": 0,
+   "count": {
+    "1": 224
+   },
+   "dtype": {
+    "uint8": 224
+   },
+   "crs": {
+    "EPSG:32638": 115,
+    "EPSG:32637": 109
+   },
+   "nodata": {
+    "255.0": 224
+   },
+   "driver": {
+    "GTiff": 224
+   },
+   "res": {
+    "[20.0, 20.0]": 224
+   },
+   "size_hw": {
+    "512x512": 224
+   },
+   "descriptions": [
+    "severity"
+   ],
+   "example": "bs/masks/BS_tr_000001_MASK.tif",
+   "bytes_total": 1372186,
+   "extent_wgs84": [
+    38.615977,
+    45.663961,
+    48.035146,
+    51.845242
+   ],
+   "mask_like": true,
+   "mask_reason": "4 unique integer values + name hint",
+   "name_says_mask": true,
+   "band_stats": [
+    {
+     "band": 1,
+     "name": "severity",
+     "nan_frac": 0.0,
+     "zero_frac": 0.87357,
+     "nodata_frac": 0.0,
+     "min": 0.0,
+     "p1": 0.0,
+     "p5": 0.0,
+     "p50": 0.0,
+     "p95": 2.0,
+     "p99": 3.0,
+     "max": 3.0,
+     "mean": 0.23276875,
+     "std": 0.675101813820284
+    }
+   ],
+   "n_sampled": 40,
+   "hints": [],
+   "slug": "bs_masks_BS_tr_n_MASK_tif",
+   "class_balance": [
+    {
+     "value": 0,
+     "pixels": 52811255,
+     "pixel_frac": 0.89937,
+     "files_with": 224,
+     "files_frac": 1.0
+    },
+    {
+     "value": 1,
+     "pixels": 2362871,
+     "pixel_frac": 0.040239,
+     "files_with": 224,
+     "files_frac": 1.0
+    },
+    {
+     "value": 2,
+     "pixels": 2192271,
+     "pixel_frac": 0.037334,
+     "files_with": 222,
+     "files_frac": 0.9911
+    },
+    {
+     "value": 3,
+     "pixels": 1353859,
+     "pixel_frac": 0.023056,
+     "files_with": 202,
+     "files_frac": 0.9018
+    }
+   ],
+   "n_mask_files_counted": 224,
+   "classes_png": "img/classes_bs_masks_BS_tr_n_MASK_tif.png"
+  },
+  {
+   "group": "bs/sentinel1_post/BS_tr_{n}_Sentinel-1_post.tif",
+   "n_files": 224,
+   "n_errors": 0,
+   "count": {
+    "2": 224
+   },
+   "dtype": {
+    "int16": 224
+   },
+   "crs": {
+    "EPSG:32638": 115,
+    "EPSG:32637": 109
+   },
+   "nodata": {
+    "None": 224
+   },
+   "driver": {
+    "GTiff": 224
+   },
+   "res": {
+    "[20.0, 20.0]": 224
+   },
+   "size_hw": {
+    "512x512": 224
+   },
+   "descriptions": [
+    "VV",
+    "VH"
+   ],
+   "example": "bs/sentinel1_post/BS_tr_000001_Sentinel-1_post.tif",
+   "bytes_total": 166461482,
+   "extent_wgs84": [
+    38.615977,
+    45.663961,
+    48.035146,
+    51.845242
+   ],
+   "mask_like": false,
+   "mask_reason": "2 bands",
+   "name_says_mask": false,
+   "band_stats": [
+    {
+     "band": 1,
+     "name": "VV",
+     "nan_frac": 0.0,
+     "zero_frac": 0.10307,
+     "nodata_frac": 0.0,
+     "min": -4327.0,
+     "p1": -2391.0,
+     "p5": -2090.0,
+     "p50": -1460.0,
+     "p95": 0.0,
+     "p99": 0.0,
+     "max": 1104.0,
+     "mean": -1358.9973,
+     "std": 592.1450668693526
+    },
+    {
+     "band": 2,
+     "name": "VH",
+     "nan_frac": 0.0,
+     "zero_frac": 0.10307,
+     "nodata_frac": 0.0,
+     "min": -4952.0,
+     "p1": -3784.01,
+     "p5": -3183.0499999999993,
+     "p50": -2405.0,
+     "p95": 0.0,
+     "p99": 0.0,
+     "max": 0.0,
+     "mean": -2196.02701875,
+     "std": 885.7613830209789
+    }
+   ],
+   "n_sampled": 40,
+   "hints": [
+    "VV/VH bands -> Sentinel-1 SAR (dB or linear?) check range."
+   ],
+   "slug": "bs_sentinel1_post_BS_tr_n_Sentinel_1_post_tif",
+   "hist_png": "img/hist_bs_sentinel1_post_BS_tr_n_Sentinel_1_post_tif.png"
+  },
+  {
+   "group": "bs/sentinel1_pre/BS_tr_{n}_Sentinel-1_pre.tif",
+   "n_files": 224,
+   "n_errors": 0,
+   "count": {
+    "2": 224
+   },
+   "dtype": {
+    "int16": 224
+   },
+   "crs": {
+    "EPSG:32638": 115,
+    "EPSG:32637": 109
+   },
+   "nodata": {
+    "None": 224
+   },
+   "driver": {
+    "GTiff": 224
+   },
+   "res": {
+    "[20.0, 20.0]": 224
+   },
+   "size_hw": {
+    "512x512": 224
+   },
+   "descriptions": [
+    "VV",
+    "VH"
+   ],
+   "example": "bs/sentinel1_pre/BS_tr_000001_Sentinel-1_pre.tif",
+   "bytes_total": 168075274,
+   "extent_wgs84": [
+    38.615977,
+    45.663961,
+    48.035146,
+    51.845242
+   ],
+   "mask_like": false,
+   "mask_reason": "2 bands",
+   "name_says_mask": false,
+   "band_stats": [
+    {
+     "band": 1,
+     "name": "VV",
+     "nan_frac": 0.0,
+     "zero_frac": 0.03911,
+     "nodata_frac": 0.0,
+     "min": -4239.0,
+     "p1": -2385.01,
+     "p5": -2021.0,
+     "p50": -1385.0,
+     "p95": -486.0,
+     "p99": 0.0,
+     "max": 1765.0,
+     "mean": -1347.73919375,
+     "std": 477.3800003522874
+    },
+    {
+     "band": 2,
+     "name": "VH",
+     "nan_frac": 0.0,
+     "zero_frac": 0.03911,
+     "nodata_frac": 0.0,
+     "min": -4939.0,
+     "p1": -3933.0,
+     "p5": -3110.0499999999993,
+     "p50": -2246.0,
+     "p95": -1264.0,
+     "p99": 0.0,
+     "max": 125.0,
+     "mean": -2195.22858125,
+     "std": 696.8684467364426
+    }
+   ],
+   "n_sampled": 40,
+   "hints": [
+    "VV/VH bands -> Sentinel-1 SAR (dB or linear?) check range."
+   ],
+   "slug": "bs_sentinel1_pre_BS_tr_n_Sentinel_1_pre_tif",
+   "hist_png": "img/hist_bs_sentinel1_pre_BS_tr_n_Sentinel_1_pre_tif.png"
+  },
+  {
+   "group": "bs/sentinel2_post/BS_tr_{n}_Sentinel-2_post.tif",
+   "n_files": 224,
+   "n_errors": 0,
+   "count": {
+    "10": 224
+   },
+   "dtype": {
+    "uint16": 224
+   },
+   "crs": {
+    "EPSG:32638": 115,
+    "EPSG:32637": 109
+   },
+   "nodata": {
+    "None": 224
+   },
+   "driver": {
+    "GTiff": 224
+   },
+   "res": {
+    "[20.0, 20.0]": 224
+   },
+   "size_hw": {
+    "512x512": 224
+   },
+   "descriptions": [
+    "B2",
+    "B3",
+    "B4",
+    "B5",
+    "B6",
+    "B7",
+    "B8A",
+    "B11",
+    "B12",
+    "SCL"
+   ],
+   "example": "bs/sentinel2_post/BS_tr_000001_Sentinel-2_post.tif",
+   "bytes_total": 755890224,
+   "extent_wgs84": [
+    38.615977,
+    45.663961,
+    48.035146,
+    51.845242
+   ],
+   "mask_like": false,
+   "mask_reason": "10 bands",
+   "name_says_mask": false,
+   "band_stats": [
+    {
+     "band": 1,
+     "name": "B2",
+     "nan_frac": 0.0,
+     "zero_frac": 0.0033,
+     "nodata_frac": 0.0,
+     "min": 0.0,
+     "p1": 160.0,
+     "p5": 278.0,
+     "p50": 667.0,
+     "p95": 1706.0,
+     "p99": 5165.040000000037,
+     "max": 18336.0,
+     "mean": 842.66565,
+     "std": 906.1070730038352
+    },
+    {
+     "band": 2,
+     "name": "B3",
+     "nan_frac": 0.0,
+     "zero_frac": 0.00315,
+     "nodata_frac": 0.0,
+     "min": 0.0,
+     "p1": 213.0,
+     "p5": 377.0,
+     "p50": 892.0,
+     "p95": 2070.0,
+     "p99": 4979.020000000019,
+     "max": 18156.0,
+     "mean": 1058.39458125,
+     "std": 870.6307182005394
+    },
+    {
+     "band": 3,
+     "name": "B4",
+     "nan_frac": 0.0,
+     "zero_frac": 0.00318,
+     "nodata_frac": 0.0,
+     "min": 0.0,
+     "p1": 173.0,
+     "p5": 325.0,
+     "p50": 1104.0,
+     "p95": 2642.0,
+     "p99": 4901.020000000019,
+     "max": 17464.0,
+     "mean": 1263.46574375,
+     "std": 938.6256804107318
+    },
+    {
+     "band": 4,
+     "name": "B5",
+     "nan_frac": 0.0,
+     "zero_frac": 0.00315,
+     "nodata_frac": 0.0,
+     "min": 0.0,
+     "p1": 189.0,
+     "p5": 480.0,
+     "p50": 1378.0,
+     "p95": 2961.0499999999884,
+     "p99": 5272.030000000028,
+     "max": 17064.0,
+     "mean": 1539.53173125,
+     "std": 972.7646398246226
+    },
+    {
+     "band": 5,
+     "name": "B6",
+     "nan_frac": 0.0,
+     "zero_frac": 0.00317,
+     "nodata_frac": 0.0,
+     "min": 0.0,
+     "p1": 127.0,
+     "p5": 492.0,
+     "p50": 1801.0,
+     "p95": 3265.0,
+     "p99": 5388.020000000019,
+     "max": 16788.0,
+     "mean": 1865.60624375,
+     "std": 996.3389374478774
+    },
+    {
+     "band": 6,
+     "name": "B7",
+     "nan_frac": 0.0,
+     "zero_frac": 0.00317,
+     "nodata_frac": 0.0,
+     "min": 0.0,
+     "p1": 133.99,
+     "p5": 521.0,
+     "p50": 1974.0,
+     "p95": 3558.0,
+     "p99": 5556.0,
+     "max": 16592.0,
+     "mean": 2031.69058125,
+     "std": 1035.0036336609098
+    },
+    {
+     "band": 7,
+     "name": "B8A",
+     "nan_frac": 0.0,
+     "zero_frac": 0.00319,
+     "nodata_frac": 0.0,
+     "min": 0.0,
+     "p1": 117.0,
+     "p5": 524.0,
+     "p50": 2191.0,
+     "p95": 3815.0499999999884,
+     "p99": 5614.0,
+     "max": 16300.0,
+     "mean": 2221.4180875,
+     "std": 1071.790834580303
+    },
+    {
+     "band": 8,
+     "name": "B11",
+     "nan_frac": 0.0,
+     "zero_frac": 0.00315,
+     "nodata_frac": 0.0,
+     "min": 0.0,
+     "p1": 88.0,
+     "p5": 558.0,
+     "p50": 2640.0,
+     "p95": 4182.0,
+     "p99": 5231.0,
+     "max": 12988.0,
+     "mean": 2623.6598875,
+     "std": 1058.8418980298652
+    },
+    {
+     "band": 9,
+     "name": "B12",
+     "nan_frac": 0.0,
+     "zero_frac": 0.00315,
+     "nodata_frac": 0.0,
+     "min": 0.0,
+     "p1": 82.0,
+     "p5": 400.0,
+     "p50": 2120.0,
+     "p95": 3300.0,
+     "p99": 4569.0,
+     "max": 11552.0,
+     "mean": 2083.88311875,
+     "std": 923.375552927964
+    },
+    {
+     "band": 10,
+     "name": "SCL",
+     "nan_frac": 0.0,
+     "zero_frac": 0.00315,
+     "nodata_frac": 0.0,
+     "min": 0.0,
+     "p1": 2.0,
+     "p5": 4.0,
+     "p50": 5.0,
+     "p95": 10.0,
+     "p99": 10.0,
+     "max": 11.0,
+     "mean": 5.26524375,
+     "std": 1.6035786550980085
+    }
+   ],
+   "n_sampled": 40,
+   "hints": [
+    "values in hundreds..thousands -> looks like S2 DN (reflectance = DN * 1e-4 [+ offset]).",
+    "band 'SCL' present -> Sen2Cor scene classification (L2A); use it as cloud/water mask, not a feature."
+   ],
+   "slug": "bs_sentinel2_post_BS_tr_n_Sentinel_2_post_tif",
+   "hist_png": "img/hist_bs_sentinel2_post_BS_tr_n_Sentinel_2_post_tif.png"
+  },
+  {
+   "group": "bs/sentinel2_pre/BS_tr_{n}_Sentinel-2_pre.tif",
+   "n_files": 224,
+   "n_errors": 0,
+   "count": {
+    "10": 224
+   },
+   "dtype": {
+    "uint16": 224
+   },
+   "crs": {
+    "EPSG:32638": 115,
+    "EPSG:32637": 109
+   },
+   "nodata": {
+    "None": 224
+   },
+   "driver": {
+    "GTiff": 224
+   },
+   "res": {
+    "[20.0, 20.0]": 224
+   },
+   "size_hw": {
+    "512x512": 224
+   },
+   "descriptions": [
+    "B2",
+    "B3",
+    "B4",
+    "B5",
+    "B6",
+    "B7",
+    "B8A",
+    "B11",
+    "B12",
+    "SCL"
+   ],
+   "example": "bs/sentinel2_pre/BS_tr_000001_Sentinel-2_pre.tif",
+   "bytes_total": 759304392,
+   "extent_wgs84": [
+    38.615977,
+    45.663961,
+    48.035146,
+    51.845242
+   ],
+   "mask_like": false,
+   "mask_reason": "10 bands",
+   "name_says_mask": false,
+   "band_stats": [
+    {
+     "band": 1,
+     "name": "B2",
+     "nan_frac": 0.0,
+     "zero_frac": 0.0072,
+     "nodata_frac": 0.0,
+     "min": 0.0,
+     "p1": 131.0,
+     "p5": 295.0,
+     "p50": 669.0,
+     "p95": 1447.0,
+     "p99": 3069.0,
+     "max": 15920.0,
+     "mean": 790.15641875,
+     "std": 706.3040849658344
+    },
+    {
+     "band": 2,
+     "name": "B3",
+     "nan_frac": 0.0,
+     "zero_frac": 0.00714,
+     "nodata_frac": 0.0,
+     "min": 0.0,
+     "p1": 211.99,
+     "p5": 460.0,
+     "p50": 903.0,
+     "p95": 1880.0,
+     "p99": 3125.0200000000186,
+     "max": 14758.0,
+     "mean": 1039.38565,
+     "std": 698.1326025541834
+    },
+    {
+     "band": 3,
+     "name": "B4",
+     "nan_frac": 0.0,
+     "zero_frac": 0.00716,
+     "nodata_frac": 0.0,
+     "min": 0.0,
+     "p1": 159.0,
+     "p5": 341.0,
+     "p50": 1124.0,
+     "p95": 2525.0,
+     "p99": 3514.0,
+     "max": 14566.0,
+     "mean": 1258.60794375,
+     "std": 817.5587765097669
+    },
+    {
+     "band": 4,
+     "name": "B5",
+     "nan_frac": 0.0,
+     "zero_frac": 0.00714,
+     "nodata_frac": 0.0,
+     "min": 0.0,
+     "p1": 237.0,
+     "p5": 620.0,
+     "p50": 1421.0,
+     "p95": 2889.0,
+     "p99": 3960.0,
+     "max": 15369.0,
+     "mean": 1574.29241875,
+     "std": 850.64695250734
+    },
+    {
+     "band": 5,
+     "name": "B6",
+     "nan_frac": 0.0,
+     "zero_frac": 0.00715,
+     "nodata_frac": 0.0,
+     "min": 0.0,
+     "p1": 152.0,
+     "p5": 588.0,
+     "p50": 1914.0,
+     "p95": 3343.0,
+     "p99": 4339.020000000019,
+     "max": 14673.0,
+     "mean": 1965.97341875,
+     "std": 913.2789134211339
+    },
+    {
+     "band": 6,
+     "name": "B7",
+     "nan_frac": 0.0,
+     "zero_frac": 0.00715,
+     "nodata_frac": 0.0,
+     "min": 0.0,
+     "p1": 159.0,
+     "p5": 623.0,
+     "p50": 2101.0,
+     "p95": 3727.0,
+     "p99": 4823.020000000019,
+     "max": 14332.0,
+     "mean": 2158.00888125,
+     "std": 982.8443587185478
+    },
+    {
+     "band": 7,
+     "name": "B8A",
+     "nan_frac": 0.0,
+     "zero_frac": 0.00716,
+     "nodata_frac": 0.0,
+     "min": 0.0,
+     "p1": 111.0,
+     "p5": 606.9500000000007,
+     "p50": 2342.0,
+     "p95": 4009.0,
+     "p99": 5019.0,
+     "max": 14117.0,
+     "mean": 2365.966025,
+     "std": 1035.4976531459158
+    },
+    {
+     "band": 8,
+     "name": "B11",
+     "nan_frac": 0.0,
+     "zero_frac": 0.00714,
+     "nodata_frac": 0.0,
+     "min": 0.0,
+     "p1": 51.0,
+     "p5": 360.0,
+     "p50": 2730.0,
+     "p95": 4267.0,
+     "p99": 4973.0,
+     "max": 11061.0,
+     "mean": 2725.2331375,
+     "std": 1046.6738134069783
+    },
+    {
+     "band": 9,
+     "name": "B12",
+     "nan_frac": 0.0,
+     "zero_frac": 0.00714,
+     "nodata_frac": 0.0,
+     "min": 0.0,
+     "p1": 33.0,
+     "p5": 252.0,
+     "p50": 2104.0,
+     "p95": 3240.0,
+     "p99": 3876.0100000000093,
+     "max": 9012.0,
+     "mean": 2046.76764375,
+     "std": 867.2664273476306
+    },
+    {
+     "band": 10,
+     "name": "SCL",
+     "nan_frac": 0.0,
+     "zero_frac": 0.00714,
+     "nodata_frac": 0.0,
+     "min": 0.0,
+     "p1": 2.0,
+     "p5": 4.0,
+     "p50": 5.0,
+     "p95": 10.0,
+     "p99": 10.0,
+     "max": 11.0,
+     "mean": 5.31804375,
+     "std": 1.7020111407055882
+    }
+   ],
+   "n_sampled": 40,
+   "hints": [
+    "values in hundreds..thousands -> looks like S2 DN (reflectance = DN * 1e-4 [+ offset]).",
+    "band 'SCL' present -> Sen2Cor scene classification (L2A); use it as cloud/water mask, not a feature."
+   ],
+   "slug": "bs_sentinel2_pre_BS_tr_n_Sentinel_2_pre_tif",
+   "hist_png": "img/hist_bs_sentinel2_pre_BS_tr_n_Sentinel_2_pre_tif.png"
+  }
+ ],
+ "group_pairs": [
+  {
+   "group_a": "af/aux/AF_tr_{n}_AUX.tif",
+   "group_b": "af/masks/AF_tr_{n}_MASK.tif",
+   "shared_ids": 420,
+   "frac_a": 1.0,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "af/aux/AF_tr_{n}_AUX.tif",
+   "group_b": "af/viirs/AF_tr_{n}_VIIRS_I1-I5.tif",
+   "shared_ids": 420,
+   "frac_a": 1.0,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "af/masks/AF_tr_{n}_MASK.tif",
+   "group_b": "af/viirs/AF_tr_{n}_VIIRS_I1-I5.tif",
+   "shared_ids": 420,
+   "frac_a": 1.0,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "af/aux/AF_tr_{n}_AUX.tif",
+   "group_b": "bs/aux/BS_tr_{n}_AUX.tif",
+   "shared_ids": 224,
+   "frac_a": 0.5333,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "af/aux/AF_tr_{n}_AUX.tif",
+   "group_b": "bs/masks/BS_tr_{n}_MASK.tif",
+   "shared_ids": 224,
+   "frac_a": 0.5333,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "af/aux/AF_tr_{n}_AUX.tif",
+   "group_b": "bs/sentinel1_post/BS_tr_{n}_Sentinel-1_post.tif",
+   "shared_ids": 224,
+   "frac_a": 0.5333,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "af/aux/AF_tr_{n}_AUX.tif",
+   "group_b": "bs/sentinel1_pre/BS_tr_{n}_Sentinel-1_pre.tif",
+   "shared_ids": 224,
+   "frac_a": 0.5333,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "af/aux/AF_tr_{n}_AUX.tif",
+   "group_b": "bs/sentinel2_post/BS_tr_{n}_Sentinel-2_post.tif",
+   "shared_ids": 224,
+   "frac_a": 0.5333,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "af/aux/AF_tr_{n}_AUX.tif",
+   "group_b": "bs/sentinel2_pre/BS_tr_{n}_Sentinel-2_pre.tif",
+   "shared_ids": 224,
+   "frac_a": 0.5333,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "af/masks/AF_tr_{n}_MASK.tif",
+   "group_b": "bs/aux/BS_tr_{n}_AUX.tif",
+   "shared_ids": 224,
+   "frac_a": 0.5333,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "af/masks/AF_tr_{n}_MASK.tif",
+   "group_b": "bs/masks/BS_tr_{n}_MASK.tif",
+   "shared_ids": 224,
+   "frac_a": 0.5333,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "af/masks/AF_tr_{n}_MASK.tif",
+   "group_b": "bs/sentinel1_post/BS_tr_{n}_Sentinel-1_post.tif",
+   "shared_ids": 224,
+   "frac_a": 0.5333,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "af/masks/AF_tr_{n}_MASK.tif",
+   "group_b": "bs/sentinel1_pre/BS_tr_{n}_Sentinel-1_pre.tif",
+   "shared_ids": 224,
+   "frac_a": 0.5333,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "af/masks/AF_tr_{n}_MASK.tif",
+   "group_b": "bs/sentinel2_post/BS_tr_{n}_Sentinel-2_post.tif",
+   "shared_ids": 224,
+   "frac_a": 0.5333,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "af/masks/AF_tr_{n}_MASK.tif",
+   "group_b": "bs/sentinel2_pre/BS_tr_{n}_Sentinel-2_pre.tif",
+   "shared_ids": 224,
+   "frac_a": 0.5333,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "af/viirs/AF_tr_{n}_VIIRS_I1-I5.tif",
+   "group_b": "bs/aux/BS_tr_{n}_AUX.tif",
+   "shared_ids": 224,
+   "frac_a": 0.5333,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "af/viirs/AF_tr_{n}_VIIRS_I1-I5.tif",
+   "group_b": "bs/masks/BS_tr_{n}_MASK.tif",
+   "shared_ids": 224,
+   "frac_a": 0.5333,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "af/viirs/AF_tr_{n}_VIIRS_I1-I5.tif",
+   "group_b": "bs/sentinel1_post/BS_tr_{n}_Sentinel-1_post.tif",
+   "shared_ids": 224,
+   "frac_a": 0.5333,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "af/viirs/AF_tr_{n}_VIIRS_I1-I5.tif",
+   "group_b": "bs/sentinel1_pre/BS_tr_{n}_Sentinel-1_pre.tif",
+   "shared_ids": 224,
+   "frac_a": 0.5333,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "af/viirs/AF_tr_{n}_VIIRS_I1-I5.tif",
+   "group_b": "bs/sentinel2_post/BS_tr_{n}_Sentinel-2_post.tif",
+   "shared_ids": 224,
+   "frac_a": 0.5333,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "af/viirs/AF_tr_{n}_VIIRS_I1-I5.tif",
+   "group_b": "bs/sentinel2_pre/BS_tr_{n}_Sentinel-2_pre.tif",
+   "shared_ids": 224,
+   "frac_a": 0.5333,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "bs/aux/BS_tr_{n}_AUX.tif",
+   "group_b": "bs/masks/BS_tr_{n}_MASK.tif",
+   "shared_ids": 224,
+   "frac_a": 1.0,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "bs/aux/BS_tr_{n}_AUX.tif",
+   "group_b": "bs/sentinel1_post/BS_tr_{n}_Sentinel-1_post.tif",
+   "shared_ids": 224,
+   "frac_a": 1.0,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "bs/aux/BS_tr_{n}_AUX.tif",
+   "group_b": "bs/sentinel1_pre/BS_tr_{n}_Sentinel-1_pre.tif",
+   "shared_ids": 224,
+   "frac_a": 1.0,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "bs/aux/BS_tr_{n}_AUX.tif",
+   "group_b": "bs/sentinel2_post/BS_tr_{n}_Sentinel-2_post.tif",
+   "shared_ids": 224,
+   "frac_a": 1.0,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "bs/aux/BS_tr_{n}_AUX.tif",
+   "group_b": "bs/sentinel2_pre/BS_tr_{n}_Sentinel-2_pre.tif",
+   "shared_ids": 224,
+   "frac_a": 1.0,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "bs/masks/BS_tr_{n}_MASK.tif",
+   "group_b": "bs/sentinel1_post/BS_tr_{n}_Sentinel-1_post.tif",
+   "shared_ids": 224,
+   "frac_a": 1.0,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "bs/masks/BS_tr_{n}_MASK.tif",
+   "group_b": "bs/sentinel1_pre/BS_tr_{n}_Sentinel-1_pre.tif",
+   "shared_ids": 224,
+   "frac_a": 1.0,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "bs/masks/BS_tr_{n}_MASK.tif",
+   "group_b": "bs/sentinel2_post/BS_tr_{n}_Sentinel-2_post.tif",
+   "shared_ids": 224,
+   "frac_a": 1.0,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "bs/masks/BS_tr_{n}_MASK.tif",
+   "group_b": "bs/sentinel2_pre/BS_tr_{n}_Sentinel-2_pre.tif",
+   "shared_ids": 224,
+   "frac_a": 1.0,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "bs/sentinel1_post/BS_tr_{n}_Sentinel-1_post.tif",
+   "group_b": "bs/sentinel1_pre/BS_tr_{n}_Sentinel-1_pre.tif",
+   "shared_ids": 224,
+   "frac_a": 1.0,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "bs/sentinel1_post/BS_tr_{n}_Sentinel-1_post.tif",
+   "group_b": "bs/sentinel2_post/BS_tr_{n}_Sentinel-2_post.tif",
+   "shared_ids": 224,
+   "frac_a": 1.0,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "bs/sentinel1_post/BS_tr_{n}_Sentinel-1_post.tif",
+   "group_b": "bs/sentinel2_pre/BS_tr_{n}_Sentinel-2_pre.tif",
+   "shared_ids": 224,
+   "frac_a": 1.0,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "bs/sentinel1_pre/BS_tr_{n}_Sentinel-1_pre.tif",
+   "group_b": "bs/sentinel2_post/BS_tr_{n}_Sentinel-2_post.tif",
+   "shared_ids": 224,
+   "frac_a": 1.0,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "bs/sentinel1_pre/BS_tr_{n}_Sentinel-1_pre.tif",
+   "group_b": "bs/sentinel2_pre/BS_tr_{n}_Sentinel-2_pre.tif",
+   "shared_ids": 224,
+   "frac_a": 1.0,
+   "frac_b": 1.0
+  },
+  {
+   "group_a": "bs/sentinel2_post/BS_tr_{n}_Sentinel-2_post.tif",
+   "group_b": "bs/sentinel2_pre/BS_tr_{n}_Sentinel-2_pre.tif",
+   "shared_ids": 224,
+   "frac_a": 1.0,
+   "frac_b": 1.0
+  }
+ ],
+ "families": [
+  {
+   "members": [
+    "af/aux/AF_tr_{n}_AUX.tif",
+    "af/masks/AF_tr_{n}_MASK.tif",
+    "af/viirs/AF_tr_{n}_VIIRS_I1-I5.tif"
+   ],
+   "images": [
+    "af/viirs/AF_tr_{n}_VIIRS_I1-I5.tif",
+    "af/aux/AF_tr_{n}_AUX.tif"
+   ],
+   "masks": [
+    "af/masks/AF_tr_{n}_MASK.tif"
+   ]
+  },
+  {
+   "members": [
+    "bs/aux/BS_tr_{n}_AUX.tif",
+    "bs/masks/BS_tr_{n}_MASK.tif",
+    "bs/sentinel1_post/BS_tr_{n}_Sentinel-1_post.tif",
+    "bs/sentinel1_pre/BS_tr_{n}_Sentinel-1_pre.tif",
+    "bs/sentinel2_post/BS_tr_{n}_Sentinel-2_post.tif",
+    "bs/sentinel2_pre/BS_tr_{n}_Sentinel-2_pre.tif"
+   ],
+   "images": [
+    "bs/sentinel2_post/BS_tr_{n}_Sentinel-2_post.tif",
+    "bs/sentinel2_pre/BS_tr_{n}_Sentinel-2_pre.tif",
+    "bs/aux/BS_tr_{n}_AUX.tif",
+    "bs/sentinel1_post/BS_tr_{n}_Sentinel-1_post.tif",
+    "bs/sentinel1_pre/BS_tr_{n}_Sentinel-1_pre.tif"
+   ],
+   "masks": [
+    "bs/masks/BS_tr_{n}_MASK.tif"
+   ]
+  }
+ ],
+ "n_pairs_guess": 644,
+ "tables": [
+  {
+   "path": "C:\\Users\\User\\hack\\fire-monitoring\\data\\train\\af\\meta.csv",
+   "ext": ".csv",
+   "size_bytes": 65030,
+   "rows": 420,
+   "cols": [
+    "chip_id",
+    "kind",
+    "fire_event_id",
+    "region",
+    "epsg",
+    "x_min",
+    "y_min",
+    "x_max",
+    "y_max",
+    "width",
+    "height",
+    "gsd",
+    "acq_datetime",
+    "satellite",
+    "date_pre",
+    "date_post",
+    "s1_date_pre",
+    "s1_date_post",
+    "valid_frac",
+    "cloud_frac",
+    "landcover_top",
+    "n_fire_px",
+    "burn_area_ha",
+    "sev1_px",
+    "sev2_px",
+    "sev3_px"
+   ],
+   "columns": [
+    {
+     "col": "chip_id",
+     "dtype": "str",
+     "missing_frac": 0.0,
+     "nunique": 420,
+     "top": [
+      "AF_tr_000001",
+      "AF_tr_000002",
+      "AF_tr_000003",
+      "AF_tr_000004",
+      "AF_tr_000005"
+     ]
+    },
+    {
+     "col": "kind",
+     "dtype": "str",
+     "missing_frac": 0.0,
+     "nunique": 1,
+     "top": [
+      "af"
+     ]
+    },
+    {
+     "col": "fire_event_id",
+     "dtype": "float64",
+     "missing_frac": 1.0,
+     "nunique": 0,
+     "top": []
+    },
+    {
+     "col": "region",
+     "dtype": "float64",
+     "missing_frac": 1.0,
+     "nunique": 0,
+     "top": []
+    },
+    {
+     "col": "epsg",
+     "dtype": "float64",
+     "missing_frac": 0.0,
+     "nunique": 2,
+     "min": 32637.0,
+     "max": 32638.0,
+     "mean": 32637.27142857143
+    },
+    {
+     "col": "x_min",
+     "dtype": "float64",
+     "missing_frac": 0.0,
+     "nunique": 6,
+     "min": 192000.0,
+     "max": 672000.0,
+     "mean": 417371.4285714286
+    },
+    {
+     "col": "y_min",
+     "dtype": "float64",
+     "missing_frac": 0.0,
+     "nunique": 11,
+     "min": 4896000.0,
+     "max": 5856000.0,
+     "mean": 5396571.428571428
+    },
+    {
+     "col": "x_max",
+     "dtype": "float64",
+     "missing_frac": 0.0,
+     "nunique": 6,
+     "min": 288000.0,
+     "max": 768000.0,
+     "mean": 513371.4285714286
+    },
+    {
+     "col": "y_max",
+     "dtype": "float64",
+     "missing_frac": 0.0,
+     "nunique": 11,
+     "min": 4992000.0,
+     "max": 5952000.0,
+     "mean": 5492571.428571428
+    },
+    {
+     "col": "width",
+     "dtype": "int64",
+     "missing_frac": 0.0,
+     "nunique": 1,
+     "min": 256.0,
+     "max": 256.0,
+     "mean": 256.0
+    },
+    {
+     "col": "height",
+     "dtype": "int64",
+     "missing_frac": 0.0,
+     "nunique": 1,
+     "min": 256.0,
+     "max": 256.0,
+     "mean": 256.0
+    },
+    {
+     "col": "gsd",
+     "dtype": "int64",
+     "missing_frac": 0.0,
+     "nunique": 1,
+     "min": 375.0,
+     "max": 375.0,
+     "mean": 375.0
+    },
+    {
+     "col": "acq_datetime",
+     "dtype": "str",
+     "missing_frac": 0.0,
+     "nunique": 78,
+     "top": [
+      "2019-08-29T11:06:00+00:00",
+      "2020-08-17T09:42:00+00:00",
+      "2021-10-09T09:54:00+00:00",
+      "2020-04-08T09:48:00+00:00",
+      "2020-09-25T00:12:00+00:00"
+     ]
+    },
+    {
+     "col": "satellite",
+     "dtype": "str",
+     "missing_frac": 0.0,
+     "nunique": 3,
+     "top": [
+      "SNPP",
+      "NOAA20",
+      "NOAA21"
+     ]
+    },
+    {
+     "col": "date_pre",
+     "dtype": "float64",
+     "missing_frac": 1.0,
+     "nunique": 0,
+     "top": []
+    },
+    {
+     "col": "date_post",
+     "dtype": "float64",
+     "missing_frac": 1.0,
+     "nunique": 0,
+     "top": []
+    },
+    {
+     "col": "s1_date_pre",
+     "dtype": "float64",
+     "missing_frac": 1.0,
+     "nunique": 0,
+     "top": []
+    },
+    {
+     "col": "s1_date_post",
+     "dtype": "float64",
+     "missing_frac": 1.0,
+     "nunique": 0,
+     "top": []
+    },
+    {
+     "col": "valid_frac",
+     "dtype": "float64",
+     "missing_frac": 0.0,
+     "nunique": 15,
+     "min": 0.4597,
+     "max": 1.0,
+     "mean": 0.9934554761904762
+    },
+    {
+     "col": "cloud_frac",
+     "dtype": "float64",
+     "missing_frac": 1.0,
+     "nunique": 0,
+     "top": []
+    },
+    {
+     "col": "landcover_top",
+     "dtype": "float64",
+     "missing_frac": 1.0,
+     "nunique": 0,
+     "top": []
+    },
+    {
+     "col": "n_fire_px",
+     "dtype": "float64",
+     "missing_frac": 0.0,
+     "nunique": 91,
+     "min": 0.0,
+     "max": 243.0,
+     "mean": 23.154761904761905
+    },
+    {
+     "col": "burn_area_ha",
+     "dtype": "float64",
+     "missing_frac": 1.0,
+     "nunique": 0,
+     "top": []
+    },
+    {
+     "col": "sev1_px",
+     "dtype": "float64",
+     "missing_frac": 1.0,
+     "nunique": 0,
+     "top": []
+    },
+    {
+     "col": "sev2_px",
+     "dtype": "float64",
+     "missing_frac": 1.0,
+     "nunique": 0,
+     "top": []
+    },
+    {
+     "col": "sev3_px",
+     "dtype": "float64",
+     "missing_frac": 1.0,
+     "nunique": 0,
+     "top": []
+    }
+   ],
+   "head": [
+    [
+     "AF_tr_000001",
+     "af",
+     NaN,
+     NaN,
+     "32637.0",
+     "384000.0",
+     "5280000.0",
+     "480000.0",
+     "5376000.0",
+     "256",
+     "256",
+     "375",
+     "2019-04-01T09:42:00+00:00",
+     "SNPP",
+     NaN,
+     NaN,
+     NaN,
+     NaN,
+     "1.0",
+     NaN,
+     NaN,
+     "44.0",
+     NaN,
+     NaN,
+     NaN,
+     NaN
+    ],
+    [
+     "AF_tr_000002",
+     "af",
+     NaN,
+     NaN,
+     "32637.0",
+     "384000.0",
+     "5664000.0",
+     "480000.0",
+     "5760000.0",
+     "256",
+     "256",
+     "375",
+     "2019-04-01T09:42:00+00:00",
+     "SNPP",
+     NaN,
+     NaN,
+     NaN,
+     NaN,
+     "1.0",
+     NaN,
+     NaN,
+     "24.0",
+     NaN,
+     NaN,
+     NaN,
+     NaN
+    ],
+    [
+     "AF_tr_000003",
+     "af",
+     NaN,
+     NaN,
+     "32637.0",
+     "480000.0",
+     "5664000.0",
+     "576000.0",
+     "5760000.0",
+     "256",
+     "256",
+     "375",
+     "2019-04-01T09:42:00+00:00",
+     "SNPP",
+     NaN,
+     NaN,
+     NaN,
+     NaN,
+     "1.0",
+     NaN,
+     NaN,
+     "40.0",
+     NaN,
+     NaN,
+     NaN,
+     NaN
+    ],
+    [
+     "AF_tr_000004",
+     "af",
+     NaN,
+     NaN,
+     "32637.0",
+     "384000.0",
+     "4992000.0",
+     "480000.0",
+     "5088000.0",
+     "256",
+     "256",
+     "375",
+     "2019-04-10T10:12:00+00:00",
+     "SNPP",
+     NaN,
+     NaN,
+     NaN,
+     NaN,
+     "1.0",
+     NaN,
+     NaN,
+     "0.0",
+     NaN,
+     NaN,
+     NaN,
+     NaN
+    ],
+    [
+     "AF_tr_000005",
+     "af",
+     NaN,
+     NaN,
+     "32637.0",
+     "384000.0",
+     "5280000.0",
+     "480000.0",
+     "5376000.0",
+     "256",
+     "256",
+     "375",
+     "2019-04-10T10:12:00+00:00",
+     "SNPP",
+     NaN,
+     NaN,
+     NaN,
+     NaN,
+     "1.0",
+     NaN,
+     NaN,
+     "21.0",
+     NaN,
+     NaN,
+     NaN,
+     NaN
+    ]
+   ],
+   "rel": "af/meta.csv"
+  },
+  {
+   "path": "C:\\Users\\User\\hack\\fire-monitoring\\data\\train\\bs\\meta.csv",
+   "ext": ".csv",
+   "size_bytes": 41198,
+   "rows": 224,
+   "cols": [
+    "chip_id",
+    "kind",
+    "fire_event_id",
+    "region",
+    "epsg",
+    "x_min",
+    "y_min",
+    "x_max",
+    "y_max",
+    "width",
+    "height",
+    "gsd",
+    "acq_datetime",
+    "satellite",
+    "date_pre",
+    "date_post",
+    "s1_date_pre",
+    "s1_date_post",
+    "valid_frac",
+    "cloud_frac",
+    "landcover_top",
+    "n_fire_px",
+    "burn_area_ha",
+    "sev1_px",
+    "sev2_px",
+    "sev3_px"
+   ],
+   "columns": [
+    {
+     "col": "chip_id",
+     "dtype": "str",
+     "missing_frac": 0.0,
+     "nunique": 224,
+     "top": [
+      "BS_tr_000001",
+      "BS_tr_000002",
+      "BS_tr_000003",
+      "BS_tr_000004",
+      "BS_tr_000005"
+     ]
+    },
+    {
+     "col": "kind",
+     "dtype": "str",
+     "missing_frac": 0.0,
+     "nunique": 1,
+     "top": [
+      "bs"
+     ]
+    },
+    {
+     "col": "fire_event_id",
+     "dtype": "str",
+     "missing_frac": 0.0,
+     "nunique": 224,
+     "top": [
+      "FE00657",
+      "FE01044",
+      "FE01122",
+      "FE01130",
+      "FE01642"
+     ]
+    },
+    {
+     "col": "region",
+     "dtype": "float64",
+     "missing_frac": 1.0,
+     "nunique": 0,
+     "top": []
+    },
+    {
+     "col": "epsg",
+     "dtype": "float64",
+     "missing_frac": 0.0,
+     "nunique": 2,
+     "min": 32637.0,
+     "max": 32638.0,
+     "mean": 32637.51339285714
+    },
+    {
+     "col": "x_min",
+     "dtype": "float64",
+     "missing_frac": 0.0,
+     "nunique": 46,
+     "min": 266240.0,
+     "max": 727040.0,
+     "mean": 519222.85714285716
+    },
+    {
+     "col": "y_min",
+     "dtype": "float64",
+     "missing_frac": 0.0,
+     "nunique": 57,
+     "min": 5058560.0,
+     "max": 5734400.0,
+     "mean": 5339062.857142857
+    },
+    {
+     "col": "x_max",
+     "dtype": "float64",
+     "missing_frac": 0.0,
+     "nunique": 46,
+     "min": 276480.0,
+     "max": 737280.0,
+     "mean": 529462.8571428572
+    },
+    {
+     "col": "y_max",
+     "dtype": "float64",
+     "missing_frac": 0.0,
+     "nunique": 57,
+     "min": 5068800.0,
+     "max": 5744640.0,
+     "mean": 5349302.857142857
+    },
+    {
+     "col": "width",
+     "dtype": "int64",
+     "missing_frac": 0.0,
+     "nunique": 1,
+     "min": 512.0,
+     "max": 512.0,
+     "mean": 512.0
+    },
+    {
+     "col": "height",
+     "dtype": "int64",
+     "missing_frac": 0.0,
+     "nunique": 1,
+     "min": 512.0,
+     "max": 512.0,
+     "mean": 512.0
+    },
+    {
+     "col": "gsd",
+     "dtype": "int64",
+     "missing_frac": 0.0,
+     "nunique": 1,
+     "min": 20.0,
+     "max": 20.0,
+     "mean": 20.0
+    },
+    {
+     "col": "acq_datetime",
+     "dtype": "float64",
+     "missing_frac": 1.0,
+     "nunique": 0,
+     "top": []
+    },
+    {
+     "col": "satellite",
+     "dtype": "float64",
+     "missing_frac": 1.0,
+     "nunique": 0,
+     "top": []
+    },
+    {
+     "col": "date_pre",
+     "dtype": "str",
+     "missing_frac": 0.0,
+     "nunique": 140,
+     "top": [
+      "2024-09-21",
+      "2024-09-23",
+      "2022-08-15",
+      "2023-09-19",
+      "2024-09-06"
+     ]
+    },
+    {
+     "col": "date_post",
+     "dtype": "str",
+     "missing_frac": 0.0,
+     "nunique": 141,
+     "top": [
+      "2020-10-07",
+      "2024-10-06",
+      "2020-07-11",
+      "2020-09-07",
+      "2020-10-09"
+     ]
+    },
+    {
+     "col": "s1_date_pre",
+     "dtype": "str",
+     "missing_frac": 0.0,
+     "nunique": 134,
+     "top": [
+      "2020-08-26",
+      "2024-09-22",
+      "2024-09-20",
+      "2020-06-27",
+      "2020-09-19"
+     ]
+    },
+    {
+     "col": "s1_date_post",
+     "dtype": "str",
+     "missing_frac": 0.0,
+     "nunique": 123,
+     "top": [
+      "2020-09-07",
+      "2020-10-13",
+      "2020-10-07",
+      "2023-10-03",
+      "2024-09-04"
+     ]
+    },
+    {
+     "col": "valid_frac",
+     "dtype": "float64",
+     "missing_frac": 0.0,
+     "nunique": 138,
+     "min": 0.5152,
+     "max": 1.0,
+     "mean": 0.9189754464285714
+    },
+    {
+     "col": "cloud_frac",
+     "dtype": "float64",
+     "missing_frac": 0.0,
+     "nunique": 138,
+     "min": 0.0,
+     "max": 0.4848,
+     "mean": 0.08102455357142858
+    },
+    {
+     "col": "landcover_top",
+     "dtype": "float64",
+     "missing_frac": 1.0,
+     "nunique": 0,
+     "top": []
+    },
+    {
+     "col": "n_fire_px",
+     "dtype": "float64",
+     "missing_frac": 1.0,
+     "nunique": 0,
+     "top": []
+    },
+    {
+     "col": "burn_area_ha",
+     "dtype": "float64",
+     "missing_frac": 0.0,
+     "nunique": 224,
+     "min": 1.08,
+     "max": 5877.88,
+     "mean": 1055.1787499999998
+    },
+    {
+     "col": "sev1_px",
+     "dtype": "float64",
+     "missing_frac": 0.0,
+     "nunique": 224,
+     "min": 27.0,
+     "max": 70690.0,
+     "mean": 10548.53125
+    },
+    {
+     "col": "sev2_px",
+     "dtype": "float64",
+     "missing_frac": 0.0,
+     "nunique": 222,
+     "min": 0.0,
+     "max": 80518.0,
+     "mean": 9786.924107142857
+    },
+    {
+     "col": "sev3_px",
+     "dtype": "float64",
+     "missing_frac": 0.0,
+     "nunique": 202,
+     "min": 0.0,
+     "max": 62450.0,
+     "mean": 6044.013392857143
+    }
+   ],
+   "head": [
+    [
+     "BS_tr_000001",
+     "bs",
+     "FE00657",
+     NaN,
+     "32638.0",
+     "491520.0",
+     "5376000.0",
+     "501760.0",
+     "5386240.0",
+     "512",
+     "512",
+     "20",
+     NaN,
+     NaN,
+     "2019-04-18",
+     "2019-04-28",
+     "2019-04-17",
+     "2019-04-29",
+     "0.9963",
+     "0.0037",
+     NaN,
+     NaN,
+     "454.8",
+     "11360.0",
+     "10.0",
+     "0.0"
+    ],
+    [
+     "BS_tr_000002",
+     "bs",
+     "FE01044",
+     NaN,
+     "32638.0",
+     "471040.0",
+     "5068800.0",
+     "481280.0",
+     "5079040.0",
+     "512",
+     "512",
+     "20",
+     NaN,
+     NaN,
+     "2019-06-04",
+     "2019-06-19",
+     "2019-06-04",
+     "2019-06-21",
+     "0.8195",
+     "0.1805",
+     NaN,
+     NaN,
+     "2865.92",
+     "40651.0",
+     "1699.0",
+     "29298.0"
+    ],
+    [
+     "BS_tr_000003",
+     "bs",
+     "FE01122",
+     NaN,
+     "32638.0",
+     "655360.0",
+     "5396480.0",
+     "665600.0",
+     "5406720.0",
+     "512",
+     "512",
+     "20",
+     NaN,
+     NaN,
+     "2019-06-14",
+     "2019-06-26",
+     "2019-06-16",
+     "2019-06-28",
+     "0.9921",
+     "0.0079",
+     NaN,
+     NaN,
+     "2486.96",
+     "8335.0",
+     "35772.0",
+     "18067.0"
+    ],
+    [
+     "BS_tr_000004",
+     "bs",
+     "FE01130",
+     NaN,
+     "32638.0",
+     "614400.0",
+     "5345280.0",
+     "624640.0",
+     "5355520.0",
+     "512",
+     "512",
+     "20",
+     NaN,
+     NaN,
+     "2019-06-16",
+     "2019-06-26",
+     "2019-06-16",
+     "2019-06-28",
+     "0.9747",
+     "0.0253",
+     NaN,
+     NaN,
+     "2306.2",
+     "18761.0",
+     "32880.0",
+     "6014.0"
+    ],
+    [
+     "BS_tr_000005",
+     "bs",
+     "FE01642",
+     NaN,
+     "32638.0",
+     "481280.0",
+     "5171200.0",
+     "491520.0",
+     "5181440.0",
+     "512",
+     "512",
+     "20",
+     NaN,
+     NaN,
+     "2019-07-29",
+     "2019-08-08",
+     "2019-07-27",
+     "2019-08-15",
+     "0.713",
+     "0.287",
+     NaN,
+     NaN,
+     "1371.24",
+     "19588.0",
+     "12764.0",
+     "1929.0"
+    ]
+   ],
+   "rel": "bs/meta.csv"
+  }
+ ],
+ "seconds": 12.7
+}

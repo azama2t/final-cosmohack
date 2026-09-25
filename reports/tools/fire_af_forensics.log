@@ -1,0 +1,9 @@
+[forensics] 420 image-mask pairs, 78 groups
+[forensics] read + sampled in 5 s
+[forensics] done in 21 s -> reports\tools\fire_af_forensics\forensics.md
+  - **0** (0): МАЖОРИТАРНЫЙ класс (100% размеченных пикселей) — высокий F1 тривиален, смотреть AUC 1.000 и F1 остальных классов [дерево-5 1.00, LGBM 1.00]
+  - **1** (1): хорошо выводима из спектра пикселя (лучший CV F1 0.86) [дерево-3 0.55, дерево-5 0.65, LGBM 0.85, AUC 1.000]; лучший порог `I4 >= 330.1` CV F1 0.861
+
+real	0m21.632s
+user	0m0.000s
+sys	0m0.000s

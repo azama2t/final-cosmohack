@@ -1,0 +1,1525 @@
+<html><head><meta charset='utf-8'><title>inspect: C:\Users\User\Documents\GitHub\final-cosmohack\data\MARIDA</title><style>body{font-family:Segoe UI,Arial,sans-serif;background:#fcfcfb;color:#0b0b0b;margin:24px;max-width:1400px}
+table{border-collapse:collapse;font-size:12px;margin:6px 0 14px}td,th{border:1px solid #ddd;padding:3px 6px;text-align:left;vertical-align:top}
+th{background:#f0efec}h2{border-bottom:2px solid #2a78d6;padding-bottom:3px}.muted{color:#52514e}.hint{background:#fff6e0;padding:4px 8px;margin:3px 0}
+code{background:#f0efec;padding:1px 4px}</style></head><body>
+<h1>Dataset inspection</h1><p class='muted'>C:\Users\User\Documents\GitHub\final-cosmohack\data\MARIDA &middot; 2026-09-25T02:42:51 &middot; 4143 rasters (4143 scanned), 67 tables/lists, other: {&quot;.cpg&quot;: 63, &quot;.dbf&quot;: 63, &quot;.prj&quot;: 63, &quot;.shx&quot;: 63} &middot; 20.2 s</p>
+<h2>Groups (name templates)</h2>
+<table><tr><th>group</th><th>n_files</th><th>count</th><th>dtype</th><th>nodata</th><th>crs</th><th>res</th><th>size_hw</th><th>mask_like</th><th>mask_reason</th><th>bytes_total</th><th>example</th></tr><tr><td>patches/S2_{date}_{tile}/S2_{date}_{tile}_{n}.tif</td><td>1381</td><td>{&quot;11&quot;: 1381}</td><td>{&quot;float32&quot;: 1381}</td><td>{&quot;None&quot;: 1381}</td><td>{&quot;EPSG:32616&quot;: 1084, &quot;EPSG:32618&quot;: 108, &quot;EPSG:32648&quot;: 53, &quot;EPSG:32748&quot;: 45, &quot;EPSG:32750&quot;: 26, &quot;EPSG:32736&quot;: 21, &quot;EPSG:32652&quot;: 16, &quot;EPSG:32651&quot;: 13}</td><td>{&quot;[10.0, 10.0]&quot;: 1381}</td><td>{&quot;256x256&quot;: 1381}</td><td>False</td><td>11 bands</td><td>3984952836</td><td>patches/S2_1-12-19_48MYU/S2_1-12-19_48MYU_0.tif</td></tr><tr><td>patches/S2_{date}_{tile}/S2_{date}_{tile}_{n}_cl.tif</td><td>1381</td><td>{&quot;1&quot;: 1381}</td><td>{&quot;float32&quot;: 1381}</td><td>{&quot;None&quot;: 1381}</td><td>{&quot;EPSG:32616&quot;: 1084, &quot;EPSG:32618&quot;: 108, &quot;EPSG:32648&quot;: 53, &quot;EPSG:32748&quot;: 45, &quot;EPSG:32750&quot;: 26, &quot;EPSG:32736&quot;: 21, &quot;EPSG:32652&quot;: 16, &quot;EPSG:32651&quot;: 13}</td><td>{&quot;[10.0, 10.0]&quot;: 1381}</td><td>{&quot;256x256&quot;: 1381}</td><td>True</td><td>3 unique integer values + name hint</td><td>362783176</td><td>patches/S2_1-12-19_48MYU/S2_1-12-19_48MYU_0_cl.tif</td></tr><tr><td>patches/S2_{date}_{tile}/S2_{date}_{tile}_{n}_conf.tif</td><td>1381</td><td>{&quot;1&quot;: 1381}</td><td>{&quot;float32&quot;: 1381}</td><td>{&quot;None&quot;: 1381}</td><td>{&quot;EPSG:32616&quot;: 1084, &quot;EPSG:32618&quot;: 108, &quot;EPSG:32648&quot;: 53, &quot;EPSG:32748&quot;: 45, &quot;EPSG:32750&quot;: 26, &quot;EPSG:32736&quot;: 21, &quot;EPSG:32652&quot;: 16, &quot;EPSG:32651&quot;: 13}</td><td>{&quot;[10.0, 10.0]&quot;: 1381}</td><td>{&quot;256x256&quot;: 1381}</td><td>True</td><td>2 unique integer values</td><td>362783176</td><td>patches/S2_1-12-19_48MYU/S2_1-12-19_48MYU_0_conf.tif</td></tr></table>
+<h2>Families (groups sharing sample ids) &rarr; suggested image / mask</h2>
+<table><tr><th>members</th><th>images</th><th>masks</th></tr><tr><td>[&quot;patches/S2_{date}_{tile}/S2_{date}_{tile}_{n}.tif&quot;, &quot;patches/S2_{date}_{tile}/S2_{date}_{tile}_{n}_cl.tif&quot;, &quot;patches/S2_{date}_{tile}/S2_{date}_{tile}_{n}_conf.tif&quot;]</td><td>[&quot;patches/S2_{date}_{tile}/S2_{date}_{tile}_{n}.tif&quot;]</td><td>[&quot;patches/S2_{date}_{tile}/S2_{date}_{tile}_{n}_cl.tif&quot;, &quot;patches/S2_{date}_{tile}/S2_{date}_{tile}_{n}_conf.tif&quot;]</td></tr></table>
+<p>pairs_guess.csv: 1381 image-mask pairs.</p>
+<h2>Group pairs by shared sample id</h2><table><tr><th>group_a</th><th>group_b</th><th>shared_ids</th><th>frac_a</th><th>frac_b</th></tr><tr><td>patches/S2_{date}_{tile}/S2_{date}_{tile}_{n}.tif</td><td>patches/S2_{date}_{tile}/S2_{date}_{tile}_{n}_cl.tif</td><td>1381</td><td>1</td><td>1</td></tr><tr><td>patches/S2_{date}_{tile}/S2_{date}_{tile}_{n}.tif</td><td>patches/S2_{date}_{tile}/S2_{date}_{tile}_{n}_conf.tif</td><td>1381</td><td>1</td><td>1</td></tr><tr><td>patches/S2_{date}_{tile}/S2_{date}_{tile}_{n}_cl.tif</td><td>patches/S2_{date}_{tile}/S2_{date}_{tile}_{n}_conf.tif</td><td>1381</td><td>1</td><td>1</td></tr></table>
+<h2>patches/S2_{date}_{tile}/S2_{date}_{tile}_{n}.tif</h2><p class='muted'>1381 files, sampled 40; descriptions: None; extent WGS84: [-88.85579, -29.897335, 129.074572, 56.406198]</p>
+<div class='hint'>float values ~0..1 -&gt; looks like reflectance already (scale=1).</div>
+<table><tr><th>band</th><th>name</th><th>min</th><th>p1</th><th>p5</th><th>p50</th><th>p95</th><th>p99</th><th>max</th><th>mean</th><th>std</th><th>nan_frac</th><th>zero_frac</th><th>nodata_frac</th></tr><tr><td>1</td><td>band1</td><td>0</td><td>0</td><td>0.02475</td><td>0.03874</td><td>0.09011</td><td>0.3306</td><td>0.6571</td><td>0.04845</td><td>0.0488</td><td>0</td><td>0.01582</td><td>0</td></tr><tr><td>2</td><td>band2</td><td>0</td><td>0</td><td>0.02029</td><td>0.03404</td><td>0.08161</td><td>0.3256</td><td>0.6775</td><td>0.04436</td><td>0.04911</td><td>0</td><td>0.01582</td><td>0</td></tr><tr><td>3</td><td>band3</td><td>0</td><td>0</td><td>0.01218</td><td>0.02706</td><td>0.09035</td><td>0.3065</td><td>0.6573</td><td>0.03784</td><td>0.04865</td><td>0</td><td>0.01582</td><td>0</td></tr><tr><td>4</td><td>band4</td><td>0</td><td>0</td><td>0.006194</td><td>0.01888</td><td>0.08339</td><td>0.32</td><td>0.6974</td><td>0.0301</td><td>0.05153</td><td>0</td><td>0.01582</td><td>0</td></tr><tr><td>5</td><td>band5</td><td>0</td><td>0</td><td>0.004947</td><td>0.0162</td><td>0.09397</td><td>0.3056</td><td>0.6649</td><td>0.02831</td><td>0.05071</td><td>0</td><td>0.01582</td><td>0</td></tr><tr><td>6</td><td>band6</td><td>-0.0008934</td><td>0</td><td>0.005127</td><td>0.01577</td><td>0.166</td><td>0.3314</td><td>0.6748</td><td>0.03283</td><td>0.06426</td><td>0</td><td>0.01582</td><td>0</td></tr><tr><td>7</td><td>band7</td><td>0</td><td>0</td><td>0.005328</td><td>0.01698</td><td>0.193</td><td>0.405</td><td>0.728</td><td>0.03717</td><td>0.07651</td><td>0</td><td>0.01582</td><td>0</td></tr><tr><td>8</td><td>band8</td><td>0</td><td>0</td><td>0.004195</td><td>0.01406</td><td>0.1796</td><td>0.3806</td><td>0.675</td><td>0.03286</td><td>0.07146</td><td>0</td><td>0.01582</td><td>0</td></tr><tr><td>9</td><td>band9</td><td>0</td><td>0</td><td>0.004731</td><td>0.01611</td><td>0.207</td><td>0.4449</td><td>0.749</td><td>0.03755</td><td>0.08298</td><td>0</td><td>0.01582</td><td>0</td></tr><tr><td>10</td><td>band10</td><td>0</td><td>0</td><td>0.001569</td><td>0.008713</td><td>0.1245</td><td>0.3197</td><td>0.5492</td><td>0.02277</td><td>0.05486</td><td>0</td><td>0.01582</td><td>0</td></tr><tr><td>11</td><td>band11</td><td>-5.795e-05</td><td>0</td><td>0.0009457</td><td>0.005952</td><td>0.0616</td><td>0.2391</td><td>0.415</td><td>0.0152</td><td>0.03705</td><td>0</td><td>0.01582</td><td>0</td></tr></table>
+<img src='img/hist_patches_S2_date_tile_S2_date_tile_n_tif.png' style='max-width:100%'>
+<h2>patches/S2_{date}_{tile}/S2_{date}_{tile}_{n}_cl.tif</h2><p class='muted'>1381 files, sampled 40; descriptions: None; extent WGS84: [-88.85579, -29.897335, 129.074572, 56.406198]</p>
+<table><tr><th>band</th><th>name</th><th>min</th><th>p1</th><th>p5</th><th>p50</th><th>p95</th><th>p99</th><th>max</th><th>mean</th><th>std</th><th>nan_frac</th><th>zero_frac</th><th>nodata_frac</th></tr><tr><td>1</td><td>band1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>14</td><td>0.05095</td><td>0.6283</td><td>0</td><td>0.9932</td><td>0</td></tr></table>
+<h3>Class balance (1381 mask files)</h3>
+<table><tr><th>value</th><th>pixels</th><th>pixel_frac</th><th>files_with</th><th>files_frac</th></tr><tr><td>0</td><td>89667839</td><td>0.9907</td><td>1381</td><td>1</td></tr><tr><td>1</td><td>3399</td><td>3.8e-05</td><td>373</td><td>0.2701</td></tr><tr><td>2</td><td>2797</td><td>3.1e-05</td><td>49</td><td>0.0355</td></tr><tr><td>3</td><td>2357</td><td>2.6e-05</td><td>106</td><td>0.0768</td></tr><tr><td>4</td><td>864</td><td>1e-05</td><td>71</td><td>0.0514</td></tr><tr><td>5</td><td>5803</td><td>6.4e-05</td><td>182</td><td>0.1318</td></tr><tr><td>6</td><td>117400</td><td>0.001297</td><td>181</td><td>0.1311</td></tr><tr><td>7</td><td>129159</td><td>0.001427</td><td>870</td><td>0.63</td></tr><tr><td>8</td><td>372937</td><td>0.004121</td><td>51</td><td>0.0369</td></tr><tr><td>9</td><td>1225</td><td>1.4e-05</td><td>59</td><td>0.0427</td></tr><tr><td>10</td><td>157612</td><td>0.001741</td><td>220</td><td>0.1593</td></tr><tr><td>11</td><td>17369</td><td>0.000192</td><td>64</td><td>0.0463</td></tr><tr><td>12</td><td>5827</td><td>6.4e-05</td><td>54</td><td>0.0391</td></tr><tr><td>13</td><td>11728</td><td>0.00013</td><td>71</td><td>0.0514</td></tr><tr><td>14</td><td>8490</td><td>9.4e-05</td><td>106</td><td>0.0768</td></tr><tr><td>15</td><td>410</td><td>5e-06</td><td>140</td><td>0.1014</td></tr></table>
+<img src='img/classes_patches_S2_date_tile_S2_date_tile_n_cl_tif.png'>
+<h2>patches/S2_{date}_{tile}/S2_{date}_{tile}_{n}_conf.tif</h2><p class='muted'>1381 files, sampled 40; descriptions: None; extent WGS84: [-88.85579, -29.897335, 129.074572, 56.406198]</p>
+<table><tr><th>band</th><th>name</th><th>min</th><th>p1</th><th>p5</th><th>p50</th><th>p95</th><th>p99</th><th>max</th><th>mean</th><th>std</th><th>nan_frac</th><th>zero_frac</th><th>nodata_frac</th></tr><tr><td>1</td><td>band1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>3</td><td>0.002169</td><td>0.04823</td><td>0</td><td>0.9978</td><td>0</td></tr></table>
+<h3>Class balance (1381 mask files)</h3>
+<table><tr><th>value</th><th>pixels</th><th>pixel_frac</th><th>files_with</th><th>files_frac</th></tr><tr><td>0</td><td>89667839</td><td>0.9907</td><td>1381</td><td>1</td></tr><tr><td>1</td><td>833808</td><td>0.009213</td><td>1341</td><td>0.971</td></tr><tr><td>2</td><td>2022</td><td>2.2e-05</td><td>334</td><td>0.2419</td></tr><tr><td>3</td><td>1547</td><td>1.7e-05</td><td>219</td><td>0.1586</td></tr></table>
+<img src='img/classes_patches_S2_date_tile_S2_date_tile_n_conf_tif.png'>
+<h2>Tables / lists / labels</h2>
+<h3>labels_mapping.txt</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.txt&quot;,
+ &quot;size_bytes&quot;: 101688,
+ &quot;lines&quot;: 1,
+ &quot;head&quot;: [
+  &quot;{\&quot;S2_1-12-19_48MYU_0.tif\&quot;: [0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0], \&quot;S2_1-12-19_48MYU_1.tif\&quot;: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], \&quot;S2_1-12-19_48MYU_2.tif\&quot;: [1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], \&quot;S2_1-12-19_48MYU_3.tif\&quot;: [1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0], \&quot;S2_11-1-19_19QDA_0.tif\&quot;: [0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], \&quot;S2_11-1-19_19QDA_1.tif\&quot;: [0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0], \&quot;S2_11-1-19_19QDA_2.tif\&quot;: [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], \&quot;S2_11-1-19_19QDA_3.tif\&quot;: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], \&quot;S2_11-1-19_19QDA_4.tif\&quot;: [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], \&quot;S2_11-6-18_16PCC_0.tif\&quot;: [0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0], \&quot;S2_11-6-18_16PCC_1.tif\&quot;: [0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0], \&quot;S2_11-6-18_16PCC_10.tif\&quot;: [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], \&quot;S2_11-6-18_16PCC_11.tif\&quot;: [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0], \&quot;S2_11-6-18_16PCC_12.tif\&quot;: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0], \&quot;S2_11-6-18_16PCC_13.tif\&quot;: [1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1], \&quot;S2_11-6-18_16PCC_14.tif\&quot;: [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0], \&quot;S2_11-6-18_16PCC_15.tif\&quot;: [1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], \&quot;S2_11-6-18_16PCC_16.tif\&quot;: [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0], \&quot;S2_11-6-18_16PCC_17.tif\&quot;: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0], \&quot;S2_11-6-18_16PCC_18.tif\&quot;: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], \&quot;S2_11-6-18_16PCC_19.tif\&quot;: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], \&quot;S2_11-6-18_16PCC_2.tif\&quot;: [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0], \&quot;S2_11-6-18_16PCC_20.tif\&quot;: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], \&quot;S2_11-6-18_16PCC_21.tif\&quot;: [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0], \&quot;S2_11-6-18_16PCC_22.tif\&quot;: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], \&quot;S2_11-6-18_16PCC_23.tif\&quot;: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], \&quot;S2_11-6-18_16PCC_24.tif\&quot;: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], \&quot;S2_11-6-18_16PCC_25.tif\&quot;: [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0], \&quot;S2_11-6-18_16PCC_26.tif\&quot;: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], \&quot;S2_11-6-18_16PCC_27.tif\&quot;: [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1], \&quot;S2_11-6-18_16PCC_28.tif\&quot;: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], \&quot;S2_11-6-18_16PCC_29.tif\&quot;: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], \&quot;S2_11-6-18_16PCC_3.tif\&quot;: [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0], \&quot;S2_11-6-18_16PCC_30.tif\&quot;: [1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1], \&quot;S2_11-6-18_16PCC_31.tif\&quot;: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], \&quot;S2_11-6-18_16PCC_32.tif\&quot;: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1], \&quot;S2_11-6-18_16PCC_33.tif\&quot;: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], \&quot;S2_11-6-18_16PCC_34.tif\&quot;: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], \&quot;S2_11-6-18_16PCC_35.tif\&quot;: [1, 0, 0, 0, 0, 0, 1, 0, 0,</pre>
+<h3>shapefiles/S2_1-12-19_48MYU.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 10324,
+ &quot;rows&quot;: 56,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32748&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 56
+ },
+ &quot;total_bounds&quot;: [
+  708203.0910879469,
+  9333644.135328656,
+  711846.7877283288,
+  9340930.737302566
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_1-12-19_48MYU.shp&quot;
+}</pre>
+<h3>shapefiles/S2_11-1-19_19QDA.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 3148,
+ &quot;rows&quot;: 21,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32619&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 21
+ },
+ &quot;total_bounds&quot;: [
+  403044.23920342827,
+  2036463.2560402635,
+  412717.9410718414,
+  2042051.9511479894
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_11-1-19_19QDA.shp&quot;
+}</pre>
+<h3>shapefiles/S2_11-6-18_16PCC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 52380,
+ &quot;rows&quot;: 241,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 241
+ },
+ &quot;total_bounds&quot;: [
+  326124.0769207483,
+  1736553.737587011,
+  385136.1215082208,
+  1771275.2060051216
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_11-6-18_16PCC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_12-1-17_16PCC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 20580,
+ &quot;rows&quot;: 108,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 108
+ },
+ &quot;total_bounds&quot;: [
+  350123.3936732552,
+  1737655.5211092725,
+  385091.7336334955,
+  1761883.5974615936
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_12-1-17_16PCC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_12-1-17_16PEC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 29220,
+ &quot;rows&quot;: 178,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 178
+ },
+ &quot;total_bounds&quot;: [
+  500843.5280410757,
+  1745804.769763833,
+  581914.9522863207,
+  1791177.6181610955
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_12-1-17_16PEC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_12-1-19_16PEC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 35452,
+ &quot;rows&quot;: 209,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 209
+ },
+ &quot;total_bounds&quot;: [
+  500695.5350466381,
+  1742634.8299839569,
+  590758.8757259393,
+  1799728.3806865315
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_12-1-19_16PEC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_12-12-20_16PCC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 7836,
+ &quot;rows&quot;: 55,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 55
+ },
+ &quot;total_bounds&quot;: [
+  359312.93854534806,
+  1737232.6794287197,
+  389176.2589716672,
+  1771976.2623242969
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_12-12-20_16PCC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_13-12-18_16PCC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 14188,
+ &quot;rows&quot;: 89,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 89
+ },
+ &quot;total_bounds&quot;: [
+  349472.0334244531,
+  1736557.5752743143,
+  401637.5448956261,
+  1779184.7790754985
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_13-12-18_16PCC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_14-11-18_48PZC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 19172,
+ &quot;rows&quot;: 112,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32648&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 112
+ },
+ &quot;total_bounds&quot;: [
+  862321.9967808207,
+  1754963.8407079622,
+  886537.3889229791,
+  1772445.593898231
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_14-11-18_48PZC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_14-12-20_18QYF.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 10964,
+ &quot;rows&quot;: 72,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32618&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 72
+ },
+ &quot;total_bounds&quot;: [
+  775253.1525462446,
+  2052292.3503427247,
+  779017.6297260512,
+  2056524.2565973678
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_14-12-20_18QYF.shp&quot;
+}</pre>
+<h3>shapefiles/S2_14-3-20_18QYF.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 25468,
+ &quot;rows&quot;: 183,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32618&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 183
+ },
+ &quot;total_bounds&quot;: [
+  764804.6406379406,
+  2054352.3271806468,
+  777738.2510254306,
+  2057294.3062860682
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_14-3-20_18QYF.shp&quot;
+}</pre>
+<h3>shapefiles/S2_14-9-18_16PCC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 23548,
+ &quot;rows&quot;: 129,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 129
+ },
+ &quot;total_bounds&quot;: [
+  354682.7823783897,
+  1737399.5305195847,
+  408907.28120844625,
+  1783566.3446434555
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_14-9-18_16PCC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_15-10-20_18QYF.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 12892,
+ &quot;rows&quot;: 75,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32618&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 75
+ },
+ &quot;total_bounds&quot;: [
+  759734.1540528069,
+  2010164.6601640496,
+  783707.1481933602,
+  2073794.4852604421
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_15-10-20_18QYF.shp&quot;
+}</pre>
+<h3>shapefiles/S2_15-11-20_16PCC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 11508,
+ &quot;rows&quot;: 70,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 70
+ },
+ &quot;total_bounds&quot;: [
+  302123.42257055396,
+  1742416.7636718713,
+  337154.6194690266,
+  1771104.8558252265
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_15-11-20_16PCC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_15-9-20_18QYF.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 16764,
+ &quot;rows&quot;: 117,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32618&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 117
+ },
+ &quot;total_bounds&quot;: [
+  743214.3316313059,
+  2063193.651194397,
+  761586.5393143498,
+  2079606.1335316147
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_15-9-20_18QYF.shp&quot;
+}</pre>
+<h3>shapefiles/S2_16-2-18_16PEC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 13156,
+ &quot;rows&quot;: 80,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 80
+ },
+ &quot;total_bounds&quot;: [
+  502381.58752765466,
+  1746281.3411891533,
+  576654.8597016375,
+  1765726.5625552733
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_16-2-18_16PEC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_17-7-16_51PTS.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 3732,
+ &quot;rows&quot;: 26,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32651&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 26
+ },
+ &quot;total_bounds&quot;: [
+  255625.41903926607,
+  1614922.191754793,
+  258917.57697232396,
+  1620727.2765342488
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_17-7-16_51PTS.shp&quot;
+}</pre>
+<h3>shapefiles/S2_18-1-18_48PZC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 13932,
+ &quot;rows&quot;: 83,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32648&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 83
+ },
+ &quot;total_bounds&quot;: [
+  856670.5519045711,
+  1736980.4069003281,
+  905992.1947555228,
+  1781505.2841177147
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_18-1-18_48PZC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_18-5-19_51PTS.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 2260,
+ &quot;rows&quot;: 14,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32651&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 14
+ },
+ &quot;total_bounds&quot;: [
+  268261.8484781123,
+  1611181.8081850521,
+  270427.4695875588,
+  1612465.3579888076
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_18-5-19_51PTS.shp&quot;
+}</pre>
+<h3>shapefiles/S2_18-9-20_16PCC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 84924,
+ &quot;rows&quot;: 555,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 555
+ },
+ &quot;total_bounds&quot;: [
+  316514.1433710763,
+  1736825.4452008323,
+  406644.97876320395,
+  1786227.7795725632
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_18-9-20_16PCC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_18-9-20_16PDC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 13740,
+ &quot;rows&quot;: 83,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 83
+ },
+ &quot;total_bounds&quot;: [
+  400519.8700612778,
+  1754104.3707193234,
+  436356.16104951565,
+  1796060.6959856446
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_18-9-20_16PDC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_19-3-20_18QYF.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 15596,
+ &quot;rows&quot;: 109,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32618&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 109
+ },
+ &quot;total_bounds&quot;: [
+  761112.5670030046,
+  2054432.3783243084,
+  775926.6247514905,
+  2074115.585988176
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_19-3-20_18QYF.shp&quot;
+}</pre>
+<h3>shapefiles/S2_19-9-18_16PCC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 21852,
+ &quot;rows&quot;: 135,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 135
+ },
+ &quot;total_bounds&quot;: [
+  350437.6341710143,
+  1735532.2111468036,
+  385794.86529920204,
+  1770081.3233529108
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_19-9-18_16PCC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_19-9-18_16PDC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 10076,
+ &quot;rows&quot;: 63,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 63
+ },
+ &quot;total_bounds&quot;: [
+  408434.7743457342,
+  1756873.921894174,
+  452076.59820776153,
+  1783764.809675832
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_19-9-18_16PDC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_20-10-20_18QYF.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 7420,
+ &quot;rows&quot;: 47,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32618&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 47
+ },
+ &quot;total_bounds&quot;: [
+  748414.1153081512,
+  2067511.2027833024,
+  754675.6640159048,
+  2076820.035398229
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_20-10-20_18QYF.shp&quot;
+}</pre>
+<h3>shapefiles/S2_20-4-18_30VWH.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 5428,
+ &quot;rows&quot;: 34,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32630&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 34
+ },
+ &quot;total_bounds&quot;: [
+  524463.7195018675,
+  6225601.330858779,
+  541918.5193519917,
+  6249956.927392645
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_20-4-18_30VWH.shp&quot;
+}</pre>
+<h3>shapefiles/S2_21-2-17_16PCC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 18644,
+ &quot;rows&quot;: 98,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 98
+ },
+ &quot;total_bounds&quot;: [
+  317670.72346776,
+  1738624.9049585836,
+  401807.76465331577,
+  1766746.5466792004
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_21-2-17_16PCC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_21-2-18_16PCC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 5284,
+ &quot;rows&quot;: 30,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 30
+ },
+ &quot;total_bounds&quot;: [
+  359451.68067781674,
+  1737702.9502264848,
+  385402.813763611,
+  1757982.7356073926
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_21-2-18_16PCC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_22-12-20_18QYF.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 4852,
+ &quot;rows&quot;: 34,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32618&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 34
+ },
+ &quot;total_bounds&quot;: [
+  729142.666616343,
+  2084852.9375382545,
+  731095.5725933987,
+  2086637.5349976483
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_22-12-20_18QYF.shp&quot;
+}</pre>
+<h3>shapefiles/S2_22-3-20_18QWF.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 19660,
+ &quot;rows&quot;: 37,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32618&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 37
+ },
+ &quot;total_bounds&quot;: [
+  574724.6045115915,
+  2001012.1280230205,
+  583476.5347685915,
+  2004134.8970146994
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_22-3-20_18QWF.shp&quot;
+}</pre>
+<h3>shapefiles/S2_23-1-21_18QYF.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 3204,
+ &quot;rows&quot;: 10,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32618&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 10
+ },
+ &quot;total_bounds&quot;: [
+  725333.3938053139,
+  2048025.1371681443,
+  733045.5835733471,
+  2052676.9159292146
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_23-1-21_18QYF.shp&quot;
+}</pre>
+<h3>shapefiles/S2_23-9-20_16PCC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 39796,
+ &quot;rows&quot;: 232,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 232
+ },
+ &quot;total_bounds&quot;: [
+  318265.06974966585,
+  1736561.3027466673,
+  402706.4327188071,
+  1780445.2205019742
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_23-9-20_16PCC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_24-10-18_16PDC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 8452,
+ &quot;rows&quot;: 54,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 54
+ },
+ &quot;total_bounds&quot;: [
+  459320.56432840746,
+  1747015.0931412063,
+  501426.793753107,
+  1761451.6330873494
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_24-10-18_16PDC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_24-11-19_48PZC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 2956,
+ &quot;rows&quot;: 17,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32648&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 17
+ },
+ &quot;total_bounds&quot;: [
+  861339.7830625296,
+  1755305.2010973555,
+  873733.9827087045,
+  1761596.2670539003
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_24-11-19_48PZC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_24-3-20_18QYF.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 1980,
+ &quot;rows&quot;: 13,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32618&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 13
+ },
+ &quot;total_bounds&quot;: [
+  728844.7466195958,
+  2040622.2019867513,
+  729436.4082747643,
+  2042204.076101203
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_24-3-20_18QYF.shp&quot;
+}</pre>
+<h3>shapefiles/S2_24-4-19_36JUN.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 13692,
+ &quot;rows&quot;: 61,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32736&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 61
+ },
+ &quot;total_bounds&quot;: [
+  313301.04631629656,
+  6693020.954312435,
+  335223.39384081203,
+  6714725.756205427
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_24-4-19_36JUN.shp&quot;
+}</pre>
+<h3>shapefiles/S2_24-8-20_16PCC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 26588,
+ &quot;rows&quot;: 153,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 153
+ },
+ &quot;total_bounds&quot;: [
+  361725.4455056897,
+  1738223.1931090443,
+  404515.7726225074,
+  1780485.7052633166
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_24-8-20_16PCC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_25-5-19_48MXU.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 2644,
+ &quot;rows&quot;: 18,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32748&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 18
+ },
+ &quot;total_bounds&quot;: [
+  609494.4465703893,
+  9349151.420608114,
+  614767.042648618,
+  9354177.006695244
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_25-5-19_48MXU.shp&quot;
+}</pre>
+<h3>shapefiles/S2_26-2-18_16PCC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 22692,
+ &quot;rows&quot;: 132,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 132
+ },
+ &quot;total_bounds&quot;: [
+  316644.2803720882,
+  1743788.9647400447,
+  396704.85990287014,
+  1769665.8117234095
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_26-2-18_16PCC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_27-1-19_16PCC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 16308,
+ &quot;rows&quot;: 110,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 110
+ },
+ &quot;total_bounds&quot;: [
+  348976.1491726535,
+  1737892.0418377786,
+  385836.63901620946,
+  1773645.096349336
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_27-1-19_16PCC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_27-1-19_16QED.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 20324,
+ &quot;rows&quot;: 116,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 116
+ },
+ &quot;total_bounds&quot;: [
+  536605.3722258002,
+  1797034.190355979,
+  552703.2535314488,
+  1811066.0828539147
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_27-1-19_16QED.shp&quot;
+}</pre>
+<h3>shapefiles/S2_28-9-20_16PCC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 12044,
+ &quot;rows&quot;: 77,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 77
+ },
+ &quot;total_bounds&quot;: [
+  316952.5350713344,
+  1737453.5453981282,
+  329564.4436601635,
+  1756647.0852157043
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_28-9-20_16PCC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_28-9-20_16PDC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 10796,
+ &quot;rows&quot;: 57,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 57
+ },
+ &quot;total_bounds&quot;: [
+  410534.222509488,
+  1758612.3487859734,
+  470574.7428900593,
+  1796987.723972976
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_28-9-20_16PDC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_29-11-15_16PEC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 7628,
+ &quot;rows&quot;: 53,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 53
+ },
+ &quot;total_bounds&quot;: [
+  526133.2875217998,
+  1773412.4437456278,
+  571386.6682490953,
+  1779325.6509253418
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_29-11-15_16PEC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_29-11-20_18QYF.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 8356,
+ &quot;rows&quot;: 60,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32618&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 60
+ },
+ &quot;total_bounds&quot;: [
+  735982.6741818069,
+  2055753.091532216,
+  766696.8533624071,
+  2087586.6483530088
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_29-11-20_18QYF.shp&quot;
+}</pre>
+<h3>shapefiles/S2_29-12-20_18QYF.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 29684,
+ &quot;rows&quot;: 190,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32618&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 190
+ },
+ &quot;total_bounds&quot;: [
+  751103.325575469,
+  2068393.185241175,
+  766127.490758682,
+  2077716.7573606118
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_29-12-20_18QYF.shp&quot;
+}</pre>
+<h3>shapefiles/S2_29-8-17_51RVQ.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 2228,
+ &quot;rows&quot;: 14,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32651&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 14
+ },
+ &quot;total_bounds&quot;: [
+  466763.6501736114,
+  3413348.8910590312,
+  505917.86920976057,
+  3422146.016264505
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_29-8-17_51RVQ.shp&quot;
+}</pre>
+<h3>shapefiles/S2_3-1-21_18QYF.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 13652,
+ &quot;rows&quot;: 98,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32618&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 98
+ },
+ &quot;total_bounds&quot;: [
+  741052.5682873911,
+  2080864.448920802,
+  746512.3161329915,
+  2087527.5891323485
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_3-1-21_18QYF.shp&quot;
+}</pre>
+<h3>shapefiles/S2_3-11-16_16PDC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 26572,
+ &quot;rows&quot;: 179,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 179
+ },
+ &quot;total_bounds&quot;: [
+  452677.77199718443,
+  1745921.0200922752,
+  504746.72998228105,
+  1784736.462910574
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_3-11-16_16PDC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_3-11-18_16PDC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 21092,
+ &quot;rows&quot;: 142,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 142
+ },
+ &quot;total_bounds&quot;: [
+  436582.97253337124,
+  1744023.2752081559,
+  506857.4240893838,
+  1778829.131829454
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_3-11-18_16PDC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_30-8-17_16PCC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 6932,
+ &quot;rows&quot;: 40,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 40
+ },
+ &quot;total_bounds&quot;: [
+  348700.6868314859,
+  1739127.9163415204,
+  378410.61962236406,
+  1751569.1591086427
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_30-8-17_16PCC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_30-8-18_16PCC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 42540,
+ &quot;rows&quot;: 213,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 213
+ },
+ &quot;total_bounds&quot;: [
+  317752.9201275425,
+  1739912.876578552,
+  384515.674778761,
+  1775077.552630675
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_30-8-18_16PCC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_4-12-20_18QYF.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 8052,
+ &quot;rows&quot;: 44,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32618&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 44
+ },
+ &quot;total_bounds&quot;: [
+  739352.5542365094,
+  2074842.720754968,
+  759186.096031523,
+  2083517.170321053
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_4-12-20_18QYF.shp&quot;
+}</pre>
+<h3>shapefiles/S2_4-3-18_50LLR.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 27580,
+ &quot;rows&quot;: 181,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32750&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 181
+ },
+ &quot;total_bounds&quot;: [
+  301953.88878441544,
+  8996313.496101538,
+  1522466.3394360642,
+  27886215.196062125
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_4-3-18_50LLR.shp&quot;
+}</pre>
+<h3>shapefiles/S2_4-9-16_16PCC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 64780,
+ &quot;rows&quot;: 377,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 377
+ },
+ &quot;total_bounds&quot;: [
+  347805.5597280848,
+  1739222.2662778986,
+  392662.5263671875,
+  1777254.0788136646
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_4-9-16_16PCC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_4-9-19_16PCC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 14972,
+ &quot;rows&quot;: 95,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 95
+ },
+ &quot;total_bounds&quot;: [
+  343517.11087873497,
+  1740073.1888494843,
+  399035.7525317983,
+  1785531.859523747
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_4-9-19_16PCC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_6-12-17_48MYU.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 5108,
+ &quot;rows&quot;: 36,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32748&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 36
+ },
+ &quot;total_bounds&quot;: [
+  706161.6474240071,
+  9335381.61609813,
+  709546.4553886523,
+  9337815.692046529
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_6-12-17_48MYU.shp&quot;
+}</pre>
+<h3>shapefiles/S2_6-12-18_48MXU.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 27844,
+ &quot;rows&quot;: 184,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32748&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 184
+ },
+ &quot;total_bounds&quot;: [
+  601223.2692001195,
+  9330452.750137214,
+  704964.3777057303,
+  9357912.591938382
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_6-12-18_48MXU.shp&quot;
+}</pre>
+<h3>shapefiles/S2_7-10-18_52SDD.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 15980,
+ &quot;rows&quot;: 95,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32652&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 95
+ },
+ &quot;total_bounds&quot;: [
+  489471.74808926514,
+  3859868.6641251687,
+  506686.55391179316,
+  3879318.5107212216
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_7-10-18_52SDD.shp&quot;
+}</pre>
+<h3>shapefiles/S2_7-3-20_18QYG.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 17604,
+ &quot;rows&quot;: 124,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32618&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 124
+ },
+ &quot;total_bounds&quot;: [
+  720645.3149379932,
+  2117482.146808663,
+  737225.0304975627,
+  2138877.809371889
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_7-3-20_18QYG.shp&quot;
+}</pre>
+<h3>shapefiles/S2_8-3-18_16PEC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 6428,
+ &quot;rows&quot;: 41,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 41
+ },
+ &quot;total_bounds&quot;: [
+  521357.4579603496,
+  1787737.3437233458,
+  569551.3677994881,
+  1799755.711813278
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_8-3-18_16PEC.shp&quot;
+}</pre>
+<h3>shapefiles/S2_8-3-18_16QED.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 18724,
+ &quot;rows&quot;: 114,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 114
+ },
+ &quot;total_bounds&quot;: [
+  534633.3441101445,
+  1796252.435105731,
+  590735.7649777272,
+  1826366.9279872465
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_8-3-18_16QED.shp&quot;
+}</pre>
+<h3>shapefiles/S2_9-10-17_16PEC.shp</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.shp&quot;,
+ &quot;size_bytes&quot;: 32236,
+ &quot;rows&quot;: 199,
+ &quot;cols&quot;: [
+  &quot;id&quot;,
+  &quot;conf&quot;,
+  &quot;report&quot;,
+  &quot;geometry&quot;
+ ],
+ &quot;crs&quot;: &quot;EPSG:32616&quot;,
+ &quot;geometry_types&quot;: {
+  &quot;Polygon&quot;: 199
+ },
+ &quot;total_bounds&quot;: [
+  515191.9321570575,
+  1743923.0822567753,
+  591966.9976311717,
+  1782288.124560155
+ ],
+ &quot;rel&quot;: &quot;shapefiles/S2_9-10-17_16PEC.shp&quot;
+}</pre>
+<h3>splits/test_X.txt</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.txt&quot;,
+ &quot;size_bytes&quot;: 6379,
+ &quot;lines&quot;: 359,
+ &quot;head&quot;: [
+  &quot;12-12-20_16PCC_0&quot;,
+  &quot;12-12-20_16PCC_1&quot;,
+  &quot;12-12-20_16PCC_10&quot;,
+  &quot;12-12-20_16PCC_11&quot;,
+  &quot;12-12-20_16PCC_12&quot;
+ ],
+ &quot;rel&quot;: &quot;splits/test_X.txt&quot;
+}</pre>
+<h3>splits/train_X.txt</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.txt&quot;,
+ &quot;size_bytes&quot;: 12181,
+ &quot;lines&quot;: 694,
+ &quot;head&quot;: [
+  &quot;1-12-19_48MYU_0&quot;,
+  &quot;1-12-19_48MYU_1&quot;,
+  &quot;1-12-19_48MYU_2&quot;,
+  &quot;1-12-19_48MYU_3&quot;,
+  &quot;11-1-19_19QDA_0&quot;
+ ],
+ &quot;rel&quot;: &quot;splits/train_X.txt&quot;
+}</pre>
+<h3>splits/val_X.txt</h3>
+<pre>{
+ &quot;ext&quot;: &quot;.txt&quot;,
+ &quot;size_bytes&quot;: 5792,
+ &quot;lines&quot;: 328,
+ &quot;head&quot;: [
+  &quot;11-6-18_16PCC_0&quot;,
+  &quot;11-6-18_16PCC_1&quot;,
+  &quot;11-6-18_16PCC_10&quot;,
+  &quot;11-6-18_16PCC_11&quot;,
+  &quot;11-6-18_16PCC_12&quot;
+ ],
+ &quot;rel&quot;: &quot;splits/val_X.txt&quot;
+}</pre>
+</body></html>

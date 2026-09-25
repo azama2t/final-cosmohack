@@ -1,0 +1,165 @@
+{
+ "n_rows": 135725,
+ "n_files": 420,
+ "n_groups": 78,
+ "folds": 3,
+ "features": [
+  "I1",
+  "I2",
+  "I3",
+  "I4",
+  "I5",
+  "solar_zenith",
+  "sensor_zenith",
+  "ND(I1,I2)",
+  "ND(I1,I3)",
+  "ND(I1,I4)",
+  "ND(I1,I5)",
+  "ND(I1,SOLAR_ZENITH)",
+  "ND(I1,SENSOR_ZENITH)",
+  "ND(I2,I3)",
+  "ND(I2,I4)",
+  "ND(I2,I5)",
+  "ND(I2,SOLAR_ZENITH)",
+  "ND(I2,SENSOR_ZENITH)",
+  "ND(I3,I4)",
+  "ND(I3,I5)",
+  "ND(I3,SOLAR_ZENITH)",
+  "ND(I3,SENSOR_ZENITH)",
+  "ND(I4,I5)",
+  "ND(I4,SOLAR_ZENITH)",
+  "ND(I4,SENSOR_ZENITH)",
+  "ND(I5,SOLAR_ZENITH)",
+  "ND(I5,SENSOR_ZENITH)",
+  "ND(SOLAR_ZENITH,SENSOR_ZENITH)"
+ ],
+ "classes": {
+  "0": {
+   "name": "0",
+   "value": 0,
+   "pixels_total": 27335244.0,
+   "sampled": 126000,
+   "files_with": 420,
+   "tree3_f1": 0.9999126497080096,
+   "tree3_f1_std": 8.773753289821051e-06,
+   "tree3_auc": 0.9973,
+   "tree4_f1": 0.9999337017793053,
+   "tree4_f1_std": 2.265581076560366e-05,
+   "tree4_auc": 0.9996,
+   "tree5_f1": 0.9999246714384631,
+   "tree5_f1_std": 2.3923593377766655e-05,
+   "tree5_auc": 0.9996,
+   "recall_edge_px": 0.9976350684450066,
+   "recall_interior_px": 0.999897743487107,
+   "rules_depth3": "|--- I4 <= 323.7734\n|   |--- ND(I4,I5) <= 0.0194\n|   |   |--- I5 <= 314.7504\n|   |   |   |--- class: True\n|   |   |--- I5 >  314.7504\n|   |   |   |--- class: False\n|   |--- ND(I4,I5) >  0.0194\n|   |   |--- solar_zenith <= 99.1300\n|   |   |   |--- class: True\n|   |   |--- solar_zenith >  99.1300\n|   |   |   |--- class: False\n|--- I4 >  323.7734\n|   |--- ND(I4,I5) <= 0.0278\n|   |   |--- I5 <= 321.9901\n|   |   |   |--- class: True\n|   |   |--- I5 >  321.9901\n|   |   |   |--- class: False\n|   |--- ND(I4,I5) >  0.0278\n|   |   |--- ND(I4,I5) <= 0.0381\n|   |   |   |--- class: False\n|   |   |--- ND(I4,I5) >  0.0381\n|   |   |   |--- class: False\n",
+   "best_thresholds": [
+    {
+     "feature": "ND(SOLAR_ZENITH,SENSOR_ZENITH)",
+     "rule": "ND(SOLAR_ZENITH,SENSOR_ZENITH) <= 0.9998",
+     "cv_f1": 0.9998,
+     "insample_f1": 0.9998
+    },
+    {
+     "feature": "sensor_zenith",
+     "rule": "sensor_zenith <= 70.12",
+     "cv_f1": 0.9997,
+     "insample_f1": 0.9998
+    },
+    {
+     "feature": "solar_zenith",
+     "rule": "solar_zenith <= 143.9",
+     "cv_f1": 0.9938,
+     "insample_f1": 0.9998
+    }
+   ],
+   "lgbm_auc": 1.0,
+   "n_px_full": 27335244,
+   "n_components": 432,
+   "comp_size_median": 65525.0,
+   "comp_size_p90": 65536.0,
+   "single_px_comp_frac": 0.009259259259259259,
+   "rectangularity_median": 1.0,
+   "rect_like_comp_frac": 0.9764705882352941,
+   "interior_frac": 0.9830516969228443,
+   "opening_keeps_frac": 0.9999547836485382,
+   "closing_adds_frac": 0.0003288428667400957,
+   "grad_edge_over_interior": 0.9884563890215661,
+   "grad_edge_over_all": 0.9883105592346578,
+   "grad_ring_over_all": 3.2847065613527793,
+   "border1_ratio": 1.0000685172785995,
+   "border8_ratio": 1.0000022281289194,
+   "centroid_offset_mean": 0.005980446619845991
+  },
+  "1": {
+   "name": "1",
+   "value": 1,
+   "pixels_total": 9725.0,
+   "sampled": 9725,
+   "files_with": 296,
+   "tree3_f1": 0.5495020937496813,
+   "tree3_f1_std": 0.3316616663434576,
+   "tree3_auc": 0.9973,
+   "tree4_f1": 0.5447955892863691,
+   "tree4_f1_std": 0.3763242017399429,
+   "tree4_auc": 0.9996,
+   "tree5_f1": 0.6534228408655821,
+   "tree5_f1_std": 0.29223314132959655,
+   "tree5_auc": 0.9996,
+   "recall_edge_px": 0.7555972092054566,
+   "recall_interior_px": 0.8360655737704918,
+   "rules_depth3": "|--- I4 <= 323.7734\n|   |--- ND(I4,I5) <= 0.0194\n|   |   |--- I5 <= 314.7504\n|   |   |   |--- class: False\n|   |   |--- I5 >  314.7504\n|   |   |   |--- class: True\n|   |--- ND(I4,I5) >  0.0194\n|   |   |--- solar_zenith <= 99.1300\n|   |   |   |--- class: False\n|   |   |--- solar_zenith >  99.1300\n|   |   |   |--- class: True\n|--- I4 >  323.7734\n|   |--- ND(I4,I5) <= 0.0278\n|   |   |--- I5 <= 321.9901\n|   |   |   |--- class: False\n|   |   |--- I5 >  321.9901\n|   |   |   |--- class: True\n|   |--- ND(I4,I5) >  0.0278\n|   |   |--- ND(I4,I5) <= 0.0381\n|   |   |   |--- class: True\n|   |   |--- ND(I4,I5) >  0.0381\n|   |   |   |--- class: True\n",
+   "best_thresholds": [
+    {
+     "feature": "I4",
+     "rule": "I4 >= 330.1",
+     "cv_f1": 0.861,
+     "insample_f1": 0.8727
+    },
+    {
+     "feature": "ND(I2,I3)",
+     "rule": "ND(I2,I3) <= -0.4214",
+     "cv_f1": 0.033,
+     "insample_f1": 0.0352
+    },
+    {
+     "feature": "I5",
+     "rule": "I5 >= 318",
+     "cv_f1": 0.0288,
+     "insample_f1": 0.025
+    }
+   ],
+   "lgbm_auc": 1.0,
+   "n_px_full": 9725,
+   "n_components": 3287,
+   "comp_size_median": 2.0,
+   "comp_size_p90": 6.0,
+   "single_px_comp_frac": 0.40675387891694553,
+   "rectangularity_median": 0.667,
+   "rect_like_comp_frac": 0.1340941512125535,
+   "interior_frac": 0.012544987146529563,
+   "opening_keeps_frac": 0.06354755784061697,
+   "closing_adds_frac": 0.09778920308483291,
+   "grad_edge_over_interior": 1.4833592075122346,
+   "grad_edge_over_all": 3.981553123273084,
+   "grad_ring_over_all": 1.1488051981016971,
+   "border1_ratio": 0.8077223291774064,
+   "border8_ratio": 0.9937467927707512,
+   "centroid_offset_mean": 0.2491737876992525
+  }
+ },
+ "multiclass": {
+  "tree5_argmax": {
+   "0": 0.999,
+   "1": 0.2584
+  },
+  "lgbm_argmax": {
+   "0": 0.9999,
+   "1": 0.7835
+  },
+  "lgbm_thr": {
+   "0": 0.9999,
+   "1": 0.8506
+  }
+ },
+ "multiclass_rules_depth3": "|--- I4 <= 323.7734\n|   |--- ND(I4,I5) <= 0.0194\n|   |   |--- I5 <= 314.7504\n|   |   |   |--- class: 0\n|   |   |--- I5 >  314.7504\n|   |   |   |--- class: 1\n|   |--- ND(I4,I5) >  0.0194\n|   |   |--- solar_zenith <= 99.1300\n|   |   |   |--- class: 0\n|   |   |--- solar_zenith >  99.1300\n|   |   |   |--- class: 1\n|--- I4 >  323.7734\n|   |--- ND(I4,I5) <= 0.0278\n|   |   |--- I5 <= 321.9901\n|   |   |   |--- class: 0\n|   |   |--- I5 >  321.9901\n|   |   |   |--- class: 1\n|   |--- ND(I4,I5) >  0.0278\n|   |   |--- ND(I4,I5) <= 0.0381\n|   |   |   |--- class: 1\n|   |   |--- ND(I4,I5) >  0.0381\n|   |   |   |--- class: 1\n"
+}

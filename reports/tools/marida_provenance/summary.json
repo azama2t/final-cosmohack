@@ -1,0 +1,31 @@
+{
+ "ours_files": 694,
+ "theirs_files": 328,
+ "theirs_with_scene_match": 0,
+ "theirs_with_tile_match": 303,
+ "theirs_with_date_match": 119,
+ "theirs_with_bbox_overlap": 188,
+ "theirs_identical_files": 0,
+ "theirs_content_match": 0,
+ "theirs_phash_match": 9,
+ "scenes_ours": 36,
+ "scenes_theirs": 12,
+ "scenes_shared": 0,
+ "tiles_shared": [
+  "16PCC",
+  "16PDC",
+  "16PEC",
+  "18QYF",
+  "48PZC"
+ ],
+ "shared_scenes": [],
+ "theirs_without_georef": 0,
+ "theirs_without_tile_date": 0,
+ "within_pairs": 7245,
+ "within_identical": 0,
+ "within_bbox": 152,
+ "within_content": 1,
+ "thumb_corr_p99": 0.78943932056427,
+ "thumb_corr_max": 0.9561489224433899,
+ "seconds": 9.3
+}

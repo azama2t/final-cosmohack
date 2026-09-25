@@ -17,3 +17,6 @@
 | Маркеры зон не видны | под canvas deck | z-index контролов 2 | `.maplibregl-marker{z-index:3}` | — |
 | Playwright кликает мимо пятна | сдвиг на высоту шапки | `map.project()` даёт координаты контейнера | прибавлять `getBoundingClientRect()` | — |
 | fps в headless ≈ 10 | swiftshader — программный рендер | нет GPU в headless по умолчанию | замер fps с `--gl gpu` (56–60 fps) | не судить о fps по swiftshader |
+| Регэкспы в YAML | `found unknown escape character 'd'` | `\d` в двойных кавычках | одинарные кавычки | — |
+| LightGBM в forensics | AUC ≈ 0.5 на новых сценах | leaf-wise без ограничения глубины переобучается под сцены | max_depth=5, нормировка весов | групповой сплит + ограничение глубины |
+| Forensics VIIRS | молча терял 127 из 420 чипов | ночные пролёты: I1–I3 NaN | достаточно одного конечного канала | — |
