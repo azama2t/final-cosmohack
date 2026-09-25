@@ -1,0 +1,2 @@
+# Optional: drift forecast (OpenDrift). Install after requirements.txt
+opendrift==1.14.12

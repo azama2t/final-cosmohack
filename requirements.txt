@@ -1,12 +1,13 @@
 # Project packages (Python 3.12). Install: .venv\Scripts\python.exe -m pip install -r requirements.txt
-# torch with CUDA 12.8 wheels (RTX 4070); for CPU-only drop the index line.
+# torch pinned to 2.11.0 with CUDA 12.8 wheels (RTX 4070; NVRTC from torch/lib is used by the GPU forest kernel). CPU-only: drop the index line. Exact versions: requirements-lock.txt
 --extra-index-url https://download.pytorch.org/whl/cu128
 numpy
 pandas
 rasterio
 lightgbm
 scikit-learn
-torch
+torch==2.11.0
+torchvision==0.26.0
 segmentation-models-pytorch
 pystac-client
 odc-stac
