@@ -91,7 +91,7 @@ powershell -ExecutionPolicy Bypass -File run.ps1
 
 **Повторяемость.**
 - Два подряд прогона `all --offline` дают одинаковые sha256 всех 24 выходных таблиц.
-- Отпечаток текущего прогона — `a84d9bb7f9131298…` (`outputs_fingerprint` в `run_summary.json`). Там же sha256 входного CSV и конфигов.
+- Отпечаток текущего прогона — `a517218f2b6b419e…` (`outputs_fingerprint` в `run_summary.json`). Там же sha256 входного CSV и конфигов.
 
 ## 3. Данные и отбор
 
@@ -297,9 +297,9 @@ MAPE не используется: в реестре есть нули. Осн�
 | Перенос оценки в шт./км² на снимок | — | **не доказан**, на карте «концентрация недоступна» |
 
 **Эксперимент на парах** (`scripts/case/pairs_experiment.py`). Признаки выбраны до запуска, пороги не подбирались.
-- Детектор в полосе: признак почти постоянен, ρ = -0.50, p Холма 1.00. Это контраст «Северное море против Чёрного», а не связь.
-- FDI в полосе: ρ Спирмена -0.78 [-1.00; -0.23], p перестановочный 0.010, после поправки Холма 0.12.
-- Та же полоса, сдвинутая в случайную воду той же сцены, даёт в среднем ρ -0.58. Значит, связь — на уровне сцены или дня, а не места наблюдения. Знак к тому же обратный ожидаемому.
+- Детектор в полосе: признак почти постоянен, ρ = -0.50, p Холма 0.90. Это контраст «Северное море против Чёрного», а не связь.
+- FDI в полосе: ρ Спирмена -0.75 [-1.00; -0.14], p перестановочный 0.013, после поправки Холма 0.15.
+- Та же полоса, сдвинутая в случайную воду той же сцены, даёт в среднем ρ -0.52. Значит, связь — на уровне сцены или дня, а не места наблюдения. Знак к тому же обратный ожидаемому.
 - При 6 независимых группах обнаружима только связь |ρ| ≥ 0.96. Для ρ = 0,5 нужно около 33 независимых пар.
 
 **Статусы на карте** (API v3.1). У зоны два независимых статуса.
@@ -328,8 +328,8 @@ MAPE не используется: в реестре есть нули. Осн�
 | детектор: пересчёт из сохранённых предсказаний | `scripts\case\run_all.py eval` | `reports/case_run/detector_recomputed.json` (сверка TP/FP/FN с `metrics.json`) | 1 с |
 | детектор: полный прогон 7 моделей на val и test MARIDA | `scripts\case\detector_compare.py` (нужен MARIDA в `data/MARIDA`) | `reports/case_detector/*` | ≈ 130 с |
 | эксперимент на парах | `scripts\case\pairs_experiment.py --no-fetch` | `reports/case_pairs/experiment.{md,json}` | ≈ 3 мин с чтением FDI по сети |
-| согласованность API и экспорта | `scripts\case\consistency_check.py` | `reports/selfcheck/consistency_<дата>.md\|json` | 61 с |
-| тесты кейса | `-m pytest -q tests\test_case_concentration.py tests\test_case_conc_model.py tests\test_case_run_all.py tests\test_case_consistency.py tests\test_api_v3.py` | 82 тестов | секунды |
+| согласованность API и экспорта | `scripts\case\consistency_check.py` | `reports/selfcheck/consistency_<дата>.md\|json` | 69 с |
+| тесты кейса | `-m pytest -q tests\test_case_concentration.py tests\test_case_conc_model.py tests\test_case_run_all.py tests\test_case_consistency.py tests\test_api_v3.py` | 100 тестов | секунды |
 
 - Предсказания детектора на MARIDA (`data/case/detector_preds/*.npz`: вероятности основной модели и RandomForest, маски 7 моделей по патчам) лежат в git. Для пересчёта TP/FP/FN из них нужна разметка MARIDA (`data/MARIDA/patches/*_cl.tif`, как скачать — раздел 2). Без разметки `run_all eval` берёт числа из `reports/case_detector/metrics.json` и записывает его sha256. Полный прогон детекторов заново делает `detector_compare.py` по MARIDA.
 - Эталон и предсказания концентрации лежат в git: `reports/case_conc/predictions.csv` (y_true, y_pred и полевой ДИ для каждой строки, схемы и модели) и `dev_predictions.csv`.
@@ -386,10 +386,10 @@ curl -OJ "http://127.0.0.1:8000/api/v3/export?layer=zones&format=geojson&detecti
 - принятые пары — 0;
 - зоны «обнаружено» — 1.
 
-Самопроверка `scripts/case/consistency_check.py` сравнивает по id четыре представления: алгоритм, JSON, CSV и GeoJSON. Последний прогон (`reports/selfcheck/consistency_20260925_1837.json`):
+Самопроверка `scripts/case/consistency_check.py` сравнивает по id четыре представления: алгоритм, JSON, CSV и GeoJSON. Последний прогон (`reports/selfcheck/consistency_20260925_1842.json`):
 - проверок 283: ok 283, расхождений 0 (подробности — в самом отчёте);
 - некорректные и пустые входы: 46 из 46 с верным кодом;
-- p95 ответа не выше 180 мс.
+- p95 ответа не выше 175 мс.
 
 ## 9. Структура
 

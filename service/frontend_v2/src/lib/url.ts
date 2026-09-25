@@ -80,6 +80,8 @@ export function readUrl(): UrlState {
 
 export function writeUrl(s: UrlState) {
   const q = new URLSearchParams();
+  // L66: the legacy «живые снимки» mode lives at ?mode=live (the case mode is the default)
+  if (new URLSearchParams(location.search).get('mode') === 'live') q.set('mode', 'live');
   if (s.region) q.set('r', s.region);
   if (s.date) q.set('d', s.date);
   if (s.model) q.set('m', s.model);

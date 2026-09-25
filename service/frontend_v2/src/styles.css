@@ -1870,3 +1870,8 @@ select.sel {
   gap: 4px;
   font-size: 12px;
 }
+
+/* L66: mode switch «Кейс | Живые снимки» on top of the legacy left column */
+.modebar {
+  padding: var(--s1) var(--s3) 0;
+}

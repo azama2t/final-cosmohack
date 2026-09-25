@@ -1,6 +1,7 @@
-[warn] S4:DOORS3:T20: FDI shape (708, 702) != quality (702, 702); FDI dropped
-[warn] S4:DOORS3:T25: FDI shape (708, 708) != quality (702, 702); FDI dropped
-прошедшие маски, S2 (детектор + FDI) 11 {'s_frac_p_thr': -0.5, 's_p_mean': -0.5, 's_p_p95': nan, 's_spots_km2': -0.5, 's_fdi_p95_anom': -0.782, 's_fdi_med_anom': -0.455, 's_fdi_frac_hi': -0.6, 'c_frac_p_thr': 0.258, 'c_p_mean': 0.22, 'c_fdi_p95': -0.758, 'x_p_mean': -0.607, 'x_fdi_p95_anom': -0.661, 'x_fdi_frac_hi': -0.745}
-прошедшие маски, только Чёрное море S4 10 {'s_frac_p_thr': nan, 's_p_mean': nan, 's_p_p95': nan, 's_spots_km2': nan, 's_fdi_p95_anom': -0.7, 's_fdi_med_anom': -0.333, 's_fdi_frac_hi': -0.45, 'c_frac_p_thr': 0.731, 'c_p_mean': 0.632, 'c_fdi_p95': -0.667, 'x_p_mean': -0.406, 'x_fdi_p95_anom': -0.617, 'x_fdi_frac_hi': -0.733}
-все S2-пары с валидной водой в полосе (в т.ч. блик/облака — загрязнённые) 19 {'s_frac_p_thr': -0.295, 's_p_mean': -0.582, 's_p_p95': nan, 's_spots_km2': -0.288, 's_fdi_p95_anom': -0.762, 's_fdi_med_anom': 0.12, 's_fdi_frac_hi': -0.147, 'c_frac_p_thr': -0.284, 'c_p_mean': -0.344, 'c_fdi_p95': -0.775, 'x_p_mean': -0.318, 'x_fdi_p95_anom': -0.267, 'x_fdi_frac_hi': -0.547}
+[fdi] S4:DOORS3:T20 (702, 702) 21.3 s
+[fdi] S4:DOORS3:T21 (708, 708) 6.0 s
+[fdi] S4:DOORS3:T25 (702, 702) 12.5 s
+прошедшие маски, S2 (детектор + FDI) 11 {'s_frac_p_thr': -0.5, 's_p_mean': -0.5, 's_p_p95': nan, 's_spots_km2': -0.5, 's_fdi_p95_anom': -0.745, 's_fdi_med_anom': -0.591, 's_fdi_frac_hi': -0.7, 'c_frac_p_thr': 0.258, 'c_p_mean': 0.22, 'c_fdi_p95': -0.491, 'x_p_mean': -0.607, 'x_fdi_p95_anom': -0.682, 'x_fdi_frac_hi': -0.618}
+прошедшие маски, только Чёрное море S4 10 {'s_frac_p_thr': nan, 's_p_mean': nan, 's_p_p95': nan, 's_spots_km2': nan, 's_fdi_p95_anom': -0.661, 's_fdi_med_anom': -0.515, 's_fdi_frac_hi': -0.6, 'c_frac_p_thr': 0.731, 'c_p_mean': 0.632, 'c_fdi_p95': -0.321, 'x_p_mean': -0.406, 'x_fdi_p95_anom': -0.636, 'x_fdi_frac_hi': -0.552}
+все S2-пары с валидной водой в полосе (в т.ч. блик/облака — загрязнённые) 19 {'s_frac_p_thr': -0.295, 's_p_mean': -0.582, 's_p_p95': nan, 's_spots_km2': -0.288, 's_fdi_p95_anom': -0.733, 's_fdi_med_anom': -0.025, 's_fdi_frac_hi': -0.295, 'c_frac_p_thr': -0.284, 'c_p_mean': -0.344, 'c_fdi_p95': -0.672, 'x_p_mean': -0.318, 'x_fdi_p95_anom': -0.312, 'x_fdi_frac_hi': -0.507}
 done C:\Users\User\Documents\GitHub\final-cosmohack\reports\case_pairs\experiment.md

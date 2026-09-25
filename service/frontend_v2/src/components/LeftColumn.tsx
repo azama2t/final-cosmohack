@@ -63,6 +63,16 @@ export default function LeftColumn(p: Props) {
 
   return (
     <aside className={`left ${p.collapsed ? 'collapsed' : ''}`} data-panel="left" data-testid="left-panel">
+      <div className="modebar">
+        <div className="seg" role="tablist" aria-label="Режим">
+          <button onClick={() => (location.href = location.pathname)} data-testid="mode-case">
+            Кейс
+          </button>
+          <button className="on" aria-selected data-testid="mode-live">
+            Живые снимки
+          </button>
+        </div>
+      </div>
       <div className="brand">
         <div className="brand-name">
           <span className="brand-dot" aria-hidden />
