@@ -1,6 +1,6 @@
 {
- "when": "2026-09-25T21:50:24",
- "isolation": "case_store.PATHS['queries'] -> C:\\Users\\User\\AppData\\Local\\Temp\\selfcheck_ur0pmixz\\queries.jsonl",
+ "when": "2026-09-25T22:11:51",
+ "isolation": "case_store.PATHS['queries'] -> C:\\Users\\User\\AppData\\Local\\Temp\\selfcheck_k5hkhshl\\queries.jsonl",
  "sources_mtime": {
   "task\\macroplastic_marine_samples.csv": "2026-09-25T16:49:06",
   "data\\pairs\\candidates.csv": "2026-09-25T21:25:44",
@@ -16,7 +16,7 @@
   {
    "key": "S2_sargasso",
    "name": "S2 Саргассово море (total_plastic — через selection)",
-   "query_id": "q_75d5719d",
+   "query_id": "q_be5902bd",
    "query": {
     "bbox": [
      -71.0,
@@ -37,7 +37,7 @@
     "layers": [],
     "scene_id": null
    },
-   "sha256_run": "7d2029dc3df09e9b688a71a7e0e11453364ba05c4c41d7d9b5dcb0b3f7f84ee9",
+   "sha256_run": "ac09fc9112017f5e231174f7277bb4b0f924e37c3bd90de7594a711fa71e862e",
    "n_obs": 330,
    "n_zones": 0,
    "n_scenes": 0,
@@ -54,7 +54,7 @@
   {
    "key": "S4_black_sea",
    "name": "Чёрное море, все пары",
-   "query_id": "q_fa24f43f",
+   "query_id": "q_fac59b43",
    "query": {
     "bbox": null,
     "date_from": null,
@@ -68,7 +68,7 @@
     "layers": [],
     "scene_id": null
    },
-   "sha256_run": "52d02cdc9493d63e18edb1353c59e44d9af35234bcf508d9117db5307aa2e21f",
+   "sha256_run": "a174a590e02ec7c780a76cf3ef9a58704a500d944f16cdfff5d14472021bc77a",
    "n_obs": 33,
    "n_zones": 24,
    "n_scenes": 217,
@@ -89,7 +89,7 @@
   {
    "key": "S3_north_sea_2016",
    "name": "Северное море, 2016",
-   "query_id": "q_912ccac1",
+   "query_id": "q_51c46d69",
    "query": {
     "bbox": null,
     "date_from": "2016-01-01",
@@ -103,7 +103,7 @@
     "layers": [],
     "scene_id": null
    },
-   "sha256_run": "3bf91b94952f9a031f1328bc2da1838a845f308c0411b2cd1237f703d35e649b",
+   "sha256_run": "b127be4f4d0de67bd113a661bfe871d7d9616532d6b44c18ae40f24578155cec",
    "n_obs": 27,
    "n_zones": 2,
    "n_scenes": 9,
@@ -124,7 +124,7 @@
   {
    "key": "S1_gpgp_trawl",
    "name": "ГПМП, трал 5–50 см",
-   "query_id": "q_83abecfc",
+   "query_id": "q_a1bb1cbd",
    "query": {
     "bbox": null,
     "date_from": null,
@@ -140,7 +140,7 @@
     "layers": [],
     "scene_id": null
    },
-   "sha256_run": "57190534a2f94d2f5c23517d5aaf4ec59c6e2514f5b4a69320c27e8a443cbd33",
+   "sha256_run": "801cce58513c50e9c21e06fe8378a630fc4742ad04e771b8a4809cad146fdb25",
    "n_obs": 83,
    "n_zones": 0,
    "n_scenes": 0,
@@ -157,7 +157,7 @@
   {
    "key": "empty_bbox",
    "name": "Пустой bbox (Южная Атлантика, наблюдений нет)",
-   "query_id": "q_f22361fd",
+   "query_id": "q_75a99cfb",
    "query": {
     "bbox": [
      -30.0,
@@ -174,7 +174,7 @@
     "layers": [],
     "scene_id": null
    },
-   "sha256_run": "385050542712bfed577f8b1ae9a2a754258a5844e5bcce29346f9ff7ed0beb88",
+   "sha256_run": "38e8e14ff450fd9d305383c0f9833434b161c719bc8939fb973e4195e1a7d6a6",
    "n_obs": 0,
    "n_zones": 0,
    "n_scenes": 0,
@@ -739,10 +739,10 @@
   {
    "endpoint": "GET /meta",
    "n": 20,
-   "cold_ms": 5.1,
-   "p50_ms": 4.8,
-   "p95_ms": 5.2,
-   "max_ms": 5.2,
+   "cold_ms": 6.0,
+   "p50_ms": 5.5,
+   "p95_ms": 6.6,
+   "max_ms": 7.0,
    "target_ms": 300,
    "ok": true,
    "status": {
@@ -753,38 +753,38 @@
   {
    "endpoint": "GET /observations (все 935)",
    "n": 20,
-   "cold_ms": 92.5,
-   "p50_ms": 58.4,
-   "p95_ms": 87.7,
-   "max_ms": 92.7,
+   "cold_ms": 82.9,
+   "p50_ms": 59.4,
+   "p95_ms": 71.1,
+   "max_ms": 87.9,
    "target_ms": 300,
    "ok": true,
    "status": {
     "200": 20
    },
-   "bytes": 1839110
+   "bytes": 1873085
   },
   {
    "endpoint": "GET /observations?source=S2",
    "n": 20,
-   "cold_ms": 26.3,
-   "p50_ms": 22.5,
-   "p95_ms": 36.5,
-   "max_ms": 56.3,
+   "cold_ms": 22.9,
+   "p50_ms": 22.7,
+   "p95_ms": 29.3,
+   "max_ms": 51.7,
    "target_ms": 300,
    "ok": true,
    "status": {
     "200": 20
    },
-   "bytes": 696733
+   "bytes": 711286
   },
   {
    "endpoint": "GET /observations/{id}",
    "n": 20,
-   "cold_ms": 3.0,
+   "cold_ms": 3.3,
    "p50_ms": 2.6,
-   "p95_ms": 4.4,
-   "max_ms": 19.0,
+   "p95_ms": 5.0,
+   "max_ms": 8.1,
    "target_ms": 300,
    "ok": true,
    "status": {
@@ -795,10 +795,10 @@
   {
    "endpoint": "GET /pairs (все)",
    "n": 20,
-   "cold_ms": 52.9,
-   "p50_ms": 53.7,
-   "p95_ms": 61.6,
-   "max_ms": 63.7,
+   "cold_ms": 54.2,
+   "p50_ms": 55.8,
+   "p95_ms": 62.1,
+   "max_ms": 64.2,
    "target_ms": 300,
    "ok": true,
    "status": {
@@ -809,10 +809,10 @@
   {
    "endpoint": "GET /pairs?status=accepted",
    "n": 20,
-   "cold_ms": 2.9,
-   "p50_ms": 1.9,
-   "p95_ms": 2.2,
-   "max_ms": 2.2,
+   "cold_ms": 3.4,
+   "p50_ms": 2.5,
+   "p95_ms": 3.1,
+   "max_ms": 3.2,
    "target_ms": 300,
    "ok": true,
    "status": {
@@ -823,10 +823,10 @@
   {
    "endpoint": "GET /scenes",
    "n": 20,
-   "cold_ms": 17.7,
-   "p50_ms": 17.8,
-   "p95_ms": 19.7,
-   "max_ms": 22.6,
+   "cold_ms": 19.0,
+   "p50_ms": 18.5,
+   "p95_ms": 19.9,
+   "max_ms": 23.0,
    "target_ms": 300,
    "ok": true,
    "status": {
@@ -837,10 +837,10 @@
   {
    "endpoint": "GET /scenes/{id}",
    "n": 20,
-   "cold_ms": 18.9,
-   "p50_ms": 18.9,
-   "p95_ms": 20.0,
-   "max_ms": 22.4,
+   "cold_ms": 22.1,
+   "p50_ms": 19.0,
+   "p95_ms": 21.0,
+   "max_ms": 23.7,
    "target_ms": 3000,
    "ok": true,
    "status": {
@@ -851,10 +851,10 @@
   {
    "endpoint": "GET /scenes/{id}/rgb.png",
    "n": 20,
-   "cold_ms": 1.8,
+   "cold_ms": 1.7,
    "p50_ms": 1.5,
-   "p95_ms": 1.7,
-   "max_ms": 1.7,
+   "p95_ms": 1.6,
+   "max_ms": 1.6,
    "target_ms": 3000,
    "ok": true,
    "status": {
@@ -865,10 +865,10 @@
   {
    "endpoint": "GET /scenes/{id}/quality.png",
    "n": 20,
-   "cold_ms": 229.3,
-   "p50_ms": 1.5,
-   "p95_ms": 1.9,
-   "max_ms": 2.0,
+   "cold_ms": 211.9,
+   "p50_ms": 2.4,
+   "p95_ms": 6.7,
+   "max_ms": 8.2,
    "target_ms": 3000,
    "ok": true,
    "status": {
@@ -879,7 +879,7 @@
   {
    "endpoint": "GET /scenes/{id}/mask.png",
    "n": 20,
-   "cold_ms": 1.7,
+   "cold_ms": 1.8,
    "p50_ms": 1.5,
    "p95_ms": 1.6,
    "max_ms": 1.6,
@@ -893,10 +893,10 @@
   {
    "endpoint": "GET /zones",
    "n": 20,
-   "cold_ms": 6.2,
-   "p50_ms": 6.3,
-   "p95_ms": 8.8,
-   "max_ms": 10.5,
+   "cold_ms": 6.3,
+   "p50_ms": 6.4,
+   "p95_ms": 6.9,
+   "max_ms": 7.0,
    "target_ms": 300,
    "ok": true,
    "status": {
@@ -907,10 +907,10 @@
   {
    "endpoint": "GET /zones/{id}",
    "n": 20,
-   "cold_ms": 5.7,
+   "cold_ms": 5.6,
    "p50_ms": 5.5,
-   "p95_ms": 6.2,
-   "max_ms": 6.2,
+   "p95_ms": 6.0,
+   "max_ms": 6.4,
    "target_ms": 300,
    "ok": true,
    "status": {
@@ -921,24 +921,24 @@
   {
    "endpoint": "GET /metrics",
    "n": 20,
-   "cold_ms": 2.9,
-   "p50_ms": 2.8,
-   "p95_ms": 3.1,
-   "max_ms": 3.2,
+   "cold_ms": 2.7,
+   "p50_ms": 2.6,
+   "p95_ms": 5.0,
+   "max_ms": 5.1,
    "target_ms": 300,
    "ok": true,
    "status": {
     "200": 20
    },
-   "bytes": 20117
+   "bytes": 21709
   },
   {
    "endpoint": "GET /export observations csv",
    "n": 20,
-   "cold_ms": 36.5,
-   "p50_ms": 37.4,
-   "p95_ms": 41.2,
-   "max_ms": 42.9,
+   "cold_ms": 41.3,
+   "p50_ms": 37.6,
+   "p95_ms": 44.3,
+   "max_ms": 46.6,
    "target_ms": 300,
    "ok": true,
    "status": {
@@ -949,10 +949,10 @@
   {
    "endpoint": "GET /export zones geojson",
    "n": 20,
-   "cold_ms": 7.1,
-   "p50_ms": 7.1,
-   "p95_ms": 7.5,
-   "max_ms": 7.5,
+   "cold_ms": 7.3,
+   "p50_ms": 7.3,
+   "p95_ms": 8.5,
+   "max_ms": 10.0,
    "target_ms": 300,
    "ok": true,
    "status": {
@@ -963,10 +963,10 @@
   {
    "endpoint": "GET /export pairs csv",
    "n": 20,
-   "cold_ms": 50.8,
-   "p50_ms": 51.5,
-   "p95_ms": 59.3,
-   "max_ms": 62.1,
+   "cold_ms": 51.9,
+   "p50_ms": 52.0,
+   "p95_ms": 60.5,
+   "max_ms": 85.1,
    "target_ms": 300,
    "ok": true,
    "status": {
@@ -977,10 +977,10 @@
   {
    "endpoint": "GET /export zones csv query_id",
    "n": 20,
-   "cold_ms": 21.2,
-   "p50_ms": 20.4,
-   "p95_ms": 30.8,
-   "max_ms": 51.8,
+   "cold_ms": 20.8,
+   "p50_ms": 20.5,
+   "p95_ms": 21.3,
+   "max_ms": 24.1,
    "target_ms": 300,
    "ok": true,
    "status": {
@@ -991,10 +991,10 @@
   {
    "endpoint": "GET /queries",
    "n": 20,
-   "cold_ms": 2.0,
-   "p50_ms": 1.6,
-   "p95_ms": 1.7,
-   "max_ms": 1.7,
+   "cold_ms": 1.9,
+   "p50_ms": 1.7,
+   "p95_ms": 2.0,
+   "max_ms": 2.0,
    "target_ms": 300,
    "ok": true,
    "status": {
@@ -1005,10 +1005,10 @@
   {
    "endpoint": "GET /queries/{id}",
    "n": 20,
-   "cold_ms": 1.6,
-   "p50_ms": 1.5,
-   "p95_ms": 1.5,
-   "max_ms": 1.6,
+   "cold_ms": 1.5,
+   "p50_ms": 1.6,
+   "p95_ms": 2.0,
+   "max_ms": 2.1,
    "target_ms": 300,
    "ok": true,
    "status": {
@@ -1019,10 +1019,10 @@
   {
    "endpoint": "GET /queries/{id}/run",
    "n": 20,
-   "cold_ms": 25.2,
-   "p50_ms": 25.7,
-   "p95_ms": 30.9,
-   "max_ms": 32.8,
+   "cold_ms": 33.1,
+   "p50_ms": 26.7,
+   "p95_ms": 34.4,
+   "max_ms": 60.0,
    "target_ms": 300,
    "ok": true,
    "status": {
@@ -1034,9 +1034,9 @@
    "endpoint": "POST /queries",
    "n": 20,
    "cold_ms": 1.7,
-   "p50_ms": 1.5,
-   "p95_ms": 2.6,
-   "max_ms": 2.7,
+   "p50_ms": 1.7,
+   "p95_ms": 7.0,
+   "max_ms": 16.6,
    "target_ms": 300,
    "ok": true,
    "status": {
@@ -1047,10 +1047,10 @@
   {
    "endpoint": "DELETE /queries/{id}",
    "n": 20,
-   "cold_ms": 9.4,
-   "p50_ms": 5.7,
-   "p95_ms": 7.4,
-   "max_ms": 11.2,
+   "cold_ms": 5.7,
+   "p50_ms": 6.0,
+   "p95_ms": 6.2,
+   "max_ms": 6.3,
    "target_ms": 300,
    "ok": true,
    "status": {
@@ -1061,10 +1061,10 @@
   {
    "endpoint": "GET /observations?bbox=1,2,3 (400)",
    "n": 20,
-   "cold_ms": 1.5,
+   "cold_ms": 1.6,
    "p50_ms": 1.3,
    "p95_ms": 1.4,
-   "max_ms": 1.4,
+   "max_ms": 1.5,
    "target_ms": 300,
    "ok": true,
    "status": {
@@ -1075,15 +1075,15 @@
  ],
  "speed_live": {
   "base": "http://127.0.0.1:8091",
-  "startup_s": 1.0,
+  "startup_s": 1.1,
   "rows": [
    {
     "endpoint": "GET /meta",
     "n": 20,
-    "cold_ms": 219.0,
-    "p50_ms": 15.4,
-    "p95_ms": 27.0,
-    "max_ms": 29.6,
+    "cold_ms": 227.4,
+    "p50_ms": 4.4,
+    "p95_ms": 24.5,
+    "max_ms": 27.3,
     "target_ms": 300,
     "ok": true,
     "status": {
@@ -1094,38 +1094,38 @@
    {
     "endpoint": "GET /observations (все 935)",
     "n": 20,
-    "cold_ms": 653.0,
-    "p50_ms": 60.7,
-    "p95_ms": 88.0,
-    "max_ms": 88.7,
+    "cold_ms": 610.8,
+    "p50_ms": 61.1,
+    "p95_ms": 89.4,
+    "max_ms": 90.1,
     "target_ms": 300,
     "ok": true,
     "status": {
      "200": 20
     },
-    "bytes": 1839110
+    "bytes": 1873085
    },
    {
     "endpoint": "GET /observations?source=S2",
     "n": 20,
-    "cold_ms": 20.8,
+    "cold_ms": 16.8,
     "p50_ms": 30.9,
-    "p95_ms": 36.8,
-    "max_ms": 40.1,
+    "p95_ms": 38.5,
+    "max_ms": 39.8,
     "target_ms": 300,
     "ok": true,
     "status": {
      "200": 20
     },
-    "bytes": 696733
+    "bytes": 711286
    },
    {
     "endpoint": "GET /observations/{id}",
     "n": 20,
-    "cold_ms": 3.0,
-    "p50_ms": 14.2,
-    "p95_ms": 25.7,
-    "max_ms": 27.2,
+    "cold_ms": 18.0,
+    "p50_ms": 15.0,
+    "p95_ms": 16.8,
+    "max_ms": 26.6,
     "target_ms": 300,
     "ok": true,
     "status": {
@@ -1136,10 +1136,10 @@
    {
     "endpoint": "GET /pairs (все)",
     "n": 20,
-    "cold_ms": 27.5,
-    "p50_ms": 43.5,
-    "p95_ms": 54.8,
-    "max_ms": 67.4,
+    "cold_ms": 41.4,
+    "p50_ms": 45.9,
+    "p95_ms": 62.0,
+    "max_ms": 66.2,
     "target_ms": 300,
     "ok": true,
     "status": {
@@ -1150,10 +1150,10 @@
    {
     "endpoint": "GET /pairs?status=accepted",
     "n": 20,
-    "cold_ms": 1.9,
-    "p50_ms": 15.3,
-    "p95_ms": 16.8,
-    "max_ms": 17.1,
+    "cold_ms": 2.0,
+    "p50_ms": 14.7,
+    "p95_ms": 24.2,
+    "max_ms": 26.7,
     "target_ms": 300,
     "ok": true,
     "status": {
@@ -1164,10 +1164,10 @@
    {
     "endpoint": "GET /scenes",
     "n": 20,
-    "cold_ms": 28.6,
-    "p50_ms": 30.7,
-    "p95_ms": 35.4,
-    "max_ms": 40.7,
+    "cold_ms": 29.1,
+    "p50_ms": 30.5,
+    "p95_ms": 32.0,
+    "max_ms": 32.7,
     "target_ms": 300,
     "ok": true,
     "status": {
@@ -1178,10 +1178,10 @@
    {
     "endpoint": "GET /scenes/{id}",
     "n": 20,
-    "cold_ms": 34.2,
-    "p50_ms": 30.6,
-    "p95_ms": 42.6,
-    "max_ms": 44.9,
+    "cold_ms": 32.5,
+    "p50_ms": 30.4,
+    "p95_ms": 37.6,
+    "max_ms": 37.9,
     "target_ms": 3000,
     "ok": true,
     "status": {
@@ -1192,10 +1192,10 @@
    {
     "endpoint": "GET /scenes/{id}/rgb.png",
     "n": 20,
-    "cold_ms": 1.2,
-    "p50_ms": 7.5,
-    "p95_ms": 15.8,
-    "max_ms": 15.9,
+    "cold_ms": 16.0,
+    "p50_ms": 14.3,
+    "p95_ms": 15.6,
+    "max_ms": 15.8,
     "target_ms": 3000,
     "ok": true,
     "status": {
@@ -1206,10 +1206,10 @@
    {
     "endpoint": "GET /scenes/{id}/quality.png",
     "n": 20,
-    "cold_ms": 299.1,
-    "p50_ms": 1.4,
-    "p95_ms": 16.5,
-    "max_ms": 24.8,
+    "cold_ms": 251.1,
+    "p50_ms": 1.0,
+    "p95_ms": 13.6,
+    "max_ms": 20.2,
     "target_ms": 3000,
     "ok": true,
     "status": {
@@ -1220,10 +1220,10 @@
    {
     "endpoint": "GET /scenes/{id}/mask.png",
     "n": 20,
-    "cold_ms": 1.8,
-    "p50_ms": 1.4,
-    "p95_ms": 17.1,
-    "max_ms": 25.5,
+    "cold_ms": 1.1,
+    "p50_ms": 15.2,
+    "p95_ms": 16.5,
+    "max_ms": 24.1,
     "target_ms": 3000,
     "ok": true,
     "status": {
@@ -1234,10 +1234,10 @@
    {
     "endpoint": "GET /zones",
     "n": 20,
-    "cold_ms": 6.2,
-    "p50_ms": 7.1,
-    "p95_ms": 28.8,
-    "max_ms": 29.9,
+    "cold_ms": 19.7,
+    "p50_ms": 14.7,
+    "p95_ms": 31.1,
+    "max_ms": 33.1,
     "target_ms": 300,
     "ok": true,
     "status": {
@@ -1248,10 +1248,10 @@
    {
     "endpoint": "GET /zones/{id}",
     "n": 20,
-    "cold_ms": 7.9,
-    "p50_ms": 7.8,
-    "p95_ms": 8.9,
-    "max_ms": 9.1,
+    "cold_ms": 16.2,
+    "p50_ms": 17.3,
+    "p95_ms": 31.1,
+    "max_ms": 35.1,
     "target_ms": 300,
     "ok": true,
     "status": {
@@ -1262,24 +1262,24 @@
    {
     "endpoint": "GET /metrics",
     "n": 20,
-    "cold_ms": 23.3,
-    "p50_ms": 2.2,
-    "p95_ms": 24.4,
-    "max_ms": 25.5,
+    "cold_ms": 5.2,
+    "p50_ms": 15.1,
+    "p95_ms": 22.7,
+    "max_ms": 25.6,
     "target_ms": 300,
     "ok": true,
     "status": {
      "200": 20
     },
-    "bytes": 20117
+    "bytes": 21709
    },
    {
     "endpoint": "GET /export observations csv",
     "n": 20,
-    "cold_ms": 29.4,
-    "p50_ms": 45.4,
-    "p95_ms": 51.1,
-    "max_ms": 53.7,
+    "cold_ms": 41.9,
+    "p50_ms": 45.8,
+    "p95_ms": 50.2,
+    "max_ms": 59.5,
     "target_ms": 300,
     "ok": true,
     "status": {
@@ -1290,10 +1290,10 @@
    {
     "endpoint": "GET /export zones geojson",
     "n": 20,
-    "cold_ms": 24.1,
-    "p50_ms": 15.9,
-    "p95_ms": 26.5,
-    "max_ms": 30.5,
+    "cold_ms": 22.3,
+    "p50_ms": 15.3,
+    "p95_ms": 27.1,
+    "max_ms": 27.3,
     "target_ms": 300,
     "ok": true,
     "status": {
@@ -1304,10 +1304,10 @@
    {
     "endpoint": "GET /export pairs csv",
     "n": 20,
-    "cold_ms": 48.7,
-    "p50_ms": 50.2,
-    "p95_ms": 61.3,
-    "max_ms": 61.4,
+    "cold_ms": 50.4,
+    "p50_ms": 58.5,
+    "p95_ms": 63.7,
+    "max_ms": 71.1,
     "target_ms": 300,
     "ok": true,
     "status": {
@@ -1318,10 +1318,10 @@
    {
     "endpoint": "GET /export zones csv query_id",
     "n": 20,
-    "cold_ms": 47.2,
-    "p50_ms": 31.4,
-    "p95_ms": 43.4,
-    "max_ms": 49.5,
+    "cold_ms": 31.4,
+    "p50_ms": 31.1,
+    "p95_ms": 44.4,
+    "max_ms": 64.6,
     "target_ms": 300,
     "ok": true,
     "status": {
@@ -1332,10 +1332,10 @@
    {
     "endpoint": "GET /queries",
     "n": 20,
-    "cold_ms": 13.0,
-    "p50_ms": 1.6,
-    "p95_ms": 16.0,
-    "max_ms": 16.2,
+    "cold_ms": 13.4,
+    "p50_ms": 14.8,
+    "p95_ms": 17.0,
+    "max_ms": 24.1,
     "target_ms": 300,
     "ok": true,
     "status": {
@@ -1346,10 +1346,10 @@
    {
     "endpoint": "GET /queries/{id}",
     "n": 20,
-    "cold_ms": 0.9,
-    "p50_ms": 1.1,
-    "p95_ms": 23.4,
-    "max_ms": 25.9,
+    "cold_ms": 15.2,
+    "p50_ms": 15.1,
+    "p95_ms": 16.3,
+    "max_ms": 16.7,
     "target_ms": 300,
     "ok": true,
     "status": {
@@ -1360,10 +1360,10 @@
    {
     "endpoint": "GET /queries/{id}/run",
     "n": 20,
-    "cold_ms": 36.1,
-    "p50_ms": 32.6,
-    "p95_ms": 47.7,
-    "max_ms": 53.6,
+    "cold_ms": 23.5,
+    "p50_ms": 44.0,
+    "p95_ms": 48.5,
+    "max_ms": 49.9,
     "target_ms": 300,
     "ok": true,
     "status": {
@@ -1374,10 +1374,10 @@
    {
     "endpoint": "POST /queries",
     "n": 20,
-    "cold_ms": 1.2,
-    "p50_ms": 15.0,
-    "p95_ms": 16.3,
-    "max_ms": 20.9,
+    "cold_ms": 25.6,
+    "p50_ms": 14.0,
+    "p95_ms": 16.1,
+    "max_ms": 20.4,
     "target_ms": 300,
     "ok": true,
     "status": {
@@ -1388,10 +1388,10 @@
    {
     "endpoint": "DELETE /queries/{id}",
     "n": 20,
-    "cold_ms": 24.7,
-    "p50_ms": 21.3,
-    "p95_ms": 31.5,
-    "max_ms": 31.7,
+    "cold_ms": 19.8,
+    "p50_ms": 20.0,
+    "p95_ms": 28.9,
+    "max_ms": 29.4,
     "target_ms": 300,
     "ok": true,
     "status": {
@@ -1402,10 +1402,10 @@
    {
     "endpoint": "GET /observations?bbox=1,2,3 (400)",
     "n": 20,
-    "cold_ms": 24.9,
-    "p50_ms": 15.0,
-    "p95_ms": 15.8,
-    "max_ms": 15.9,
+    "cold_ms": 11.0,
+    "p50_ms": 15.2,
+    "p95_ms": 15.9,
+    "max_ms": 16.0,
     "target_ms": 300,
     "ok": true,
     "status": {
@@ -1415,8 +1415,8 @@
    }
   ],
   "run_hash": [
-   "d6eb127cf4cde1ff8ce3fb904378f2f5e1a555307d05f6378f603a6679c88ee8",
-   "d6eb127cf4cde1ff8ce3fb904378f2f5e1a555307d05f6378f603a6679c88ee8"
+   "0112521cb3caefe957db76f1c15544406be1941a7020f011450279b4f4a1e2a0",
+   "0112521cb3caefe957db76f1c15544406be1941a7020f011450279b4f4a1e2a0"
   ],
   "log": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\reports\\selfcheck\\live_8091.log"
  },
@@ -1449,7 +1449,7 @@
    "query": "S2_sargasso",
    "check": "run.sha256_repeat",
    "status": "ok",
-   "detail": "7d2029dc3df09e9b vs 7d2029dc3df09e9b",
+   "detail": "ac09fc9112017f5e vs ac09fc9112017f5e",
    "example": null,
    "n": null
   },
@@ -1761,7 +1761,7 @@
    "query": "S4_black_sea",
    "check": "run.sha256_repeat",
    "status": "ok",
-   "detail": "52d02cdc9493d63e vs 52d02cdc9493d63e",
+   "detail": "a174a590e02ec7c7 vs a174a590e02ec7c7",
    "example": null,
    "n": null
   },
@@ -2033,7 +2033,7 @@
    "query": "S3_north_sea_2016",
    "check": "run.sha256_repeat",
    "status": "ok",
-   "detail": "3bf91b94952f9a03 vs 3bf91b94952f9a03",
+   "detail": "b127be4f4d0de67b vs b127be4f4d0de67b",
    "example": null,
    "n": null
   },
@@ -2305,7 +2305,7 @@
    "query": "S1_gpgp_trawl",
    "check": "run.sha256_repeat",
    "status": "ok",
-   "detail": "57190534a2f94d2f vs 57190534a2f94d2f",
+   "detail": "801cce58513c50e9 vs 801cce58513c50e9",
    "example": null,
    "n": null
   },
@@ -2617,7 +2617,7 @@
    "query": "empty_bbox",
    "check": "run.sha256_repeat",
    "status": "ok",
-   "detail": "385050542712bfed vs 385050542712bfed",
+   "detail": "38e8e14ff450fd9d vs 38e8e14ff450fd9d",
    "example": null,
    "n": null
   },
@@ -3297,7 +3297,7 @@
    "query": "live",
    "check": "live run sha256 repeat",
    "status": "ok",
-   "detail": "d6eb127cf4cde1ff",
+   "detail": "0112521cb3caefe9",
    "example": null,
    "n": null
   },
@@ -3305,7 +3305,7 @@
    "query": "speed",
    "check": "speed_testclient: GET /meta p95<300ms",
    "status": "ok",
-   "detail": "p50 4.8 / p95 5.2 ms",
+   "detail": "p50 5.5 / p95 6.6 ms",
    "example": null,
    "n": null
   },
@@ -3313,7 +3313,7 @@
    "query": "speed",
    "check": "speed_testclient: GET /observations (все 935) p95<300ms",
    "status": "ok",
-   "detail": "p50 58.4 / p95 87.7 ms",
+   "detail": "p50 59.4 / p95 71.1 ms",
    "example": null,
    "n": null
   },
@@ -3321,7 +3321,7 @@
    "query": "speed",
    "check": "speed_testclient: GET /observations?source=S2 p95<300ms",
    "status": "ok",
-   "detail": "p50 22.5 / p95 36.5 ms",
+   "detail": "p50 22.7 / p95 29.3 ms",
    "example": null,
    "n": null
   },
@@ -3329,7 +3329,7 @@
    "query": "speed",
    "check": "speed_testclient: GET /observations/{id} p95<300ms",
    "status": "ok",
-   "detail": "p50 2.6 / p95 4.4 ms",
+   "detail": "p50 2.6 / p95 5.0 ms",
    "example": null,
    "n": null
   },
@@ -3337,7 +3337,7 @@
    "query": "speed",
    "check": "speed_testclient: GET /pairs (все) p95<300ms",
    "status": "ok",
-   "detail": "p50 53.7 / p95 61.6 ms",
+   "detail": "p50 55.8 / p95 62.1 ms",
    "example": null,
    "n": null
   },
@@ -3345,7 +3345,7 @@
    "query": "speed",
    "check": "speed_testclient: GET /pairs?status=accepted p95<300ms",
    "status": "ok",
-   "detail": "p50 1.9 / p95 2.2 ms",
+   "detail": "p50 2.5 / p95 3.1 ms",
    "example": null,
    "n": null
   },
@@ -3353,7 +3353,7 @@
    "query": "speed",
    "check": "speed_testclient: GET /scenes p95<300ms",
    "status": "ok",
-   "detail": "p50 17.8 / p95 19.7 ms",
+   "detail": "p50 18.5 / p95 19.9 ms",
    "example": null,
    "n": null
   },
@@ -3361,7 +3361,7 @@
    "query": "speed",
    "check": "speed_testclient: GET /scenes/{id} p95<3000ms",
    "status": "ok",
-   "detail": "p50 18.9 / p95 20.0 ms",
+   "detail": "p50 19.0 / p95 21.0 ms",
    "example": null,
    "n": null
   },
@@ -3369,7 +3369,7 @@
    "query": "speed",
    "check": "speed_testclient: GET /scenes/{id}/rgb.png p95<3000ms",
    "status": "ok",
-   "detail": "p50 1.5 / p95 1.7 ms",
+   "detail": "p50 1.5 / p95 1.6 ms",
    "example": null,
    "n": null
   },
@@ -3377,7 +3377,7 @@
    "query": "speed",
    "check": "speed_testclient: GET /scenes/{id}/quality.png p95<3000ms",
    "status": "ok",
-   "detail": "p50 1.5 / p95 1.9 ms",
+   "detail": "p50 2.4 / p95 6.7 ms",
    "example": null,
    "n": null
   },
@@ -3393,7 +3393,7 @@
    "query": "speed",
    "check": "speed_testclient: GET /zones p95<300ms",
    "status": "ok",
-   "detail": "p50 6.3 / p95 8.8 ms",
+   "detail": "p50 6.4 / p95 6.9 ms",
    "example": null,
    "n": null
   },
@@ -3401,7 +3401,7 @@
    "query": "speed",
    "check": "speed_testclient: GET /zones/{id} p95<300ms",
    "status": "ok",
-   "detail": "p50 5.5 / p95 6.2 ms",
+   "detail": "p50 5.5 / p95 6.0 ms",
    "example": null,
    "n": null
   },
@@ -3409,7 +3409,7 @@
    "query": "speed",
    "check": "speed_testclient: GET /metrics p95<300ms",
    "status": "ok",
-   "detail": "p50 2.8 / p95 3.1 ms",
+   "detail": "p50 2.6 / p95 5.0 ms",
    "example": null,
    "n": null
   },
@@ -3417,7 +3417,7 @@
    "query": "speed",
    "check": "speed_testclient: GET /export observations csv p95<300ms",
    "status": "ok",
-   "detail": "p50 37.4 / p95 41.2 ms",
+   "detail": "p50 37.6 / p95 44.3 ms",
    "example": null,
    "n": null
   },
@@ -3425,7 +3425,7 @@
    "query": "speed",
    "check": "speed_testclient: GET /export zones geojson p95<300ms",
    "status": "ok",
-   "detail": "p50 7.1 / p95 7.5 ms",
+   "detail": "p50 7.3 / p95 8.5 ms",
    "example": null,
    "n": null
   },
@@ -3433,7 +3433,7 @@
    "query": "speed",
    "check": "speed_testclient: GET /export pairs csv p95<300ms",
    "status": "ok",
-   "detail": "p50 51.5 / p95 59.3 ms",
+   "detail": "p50 52.0 / p95 60.5 ms",
    "example": null,
    "n": null
   },
@@ -3441,7 +3441,7 @@
    "query": "speed",
    "check": "speed_testclient: GET /export zones csv query_id p95<300ms",
    "status": "ok",
-   "detail": "p50 20.4 / p95 30.8 ms",
+   "detail": "p50 20.5 / p95 21.3 ms",
    "example": null,
    "n": null
   },
@@ -3449,7 +3449,7 @@
    "query": "speed",
    "check": "speed_testclient: GET /queries p95<300ms",
    "status": "ok",
-   "detail": "p50 1.6 / p95 1.7 ms",
+   "detail": "p50 1.7 / p95 2.0 ms",
    "example": null,
    "n": null
   },
@@ -3457,7 +3457,7 @@
    "query": "speed",
    "check": "speed_testclient: GET /queries/{id} p95<300ms",
    "status": "ok",
-   "detail": "p50 1.5 / p95 1.5 ms",
+   "detail": "p50 1.6 / p95 2.0 ms",
    "example": null,
    "n": null
   },
@@ -3465,7 +3465,7 @@
    "query": "speed",
    "check": "speed_testclient: GET /queries/{id}/run p95<300ms",
    "status": "ok",
-   "detail": "p50 25.7 / p95 30.9 ms",
+   "detail": "p50 26.7 / p95 34.4 ms",
    "example": null,
    "n": null
   },
@@ -3473,7 +3473,7 @@
    "query": "speed",
    "check": "speed_testclient: POST /queries p95<300ms",
    "status": "ok",
-   "detail": "p50 1.5 / p95 2.6 ms",
+   "detail": "p50 1.7 / p95 7.0 ms",
    "example": null,
    "n": null
   },
@@ -3481,7 +3481,7 @@
    "query": "speed",
    "check": "speed_testclient: DELETE /queries/{id} p95<300ms",
    "status": "ok",
-   "detail": "p50 5.7 / p95 7.4 ms",
+   "detail": "p50 6.0 / p95 6.2 ms",
    "example": null,
    "n": null
   },
@@ -3497,7 +3497,7 @@
    "query": "speed",
    "check": "speed_live: GET /meta p95<300ms",
    "status": "ok",
-   "detail": "p50 15.4 / p95 27.0 ms",
+   "detail": "p50 4.4 / p95 24.5 ms",
    "example": null,
    "n": null
   },
@@ -3505,7 +3505,7 @@
    "query": "speed",
    "check": "speed_live: GET /observations (все 935) p95<300ms",
    "status": "ok",
-   "detail": "p50 60.7 / p95 88.0 ms",
+   "detail": "p50 61.1 / p95 89.4 ms",
    "example": null,
    "n": null
   },
@@ -3513,7 +3513,7 @@
    "query": "speed",
    "check": "speed_live: GET /observations?source=S2 p95<300ms",
    "status": "ok",
-   "detail": "p50 30.9 / p95 36.8 ms",
+   "detail": "p50 30.9 / p95 38.5 ms",
    "example": null,
    "n": null
   },
@@ -3521,7 +3521,7 @@
    "query": "speed",
    "check": "speed_live: GET /observations/{id} p95<300ms",
    "status": "ok",
-   "detail": "p50 14.2 / p95 25.7 ms",
+   "detail": "p50 15.0 / p95 16.8 ms",
    "example": null,
    "n": null
   },
@@ -3529,7 +3529,7 @@
    "query": "speed",
    "check": "speed_live: GET /pairs (все) p95<300ms",
    "status": "ok",
-   "detail": "p50 43.5 / p95 54.8 ms",
+   "detail": "p50 45.9 / p95 62.0 ms",
    "example": null,
    "n": null
   },
@@ -3537,7 +3537,7 @@
    "query": "speed",
    "check": "speed_live: GET /pairs?status=accepted p95<300ms",
    "status": "ok",
-   "detail": "p50 15.3 / p95 16.8 ms",
+   "detail": "p50 14.7 / p95 24.2 ms",
    "example": null,
    "n": null
   },
@@ -3545,7 +3545,7 @@
    "query": "speed",
    "check": "speed_live: GET /scenes p95<300ms",
    "status": "ok",
-   "detail": "p50 30.7 / p95 35.4 ms",
+   "detail": "p50 30.5 / p95 32.0 ms",
    "example": null,
    "n": null
   },
@@ -3553,7 +3553,7 @@
    "query": "speed",
    "check": "speed_live: GET /scenes/{id} p95<3000ms",
    "status": "ok",
-   "detail": "p50 30.6 / p95 42.6 ms",
+   "detail": "p50 30.4 / p95 37.6 ms",
    "example": null,
    "n": null
   },
@@ -3561,7 +3561,7 @@
    "query": "speed",
    "check": "speed_live: GET /scenes/{id}/rgb.png p95<3000ms",
    "status": "ok",
-   "detail": "p50 7.5 / p95 15.8 ms",
+   "detail": "p50 14.3 / p95 15.6 ms",
    "example": null,
    "n": null
   },
@@ -3569,7 +3569,7 @@
    "query": "speed",
    "check": "speed_live: GET /scenes/{id}/quality.png p95<3000ms",
    "status": "ok",
-   "detail": "p50 1.4 / p95 16.5 ms",
+   "detail": "p50 1.0 / p95 13.6 ms",
    "example": null,
    "n": null
   },
@@ -3577,7 +3577,7 @@
    "query": "speed",
    "check": "speed_live: GET /scenes/{id}/mask.png p95<3000ms",
    "status": "ok",
-   "detail": "p50 1.4 / p95 17.1 ms",
+   "detail": "p50 15.2 / p95 16.5 ms",
    "example": null,
    "n": null
   },
@@ -3585,7 +3585,7 @@
    "query": "speed",
    "check": "speed_live: GET /zones p95<300ms",
    "status": "ok",
-   "detail": "p50 7.1 / p95 28.8 ms",
+   "detail": "p50 14.7 / p95 31.1 ms",
    "example": null,
    "n": null
   },
@@ -3593,7 +3593,7 @@
    "query": "speed",
    "check": "speed_live: GET /zones/{id} p95<300ms",
    "status": "ok",
-   "detail": "p50 7.8 / p95 8.9 ms",
+   "detail": "p50 17.3 / p95 31.1 ms",
    "example": null,
    "n": null
   },
@@ -3601,7 +3601,7 @@
    "query": "speed",
    "check": "speed_live: GET /metrics p95<300ms",
    "status": "ok",
-   "detail": "p50 2.2 / p95 24.4 ms",
+   "detail": "p50 15.1 / p95 22.7 ms",
    "example": null,
    "n": null
   },
@@ -3609,7 +3609,7 @@
    "query": "speed",
    "check": "speed_live: GET /export observations csv p95<300ms",
    "status": "ok",
-   "detail": "p50 45.4 / p95 51.1 ms",
+   "detail": "p50 45.8 / p95 50.2 ms",
    "example": null,
    "n": null
   },
@@ -3617,7 +3617,7 @@
    "query": "speed",
    "check": "speed_live: GET /export zones geojson p95<300ms",
    "status": "ok",
-   "detail": "p50 15.9 / p95 26.5 ms",
+   "detail": "p50 15.3 / p95 27.1 ms",
    "example": null,
    "n": null
   },
@@ -3625,7 +3625,7 @@
    "query": "speed",
    "check": "speed_live: GET /export pairs csv p95<300ms",
    "status": "ok",
-   "detail": "p50 50.2 / p95 61.3 ms",
+   "detail": "p50 58.5 / p95 63.7 ms",
    "example": null,
    "n": null
   },
@@ -3633,7 +3633,7 @@
    "query": "speed",
    "check": "speed_live: GET /export zones csv query_id p95<300ms",
    "status": "ok",
-   "detail": "p50 31.4 / p95 43.4 ms",
+   "detail": "p50 31.1 / p95 44.4 ms",
    "example": null,
    "n": null
   },
@@ -3641,7 +3641,7 @@
    "query": "speed",
    "check": "speed_live: GET /queries p95<300ms",
    "status": "ok",
-   "detail": "p50 1.6 / p95 16.0 ms",
+   "detail": "p50 14.8 / p95 17.0 ms",
    "example": null,
    "n": null
   },
@@ -3649,7 +3649,7 @@
    "query": "speed",
    "check": "speed_live: GET /queries/{id} p95<300ms",
    "status": "ok",
-   "detail": "p50 1.1 / p95 23.4 ms",
+   "detail": "p50 15.1 / p95 16.3 ms",
    "example": null,
    "n": null
   },
@@ -3657,7 +3657,7 @@
    "query": "speed",
    "check": "speed_live: GET /queries/{id}/run p95<300ms",
    "status": "ok",
-   "detail": "p50 32.6 / p95 47.7 ms",
+   "detail": "p50 44.0 / p95 48.5 ms",
    "example": null,
    "n": null
   },
@@ -3665,7 +3665,7 @@
    "query": "speed",
    "check": "speed_live: POST /queries p95<300ms",
    "status": "ok",
-   "detail": "p50 15.0 / p95 16.3 ms",
+   "detail": "p50 14.0 / p95 16.1 ms",
    "example": null,
    "n": null
   },
@@ -3673,7 +3673,7 @@
    "query": "speed",
    "check": "speed_live: DELETE /queries/{id} p95<300ms",
    "status": "ok",
-   "detail": "p50 21.3 / p95 31.5 ms",
+   "detail": "p50 20.0 / p95 28.9 ms",
    "example": null,
    "n": null
   },
@@ -3681,7 +3681,7 @@
    "query": "speed",
    "check": "speed_live: GET /observations?bbox=1,2,3 (400) p95<300ms",
    "status": "ok",
-   "detail": "p50 15.0 / p95 15.8 ms",
+   "detail": "p50 15.2 / p95 15.9 ms",
    "example": null,
    "n": null
   },
@@ -3697,6 +3697,6 @@
  "stats": {
   "ok": 284
  },
- "seconds": 25.9,
+ "seconds": 27.2,
  "findings": []
 }

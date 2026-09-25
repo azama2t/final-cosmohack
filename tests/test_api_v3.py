@@ -807,3 +807,32 @@ def test_glint_fraction_and_summary(client):
     s = client.get("/api/v3/meta").json()["summary"]
     assert s["text"].endswith(f"подозрительные пиксели в полосах пар, прошедших маски качества: "
                               f"{s['n_suspicious_in_quality_ok_strips']}")
+
+
+# ------------------------------------------------------------------ 3.6 (jury-3, action 4)
+@pytest.mark.skipif(not (HAS_CONC_MODEL and HAS_FINAL and HAS_SAMPLES), reason="нет модели L68 / final_test / CSV")
+def test_selected_median_and_scenarios(client):
+    c = client.get("/api/v3/metrics").json()["concentration"]
+    for prof, pr in c["profiles"].items():
+        if pr.get("final_test") and not pr["final_test"]["main_better_significant"]:
+            assert pr["selected"] == "median_train" and c["selected"][prof] == "median_train"
+            assert "eb35414" in pr["selected_reason"] and "не лучше медианы" in pr["selected_reason"]
+            assert "справочно, после решения" in pr["final_test"]["reference_models_note"]
+    fe = client.get("/api/v3/observations/MPL-0200").json()["properties"]["field_estimate"]
+    sc = fe["scenarios"]
+    assert sc["p25"] <= sc["p50"] <= sc["p75"] and sc["unit"] == "items/km2"
+    assert sc["p50"] == fe["value"]  # p50 of the training profile = the median on the map
+
+
+@pytest.mark.skipif(not HAS_FINAL, reason="нет final_test.json")
+def test_final_test_predictions_split_by_role():
+    d = cs.PATHS["final_test"].parent
+    main = list(csv.DictReader(open(d / "final_test_predictions.csv", encoding="utf-8-sig")))
+    assert main and {r["role"] for r in main} <= {"main", "baseline"}
+    ref_path = d / "final_test_reference_predictions.csv"
+    if ref_path.is_file():
+        lines = ref_path.read_text(encoding="utf-8").splitlines()
+        assert lines[0].startswith("# справочно, после решения; не использовалось для выбора")
+        ref = list(csv.DictReader(lines[1:]))
+        assert ref and {r["role"] for r in ref} == {"reference"}
+        assert not ({(r["profile"], r["model"]) for r in ref} & {(r["profile"], r["model"]) for r in main})

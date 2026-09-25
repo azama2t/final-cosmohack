@@ -691,6 +691,28 @@ def profile_median_estimate(profile: str) -> Optional[dict]:
     return dict(val) if val else None
 
 
+def profile_scenarios(profile: str) -> Optional[dict]:
+    """p25/p50/p75 of the training (dev) profile, items/km2 (reference values y_true of dev_predictions.csv,
+    one per dev sample): scenarios «ниже / типично / выше» next to the median interval."""
+    rows = _cached("dev_predictions", PATHS["dev_cv"].parent / "dev_predictions.csv", _read_csv) or []
+    ys = {}
+    for r in rows:
+        if r.get("profile") == profile and fnum(r.get("y_true")) is not None:
+            ys[r.get("sample_id")] = fnum(r.get("y_true"))
+    if not ys:
+        return None
+    import numpy as np
+    a = np.asarray(sorted(ys.values()), float)
+    q = np.percentile(a, [25, 50, 75])
+    return {"p25": round(float(q[0]), 2), "p50": round(float(q[1]), 2), "p75": round(float(q[2]), 2),
+            "n": int(a.size), "unit": "items/km2",
+            "note": "квартили полевых значений обучающего (dev) профиля: сценарии ниже / типично / выше"}
+
+
+SELECTED_REASON = ("основная модель на отложенном test не лучше медианы, правило записано до открытия, "
+                   "коммит eb35414")
+
+
 def _profile_median_estimate(profile: str) -> Optional[dict]:
     """The map value for a profile: median of the training (dev) profile with the median's interval
     (q_lo/q_hi of the baseline in final_test.json) and its actual coverage on the held-out test and on dev CV."""
@@ -719,7 +741,8 @@ def _profile_median_estimate(profile: str) -> Optional[dict]:
             "interval_coverage_test": cov_test, "interval_coverage_cv": cov_cv,
             "n_test": ft.get("n_test"), "unit": "items/km2",
             "measurement_profile": (cfg.get("measurement_profile") or [None])[0], "profile_config": profile,
-            "model": "median_train", "basis": "field_model", "note": FIELD_EST_NOTE}
+            "model": "median_train", "basis": "field_model", "note": FIELD_EST_NOTE,
+            "scenarios": profile_scenarios(profile)}
 
 
 def obs_field_estimate(sample_id: str) -> Optional[dict]:
@@ -1126,6 +1149,7 @@ def field_estimate_at(lon, lat, when) -> Optional[dict]:
                 "unit": "items/km2", "measurement_profile": (cfg.get("measurement_profile") or [None])[0],
                 "profile_config": profile, "model": model_name, "basis": "field_model",
                 "label": label, "final_test_decision": (dec or {}).get("use"),
+                "scenarios": profile_scenarios(profile) if model_name == "median_train" else None,
                 "applicability": "точка в области полевых данных профиля", "domain_bbox": [round(v, 4) for v in dom]}
     return None
 
@@ -1195,6 +1219,12 @@ def conc_metrics_block() -> dict:
                          "основная модель на test не лучше медианы — на карте медиана обучающего профиля")}
         if prof in profiles:
             profiles[prof]["final_test"] = ft_summary[prof]
+            profiles[prof]["selected"] = "median_train" if not better else pr.get("main_model")
+            profiles[prof]["selected_reason"] = (SELECTED_REASON if not better else
+                                                 "основная модель на отложенном test значимо лучше медианы")
+            ft_summary[prof]["reference_models_note"] = (
+                "метрики и прогнозы остальных моделей на test — справочно, после решения; не использовались для "
+                "выбора (reports/case_conc/final_test_reference_predictions.csv)")
             pm = profile_median_estimate(prof)
             if pm:
                 profiles[prof]["map_field_estimate"] = {k: pm[k] for k in (
@@ -1210,6 +1240,7 @@ def conc_metrics_block() -> dict:
                       "k_blocks": cvp.get("k_blocks"), "buffer_days": cvp.get("buffer_days")} if cvp else None,
             "final_test": ft,
             "final_test_summary": ft_summary or None,
+            "selected": {k: v.get("selected") for k, v in profiles.items() if v.get("selected")} or None,
             "final_test_status": (f"посчитан один раз {str(ft.get('when') or '')[8:10]}.{str(ft.get('when') or '')[5:7]}"
                                   if ft and ft.get("when") else ("посчитан один раз" if ft else
                                                                  "будет посчитан один раз в приёмке")),
