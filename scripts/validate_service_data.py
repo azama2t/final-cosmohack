@@ -143,8 +143,8 @@ def check_detections(v: V, rel, region, date, model):
                     v.err(w, f"confirmed_by must be the other model's id, got {cb!r}")
                 elif not pr["confirmed"] and cb is not None:
                     v.err(w, "confirmed_by must be null when confirmed is false")
-            if "artifact" in pr and pr["artifact"] not in (None, "seam", "wake", "ship"):  # optional (L37)
-                v.err(w, f"artifact must be seam|wake|ship|null, got {pr['artifact']!r}")
+            if "artifact" in pr and pr["artifact"] not in (None, "seam", "wake", "ship", "other"):  # optional (L37, L56)
+                v.err(w, f"artifact must be seam|wake|ship|other|null, got {pr['artifact']!r}")
         if i > 5000:
             break
     return len(fc["features"])

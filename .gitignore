@@ -37,3 +37,9 @@ __pycache__/
 /.playwright-mcp/
 /service/tiles/
 /service/static_v2/assets/*.map
+# временные артефакты проверок
+/reports/tmp_*
+/reports/tools/org_*/
+/reports/jury_pre*.md
+/reports/cloud_edge_components.csv
+/reports/mados_overlap_selfcheck*.csv

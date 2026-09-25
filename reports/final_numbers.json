@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-25T16:30:29+03:00",
+ "generated": "2026-09-25T16:57:32+03:00",
  "note": "генерируется scripts/final_numbers.py; руками не править; null = ещё не посчитано",
  "l3_lgbm": {
   "available": true,
@@ -1308,7 +1308,7 @@
   "kind": "real",
   "n_regions": 18,
   "n_dates": 64,
-  "n_detections_total": 203,
+  "n_detections_total": 197,
   "models": [
    "lgbm",
    "mdd"
@@ -1504,13 +1504,13 @@
     ],
     "latest_date": "2026-05-30",
     "model": "mdd",
-    "index_permille": 0.0251,
-    "n_detections": 7,
-    "total_debris_area_km2": 0.0128,
+    "index_permille": 0.0061,
+    "n_detections": 4,
+    "total_debris_area_km2": 0.0031,
     "n_dates": 8,
     "n_drift": 6,
     "n_confirmed_latest": 1,
-    "n_zones": 6,
+    "n_zones": 4,
     "last_date": "2026-05-30",
     "reliable": true,
     "unreliable_reason": null
@@ -1570,13 +1570,13 @@
     ],
     "latest_date": "2025-11-10",
     "model": "mdd",
-    "index_permille": 0.02,
-    "n_detections": 8,
-    "total_debris_area_km2": 0.0067,
+    "index_permille": 0.0105,
+    "n_detections": 6,
+    "total_debris_area_km2": 0.0036,
     "n_dates": 1,
     "n_drift": 1,
     "n_confirmed_latest": 0,
-    "n_zones": 4,
+    "n_zones": 3,
     "last_date": "2025-11-10",
     "reliable": true,
     "unreliable_reason": null
@@ -1641,13 +1641,13 @@
     ],
     "latest_date": "2026-01-01",
     "model": "mdd",
-    "index_permille": 0.0473,
-    "n_detections": 8,
-    "total_debris_area_km2": 0.0167,
+    "index_permille": 0.0274,
+    "n_detections": 7,
+    "total_debris_area_km2": 0.0097,
     "n_dates": 3,
     "n_drift": 3,
     "n_confirmed_latest": 3,
-    "n_zones": 6,
+    "n_zones": 5,
     "last_date": "2026-01-01",
     "reliable": true,
     "unreliable_reason": null
@@ -1748,10 +1748,10 @@
   "ranking_reliable": [
    "guanabara",
    "mumbai",
-   "honduras",
-   "lagos",
    "danang",
+   "lagos",
    "santo_domingo",
+   "honduras",
    "tiber",
    "scotland",
    "bali",
@@ -3188,22 +3188,22 @@
  "incidents": {
   "available": true,
   "data_root": "service/data",
-  "total": 7494,
+  "total": 7490,
   "by_kind": {
-   "zone": 869,
+   "zone": 865,
    "detection": 6625
   },
-  "excluded_artifacts": 1078,
+  "excluded_artifacts": 1084,
   "reviewed": 0,
   "confirmed_reviewed": 0,
   "confirmed_share_of_reviewed": null,
   "by_status": {
-   "detected": 6415,
-   "under_review": 1,
+   "detected": 6406,
+   "under_review": 0,
    "confirmed": 0,
    "false_alarm": 0,
    "resolved": 0,
-   "excluded": 1078
+   "excluded": 1084
   }
  }
 }

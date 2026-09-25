@@ -28,6 +28,10 @@ x 0.5 on a haze/glint date; repeat_dates counts reliable dates only (grid.zones)
 L42 cross-model artefacts: collinear pieces of one model are classified as one strip (grid.artifacts
 collinear_groups); an object of one model with >= 30 % of its pixels within 2 px of an artefact of the other model
 gets the same mark and properties.artifact_from = that model; the partner's artefact pixels do not confirm.
+L56 manual marks (configs/manual_artifacts.yaml, --manual-artifacts; reports/manual_review.md): after the automatic
+ones, an object (still unmarked) with a pixel within radius_m of a listed point on that region/date/model ("*" = any)
+gets properties.artifact = kind (wake|ship|seam|other) and properties.artifact_source = "manual"; from then on it
+is treated like any artefact.
 Idempotent: region folders being built are recreated; with --regions, other regions of an existing
 manifest are kept.
 """
@@ -93,6 +97,50 @@ SOURCES = [
 CLOUD_SCL = (3, 8, 9, 10)
 RETRIES, RETRY_WAIT_S = 3, 30  # input scene may be mid-write by lane L6
 THR_OVERRIDE: dict[str, float] = {}  # --thresholds mdd=0.3,lgbm=0.5  # cloud shadow, cloud medium/high, thin cirrus
+MANUAL_KINDS = ("wake", "ship", "seam", "other")
+MANUAL_RULES: list[dict] = []  # L56: entries of configs/manual_artifacts.yaml (set in main)
+
+
+def load_manual_artifacts(path) -> list[dict]:
+    """L56: list of manual marks {region, date, model|"*", lon, lat, radius_m, kind, reason, who, when}."""
+    if not path or not Path(path).exists():
+        return []
+    import yaml
+
+    raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+    items = raw.get("artifacts", raw) if isinstance(raw, dict) else raw
+    out = []
+    for it in items or []:
+        if it.get("kind") not in MANUAL_KINDS:
+            raise SystemExit(f"{path}: kind must be one of {MANUAL_KINDS}, got {it.get('kind')!r}")
+        out.append(dict(it, date=str(it["date"]), model=str(it.get("model", "*")),
+                        lon=float(it["lon"]), lat=float(it["lat"]), radius_m=float(it["radius_m"])))
+    return out
+
+
+def manual_marks(labels, n, transform, crs, region, date, model, rules=None) -> dict[int, str]:
+    """L56: {component index k (0-based, label k+1): kind} for components with a pixel centre within
+    radius_m (+ half a pixel) of a manual point for this region/date/model."""
+    from rasterio.warp import transform as warp_xy
+
+    res = abs(transform.a)
+    out: dict[int, str] = {}
+    for r in MANUAL_RULES if rules is None else rules:
+        if r["region"] != region or r["date"] != date or r["model"] not in ("*", model) or n == 0:
+            continue
+        xs, ys = warp_xy("EPSG:4326", crs, [r["lon"]], [r["lat"]])
+        col, row = ~transform * (xs[0], ys[0])
+        rad = r["radius_m"] / res + 0.5
+        r0, r1 = max(int(math.floor(row - rad)), 0), min(int(math.ceil(row + rad)) + 1, labels.shape[0])
+        c0, c1 = max(int(math.floor(col - rad)), 0), min(int(math.ceil(col + rad)) + 1, labels.shape[1])
+        if r0 >= r1 or c0 >= c1:
+            continue
+        rr, cc = np.mgrid[r0:r1, c0:c1]
+        near = (rr + 0.5 - row) ** 2 + (cc + 0.5 - col) ** 2 <= rad ** 2
+        for k in np.unique(labels[r0:r1, c0:c1][near]):
+            if k > 0:
+                out.setdefault(int(k) - 1, r["kind"])
+    return out
 
 
 def read_json(p: Path):
@@ -327,6 +375,15 @@ def process_scene(region: str, date: str, sdir: Path, models: list[str], out: Pa
                     art_from[m][k] = frm
         if art_from[m]:
             log(f"  {region}/{date}/{m}: {len(art_from[m])} objects marked from the other model's artefacts")
+    # L56: manual marks after the automatic ones (objects already marked keep their automatic mark)
+    manual: dict[str, set] = {m: set() for m in pre}
+    for m, v in pre.items():
+        for k, kind in manual_marks(v["labels"], v["n"], s_transform, s_crs, region, date, m).items():
+            if v["art"][k] is None:
+                v["art"][k] = kind
+                manual[m].add(k)
+        if manual[m]:
+            log(f"  {region}/{date}/{m}: {len(manual[m])} objects marked manually (configs/manual_artifacts.yaml)")
     for m, v in pre.items():
         prob, thr, pj, mdir, labels, n, raw, guard, art = (v[k] for k in ("prob", "thr", "pj", "mdir", "labels", "n",
                                                                           "raw", "guard", "art"))
@@ -338,14 +395,17 @@ def process_scene(region: str, date: str, sdir: Path, models: list[str], out: Pa
                 rec["props"]["artifact"] = art[k - 1]
                 if (k - 1) in art_from[m]:
                     rec["props"]["artifact_from"] = art_from[m][k - 1]
+                if (k - 1) in manual[m]:
+                    rec["props"]["artifact_source"] = "manual"
         real = [rec for rec in recs if not rec["props"].get("artifact")]
         art_px = is_art[labels]
         a_stat = {"seam": 0, "wake": 0, "ship": 0}
         for rec in recs:
             if rec["props"].get("artifact"):
-                a_stat[rec["props"]["artifact"]] += 1
+                a_stat[rec["props"]["artifact"]] = a_stat.get(rec["props"]["artifact"], 0) + 1
         a_stat["px"] = int(art_px.sum())
         a_stat["from_other"] = len(art_from[m])
+        a_stat["manual"] = len(manual[m])
         if a_stat["px"]:
             log(f"  {region}/{date}/{m}: artefacts {a_stat} of {len(recs)} det / {int((labels > 0).sum())} px")
         masks[m] = (labels, n, raw, is_art)
@@ -540,12 +600,17 @@ def main(argv=None):
                                                        "{region, date, reason} (without the flag the field is not written)")
     ap.add_argument("--demo-date", default="", help="L43: date for --demo-region (default: the region's latest date)")
     ap.add_argument("--demo-reason", default="", help="L43: why this region (shown in DEMO.md / report)")
+    ap.add_argument("--manual-artifacts", default=str(ROOT / "configs" / "manual_artifacts.yaml"),
+                    help="L56: manual artefact marks (yaml; '' = none)")
     ap.add_argument("--manifest-only", action="store_true",
                     help="L43: do not rebuild scenes, only rewrite manifest.json of --out (demo field)")
     a = ap.parse_args(argv)
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     if a.manifest_only:
         return write_demo_only(Path(a.out), a.demo_region, a.demo_date, a.demo_reason)
+    MANUAL_RULES[:] = load_manual_artifacts(a.manual_artifacts)
+    if MANUAL_RULES:
+        print(f"manual artefact marks: {len(MANUAL_RULES)} from {a.manual_artifacts}")
     for kv in filter(None, a.thresholds.split(",")):
         k, v = kv.split("=")
         THR_OVERRIDE[k.strip()] = float(v)
