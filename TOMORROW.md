@@ -167,3 +167,30 @@ start $I\report\index.html                        # сверху: текст REA
 - `adapter.yaml`, правленый вручную, повторный запуск не перезапишет (свежий автоконфиг ляжет в `adapter.auto.yaml`).
 - Обучение без `--cv`: сплит официальный (train/val в папках) или групповой по сцене; с `--cv K` — K-fold по сценам и финальная модель на всём train.
 - Модели и метрики: `weights_exp\lgbm_ingest\<name>\{model.txt, meta.json, cv.json}`; `weights\lgbm` не трогается.
+
+---
+
+## Показать данные организаторов на карте (L49, ≈1 мин на 60 чипов, CPU)
+
+Нужны GeoTIFF-чипы с геопривязкой (CRS + геотрансформ). Если геопривязки нет, `org_to_map.py` завершится с кодом 2 и понятной ошибкой: режима «галерея» нет, показываем сабмит и `score.py` без карты.
+
+```powershell
+$env:PYTHONPATH = "src"; $env:CUDA_VISIBLE_DEVICES = "-1"
+# 1) вероятности (любой из двух путей; результат одинаковый, проверено: 0 px разницы)
+.venv\Scripts\python.exe scripts	ools\predict_org.py --images <их чипы> --config $Idapter.yaml --weights <веса> --out out\org_pred --format tif --prob
+#    или: .venv\Scripts\python.exe inference.py --data-dir <их чипы> --output out\org_pred_prob --model lgbm --device cpu
+# 2) чипы + вероятности -> корень данных карты (вторая модель и разметка необязательны)
+.venv\Scripts\python.exe scripts	ools\org_to_map.py --chips <их чипы> --config $Idapter.yaml --pred lgbm=out\org_pred_prob --out out\org_map [--pred fdi_rule=<папка>] [--labels <их маски> --label-debris 3] [--threshold lgbm=0.63]
+# 3) карта
+.venv\Scripts\python.exe -m service --port 8090 --data-root out\org_map      # http://127.0.0.1:8090
+```
+
+Что проверить:
+- В логе `org_to_map`: «N чипов -> K сцен» — число сцен разумное. Сцена = CRS + дата + префикс имени (`--group name`); `--group date` — все чипы одной даты; `--group adjacency` — только по соседству, смешивает даты (будет предупреждение). Даты берутся из имени (`YYYY-MM-DD`, `YYYYMMDD`, `D-M-YY` как в MARIDA; для M-D-YY нужен `--date-order mdy`) или из тегов TIFF. Если даты нет, ставится `1900-01-01` и в названии «(дата неизвестна)».
+- Строка «предсказания lgbm: 60/60 чипов найдено». Если 0 — имена prob-файлов не совпали с чипами: ожидаются `<stem>_prob.tif` или `<stem>.png`/`.tif`.
+- `.venv\Scripts\python.exe scriptsalidate_service_data.py out\org_map` → `0 errors`.
+- На карте: снимок лежит на своём месте (не в океане у 0,0), вода не закрашена как суша (`water_frac` в `out\org_map_live\<сцена>\<дата>\scene.json` ≈ доля воды на снимке). Если нет — порог `--ndwi` (по умолчанию 0). Если снимок чёрный или белый — проверьте scale в `adapter.yaml`.
+- С `--labels` пиксельные P/R/F1 каждой модели лежат в `scene.json` → `models.<m>.labels` и в `out\org_map_live\org_to_map_report.json`. Это считается до постобработки карты, по размеченным пикселям.
+- Первая модель в `--pred` — основная: сводка района и модель, которую карта открывает первой. Порог берётся из `--threshold`, иначе из `weights\<имя>\meta.json`, иначе 0.5. Для модели, обученной на их train, передавайте `--threshold lgbm=<порог из её meta.json>`: по умолчанию читается `weights\lgbm`.
+- Повторный запуск перезаписывает `out\org_map` и `out\org_map_live`, но только если их создал `org_to_map` (есть файл-метка).
+

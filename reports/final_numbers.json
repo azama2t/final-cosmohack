@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-25T12:52:24+03:00",
+ "generated": "2026-09-25T13:56:23+03:00",
  "note": "генерируется scripts/final_numbers.py; руками не править; null = ещё не посчитано",
  "l3_lgbm": {
   "available": true,
@@ -3139,5 +3139,63 @@
   "unlabelled_pct": 99.0,
   "n_test_chips": 147,
   "n_scenes": 27
+ },
+ "drift_check": {
+  "available": true,
+  "label": "эксперимент",
+  "n_pairs": 18,
+  "n_pairs_with_det2": 15,
+  "k_hit": 7,
+  "k_hit_baseline": 7,
+  "k_hit_shift": 11,
+  "hit_rate": 0.389,
+  "baseline_hit_rate": 0.389,
+  "shift_hit_rate": 0.611,
+  "pairs_forecast_better": 3,
+  "pairs_baseline_better": 5,
+  "n_pairs_verifiable": 11,
+  "forecast_better": false,
+  "verdict": "прогноз НЕ лучше «нулевого дрейфа»; K/N 7/18 против 7/18; но облако той же площади без адвекции («сдвиг назад») попадает не реже: 11/18 — вклад направления дрейфа не подтверждён; попаданий относительно случайного при той же площади: прогноз ×1.7, нулевой дрейф ×1.31; N = 18, разница в 0 пар(у) — статистически не значима",
+  "criterion": "Находка второго снимка (компонента MDD P≥0.5 на воде, центроид) попадает, если лежит внутри 90%-го контура облака частиц на момент второго снимка (область наибольшей плотности гауссова KDE, окно = Скотт, но ≥ 500 м; уровень — 10-й перцентиль плотности в частицах). Пара «попала», если попала ≥ 1 находка; hit_rate = K/N по парам. Базовая линия «нулевой дрейф» — то же для стартовых позиций частиц (час 0). Доп. линия «сдвиг назад» — облако прогноза минус средний вектор смещения (та же площадь). Критерий записан до подсчёта (tasklog/45)."
+ },
+ "context": {
+  "available": true,
+  "objects_by_kind": {
+   "aquaculture": 1032,
+   "beach": 466,
+   "port": 50,
+   "marina": 74,
+   "protected_area": 229,
+   "river_mouth": 295,
+   "outfall": 72,
+   "wastewater_plant": 220
+  },
+  "objects_total": 2438,
+  "n_regions": 18,
+  "n_drift_scenes": 44,
+  "n_drift_scenes_touching": 29,
+  "n_drift_objects": 238,
+  "note": "объекты OSM (ODbL) для контекста; пересечение с демо-дрейфом без сроков и вероятностей, не предупреждение"
+ },
+ "incidents": {
+  "available": true,
+  "data_root": "service/data",
+  "total": 7494,
+  "by_kind": {
+   "zone": 869,
+   "detection": 6625
+  },
+  "excluded_artifacts": 1078,
+  "reviewed": 0,
+  "confirmed_reviewed": 0,
+  "confirmed_share_of_reviewed": null,
+  "by_status": {
+   "detected": 6416,
+   "under_review": 0,
+   "confirmed": 0,
+   "false_alarm": 0,
+   "resolved": 0,
+   "excluded": 1078
+  }
  }
 }

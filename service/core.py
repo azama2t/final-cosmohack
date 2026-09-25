@@ -129,7 +129,7 @@ class Store:
         if not self.has_data():
             return "none"
         kind = self.manifest().get("kind")
-        if kind in ("real", "demo", "fixture"):
+        if kind in ("real", "demo", "fixture", "organizer"):
             return kind
         return {"data": "real", "demo": "demo", "demo_fixtures": "fixture"}.get(
             self.root.name if self.root else "", "real")

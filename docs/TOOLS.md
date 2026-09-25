@@ -20,6 +20,7 @@ $ORG = "D:\org\train"          # <- папка организаторов
 | 15–25 (параллельно) | пересечения с нашим train | `provenance_check.py` | `reports\tools\org_provenance\provenance.md` |
 | 25–40 | привести к нашему формату | `organizer_adapter` | `data\organizer\org\` + `manifest.csv` |
 | 40–60 | переобучение LightGBM на adapter-выходе, метрика организаторов | `train_lgbm_ingest.py` | число на val |
+| по готовности | их GeoTIFF-чипы + наши prob → карта (мозаика по сценам, water_mask по NDWI, H3, зоны) | `org_to_map.py --chips … --pred lgbm=… --out out\org_map` → `python -m service --data-root out\org_map` | корень карты `kind: organizer`, ≈1 мин на 60 чипов (TOMORROW.md, «Показать данные организаторов на карте») |
 
 ## 1. inspect_dataset.py — что в данных (≈20 с на MARIDA, 15 с на пожарном датасете)
 

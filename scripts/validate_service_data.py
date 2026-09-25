@@ -289,8 +289,8 @@ def validate(root: Path) -> V:
                                     "models": (dict,), "regions": (list,), "sources": (list,)}):
         return v
     kind = man["kind"]
-    if kind not in ("real", "demo", "fixture"):
-        v.err("manifest", f"kind '{kind}' not in real|demo|fixture")
+    if kind not in ("real", "demo", "fixture", "organizer"):
+        v.err("manifest", f"kind '{kind}' not in real|demo|fixture|organizer")
     v.need(man["index"], "manifest.index", {"name": (str,), "unit": (str,), "h3_res": (int,), "formula": (str,),
                                             "note": (str,)})
     for m, mm in man["models"].items():

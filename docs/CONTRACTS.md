@@ -43,7 +43,7 @@ FeatureCollection, Polygon = граница ячейки H3 res 8. Только 
 {
   "version": 1,
   "generated": "ISO time",
-  "kind": "real | demo | fixture",
+  "kind": "real | demo | fixture | organizer",
   "index": {"name": "доля наблюдаемой воды с признаками мусора", "unit": "‰", "h3_res": 8,
             "formula": "flagged_water_px / observed_water_px", "note": "индекс по снимку, не масса пластика"},
   "models": {"mdd": {"name": "marinedebrisdetector (UNet++)", "threshold": 0.5, "url": "https://github.com/MarcCoru/marinedebrisdetector", "license": "MIT"},

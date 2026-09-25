@@ -24,6 +24,9 @@ Sources (all optional; a missing source gives null, never an error):
   reports/l33_scene_relative.json        scene-relative features (rejected)
   reports/robustness.md                  PASS / WARN / FAIL of the robustness checks
   reports/rehearsal2.md, reports/l35_asis_check.{md,json}   rehearsal of the first hour on an unfamiliar dataset
+  reports/drift_check.json               drift forecast check on pairs of scenes (experiment; criterion fixed in advance)
+  reports/context.json                   OSM objects by kind, demo drift clouds touching objects (no alerts)
+  service/routes_incidents.py            incidents: same logic as /api/incidents/summary (total, excluded, reviewed)
 
 The file is generated; do not edit it by hand.
 """
@@ -743,6 +746,61 @@ def collect_ui_perf() -> dict:
     return res
 
 
+def collect_drift_check() -> dict:
+    """reports/drift_check.json: forecast vs 'zero drift' baseline on pairs of scenes. Experiment, not a product metric."""
+    d = _load_json(ROOT / "reports" / "drift_check.json")
+    if not isinstance(d, dict):
+        return {"available": False}
+    ph = d.get("posthoc") or {}
+    return {"available": True, "label": "эксперимент",
+            "n_pairs": d.get("n_pairs"), "n_pairs_with_det2": d.get("n_pairs_with_det2"),
+            "k_hit": d.get("k_hit"), "k_hit_baseline": d.get("k_hit_baseline"), "k_hit_shift": d.get("k_hit_shift"),
+            "hit_rate": _r(d.get("hit_rate"), 3), "baseline_hit_rate": _r(d.get("baseline_hit_rate"), 3),
+            "shift_hit_rate": _r(d.get("shift_hit_rate"), 3),
+            "pairs_forecast_better": d.get("pairs_forecast_better"), "pairs_baseline_better": d.get("pairs_baseline_better"),
+            "n_pairs_verifiable": ph.get("n_pairs_verifiable"),
+            "forecast_better": (d.get("k_hit") or 0) > (d.get("k_hit_baseline") or 0),
+            "verdict": d.get("verdict"), "criterion": d.get("criterion")}
+
+
+def collect_context() -> dict:
+    """reports/context.json: OSM objects by kind and demo drift scenes touching objects. No hours / threats / sources."""
+    d = _load_json(ROOT / "reports" / "context.json")
+    if not isinstance(d, dict):
+        return {"available": False}
+    ob = d.get("objects_total") or {}
+    return {"available": True, "objects_by_kind": ob, "objects_total": sum(v for v in ob.values() if isinstance(v, int)),
+            "n_regions": len(d.get("regions") or {}) or None,
+            "n_drift_scenes": d.get("n_drift_scenes"), "n_drift_scenes_touching": d.get("n_drift_scenes_touching"),
+            "n_drift_objects": d.get("n_drift_objects"),
+            "note": "объекты OSM (ODbL) для контекста; пересечение с демо-дрейфом без сроков и вероятностей, не предупреждение"}
+
+
+def collect_incidents(root: Path | None = None) -> dict:
+    """Incidents computed with the API code (service/routes_incidents.py, same as /api/incidents/summary)."""
+    res = {"available": False, "data_root": None, "total": None, "by_kind": None, "excluded_artifacts": None,
+           "reviewed": None, "confirmed_reviewed": None, "confirmed_share_of_reviewed": None}
+    try:
+        if str(ROOT) not in sys.path:
+            sys.path.insert(0, str(ROOT))
+        from service import core as score  # noqa: WPS433
+        from service import routes_incidents as ri  # noqa: WPS433
+        st = score.Store.open(root or next((c for c in (ROOT / "service" / "data", ROOT / "service" / "demo")
+                                            if (c / "manifest.json").is_file()), None))
+        if not st.has_data():
+            return res
+        sm = ri.summary(ri.state(st)["incidents"])
+    except Exception as e:  # noqa: BLE001
+        res["error"] = f"{type(e).__name__}: {e}"
+        return res
+    res.update({"available": True, "data_root": str(Path(st.root).relative_to(ROOT)).replace("\\", "/"),
+                "total": sm.get("total"), "by_kind": sm.get("by_kind"), "by_status": sm.get("by_status"),
+                "excluded_artifacts": (sm.get("by_status") or {}).get("excluded"),
+                "reviewed": sm.get("reviewed"), "confirmed_reviewed": sm.get("confirmed_reviewed"),
+                "confirmed_share_of_reviewed": sm.get("confirmed_share_of_reviewed")})
+    return res
+
+
 def collect_artifacts() -> dict:
     def ex(rel):
         return (ROOT / rel).exists()
@@ -792,6 +850,9 @@ def main(argv=None) -> int:
     fn["rejected"] = collect_rejected(fn["l23"], fn["metric_audit"])
     fn["robustness"] = collect_robustness()
     fn["rehearsal"] = collect_rehearsal()
+    fn["drift_check"] = collect_drift_check()
+    fn["context"] = collect_context()
+    fn["incidents"] = collect_incidents()
     out = Path(a.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
@@ -829,6 +890,11 @@ def main(argv=None) -> int:
         rj = fn["rejected"]
         print(f"  rejected: light={rj.get('light')} | mid={rj.get('mid')} | zfeat={rj.get('zfeat')}")
         print(f"  robustness: {fn['robustness']} | rehearsal: {fn['rehearsal']}")
+        dc, cx, ic = fn["drift_check"], fn["context"], fn["incidents"]
+        print(f"  drift_check (эксперимент): {dc.get('k_hit')}/{dc.get('n_pairs')} vs baseline "
+              f"{dc.get('k_hit_baseline')}/{dc.get('n_pairs')} | context: objects={cx.get('objects_total')} "
+              f"drift scenes touching={cx.get('n_drift_scenes_touching')}/{cx.get('n_drift_scenes')} | incidents: "
+              f"total={ic.get('total')} excluded={ic.get('excluded_artifacts')} reviewed={ic.get('reviewed')}")
         u = fn["ui_perf"]
         print(f"  ui: load={u.get('load_s')} flyto={u.get('flyto_fps')} globe={u.get('globe_fps')} "
               f"tour={u.get('tour_s')} gzip={u.get('bundle_gzip_mb')} err={u.get('console_errors')}")

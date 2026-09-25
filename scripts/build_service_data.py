@@ -533,7 +533,7 @@ def main(argv=None):
     ap.add_argument("--out", default="service/data")
     ap.add_argument("--regions", default="")
     ap.add_argument("--models", default="")
-    ap.add_argument("--kind", default="real", choices=["real", "demo", "fixture"])
+    ap.add_argument("--kind", default="real", choices=["real", "demo", "fixture", "organizer"])
     ap.add_argument("--thresholds", default="", help="override decision thresholds, e.g. mdd=0.3,lgbm=0.5 "
                                                      "(default: threshold from prob_<model>.json)")
     ap.add_argument("--demo-region", default="", help="L43: region the demo tour / speech open: manifest demo "
