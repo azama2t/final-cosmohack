@@ -1,0 +1,106 @@
+{
+ "model": "ln C_field,i = ln k + b · ln S_i + ε_i,  S_i — доля покрытия (м²/км²) в том же следе и в то же время; b = 1 — пропорциональная модель (C = k·S); ε = несовпадение следа (пятнистость) + пуассоновский шум + ошибка спутниковой доли (порог, субпиксельная доля, пена/водоросли)",
+ "assumptions": [
+  "пара A: снимок и трансекта совпадают по времени (|dt| ≤ ~4 ч при 0.2 м/с и буфере 3 км), месту, обследованной площади и совокупности (профиль: метод, размер, материал)",
+  "одна пара = один независимый участок (разные сутки/сцены); трансекты одних суток — не независимы",
+  "S > 0 (детектор видит скопление); пары с S = 0 дают только цензурированную информацию",
+  "ε логнормальный, не зависит от S"
+ ],
+ "sd_components_ln": {
+  "sd_lnC_between_events_S2": 0.836,
+  "sd_poisson_S2": 0.435,
+  "sd_match_within_day_S2": 0.464,
+  "sd_threshold_from_scenes": 0.562,
+  "threshold_ratio_median": 9.07
+ },
+ "scenarios": [
+  {
+   "sd_satellite_ln": 0.3,
+   "basis": "допущение",
+   "sd_resid_ln": 0.703,
+   "best_pi95_factor": 3.97,
+   "n_factor_1_5": 12,
+   "n_factor_2": 4,
+   "n_factor_3": 2,
+   "n_prediction_x2": null,
+   "n_prediction_x3": null,
+   "slope_se_n30": 0.156,
+   "slope_se_n100": 0.085
+  },
+  {
+   "sd_satellite_ln": 0.5,
+   "basis": "допущение",
+   "sd_resid_ln": 0.809,
+   "best_pi95_factor": 4.88,
+   "n_factor_1_5": 16,
+   "n_factor_2": 6,
+   "n_factor_3": 3,
+   "n_prediction_x2": null,
+   "n_prediction_x3": null,
+   "slope_se_n30": 0.18,
+   "slope_se_n100": 0.097
+  },
+  {
+   "sd_satellite_ln": 0.562,
+   "basis": "измерено: только разброс по порогу 0.10–0.88 на сценах",
+   "sd_resid_ln": 0.849,
+   "best_pi95_factor": 5.28,
+   "n_factor_1_5": 17,
+   "n_factor_2": 6,
+   "n_factor_3": 3,
+   "n_prediction_x2": null,
+   "n_prediction_x3": null,
+   "slope_se_n30": 0.189,
+   "slope_se_n100": 0.102
+  },
+  {
+   "sd_satellite_ln": 1.0,
+   "basis": "допущение",
+   "sd_resid_ln": 1.185,
+   "best_pi95_factor": 10.21,
+   "n_factor_1_5": 33,
+   "n_factor_2": 12,
+   "n_factor_3": 5,
+   "n_prediction_x2": null,
+   "n_prediction_x3": null,
+   "slope_se_n30": 0.263,
+   "slope_se_n100": 0.143
+  }
+ ],
+ "n_pairs_correlation": {
+  "r0.3": 85,
+  "r0.5": 30,
+  "r0.7": 14
+ },
+ "floor_no_satellite": {
+  "sd_ln": 0.636,
+  "best_pi95_factor": 3.48,
+  "median_baseline_pi95_factor": 5.14,
+  "note": "даже при идеальном спутнике (σ_sat = 0) и бесконечном числе пар интервал одной оценки не уже ×/÷ этого множителя (пятнистость + пуассоновский шум поля)"
+ },
+ "detect_share": {
+  "strips_accept_nonzero": 0,
+  "strips_accept_with_detector": 11,
+  "p_nonzero_upper95": 0.285,
+  "note": "0 из 11 принятых полос с S > 0: доля пар с ненулевой S ≤ 0.28 (95 %, Клоппер–Пирсон) → полевых обследований нужно ≥ n / 0.28, т. е. в ≥ 3.5 раза больше, чем пар в таблице"
+ },
+ "adis_check": {
+  "sd_poisson_10km_segments": 0.748,
+  "sd_extra_within_day": 0.0,
+  "zero_share": 0.72,
+  "note": "на отрезках 10 км (ADIS) избыточного разброса сверх Пуассона внутри суток нет, но счёт мал (медиана 1–2 предмета) → σ Пуассона 0.75; 72 % отрезков — ноль (ln не определён) → нужна модель с нулями"
+ },
+ "have_now": {
+  "pairs_A": 0,
+  "pairs_accept_meta": 29,
+  "pairs_quality_ok": 12,
+  "synchronous_typical_drift": 0,
+  "detections_in_strips": 0
+ },
+ "formulas": {
+  "factor": "n = ⌈(1.96·σ / ln f)²⌉ — 95 % ДИ множителя k в пределах ×/÷ f",
+  "prediction": "интервал предсказания одной пары 1.96·σ·√(1+1/n) ≤ ln f; при 1.96·σ ≥ ln f недостижим",
+  "correlation": "n = ((z_0.975 + z_0.8) / atanh r)² + 3",
+  "slope": "SE(b) = σ / (sd(ln S) · √(n−1)); sd(ln S) взят = sd ln C между событиями (b ≈ 1)"
+ }
+}

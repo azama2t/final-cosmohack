@@ -1,0 +1,32 @@
+{
+ "source": "ADIS, de Vries et al. 2026, 4TU 10.4121/ddede7f5-aca5-42ae-b851-e0bbb9a2c4c2 (CC BY 4.0), data/extra/field/adis",
+ "n_segments": 21444,
+ "zero_share": 0.72,
+ "area_km2": 14549.1,
+ "n_items_gt5cm": 22604,
+ "pooled_items_km2_raw": 1.554,
+ "segment_ppm_quantiles": {
+  "p50": 0.0,
+  "p90": 2.4,
+  "p99": 16.252,
+  "p99.9": 49.703
+ },
+ "segment_ppm_max": 247.8,
+ "sd_lnC_between_segments": 0.939,
+ "sd_poisson": 0.748,
+ "within_day": {
+  "n_segments": 5753,
+  "n_ship_days": 1108,
+  "var_lnC": 0.444,
+  "var_poisson": 0.551,
+  "sd_extra": 0.0
+ },
+ "items_by_area": {
+  "ge_10m2": 100,
+  "ge_20m2": 23,
+  "ge_40m2": 6
+ },
+ "rate_items_ge20m2_per_km2": 0.00158,
+ "expected_ge20m2_in_strip_0_8km2": 0.00126,
+ "note": "ppm = Σ площади предметов сегмента / обследованная площадь (м²/км²), без поправки на пропуски; предмет ≥ 20 м² в одиночку закрывает ≥ 20 % пикселя (порог обнаружения по Cózar 2024); остальные ≤ 11 % пикселя и в пикселе на таких плотностях не складываются"
+}

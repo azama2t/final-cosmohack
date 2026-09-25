@@ -1,0 +1,276 @@
+{
+ "label": "исследовательский сценарий (допущения), не измерение",
+ "fill_frac": [
+  0.2,
+  1.0
+ ],
+ "data_item_sizes": {
+  "ADIS_Objects": {
+   "n": 22642,
+   "mean_m2": 0.6465,
+   "median_m2": 0.2702,
+   "p25_m2": 0.131,
+   "p75_m2": 0.6177,
+   "source": "de Vries et al. 2026, 4TU 10.4121/ddede7f5-aca5-42ae-b851-e0bbb9a2c4c2 (data/extra/field/adis)"
+  },
+  "Lebreton2018_mosaic": {
+   "n": 1594,
+   "mean_m2": 0.4334,
+   "median_m2": 0.1919,
+   "p25_m2": 0.1056,
+   "p75_m2": 0.3498,
+   "source": "Lebreton et al. 2018, figshare 5873142 (data/extra/field/csv)"
+  }
+ },
+ "cozar_windrows": {
+  "n": 14374,
+  "median_m2": 3700.0,
+  "p90_m2": 13600.0,
+  "sum_km2": 94.46,
+  "source": "Cózar et al. 2024 каталог (Zenodo 11045944), data/extra/registry_cozar2024.csv",
+  "items_median_windrow_S2_composition": {
+   "label": "исследовательский сценарий (допущения), не измерение",
+   "area_m2": 3700.0,
+   "fill_frac": [
+    0.2,
+    1.0
+   ],
+   "item_area_m2": [
+    0.0014964467005076144,
+    0.03685279187817259
+   ],
+   "items_min": 20079.889807162534,
+   "items_max": 2472523.7449118043,
+   "ratio_max_min": 123.13432835820896
+  },
+  "items_median_windrow_ADIS_sizes": {
+   "label": "исследовательский сценарий (допущения), не измерение",
+   "area_m2": 3700.0,
+   "fill_frac": [
+    0.2,
+    1.0
+   ],
+   "item_area_m2": [
+    0.131,
+    0.6177
+   ],
+   "items_min": 1197.992553019265,
+   "items_max": 28244.274809160303,
+   "ratio_max_min": 23.576335877862597
+  }
+ },
+ "fill_basis": "Cózar et al. 2024: обнаружение при покрытии пикселя около 20 % (нижняя граница f); 1.0 — пиксель сплошь",
+ "item_groups": [
+  {
+   "group": "фрагмент",
+   "regex": "piece|fragment|snippet|chip",
+   "item_area_m2": [
+    0.0004,
+    0.01
+   ],
+   "basis": "2–10 см, квадрат"
+  },
+  {
+   "group": "тара",
+   "regex": "bottle|box|jerrycan|container|bucket|barrel|basket|beaker|\\bcan\\b|fish box|cup",
+   "item_area_m2": [
+    0.01,
+    0.25
+   ],
+   "basis": "10–50 см"
+  },
+  {
+   "group": "плёнка/пакет",
+   "regex": "bag|foil|packaging|balloon|belt|plate|sheet",
+   "item_area_m2": [
+    0.01,
+    0.16
+   ],
+   "basis": "10–40 см"
+  },
+  {
+   "group": "верёвка/леска",
+   "regex": "rope|line|net|thread|pipe",
+   "item_area_m2": [
+    0.001,
+    0.02
+   ],
+   "basis": "1–2 см × 10–100 см"
+  },
+  {
+   "group": "пенопласт",
+   "regex": "styrofoam|foam|eps",
+   "item_area_m2": [
+    0.0004,
+    0.09
+   ],
+   "basis": "2–30 см"
+  },
+  {
+   "group": "прочий мелкий",
+   "regex": ".*",
+   "item_area_m2": [
+    0.0004,
+    0.01
+   ],
+   "basis": "2–10 см (как фрагмент)"
+  }
+ ],
+ "composition": {
+  "S2_SARGASSO_MSM41": {
+   "n_items": 197,
+   "counts": {
+    "фрагмент": 131,
+    "прочий мелкий": 29,
+    "плёнка/пакет": 7,
+    "пенопласт": 7,
+    "верёвка/леска": 8,
+    "тара": 15
+   },
+   "mean_item_area_m2": [
+    0.0014964467005076144,
+    0.03685279187817259
+   ]
+  },
+  "S3_SE_NORTH_SEA": {
+   "n_items": 140,
+   "counts": {
+    "фрагмент": 63,
+    "плёнка/пакет": 39,
+    "прочий мелкий": 22,
+    "тара": 8,
+    "пенопласт": 2,
+    "верёвка/леска": 6
+   },
+   "mean_item_area_m2": [
+    0.003648571428571429,
+    0.06707142857142857
+   ]
+  }
+ },
+ "size_class_bounds_m": {
+  "S2_visual_GT2": [
+   0.02,
+   0.5
+  ],
+  "S3_visual_GT2": [
+   0.02,
+   0.5
+  ],
+  "S4_visual_GT2_5": [
+   0.025,
+   0.5
+  ],
+  "S1_trawl_5_to_50": [
+   0.05,
+   0.5
+  ]
+ },
+ "one_minimal_object_200m2": {
+  "composition_S2": {
+   "label": "исследовательский сценарий (допущения), не измерение",
+   "area_m2": 200.0,
+   "fill_frac": [
+    0.2,
+    1.0
+   ],
+   "item_area_m2": [
+    0.0014964467005076144,
+    0.03685279187817259
+   ],
+   "items_min": 1085.3994490358125,
+   "items_max": 133649.93215739483,
+   "ratio_max_min": 123.13432835820896
+  },
+  "size_class_bounds_S2": {
+   "label": "исследовательский сценарий (допущения), не измерение",
+   "area_m2": 200.0,
+   "fill_frac": [
+    0.2,
+    1.0
+   ],
+   "item_area_m2": [
+    0.0004,
+    0.25
+   ],
+   "items_min": 160.0,
+   "items_max": 500000.0,
+   "ratio_max_min": 3125.0
+  },
+  "data_sizes_ADIS_Objects": {
+   "label": "исследовательский сценарий (допущения), не измерение",
+   "area_m2": 200.0,
+   "fill_frac": [
+    0.2,
+    1.0
+   ],
+   "item_area_m2": [
+    0.131,
+    0.6177
+   ],
+   "items_min": 64.75635421725757,
+   "items_max": 1526.7175572519084,
+   "ratio_max_min": 23.576335877862597
+  },
+  "data_sizes_Lebreton2018_mosaic": {
+   "label": "исследовательский сценарий (допущения), не измерение",
+   "area_m2": 200.0,
+   "fill_frac": [
+    0.2,
+    1.0
+   ],
+   "item_area_m2": [
+    0.1056,
+    0.3498
+   ],
+   "items_min": 114.35105774728416,
+   "items_max": 1893.939393939394,
+   "ratio_max_min": 16.5625
+  }
+ },
+ "field_vs_detection": {
+  "C_median_items_km2": 36.99,
+  "C_max_items_km2": 222.699,
+  "litter_m2_per_km2_at_median": [
+   0.05535356345177666,
+   1.3631847715736043
+  ],
+  "litter_m2_per_km2_at_max": [
+   0.3332571837563452,
+   8.20707989847716
+  ],
+  "local_items_km2_needed_for_detection": [
+   5426997.245179063,
+   133649932.15739483
+  ],
+  "factor_vs_field_median": [
+   146715.25399240505,
+   3613136.8520517657
+  ],
+  "factor_vs_field_max": [
+   24369.20347724535,
+   600137.1005590273
+  ]
+ },
+ "scenes": {
+  "ppm_median": 3.184,
+  "ppm_max": 81.969,
+  "items_km2_at_ppm_max": {
+   "label": "исследовательский сценарий (допущения), не измерение",
+   "area_m2": 81.969,
+   "fill_frac": [
+    0.2,
+    1.0
+   ],
+   "item_area_m2": [
+    0.0014964467005076144,
+    0.03685279187817259
+   ],
+   "items_min": 444.84553719008255,
+   "items_max": 54775.75644504748,
+   "ratio_max_min": 123.13432835820896
+  },
+  "note": "м²/км² × f / a = шт./км²; S2-состав предметов перенесён на чужие регионы — ещё одно допущение"
+ },
+ "formula": "N = S_маски · f / ā;  N_min = S·f_min/ā_max, N_max = S·f_max/ā_min;  ā — средняя площадь предмета по составу"
+}

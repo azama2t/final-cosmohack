@@ -1,0 +1,2144 @@
+{
+ "n_scenes": 64,
+ "current": {
+  "n_scenes": 64,
+  "scenes_nonzero": 52,
+  "ppm_median": 3.184,
+  "ppm_p90": 39.601,
+  "ppm_max": 81.969,
+  "total_area_m2": 312900.0,
+  "total_water_km2": 30235.4,
+  "pooled_ppm": 10.3488,
+  "range_ppm_median_min": 0.845,
+  "range_ppm_median_max": 18.203,
+  "scenes_nonzero_any_threshold": 62
+ },
+ "service": {
+  "n_scenes": 64,
+  "scenes_nonzero": 63,
+  "ppm_median": 41.646,
+  "ppm_p90": 130.618,
+  "ppm_max": 1585.626,
+  "total_area_m2": 2366700.0,
+  "total_water_km2": 30235.4,
+  "pooled_ppm": 78.2758,
+  "range_ppm_median_min": 23.639,
+  "range_ppm_median_max": 93.664,
+  "scenes_nonzero_any_threshold": 64
+ },
+ "by_region": {
+  "accra": {
+   "n_scenes": 1,
+   "current_median": 0.0,
+   "current_max": 0.0,
+   "current_threshold_range": [
+    0.0,
+    0.41
+   ],
+   "map_median": 1.84
+  },
+  "bali": {
+   "n_scenes": 6,
+   "current_median": 1.83,
+   "current_max": 9.4,
+   "current_threshold_range": [
+    0.0,
+    39.92
+   ],
+   "map_median": 7.02
+  },
+  "danang": {
+   "n_scenes": 2,
+   "current_median": 0.96,
+   "current_max": 1.53,
+   "current_threshold_range": [
+    0.0,
+    12.46
+   ],
+   "map_median": 15.75
+  },
+  "durban": {
+   "n_scenes": 8,
+   "current_median": 7.0,
+   "current_max": 81.0,
+   "current_threshold_range": [
+    0.0,
+    172.14
+   ],
+   "map_median": 13.14
+  },
+  "ganges": {
+   "n_scenes": 3,
+   "current_median": 0.77,
+   "current_max": 1.35,
+   "current_threshold_range": [
+    0.0,
+    8.46
+   ],
+   "map_median": 22.56
+  },
+  "guanabara": {
+   "n_scenes": 3,
+   "current_median": 58.16,
+   "current_max": 81.97,
+   "current_threshold_range": [
+    17.88,
+    232.72
+   ],
+   "map_median": 93.28
+  },
+  "haiti": {
+   "n_scenes": 4,
+   "current_median": 2.06,
+   "current_max": 26.04,
+   "current_threshold_range": [
+    0.0,
+    55.81
+   ],
+   "map_median": 1.86
+  },
+  "honduras": {
+   "n_scenes": 8,
+   "current_median": 11.78,
+   "current_max": 33.82,
+   "current_threshold_range": [
+    0.77,
+    72.86
+   ],
+   "map_median": 34.22
+  },
+  "jakarta": {
+   "n_scenes": 2,
+   "current_median": 4.36,
+   "current_max": 8.71,
+   "current_threshold_range": [
+    0.0,
+    32.59
+   ],
+   "map_median": 47.12
+  },
+  "karachi": {
+   "n_scenes": 3,
+   "current_median": 44.43,
+   "current_max": 67.67,
+   "current_threshold_range": [
+    20.48,
+    173.24
+   ],
+   "map_median": 46.32
+  },
+  "lagos": {
+   "n_scenes": 1,
+   "current_median": 0.0,
+   "current_max": 0.0,
+   "current_threshold_range": [
+    0.0,
+    0.93
+   ],
+   "map_median": 0.0
+  },
+  "manila": {
+   "n_scenes": 7,
+   "current_median": 20.28,
+   "current_max": 26.02,
+   "current_threshold_range": [
+    2.44,
+    66.51
+   ],
+   "map_median": 36.82
+  },
+  "mekong": {
+   "n_scenes": 1,
+   "current_median": 0.0,
+   "current_max": 0.0,
+   "current_threshold_range": [
+    0.0,
+    3.92
+   ],
+   "map_median": 1515.26
+  },
+  "mumbai": {
+   "n_scenes": 3,
+   "current_median": 1.13,
+   "current_max": 7.04,
+   "current_threshold_range": [
+    0.0,
+    78.83
+   ],
+   "map_median": 73.64
+  },
+  "nile": {
+   "n_scenes": 3,
+   "current_median": 0.42,
+   "current_max": 4.86,
+   "current_threshold_range": [
+    0.0,
+    16.48
+   ],
+   "map_median": 56.62
+  },
+  "santo_domingo": {
+   "n_scenes": 6,
+   "current_median": 0.8,
+   "current_max": 3.5,
+   "current_threshold_range": [
+    0.0,
+    55.18
+   ],
+   "map_median": 9.57
+  },
+  "scotland": {
+   "n_scenes": 2,
+   "current_median": 0.0,
+   "current_max": 0.0,
+   "current_threshold_range": [
+    0.0,
+    10.99
+   ],
+   "map_median": 4.77
+  },
+  "tiber": {
+   "n_scenes": 1,
+   "current_median": 0.0,
+   "current_max": 0.0,
+   "current_threshold_range": [
+    0.0,
+    7.74
+   ],
+   "map_median": 2.76
+  }
+ },
+ "service_map": {
+  "n": 64,
+  "ppm_median": 27.318,
+  "ppm_max": 1515.257
+ },
+ "threshold_ratio_max_over_min": {
+  "n": 40,
+  "median": 9.07,
+  "p90": 29.92
+ },
+ "rows": [
+  {
+   "scene": "accra/2025-10-21",
+   "water_km2": 487.7,
+   "floor_ppm_1obj": 0.41,
+   "service_map": {
+    "flagged_px": 9,
+    "observed_px": 4877474,
+    "m2_per_km2": 1.845
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 0.0,
+    "objects_at_threshold": 0,
+    "area_m2_at_threshold": 0.0,
+    "ppm_min": 0.0,
+    "ppm_max": 0.41,
+    "objects_min": 0,
+    "objects_max": 1
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 1.845,
+    "objects_at_threshold": 4,
+    "area_m2_at_threshold": 900.0,
+    "ppm_min": 0.41,
+    "ppm_max": 2.46,
+    "objects_min": 1,
+    "objects_max": 5
+   }
+  },
+  {
+   "scene": "bali/2018-02-27",
+   "water_km2": 563.7,
+   "floor_ppm_1obj": 0.355,
+   "service_map": {
+    "flagged_px": 536,
+    "observed_px": 5636679,
+    "m2_per_km2": 95.091
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 9.403,
+    "objects_at_threshold": 17,
+    "area_m2_at_threshold": 5300.0,
+    "ppm_min": 3.371,
+    "ppm_max": 39.917,
+    "objects_min": 7,
+    "objects_max": 53
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 101.301,
+    "objects_at_threshold": 141,
+    "area_m2_at_threshold": 57100.0,
+    "ppm_min": 64.045,
+    "ppm_max": 194.086,
+    "objects_min": 99,
+    "objects_max": 227
+   }
+  },
+  {
+   "scene": "bali/2025-05-11",
+   "water_km2": 613.9,
+   "floor_ppm_1obj": 0.326,
+   "service_map": {
+    "flagged_px": 30,
+    "observed_px": 6139440,
+    "m2_per_km2": 4.886
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 0.977,
+    "objects_at_threshold": 2,
+    "area_m2_at_threshold": 600.0,
+    "ppm_min": 0.0,
+    "ppm_max": 15.148,
+    "objects_min": 0,
+    "objects_max": 28
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 5.864,
+    "objects_at_threshold": 16,
+    "area_m2_at_threshold": 3600.0,
+    "ppm_min": 2.443,
+    "ppm_max": 19.872,
+    "objects_min": 7,
+    "objects_max": 44
+   }
+  },
+  {
+   "scene": "bali/2025-07-20",
+   "water_km2": 591.4,
+   "floor_ppm_1obj": 0.338,
+   "service_map": {
+    "flagged_px": 34,
+    "observed_px": 5914269,
+    "m2_per_km2": 5.749
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 2.874,
+    "objects_at_threshold": 3,
+    "area_m2_at_threshold": 1700.0,
+    "ppm_min": 1.014,
+    "ppm_max": 19.444,
+    "objects_min": 2,
+    "objects_max": 36
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 33.478,
+    "objects_at_threshold": 30,
+    "area_m2_at_threshold": 19800.0,
+    "ppm_min": 17.585,
+    "ppm_max": 94.179,
+    "objects_min": 22,
+    "objects_max": 102
+   }
+  },
+  {
+   "scene": "bali/2026-04-28",
+   "water_km2": 569.5,
+   "floor_ppm_1obj": 0.351,
+   "service_map": {
+    "flagged_px": 13,
+    "observed_px": 5694828,
+    "m2_per_km2": 2.283
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 0.351,
+    "objects_at_threshold": 1,
+    "area_m2_at_threshold": 200.0,
+    "ppm_min": 0.0,
+    "ppm_max": 2.985,
+    "objects_min": 0,
+    "objects_max": 8
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 2.985,
+    "objects_at_threshold": 8,
+    "area_m2_at_threshold": 1700.0,
+    "ppm_min": 0.878,
+    "ppm_max": 36.524,
+    "objects_min": 2,
+    "objects_max": 74
+   }
+  },
+  {
+   "scene": "bali/2026-05-31",
+   "water_km2": 615.4,
+   "floor_ppm_1obj": 0.325,
+   "service_map": {
+    "flagged_px": 51,
+    "observed_px": 6153800,
+    "m2_per_km2": 8.288
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 2.113,
+    "objects_at_threshold": 5,
+    "area_m2_at_threshold": 1300.0,
+    "ppm_min": 0.325,
+    "ppm_max": 16.25,
+    "objects_min": 1,
+    "objects_max": 29
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 10.238,
+    "objects_at_threshold": 26,
+    "area_m2_at_threshold": 6300.0,
+    "ppm_min": 4.875,
+    "ppm_max": 29.575,
+    "objects_min": 12,
+    "objects_max": 64
+   }
+  },
+  {
+   "scene": "bali/2026-07-05",
+   "water_km2": 578.6,
+   "floor_ppm_1obj": 0.346,
+   "service_map": {
+    "flagged_px": 88,
+    "observed_px": 5786304,
+    "m2_per_km2": 15.208
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 1.555,
+    "objects_at_threshold": 4,
+    "area_m2_at_threshold": 900.0,
+    "ppm_min": 0.0,
+    "ppm_max": 39.403,
+    "objects_min": 0,
+    "objects_max": 100
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 16.072,
+    "objects_at_threshold": 43,
+    "area_m2_at_threshold": 9300.0,
+    "ppm_min": 3.975,
+    "ppm_max": 181.117,
+    "objects_min": 10,
+    "objects_max": 471
+   }
+  },
+  {
+   "scene": "danang/2018-10-25",
+   "water_km2": 510.2,
+   "floor_ppm_1obj": 0.392,
+   "service_map": {
+    "flagged_px": 18,
+    "observed_px": 5101557,
+    "m2_per_km2": 3.528
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 0.392,
+    "objects_at_threshold": 1,
+    "area_m2_at_threshold": 200.0,
+    "ppm_min": 0.0,
+    "ppm_max": 1.96,
+    "objects_min": 0,
+    "objects_max": 5
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 3.528,
+    "objects_at_threshold": 8,
+    "area_m2_at_threshold": 1800.0,
+    "ppm_min": 2.744,
+    "ppm_max": 8.037,
+    "objects_min": 6,
+    "objects_max": 18
+   }
+  },
+  {
+   "scene": "danang/2025-09-15",
+   "water_km2": 457.6,
+   "floor_ppm_1obj": 0.437,
+   "service_map": {
+    "flagged_px": 128,
+    "observed_px": 4576060,
+    "m2_per_km2": 27.972
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 1.53,
+    "objects_at_threshold": 3,
+    "area_m2_at_threshold": 700.0,
+    "ppm_min": 0.0,
+    "ppm_max": 12.456,
+    "objects_min": 0,
+    "objects_max": 24
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 35.183,
+    "objects_at_threshold": 56,
+    "area_m2_at_threshold": 16100.0,
+    "ppm_min": 21.634,
+    "ppm_max": 67.744,
+    "objects_min": 36,
+    "objects_max": 95
+   }
+  },
+  {
+   "scene": "durban/2019-04-19",
+   "water_km2": 753.1,
+   "floor_ppm_1obj": 0.266,
+   "service_map": {
+    "flagged_px": 5,
+    "observed_px": 7530611,
+    "m2_per_km2": 0.664
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 0.266,
+    "objects_at_threshold": 1,
+    "area_m2_at_threshold": 200.0,
+    "ppm_min": 0.0,
+    "ppm_max": 4.78,
+    "objects_min": 0,
+    "objects_max": 6
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 3.187,
+    "objects_at_threshold": 6,
+    "area_m2_at_threshold": 2400.0,
+    "ppm_min": 1.726,
+    "ppm_max": 11.951,
+    "objects_min": 5,
+    "objects_max": 16
+   }
+  },
+  {
+   "scene": "durban/2019-04-24",
+   "water_km2": 98.8,
+   "floor_ppm_1obj": 2.025,
+   "service_map": {
+    "flagged_px": 215,
+    "observed_px": 987591,
+    "m2_per_km2": 217.701
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 81.005,
+    "objects_at_threshold": 25,
+    "area_m2_at_threshold": 8000.0,
+    "ppm_min": 47.591,
+    "ppm_max": 172.136,
+    "objects_min": 20,
+    "objects_max": 47
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 260.229,
+    "objects_at_threshold": 64,
+    "area_m2_at_threshold": 25700.0,
+    "ppm_min": 185.299,
+    "ppm_max": 479.956,
+    "objects_min": 50,
+    "objects_max": 98
+   }
+  },
+  {
+   "scene": "durban/2025-06-21",
+   "water_km2": 335.8,
+   "floor_ppm_1obj": 0.596,
+   "service_map": {
+    "flagged_px": 6,
+    "observed_px": 3358261,
+    "m2_per_km2": 1.787
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 0.596,
+    "objects_at_threshold": 1,
+    "area_m2_at_threshold": 200.0,
+    "ppm_min": 0.0,
+    "ppm_max": 2.978,
+    "objects_min": 0,
+    "objects_max": 4
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 1.787,
+    "objects_at_threshold": 2,
+    "area_m2_at_threshold": 600.0,
+    "ppm_min": 1.191,
+    "ppm_max": 8.04,
+    "objects_min": 1,
+    "objects_max": 9
+   }
+  },
+  {
+   "scene": "durban/2025-07-28",
+   "water_km2": 336.2,
+   "floor_ppm_1obj": 0.595,
+   "service_map": {
+    "flagged_px": 8,
+    "observed_px": 3361870,
+    "m2_per_km2": 2.38
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 5.949,
+    "objects_at_threshold": 6,
+    "area_m2_at_threshold": 2000.0,
+    "ppm_min": 1.19,
+    "ppm_max": 35.397,
+    "objects_min": 2,
+    "objects_max": 12
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 43.428,
+    "objects_at_threshold": 19,
+    "area_m2_at_threshold": 14600.0,
+    "ppm_min": 19.632,
+    "ppm_max": 123.443,
+    "objects_min": 10,
+    "objects_max": 42
+   }
+  },
+  {
+   "scene": "durban/2025-09-26",
+   "water_km2": 334.8,
+   "floor_ppm_1obj": 0.597,
+   "service_map": {
+    "flagged_px": 104,
+    "observed_px": 3347641,
+    "m2_per_km2": 31.067
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 45.106,
+    "objects_at_threshold": 15,
+    "area_m2_at_threshold": 15100.0,
+    "ppm_min": 18.819,
+    "ppm_max": 109.032,
+    "objects_min": 11,
+    "objects_max": 30
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 91.408,
+    "objects_at_threshold": 22,
+    "area_m2_at_threshold": 30600.0,
+    "ppm_min": 71.394,
+    "ppm_max": 143.385,
+    "objects_min": 18,
+    "objects_max": 34
+   }
+  },
+  {
+   "scene": "durban/2026-05-04",
+   "water_km2": 335.5,
+   "floor_ppm_1obj": 0.596,
+   "service_map": {
+    "flagged_px": 48,
+    "observed_px": 3355382,
+    "m2_per_km2": 14.305
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 8.047,
+    "objects_at_threshold": 9,
+    "area_m2_at_threshold": 2700.0,
+    "ppm_min": 0.0,
+    "ppm_max": 82.852,
+    "objects_min": 0,
+    "objects_max": 40
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 69.441,
+    "objects_at_threshold": 27,
+    "area_m2_at_threshold": 23300.0,
+    "ppm_min": 42.022,
+    "ppm_max": 152.591,
+    "objects_min": 20,
+    "objects_max": 48
+   }
+  },
+  {
+   "scene": "durban/2026-05-17",
+   "water_km2": 200.5,
+   "floor_ppm_1obj": 0.998,
+   "service_map": {
+    "flagged_px": 24,
+    "observed_px": 2004836,
+    "m2_per_km2": 11.971
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 5.487,
+    "objects_at_threshold": 5,
+    "area_m2_at_threshold": 1100.0,
+    "ppm_min": 0.998,
+    "ppm_max": 31.424,
+    "objects_min": 1,
+    "objects_max": 12
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 30.426,
+    "objects_at_threshold": 8,
+    "area_m2_at_threshold": 6100.0,
+    "ppm_min": 19.453,
+    "ppm_max": 94.771,
+    "objects_min": 7,
+    "objects_max": 25
+   }
+  },
+  {
+   "scene": "durban/2026-07-03",
+   "water_km2": 335.2,
+   "floor_ppm_1obj": 0.597,
+   "service_map": {
+    "flagged_px": 140,
+    "observed_px": 3352323,
+    "m2_per_km2": 41.762
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 15.512,
+    "objects_at_threshold": 6,
+    "area_m2_at_threshold": 5200.0,
+    "ppm_min": 4.475,
+    "ppm_max": 76.962,
+    "objects_min": 2,
+    "objects_max": 21
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 85.911,
+    "objects_at_threshold": 17,
+    "area_m2_at_threshold": 28800.0,
+    "ppm_min": 58.765,
+    "ppm_max": 162.872,
+    "objects_min": 11,
+    "objects_max": 31
+   }
+  },
+  {
+   "scene": "ganges/2025-11-19",
+   "water_km2": 526.5,
+   "floor_ppm_1obj": 0.38,
+   "service_map": {
+    "flagged_px": 1751,
+    "observed_px": 5264724,
+    "m2_per_km2": 332.591
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 0.0,
+    "objects_at_threshold": 0,
+    "area_m2_at_threshold": 0.0,
+    "ppm_min": 0.0,
+    "ppm_max": 0.0,
+    "objects_min": 0,
+    "objects_max": 0
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 367.541,
+    "objects_at_threshold": 257,
+    "area_m2_at_threshold": 193500.0,
+    "ppm_min": 209.698,
+    "ppm_max": 817.517,
+    "objects_min": 158,
+    "objects_max": 508
+   }
+  },
+  {
+   "scene": "ganges/2026-01-13",
+   "water_km2": 518.7,
+   "floor_ppm_1obj": 0.386,
+   "service_map": {
+    "flagged_px": 117,
+    "observed_px": 5186508,
+    "m2_per_km2": 22.559
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 1.35,
+    "objects_at_threshold": 2,
+    "area_m2_at_threshold": 700.0,
+    "ppm_min": 0.0,
+    "ppm_max": 5.013,
+    "objects_min": 0,
+    "objects_max": 4
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 37.212,
+    "objects_at_threshold": 45,
+    "area_m2_at_threshold": 19300.0,
+    "ppm_min": 15.425,
+    "ppm_max": 88.692,
+    "objects_min": 22,
+    "objects_max": 79
+   }
+  },
+  {
+   "scene": "ganges/2026-02-12",
+   "water_km2": 520.0,
+   "floor_ppm_1obj": 0.385,
+   "service_map": {
+    "flagged_px": 98,
+    "observed_px": 5199681,
+    "m2_per_km2": 18.847
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 0.769,
+    "objects_at_threshold": 1,
+    "area_m2_at_threshold": 400.0,
+    "ppm_min": 0.385,
+    "ppm_max": 8.462,
+    "objects_min": 1,
+    "objects_max": 14
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 40.387,
+    "objects_at_threshold": 41,
+    "area_m2_at_threshold": 21000.0,
+    "ppm_min": 26.155,
+    "ppm_max": 81.351,
+    "objects_min": 23,
+    "objects_max": 73
+   }
+  },
+  {
+   "scene": "guanabara/2025-06-26",
+   "water_km2": 318.8,
+   "floor_ppm_1obj": 0.627,
+   "service_map": {
+    "flagged_px": 276,
+    "observed_px": 3188271,
+    "m2_per_km2": 86.567
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 37.011,
+    "objects_at_threshold": 30,
+    "area_m2_at_threshold": 11800.0,
+    "ppm_min": 17.878,
+    "ppm_max": 149.611,
+    "objects_min": 14,
+    "objects_max": 125
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 109.464,
+    "objects_at_threshold": 107,
+    "area_m2_at_threshold": 34900.0,
+    "ppm_min": 62.416,
+    "ppm_max": 248.097,
+    "objects_min": 69,
+    "objects_max": 213
+   }
+  },
+  {
+   "scene": "guanabara/2025-09-04",
+   "water_km2": 318.4,
+   "floor_ppm_1obj": 0.628,
+   "service_map": {
+    "flagged_px": 297,
+    "observed_px": 3184144,
+    "m2_per_km2": 93.275
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 81.969,
+    "objects_at_threshold": 78,
+    "area_m2_at_threshold": 26100.0,
+    "ppm_min": 39.257,
+    "ppm_max": 232.716,
+    "objects_min": 39,
+    "objects_max": 191
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 122.168,
+    "objects_at_threshold": 137,
+    "area_m2_at_threshold": 38900.0,
+    "ppm_min": 71.605,
+    "ppm_max": 282.651,
+    "objects_min": 88,
+    "objects_max": 274
+   }
+  },
+  {
+   "scene": "guanabara/2026-07-16",
+   "water_km2": 318.1,
+   "floor_ppm_1obj": 0.629,
+   "service_map": {
+    "flagged_px": 325,
+    "observed_px": 3180893,
+    "m2_per_km2": 102.173
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 58.16,
+    "objects_at_threshold": 67,
+    "area_m2_at_threshold": 18500.0,
+    "ppm_min": 20.12,
+    "ppm_max": 209.69,
+    "objects_min": 28,
+    "objects_max": 184
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 134.239,
+    "objects_at_threshold": 130,
+    "area_m2_at_threshold": 42700.0,
+    "ppm_min": 80.166,
+    "ppm_max": 320.35,
+    "objects_min": 87,
+    "objects_max": 258
+   }
+  },
+  {
+   "scene": "haiti/2020-12-19",
+   "water_km2": 510.7,
+   "floor_ppm_1obj": 0.392,
+   "service_map": {
+    "flagged_px": 101,
+    "observed_px": 5106678,
+    "m2_per_km2": 19.778
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 26.044,
+    "objects_at_threshold": 31,
+    "area_m2_at_threshold": 13300.0,
+    "ppm_min": 16.057,
+    "ppm_max": 55.809,
+    "objects_min": 25,
+    "objects_max": 48
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 26.632,
+    "objects_at_threshold": 42,
+    "area_m2_at_threshold": 13600.0,
+    "ppm_min": 17.624,
+    "ppm_max": 44.256,
+    "objects_min": 27,
+    "objects_max": 55
+   }
+  },
+  {
+   "scene": "haiti/2021-01-03",
+   "water_km2": 510.6,
+   "floor_ppm_1obj": 0.392,
+   "service_map": {
+    "flagged_px": 13,
+    "observed_px": 5106329,
+    "m2_per_km2": 2.546
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 4.113,
+    "objects_at_threshold": 5,
+    "area_m2_at_threshold": 2100.0,
+    "ppm_min": 1.567,
+    "ppm_max": 8.617,
+    "objects_min": 3,
+    "objects_max": 10
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 2.546,
+    "objects_at_threshold": 4,
+    "area_m2_at_threshold": 1300.0,
+    "ppm_min": 1.567,
+    "ppm_max": 4.504,
+    "objects_min": 2,
+    "objects_max": 7
+   }
+  },
+  {
+   "scene": "haiti/2025-01-27",
+   "water_km2": 510.3,
+   "floor_ppm_1obj": 0.392,
+   "service_map": {
+    "flagged_px": 4,
+    "observed_px": 5103347,
+    "m2_per_km2": 0.784
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 0.0,
+    "objects_at_threshold": 0,
+    "area_m2_at_threshold": 0.0,
+    "ppm_min": 0.0,
+    "ppm_max": 0.0,
+    "objects_min": 0,
+    "objects_max": 0
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 0.784,
+    "objects_at_threshold": 1,
+    "area_m2_at_threshold": 400.0,
+    "ppm_min": 0.784,
+    "ppm_max": 0.784,
+    "objects_min": 1,
+    "objects_max": 1
+   }
+  },
+  {
+   "scene": "haiti/2026-01-09",
+   "water_km2": 510.4,
+   "floor_ppm_1obj": 0.392,
+   "service_map": {
+    "flagged_px": 6,
+    "observed_px": 5103846,
+    "m2_per_km2": 1.176
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 0.0,
+    "objects_at_threshold": 0,
+    "area_m2_at_threshold": 0.0,
+    "ppm_min": 0.0,
+    "ppm_max": 0.392,
+    "objects_min": 0,
+    "objects_max": 1
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 1.176,
+    "objects_at_threshold": 1,
+    "area_m2_at_threshold": 600.0,
+    "ppm_min": 0.98,
+    "ppm_max": 1.959,
+    "objects_min": 1,
+    "objects_max": 2
+   }
+  },
+  {
+   "scene": "honduras/2019-01-12",
+   "water_km2": 519.1,
+   "floor_ppm_1obj": 0.385,
+   "service_map": {
+    "flagged_px": 97,
+    "observed_px": 5190998,
+    "m2_per_km2": 18.686
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 2.697,
+    "objects_at_threshold": 6,
+    "area_m2_at_threshold": 1400.0,
+    "ppm_min": 0.771,
+    "ppm_max": 21.768,
+    "objects_min": 2,
+    "objects_max": 43
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 18.686,
+    "objects_at_threshold": 41,
+    "area_m2_at_threshold": 9700.0,
+    "ppm_min": 7.898,
+    "ppm_max": 75.515,
+    "objects_min": 18,
+    "objects_max": 135
+   }
+  },
+  {
+   "scene": "honduras/2020-08-29",
+   "water_km2": 517.5,
+   "floor_ppm_1obj": 0.387,
+   "service_map": {
+    "flagged_px": 262,
+    "observed_px": 5174513,
+    "m2_per_km2": 50.633
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 33.82,
+    "objects_at_threshold": 56,
+    "area_m2_at_threshold": 17500.0,
+    "ppm_min": 19.325,
+    "ppm_max": 72.857,
+    "objects_min": 38,
+    "objects_max": 85
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 56.43,
+    "objects_at_threshold": 70,
+    "area_m2_at_threshold": 29200.0,
+    "ppm_min": 45.995,
+    "ppm_max": 93.149,
+    "objects_min": 60,
+    "objects_max": 114
+   }
+  },
+  {
+   "scene": "honduras/2025-01-30",
+   "water_km2": 517.1,
+   "floor_ppm_1obj": 0.387,
+   "service_map": {
+    "flagged_px": 319,
+    "observed_px": 5171110,
+    "m2_per_km2": 61.689
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 15.277,
+    "objects_at_threshold": 25,
+    "area_m2_at_threshold": 7900.0,
+    "ppm_min": 11.023,
+    "ppm_max": 32.875,
+    "objects_min": 22,
+    "objects_max": 49
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 63.429,
+    "objects_at_threshold": 87,
+    "area_m2_at_threshold": 32800.0,
+    "ppm_min": 53.76,
+    "ppm_max": 85.668,
+    "objects_min": 80,
+    "objects_max": 102
+   }
+  },
+  {
+   "scene": "honduras/2025-02-19",
+   "water_km2": 518.6,
+   "floor_ppm_1obj": 0.386,
+   "service_map": {
+    "flagged_px": 45,
+    "observed_px": 5185724,
+    "m2_per_km2": 8.678
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 2.507,
+    "objects_at_threshold": 4,
+    "area_m2_at_threshold": 1300.0,
+    "ppm_min": 1.928,
+    "ppm_max": 4.05,
+    "objects_min": 3,
+    "objects_max": 6
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 10.606,
+    "objects_at_threshold": 13,
+    "area_m2_at_threshold": 5500.0,
+    "ppm_min": 8.099,
+    "ppm_max": 20.826,
+    "objects_min": 11,
+    "objects_max": 22
+   }
+  },
+  {
+   "scene": "honduras/2025-12-28",
+   "water_km2": 517.2,
+   "floor_ppm_1obj": 0.387,
+   "service_map": {
+    "flagged_px": 281,
+    "observed_px": 5172420,
+    "m2_per_km2": 54.327
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 17.593,
+    "objects_at_threshold": 32,
+    "area_m2_at_threshold": 9100.0,
+    "ppm_min": 9.86,
+    "ppm_max": 38.28,
+    "objects_min": 19,
+    "objects_max": 63
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 56.453,
+    "objects_at_threshold": 85,
+    "area_m2_at_threshold": 29200.0,
+    "ppm_min": 38.087,
+    "ppm_max": 107.3,
+    "objects_min": 67,
+    "objects_max": 137
+   }
+  },
+  {
+   "scene": "honduras/2026-02-14",
+   "water_km2": 518.8,
+   "floor_ppm_1obj": 0.386,
+   "service_map": {
+    "flagged_px": 109,
+    "observed_px": 5187842,
+    "m2_per_km2": 21.011
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 8.289,
+    "objects_at_threshold": 9,
+    "area_m2_at_threshold": 4300.0,
+    "ppm_min": 6.168,
+    "ppm_max": 16.963,
+    "objects_min": 8,
+    "objects_max": 19
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 22.36,
+    "objects_at_threshold": 28,
+    "area_m2_at_threshold": 11600.0,
+    "ppm_min": 15.035,
+    "ppm_max": 42.021,
+    "objects_min": 18,
+    "objects_max": 52
+   }
+  },
+  {
+   "scene": "honduras/2026-04-10",
+   "water_km2": 518.6,
+   "floor_ppm_1obj": 0.386,
+   "service_map": {
+    "flagged_px": 246,
+    "observed_px": 5186483,
+    "m2_per_km2": 47.431
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 18.124,
+    "objects_at_threshold": 27,
+    "area_m2_at_threshold": 9400.0,
+    "ppm_min": 13.304,
+    "ppm_max": 30.849,
+    "objects_min": 19,
+    "objects_max": 42
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 49.359,
+    "objects_at_threshold": 79,
+    "area_m2_at_threshold": 25600.0,
+    "ppm_min": 25.644,
+    "ppm_max": 102.189,
+    "objects_min": 39,
+    "objects_max": 153
+   }
+  },
+  {
+   "scene": "honduras/2026-05-30",
+   "water_km2": 510.6,
+   "floor_ppm_1obj": 0.392,
+   "service_map": {
+    "flagged_px": 64,
+    "observed_px": 5106202,
+    "m2_per_km2": 12.534
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 4.113,
+    "objects_at_threshold": 7,
+    "area_m2_at_threshold": 2100.0,
+    "ppm_min": 1.371,
+    "ppm_max": 14.688,
+    "objects_min": 3,
+    "objects_max": 24
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 14.296,
+    "objects_at_threshold": 24,
+    "area_m2_at_threshold": 7300.0,
+    "ppm_min": 9.792,
+    "ppm_max": 32.314,
+    "objects_min": 18,
+    "objects_max": 52
+   }
+  },
+  {
+   "scene": "jakarta/2019-05-30",
+   "water_km2": 603.8,
+   "floor_ppm_1obj": 0.331,
+   "service_map": {
+    "flagged_px": 195,
+    "observed_px": 6038495,
+    "m2_per_km2": 32.293
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 0.0,
+    "objects_at_threshold": 0,
+    "area_m2_at_threshold": 0.0,
+    "ppm_min": 0.0,
+    "ppm_max": 0.662,
+    "objects_min": 0,
+    "objects_max": 1
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 54.484,
+    "objects_at_threshold": 110,
+    "area_m2_at_threshold": 32900.0,
+    "ppm_min": 29.809,
+    "ppm_max": 146.56,
+    "objects_min": 62,
+    "objects_max": 252
+   }
+  },
+  {
+   "scene": "jakarta/2026-04-03",
+   "water_km2": 619.8,
+   "floor_ppm_1obj": 0.323,
+   "service_map": {
+    "flagged_px": 384,
+    "observed_px": 6197929,
+    "m2_per_km2": 61.956
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 8.713,
+    "objects_at_threshold": 21,
+    "area_m2_at_threshold": 5400.0,
+    "ppm_min": 1.613,
+    "ppm_max": 32.592,
+    "objects_min": 5,
+    "objects_max": 71
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 80.995,
+    "objects_at_threshold": 150,
+    "area_m2_at_threshold": 50200.0,
+    "ppm_min": 49.533,
+    "ppm_max": 207.005,
+    "objects_min": 102,
+    "objects_max": 330
+   }
+  },
+  {
+   "scene": "karachi/2025-11-11",
+   "water_km2": 385.6,
+   "floor_ppm_1obj": 0.519,
+   "service_map": {
+    "flagged_px": 115,
+    "observed_px": 3856496,
+    "m2_per_km2": 29.82
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 40.711,
+    "objects_at_threshold": 46,
+    "area_m2_at_threshold": 15700.0,
+    "ppm_min": 20.485,
+    "ppm_max": 95.423,
+    "objects_min": 21,
+    "objects_max": 93
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 79.606,
+    "objects_at_threshold": 93,
+    "area_m2_at_threshold": 30700.0,
+    "ppm_min": 45.897,
+    "ppm_max": 173.992,
+    "objects_min": 53,
+    "objects_max": 197
+   }
+  },
+  {
+   "scene": "karachi/2026-01-15",
+   "water_km2": 332.5,
+   "floor_ppm_1obj": 0.602,
+   "service_map": {
+    "flagged_px": 154,
+    "observed_px": 3324892,
+    "m2_per_km2": 46.317
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 67.671,
+    "objects_at_threshold": 51,
+    "area_m2_at_threshold": 22500.0,
+    "ppm_min": 46.618,
+    "ppm_max": 173.239,
+    "objects_min": 35,
+    "objects_max": 140
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 101.357,
+    "objects_at_threshold": 83,
+    "area_m2_at_threshold": 33700.0,
+    "ppm_min": 55.039,
+    "ppm_max": 217.451,
+    "objects_min": 49,
+    "objects_max": 156
+   }
+  },
+  {
+   "scene": "karachi/2026-02-14",
+   "water_km2": 387.1,
+   "floor_ppm_1obj": 0.517,
+   "service_map": {
+    "flagged_px": 202,
+    "observed_px": 3871297,
+    "m2_per_km2": 52.179
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 44.43,
+    "objects_at_threshold": 53,
+    "area_m2_at_threshold": 17200.0,
+    "ppm_min": 21.698,
+    "ppm_max": 127.089,
+    "objects_min": 25,
+    "objects_max": 139
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 106.424,
+    "objects_at_threshold": 105,
+    "area_m2_at_threshold": 41200.0,
+    "ppm_min": 67.936,
+    "ppm_max": 195.542,
+    "objects_min": 70,
+    "objects_max": 180
+   }
+  },
+  {
+   "scene": "lagos/2025-11-10",
+   "water_km2": 322.7,
+   "floor_ppm_1obj": 0.62,
+   "service_map": {
+    "flagged_px": 0,
+    "observed_px": 3227204,
+    "m2_per_km2": 0.0
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 0.0,
+    "objects_at_threshold": 0,
+    "area_m2_at_threshold": 0.0,
+    "ppm_min": 0.0,
+    "ppm_max": 0.93,
+    "objects_min": 0,
+    "objects_max": 1
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 0.0,
+    "objects_at_threshold": 0,
+    "area_m2_at_threshold": 0.0,
+    "ppm_min": 0.0,
+    "ppm_max": 1.549,
+    "objects_min": 0,
+    "objects_max": 2
+   }
+  },
+  {
+   "scene": "manila/2019-05-13",
+   "water_km2": 557.1,
+   "floor_ppm_1obj": 0.359,
+   "service_map": {
+    "flagged_px": 251,
+    "observed_px": 5571297,
+    "m2_per_km2": 45.052
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 20.283,
+    "objects_at_threshold": 39,
+    "area_m2_at_threshold": 11300.0,
+    "ppm_min": 10.231,
+    "ppm_max": 57.078,
+    "objects_min": 22,
+    "objects_max": 93
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 55.463,
+    "objects_at_threshold": 100,
+    "area_m2_at_threshold": 30900.0,
+    "ppm_min": 33.385,
+    "ppm_max": 140.542,
+    "objects_min": 57,
+    "objects_max": 246
+   }
+  },
+  {
+   "scene": "manila/2025-01-06",
+   "water_km2": 615.3,
+   "floor_ppm_1obj": 0.325,
+   "service_map": {
+    "flagged_px": 191,
+    "observed_px": 6153132,
+    "m2_per_km2": 31.041
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 4.063,
+    "objects_at_threshold": 12,
+    "area_m2_at_threshold": 2500.0,
+    "ppm_min": 2.438,
+    "ppm_max": 25.678,
+    "objects_min": 7,
+    "objects_max": 69
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 42.905,
+    "objects_at_threshold": 96,
+    "area_m2_at_threshold": 26400.0,
+    "ppm_min": 26.328,
+    "ppm_max": 88.735,
+    "objects_min": 58,
+    "objects_max": 184
+   }
+  },
+  {
+   "scene": "manila/2025-06-15",
+   "water_km2": 616.5,
+   "floor_ppm_1obj": 0.324,
+   "service_map": {
+    "flagged_px": 305,
+    "observed_px": 6164686,
+    "m2_per_km2": 49.475
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 25.143,
+    "objects_at_threshold": 31,
+    "area_m2_at_threshold": 15500.0,
+    "ppm_min": 11.679,
+    "ppm_max": 66.508,
+    "objects_min": 18,
+    "objects_max": 71
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 63.75,
+    "objects_at_threshold": 107,
+    "area_m2_at_threshold": 39300.0,
+    "ppm_min": 41.365,
+    "ppm_max": 116.794,
+    "objects_min": 72,
+    "objects_max": 180
+   }
+  },
+  {
+   "scene": "manila/2025-08-04",
+   "water_km2": 616.1,
+   "floor_ppm_1obj": 0.325,
+   "service_map": {
+    "flagged_px": 208,
+    "observed_px": 6161007,
+    "m2_per_km2": 33.761
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 7.629,
+    "objects_at_threshold": 22,
+    "area_m2_at_threshold": 4700.0,
+    "ppm_min": 3.571,
+    "ppm_max": 34.897,
+    "objects_min": 11,
+    "objects_max": 88
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 46.908,
+    "objects_at_threshold": 96,
+    "area_m2_at_threshold": 28900.0,
+    "ppm_min": 27.918,
+    "ppm_max": 127.252,
+    "objects_min": 59,
+    "objects_max": 262
+   }
+  },
+  {
+   "scene": "manila/2025-11-07",
+   "water_km2": 553.9,
+   "floor_ppm_1obj": 0.361,
+   "service_map": {
+    "flagged_px": 357,
+    "observed_px": 5539488,
+    "m2_per_km2": 64.446
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 11.553,
+    "objects_at_threshold": 20,
+    "area_m2_at_threshold": 6400.0,
+    "ppm_min": 5.596,
+    "ppm_max": 31.772,
+    "objects_min": 9,
+    "objects_max": 62
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 70.584,
+    "objects_at_threshold": 107,
+    "area_m2_at_threshold": 39100.0,
+    "ppm_min": 46.755,
+    "ppm_max": 136.655,
+    "objects_min": 75,
+    "objects_max": 201
+   }
+  },
+  {
+   "scene": "manila/2025-12-27",
+   "water_km2": 616.5,
+   "floor_ppm_1obj": 0.324,
+   "service_map": {
+    "flagged_px": 227,
+    "observed_px": 6165035,
+    "m2_per_km2": 36.821
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 25.142,
+    "objects_at_threshold": 60,
+    "area_m2_at_threshold": 15500.0,
+    "ppm_min": 15.896,
+    "ppm_max": 60.016,
+    "objects_min": 38,
+    "objects_max": 136
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 46.066,
+    "objects_at_threshold": 107,
+    "area_m2_at_threshold": 28400.0,
+    "ppm_min": 29.197,
+    "ppm_max": 87.429,
+    "objects_min": 72,
+    "objects_max": 179
+   }
+  },
+  {
+   "scene": "manila/2026-04-01",
+   "water_km2": 618.8,
+   "floor_ppm_1obj": 0.323,
+   "service_map": {
+    "flagged_px": 165,
+    "observed_px": 6188080,
+    "m2_per_km2": 26.664
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 26.018,
+    "objects_at_threshold": 63,
+    "area_m2_at_threshold": 16100.0,
+    "ppm_min": 14.382,
+    "ppm_max": 63.832,
+    "objects_min": 40,
+    "objects_max": 139
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 34.906,
+    "objects_at_threshold": 84,
+    "area_m2_at_threshold": 21600.0,
+    "ppm_min": 19.554,
+    "ppm_max": 78.376,
+    "objects_min": 49,
+    "objects_max": 175
+   }
+  },
+  {
+   "scene": "mekong/2026-03-02",
+   "water_km2": 407.9,
+   "floor_ppm_1obj": 0.49,
+   "service_map": {
+    "flagged_px": 6180,
+    "observed_px": 4078515,
+    "m2_per_km2": 1515.257
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 0.0,
+    "objects_at_threshold": 0,
+    "area_m2_at_threshold": 0.0,
+    "ppm_min": 0.0,
+    "ppm_max": 3.923,
+    "objects_min": 0,
+    "objects_max": 7
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 1585.626,
+    "objects_at_threshold": 763,
+    "area_m2_at_threshold": 646700.0,
+    "ppm_min": 950.591,
+    "ppm_max": 3894.064,
+    "objects_min": 487,
+    "objects_max": 1630
+   }
+  },
+  {
+   "scene": "mumbai/2025-01-31",
+   "water_km2": 355.2,
+   "floor_ppm_1obj": 0.563,
+   "service_map": {
+    "flagged_px": 1421,
+    "observed_px": 3552084,
+    "m2_per_km2": 400.047
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 7.038,
+    "objects_at_threshold": 10,
+    "area_m2_at_threshold": 2500.0,
+    "ppm_min": 0.563,
+    "ppm_max": 78.827,
+    "objects_min": 1,
+    "objects_max": 85
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 485.63,
+    "objects_at_threshold": 279,
+    "area_m2_at_threshold": 172500.0,
+    "ppm_min": 294.475,
+    "ppm_max": 1128.915,
+    "objects_min": 177,
+    "objects_max": 604
+   }
+  },
+  {
+   "scene": "mumbai/2025-12-17",
+   "water_km2": 355.4,
+   "floor_ppm_1obj": 0.563,
+   "service_map": {
+    "flagged_px": 228,
+    "observed_px": 3554424,
+    "m2_per_km2": 64.145
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 0.0,
+    "objects_at_threshold": 0,
+    "area_m2_at_threshold": 0.0,
+    "ppm_min": 0.0,
+    "ppm_max": 3.657,
+    "objects_min": 0,
+    "objects_max": 5
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 80.182,
+    "objects_at_threshold": 92,
+    "area_m2_at_threshold": 28500.0,
+    "ppm_min": 44.17,
+    "ppm_max": 164.584,
+    "objects_min": 57,
+    "objects_max": 174
+   }
+  },
+  {
+   "scene": "mumbai/2026-01-01",
+   "water_km2": 354.4,
+   "floor_ppm_1obj": 0.564,
+   "service_map": {
+    "flagged_px": 261,
+    "observed_px": 3544448,
+    "m2_per_km2": 73.636
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 1.129,
+    "objects_at_threshold": 2,
+    "area_m2_at_threshold": 400.0,
+    "ppm_min": 0.564,
+    "ppm_max": 9.592,
+    "objects_min": 1,
+    "objects_max": 13
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 110.031,
+    "objects_at_threshold": 121,
+    "area_m2_at_threshold": 39000.0,
+    "ppm_min": 60.658,
+    "ppm_max": 239.247,
+    "objects_min": 60,
+    "objects_max": 270
+   }
+  },
+  {
+   "scene": "nile/2025-11-11",
+   "water_km2": 472.8,
+   "floor_ppm_1obj": 0.423,
+   "service_map": {
+    "flagged_px": 90,
+    "observed_px": 4728439,
+    "m2_per_km2": 19.034
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 0.423,
+    "objects_at_threshold": 1,
+    "area_m2_at_threshold": 200.0,
+    "ppm_min": 0.0,
+    "ppm_max": 3.595,
+    "objects_min": 0,
+    "objects_max": 7
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 21.149,
+    "objects_at_threshold": 33,
+    "area_m2_at_threshold": 10000.0,
+    "ppm_min": 12.266,
+    "ppm_max": 64.715,
+    "objects_min": 22,
+    "objects_max": 89
+   }
+  },
+  {
+   "scene": "nile/2026-01-05",
+   "water_km2": 473.3,
+   "floor_ppm_1obj": 0.423,
+   "service_map": {
+    "flagged_px": 268,
+    "observed_px": 4733171,
+    "m2_per_km2": 56.622
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 4.859,
+    "objects_at_threshold": 10,
+    "area_m2_at_threshold": 2300.0,
+    "ppm_min": 0.845,
+    "ppm_max": 16.479,
+    "objects_min": 2,
+    "objects_max": 31
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 92.538,
+    "objects_at_threshold": 143,
+    "area_m2_at_threshold": 43800.0,
+    "ppm_min": 59.791,
+    "ppm_max": 171.344,
+    "objects_min": 96,
+    "objects_max": 224
+   }
+  },
+  {
+   "scene": "nile/2026-03-16",
+   "water_km2": 471.9,
+   "floor_ppm_1obj": 0.424,
+   "service_map": {
+    "flagged_px": 872,
+    "observed_px": 4719497,
+    "m2_per_km2": 184.765
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 0.0,
+    "objects_at_threshold": 0,
+    "area_m2_at_threshold": 0.0,
+    "ppm_min": 0.0,
+    "ppm_max": 1.271,
+    "objects_min": 0,
+    "objects_max": 2
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 207.225,
+    "objects_at_threshold": 405,
+    "area_m2_at_threshold": 97800.0,
+    "ppm_min": 54.879,
+    "ppm_max": 1424.728,
+    "objects_min": 112,
+    "objects_max": 2514
+   }
+  },
+  {
+   "scene": "santo_domingo/2019-01-21",
+   "water_km2": 473.0,
+   "floor_ppm_1obj": 0.423,
+   "service_map": {
+    "flagged_px": 1190,
+    "observed_px": 4729684,
+    "m2_per_km2": 251.602
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 1.691,
+    "objects_at_threshold": 2,
+    "area_m2_at_threshold": 800.0,
+    "ppm_min": 0.846,
+    "ppm_max": 55.183,
+    "objects_min": 1,
+    "objects_max": 114
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 253.928,
+    "objects_at_threshold": 519,
+    "area_m2_at_threshold": 120100.0,
+    "ppm_min": 86.687,
+    "ppm_max": 639.789,
+    "objects_min": 194,
+    "objects_max": 1106
+   }
+  },
+  {
+   "scene": "santo_domingo/2025-02-23",
+   "water_km2": 437.4,
+   "floor_ppm_1obj": 0.457,
+   "service_map": {
+    "flagged_px": 18,
+    "observed_px": 4374297,
+    "m2_per_km2": 4.115
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 0.457,
+    "objects_at_threshold": 1,
+    "area_m2_at_threshold": 200.0,
+    "ppm_min": 0.0,
+    "ppm_max": 7.773,
+    "objects_min": 0,
+    "objects_max": 13
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 6.858,
+    "objects_at_threshold": 12,
+    "area_m2_at_threshold": 3000.0,
+    "ppm_min": 1.372,
+    "ppm_max": 49.151,
+    "objects_min": 3,
+    "objects_max": 84
+   }
+  },
+  {
+   "scene": "santo_domingo/2025-03-05",
+   "water_km2": 457.1,
+   "floor_ppm_1obj": 0.438,
+   "service_map": {
+    "flagged_px": 60,
+    "observed_px": 4570810,
+    "m2_per_km2": 13.127
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 0.875,
+    "objects_at_threshold": 2,
+    "area_m2_at_threshold": 400.0,
+    "ppm_min": 0.438,
+    "ppm_max": 6.126,
+    "objects_min": 1,
+    "objects_max": 11
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 15.533,
+    "objects_at_threshold": 27,
+    "area_m2_at_threshold": 7100.0,
+    "ppm_min": 6.563,
+    "ppm_max": 48.788,
+    "objects_min": 13,
+    "objects_max": 73
+   }
+  },
+  {
+   "scene": "santo_domingo/2025-10-18",
+   "water_km2": 429.2,
+   "floor_ppm_1obj": 0.466,
+   "service_map": {
+    "flagged_px": 156,
+    "observed_px": 4291877,
+    "m2_per_km2": 36.348
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 3.495,
+    "objects_at_threshold": 6,
+    "area_m2_at_threshold": 1500.0,
+    "ppm_min": 1.631,
+    "ppm_max": 23.3,
+    "objects_min": 2,
+    "objects_max": 36
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 36.348,
+    "objects_at_threshold": 72,
+    "area_m2_at_threshold": 15600.0,
+    "ppm_min": 4.66,
+    "ppm_max": 195.253,
+    "objects_min": 10,
+    "objects_max": 341
+   }
+  },
+  {
+   "scene": "santo_domingo/2025-12-30",
+   "water_km2": 482.3,
+   "floor_ppm_1obj": 0.415,
+   "service_map": {
+    "flagged_px": 29,
+    "observed_px": 4822620,
+    "m2_per_km2": 6.013
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 0.415,
+    "objects_at_threshold": 1,
+    "area_m2_at_threshold": 200.0,
+    "ppm_min": 0.0,
+    "ppm_max": 6.635,
+    "objects_min": 0,
+    "objects_max": 14
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 6.013,
+    "objects_at_threshold": 12,
+    "area_m2_at_threshold": 2900.0,
+    "ppm_min": 1.866,
+    "ppm_max": 22.394,
+    "objects_min": 4,
+    "objects_max": 42
+   }
+  },
+  {
+   "scene": "santo_domingo/2026-02-18",
+   "water_km2": 408.7,
+   "floor_ppm_1obj": 0.489,
+   "service_map": {
+    "flagged_px": 21,
+    "observed_px": 4086665,
+    "m2_per_km2": 5.139
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 0.734,
+    "objects_at_threshold": 1,
+    "area_m2_at_threshold": 300.0,
+    "ppm_min": 0.489,
+    "ppm_max": 6.117,
+    "objects_min": 1,
+    "objects_max": 9
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 5.139,
+    "objects_at_threshold": 10,
+    "area_m2_at_threshold": 2100.0,
+    "ppm_min": 0.489,
+    "ppm_max": 33.279,
+    "objects_min": 1,
+    "objects_max": 55
+   }
+  },
+  {
+   "scene": "scotland/2018-03-26",
+   "water_km2": 603.4,
+   "floor_ppm_1obj": 0.331,
+   "service_map": {
+    "flagged_px": 42,
+    "observed_px": 6034097,
+    "m2_per_km2": 6.96
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 0.0,
+    "objects_at_threshold": 0,
+    "area_m2_at_threshold": 0.0,
+    "ppm_min": 0.0,
+    "ppm_max": 1.492,
+    "objects_min": 0,
+    "objects_max": 4
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 7.789,
+    "objects_at_threshold": 16,
+    "area_m2_at_threshold": 4700.0,
+    "ppm_min": 6.629,
+    "ppm_max": 13.589,
+    "objects_min": 15,
+    "objects_max": 25
+   }
+  },
+  {
+   "scene": "scotland/2026-07-19",
+   "water_km2": 427.8,
+   "floor_ppm_1obj": 0.467,
+   "service_map": {
+    "flagged_px": 11,
+    "observed_px": 4278212,
+    "m2_per_km2": 2.571
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 0.0,
+    "objects_at_threshold": 0,
+    "area_m2_at_threshold": 0.0,
+    "ppm_min": 0.0,
+    "ppm_max": 10.986,
+    "objects_min": 0,
+    "objects_max": 16
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 4.675,
+    "objects_at_threshold": 9,
+    "area_m2_at_threshold": 2000.0,
+    "ppm_min": 0.935,
+    "ppm_max": 39.035,
+    "objects_min": 2,
+    "objects_max": 54
+   }
+  },
+  {
+   "scene": "tiber/2025-11-05",
+   "water_km2": 362.0,
+   "floor_ppm_1obj": 0.553,
+   "service_map": {
+    "flagged_px": 10,
+    "observed_px": 3619679,
+    "m2_per_km2": 2.763
+   },
+   "current": {
+    "threshold": 0.63,
+    "ppm_at_threshold": 0.0,
+    "objects_at_threshold": 0,
+    "area_m2_at_threshold": 0.0,
+    "ppm_min": 0.0,
+    "ppm_max": 7.735,
+    "objects_min": 0,
+    "objects_max": 12
+   },
+   "service": {
+    "threshold": 0.64,
+    "ppm_at_threshold": 4.973,
+    "objects_at_threshold": 8,
+    "area_m2_at_threshold": 1800.0,
+    "ppm_min": 3.315,
+    "ppm_max": 32.047,
+    "objects_min": 6,
+    "objects_max": 39
+   }
+  }
+ ],
+ "note": "current = weights/lgbm без гармонизации; service = prob_lgbm.tif (lgbm_live + гармонизация water_median, из них построена карта); service_map = h3 карты сервиса (после фильтра артефактов). Пороги 0.10–0.88 (F1 MARIDA val ≥ max−0.01). Без фильтра судов/кильватера → current/service — верхняя оценка."
+}

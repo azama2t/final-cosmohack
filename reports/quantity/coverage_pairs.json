@@ -1,0 +1,1983 @@
+{
+ "summary": {
+  "n_events": 29,
+  "n_accept": 12,
+  "n_with_prob": 22,
+  "strip_detections_accept": 0,
+  "crop_scenes_nonzero_at_063": 1,
+  "crop_scenes_nonzero_at_010": 3,
+  "field_C_accept_range": [
+   52.3,
+   976.01
+  ],
+  "strip_floor_ppm_median": 124.3
+ },
+ "rows": [
+  {
+   "event_id": "S3:HE419_MarLitter_transect29",
+   "decision": "reject",
+   "reason": "cloud",
+   "scene_id": "LC08_L2SP_196022_20140412_02_T1",
+   "dt_hours": 23.65,
+   "time_known": true,
+   "field_items_km2": 17.3,
+   "strip_area_km2": 1.1997,
+   "strip_valid_water_frac": 0.0,
+   "strip_n_det": null,
+   "strip_det_area_m2": null,
+   "level": "C/D (не A): нет синхронности по дрейфу",
+   "strip_floor_ppm_1px": null
+  },
+  {
+   "event_id": "S3:HE419_MarLitter_transect30",
+   "decision": "reject",
+   "reason": "cloud(qa_suspect:red_sr<0.03)",
+   "scene_id": "LC08_L2SP_196022_20140412_02_T1",
+   "dt_hours": 21.22,
+   "time_known": true,
+   "field_items_km2": 195.1,
+   "strip_area_km2": 0.9504,
+   "strip_valid_water_frac": 0.0,
+   "strip_n_det": null,
+   "strip_det_area_m2": null,
+   "level": "C/D (не A): нет синхронности по дрейфу",
+   "strip_floor_ppm_1px": null
+  },
+  {
+   "event_id": "S3:HE419_MarLitter_transect32",
+   "decision": "reject",
+   "reason": "insufficient_coverage",
+   "scene_id": "LC08_L2SP_196022_20140412_02_T1",
+   "dt_hours": 15.78,
+   "time_known": true,
+   "field_items_km2": 19.7,
+   "strip_area_km2": 1.5408,
+   "strip_valid_water_frac": 0.0,
+   "strip_n_det": null,
+   "strip_det_area_m2": null,
+   "level": "C/D (не A): нет синхронности по дрейфу",
+   "strip_floor_ppm_1px": null
+  },
+  {
+   "event_id": "S3:HE460_MarLitter_transect01",
+   "decision": "reject",
+   "reason": "cloud",
+   "scene_id": "S2A_MSIL2A_20160408T104022_R008_T32UMF_20210211T022918",
+   "dt_hours": -5.97,
+   "time_known": true,
+   "field_items_km2": 19.9,
+   "strip_area_km2": 0.5109,
+   "strip_valid_water_frac": 0.0233,
+   "strip_n_det": 0,
+   "strip_det_area_m2": 0.0,
+   "level": "C/D (не A): нет синхронности по дрейфу",
+   "strip_floor_ppm_1px": 8400.6,
+   "crop_water_km2": 41.604,
+   "crop_by_threshold": [
+    {
+     "threshold": 0.1,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.2,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.3,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.4,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.5,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.6,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.63,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.7,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.8,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.88,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    }
+   ],
+   "crop_ppm_range": [
+    0.0,
+    0.0
+   ],
+   "crop_ppm_at_063": 0.0,
+   "crop_floor_ppm_1px": 2.4
+  },
+  {
+   "event_id": "S3:HE460_MarLitter_transect03",
+   "decision": "accept",
+   "reason": null,
+   "scene_id": "S2A_MSIL2A_20160411T105022_R051_T32ULF_20210211T031140",
+   "dt_hours": 18.06,
+   "time_known": true,
+   "field_items_km2": 52.3,
+   "strip_area_km2": 0.7633,
+   "strip_valid_water_frac": 1.0,
+   "strip_n_det": 0,
+   "strip_det_area_m2": 0.0,
+   "level": "C/D (не A): нет синхронности по дрейфу",
+   "strip_floor_ppm_1px": 131.0,
+   "crop_water_km2": 418.19,
+   "crop_by_threshold": [
+    {
+     "threshold": 0.1,
+     "px": 350,
+     "objects": 308,
+     "m2_per_km2": 83.69
+    },
+    {
+     "threshold": 0.2,
+     "px": 100,
+     "objects": 95,
+     "m2_per_km2": 23.91
+    },
+    {
+     "threshold": 0.3,
+     "px": 48,
+     "objects": 48,
+     "m2_per_km2": 11.48
+    },
+    {
+     "threshold": 0.4,
+     "px": 31,
+     "objects": 31,
+     "m2_per_km2": 7.41
+    },
+    {
+     "threshold": 0.5,
+     "px": 16,
+     "objects": 16,
+     "m2_per_km2": 3.83
+    },
+    {
+     "threshold": 0.6,
+     "px": 7,
+     "objects": 7,
+     "m2_per_km2": 1.67
+    },
+    {
+     "threshold": 0.63,
+     "px": 5,
+     "objects": 5,
+     "m2_per_km2": 1.2
+    },
+    {
+     "threshold": 0.7,
+     "px": 3,
+     "objects": 3,
+     "m2_per_km2": 0.72
+    },
+    {
+     "threshold": 0.8,
+     "px": 2,
+     "objects": 2,
+     "m2_per_km2": 0.48
+    },
+    {
+     "threshold": 0.88,
+     "px": 1,
+     "objects": 1,
+     "m2_per_km2": 0.24
+    }
+   ],
+   "crop_ppm_range": [
+    0.24,
+    83.69
+   ],
+   "crop_ppm_at_063": 1.2,
+   "crop_floor_ppm_1px": 0.24
+  },
+  {
+   "event_id": "S4:DOORS3:T1",
+   "decision": "accept",
+   "reason": null,
+   "scene_id": "S2A_35TQJ_20240602_0_L2A",
+   "dt_hours": -3.03,
+   "time_known": false,
+   "field_items_km2": 192.54,
+   "strip_area_km2": 0.8049,
+   "strip_valid_water_frac": 1.0,
+   "strip_n_det": 0,
+   "strip_det_area_m2": 0.0,
+   "level": "C/D (не A): нет синхронности по дрейфу; время наблюдения неизвестно",
+   "strip_floor_ppm_1px": 124.2,
+   "crop_water_km2": 49.702,
+   "crop_by_threshold": [
+    {
+     "threshold": 0.1,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.2,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.3,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.4,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.5,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.6,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.63,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.7,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.8,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.88,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    }
+   ],
+   "crop_ppm_range": [
+    0.0,
+    0.0
+   ],
+   "crop_ppm_at_063": 0.0,
+   "crop_floor_ppm_1px": 2.01
+  },
+  {
+   "event_id": "S4:DOORS3:T11",
+   "decision": "accept",
+   "reason": null,
+   "scene_id": "S2A_36TYN_20240603_0_L2A",
+   "dt_hours": -27.53,
+   "time_known": false,
+   "field_items_km2": 62.52,
+   "strip_area_km2": 0.8042,
+   "strip_valid_water_frac": 0.9956,
+   "strip_n_det": 0,
+   "strip_det_area_m2": 0.0,
+   "level": "C/D (не A): нет синхронности по дрейфу; время наблюдения неизвестно",
+   "strip_floor_ppm_1px": 124.9,
+   "crop_water_km2": 49.702,
+   "crop_by_threshold": [
+    {
+     "threshold": 0.1,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.2,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.3,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.4,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.5,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.6,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.63,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.7,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.8,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.88,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    }
+   ],
+   "crop_ppm_range": [
+    0.0,
+    0.0
+   ],
+   "crop_ppm_at_063": 0.0,
+   "crop_floor_ppm_1px": 2.01
+  },
+  {
+   "event_id": "S4:DOORS3:T12",
+   "decision": "reject",
+   "reason": "glint",
+   "scene_id": "S2A_37TCH_20240603_0_L2A",
+   "dt_hours": -27.53,
+   "time_known": false,
+   "field_items_km2": 48.97,
+   "strip_area_km2": 0.8041,
+   "strip_valid_water_frac": 0.0,
+   "strip_n_det": 0,
+   "strip_det_area_m2": 0.0,
+   "level": "C/D (не A): нет синхронности по дрейфу; время наблюдения неизвестно",
+   "strip_floor_ppm_1px": null,
+   "crop_water_km2": 49.702,
+   "crop_by_threshold": [
+    {
+     "threshold": 0.1,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.2,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.3,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.4,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.5,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.6,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.63,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.7,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.8,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.88,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    }
+   ],
+   "crop_ppm_range": [
+    0.0,
+    0.0
+   ],
+   "crop_ppm_at_063": 0.0,
+   "crop_floor_ppm_1px": 2.01
+  },
+  {
+   "event_id": "S4:DOORS3:T13",
+   "decision": "reject",
+   "reason": "glint",
+   "scene_id": "S2A_37TCH_20240603_0_L2A",
+   "dt_hours": -27.53,
+   "time_known": false,
+   "field_items_km2": 263.57,
+   "strip_area_km2": 0.8045,
+   "strip_valid_water_frac": 0.0,
+   "strip_n_det": 0,
+   "strip_det_area_m2": 0.0,
+   "level": "C/D (не A): нет синхронности по дрейфу; время наблюдения неизвестно",
+   "strip_floor_ppm_1px": null,
+   "crop_water_km2": 50.098,
+   "crop_by_threshold": [
+    {
+     "threshold": 0.1,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.2,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.3,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.4,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.5,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.6,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.63,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.7,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.8,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.88,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    }
+   ],
+   "crop_ppm_range": [
+    0.0,
+    0.0
+   ],
+   "crop_ppm_at_063": 0.0,
+   "crop_floor_ppm_1px": 2.0
+  },
+  {
+   "event_id": "S4:DOORS3:T14",
+   "decision": "reject",
+   "reason": "glint",
+   "scene_id": "S2A_37TCG_20240603_0_L2A",
+   "dt_hours": -27.52,
+   "time_known": false,
+   "field_items_km2": 89.39,
+   "strip_area_km2": 0.8045,
+   "strip_valid_water_frac": 0.0,
+   "strip_n_det": 0,
+   "strip_det_area_m2": 0.0,
+   "level": "C/D (не A): нет синхронности по дрейфу; время наблюдения неизвестно",
+   "strip_floor_ppm_1px": null,
+   "crop_water_km2": 50.03,
+   "crop_by_threshold": [
+    {
+     "threshold": 0.1,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.2,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.3,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.4,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.5,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.6,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.63,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.7,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.8,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.88,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    }
+   ],
+   "crop_ppm_range": [
+    0.0,
+    0.0
+   ],
+   "crop_ppm_at_063": 0.0,
+   "crop_floor_ppm_1px": 2.0
+  },
+  {
+   "event_id": "S4:DOORS3:T15",
+   "decision": "reject",
+   "reason": "glint",
+   "scene_id": "S2A_37TDG_20240603_0_L2A",
+   "dt_hours": -27.52,
+   "time_known": false,
+   "field_items_km2": 127.14,
+   "strip_area_km2": 0.8046,
+   "strip_valid_water_frac": 0.0,
+   "strip_n_det": 0,
+   "strip_det_area_m2": 0.0,
+   "level": "C/D (не A): нет синхронности по дрейфу; время наблюдения неизвестно",
+   "strip_floor_ppm_1px": null,
+   "crop_water_km2": 49.686,
+   "crop_by_threshold": [
+    {
+     "threshold": 0.1,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.2,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.3,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.4,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.5,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.6,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.63,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.7,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.8,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.88,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    }
+   ],
+   "crop_ppm_range": [
+    0.0,
+    0.0
+   ],
+   "crop_ppm_at_063": 0.0,
+   "crop_floor_ppm_1px": 2.01
+  },
+  {
+   "event_id": "S4:DOORS3:T16",
+   "decision": "reject",
+   "reason": "glint",
+   "scene_id": "S2A_37TDG_20240603_0_L2A",
+   "dt_hours": -27.52,
+   "time_known": false,
+   "field_items_km2": 64.91,
+   "strip_area_km2": 0.8045,
+   "strip_valid_water_frac": 0.074,
+   "strip_n_det": 0,
+   "strip_det_area_m2": 0.0,
+   "level": "C/D (не A): нет синхронности по дрейфу; время наблюдения неизвестно",
+   "strip_floor_ppm_1px": 1679.7,
+   "crop_water_km2": 49.702,
+   "crop_by_threshold": [
+    {
+     "threshold": 0.1,
+     "px": 8,
+     "objects": 6,
+     "m2_per_km2": 16.1
+    },
+    {
+     "threshold": 0.2,
+     "px": 3,
+     "objects": 3,
+     "m2_per_km2": 6.04
+    },
+    {
+     "threshold": 0.3,
+     "px": 2,
+     "objects": 2,
+     "m2_per_km2": 4.02
+    },
+    {
+     "threshold": 0.4,
+     "px": 1,
+     "objects": 1,
+     "m2_per_km2": 2.01
+    },
+    {
+     "threshold": 0.5,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.6,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.63,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.7,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.8,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.88,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    }
+   ],
+   "crop_ppm_range": [
+    0.0,
+    16.1
+   ],
+   "crop_ppm_at_063": 0.0,
+   "crop_floor_ppm_1px": 2.01
+  },
+  {
+   "event_id": "S4:DOORS3:T17",
+   "decision": "accept",
+   "reason": null,
+   "scene_id": "S2A_37TDG_20240603_0_L2A",
+   "dt_hours": -27.52,
+   "time_known": false,
+   "field_items_km2": 89.61,
+   "strip_area_km2": 0.8046,
+   "strip_valid_water_frac": 1.0,
+   "strip_n_det": 0,
+   "strip_det_area_m2": 0.0,
+   "level": "C/D (не A): нет синхронности по дрейфу; время наблюдения неизвестно",
+   "strip_floor_ppm_1px": 124.3,
+   "crop_water_km2": 49.702,
+   "crop_by_threshold": [
+    {
+     "threshold": 0.1,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.2,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.3,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.4,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.5,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.6,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.63,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.7,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.8,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.88,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    }
+   ],
+   "crop_ppm_range": [
+    0.0,
+    0.0
+   ],
+   "crop_ppm_at_063": 0.0,
+   "crop_floor_ppm_1px": 2.01
+  },
+  {
+   "event_id": "S4:DOORS3:T18",
+   "decision": "accept",
+   "reason": null,
+   "scene_id": "S2B_37TFG_20240605_0_L2A",
+   "dt_hours": -3.69,
+   "time_known": false,
+   "field_items_km2": 348.74,
+   "strip_area_km2": 0.8044,
+   "strip_valid_water_frac": 1.0,
+   "strip_n_det": 0,
+   "strip_det_area_m2": 0.0,
+   "level": "C/D (не A): нет синхронности по дрейфу; время наблюдения неизвестно",
+   "strip_floor_ppm_1px": 124.3,
+   "crop_water_km2": 49.702,
+   "crop_by_threshold": [
+    {
+     "threshold": 0.1,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.2,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.3,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.4,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.5,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.6,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.63,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.7,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.8,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.88,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    }
+   ],
+   "crop_ppm_range": [
+    0.0,
+    0.0
+   ],
+   "crop_ppm_at_063": 0.0,
+   "crop_floor_ppm_1px": 2.01
+  },
+  {
+   "event_id": "S4:DOORS3:T19",
+   "decision": "accept",
+   "reason": null,
+   "scene_id": "S2B_37TFG_20240605_0_L2A",
+   "dt_hours": -3.69,
+   "time_known": false,
+   "field_items_km2": 544.69,
+   "strip_area_km2": 0.8043,
+   "strip_valid_water_frac": 1.0,
+   "strip_n_det": 0,
+   "strip_det_area_m2": 0.0,
+   "level": "C/D (не A): нет синхронности по дрейфу; время наблюдения неизвестно",
+   "strip_floor_ppm_1px": 124.3,
+   "crop_water_km2": 50.126,
+   "crop_by_threshold": [
+    {
+     "threshold": 0.1,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.2,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.3,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.4,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.5,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.6,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.63,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.7,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.8,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.88,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    }
+   ],
+   "crop_ppm_range": [
+    0.0,
+    0.0
+   ],
+   "crop_ppm_at_063": 0.0,
+   "crop_floor_ppm_1px": 1.99
+  },
+  {
+   "event_id": "S4:DOORS3:T2",
+   "decision": "accept",
+   "reason": null,
+   "scene_id": "S2A_35TQJ_20240602_0_L2A",
+   "dt_hours": -3.03,
+   "time_known": false,
+   "field_items_km2": 439.84,
+   "strip_area_km2": 0.8042,
+   "strip_valid_water_frac": 1.0,
+   "strip_n_det": 0,
+   "strip_det_area_m2": 0.0,
+   "level": "C/D (не A): нет синхронности по дрейфу; время наблюдения неизвестно",
+   "strip_floor_ppm_1px": 124.3,
+   "crop_water_km2": 49.702,
+   "crop_by_threshold": [
+    {
+     "threshold": 0.1,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.2,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.3,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.4,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.5,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.6,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.63,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.7,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.8,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.88,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    }
+   ],
+   "crop_ppm_range": [
+    0.0,
+    0.0
+   ],
+   "crop_ppm_at_063": 0.0,
+   "crop_floor_ppm_1px": 2.01
+  },
+  {
+   "event_id": "S4:DOORS3:T20",
+   "decision": "reject",
+   "reason": "glint",
+   "scene_id": "S2A_37TGG_20240607_0_L2A",
+   "dt_hours": -3.86,
+   "time_known": false,
+   "field_items_km2": 224.92,
+   "strip_area_km2": 0.804,
+   "strip_valid_water_frac": 0.0,
+   "strip_n_det": 0,
+   "strip_det_area_m2": 0.0,
+   "level": "C/D (не A): нет синхронности по дрейфу; время наблюдения неизвестно",
+   "strip_floor_ppm_1px": null,
+   "crop_water_km2": 44.721,
+   "crop_by_threshold": [
+    {
+     "threshold": 0.1,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.2,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.3,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.4,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.5,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.6,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.63,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.7,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.8,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.88,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    }
+   ],
+   "crop_ppm_range": [
+    0.0,
+    0.0
+   ],
+   "crop_ppm_at_063": 0.0,
+   "crop_floor_ppm_1px": 2.24
+  },
+  {
+   "event_id": "S4:DOORS3:T21",
+   "decision": "reject",
+   "reason": "glint",
+   "scene_id": "S2A_37TGG_20240607_0_L2A",
+   "dt_hours": -3.86,
+   "time_known": false,
+   "field_items_km2": 67.34,
+   "strip_area_km2": 0.804,
+   "strip_valid_water_frac": 0.0,
+   "strip_n_det": 0,
+   "strip_det_area_m2": 0.0,
+   "level": "C/D (не A): нет синхронности по дрейфу; время наблюдения неизвестно",
+   "strip_floor_ppm_1px": null,
+   "crop_water_km2": 36.861,
+   "crop_by_threshold": [
+    {
+     "threshold": 0.1,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.2,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.3,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.4,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.5,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.6,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.63,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.7,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.8,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.88,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    }
+   ],
+   "crop_ppm_range": [
+    0.0,
+    0.0
+   ],
+   "crop_ppm_at_063": 0.0,
+   "crop_floor_ppm_1px": 2.71
+  },
+  {
+   "event_id": "S4:DOORS3:T25",
+   "decision": "accept",
+   "reason": null,
+   "scene_id": "S2B_37TGG_20240612_0_L2A",
+   "dt_hours": 20.14,
+   "time_known": false,
+   "field_items_km2": 976.01,
+   "strip_area_km2": 0.8041,
+   "strip_valid_water_frac": 1.0,
+   "strip_n_det": 0,
+   "strip_det_area_m2": 0.0,
+   "level": "C/D (не A): нет синхронности по дрейфу; время наблюдения неизвестно",
+   "strip_floor_ppm_1px": 124.4,
+   "crop_water_km2": 49.125,
+   "crop_by_threshold": [
+    {
+     "threshold": 0.1,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.2,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.3,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.4,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.5,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.6,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.63,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.7,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.8,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.88,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    }
+   ],
+   "crop_ppm_range": [
+    0.0,
+    0.0
+   ],
+   "crop_ppm_at_063": 0.0,
+   "crop_floor_ppm_1px": 2.04
+  },
+  {
+   "event_id": "S4:DOORS3:T3",
+   "decision": "reject",
+   "reason": "glint",
+   "scene_id": "S2A_36TVN_20240602_0_L2A",
+   "dt_hours": -27.03,
+   "time_known": false,
+   "field_items_km2": 686.06,
+   "strip_area_km2": 0.8046,
+   "strip_valid_water_frac": 0.0,
+   "strip_n_det": 0,
+   "strip_det_area_m2": 0.0,
+   "level": "C/D (не A): нет синхронности по дрейфу; время наблюдения неизвестно",
+   "strip_floor_ppm_1px": null,
+   "crop_water_km2": 0.0,
+   "crop_by_threshold": [
+    {
+     "threshold": 0.1,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.2,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.3,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.4,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.5,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.6,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.63,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.7,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.8,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.88,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    }
+   ],
+   "crop_ppm_range": [
+    0.0,
+    0.0
+   ],
+   "crop_ppm_at_063": 0.0,
+   "crop_floor_ppm_1px": 250000.0
+  },
+  {
+   "event_id": "S4:DOORS3:T30",
+   "decision": "accept",
+   "reason": null,
+   "scene_id": "S2B_36TUN_20240617_0_L2A",
+   "dt_hours": -3.03,
+   "time_known": false,
+   "field_items_km2": 587.41,
+   "strip_area_km2": 0.8045,
+   "strip_valid_water_frac": 1.0,
+   "strip_n_det": 0,
+   "strip_det_area_m2": 0.0,
+   "level": "C/D (не A): нет синхронности по дрейфу; время наблюдения неизвестно",
+   "strip_floor_ppm_1px": 124.3,
+   "crop_water_km2": 50.126,
+   "crop_by_threshold": [
+    {
+     "threshold": 0.1,
+     "px": 1,
+     "objects": 1,
+     "m2_per_km2": 1.99
+    },
+    {
+     "threshold": 0.2,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.3,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.4,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.5,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.6,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.63,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.7,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.8,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.88,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    }
+   ],
+   "crop_ppm_range": [
+    0.0,
+    1.99
+   ],
+   "crop_ppm_at_063": 0.0,
+   "crop_floor_ppm_1px": 1.99
+  },
+  {
+   "event_id": "S4:DOORS3:T31",
+   "decision": "accept",
+   "reason": null,
+   "scene_id": "S2B_36TUN_20240617_0_L2A",
+   "dt_hours": -3.03,
+   "time_known": false,
+   "field_items_km2": 345.29,
+   "strip_area_km2": 0.8041,
+   "strip_valid_water_frac": 1.0,
+   "strip_n_det": 0,
+   "strip_det_area_m2": 0.0,
+   "level": "C/D (не A): нет синхронности по дрейфу; время наблюдения неизвестно",
+   "strip_floor_ppm_1px": 124.4,
+   "crop_water_km2": 49.702,
+   "crop_by_threshold": [
+    {
+     "threshold": 0.1,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.2,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.3,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.4,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.5,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.6,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.63,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.7,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.8,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.88,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    }
+   ],
+   "crop_ppm_range": [
+    0.0,
+    0.0
+   ],
+   "crop_ppm_at_063": 0.0,
+   "crop_floor_ppm_1px": 2.01
+  },
+  {
+   "event_id": "S4:DOORS3:T32",
+   "decision": "accept",
+   "reason": null,
+   "scene_id": "S2B_36TUN_20240617_0_L2A",
+   "dt_hours": -3.03,
+   "time_known": false,
+   "field_items_km2": 198.51,
+   "strip_area_km2": 0.8039,
+   "strip_valid_water_frac": 1.0,
+   "strip_n_det": 0,
+   "strip_det_area_m2": 0.0,
+   "level": "C/D (не A): нет синхронности по дрейфу; время наблюдения неизвестно",
+   "strip_floor_ppm_1px": 124.4,
+   "crop_water_km2": 49.702,
+   "crop_by_threshold": [
+    {
+     "threshold": 0.1,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.2,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.3,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.4,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.5,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.6,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.63,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.7,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.8,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.88,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    }
+   ],
+   "crop_ppm_range": [
+    0.0,
+    0.0
+   ],
+   "crop_ppm_at_063": 0.0,
+   "crop_floor_ppm_1px": 2.01
+  },
+  {
+   "event_id": "S4:DOORS3:T33",
+   "decision": "accept",
+   "reason": null,
+   "scene_id": "LC09_L2SP_180030_20240618_02_T1",
+   "dt_hours": -3.26,
+   "time_known": false,
+   "field_items_km2": 340.86,
+   "strip_area_km2": 0.8451,
+   "strip_valid_water_frac": 1.0,
+   "strip_n_det": null,
+   "strip_det_area_m2": null,
+   "level": "C/D (не A): нет синхронности по дрейфу; время наблюдения неизвестно",
+   "strip_floor_ppm_1px": 118.3
+  },
+  {
+   "event_id": "S4:DOORS3:T4",
+   "decision": "reject",
+   "reason": "glint",
+   "scene_id": "S2A_36TVN_20240602_0_L2A",
+   "dt_hours": -27.03,
+   "time_known": false,
+   "field_items_km2": 269.64,
+   "strip_area_km2": 0.8045,
+   "strip_valid_water_frac": 0.0,
+   "strip_n_det": 0,
+   "strip_det_area_m2": 0.0,
+   "level": "C/D (не A): нет синхронности по дрейфу; время наблюдения неизвестно",
+   "strip_floor_ppm_1px": null,
+   "crop_water_km2": 0.0,
+   "crop_by_threshold": [
+    {
+     "threshold": 0.1,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.2,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.3,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.4,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.5,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.6,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.63,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.7,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.8,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.88,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    }
+   ],
+   "crop_ppm_range": [
+    0.0,
+    0.0
+   ],
+   "crop_ppm_at_063": 0.0,
+   "crop_floor_ppm_1px": 250000.0
+  },
+  {
+   "event_id": "S4:DOORS3:T5",
+   "decision": "reject",
+   "reason": "glint",
+   "scene_id": "S2A_36TVN_20240602_0_L2A",
+   "dt_hours": -27.03,
+   "time_known": false,
+   "field_items_km2": 389.72,
+   "strip_area_km2": 0.8045,
+   "strip_valid_water_frac": 0.0,
+   "strip_n_det": 0,
+   "strip_det_area_m2": 0.0,
+   "level": "C/D (не A): нет синхронности по дрейфу; время наблюдения неизвестно",
+   "strip_floor_ppm_1px": null,
+   "crop_water_km2": 0.0,
+   "crop_by_threshold": [
+    {
+     "threshold": 0.1,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.2,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.3,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.4,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.5,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.6,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.63,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.7,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.8,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    },
+    {
+     "threshold": 0.88,
+     "px": 0,
+     "objects": 0,
+     "m2_per_km2": 0.0
+    }
+   ],
+   "crop_ppm_range": [
+    0.0,
+    0.0
+   ],
+   "crop_ppm_at_063": 0.0,
+   "crop_floor_ppm_1px": 500000.0
+  },
+  {
+   "event_id": "S4:DOORS3:T6",
+   "decision": "reject",
+   "reason": "cloud(qa_suspect:red_sr<0.03)",
+   "scene_id": "LC09_L2SP_178030_20240604_02_T2",
+   "dt_hours": 20.53,
+   "time_known": false,
+   "field_items_km2": 268.24,
+   "strip_area_km2": 0.8496,
+   "strip_valid_water_frac": 0.0,
+   "strip_n_det": null,
+   "strip_det_area_m2": null,
+   "level": "C/D (не A): нет синхронности по дрейфу; время наблюдения неизвестно",
+   "strip_floor_ppm_1px": null
+  },
+  {
+   "event_id": "S4:DOORS3:T7",
+   "decision": "reject",
+   "reason": "cloud(qa_suspect:red_sr<0.03)",
+   "scene_id": "LC09_L2SP_178030_20240604_02_T2",
+   "dt_hours": 20.53,
+   "time_known": false,
+   "field_items_km2": 131.17,
+   "strip_area_km2": 0.8442,
+   "strip_valid_water_frac": 0.0,
+   "strip_n_det": null,
+   "strip_det_area_m2": null,
+   "level": "C/D (не A): нет синхронности по дрейфу; время наблюдения неизвестно",
+   "strip_floor_ppm_1px": null
+  },
+  {
+   "event_id": "S4:DOORS3:T8",
+   "decision": "reject",
+   "reason": "cloud(qa_suspect:red_sr<0.03)",
+   "scene_id": "LC09_L2SP_178030_20240604_02_T2",
+   "dt_hours": 20.53,
+   "time_known": false,
+   "field_items_km2": 217.98,
+   "strip_area_km2": 0.8469,
+   "strip_valid_water_frac": 0.0,
+   "strip_n_det": null,
+   "strip_det_area_m2": null,
+   "level": "C/D (не A): нет синхронности по дрейфу; время наблюдения неизвестно",
+   "strip_floor_ppm_1px": null
+  }
+ ],
+ "thresholds": [
+  0.1,
+  0.2,
+  0.3,
+  0.4,
+  0.5,
+  0.6,
+  0.63,
+  0.7,
+  0.8,
+  0.88
+ ],
+ "note": "detector weights/lgbm без гармонизации (как reports/case_pairs); вода = quality.tif код 1; min_px 1; полевая C и доля покрытия НЕ пара A (нет синхронности), рядом только для масштаба"
+}
