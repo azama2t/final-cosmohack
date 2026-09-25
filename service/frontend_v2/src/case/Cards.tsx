@@ -3,7 +3,7 @@
 // field_estimate separately («оценка по полевым данным, не по снимку»); zone area separately from concentration.
 import { useEffect, useState, type ReactNode } from 'react';
 import Info from '../components/Info';
-import { get, API_BASE, ApiErr, type Feat, type Meta, type ObsProps, type Pair, type Scene, type ZoneDetail, type ZoneProps } from './api3';
+import { get, send, API_BASE, ApiErr, type Feat, type Meta, type ObsProps, type Pair, type Scene, type ZoneDetail, type ZoneProps } from './api3';
 import { plural, color, dateRu, dateTimeRu, driftTitle, driftTxt, dtTitle, dtTxt, eventRu, flagRu, label, missionShort, num, pairDecision, pairReasons, pct, poissonCI, profileRu, reasonRu, scopeRu, sourceShort, unitRu, zoneFlagRu } from './fmt';
 
 function useFetch<T>(fn: (() => Promise<T>) | null, deps: unknown[]): { data: T | null; err: string | null; loading: boolean } {
@@ -408,7 +408,7 @@ export function ObsCard({
   onObs: (id: string) => void;
   onPair: (p: Pair) => void;
 }) {
-  const r = useFetch<Feat<ObsProps> & { pairs: Pair[] }>(() => get(`/api/v3/observations/${encodeURIComponent(id)}`), [id]);
+  const r = useFetch<Feat<ObsProps> & { pairs: Pair[] }>(() => get(`/api/v3/observations/${encodeURIComponent(id)}`, { geometry: 'line' }), [id]);
   if (r.err)
     return (
       <div className="right-inner" data-testid="obs-card">
@@ -478,6 +478,15 @@ export function ObsCard({
                 </dd>
               </>
             )}
+            {geomLine(r.data) && (
+              <>
+                <dt>
+                  Геометрия{' '}
+                  <Info label="Источник геометрии">{(p as any).geometry_source ?? '—'}</Info>
+                </dt>
+                <dd data-testid="obs-geometry">{geomLine(r.data)}</dd>
+              </>
+            )}
             {p.quality_flags?.length ? (
               <>
                 <dt>
@@ -501,6 +510,7 @@ export function ObsCard({
           </div>
           <PairList meta={meta} pairs={r.data.pairs ?? []} activePair={activePair} onPair={onPair} testid="obs-pairs" />
         </div>
+        <PairFinder key={id} obs={r.data} />
 
         {others.length > 0 && (
           <div className="sec">
@@ -614,4 +624,128 @@ function suspicious(p: ZoneProps, d: ZoneDetail | null): string {
   if (!n && !a) return 'подозрительных пикселей в полосе нет';
   const nOut = d?.detections?.features?.filter((f) => f.properties.in_strip === false).length ?? 0;
   return `подозрительные пиксели на снимке-кандидате${tail}: ${plural(n ?? 0, 'объект', 'объекта', 'объектов')}, ${num(a ?? null, 0)} м²${nOut ? ` (ещё ${nOut} вне полосы)` : ''}`;
+}
+
+function hav(a: number[], b: number[]): number {
+  const R = 6371,
+    t = Math.PI / 180;
+  const dLat = (b[1] - a[1]) * t,
+    dLon = (b[0] - a[0]) * t;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a[1] * t) * Math.cos(b[1] * t) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+const srcShortGeom = (s: string | null | undefined) => {
+  const m = (s ?? '').match(/PANGAEA\.(\d+)/);
+  return m ? `PANGAEA ${m[1]}` : s ? s.slice(0, 28) : 'источник';
+};
+
+/** one line about the transect geometry: segments of an interrupted transect / an approximately restored end */
+function geomLine(f: Feat<ObsProps>): string | null {
+  const p = f.properties as any;
+  const g = f.geometry;
+  if (p.geometry_status === 'reconstructed_approx') return `конец трансекты восстановлен приближённо (${srcShortGeom(p.geometry_source)})`;
+  if (g?.type === 'MultiLineString') {
+    const segs: number[][][] = g.coordinates;
+    let gap = 0;
+    for (let i = 0; i + 1 < segs.length; i++) {
+      const a = segs[i][segs[i].length - 1];
+      const b = segs[i + 1][0];
+      gap += hav(a, b);
+    }
+    return `сегменты по ${srcShortGeom(p.geometry_source)}: ${plural(segs.length, 'сегмент', 'сегмента', 'сегментов')}, разрыв ${num(gap, 1)} км`;
+  }
+  if (g?.type === 'LineString' && p.geometry_source) return `трансекта по ${srcShortGeom(p.geometry_source)}`;
+  return null;
+}
+
+const DECISION_RU: Record<string, string> = {
+  synchronous: 'синхронно',
+  not_synchronous: 'не синхронно',
+  synchronous_if_time_in_window: 'синхронно, если время в окне',
+  reject: 'отклонено',
+  rejected: 'отклонено',
+};
+
+/** «Подобрать снимок»: POST /api/v3/pairfinder for this observation — sync window and candidates, one line each */
+function PairFinder({ obs }: { obs: Feat<ObsProps> }) {
+  const [st, setSt] = useState<{ loading: boolean; err: string | null; data: any | null }>({ loading: false, err: null, data: null });
+  const p = obs.properties;
+  const run = async () => {
+    const t = p.transect;
+    const g = obs.geometry;
+    let geometry: any = null;
+    if (g?.type === 'Point' || g?.type === 'LineString') geometry = g;
+    else if (g?.type === 'MultiLineString') geometry = { type: 'LineString', coordinates: [g.coordinates[0][0], g.coordinates[g.coordinates.length - 1].slice(-1)[0]] };
+    else if (t && t.lon_start !== null && t.lat_start !== null) geometry = { lon_start: t.lon_start, lat_start: t.lat_start, lon_end: t.lon_end, lat_end: t.lat_end };
+    const dt = p.date_utc ? (p.time_start_utc ? `${p.date_utc}T${p.time_start_utc.slice(0, 8)}Z` : p.date_utc) : null;
+    if (!geometry || !dt) return setSt({ loading: false, err: 'нет координат или даты наблюдения', data: null });
+    setSt({ loading: true, err: null, data: null });
+    try {
+      const body: any = { geometry, datetime: dt };
+      if (t?.width_m) body.width_m = t.width_m;
+      const d = await send<any>('POST', '/api/v3/pairfinder', body);
+      setSt({ loading: false, err: null, data: d });
+    } catch (e: any) {
+      setSt({ loading: false, err: e?.message ?? String(e), data: null });
+    }
+  };
+  const d = st.data;
+  const sw = d?.sync_window;
+  return (
+    <div className="sec" data-testid="pairfinder">
+      <div className="sec-h">
+        <h3>Подбор снимка</h3>
+        <Info label="Как считается" align="right">
+          Поиск сцен Sentinel-2 / Landsat вокруг даты наблюдения. Пара синхронна, если смещение воды за |Δt| (сценарий дрейфа) не больше допуска. {sw?.rule ?? ''}
+        </Info>
+      </div>
+      {!d && (
+        <button className="btn sm" onClick={run} disabled={st.loading} data-testid="pairfinder-run">
+          {st.loading ? 'Поиск…' : 'Подобрать снимок'}
+        </button>
+      )}
+      {st.err && <div className="c-err">{st.err}</div>}
+      {d && (
+        <>
+          <div className="c-line" data-testid="pairfinder-window">
+            окно синхронизации: |Δt| ≤ {num(sw?.max_abs_dt_hours ?? null, 1)} ч (дрейф {num(sw?.speed_ms ?? null, 1)} м/с, допуск {num(sw?.tolerance_km ?? null, 1)} км)
+            {d.query?.time_known === false ? ` · время не задано, +${num(sw?.unknown_time_extra_hours ?? 12, 0)} ч` : ''}
+          </div>
+          <div className="c-line">
+            кандидатов {num(d.count ?? 0, 0)} · синхронных {num(d.n_synchronous ?? 0, 0)}
+            {d.n_synchronous_if_time_in_window ? ` · если время в окне: ${d.n_synchronous_if_time_in_window}` : ''}
+          </div>
+          {!d.candidates?.length && <div className="note">{d.empty_reason ?? 'снимков в окне поиска нет'}</div>}
+          {d.candidates?.length > 0 && (
+            <table className="c-ptable" data-testid="pairfinder-table">
+              <thead>
+                <tr>
+                  <th>Снимок</th>
+                  <th className="r">Δt, ч</th>
+                  <th className="r">Сдвиг / допуск, км</th>
+                  <th>Решение</th>
+                </tr>
+              </thead>
+              <tbody>
+                {d.candidates.slice(0, 10).map((c: any) => (
+                  <tr key={c.scene_id} title={c.reason ?? ''} data-testid="pairfinder-row">
+                    <td>
+                      {c.mission} · {dateRu(c.scene_datetime)}
+                    </td>
+                    <td className="r">{c.dt_hours === null || c.dt_hours === undefined ? '—' : `${c.dt_hours > 0 ? '+' : c.dt_hours < 0 ? '−' : ''}${num(Math.abs(c.dt_hours), 1)}`}</td>
+                    <td className="r">
+                      {num(c.drift?.shift_km_selected ?? null, 1)} / {num(c.tolerance_km ?? null, 1)}
+                    </td>
+                    <td>
+                      <span className={`c-dec ${c.synchronous ? 'accepted' : 'rejected'}`}>{DECISION_RU[c.decision] ?? (c.synchronous ? 'синхронно' : 'не синхронно')}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </>
+      )}
+    </div>
+  );
 }

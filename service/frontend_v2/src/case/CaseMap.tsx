@@ -80,11 +80,13 @@ function obsPoints(fc: FC<ObsProps> | null) {
   for (const f of fc?.features ?? []) {
     const p = f.properties;
     let c: number[] | null = null;
+    const tc = (p as any).track_center;
     if (f.geometry?.type === 'Point') c = f.geometry.coordinates;
+    else if (Array.isArray(tc) && tc.length === 2) c = tc;
     else if (f.geometry?.type === 'LineString') {
       const cs = f.geometry.coordinates;
       c = [(cs[0][0] + cs[cs.length - 1][0]) / 2, (cs[0][1] + cs[cs.length - 1][1]) / 2];
-    }
+    } else if (f.geometry?.type === 'MultiLineString') c = geomCenter(f.geometry);
     if (!c) continue;
     const v = p.concentration_items_km2;
     const k = v === null || v === undefined ? 'i' : v === 0 ? 'z' : 'd';
@@ -97,15 +99,11 @@ function obsPoints(fc: FC<ObsProps> | null) {
 
 function obsLines(fc: FC<ObsProps> | null) {
   const feats: any[] = [];
+  // the API geometry itself: an interrupted transect is a MultiLineString — its segments are NOT joined across the gap
   for (const f of fc?.features ?? []) {
-    const t = f.properties.transect;
-    if (!t || t.lon_start === null || t.lat_start === null || t.lon_end === null || t.lat_end === null) continue;
-    if (t.lon_start === t.lon_end && t.lat_start === t.lat_end) continue;
-    feats.push({
-      type: 'Feature',
-      geometry: { type: 'LineString', coordinates: [[t.lon_start, t.lat_start], [t.lon_end, t.lat_end]] },
-      properties: { id: f.id },
-    });
+    const g = f.geometry;
+    if (!g || (g.type !== 'LineString' && g.type !== 'MultiLineString')) continue;
+    feats.push({ type: 'Feature', geometry: g, properties: { id: f.id, st: (f.properties as any).geometry_status ?? null } });
   }
   return { type: 'FeatureCollection', features: feats };
 }
@@ -225,7 +223,21 @@ export default function CaseMap(p: CaseMapProps) {
     const statusCol: any = ['match', ['get', 'ps'], 'accepted', STRIP_OK, STRIP_NO];
     void statusMatch;
     add({ id: 'c-scene-fp', type: 'line', source: 'c-scene-fp', paint: { 'line-color': '#e7e8ea', 'line-opacity': 0.45, 'line-width': 1 } });
-    add({ id: 'c-obs-lines', type: 'line', source: 'c-obs-lines', paint: { 'line-color': '#e7e8ea', 'line-width': 1.4, 'line-opacity': 0.75 } });
+    add({
+      id: 'c-obs-lines',
+      type: 'line',
+      source: 'c-obs-lines',
+      filter: ['!=', ['get', 'st'], 'reconstructed_approx'],
+      paint: { 'line-color': '#e7e8ea', 'line-width': 1.4, 'line-opacity': 0.75 },
+    });
+    // an approximately reconstructed transect: dotted
+    add({
+      id: 'c-obs-lines-approx',
+      type: 'line',
+      source: 'c-obs-lines',
+      filter: ['==', ['get', 'st'], 'reconstructed_approx'],
+      paint: { 'line-color': '#e7e8ea', 'line-width': 1.4, 'line-opacity': 0.75, 'line-dasharray': [1, 1.5] },
+    });
     add({ id: 'c-zones-fill', type: 'fill', source: 'c-zones', paint: { 'fill-color': statusCol, 'fill-opacity': 0.18 } });
     add({
       id: 'c-zones-line',
@@ -286,7 +298,7 @@ export default function CaseMap(p: CaseMapProps) {
     add({ id: 'c-det-fill', type: 'fill', source: 'c-det', paint: { 'fill-color': ACCENT, 'fill-opacity': ['case', ['==', ['get', 'in_strip'], true], 0.55, 0.12] } });
     add({ id: 'c-det-line', type: 'line', source: 'c-det', paint: { 'line-color': ACCENT, 'line-width': 1.2, 'line-opacity': ['case', ['==', ['get', 'in_strip'], true], 1, 0.45] } });
     add({ id: 'c-pair-scene', type: 'line', source: 'c-pair-scene', paint: { 'line-color': ACCENT, 'line-width': 2 } });
-    add({ id: 'c-pair', type: 'line', source: 'c-pair', filter: ['==', ['geometry-type'], 'LineString'], paint: { 'line-color': ACCENT, 'line-width': 3 } });
+    add({ id: 'c-pair', type: 'line', source: 'c-pair', filter: ['in', ['geometry-type'], ['literal', ['LineString', 'MultiLineString']]], paint: { 'line-color': ACCENT, 'line-width': 3 } });
     add({
       id: 'c-pair-pt',
       type: 'circle',
@@ -321,7 +333,7 @@ export default function CaseMap(p: CaseMapProps) {
 
     // visibility + selection
     const vis = (id: string, on: boolean) => map.getLayer(id) && map.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none');
-    for (const id of ['c-obs-lines', 'c-obs-items', 'c-obs-zero', 'c-obs-dens', 'c-obs-sel']) vis(id, cur.layers.obs);
+    for (const id of ['c-obs-lines', 'c-obs-lines-approx', 'c-obs-items', 'c-obs-zero', 'c-obs-dens', 'c-obs-sel']) vis(id, cur.layers.obs);
     for (const id of ['c-zones-fill', 'c-zones-line', 'c-zones-sel', 'c-zone-pts']) vis(id, cur.layers.zones);
     vis('c-scene-fp', cur.layers.scenes);
     const sel = cur.selected;

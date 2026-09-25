@@ -154,7 +154,7 @@ export default function CaseApp() {
   const oP = obsParams(q);
   const zP = zoneParams(q);
   const sP = sceneParams(q, box);
-  const obs = useLoad<FC<ObsProps>>(ready ? (s) => get('/api/v3/observations', { ...oP, limit: 5000 }, s) : null, ready ? 'o' + fkey : '');
+  const obs = useLoad<FC<ObsProps>>(ready ? (s) => get('/api/v3/observations', { ...oP, geometry: 'line', limit: 5000 }, s) : null, ready ? 'o' + fkey : '');
   const zones = useLoad<FC<ZoneProps>>(ready ? (s) => get('/api/v3/zones', zP, s) : null, ready ? 'z' + fkey : '');
   const scenes = useLoad<{ count: number; scenes: Scene[]; empty_reason: string | null }>(ready ? (s) => get('/api/v3/scenes', sP, s) : null, ready ? 's' + fkey : '');
   const pP = pairParams(q, pairStatus);

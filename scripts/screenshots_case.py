@@ -478,7 +478,7 @@ def run(args) -> dict:
         def s_url():
             # a shared link (?q=…&sel=…) restores filters, selection and the card without the backend's saved queries
             p8 = new_page()
-            p8.goto(base + "/?q=eyJzb3VyY2UiOiJTM19TRV9OT1JUSF9TRUEiLCJmcm9tIjpudWxsLCJ0byI6bnVsbCwicHJvZmlsZSI6bnVsbCwiZGV0IjpbImRldGVjdGVkIl0sImNvbmMiOltdLCJsYXllcnMiOnsib2JzIjp0cnVlLCJ6b25lcyI6dHJ1ZSwic2NlbmVzIjp0cnVlLCJxdWFsaXR5Ijp0cnVlfX0&sel=zone:Z-S3_HE460_MarLitter_transect03", wait_until="domcontentloaded")
+            p8.goto(base + "/?q=eyJzb3VyY2UiOiJTM19TRV9OT1JUSF9TRUEiLCJmcm9tIjpudWxsLCJ0byI6bnVsbCwicHJvZmlsZSI6bnVsbCwic2NvcGUiOm51bGwsImRldCI6W10sImNvbmMiOltdLCJsYXllcnMiOnsib2JzIjp0cnVlLCJ6b25lcyI6dHJ1ZSwic2NlbmVzIjp0cnVlLCJxdWFsaXR5Ijp0cnVlfX0&sel=zone:Z-S3_HE460_MarLitter_transect03", wait_until="domcontentloaded")
             wait_ready(p8)
             p8.wait_for_selector("[data-testid='zone-card']", timeout=15000)
             wait_idle(p8, 2500)
@@ -487,6 +487,39 @@ def run(args) -> dict:
             p8.context.close()
 
         step("url_restore", s_url)
+
+        def s_geom():
+            # L66 it.8: interrupted transect (MultiLineString, 2 segments, gap not joined), reconstructed end, pairfinder
+            p9 = new_page()
+            p9.goto(base + "/", wait_until="domcontentloaded")
+            wait_ready(p9)
+            p9.locator("[data-testid='f-source']").select_option("S2_SARGASSO_MSM41")
+            p9.wait_for_function("window.__app.q.source === 'S2_SARGASSO_MSM41' && window.__app.ready")
+            wait_idle(p9, 1500)
+            p9.evaluate("window.__app.selectObs('MPL-0257')")
+            p9.wait_for_selector("[data-testid='obs-geometry']", timeout=15000)
+            wait_idle(p9, 2000)
+            shot(p9, "24_multiline_transect")
+            res["geom_multiline"] = p9.evaluate("document.querySelector('[data-testid=obs-geometry]')?.textContent")
+            p9.locator("[data-testid='pairfinder-run']").click()
+            p9.wait_for_selector("[data-testid='pairfinder-window']", timeout=60000)
+            p9.wait_for_timeout(500)
+            shot(p9, "25_pairfinder_s2")
+            p9.locator("[data-testid='f-source']").select_option("S3_SE_NORTH_SEA")
+            p9.wait_for_function("window.__app.q.source === 'S3_SE_NORTH_SEA' && window.__app.ready")
+            wait_idle(p9, 1500)
+            p9.evaluate("window.__app.selectObs('MPL-0779')")
+            p9.wait_for_selector("[data-testid='obs-geometry']", timeout=15000)
+            wait_idle(p9, 2000)
+            res["geom_reconstructed"] = p9.evaluate("document.querySelector('[data-testid=obs-geometry]')?.textContent")
+            p9.locator("[data-testid='pairfinder-run']").click()
+            p9.wait_for_selector("[data-testid='pairfinder-window']", timeout=60000)
+            p9.wait_for_timeout(500)
+            shot(p9, "26_reconstructed_pairfinder")
+            res["pairfinder_rows"] = p9.locator("[data-testid='pairfinder-row']").count()
+            p9.context.close()
+
+        step("geometry_pairfinder", s_geom)
         browser.close()
 
     # never leave test queries in the shared saved-queries file
