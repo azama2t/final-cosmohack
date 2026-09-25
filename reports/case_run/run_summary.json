@@ -68,9 +68,9 @@
    "reject": 306
   }
  },
- "command": "run_all.py all --offline",
- "last_subcommand": "all",
- "finished": "2026-09-25T19:01:32",
+ "command": "run_all.py export --offline",
+ "last_subcommand": "export",
+ "finished": "2026-09-25T19:25:06",
  "offline": true,
  "force": false,
  "workdir": null,
@@ -85,11 +85,11 @@
   "shapely": "2.1.2",
   "fastapi": "0.141.1",
   "yaml": "6.0.3",
-  "git_commit": "a93e80bf89efdcb6713c5d9440c5382aab38692e"
+  "git_commit": "93cf856bc4512b232937d40feaa0a3790fda7d4b"
  },
  "inputs": {
   "task/macroplastic_marine_samples.csv": "30ce0a65e3880b833b5dfe3bc6f528ee5f5af14a0d22f25995f4ef8af585a764",
-  "configs/case_selection.yaml": "e1421d2115b2a831973ec765f385dcf6853408b9f76f51838de5c758c7b6a750",
+  "configs/case_selection.yaml": "283fa0885c63e9311958db2d0987c3cf025415aa6153557213c2112199c933ba",
   "configs/case_pairs.yaml": "d2001925b3863cbacd434e8f5f306e45f0a6bb6867371f1525b8668502ee4f5a",
   "weights/lgbm/meta.json": "97db8f94afb5b46b89f45f08562519b0b6a1ee91dc0e2aa5716b5926c4a1da07"
  },
@@ -109,17 +109,17 @@
   "reports/case_conc/consistency.csv": "8ce619025128c25384b37f17ffbf9c9037fdc8419e823c0a725a3b93cf9af86d",
   "reports/case_conc/metrics.json": "77713271b4893f1462de369ba246834838d322b139d336b7c3e7925125314df4",
   "reports/case_run/detector_recomputed.json": "1caae3772b8822b04b4876e7243a9e4c4afd3c4976af8699cfce677d7cbf0b1c",
-  "out/case_export/observations.geojson": "7750ecd02b8cac8fc41ddb5d6793fba079f5c66a17694a00d52e62cea0c56932",
+  "out/case_export/observations.geojson": "1d9aad934e02482106e012122763ee9e9830d86fb931d5202328d6cb6a9c9cf9",
   "out/case_export/observations.csv": "c10a007355c1b8e0b1961af473ff8427b9ab48db806f5f243e0d3f01e20c54ca",
   "out/case_export/pairs.geojson": "f050f282e32d2c1691331fce7b1779126595696cbd6c64c3b645ff5bf73cf4e6",
   "out/case_export/pairs.csv": "fd2c383165668ee679d3e81368a10a5f348505328f4820c1b5f01d6f476d2c69",
-  "out/case_export/zones.geojson": "b3a0c0a397e50454798417a0c6e39beac1c55bf1a71559af975dafcc5bfea2c9",
-  "out/case_export/zones.csv": "9d257343dc5fa2ec64885637997c3287002b89342eb7ebf61baa7dca182d4eac",
+  "out/case_export/zones.geojson": "7757ba9b3310d05f70e1c30ac07e54590c0d575e5a448ce33680a6a54ad1f22c",
+  "out/case_export/zones.csv": "edb43353796d4769c09717bdd5cfd946b007d6366e1f48d4f772f8bec638883b",
   "out/case_export/example_pairs_black_sea_24h.csv": "58191fc37a639f79a8197a02e4deabc75bafefe3e3aca8187d11b1fda13f6cc3",
   "out/case_export/example_pairs_accepted.csv": "c98dfb6d693c97b031d7abb94751e54b4baf7972f9f493e0a2b997bffcae2dbe",
-  "out/case_export/example_zones_detected.geojson": "6a5b4b82c6d85946b458c913871edc5397b6a1bb13e89350425f2ef73722d369"
+  "out/case_export/example_zones_detected.geojson": "58fd0941b152a511fe654ad736dec6fc78e45ec37dc7e9b29cab9792fe7ca0c6"
  },
- "outputs_fingerprint": "a517218f2b6b419e2a79917a4949bb85c7bf5ced37cafe3f9f1e72e6eadc3964",
+ "outputs_fingerprint": "85335b7a5f8aa5de79482138e7f6e1ba76ce796afbf0c9933a5c0e27b820e182",
  "steps": {
   "1_selection": {
    "step": "1_selection",
@@ -171,7 +171,7 @@
    "step": "6_export_api_v3",
    "ok": true,
    "note": "observations.geojson: 935, observations.csv: 935, pairs.geojson: 4436, pairs.csv: 4436, zones.geojson: 29, zones.csv: 29",
-   "seconds": 1.0
+   "seconds": 1.1
   },
   "total_export": {
    "step": "total_export",
@@ -384,7 +384,7 @@
    {
     "file": "example_zones_detected.geojson",
     "request": "GET /api/v3/export?layer=zones&format=geojson&detection_status=detected",
-    "records": 1
+    "records": 0
    }
   ]
  }

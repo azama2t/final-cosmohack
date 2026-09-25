@@ -492,7 +492,41 @@ def case_final_test_text(fn: dict) -> str:
                      f"(n = {fmt(r.get('n_test'), None)}), ΔMAE {_num(dd.get('d_mae'), 1, True)} {_ci_txt(dd.get('ci95'))}"
                      + (f", покрытие 90 %-интервала {100 * float(cov):.0f} %" if cov is not None else "")
                      + ("; выигрыш значим" if r.get("main_better_significant") else "; выигрыш не значим"))
-    return "**Отложенный test посчитан один раз** (`reports/case_conc/final_test.json`): " + "; ".join(parts) + "."
+    ftx = ((fn.get("case") or {}).get("sections") or {}).get("field_test") or {}
+    tail = ""
+    if ftx.get("rule"):
+        tail += f"\n\nПравило, записанное до открытия test ({fmt(ftx.get('decision_recorded_at'), None)}): {ftx['rule']}."
+    if ftx.get("limitation"):
+        tail += f" Ограничение: {ftx['limitation']}."
+    return (f"**Отложенный test посчитан один раз** ({fmt(ftx.get('when'), None)}, `reports/case_conc/final_test.json`, "
+            "прогнозы — `final_test_predictions.csv`): " + "; ".join(parts) + "." + tail)
+
+
+def case_sections_table(fn: dict) -> str:
+    s = ((fn.get("case") or {}).get("sections") or {})
+    if not s:
+        return DASH
+    m, dv, ft, ex = s.get("marida_test") or {}, s.get("field_dev") or {}, s.get("field_test") or {}, s.get("sat_experiment") or {}
+    ci = m.get("lgbm_ci95") or [None, None]
+    d2, d1 = dv.get("S2") or {}, dv.get("S1") or {}
+    t2, t1 = ft.get("S2") or {}, ft.get("S1") or {}
+
+    def tt(t):
+        if not t.get("computed"):
+            return f"не посчитан (n = {fmt(t.get('n_test'), None)})"
+        return (f"{t.get('main_model')} {_num(t.get('main_mae'))} против медианы {_num(t.get('median_mae'))}, "
+                f"ΔMAE {_ci_txt(t.get('d_mae_ci95'))} — {t.get('verdict')}")
+    rows = ["| Раздел | Главные числа | Протокол | Источник |", "|---|---|---|---|",
+            f"| 1. Детектор на MARIDA test | LightGBM F1 {fmt(m.get('lgbm_f1'), 'f3')} [{fmt(ci[0], 'f3')}–{fmt(ci[1], 'f3')}], RF {fmt(m.get('rf_f1'), 'f3')}, "
+            f"FDI × NDVI {fmt(m.get('fdi_ndvi_f1'), 'f3')}; {fmt(m.get('n_scenes'), None)} сцен | {m.get('protocol') or DASH} | `{m.get('source') or DASH}` |",
+            f"| 2. Полевая dev-проверка | S2 ({fmt_pl(d2.get('n_dev'), 'событие/события/событий')}): {d2.get('primary')} MAE {_num(d2.get('main_mae'))} против медианы {_num(d2.get('median_mae'))}, "
+            f"ΔMAE {_ci_txt(d2.get('d_mae_ci95'))}; S1 ({fmt(d1.get('n_dev'), None)}): {d1.get('primary')} {_num(d1.get('main_mae'))} против {_num(d1.get('median_mae'))} | "
+            f"{dv.get('protocol') or DASH} | `{dv.get('source') or DASH}` |",
+            f"| 3. Полевой отложенный test | S2 ({fmt(t2.get('n_test'), None)}): {tt(t2)}; S1 ({fmt(t1.get('n_test'), None)}): {tt(t1)} | "
+            f"{ft.get('protocol') or DASH}. Ограничение: ранняя разведка бейзлайнов видела все события профиля | `{ft.get('source') or DASH}` |",
+            f"| 4. Эксперимент на снимках | {fmt(ex.get('n_pairs'), None)} пар S2 ({fmt(ex.get('n_groups'), None)} групп), весь мусор, не пластик: FDI ρ {fmt(ex.get('fdi_rho'), 'f2')}, "
+            f"p Холма {fmt(ex.get('fdi_p_holm'), 'f2')}, случайная вода сцены {fmt(ex.get('fdi_null_median'), 'f2')} — {ex.get('verdict')} | {ex.get('protocol') or DASH} | `{ex.get('source') or DASH}` |"]
+    return "\n".join(rows)
 
 
 def derived(fn: dict) -> dict:
@@ -640,7 +674,7 @@ def derived(fn: dict) -> dict:
             "case_detector_table": case_detector_table(fn), "case_fp_table": case_fp_table(fn),
             "case_conc_table_S2": case_conc_table(fn, "S2"), "case_conc_table_S1": case_conc_table(fn, "S1"),
             "case_pairs_table": case_pairs_table(fn), "case_schemes_table": case_schemes_table(fn),"case_drift_table": case_drift_table(fn),
-            "case_final_test_text": case_final_test_text(fn)}
+            "case_final_test_text": case_final_test_text(fn), "case_sections_table": case_sections_table(fn)}
 
 
 def render(text: str, ctx: dict, missing: list) -> str:

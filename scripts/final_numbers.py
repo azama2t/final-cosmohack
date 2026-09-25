@@ -1137,6 +1137,74 @@ def _case_selfcheck() -> dict:
             "p95_max_ms": _r(max(p95), 0) if p95 else None}
 
 
+def _case_sections(c: dict) -> dict:
+    """The four evidence sections of the case, each number with its source and protocol (one source of numbers)."""
+    det, cc, ex = c.get("detector") or {}, c.get("conc") or {}, c.get("experiment") or {}
+    te = det.get("test") or {}
+    sel = _load_yaml(ROOT / "configs" / "case_selection.yaml") or {}
+    dec = ((sel.get("final_test") or {}).get("decision_before_opening")) or {}
+
+    def ft(key):
+        p = cc.get(key) or {}
+        r = (p.get("final_test") or {}).get("result") or {}
+        if not r:
+            return {"computed": False, "n_test": (p.get("final_test") or {}).get("n_test")}
+        mm, bm, d = r.get("main") or {}, r.get("baseline_metrics") or {}, r.get("main_vs_baseline") or {}
+        sig = bool(r.get("main_better_significant"))
+        return {"computed": True, "n_test": r.get("n_test"), "test_cruise_days": r.get("test_cruise_days"),
+                "main_model": r.get("main_model"), "main_mae": _r(mm.get("mae"), 1), "main_rmse": _r(mm.get("rmse"), 1),
+                "main_log1p_mae": _r(mm.get("log1p_mae"), 3),
+                "main_coverage90_pct": _r(100 * mm["coverage90"], 0) if mm.get("coverage90") is not None else None,
+                "median_mae": _r(bm.get("mae"), 1), "median_rmse": _r(bm.get("rmse"), 1),
+                "median_log1p_mae": _r(bm.get("log1p_mae"), 3),
+                "median_coverage90_pct": _r(100 * bm["coverage90"], 0) if bm.get("coverage90") is not None else None,
+                "d_mae": _r(d.get("d_mae"), 1), "d_mae_ci95": _ci2(d.get("ci95"), 1),
+                "main_better_significant": sig,
+                "verdict": ("основная модель лучше медианы" if sig else
+                            ("основная модель не лучше медианы" if (d.get("d_mae") or 0) > 0 else "разницы с медианой нет")),
+                "field_estimate_model": r.get("main_model") if sig else "median"}
+    ft_when = None
+    ftj = _load_json(ROOT / "reports" / "case_conc" / "final_test.json")
+    if isinstance(ftj, dict):
+        ft_when = _dt_ru(ftj.get("when"))
+    return {
+        "marida_test": {
+            "source": "reports/case_detector/metrics.json",
+            "protocol": "официальный test MARIDA, один раз после заморозки; порог и настройки бейзлайнов — только по val; "
+                        "класс Marine Debris против остальных размеченных классов, неразмеченные не считаются фоном; ДИ — бутстреп по сценам",
+            "n_scenes": det.get("test_n_scenes"), "n_patches": det.get("test_n_patches"), "md_px": det.get("test_md_px"),
+            "lgbm_f1": (te.get("lgbm") or {}).get("f1"), "lgbm_ci95": (te.get("lgbm") or {}).get("ci95_f1"),
+            "rf_f1": (te.get("rf_argmax") or {}).get("f1"), "fdi_ndvi_f1": (te.get("fdi_ndvi_box") or {}).get("f1"),
+            "delta_vs_rf": (det.get("paired_vs_rf") or {}).get("delta_f1"), "delta_vs_rf_ci95": (det.get("paired_vs_rf") or {}).get("ci95")},
+        "field_dev": {
+            "source": "reports/case_conc/dev_cv.json, configs/case_conc_model.yaml",
+            "protocol": "кросс-валидация внутри dev по 5 участкам маршрута с буфером 1 сут (route_buf1); протокол и правило выбора записаны до CV; "
+                        "ДИ разности MAE — бутстреп по дням рейса",
+            "S2": {k: (cc.get("S2") or {}).get(k) for k in ("n_dev", "dev_days", "primary")} |
+                  {"main_mae": ((cc.get("S2") or {}).get("main") or {}).get("mae"),
+                   "median_mae": ((cc.get("S2") or {}).get("median") or {}).get("mae"),
+                   "d_mae_ci95": ((cc.get("S2") or {}).get("main") or {}).get("d_mae_ci95")},
+            "S1": {k: (cc.get("S1") or {}).get(k) for k in ("n_dev", "dev_days", "primary")} |
+                  {"main_mae": ((cc.get("S1") or {}).get("main") or {}).get("mae"),
+                   "median_mae": ((cc.get("S1") or {}).get("median") or {}).get("mae"),
+                   "d_mae_ci95": ((cc.get("S1") or {}).get("main") or {}).get("d_mae_ci95")}},
+        "field_test": {
+            "source": "reports/case_conc/final_test.json, reports/case_conc/final_test_predictions.csv",
+            "protocol": "отложенный участок маршрута (+ буфер 1 сут), состав зафиксирован до моделей (sha256 в configs/case_selection.yaml), "
+                        "посчитан один раз; основная модель против медианы dev на тех же событиях; ДИ — бутстреп по дням рейса test",
+            "computed": isinstance(ftj, dict), "when": ft_when,
+            "decision_recorded_at": _dt_ru(dec.get("recorded_at")), "rule": dec.get("rule"), "limitation": dec.get("limitation"),
+            "S2": ft("S2"), "S1": ft("S1")},
+        "sat_experiment": {
+            "source": "reports/case_pairs/experiment.json",
+            "protocol": "пары, прошедшие маски качества; эталон — полевая плотность всего мусора (all_litter), не пластика; "
+                        "ранговая связь Спирмена, бутстреп по группам «район × день», поправка Холма, нулевая модель — случайная вода той же сцены",
+            "n_pairs": ex.get("n_accept_s2"), "n_groups": ex.get("n_groups"), "fdi_rho": (ex.get("fdi") or {}).get("rho"),
+            "fdi_p_holm": (ex.get("fdi") or {}).get("p_holm"), "fdi_null_median": (ex.get("fdi") or {}).get("null_median"),
+            "verdict": "связь не установлена"},
+    }
+
+
 def collect_case() -> dict:
     """Case «макропластик, шт./км²»: selection, pairs, detector on MARIDA test, concentration (dev CV + frozen test),
     pairs experiment, run_all summary. Sources: reports/case_run/run_summary.json, reports/case_conc/*, configs/case_*.yaml,
@@ -1200,6 +1268,7 @@ def collect_case() -> dict:
                   "step_s": {k: (v or {}).get("seconds") for k, v in steps.items() if not k.startswith("total")},
                   "export": {Path(f.get("file", "")).stem: f.get("records") for f in (rs.get("export") or {}).get("files") or []},
                   "detector_recomputed": ((rs.get("detector") or {}).get("recomputed_from_preds") or {}).get("test")}
+    out["sections"] = _case_sections(out)
     out["splits_files"] = len(glob.glob(str(ROOT / "reports" / "case_splits" / "*.csv"))) or None
     tests = 0
     for p in glob.glob(str(ROOT / "tests" / "test_case_*.py")) + [str(ROOT / "tests" / "test_api_v3.py")]:

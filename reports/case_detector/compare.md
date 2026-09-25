@@ -4,6 +4,7 @@
 Числа: `reports/case_detector/metrics.json`. Предсказания: `data/case/detector_preds/{test,val}_preds.npz` (в git).
 
 ## Выборка, эталон, классы
+- **Класс MARIDA Marine Debris = любой плавающий мусор, не только пластик.** Детектор отличает мусор от сложного фона, но пластик отдельно не выделяет.
 - **Проверочная выборка:** официальный сплит MARIDA test: 359 патчей 256×256 (Sentinel-2 L2A, 10 м), 15 сцен, список в `data/MARIDA/splits/test_X.txt`.
   Настройки выбирались только на MARIDA val (328 патчей, 12 сцен); на test ничего не подбиралось.
 - **Эталон:** ручная разметка MARIDA (`*_cl.tif`): 15 классов, 0 — не размечено. Классы: 1 Marine Debris (цель), 2 Dense Sargassum,

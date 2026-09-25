@@ -178,6 +178,7 @@ def main():
 
     all_pr, all_folds, report = [], [], {}
     lines = ["# Бейзлайны концентрации шт./км² (полевые данные)", "",
+             "> **Разведка до заморозки test, другой протокол (все события профиля, включая будущий отложенный test); не основной результат.** Основные числа: dev CV — reports/case_conc/dev_cv.md, отложенный test — reports/case_conc/final_test.json (сводка — README, раздел 5).", "",
              f"**Основной сплит (зафиксирован в configs/case_selection.yaml до моделей): `{main_scheme}`** — "
              f"{args.k_blocks} непрерывных участков маршрута по дням рейса (фолд = участок), из train убраны "
              f"записи ближе {ms['buffer_days']:g} сут к test.", "",

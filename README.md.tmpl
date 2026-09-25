@@ -3,11 +3,18 @@
 Веб-сервис и воспроизводимый расчёт по кейсу «Детектирование и оценка концентрации макропластика в морских акваториях». Два алгоритма проверяются раздельно, как допускает постановка:
 
 - **Детектор** по снимку Sentinel-2 строит маску вероятного скопления плавающего мусора. Проверен на отложенном test MARIDA.
-- **Модель концентрации** считает шт./км² для заявленного профиля по полевым данным. Проверена кросс-валидацией на участках маршрута, отложенный test зафиксирован до моделей.
+- **Модель концентрации** считает шт./км² для заявленного профиля по полевым данным. Проверена кросс-валидацией на участках маршрута и один раз на отложенном test. Итог на test: у S2 — {{case.sections.field_test.S2.verdict}}, у S1 — {{case.sections.field_test.S1.verdict}}. Поэтому по правилу, записанному до открытия test, оценка по полевым данным на карте — **медиана профиля**.
 
-Карта связывает снимки, полевые наблюдения, зоны, статусы и выгрузку. Перенос концентрации со снимка в шт./км² **не подтверждён**, и сервис так и пишет: у всех зон стоит статус «концентрация недоступна».
+**Что на карте.** {{case.run.export.zones}} обследованных участков со снимками-кандидатами; **0 подтверждённых пар** «снимок ↔ полевое измерение»; для пластика снимков нет.
+- Участок на карте — полоса обследования на снимке, а не контур пятна.
+- Пиксели, которые детектор счёл подозрительными, — отдельный слой, без полевого подтверждения.
+- Концентрация по снимку не выдаётся: у всех участков статус «концентрация недоступна».
 
-Все числа ниже подставляются из `reports/final_numbers.json`. Этот файл собирает `scripts/final_numbers.py` из отчётов и конфигов, путь к каждому источнику указан рядом с числом. Подробный отчёт — [reports/report.md](reports/report.md), порядок запуска и время — [docs/CASE_RUN.md](docs/CASE_RUN.md), контракт API — [docs/CONTRACTS_V3.md](docs/CONTRACTS_V3.md), разбор постановки — [docs/CASE_ANALYSIS.md](docs/CASE_ANALYSIS.md), подготовительный этап — [docs/PREP.md](docs/PREP.md).
+Все числа ниже подставляются из `reports/final_numbers.json`. Этот файл собирает `scripts/final_numbers.py` из отчётов и конфигов, путь к каждому источнику указан рядом с числом. Подробный отчёт — [reports/report.md](reports/report.md), порядок запуска и время — [docs/CASE_RUN.md](docs/CASE_RUN.md), контракт API — [docs/CONTRACTS_V3.md](docs/CONTRACTS_V3.md), разбор постановки — [docs/CASE_ANALYSIS.md](docs/CASE_ANALYSIS.md), подготовительный этап — [docs/PREP.md](docs/PREP.md), дополнительные функции (в том числе подбор снимка под наблюдение, `/api/v3/pairfinder`) — [docs/EXTRA_FEATURES.md](docs/EXTRA_FEATURES.md), геометрия трансект по первоисточникам PANGAEA — [reports/case_geometry/summary.md](reports/case_geometry/summary.md).
+
+Числа разбиты на четыре раздела, у каждого свой источник и протокол (в `final_numbers.json` — поля `source` и `protocol` блока `case.sections`):
+
+{{derived.case_sections_table}}
 
 ## Главное
 
@@ -15,8 +22,8 @@
 |---|---|---|
 | Целевая величина | суммарный плавающий пластик (`total_plastic`), предметы > 2 см, шт./км², визуальная полоса 10 м с судна — профиль `S2_visual_GT2`, {{case.conc.S2.target.n_events|pl:событие/события/событий}} | конфиг `configs/case_selection.yaml` |
 | Формула | C = N / A; контрольный пример {{case.control.n}} / {{case.control.area_km2|f2}} км² = **{{case.control.value|f1}} шт./км²** (95 % ДИ Пуассона {{case.control.lower|f1}}–{{case.control.upper|f1}}); C = N/A совпала с опубликованной (допуск 2 %) у {{case.conc.consistency.match}} из {{case.conc.consistency.rows}} строк | `src/macroplastic/case/concentration.py`, тесты |
-| Концентрация, S2 (dev CV) | {{case.conc.S2.primary}}: MAE **{{case.conc.S2.main.mae|f1}}** против медианы {{case.conc.S2.median.mae|f1}} шт./км², ΔMAE {{case.conc.S2.main.d_mae|f1}} [{{case.conc.S2.main.d_mae_ci95.0|f1}}; {{case.conc.S2.main.d_mae_ci95.1|f1}}]; выигрыш слабый: с поправкой на {{case.conc.protocol.n_candidates}} кандидатов не значим | поле, `reports/case_conc/dev_cv.md` |
-| Отложенный test концентрации | {{case.conc.S2.final_test.n_test}} событий S2 и {{case.conc.S1.final_test.n_test}} событий S1 зафиксированы до моделей (sha256 в конфиге); статус: {{case.conc.final_test_status}} | `reports/case_splits/final_test_*.csv` |
+| Концентрация, dev CV | S2 {{case.conc.S2.primary}}: MAE {{case.conc.S2.main.mae|f1}} против медианы {{case.conc.S2.median.mae|f1}} шт./км², ΔMAE [{{case.conc.S2.main.d_mae_ci95.0|f1}}; {{case.conc.S2.main.d_mae_ci95.1|f1}}] — слабый выигрыш | поле, `reports/case_conc/dev_cv.json` |
+| **Концентрация, отложенный test** (один раз, {{case.sections.field_test.when}}) | S2 {{case.sections.field_test.S2.main_model}}: MAE **{{case.sections.field_test.S2.main_mae|f1}}** против медианы **{{case.sections.field_test.S2.median_mae|f1}}** шт./км² ({{case.sections.field_test.S2.n_test}} событий) — {{case.sections.field_test.S2.verdict}}; S1 {{case.sections.field_test.S1.main_model}}: {{case.sections.field_test.S1.main_mae|f1}} против {{case.sections.field_test.S1.median_mae|f1}} — {{case.sections.field_test.S1.verdict}}. На карте оценка по полевым данным — медиана | поле, `reports/case_conc/final_test.json` |
 | Детектор, test MARIDA | F1 Marine Debris **{{case.detector.test.lgbm.f1|f3}}** [{{case.detector.test.lgbm.ci95_f1.0|f3}}–{{case.detector.test.lgbm.ci95_f1.1|f3}}] против RandomForest {{case.detector.test.rf_argmax.f1|f3}} и окна FDI × NDVI {{case.detector.test.fdi_ndvi_box.f1|f3}} на тех же {{case.detector.test_n_scenes}} сценах | разметка MARIDA, `reports/case_detector/compare.md` |
 | Спутниковые пары | по метаданным {{case.pairs.events_accept_meta}} из {{case.pairs.events}} событий; маски качества прошли {{case.pairs.quality_accept}}; **синхронных при типичном дрейфе — {{case.pairs.events_accept_drift}}**. Для профилей пластика сцен нет | реестр пар, `reports/case_pairs/summary.md` |
 | Перенос «снимок → шт./км²» | не установлен: на {{case.experiment.n_accept_s2}} парах ({{case.experiment.n_groups}} независимых групп) связь признаков снимка с полевой плотностью всего мусора не отличается от случайной воды той же сцены | `reports/case_pairs/experiment.md` |
@@ -135,6 +142,8 @@ powershell -ExecutionPolicy Bypass -File run.ps1
 
 {{derived.case_pairs_table}}
 
+Геометрия трансект S2 и S3, включая прерванные трансекты S2 (по два сегмента), восстановлена по первоисточникам PANGAEA — [reports/case_geometry/summary.md](reports/case_geometry/summary.md); эталоном площади для C остаётся площадь автора.
+
 Пар для профилей пластика нет. S1 и S2 — открытый океан. Экспедиция MSM41 шла в апреле 2015 года, а Sentinel-2A начал съёмку в конце июня 2015.
 
 Отбор пары идёт в три этапа:
@@ -169,7 +178,7 @@ powershell -ExecutionPolicy Bypass -File run.ps1
 - Пропуски сосредоточены: {{case.detector.fn_top3}} из {{case.detector.test.lgbm.fn}} приходятся на 3 сцены, где полосы мусора размечены отдельными точками.
 - Вырезки удачных и ошибочных случаев (саргассум, пена, судно, кильватер, взвесь, органика, пропуск) — в `reports/case_detector/examples/`. Предсказания по патчам — `per_patch.csv`, по сценам — `fn_by_scene.csv`, по классам — `fp_by_class.csv`.
 
-**На спутниковых парах** детектор запускается на вырезках Sentinel-2 вокруг полосы наблюдения. На всех {{case.experiment.n_black_sea_accept_zero_det}} принятых черноморских парах в полосе **0 пикселей** P ≥ {{l3_lgbm.threshold|f2}}, хотя полевая плотность всего мусора там от {{case.experiment.field_min|int}} до {{case.experiment.field_max|int}} шт./км². Это согласуется с физикой: гораздо меньше одного предмета на пиксель 10 м. Зона «обнаружено» одна: Северное море, HE460 transect03.
+**На спутниковых парах** детектор запускается на вырезках Sentinel-2 вокруг полосы наблюдения. На всех {{case.experiment.n_black_sea_accept_zero_det}} принятых черноморских парах в полосе **0 пикселей** P ≥ {{l3_lgbm.threshold|f2}}, хотя полевая плотность всего мусора там от {{case.experiment.field_min|int}} до {{case.experiment.field_max|int}} шт./км². Это согласуется с физикой: гораздо меньше одного предмета на пиксель 10 м. Подозрительные пиксели есть только у одной пары: Северное море, HE460 transect03, 3 пятна. Её связь с полевым измерением по синхронизации не подтверждена, поэтому на карте это «подозрительные пиксели на снимке-кандидате, без полевого подтверждения», а не «обнаружено».
 
 ## 5. Концентрация шт./км²
 
@@ -215,7 +224,7 @@ MAPE не используется: в реестре есть нули. Осн�
 - при 4 участках вместо 5 ΔMAE {{case.conc.S2.sensitivity.k4.d_mae|f1}} [{{case.conc.S2.sensitivity.k4.ci95.0|f1}}; {{case.conc.S2.sensitivity.k4.ci95.1|f1}}] — тоже незначимо;
 - kNN почти равна ей по MAE ({{case.conc.S2.knn5_log.mae|f1}}).
 
-Какая из двух лучше, покажет отложенный test.
+На отложенном test выигрыш не подтвердился: S2 {{case.sections.field_test.S2.main_model}} {{case.sections.field_test.S2.main_mae|f1}} против медианы {{case.sections.field_test.S2.median_mae|f1}} шт./км², ΔMAE {{case.sections.field_test.S2.d_mae|f1}} [{{case.sections.field_test.S2.d_mae_ci95.0|f1}}; {{case.sections.field_test.S2.d_mae_ci95.1|f1}}].
 
 **S1 трал 5–50 см, dev CV** ({{case.conc.S1.n_dev|pl:событие/события/событий}}, {{case.conc.S1.dev_days|pl:день/дня/дней}} рейса):
 
@@ -228,14 +237,14 @@ MAPE не используется: в реестре есть нули. Осн�
 - Фактическое покрытие на CV ниже номинала: S2 {{case.conc.S2.main.coverage90_pct|f0}} %, S1 {{case.conc.S1.main.coverage90_pct|f0}} %.
 - На карточке и в API интервал подписан фактическим покрытием («≈{{case.conc.S2.main.coverage90_pct|f0}} % по CV»), а не номиналом.
 
-**Справочно, до фиксации test.** На всех {{case.conc.S2.all_events_route_buf1.n}} событиях S2 и том же разбиении медиана даёт MAE {{case.conc.S2.all_events_route_buf1.median_mae|f1}}, kNN — {{case.conc.S2.all_events_route_buf1.knn5_log_mae|f1}}, ΔMAE {{case.conc.S2.all_events_route_buf1.d_knn5_log|f1}} [{{case.conc.S2.all_events_route_buf1.d_knn5_log_ci95.0|f1}}; {{case.conc.S2.all_events_route_buf1.d_knn5_log_ci95.1|f1}}] — незначимо (`reports/case_conc/baseline.md`). Эти бейзлайны видели будущие test-события, поэтому для выбора модели они не использовались.
+**Справочно, до фиксации test.** На всех {{case.conc.S2.all_events_route_buf1.n}} событиях S2 и том же разбиении медиана даёт MAE {{case.conc.S2.all_events_route_buf1.median_mae|f1}}, kNN — {{case.conc.S2.all_events_route_buf1.knn5_log_mae|f1}}, ΔMAE {{case.conc.S2.all_events_route_buf1.d_knn5_log|f1}} [{{case.conc.S2.all_events_route_buf1.d_knn5_log_ci95.0|f1}}; {{case.conc.S2.all_events_route_buf1.d_knn5_log_ci95.1|f1}}] — незначимо (`reports/case_conc/baseline.md`). Это разведка до заморозки test по другому протоколу (все события профиля), а не основной результат. Эти бейзлайны видели будущие test-события, поэтому отложенный test не абсолютно нетронутый — это ограничение записано в `configs/case_selection.yaml` (`final_test.decision_before_opening`) до открытия test.
 
 ## 6. Что проверено, где и что не доказано
 
 | Утверждение | Данные | Статус |
 |---|---|---|
 | C = N/A считается верно, единицы и агрегация проверяемы | поле: {{case.conc.consistency.rows}} строк с N, A и C; контрольные примеры 60 и 15 | проверено: {{case.conc.consistency.match}}/{{case.conc.consistency.rows}} |
-| Модель концентрации лучше медианы | поле, dev CV по участкам маршрута | S2 — слабо, S1 — да; отложенный test: {{case.conc.final_test_status}} |
+| Модель концентрации лучше медианы | поле: dev CV по участкам маршрута; отложенный test | dev CV: S2 — слабо, S1 — да. **Отложенный test: S2 — {{case.sections.field_test.S2.verdict}}, S1 — {{case.sections.field_test.S1.verdict}}** → оценка по полевым данным = медиана |
 | Детектор отличает мусор от сложного фона | разметка MARIDA, test, {{case.detector.test_n_scenes}} сцен | проверено: F1 {{case.detector.test.lgbm.f1|f3}}, 0 срабатываний на саргассуме и мутной воде |
 | Снимок пригоден в полосе наблюдения | 29 пар, маски качества | {{case.pairs.quality_accept}} прошли, причины отказа в реестре |
 | Снимок синхронен наблюдению | реестр пар + дрейф | **нет ни одной пары** при типичном дрейфе |
@@ -248,15 +257,20 @@ MAPE не используется: в реестре есть нули. Осн�
 - Та же полоса, сдвинутая в случайную воду той же сцены, даёт в среднем ρ {{case.experiment.fdi.null_median|f2}}. Значит, связь — на уровне сцены или дня, а не места наблюдения. Знак к тому же обратный ожидаемому.
 - При {{case.experiment.n_groups}} независимых группах обнаружима только связь |ρ| ≥ {{case.experiment.power_min_rho.6|f2}}. Для ρ = 0,5 нужно около {{case.experiment.n_needed_rho05}} независимых пар.
 
-**Статусы на карте** (API v3.1). У зоны два независимых статуса.
+**Слои и статусы на карте** (API v3.1). Три слоя с разными подписями:
+- «Полевые измерения» — настоящие шт./км² с интервалом Пуассона;
+- «Проверенные снимки-кандидаты» — полосы обследования на снимке, со статусом пары и причиной отказа;
+- «Подозрительные пиксели детектора» — контуры найденных пикселей, без полевого подтверждения.
+
+У участка два независимых статуса. Если пара «снимок ↔ измерение» отклонена, детекция получает статус «недостаточно данных» с причиной «связь снимка с полевым измерением не подтверждена». Сырой результат детектора остаётся отдельным полем и слоем подозрительных пикселей.
 
 | Статус | Значения | Когда |
 |---|---|---|
-| Детекция | «обнаружено» / «не обнаружено» / «недостаточно данных» | маски прошли и есть пиксели ≥ порога / маски прошли и пикселей нет / маски не прошли |
+| Детекция | «обнаружено» / «не обнаружено» / «недостаточно данных» | пара подтверждена, маски прошли и есть пиксели ≥ порога / пара подтверждена и пикселей нет / маски не прошли или пара не подтверждена (сейчас — все участки, подтверждённых пар 0) |
 | Концентрация | «концентрация недоступна» / «исследовательская оценка» / «есть полевое измерение рядом» | сейчас у всех {{case.run.export.zones}} зон «недоступна»: калибровки «снимок → шт./км²» нет, а полевые значения в полосах — весь мусор, не пластик |
 
 - Поле `concentration` у зоны всегда `null`. Площадь зоны и площадь маски — отдельные поля.
-- Оценка по полевым данным (`field_estimate`) выдаётся только в области применимости профиля: bbox полевых записей ± 1°. Подписана «оценка по полевым данным, не по снимку», с интервалом и его фактическим покрытием.
+- Оценка по полевым данным (`field_estimate`) выдаётся только в области применимости профиля: bbox полевых записей ± 1°. Подписана «оценка по полевым данным, не по снимку», с интервалом и его фактическим покрытием. По правилу, записанному до открытия test, это медиана профиля: основная модель на test не лучше медианы.
 
 ## 7. Как пересчитать каждую метрику
 
@@ -270,7 +284,7 @@ MAPE не используется: в реестре есть нули. Осн�
 | маски и детектор на парах | `scripts\case\pair_quality.py` (`--force` — заново) | `data/pairs/quality/<событие>/`, `data/pairs/pair_quality.csv`, `reports/case_pairs/quality.md` | ≈ 4–5 мин с сетью |
 | бейзлайны концентрации, 6 схем разбиения | `scripts\case\baseline_concentration.py` | `reports/case_conc/{metrics.json, predictions.csv, metrics_by_fold.csv, consistency.csv, baseline.md}` | {{case.run.step_s.4_concentration}} с |
 | модели концентрации, dev CV | `scripts\case\conc_model_cv.py` | `reports/case_conc/{dev_cv.md, dev_cv.json, dev_predictions.csv}`, `weights/case_conc/*.json` | ≈ 6 с |
-| отложенный test концентрации | `scripts\case\final_test_conc.py` (**один раз**; повтор и запуск до приёмки скрипт отклоняет) | `reports/case_conc/final_test.json`, `final_test_predictions.csv` | секунды |
+| отложенный test концентрации | `scripts\case\final_test_conc.py` (**один раз**, уже посчитан; повтор скрипт отклоняет) | `reports/case_conc/final_test.json`, `final_test_predictions.csv` | секунды |
 | детектор: пересчёт из сохранённых предсказаний | `scripts\case\run_all.py eval` | `reports/case_run/detector_recomputed.json` (сверка TP/FP/FN с `metrics.json`) | {{case.run.step_s.5_detector_marida}} с |
 | детектор: полный прогон 7 моделей на val и test MARIDA | `scripts\case\detector_compare.py` (нужен MARIDA в `data/MARIDA`) | `reports/case_detector/*` | ≈ {{case.detector.seconds|int}} с |
 | эксперимент на парах | `scripts\case\pairs_experiment.py --no-fetch` | `reports/case_pairs/experiment.{md,json}` | ≈ 3 мин с чтением FDI по сети |
@@ -330,7 +344,7 @@ curl -OJ "http://127.0.0.1:8000/api/v3/export?layer=zones&format=geojson&detecti
 - зоны — {{case.run.export.zones}};
 - пары Чёрного моря с |dt| ≤ 24 ч — {{case.run.export.example_pairs_black_sea_24h}};
 - принятые пары — {{case.run.export.example_pairs_accepted}};
-- зоны «обнаружено» — {{case.run.export.example_zones_detected}}.
+- участки со статусом детекции «обнаружено» — {{case.run.export.example_zones_detected}} (при 0 подтверждённых пар их и должно быть 0; подозрительные пиксели — отдельный слой `detections`).
 
 Самопроверка `scripts/case/consistency_check.py` сравнивает по id четыре представления: алгоритм, JSON, CSV и GeoJSON. Последний прогон (`{{case.selfcheck.file}}`):
 - проверок {{case.selfcheck.checks}}: ok {{case.selfcheck.ok}}, расхождений {{case.selfcheck.fail}} (подробности — в самом отчёте);
@@ -350,7 +364,7 @@ curl -OJ "http://127.0.0.1:8000/api/v3/export?layer=zones&format=geojson&detecti
 | `task/` | постановка, критерии, CSV реестра и его описание |
 | `tests/test_case_*.py`, `tests/test_api_v3.py` | тесты кейса |
 
-Полная карта файлов — [docs/FILEMAP.md](docs/FILEMAP.md).
+Полная карта файлов — [docs/FILEMAP.md](docs/FILEMAP.md). Дополнительные функции — [docs/EXTRA_FEATURES.md](docs/EXTRA_FEATURES.md), геометрия трансект — [reports/case_geometry/summary.md](reports/case_geometry/summary.md).
 
 ## 10. Подготовительный этап
 
@@ -366,7 +380,8 @@ curl -OJ "http://127.0.0.1:8000/api/v3/export?layer=zones&format=geojson&detecti
 ## Ограничения
 
 - **Перенос концентрации на снимок не доказан.** Синхронных пар нет, а на имеющихся связь не установлена. Поэтому модельная концентрация есть только по полевым данным и только в области применимости профиля.
-- **Мало независимых данных.** S2 — {{case.conc.S2.target.n_events|pl:событие/события/событий}} одного рейса за {{case.conc.S2.target.n_days|pl:день/дня/дней}}. ДИ широкие, выбор основной модели на S2 держится на границе значимости.
+- **Мало независимых данных.** S2 — {{case.conc.S2.target.n_events|pl:событие/события/событий}} одного рейса за {{case.conc.S2.target.n_days|pl:день/дня/дней}}. ДИ широкие. На отложенном test основная модель S2 по MAE хуже медианы ({{case.sections.field_test.S2.main_mae|f1}} против {{case.sections.field_test.S2.median_mae|f1}}, разница незначима), поэтому используется медиана.
+- **Отложенный test не абсолютно нетронутый.** Ранняя разведка бейзлайнов (медиана, среднее, kNN) видела все события профиля, включая будущий test. Модели и их гиперпараметры выбирались только на dev.
 - **Интервалы недопокрывают** при сдвиге между участками маршрута: {{case.conc.S2.main.coverage90_pct|f0}} % и {{case.conc.S1.main.coverage90_pct|f0}} % вместо 90 %.
 - **Детектор** проверен на разметке MARIDA (ACOLITE). На вырезках L2A пар он работает через гармонизацию по медиане воды, и там его качество по разметке не измерено. Отдельные предметы на 10 м не видны, видны только скопления.
 - **Блик** — главная причина отказа летних пар в Чёрном море. Порог блика B11 > {{case.pairs.decision.glint_b11}} взят из контура живых снимков и на этих сценах не калибровался.
