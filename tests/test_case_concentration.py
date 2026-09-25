@@ -195,3 +195,52 @@ def test_assert_no_overlap_detects_leak():
                        "group": ["g1", "g1"], "fold": [0, 1]})
     with pytest.raises(AssertionError):
         P.assert_no_overlap(sp)
+
+
+# ---------------------------------------------------------------- L60b: основной сплит, утечки, правила
+def test_main_split_no_cruise_day_overlap(samples):
+    cfg = S.load_config()
+    ms = cfg["main_split"]
+    assert ms["method"] == "route" and ms["buffer_days"] >= 1.0
+    for prof in cfg["profiles"]:
+        acc, _ = S.select(samples, cfg, prof)
+        sp = P.make_split(acc, ms["method"], seed=ms["seed"], k_blocks=ms["k_blocks"])
+        P.assert_no_overlap(sp, cruise_day=True)
+        chk = P.check_split(sp, acc)
+        assert (chk.shared_cruise_days == 0).all() and (chk.shared_events == 0).all()
+        assert sp["fold"].nunique() == ms["k_blocks"]
+        # участки непрерывны по времени: максимум даты блока i < минимума блока i+1
+        dates = acc.set_index("sample_id").loc[sp.sample_id, "date_utc"].to_numpy()
+        rng_ = pd.DataFrame({"fold": sp.fold, "d": dates}).groupby("fold").d.agg(["min", "max"]).sort_index()
+        assert (rng_["max"].to_numpy()[:-1] < rng_["min"].to_numpy()[1:]).all()
+        # буфер: в train нет записей ближе 1 сут к test
+        t = P.times_days(acc.set_index("sample_id").loc[sp.sample_id].reset_index())
+        for f in sp.fold.unique():
+            tr = P.buffered_train_mask(sp, acc, f, ms["buffer_days"])
+            te = (sp.fold == f).to_numpy()
+            assert np.abs(t[tr][:, None] - t[te][None, :]).min() > ms["buffer_days"]
+
+
+def test_allowed_features_exclude_explicit_leaks():
+    explicit = ["concentration_value_orig", "concentration_unit_orig", "concentration_items_km2",
+                "concentration_g_km2", "items_count", "density_numerator_items",
+                "source_object_filtered_items", "source_reported_total_items",
+                "reported_concentration_items_km2", "reported_concentration_g_km2",
+                "parent_sample_id", "parent_concentration_items_km2"]
+    assert not set(explicit) & set(S.ALLOWED_FEATURES)
+    assert all(S.is_leak(c) for c in explicit + S.LEAK_EXPLICIT)
+    S.assert_no_leak(S.ALLOWED_FEATURES)
+
+
+def test_team_rules_reasons(samples):
+    cfg = S.load_config()
+    acc, rej = S.select(samples, cfg)
+    r = rej.set_index("sample_id").reason
+    sm = samples.set_index("sample_id")
+    assert r[sm.record_type == "item_observation"].str.startswith("item_observation").all()
+    assert (sm.record_type == "item_observation").sum() == 337
+    all_litter = sm.index[sm.target_scope == "all_litter"]
+    assert r[all_litter].str.contains("НЕ пластик").all()
+    s1a = sm.index[(sm.measurement_profile == "S1_aerial_GT50") & (sm.target_scope == "total_plastic")]
+    assert len(s1a) == 16 and r[s1a].str.contains("не профиль").all()
+    assert not acc.target_scope.isin(["all_litter", "fisheries_litter_category", "object_context"]).any()

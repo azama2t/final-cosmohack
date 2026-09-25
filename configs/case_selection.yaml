@@ -17,6 +17,29 @@
 
 default_profile: S2_visual_total_plastic
 
+# Правила команды: применяются ко всем профилям ДО фильтров профиля, первая сработавшая даёт причину отказа.
+# when: {колонка: [значения]} — все условия через И.
+team_rules:
+  - when: {record_type: [item_observation]}
+    reason: "item_observation: объектная строка (отдельный предмет), не плотность шт./км²"
+  - when: {target_scope: [all_litter]}
+    reason: "all_litter: общий мусор всех материалов, НЕ пластик (S3/S4)"
+  - when: {target_scope: [fisheries_litter_category]}
+    reason: "fisheries_litter_category: категория общего мусора, не суммарный пластик"
+  - when: {measurement_profile: [S1_aerial_GT50], target_scope: [total_plastic]}
+    reason: "S1_aerial_GT50 total_plastic: одно опубликованное число на 16 строк, не профиль"
+  - when: {target_scope: [plastic_category]}
+    reason: "plastic_category: категория пластика, не суммарный пластик (категории не суммируются: пусто ≠ 0)"
+
+# Основной сплит для всех моделей концентрации — фиксируется ДО моделей (L60b, reports/tasklog/60_concentration.md):
+# участки маршрута (5 непрерывных блоков дней рейса, фолд = блок) + буфер 1 сут: из train убраны записи
+# ближе 1 сут к test-блоку. Самая строгая из честных схем: нет общих событий, дней рейса и соседних дней.
+main_split:
+  method: route
+  k_blocks: 5
+  buffer_days: 1.0
+  seed: 42
+
 target_column: concentration_items_km2
 
 profiles:

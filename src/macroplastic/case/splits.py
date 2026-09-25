@@ -7,6 +7,11 @@
 - st      — пространственно-временные группы: связная компонента графа, где ребро между
             записями, если расстояние ≤ R км И разница времени ≤ T сут (транзитивно: цепочка
             станций одного рейса сливается в один блок).
+- cruiseday — «день рейса»: источник × судно × дата UTC;
+- route   — «участок маршрута»: дни рейса по порядку режутся на k непрерывных блоков, фолд = блок
+            (blocked CV по времени); buffered_train_mask() дополнительно убирает из train записи
+            ближе buffer_days к test. route + буфер 1 сут — основной сплит (configs/case_selection.yaml),
+            т.к. kNN на st/event/daycell выигрывает за счёт соседей того же дня рейса (L60b).
 Все схемы дополнительно объединяются с event_id (union-find), так что событие никогда
 не разрезается. Фолды — жадная балансировка групп по размеру с фиксированным seed.
 
@@ -115,6 +120,51 @@ def daycell_groups(df: pd.DataFrame, cell_deg: float = 1.0) -> np.ndarray:
     return _labels(dsu, len(df), "dc")
 
 
+def cruise_keys(df: pd.DataFrame) -> pd.Series:
+    """Рейс = источник × платформа (S2: MSM41 на RV Maria S. Merian; S1-трал: RV Ocean Starr)."""
+    def col(c):
+        return df[c].astype(str) if c in df else pd.Series("", index=df.index)
+    return col("source_id") + "|" + col("platform")
+
+
+def cruise_day_keys(df: pd.DataFrame) -> pd.Series:
+    return cruise_keys(df) + "|" + df["date_utc"].astype(str)
+
+
+def cruiseday_groups(df: pd.DataFrame) -> np.ndarray:
+    """«День рейса»: все события одного рейса за одни сутки UTC (+ event_id)."""
+    dsu = _DSU(len(df))
+    _union_by_key(dsu, df["event_id"].tolist())
+    _union_by_key(dsu, cruise_day_keys(df).tolist())
+    return _labels(dsu, len(df), "cd")
+
+
+def route_block_groups(df: pd.DataFrame, k_blocks: int = 5) -> tuple[np.ndarray, np.ndarray]:
+    """«Участок маршрута»: дни каждого рейса по порядку режутся на k_blocks непрерывных
+    отрезков с примерно равным числом событий; граница блока проходит только между днями,
+    поэтому день рейса (и событие) никогда не делится. → (group, block_index 0..k-1).
+    Блок i разных рейсов получает один индекс — фолд = блок (blocked CV по времени)."""
+    key = cruise_keys(df)
+    day = df["date_utc"].astype(str)
+    group = np.empty(len(df), dtype=object)
+    block = np.zeros(len(df), dtype=int)
+    for c in key.unique():
+        m = (key == c).to_numpy()
+        days = day[m].value_counts().sort_index()
+        cum = days.cumsum().to_numpy()
+        total = cum[-1]
+        # день относится к блоку по доле накопленных событий в его середине
+        mid = cum - days.to_numpy() / 2.0
+        b = np.minimum((mid / total * k_blocks).astype(int), k_blocks - 1)
+        # на случай пустых блоков (дней меньше k) — переиндексация по порядку
+        _, b = np.unique(b, return_inverse=True)
+        day_to_b = dict(zip(days.index, b))
+        bb = day[m].map(day_to_b).to_numpy()
+        block[m] = bb
+        group[m] = [f"rb|{c}|{i}" for i in bb]
+    return group, block
+
+
 def spatiotemporal_groups(df: pd.DataFrame, radius_km: float = 50.0, days: float = 1.0,
                           scene_id: Optional[Iterable] = None) -> np.ndarray:
     """Связные компоненты: ребро, если dist ≤ radius_km и |Δt| ≤ days (+ event_id, + сцена)."""
@@ -154,7 +204,8 @@ def assign_folds(groups: Sequence, n_folds: int = 5, seed: int = 42) -> np.ndarr
 
 def make_split(df: pd.DataFrame, method: str = "st", n_folds: int = 5, seed: int = 42,
                radius_km: float = 50.0, days: float = 1.0, cell_deg: float = 1.0,
-               scene_id: Optional[Iterable] = None) -> pd.DataFrame:
+               scene_id: Optional[Iterable] = None, k_blocks: int = 5) -> pd.DataFrame:
+    fold = None
     if method == "event":
         grp = event_groups(df)
     elif method == "scene":
@@ -163,15 +214,20 @@ def make_split(df: pd.DataFrame, method: str = "st", n_folds: int = 5, seed: int
         grp = daycell_groups(df, cell_deg)
     elif method == "st":
         grp = spatiotemporal_groups(df, radius_km, days, scene_id)
+    elif method == "cruiseday":
+        grp = cruiseday_groups(df)
+    elif method == "route":
+        grp, fold = route_block_groups(df, k_blocks)
     else:
         raise ValueError(method)
     scene = (pd.Series(list(scene_id), index=df.index) if scene_id is not None
              else pd.Series(np.nan, index=df.index, dtype=object))
     out = pd.DataFrame({"sample_id": df["sample_id"].to_numpy(), "event_id": df["event_id"].to_numpy(),
                         "scene_id": scene.to_numpy(), "group": grp,
-                        "fold": assign_folds(grp, n_folds, seed)})
+                        "cruise_day": cruise_day_keys(df).to_numpy(),
+                        "fold": assign_folds(grp, n_folds, seed) if fold is None else fold})
     out.attrs.update(method=method, n_folds=n_folds, seed=seed, radius_km=radius_km, days=days,
-                     cell_deg=cell_deg)
+                     cell_deg=cell_deg, k_blocks=k_blocks)
     return out
 
 
@@ -202,6 +258,8 @@ def check_split(split: pd.DataFrame, df: Optional[pd.DataFrame] = None) -> pd.Da
              "shared_groups": len(set(split.loc[te, "group"]) & set(split.loc[tr, "group"])),
              "shared_scenes": len(set(split.loc[te, "scene_id"].dropna())
                                   & set(split.loc[tr, "scene_id"].dropna()))}
+        if "cruise_day" in split:
+            r["shared_cruise_days"] = len(set(split.loc[te, "cruise_day"]) & set(split.loc[tr, "cruise_day"]))
         if df is not None and tr.any():
             ti, ri = np.nonzero(te.to_numpy())[0], np.nonzero(tr.to_numpy())[0]
             D = haversine_km(lat[ti][:, None], lon[ti][:, None], lat[ri][None, :], lon[ri][None, :])
@@ -214,8 +272,24 @@ def check_split(split: pd.DataFrame, df: Optional[pd.DataFrame] = None) -> pd.Da
     return pd.DataFrame(rows)
 
 
-def assert_no_overlap(split: pd.DataFrame) -> None:
+def buffered_train_mask(split: pd.DataFrame, df: pd.DataFrame, fold: int,
+                        buffer_days: float = 1.0) -> np.ndarray:
+    """Маска train для фолда с временным буфером: из train убираются записи ближе
+    buffer_days к любой test-записи (соседние дни рейса на границе блока)."""
+    df = df.set_index("sample_id").loc[split["sample_id"]].reset_index()
+    t = times_days(df)
+    te = (split["fold"] == fold).to_numpy()
+    tr = ~te
+    if buffer_days > 0 and te.any():
+        dt = np.abs(t[:, None] - t[te][None, :]).min(axis=1)
+        tr &= dt > buffer_days
+    return tr
+
+
+def assert_no_overlap(split: pd.DataFrame, cruise_day: bool = False) -> None:
     chk = check_split(split)
     bad = chk[(chk.shared_events > 0) | (chk.shared_groups > 0) | (chk.shared_scenes > 0)]
+    if cruise_day:
+        bad = pd.concat([bad, chk[chk.get("shared_cruise_days", 0) > 0]])
     if len(bad):
         raise AssertionError(f"пересечение групп между фолдами:\n{bad}")

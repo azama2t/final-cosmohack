@@ -4,11 +4,63 @@
   "events": 63,
   "rejected": 872,
   "reasons": {
-   "source_id_not_in_profile": 605,
-   "record_type_not_in_profile": 197,
-   "target_scope_not_in_profile": 70
+   "item_observation: объектная строка (отдельный предмет), не плотность шт./км²": 337,
+   "plastic_category: категория пластика, не суммарный пластик (категории не суммируются: пусто ≠ 0)": 321,
+   "source_id_not_in_profile": 83,
+   "all_litter: общий мусор всех материалов, НЕ пластик (S3/S4)": 74,
+   "fisheries_litter_category: категория общего мусора, не суммарный пластик": 41,
+   "S1_aerial_GT50 total_plastic: одно опубликованное число на 16 строк, не профиль": 16
   },
+  "main_split": "route_buf1",
   "overall": [
+   {
+    "profile": "S2_visual_total_plastic",
+    "split": "cruiseday",
+    "model": "knn5",
+    "n": 63.0,
+    "mae": 30.892368705622058,
+    "rmse": 41.89827496490882,
+    "median_ae": 21.458989812879995,
+    "log1p_mae": 0.6286486505729298,
+    "rmsle": 0.7490494804560538,
+    "bias": -3.5623186598870165
+   },
+   {
+    "profile": "S2_visual_total_plastic",
+    "split": "cruiseday",
+    "model": "knn5_log",
+    "n": 63.0,
+    "mae": 30.284325195817637,
+    "rmse": 43.91957043266612,
+    "median_ae": 18.50342008295889,
+    "log1p_mae": 0.6077509105832848,
+    "rmsle": 0.7376653731914036,
+    "bias": -12.359673963440502
+   },
+   {
+    "profile": "S2_visual_total_plastic",
+    "split": "cruiseday",
+    "model": "mean",
+    "n": 63.0,
+    "mae": 35.92163269569067,
+    "rmse": 45.98458527682635,
+    "median_ae": 32.716717483652346,
+    "log1p_mae": 0.7529676575908683,
+    "rmsle": 0.9021561344580706,
+    "bias": -0.03700600229484778
+   },
+   {
+    "profile": "S2_visual_total_plastic",
+    "split": "cruiseday",
+    "model": "median",
+    "n": 63.0,
+    "mae": 34.85048167577222,
+    "rmse": 48.45766961817568,
+    "median_ae": 25.214316667299997,
+    "log1p_mae": 0.7453868111155112,
+    "rmsle": 0.8719405070127475,
+    "bias": -16.62562800100714
+   },
    {
     "profile": "S2_visual_total_plastic",
     "split": "daycell",
@@ -107,6 +159,102 @@
    },
    {
     "profile": "S2_visual_total_plastic",
+    "split": "route",
+    "model": "knn5",
+    "n": 63.0,
+    "mae": 33.78823115496971,
+    "rmse": 45.12466762582797,
+    "median_ae": 25.111950254759993,
+    "log1p_mae": 0.6783919789466251,
+    "rmsle": 0.8182706340283828,
+    "bias": -1.8994519758017137
+   },
+   {
+    "profile": "S2_visual_total_plastic",
+    "split": "route",
+    "model": "knn5_log",
+    "n": 63.0,
+    "mae": 35.034114632660234,
+    "rmse": 47.67337016459371,
+    "median_ae": 25.53712228021137,
+    "log1p_mae": 0.7070715680949093,
+    "rmsle": 0.83885598662338,
+    "bias": -8.91342774592666
+   },
+   {
+    "profile": "S2_visual_total_plastic",
+    "split": "route",
+    "model": "mean",
+    "n": 63.0,
+    "mae": 37.06857745156357,
+    "rmse": 46.95680090702591,
+    "median_ae": 34.2922101385264,
+    "log1p_mae": 0.7766084083110184,
+    "rmsle": 0.9202958069549615,
+    "bias": -0.2195453223086606
+   },
+   {
+    "profile": "S2_visual_total_plastic",
+    "split": "route",
+    "model": "median",
+    "n": 63.0,
+    "mae": 36.07666932959603,
+    "rmse": 48.82532309485894,
+    "median_ae": 26.400163596999995,
+    "log1p_mae": 0.771572944085416,
+    "rmsle": 0.882910886661944,
+    "bias": -15.059968190216665
+   },
+   {
+    "profile": "S2_visual_total_plastic",
+    "split": "route_buf1",
+    "model": "knn5",
+    "n": 63.0,
+    "mae": 31.322939326027402,
+    "rmse": 41.07980088068564,
+    "median_ae": 25.111950254759993,
+    "log1p_mae": 0.6375665337768712,
+    "rmsle": 0.7810647563108704,
+    "bias": -2.2057937172863804
+   },
+   {
+    "profile": "S2_visual_total_plastic",
+    "split": "route_buf1",
+    "model": "knn5_log",
+    "n": 63.0,
+    "mae": 31.670415545967643,
+    "rmse": 41.49977461675674,
+    "median_ae": 23.99135852860961,
+    "log1p_mae": 0.6681265017502914,
+    "rmsle": 0.7864397881376988,
+    "bias": -9.747902740635727
+   },
+   {
+    "profile": "S2_visual_total_plastic",
+    "split": "route_buf1",
+    "model": "mean",
+    "n": 63.0,
+    "mae": 36.83791480604536,
+    "rmse": 46.769109086144816,
+    "median_ae": 34.05901265242541,
+    "log1p_mae": 0.7715248611205201,
+    "rmsle": 0.9122052431829143,
+    "bias": -0.9978841772689306
+   },
+   {
+    "profile": "S2_visual_total_plastic",
+    "split": "route_buf1",
+    "model": "median",
+    "n": 63.0,
+    "mae": 35.90081974533095,
+    "rmse": 49.1214309489282,
+    "median_ae": 26.646785027849994,
+    "log1p_mae": 0.7667962908581364,
+    "rmsle": 0.8847621295426604,
+    "bias": -16.143547666392855
+   },
+   {
+    "profile": "S2_visual_total_plastic",
     "split": "st",
     "model": "knn5",
     "n": 63.0,
@@ -155,51 +303,104 @@
    }
   ],
   "bootstrap_mae_diff_vs_median": {
-   "event:mean-median": [
+   "event:mean": [
     1.519273560714936,
-    -2.3257558081668597,
-    5.604648049020702
+    -3.546240473305632,
+    6.904330375833312
    ],
-   "event:knn5-median": [
+   "event:knn5": [
     -6.869550493740412,
-    -14.016506527789831,
-    -0.5420563777050841
+    -17.924015279327456,
+    2.5799755112091365
    ],
-   "event:knn5_log-median": [
+   "event:knn5_log": [
     -6.736477009443753,
-    -12.525430453691463,
-    -1.5871827019899298
+    -15.111898450659005,
+    0.5720772609242891
    ],
-   "daycell:mean-median": [
+   "daycell:mean": [
     1.7702272992672476,
-    -2.61951216575364,
-    6.022635049904642
+    -3.2650449397538175,
+    7.020043884208372
    ],
-   "daycell:knn5-median": [
+   "daycell:knn5": [
     -7.984728603195695,
-    -17.789433675204524,
-    1.5607141465652323
+    -19.6269381301378,
+    2.7569778246220844
    ],
-   "daycell:knn5_log-median": [
+   "daycell:knn5_log": [
     -8.240511556357486,
-    -18.001332434548747,
-    1.0379583950430251
+    -19.834853715288595,
+    2.194483582038829
    ],
-   "st:mean-median": [
+   "cruiseday:mean": [
+    1.071151019918446,
+    -4.049054441709549,
+    6.244937572858574
+   ],
+   "cruiseday:knn5": [
+    -3.9581129701501645,
+    -10.673040022079888,
+    3.1145022382038414
+   ],
+   "cruiseday:knn5_log": [
+    -4.566156479954586,
+    -10.285644143728128,
+    1.4385498071671692
+   ],
+   "st:mean": [
     -0.5535760429055898,
-    -5.013431611927081,
-    3.9543895670746174
+    -5.038043740183827,
+    4.444348863735295
    ],
-   "st:knn5-median": [
+   "st:knn5": [
     -9.722802184724099,
-    -21.864281143306787,
-    0.9386743814984769
+    -22.12927882383547,
+    1.5468279133407525
    ],
-   "st:knn5_log-median": [
+   "st:knn5_log": [
     -11.569949783537155,
-    -22.693354130445666,
-    -1.2647264641856037
+    -23.12858823915262,
+    -0.9451556912452485
+   ],
+   "route:mean": [
+    0.9919081219675405,
+    -3.4677040242376878,
+    6.009174600850052
+   ],
+   "route:knn5": [
+    -2.2884381746263216,
+    -10.556491269434597,
+    7.035144983516327
+   ],
+   "route:knn5_log": [
+    -1.0425546969357953,
+    -7.878409212191169,
+    7.1191413370849705
+   ],
+   "route_buf1:mean": [
+    0.9370950607144124,
+    -3.653305393927876,
+    5.936685094186437
+   ],
+   "route_buf1:knn5": [
+    -4.577880419303547,
+    -13.897825950525002,
+    4.72056913112708
+   ],
+   "route_buf1:knn5_log": [
+    -4.230404199363306,
+    -11.983240111711723,
+    3.3782272650999494
    ]
+  },
+  "knn_neighbors_within_1d": {
+   "cruiseday": 0.4222222222222222,
+   "daycell": 0.4793650793650794,
+   "event": 0.638095238095238,
+   "route": 0.09206349206349207,
+   "route_buf1": 0.0,
+   "st": 0.26666666666666666
   },
   "split_checks": {
    "event": [
@@ -211,6 +412,7 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 12,
      "min_dist_km": 25.100267309933752,
      "min_dt_days": 0.06944444444525288,
      "min_dist_km_within_1d": 25.100267309933752
@@ -223,6 +425,7 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 11,
      "min_dist_km": 10.782006725658182,
      "min_dt_days": 0.06944444444525288,
      "min_dist_km_within_1d": 10.782006725658182
@@ -235,6 +438,7 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 10,
      "min_dist_km": 19.56452512258632,
      "min_dt_days": 0.08055555555620231,
      "min_dist_km_within_1d": 19.56452512258632
@@ -247,6 +451,7 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 10,
      "min_dist_km": 10.782006725658182,
      "min_dt_days": 0.08055555555620231,
      "min_dist_km_within_1d": 10.782006725658182
@@ -259,6 +464,7 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 10,
      "min_dist_km": 19.56452512258632,
      "min_dt_days": 0.08055555555620231,
      "min_dist_km_within_1d": 19.56452512258632
@@ -273,6 +479,7 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 5,
      "min_dist_km": 19.56452512258632,
      "min_dt_days": 0.09583333333284827,
      "min_dist_km_within_1d": 19.56452512258632
@@ -285,6 +492,7 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 5,
      "min_dist_km": 19.56452512258632,
      "min_dt_days": 0.2569444444452529,
      "min_dist_km_within_1d": 19.56452512258632
@@ -297,6 +505,7 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 5,
      "min_dist_km": 37.568907488324065,
      "min_dt_days": 0.08055555555620231,
      "min_dist_km_within_1d": 37.568907488324065
@@ -309,6 +518,7 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 4,
      "min_dist_km": 25.100267309933752,
      "min_dt_days": 0.10069444444525288,
      "min_dist_km_within_1d": 25.100267309933752
@@ -321,9 +531,77 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 4,
      "min_dist_km": 37.568907488324065,
      "min_dt_days": 0.08055555555620231,
      "min_dist_km_within_1d": 37.568907488324065
+    }
+   ],
+   "cruiseday": [
+    {
+     "fold": 0,
+     "n_test": 13,
+     "n_train": 50,
+     "test_events": 13,
+     "shared_events": 0,
+     "shared_groups": 0,
+     "shared_scenes": 0,
+     "shared_cruise_days": 0,
+     "min_dist_km": 25.100267309933752,
+     "min_dt_days": 0.5583333333343035,
+     "min_dist_km_within_1d": 25.100267309933752
+    },
+    {
+     "fold": 1,
+     "n_test": 13,
+     "n_train": 50,
+     "test_events": 13,
+     "shared_events": 0,
+     "shared_groups": 0,
+     "shared_scenes": 0,
+     "shared_cruise_days": 0,
+     "min_dist_km": 25.100267309933752,
+     "min_dt_days": 0.5583333333343035,
+     "min_dist_km_within_1d": 25.100267309933752
+    },
+    {
+     "fold": 2,
+     "n_test": 13,
+     "n_train": 50,
+     "test_events": 13,
+     "shared_events": 0,
+     "shared_groups": 0,
+     "shared_scenes": 0,
+     "shared_cruise_days": 0,
+     "min_dist_km": 90.78568223710552,
+     "min_dt_days": 0.5909722222204437,
+     "min_dist_km_within_1d": 90.78568223710552
+    },
+    {
+     "fold": 3,
+     "n_test": 12,
+     "n_train": 51,
+     "test_events": 12,
+     "shared_events": 0,
+     "shared_groups": 0,
+     "shared_scenes": 0,
+     "shared_cruise_days": 0,
+     "min_dist_km": 91.10097429177158,
+     "min_dt_days": 0.6520833333306655,
+     "min_dist_km_within_1d": 91.10097429177158
+    },
+    {
+     "fold": 4,
+     "n_test": 12,
+     "n_train": 51,
+     "test_events": 12,
+     "shared_events": 0,
+     "shared_groups": 0,
+     "shared_scenes": 0,
+     "shared_cruise_days": 0,
+     "min_dist_km": 119.01921775917322,
+     "min_dt_days": 0.5909722222204437,
+     "min_dist_km_within_1d": 119.01921775917322
     }
    ],
    "st": [
@@ -335,6 +613,7 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 0,
      "min_dist_km": 90.3243057957929,
      "min_dt_days": 0.5909722222204437,
      "min_dist_km_within_1d": 119.01921775917322
@@ -347,6 +626,7 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 1,
      "min_dist_km": 104.50269098553272,
      "min_dt_days": 0.18611111111022183,
      "min_dist_km_within_1d": 104.50269098553272
@@ -359,6 +639,7 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 1,
      "min_dist_km": 90.3243057957929,
      "min_dt_days": 0.18611111111022183,
      "min_dist_km_within_1d": 104.50269098553272
@@ -371,6 +652,7 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 0,
      "min_dist_km": 137.38306108062804,
      "min_dt_days": 0.5909722222204437,
      "min_dist_km_within_1d": 137.38306108062804
@@ -383,9 +665,77 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 0,
      "min_dist_km": 119.01921775917322,
      "min_dt_days": 0.6687500000007276,
      "min_dist_km_within_1d": 119.01921775917322
+    }
+   ],
+   "route": [
+    {
+     "fold": 0,
+     "n_test": 11,
+     "n_train": 52,
+     "test_events": 11,
+     "shared_events": 0,
+     "shared_groups": 0,
+     "shared_scenes": 0,
+     "shared_cruise_days": 0,
+     "min_dist_km": 90.3243057957929,
+     "min_dt_days": 0.742361111108039,
+     "min_dist_km_within_1d": 119.01921775917322
+    },
+    {
+     "fold": 1,
+     "n_test": 14,
+     "n_train": 49,
+     "test_events": 14,
+     "shared_events": 0,
+     "shared_groups": 0,
+     "shared_scenes": 0,
+     "shared_cruise_days": 0,
+     "min_dist_km": 39.01500299002162,
+     "min_dt_days": 0.5583333333343035,
+     "min_dist_km_within_1d": 39.01500299002162
+    },
+    {
+     "fold": 2,
+     "n_test": 13,
+     "n_train": 50,
+     "test_events": 13,
+     "shared_events": 0,
+     "shared_groups": 0,
+     "shared_scenes": 0,
+     "shared_cruise_days": 0,
+     "min_dist_km": 39.01500299002162,
+     "min_dt_days": 0.5583333333343035,
+     "min_dist_km_within_1d": 39.01500299002162
+    },
+    {
+     "fold": 3,
+     "n_test": 12,
+     "n_train": 51,
+     "test_events": 12,
+     "shared_events": 0,
+     "shared_groups": 0,
+     "shared_scenes": 0,
+     "shared_cruise_days": 0,
+     "min_dist_km": 119.54332945205311,
+     "min_dt_days": 0.7055555555562023,
+     "min_dist_km_within_1d": 119.54332945205311
+    },
+    {
+     "fold": 4,
+     "n_test": 13,
+     "n_train": 50,
+     "test_events": 13,
+     "shared_events": 0,
+     "shared_groups": 0,
+     "shared_scenes": 0,
+     "shared_cruise_days": 0,
+     "min_dist_km": 119.54332945205311,
+     "min_dt_days": 0.7055555555562023,
+     "min_dist_km_within_1d": 119.54332945205311
     }
    ]
   }
@@ -395,11 +745,75 @@
   "events": 83,
   "rejected": 852,
   "reasons": {
-   "source_id_not_in_profile": 585,
-   "target_scope_not_in_profile": 251,
-   "measurement_profile_not_in_profile": 16
+   "item_observation: объектная строка (отдельный предмет), не плотность шт./км²": 337,
+   "plastic_category: категория пластика, не суммарный пластик (категории не суммируются: пусто ≠ 0)": 321,
+   "all_litter: общий мусор всех материалов, НЕ пластик (S3/S4)": 74,
+   "source_id_not_in_profile": 63,
+   "fisheries_litter_category: категория общего мусора, не суммарный пластик": 41,
+   "S1_aerial_GT50 total_plastic: одно опубликованное число на 16 строк, не профиль": 16
   },
+  "main_split": "route_buf1",
   "overall": [
+   {
+    "profile": "S1_trawl_total_plastic",
+    "split": "cruiseday",
+    "model": "knn5",
+    "n": 83.0,
+    "mae": 422.9518202048193,
+    "rmse": 538.9538512763005,
+    "median_ae": 352.3320435999999,
+    "log1p_mae": 0.7021690834377166,
+    "rmsle": 0.9350566593710213,
+    "bias": 55.71037870602411
+   },
+   {
+    "profile": "S1_trawl_total_plastic",
+    "split": "cruiseday",
+    "model": "knn5_log",
+    "n": 83.0,
+    "mae": 408.53799686417995,
+    "rmse": 523.6357314038019,
+    "median_ae": 323.12979735936347,
+    "log1p_mae": 0.7043625501920365,
+    "rmsle": 0.8908359498052487,
+    "bias": -47.20637787275716
+   },
+   {
+    "profile": "S1_trawl_total_plastic",
+    "split": "cruiseday",
+    "model": "mean",
+    "n": 83.0,
+    "mae": 416.5690572529358,
+    "rmse": 528.5372127730209,
+    "median_ae": 346.5759860151515,
+    "log1p_mae": 0.7113122775768586,
+    "rmsle": 0.9324588236922011,
+    "bias": 0.8469991629802469
+   },
+   {
+    "profile": "S1_trawl_total_plastic",
+    "split": "cruiseday",
+    "model": "median",
+    "n": 83.0,
+    "mae": 414.62532206626497,
+    "rmse": 538.798030521306,
+    "median_ae": 312.6916655,
+    "log1p_mae": 0.7136266311564832,
+    "rmsle": 0.9057429866100568,
+    "bias": -93.88581245180725
+   },
+   {
+    "profile": "S1_trawl_total_plastic",
+    "split": "cruiseday",
+    "model": "wind_lin",
+    "n": 83.0,
+    "mae": 416.54795348464995,
+    "rmse": 556.6990202570865,
+    "median_ae": 319.5607178628899,
+    "log1p_mae": 0.7234228316013871,
+    "rmsle": 0.9002265023881283,
+    "bias": -171.09549469707628
+   },
    {
     "profile": "S1_trawl_total_plastic",
     "split": "daycell",
@@ -522,6 +936,126 @@
    },
    {
     "profile": "S1_trawl_total_plastic",
+    "split": "route",
+    "model": "knn5",
+    "n": 83.0,
+    "mae": 409.9351964240964,
+    "rmse": 511.3418524249565,
+    "median_ae": 343.7090316,
+    "log1p_mae": 0.6807865376732678,
+    "rmsle": 0.9102247346271922,
+    "bias": 103.20951949879519
+   },
+   {
+    "profile": "S1_trawl_total_plastic",
+    "split": "route",
+    "model": "knn5_log",
+    "n": 83.0,
+    "mae": 378.52478030030596,
+    "rmse": 490.9813552719788,
+    "median_ae": 294.0769432440868,
+    "log1p_mae": 0.6529844706763478,
+    "rmsle": 0.8558034230239493,
+    "bias": -14.171897711688857
+   },
+   {
+    "profile": "S1_trawl_total_plastic",
+    "split": "route",
+    "model": "mean",
+    "n": 83.0,
+    "mae": 430.3917925267689,
+    "rmse": 533.3083112105502,
+    "median_ae": 375.2551342058823,
+    "log1p_mae": 0.7277171767939475,
+    "rmsle": 0.9517393638545965,
+    "bias": 1.4480636694799855
+   },
+   {
+    "profile": "S1_trawl_total_plastic",
+    "split": "route",
+    "model": "median",
+    "n": 83.0,
+    "mae": 442.95505497590375,
+    "rmse": 560.3143818181649,
+    "median_ae": 382.85066300000005,
+    "log1p_mae": 0.7585412251211275,
+    "rmsle": 0.9486044825496682,
+    "bias": -115.61374895180724
+   },
+   {
+    "profile": "S1_trawl_total_plastic",
+    "split": "route",
+    "model": "wind_lin",
+    "n": 83.0,
+    "mae": 443.55309564113367,
+    "rmse": 573.93201498546,
+    "median_ae": 368.8511800895296,
+    "log1p_mae": 0.767748982361877,
+    "rmsle": 0.9415874996665223,
+    "bias": -174.08876888632344
+   },
+   {
+    "profile": "S1_trawl_total_plastic",
+    "split": "route_buf1",
+    "model": "knn5",
+    "n": 83.0,
+    "mae": 448.85821598795184,
+    "rmse": 538.6551356506234,
+    "median_ae": 388.5713056000001,
+    "log1p_mae": 0.7444994146101985,
+    "rmsle": 0.9710155419630593,
+    "bias": 152.02437596867472
+   },
+   {
+    "profile": "S1_trawl_total_plastic",
+    "split": "route_buf1",
+    "model": "knn5_log",
+    "n": 83.0,
+    "mae": 388.05675922242807,
+    "rmse": 500.09773233064794,
+    "median_ae": 305.95551814042256,
+    "log1p_mae": 0.6792829129216796,
+    "rmsle": 0.9062060991785399,
+    "bias": 26.869396318576747
+   },
+   {
+    "profile": "S1_trawl_total_plastic",
+    "split": "route_buf1",
+    "model": "mean",
+    "n": 83.0,
+    "mae": 445.7062522891784,
+    "rmse": 547.5678903155155,
+    "median_ae": 385.00230706451623,
+    "log1p_mae": 0.7479142262483652,
+    "rmsle": 0.9720677786649979,
+    "bias": 5.9090045697377755
+   },
+   {
+    "profile": "S1_trawl_total_plastic",
+    "split": "route_buf1",
+    "model": "median",
+    "n": 83.0,
+    "mae": 456.3792604578313,
+    "rmse": 572.4120035905761,
+    "median_ae": 408.5169400000001,
+    "log1p_mae": 0.7806200405537045,
+    "rmsle": 0.9709926720445504,
+    "bias": -111.46118293975904
+   },
+   {
+    "profile": "S1_trawl_total_plastic",
+    "split": "route_buf1",
+    "model": "wind_lin",
+    "n": 83.0,
+    "mae": 455.6948122828999,
+    "rmse": 584.2162093831423,
+    "median_ae": 387.4615075205912,
+    "log1p_mae": 0.7875856892688987,
+    "rmsle": 0.9706454768354307,
+    "bias": -164.19650687375332
+   },
+   {
+    "profile": "S1_trawl_total_plastic",
     "split": "st",
     "model": "knn5",
     "n": 83.0,
@@ -582,66 +1116,134 @@
    }
   ],
   "bootstrap_mae_diff_vs_median": {
-   "event:mean-median": [
+   "event:mean": [
     -3.4949063332762194,
-    -25.36752525351012,
-    19.07237357743069
+    -32.91036403737193,
+    27.661867884502417
    ],
-   "event:knn5-median": [
+   "event:knn5": [
     -53.46478316265063,
-    -105.4026292506325,
-    1.2794616915059476
+    -115.23009784477838,
+    6.782786802990056
    ],
-   "event:knn5_log-median": [
+   "event:knn5_log": [
     -82.83321848770544,
-    -127.889547243504,
-    -36.93586960961013
+    -142.5318191856481,
+    -30.2913291729616
    ],
-   "event:wind_lin-median": [
+   "event:wind_lin": [
     0.29107438348023607,
-    -22.127379110242803,
-    22.02317716827556
+    -28.967606743958868,
+    27.460209734308993
    ],
-   "daycell:mean-median": [
+   "daycell:mean": [
     -2.8940154463062413,
-    -28.533960065977066,
-    23.686745657439804
+    -35.05632943511026,
+    31.658538329529105
    ],
-   "daycell:knn5-median": [
+   "daycell:knn5": [
     -50.55931526144576,
-    -99.87181914653031,
-    1.002012440791292
+    -114.25675054016087,
+    8.898853829345247
    ],
-   "daycell:knn5_log-median": [
+   "daycell:knn5_log": [
     -69.18097582090974,
-    -113.75837530368287,
-    -23.019994137748213
+    -129.5779309818664,
+    -10.930470413146008
    ],
-   "daycell:wind_lin-median": [
+   "daycell:wind_lin": [
     -0.9130365758098264,
-    -24.801593854353207,
-    23.84626331785005
+    -28.79317441354386,
+    24.548799184509207
    ],
-   "st:mean-median": [
+   "cruiseday:mean": [
+    1.9437351866708354,
+    -24.5526623287658,
+    30.049363667465876
+   ],
+   "cruiseday:knn5": [
+    8.326498138554314,
+    -63.7392000848987,
+    81.63215376459783
+   ],
+   "cruiseday:knn5_log": [
+    -6.087325202085026,
+    -64.85465056196088,
+    55.09776868535034
+   ],
+   "cruiseday:wind_lin": [
+    1.9226314183849809,
+    -27.815911232440005,
+    29.750168487377753
+   ],
+   "st:mean": [
     -9.811408258410381,
-    -66.79516194816247,
-    50.03383146344619
+    -47.510391926371476,
+    28.770182299293413
    ],
-   "st:knn5-median": [
+   "st:knn5": [
     -8.471801371084325,
-    -92.45195065610186,
-    56.85192017493353
+    -95.98862539541896,
+    72.45101051060959
    ],
-   "st:knn5_log-median": [
+   "st:knn5_log": [
     -24.713553109191196,
-    -89.57814392804282,
-    45.637875747095414
+    -88.11650389843048,
+    35.713237061646005
    ],
-   "st:wind_lin-median": [
+   "st:wind_lin": [
     14.164114985855747,
-    -15.948862307867767,
-    46.10981578340086
+    -2.517187841557103,
+    31.38387498017571
+   ],
+   "route:mean": [
+    -12.563262449134868,
+    -46.431417302465775,
+    22.972437248131225
+   ],
+   "route:knn5": [
+    -33.019858551807374,
+    -112.30907164431368,
+    53.68851572861667
+   ],
+   "route:knn5_log": [
+    -64.43027467559779,
+    -138.22252049752504,
+    13.385161376462472
+   ],
+   "route:wind_lin": [
+    0.5980406652299166,
+    -26.744244687505866,
+    24.09162840566318
+   ],
+   "route_buf1:mean": [
+    -10.673008168652927,
+    -45.35489190815869,
+    26.973267494584103
+   ],
+   "route_buf1:knn5": [
+    -7.5210444698794845,
+    -97.24755126535518,
+    83.63793730614358
+   ],
+   "route_buf1:knn5_log": [
+    -68.32250123540325,
+    -138.82731228135864,
+    -0.9905357651432934
+   ],
+   "route_buf1:wind_lin": [
+    -0.6844481749314468,
+    -27.01523814474366,
+    20.93653556008105
    ]
+  },
+  "knn_neighbors_within_1d": {
+   "cruiseday": 0.29397590361445786,
+   "daycell": 0.4867469879518072,
+   "event": 0.5927710843373494,
+   "route": 0.0819277108433735,
+   "route_buf1": 0.0,
+   "st": 0.10602409638554217
   },
   "split_checks": {
    "event": [
@@ -653,6 +1255,7 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 12,
      "min_dist_km": 0.12769856454369893,
      "min_dt_days": 0.011111111110949423,
      "min_dist_km_within_1d": 0.12769856454369893
@@ -665,6 +1268,7 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 12,
      "min_dist_km": 0.39564801590532156,
      "min_dt_days": 0.011111111110949423,
      "min_dist_km_within_1d": 0.39564801590532156
@@ -677,6 +1281,7 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 15,
      "min_dist_km": 0.39564801590532156,
      "min_dt_days": 0.011111111110949423,
      "min_dist_km_within_1d": 0.39564801590532156
@@ -689,6 +1294,7 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 9,
      "min_dist_km": 1.1169158496384526,
      "min_dt_days": 0.012500000000727596,
      "min_dist_km_within_1d": 1.1169158496384526
@@ -701,6 +1307,7 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 14,
      "min_dist_km": 0.12769856454369893,
      "min_dt_days": 0.011111111110949423,
      "min_dist_km_within_1d": 0.12769856454369893
@@ -715,6 +1322,7 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 9,
      "min_dist_km": 35.685017491666414,
      "min_dt_days": 0.018749999999272404,
      "min_dist_km_within_1d": 35.685017491666414
@@ -727,6 +1335,7 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 10,
      "min_dist_km": 46.149981208462314,
      "min_dt_days": 0.22916666666424135,
      "min_dist_km_within_1d": 46.149981208462314
@@ -739,6 +1348,7 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 11,
      "min_dist_km": 48.59381924002805,
      "min_dt_days": 0.21736111111022183,
      "min_dist_km_within_1d": 48.59381924002805
@@ -751,6 +1361,7 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 7,
      "min_dist_km": 40.67437006668405,
      "min_dt_days": 0.23472222221971606,
      "min_dist_km_within_1d": 40.67437006668405
@@ -763,9 +1374,77 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 8,
      "min_dist_km": 35.685017491666414,
      "min_dt_days": 0.018749999999272404,
      "min_dist_km_within_1d": 35.685017491666414
+    }
+   ],
+   "cruiseday": [
+    {
+     "fold": 0,
+     "n_test": 16,
+     "n_train": 67,
+     "test_events": 16,
+     "shared_events": 0,
+     "shared_groups": 0,
+     "shared_scenes": 0,
+     "shared_cruise_days": 0,
+     "min_dist_km": 49.50973896739536,
+     "min_dt_days": 0.24305555555474712,
+     "min_dist_km_within_1d": 49.50973896739536
+    },
+    {
+     "fold": 1,
+     "n_test": 17,
+     "n_train": 66,
+     "test_events": 17,
+     "shared_events": 0,
+     "shared_groups": 0,
+     "shared_scenes": 0,
+     "shared_cruise_days": 0,
+     "min_dist_km": 40.67437006668405,
+     "min_dt_days": 0.21736111111022183,
+     "min_dist_km_within_1d": 40.67437006668405
+    },
+    {
+     "fold": 2,
+     "n_test": 17,
+     "n_train": 66,
+     "test_events": 17,
+     "shared_events": 0,
+     "shared_groups": 0,
+     "shared_scenes": 0,
+     "shared_cruise_days": 0,
+     "min_dist_km": 43.477823294449244,
+     "min_dt_days": 0.2312500000007276,
+     "min_dist_km_within_1d": 43.477823294449244
+    },
+    {
+     "fold": 3,
+     "n_test": 17,
+     "n_train": 66,
+     "test_events": 17,
+     "shared_events": 0,
+     "shared_groups": 0,
+     "shared_scenes": 0,
+     "shared_cruise_days": 0,
+     "min_dist_km": 40.840782041719045,
+     "min_dt_days": 0.21736111111022183,
+     "min_dist_km_within_1d": 40.840782041719045
+    },
+    {
+     "fold": 4,
+     "n_test": 16,
+     "n_train": 67,
+     "test_events": 16,
+     "shared_events": 0,
+     "shared_groups": 0,
+     "shared_scenes": 0,
+     "shared_cruise_days": 0,
+     "min_dist_km": 40.67437006668405,
+     "min_dt_days": 0.23472222221971606,
+     "min_dist_km_within_1d": 40.67437006668405
     }
    ],
    "st": [
@@ -777,6 +1456,7 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 0,
      "min_dist_km": 105.26082903929714,
      "min_dt_days": 0.726388888888323,
      "min_dist_km_within_1d": 116.04263947370752
@@ -789,6 +1469,7 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 1,
      "min_dist_km": 105.26082903929714,
      "min_dt_days": 0.5048611111087666,
      "min_dist_km_within_1d": 110.90846100080027
@@ -801,6 +1482,7 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 2,
      "min_dist_km": 101.99087805121545,
      "min_dt_days": 0.4895833333321207,
      "min_dist_km_within_1d": 101.99087805121545
@@ -813,6 +1495,7 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 2,
      "min_dist_km": 104.21680323975416,
      "min_dt_days": 0.49722222222044365,
      "min_dist_km_within_1d": 104.21680323975416
@@ -825,9 +1508,77 @@
      "shared_events": 0,
      "shared_groups": 0,
      "shared_scenes": 0,
+     "shared_cruise_days": 3,
      "min_dist_km": 101.99087805121545,
      "min_dt_days": 0.4895833333321207,
      "min_dist_km_within_1d": 101.99087805121545
+    }
+   ],
+   "route": [
+    {
+     "fold": 0,
+     "n_test": 16,
+     "n_train": 67,
+     "test_events": 16,
+     "shared_events": 0,
+     "shared_groups": 0,
+     "shared_scenes": 0,
+     "shared_cruise_days": 0,
+     "min_dist_km": 68.0638543224481,
+     "min_dt_days": 0.2548611111124046,
+     "min_dist_km_within_1d": 68.0638543224481
+    },
+    {
+     "fold": 1,
+     "n_test": 19,
+     "n_train": 64,
+     "test_events": 19,
+     "shared_events": 0,
+     "shared_groups": 0,
+     "shared_scenes": 0,
+     "shared_cruise_days": 0,
+     "min_dist_km": 56.487336518251084,
+     "min_dt_days": 0.24861111111022183,
+     "min_dist_km_within_1d": 56.487336518251084
+    },
+    {
+     "fold": 2,
+     "n_test": 15,
+     "n_train": 68,
+     "test_events": 15,
+     "shared_events": 0,
+     "shared_groups": 0,
+     "shared_scenes": 0,
+     "shared_cruise_days": 0,
+     "min_dist_km": 56.487336518251084,
+     "min_dt_days": 0.24861111111022183,
+     "min_dist_km_within_1d": 56.487336518251084
+    },
+    {
+     "fold": 3,
+     "n_test": 15,
+     "n_train": 68,
+     "test_events": 15,
+     "shared_events": 0,
+     "shared_groups": 0,
+     "shared_scenes": 0,
+     "shared_cruise_days": 0,
+     "min_dist_km": 49.50973896739536,
+     "min_dt_days": 0.24861111111022183,
+     "min_dist_km_within_1d": 49.50973896739536
+    },
+    {
+     "fold": 4,
+     "n_test": 18,
+     "n_train": 65,
+     "test_events": 18,
+     "shared_events": 0,
+     "shared_groups": 0,
+     "shared_scenes": 0,
+     "shared_cruise_days": 0,
+     "min_dist_km": 49.50973896739536,
+     "min_dt_days": 0.24861111111022183,
+     "min_dist_km_within_1d": 49.50973896739536
     }
    ]
   }
@@ -841,6 +1592,7 @@
   "radius_km": 100.0,
   "days": 2.0,
   "folds": 5,
+  "k_blocks": 5,
   "seed": 42
  }
 }

@@ -75,7 +75,10 @@ def build_events(df: pd.DataFrame) -> pd.DataFrame:
         else:
             obs, tnote, known = day + pd.Timedelta(hours=12), "date_only_noon", False
         rows.append(dict(event_id=eid, source_id=r.source_id, lat=lat, lon=lon, point_from=how,
-                         obs_datetime=obs, time_known=known, time_note=tnote, n_rows=len(g)))
+                         obs_datetime=obs, time_known=known, time_note=tnote, n_rows=len(g),
+                         width_m=float(g.transect_width_m.median()) if g.transect_width_m.notna().any() else np.nan,
+                         length_km=float(g.transect_length_km.median()) if g.transect_length_km.notna().any() else np.nan,
+                         wind_ms=float(g.wind_speed_kn.mean()) * 0.514444 if g.wind_speed_kn.notna().any() else np.nan))
     return pd.DataFrame(rows)
 
 
@@ -187,6 +190,65 @@ def make_rows(ev: dict, src: tuple, res, a: argparse.Namespace) -> list[dict]:
 
 
 # ---------------------------------------------------------------- summary
+def load_drift_cfg(path: Path) -> dict:
+    import yaml
+    return yaml.safe_load(path.read_text(encoding="utf-8"))["drift"]
+
+
+def add_drift(cand: pd.DataFrame, ev: pd.DataFrame, dc: dict) -> pd.DataFrame:
+    """drift_shift_km по сценариям, tolerance_km и accept с учётом дрейфа (accept_meta — прежний отбор по метаданным)."""
+    cand = cand.merge(ev[["event_id", "width_m", "length_km", "wind_ms"]], on="event_id", how="left")
+    extra = np.where(cand.time_known, 0.0, dc["unknown_time_extra_h"])
+    cand["dt_drift_h"] = cand.dt_hours.abs() + extra
+    cand["drift_time_worst_case"] = ~cand.time_known.astype(bool)
+    wind = cand.wind_ms.fillna(0.0)
+    for name, sc in dc["scenarios"].items():
+        v = sc["current_ms"] + sc["windage"] * wind
+        cand[f"drift_shift_km_{name}"] = (v * cand.dt_drift_h * 3.6).round(2)
+    cand["drift_shift_km"] = cand[f"drift_shift_km_{dc['accept_scenario']}"]
+    tol = dc["tolerance"]
+    cand["tolerance_km"] = (cand.width_m.fillna(tol["default_width_m"]) / 2000 + tol["buffer_km"]).round(3)
+    cand["accept_meta"] = cand.accept
+    bad = cand.item_id.notna() & (cand.drift_shift_km > cand.tolerance_km)
+    rr = cand.reject_reason.fillna("")
+    cand.loc[bad, "reject_reason"] = np.where(rr[bad] == "", "sync_unreliable_drift", rr[bad] + ";sync_unreliable_drift")
+    cand["accept"] = cand.accept_meta & ~bad
+    return cand
+
+
+def drift_section(cand: pd.DataFrame, dc: dict) -> list[str]:
+    m = cand[cand.accept_meta]
+    L = ["## Допуск по дрейфу (L59b)", "",
+         "drift_shift_km = (скорость течения + windage × ветер) × |dt|; при неизвестном времени |dt| + "
+         f"{dc['unknown_time_extra_h']} ч (худший случай, флаг drift_time_worst_case). Ветер есть в реестре только у S1 (у которого нет сцен), "
+         "поэтому для всех пар действует только течение. tolerance_km = ширина полосы / 2 + буфер "
+         f"(буфер {dc['tolerance']['buffer_km']} км, конфиг `configs/case_pairs.yaml`, секция drift). "
+         f"accept требует drift_shift_km({dc['accept_scenario']}) ≤ tolerance_km, иначе reject_reason += sync_unreliable_drift.", "",
+         f"Исходно по метаданным (|dt|, облачность, контур) принято {m.event_id.nunique()} событий / {len(m)} строк. Сколько остаётся:", "",
+         "| сценарий | скорость течения, м/с | буфер 0.5 км | буфер 3 км | буфер 10 км | допуск = ½ длины трансекты* | медиана смещения, км (p25–p75) |",
+         "|---|---:|---:|---:|---:|---:|---:|"]
+    for name, sc in dc["scenarios"].items():
+        col = f"drift_shift_km_{name}"
+        cells = []
+        for b in (0.5, 3.0, 10.0):
+            tol = m.width_m.fillna(dc["tolerance"]["default_width_m"]) / 2000 + b
+            ok = m[m[col] <= tol]
+            cells.append(f"{ok.event_id.nunique()} соб. / {len(ok)}")
+        ok = m[m[col] <= (m.length_km / 2).fillna(dc["tolerance"]["buffer_km"])]
+        cells.append(f"{ok.event_id.nunique()} соб. / {len(ok)}")
+        L.append(f"| {name} | {sc['current_ms']} | " + " | ".join(cells) +
+                 f" | {m[col].median():.1f} ({m[col].quantile(.25):.1f}–{m[col].quantile(.75):.1f}) |")
+    a = cand[cand.accept]
+    L += ["", f"Итог с допуском по дрейфу (сценарий {dc['accept_scenario']}, буфер {dc['tolerance']['buffer_km']} км): "
+          f"**{a.event_id.nunique()} событий / {len(a)} строк** из {m.event_id.nunique()} / {len(m)}. "
+          + ("Оставшиеся: " + ", ".join(f"{r.event_id} ({r.mission}, dt {r.dt_hours:+.1f} ч, сдвиг {r.drift_shift_km} км)"
+                                       for r in a.sort_values("drift_shift_km").drop_duplicates("event_id").itertuples()) if len(a) else ""),
+          "", "\* ½ длины трансекты (S3: 5–30 км) — мягкий вариант: пара считается синхронной, если смещённая вода остаётся в пределах "
+          "обследованного маршрута; у S4 длины нет, берётся буфер.", "", "Предельное |dt| при типичном сценарии и буфере 3 км: 3.0 / (0.2 × 3.6) ≈ 4.2 ч; для событий без времени (+12 ч) "
+          "допуск не выполняется никогда — пары S4 возможны только как «контекст района», не как синхронная пара.", ""]
+    return L
+
+
 def summarize(cand: pd.DataFrame, ev: pd.DataFrame, a: argparse.Namespace) -> str:
     L = ["# Кандидаты пар «полевое наблюдение ↔ спутниковая сцена»", "",
          f"Скрипт `scripts/case/find_pairs.py`, параметры: окно поиска ±{a.window_days:g} сут, отбор: |dt| ≤ {a.accept_days:g} сут, "
@@ -219,9 +281,12 @@ def summarize(cand: pd.DataFrame, ev: pd.DataFrame, a: argparse.Namespace) -> st
             cells.append(ff[ff.adt_d <= a.accept_days + extra].event_id.nunique())
         n = len(ev) if s == "ВСЕ" else int(nev[s])
         L.append(f"| {s} | {n} | " + " | ".join(str(c) for c in cells) + " |")
-    L += ["", f"Принято (accept=True, все условия): событий {cand[cand.accept].event_id.nunique()}, "
-          f"пар {int(cand.accept.sum())}; по миссиям: "
-          + ", ".join(f"{m} — {k} соб." for m, k in cand[cand.accept].groupby('mission').event_id.nunique().items()), ""]
+    am = cand[cand.accept_meta]
+    L += ["", f"Принято по метаданным (accept_meta: |dt|, облачность, контур): событий {am.event_id.nunique()}, "
+          f"пар {len(am)}; по миссиям: "
+          + ", ".join(f"{m} — {k} соб." for m, k in am.groupby('mission').event_id.nunique().items())
+          + f". С допуском по дрейфу (accept): событий {cand[cand.accept].event_id.nunique()}, пар {int(cand.accept.sum())} — см. раздел ниже.", ""]
+    L += drift_section(cand, a.drift_cfg)
     # level found for S2
     s2 = sc[sc.fam == "Sentinel-2"]
     if len(s2):
@@ -257,7 +322,7 @@ def summarize(cand: pd.DataFrame, ev: pd.DataFrame, a: argparse.Namespace) -> st
         L.append(f"- {s}: {int((~e.event_id.isin(have)).sum())} из {len(e)}")
     L.append("")
     # top-10
-    acc = cand[cand.accept].copy()
+    acc = cand[cand.accept_meta].copy()
     if len(acc):
         acc["score"] = (acc.dt_hours.abs() / 24 + acc.cloud_cover / 100 + (~acc.time_known) * 0.5).round(1)
         acc["lvl_rank"] = acc.level.map({"L2A": 0, "L2SP": 0, "L1C": 1})
@@ -265,12 +330,12 @@ def summarize(cand: pd.DataFrame, ev: pd.DataFrame, a: argparse.Namespace) -> st
         acc = acc.sort_values(["score", "lvl_rank"]).drop_duplicates(["event_id", "mission", "sdate"])
         acc.drop(columns=["lvl_rank", "sdate"]).drop_duplicates("event_id").to_csv(OUT / "best_per_event.csv", index=False)
         acc = acc.head(10)
-        L += ["## 10 лучших пар (минимум |dt|/сут + облачность/100 + 0.5 за неизвестное время; дубли ES/PC одной сцены свёрнуты, приоритет L2A)", "",
-              "| event_id | источник | lat, lon | наблюдение UTC | время известно | миссия / уровень | item_id | dt, ч | облачн., % | тайл |",
-              "|---|---|---|---|---|---|---|---:|---:|---|"]
+        L += ["## 10 лучших пар по метаданным (accept_meta; минимум |dt|/сут + облачность/100 + 0.5 за неизвестное время; дубли ES/PC одной сцены свёрнуты, приоритет L2A)", "",
+              "| event_id | источник | lat, lon | наблюдение UTC | время известно | миссия / уровень | item_id | dt, ч | облачн., % | тайл | сдвиг typ, км | допуск, км | accept с дрейфом |",
+              "|---|---|---|---|---|---|---|---:|---:|---|---:|---:|---|"]
         for r in acc.itertuples():
             L.append(f"| {r.event_id} | {r.source_id} | {r.lat:.3f}, {r.lon:.3f} | {r.obs_datetime:%Y-%m-%d %H:%M} | {'да' if r.time_known else 'нет'} | "
-                     f"{r.mission} / {r.level} ({r.endpoint}) | {r.item_id} | {r.dt_hours:+.1f} | {r.cloud_cover:.1f} | {r.tile} |")
+                     f"{r.mission} / {r.level} ({r.endpoint}) | {r.item_id} | {r.dt_hours:+.1f} | {r.cloud_cover:.1f} | {r.tile} | {r.drift_shift_km:.1f} | {r.tolerance_km:.1f} | {'да' if r.accept else 'нет'} |")
         L.append("")
     L += ["## Оговорки", "",
           "- Облачность — по всей сцене/тайлу (eo:cloud_cover), не в точке; для отбора пары нужна проверка SCL/QA_PIXEL в точке.",
@@ -288,7 +353,7 @@ def point_scl(n: int) -> str:
     from rasterio.windows import Window
     b = pd.read_csv(OUT / "best_per_event.csv") if (OUT / "best_per_event.csv").exists() else None
     c = pd.read_parquet(OUT / "candidates.parquet")
-    acc = c[c.accept & (c.endpoint == "planetary-computer") & (c.level == "L2A")].copy()
+    acc = c[c.accept_meta & (c.endpoint == "planetary-computer") & (c.level == "L2A")].copy()
     acc["score"] = acc.dt_hours.abs() / 24 + acc.cloud_cover / 100 + (~acc.time_known) * 0.5
     acc = acc.sort_values("score").drop_duplicates("event_id").head(n)
     names = {0: "nodata", 1: "defect", 2: "dark", 3: "cl_shadow", 4: "veg", 5: "bare", 6: "water", 7: "unclass",
@@ -318,6 +383,7 @@ def main() -> int:
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--limit", type=int, default=0, help="только первые N событий (отладка)")
     ap.add_argument("--summary-only", action="store_true")
+    ap.add_argument("--config", default=str(ROOT / "configs" / "case_pairs.yaml"), help="секция drift")
     ap.add_argument("--point-scl", type=int, default=0, help="проверить SCL в точке для N лучших пар S2 L2A (PC)")
     a = ap.parse_args()
     a.workers = min(a.workers, 4)
@@ -340,6 +406,8 @@ def main() -> int:
                 print(f"{done}/{len(jobs)} {time.time() - t0:.0f}s", flush=True)
     cand = pd.DataFrame(rows).sort_values(["source_id", "event_id", "collection", "endpoint", "dt_hours"]).reset_index(drop=True)
     cand["point_inside_footprint"] = cand.point_inside_footprint.astype("boolean")
+    a.drift_cfg = load_drift_cfg(Path(a.config))
+    cand = add_drift(cand, ev, a.drift_cfg)
     cand.to_parquet(OUT / "candidates.parquet", index=False)
     cand.to_csv(OUT / "candidates.csv", index=False)
     text = summarize(cand, ev, a)

@@ -1,7 +1,9 @@
 """Отбор совместимых полевых записей для концентрации шт./км² по configs/case_selection.yaml.
 
 Каждая строка реестра получает ровно один исход: «принята» или первая причина отказа
-(порядок проверок: source_id → record_type → target_scope → measurement_profile →
+(порядок проверок: правила команды team_rules из конфига — item_observation не плотность,
+all_litter не пластик, S1 aerial total_plastic не профиль, категории не суммарный пластик —
+затем фильтры профиля source_id → record_type → target_scope → measurement_profile →
 size_class → material → quality_flags → наличие целевой концентрации). Отказы
 сохраняются с sample_id и причиной — это требование постановки «обосновать включения
 и исключения».
@@ -35,8 +37,19 @@ LEAK_EXACT = {"items_count", "density_numerator_items", "source_object_filtered_
               "quality_flags", "source_row_refs", "target"}
 
 
+# Явный список запрещённых предикторов из постановки (раздел «Независимая проверка») + производные.
+LEAK_EXPLICIT = ["concentration_value_orig", "concentration_unit_orig", "concentration_items_km2",
+                 "concentration_g_km2", "concentration_basis", "items_count", "density_numerator_items",
+                 "source_object_filtered_items", "source_reported_total_items",
+                 "reported_concentration_items_km2", "reported_concentration_g_km2",
+                 "parent_sample_id", "parent_concentration_items_km2", "zero_scope"]
+
+# Разрешённые предикторы модели концентрации: доступны до подсчёта предметов.
+ALLOWED_FEATURES = ["latitude", "longitude", "wind_speed_kn", "sea_state_beaufort"]
+
+
 def is_leak(col: str) -> bool:
-    return col in LEAK_EXACT or col.startswith(LEAK_PREFIXES)
+    return col in LEAK_EXACT or col in LEAK_EXPLICIT or col.startswith(LEAK_PREFIXES)
 
 
 def assert_no_leak(features) -> None:
@@ -72,6 +85,11 @@ def select(df: pd.DataFrame, cfg: dict, profile: Optional[str] = None
         m = mask & (reasons == "")
         reasons[m] = text
 
+    for rule in cfg.get("team_rules") or []:
+        m = pd.Series(True, index=df.index)
+        for col, vals in rule["when"].items():
+            m &= df[col].isin(vals)
+        reject(m, rule["reason"])
     for col in ("source_id", "record_type", "target_scope", "measurement_profile",
                 "size_class", "material"):
         allowed = p.get(col)

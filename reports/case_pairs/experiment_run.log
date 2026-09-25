@@ -1,0 +1,26 @@
+﻿[fdi] S3:HE460_MarLitter_transect01 (708, 708) 6.6 s
+[fdi] S3:HE460_MarLitter_transect03 (2712, 1542) 5.5 s
+[fdi] S4:DOORS3:T1 (702, 708) 8.0 s
+[fdi] S4:DOORS3:T11 (702, 708) 9.0 s
+[fdi] S4:DOORS3:T12 (702, 708) 8.1 s
+[fdi] S4:DOORS3:T13 (708, 708) 6.0 s
+[fdi] S4:DOORS3:T14 (708, 708) 7.7 s
+[fdi] S4:DOORS3:T15 (708, 702) 7.4 s
+[fdi] S4:DOORS3:T16 (702, 708) 13.4 s
+[fdi] S4:DOORS3:T17 (702, 708) 5.3 s
+[fdi] S4:DOORS3:T18 (702, 708) 19.4 s
+[fdi] S4:DOORS3:T19 (708, 708) 10.1 s
+[fdi] S4:DOORS3:T2 (702, 708) 11.3 s
+[fdi] S4:DOORS3:T20 (708, 702) 7.1 s
+[fdi] S4:DOORS3:T21 (708, 708) 7.1 s
+[fdi] S4:DOORS3:T25 (708, 708) 8.7 s
+[fdi] S4:DOORS3:T3 (708, 702) 6.0 s
+[fdi] S4:DOORS3:T30 (708, 708) 8.4 s
+[fdi] S4:DOORS3:T31 (702, 708) 4.6 s
+[fdi] S4:DOORS3:T32 (708, 702) 5.1 s
+[fdi] S4:DOORS3:T4 (708, 708) 5.2 s
+[fdi] S4:DOORS3:T5 (708, 702) 3.8 s
+прошедшие маски, S2 (детектор + FDI) 11 {'s_frac_p_thr': -0.5, 's_p_mean': -0.5, 's_p_p95': nan, 's_spots_km2': -0.5, 's_fdi_p95_anom': -0.745, 's_fdi_med_anom': -0.591, 's_fdi_frac_hi': -0.7, 'c_frac_p_thr': 0.258, 'c_p_mean': 0.22, 'c_fdi_p95': -0.564}
+прошедшие маски, только Чёрное море S4 10 {'s_frac_p_thr': nan, 's_p_mean': nan, 's_p_p95': nan, 's_spots_km2': nan, 's_fdi_p95_anom': -0.661, 's_fdi_med_anom': -0.515, 's_fdi_frac_hi': -0.6, 'c_frac_p_thr': 0.731, 'c_p_mean': 0.632, 'c_fdi_p95': -0.418}
+все S2-пары с валидной водой в полосе (в т.ч. блик/облака — загрязнённые) 19 {'s_frac_p_thr': -0.378, 's_p_mean': -0.582, 's_p_p95': nan, 's_spots_km2': -0.378, 's_fdi_p95_anom': -0.733, 's_fdi_med_anom': -0.025, 's_fdi_frac_hi': -0.298, 'c_frac_p_thr': -0.282, 'c_p_mean': -0.344, 'c_fdi_p95': -0.691}
+done C:\Users\User\Documents\GitHub\final-cosmohack\reports\case_pairs\experiment.md
