@@ -93,42 +93,19 @@ FeatureCollection, Polygon = граница ячейки H3 res 8. Только 
 - `GET /api/review/labels` → `{path, items:[запись…]}`.
 - `POST /api/review/retrain` → `{id, status:"running", started, n_labels, out_dir, log_tail, result:null}`; 422 `нет меток для дообучения…`, если меток нет, или если задача уже идёт. `GET /api/review/retrain/{id}` → `{id, status: running|done|error, returncode, log_tail, result}`; `result` = `weights_exp/review/<id>/result.json`: `{ok, n_labels, n_label_px, val_f1_before, val_f1_after, gain, rule, accepted, decision, replace_command (строка | null), replace_note, labels:[…], labelled_px_agreement, seconds, caveat}` или `{error}`. Веса в `weights/` не подменяются автоматически.
 
-## Локальные тайлы (L44)
+## Подложки: онлайн CARTO/Esri, офлайн — Sentinel-2 + береговая линия Natural Earth
 
-Обе подложки отдаёт сам сервис — интернет не нужен. Роутер `service/routes_tiles.py`, загрузчик `scripts/fetch_tiles.py`,
-файлы `service/tiles/{layer}/{z}/{x}/{y}.{ext}` (в git не входят).
+Решение команды (L44): тайлы CARTO и Esri **не скачиваются и не раздаются сервисом**: условия CARTO запрещают массовую
+загрузку и серверное кэширование, для офлайна Esri нужен собственный экспорт. Подложки берутся онлайн прямо у поставщиков,
+атрибуция на карте обязательна.
 
-| слой | URL-шаблон (XYZ, 256 px) | формат | источник | атрибуция (показывать обязательно) |
-|---|---|---|---|---|
-| `dark` | `/tiles/dark/{z}/{x}/{y}.png` | PNG | CARTO `dark_all` (растр, с подписями) | `© CARTO, © OpenStreetMap contributors` |
-| `sat` | `/tiles/sat/{z}/{x}/{y}.jpg` | JPEG | Esri World Imagery | `Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community` |
+| подложка | источник (онлайн) | атрибуция (показывать всегда) |
+|---|---|---|
+| «Тёмная» (`dark`, по умолчанию) | CARTO dark-matter, векторный стиль `https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json` | `© CARTO, © OpenStreetMap contributors` |
+| «Спутник» (`satellite`) | Esri World Imagery, растр `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}` | `Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community` |
+| «Без» (`none`, офлайн) | локально: фон океана `#07111f` + контур суши Natural Earth 1:110m (`/land-110m.geojson`, public domain, 75 КБ) + наши вырезки Sentinel-2 (`/data/...`) | `Контур суши: Natural Earth (public domain)`; снимки — Copernicus Sentinel-2 |
 
-Уровни: весь мир z0–6; на каждый район из manifest.json — z7–9 (центр ± 3°), z10–11 (центр ± 1°), z12 (bounds ± 50 %),
-z13–14 (bounds ± 20 %). Фактическое наличие — `GET /tiles/info` → `layers.{dark,sat}.{minzoom,maxzoom,levels{z:{tiles,mb}},attribution,url}`.
-
-Поведение: есть файл → 200, `Cache-Control: public, max-age=2592000, immutable`. Нет файла → 200 PNG, дорисованный
-сервером из ближайшего предка (заголовок `X-Tile-Overzoom: <z предка>`, кэш 1 ч), поэтому за краем кэша нет дыр и
-ошибок в консоли. Нет вообще ничего → прозрачный PNG 1×1 (`X-Tile-Empty: 1`). Неизвестный слой → 404.
-
-MapLibre (растровый источник): `{type:'raster', tiles:[location.origin + '/tiles/dark/{z}/{x}/{y}.png'], tileSize:256, maxzoom:14, attribution:'© CARTO, © OpenStreetMap contributors'}`
-(`maxzoom: 14` — глубже MapLibre растягивает z14). Для спутника то же с `/tiles/sat/{z}/{x}/{y}.jpg` и атрибуцией Esri.
-Во фронте v1: `service/frontend/src/map/controller.ts` → `LOCAL_TILES`, `darkStyle()`, `satelliteStyle()`.
-
-## Инциденты и лента событий
-Модуль: `service/routes_incidents.py` (роутер подключается автоматически). Ориентир — NOAA ERMA / EMSA CleanSeaNet.
-**Инцидент** = каждая находка `detections.geojson` (id = `properties.id`) и каждая зона `zones.json` (id = `zone:<region>:<date>:<model>:<h3>`):
-`{id, kind: detection|zone, region, region_name, date, model, scene_id, lon, lat, area_m2, priority (ранг зоны; для находки — ранг зоны, в чью ячейку H3 попал центр; null — вне топа/артефакт), zone_id? (для находки), confirmed_by_other_model, artifact (seam|wake|ship|null), artifact_ru?, max_prob?, mean_prob?, status, status_ru, verdict (последний вердикт оператора confirmed|false_alarm|null), label (последняя метка «Проверки»|null), updated, allowed:[статусы], n_events, history?:[{ts, actor: system|operator, from, to, note, source: build|review|api, label?}]}`.
-**Статусы и переходы** (иначе 409): `detected → under_review | confirmed | false_alarm`; `under_review → confirmed | false_alarm | detected`; `confirmed → resolved | under_review`; `false_alarm → resolved | under_review`; `resolved → under_review`; `excluded → under_review`. `excluded` — начальный статус артефактов (`properties.artifact`), ставит система (событие `build`, note «артефакт: …»); это не вердикт человека и в «проверенные» не входит.
-**Состояние** = начальное (из корня данных; событие `build`, `ts` = время съёмки из `scene_id`, иначе `<date>T00:00:00+00:00`) + события, упорядоченные по `ts`: (1) метки `labels.jsonl` (`kind:label`: `debris → confirmed`, `foam|algae|ship_wake|cloud|other → false_alarm`, actor `operator`, source `review`; `kind:flag_false` → `under_review`, только из `detected`); (2) журнал `incidents.jsonl` в папке `labels.jsonl` (`$MACROPLASTIC_LABELS`), только дозапись: `{kind:"status", id, region, date, model, from, to, note, actor:"operator", source:"api", ts (UTC ISO), user:"local"}`. Метка «Проверки» применяется без проверки перехода (решение оператора главное). События к неизвестным id игнорируются.
-- `GET /api/incidents?[region=][&status=a,b][&model=][&date=][&kind=detection|zone][&limit=200]` → `{n_total, statuses, status_ru, transitions, items:[инцидент без history]}`; сортировка: `updated` (новые сверху), затем `priority`, затем площадь. 422 — неизвестный статус.
-- `GET /api/incidents/{id}` → инцидент с `history`; 404 — нет такого.
-- `POST /api/incidents/{id}/status` JSON `{to, note?}` → инцидент с `history`; 422 — `to` не из списка; 404; 409 `{detail, from, to, allowed}` — недопустимый переход.
-- `GET /api/incidents/summary?[region=][&kind=]` → `{total, by_status:{<статус>:n}, by_kind, reviewed (есть вердикт оператора), confirmed_reviewed, confirmed_share_of_reviewed (0..1 | null), confirmed_share_text («подтверждено X % проверенных (a из b)»), rules}`.
-- `GET /api/feed?[limit=50][&region=][&kind=new,zone,excluded,under_review,confirmed,false_alarm,resolved,reopened,detected][&since=ISO]` → `{n_total, limit, items:[{ts, kind, text (рус.), region, region_name, incident_id, incident_kind, date, model, lon, lat, priority, area_m2, status, actor, source}]}`, по `ts` убыв. (при равенстве — ранг зоны). Тексты: «новое пятно · Мумбаи · 7 000 м² · приоритет 2», «зона приоритета 1 · Мумбаи · 24 200 м²», «исключено как кильватер · …» (артефакт) / «исключено как пена · …» (метка), «подтверждено оператором · …», «взято на проверку · …», «отмечено «ложное» на карте, на проверке · …», «возвращено на проверку · …», «закрыто · …».
-
-## Контекст: объекты OSM, угрозы, постоянные источники
-Модуль `service/routes_context.py` (L47). Объекты: `service/context/<region>.geojson` (папку можно подменить `$MACROPLASTIC_CONTEXT`), генерирует `scripts/fetch_osm_context.py` (Overpass, bbox района ± 10 км, кэш ответов `data_cache/osm/`). Сводка: `scripts/context_report.py` → `reports/context.md`.
-- `service/context/<region>.geojson` — FeatureCollection WGS84, `{region, bbox, source, fetched, note, features}`; `properties`: `id` (`<region>_osm_<n>`), `kind` ∈ `aquaculture | beach | port | marina | protected_area | river_mouth | outfall | wastewater_plant`, `kind_ru`, `name` (str | null), `osm_id` (`node|way|relation/<id>`), `source` = `© OpenStreetMap contributors (ODbL)`; у `river_mouth` ещё `waterway`, `coast_dist_m`. Полигоны обрезаны по bbox и упрощены (~20 м). Устье — концевой узел реки (последний) / канала (любой конец), не общий с другими водотоками, ≤ 1,5 км от береговой линии OSM.
-- `GET /api/context?region=[&kind=a,b]` → этот GeoJSON (`application/geo+json`); 404 — нет района или файла, 422 — плохое имя.
-- `GET /api/threats?region=[&date=][&buffer_m=300 (50–5000)][&min_pct=1]` → `{region, date, buffer_m, n_particles, caption, note, forcing, start_time, threats:[{object_id, kind, kind_ru, name, osm_id, lon, lat, n_particles, pct, first_h, median_h, at_start, text, source}]}`. Для объектов `aquaculture|beach|protected_area|marina|port`: частица (`drift.json particles[].path`) «дошла», если точка пути в буфере `buffer_m` от объекта; `first_h` — первый час среди всех частиц (0 — уже в буфере на момент снимка), `median_h` — медиана первых попаданий, `pct` — доля частиц. Сортировка по `pct`↓. `caption` = «демо-оценка по демонстрационному прогнозу дрейфа, без валидации». 404 — нет `drift.json` у даты или нет файла объектов.
-- `GET /api/sources[?region=][&min_dates=2][&model=]` → `{region, model, min_dates, h3_res:8, caption, rule, n_sources, osm_source, sources:[{region, h3, lon, lat, n_dates, dates, models, n_detections, n_confirmed, area_m2, detection_ids, nearest_source:{kind, kind_ru, name, osm_id, lon, lat, dist_m, source} | null, text}]}`. Правило: находки без `artifact` (любая модель или `model`) в одной ячейке H3 res 8 (по `properties.lon/lat` или центроиду) на ≥ `min_dates` надёжных датах (правило «ненадёжно» из `/api/calendar`); `area_m2` — сумма по датам, на дату максимум по моделям; `nearest_source` — ближайший `river_mouth|outfall|wastewater_plant` от центра ячейки. Без `region` — все районы. Подпись: «вероятный постоянный источник, требует проверки; не утверждение о загрязнителе».
+Поведение без сети (фронт v1, `service/frontend/src/App.tsx`, `map/controller.ts`, `map/MapView.tsx`):
+`navigator.onLine === false` при старте → сразу «Без»; событие `offline` → переключение на «Без» + тост; не загрузился стиль
+CARTO или ≥ 8 ошибок тайлов Esri → «Без» + тост. Всё остальное (снимки, находки, индекс, зоны, дрейф, шрифты) — локально.
+URL-параметр `?b=none|dark|satellite` задаёт подложку явно. Эндпоинта `/tiles/...` в сервисе нет.
