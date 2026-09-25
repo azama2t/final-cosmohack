@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-25T07:42:19+03:00",
+ "generated": "2026-09-25T08:18:56+03:00",
  "note": "генерируется scripts/final_numbers.py; руками не править; null = ещё не посчитано",
  "l3_lgbm": {
   "available": true,
@@ -201,9 +201,9 @@
   }
  },
  "live": {
-  "n_scenes": 48,
-  "n_regions": 12,
-  "n_fresh_2025_2026": 36,
+  "n_scenes": 64,
+  "n_regions": 18,
+  "n_fresh_2025_2026": 52,
   "scenes": [
    {
     "region": "accra",
@@ -495,6 +495,108 @@
     ]
    },
    {
+    "region": "ganges",
+    "date": "2025-11-19",
+    "scene_id": "S2C_MSIL2A_20251119T044111_R033_T45QXD_20251119T075312",
+    "tile": "45QXD",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0,
+    "water_frac": 0.8425,
+    "size_px": [
+     2508,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "ganges",
+    "date": "2026-01-13",
+    "scene_id": "S2B_MSIL2A_20260113T044039_R033_T45QXD_20260113T070956",
+    "tile": "45QXD",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0001,
+    "water_frac": 0.8353,
+    "size_px": [
+     2508,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "ganges",
+    "date": "2026-02-12",
+    "scene_id": "S2B_MSIL2A_20260212T043809_R033_T45QXD_20260212T081425",
+    "tile": "45QXD",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0001,
+    "water_frac": 0.8368,
+    "size_px": [
+     2508,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "guanabara",
+    "date": "2025-06-26",
+    "scene_id": "S2C_MSIL2A_20250626T130311_R095_T23KPQ_20250626T172059",
+    "tile": "23KPQ",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0002,
+    "water_frac": 0.5084,
+    "size_px": [
+     2508,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "guanabara",
+    "date": "2025-09-04",
+    "scene_id": "S2C_MSIL2A_20250904T130301_R095_T23KPQ_20250904T173012",
+    "tile": "23KPQ",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0007,
+    "water_frac": 0.508,
+    "size_px": [
+     2508,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "guanabara",
+    "date": "2026-07-16",
+    "scene_id": "S2B_MSIL2A_20260716T130249_R095_T23KPQ_20260716T162506",
+    "tile": "23KPQ",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0002,
+    "water_frac": 0.5073,
+    "size_px": [
+     2508,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
     "region": "haiti",
     "date": "2020-12-19",
     "scene_id": "S2B_18QYF_20201219_0_L2A",
@@ -733,6 +835,57 @@
     ]
    },
    {
+    "region": "karachi",
+    "date": "2025-11-11",
+    "scene_id": "S2B_MSIL2A_20251111T061009_R134_T42RTN_20251111T070326",
+    "tile": "42RTN",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0002,
+    "water_frac": 0.6256,
+    "size_px": [
+     2502,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "karachi",
+    "date": "2026-01-15",
+    "scene_id": "S2C_MSIL2A_20260115T061211_R134_T42RTN_20260115T093110",
+    "tile": "42RTN",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0998,
+    "water_frac": 0.5369,
+    "size_px": [
+     2502,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "karachi",
+    "date": "2026-02-14",
+    "scene_id": "S2C_MSIL2A_20260214T060941_R134_T42RTN_20260214T085315",
+    "tile": "42RTN",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0001,
+    "water_frac": 0.6233,
+    "size_px": [
+     2502,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
     "region": "lagos",
     "date": "2025-11-10",
     "scene_id": "S2B_MSIL2A_20251110T100139_R122_T31NEG_20251110T134828",
@@ -862,6 +1015,125 @@
     "size_px": [
      2508,
      2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "mekong",
+    "date": "2026-03-02",
+    "scene_id": "S2C_MSIL2A_20260302T030641_R075_T48PXS_20260302T075908",
+    "tile": "48PXS",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0188,
+    "water_frac": 0.6568,
+    "size_px": [
+     2508,
+     2508
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "mumbai",
+    "date": "2025-01-31",
+    "scene_id": "S2C_MSIL2A_20250131T054121_R005_T43QBB_20250131T124701",
+    "tile": "43QBB",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0001,
+    "water_frac": 0.5703,
+    "size_px": [
+     2508,
+     2502
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "mumbai",
+    "date": "2025-12-17",
+    "scene_id": "S2C_MSIL2A_20251217T054241_R005_T43QBB_20251217T091609",
+    "tile": "43QBB",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0,
+    "water_frac": 0.5709,
+    "size_px": [
+     2508,
+     2502
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "mumbai",
+    "date": "2026-01-01",
+    "scene_id": "S2B_MSIL2A_20260101T054139_R005_T43QBB_20260101T074000",
+    "tile": "43QBB",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0001,
+    "water_frac": 0.5692,
+    "size_px": [
+     2508,
+     2502
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "nile",
+    "date": "2025-11-11",
+    "scene_id": "S2C_MSIL2A_20251111T084221_R064_T36RTV_20251111T121910",
+    "tile": "36RTV",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0003,
+    "water_frac": 0.7587,
+    "size_px": [
+     2508,
+     2502
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "nile",
+    "date": "2026-01-05",
+    "scene_id": "S2B_MSIL2A_20260105T084239_R064_T36RTV_20260105T123702",
+    "tile": "36RTV",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0,
+    "water_frac": 0.7602,
+    "size_px": [
+     2508,
+     2502
+    ],
+    "models": [
+     "lgbm",
+     "mdd"
+    ]
+   },
+   {
+    "region": "nile",
+    "date": "2026-03-16",
+    "scene_id": "S2B_MSIL2A_20260316T083609_R064_T36RTV_20260316T125407",
+    "tile": "36RTV",
+    "source": "planetary-computer",
+    "crop_cloud_frac": 0.0035,
+    "water_frac": 0.7581,
+    "size_px": [
+     2508,
+     2502
     ],
     "models": [
      "lgbm",
@@ -1026,19 +1298,19 @@
  "service": {
   "data_root": "service/data",
   "kind": "real",
-  "n_regions": 12,
-  "n_dates": 48,
-  "n_detections_total": 83,
+  "n_regions": 18,
+  "n_dates": 64,
+  "n_detections_total": 263,
   "models": [
    "lgbm",
    "mdd"
   ],
   "mdd_threshold": 0.5,
   "lgbm_threshold_map": 0.64,
-  "n_drift": 28,
-  "n_confirmed_total": 250,
-  "n_dates_with_confirmed": 27,
-  "n_confirmed_latest_total": 14,
+  "n_drift": 44,
+  "n_confirmed_total": 360,
+  "n_dates_with_confirmed": 42,
+  "n_confirmed_latest_total": 64,
   "regions": [
    {
     "id": "accra",
@@ -1126,6 +1398,46 @@
     "n_zones": 0
    },
    {
+    "id": "ganges",
+    "name": "Устье Хугли (дельта Ганга, остров Сагар)",
+    "country": "Индия",
+    "tile": "45QXD",
+    "dates": [
+     "2025-11-19",
+     "2026-01-13",
+     "2026-02-12"
+    ],
+    "latest_date": "2026-01-13",
+    "model": "mdd",
+    "index_permille": 0.0087,
+    "n_detections": 6,
+    "total_debris_area_km2": 0.0045,
+    "n_dates": 3,
+    "n_drift": 3,
+    "n_confirmed_latest": 2,
+    "n_zones": 4
+   },
+   {
+    "id": "guanabara",
+    "name": "Залив Гуанабара (Рио-де-Жанейро)",
+    "country": "Бразилия",
+    "tile": "23KPQ",
+    "dates": [
+     "2025-06-26",
+     "2025-09-04",
+     "2026-07-16"
+    ],
+    "latest_date": "2026-07-16",
+    "model": "mdd",
+    "index_permille": 0.4238,
+    "n_detections": 14,
+    "total_debris_area_km2": 0.1347,
+    "n_dates": 3,
+    "n_drift": 3,
+    "n_confirmed_latest": 2,
+    "n_zones": 10
+   },
+   {
     "id": "haiti",
     "name": "Залив Порт-о-Пренс (Гаити)",
     "country": "Гаити",
@@ -1191,6 +1503,26 @@
     "n_zones": 10
    },
    {
+    "id": "karachi",
+    "name": "Карачи (порт, устье Лиари)",
+    "country": "Пакистан",
+    "tile": "42RTN",
+    "dates": [
+     "2025-11-11",
+     "2026-01-15",
+     "2026-02-14"
+    ],
+    "latest_date": "2026-01-15",
+    "model": "mdd",
+    "index_permille": 0.0295,
+    "n_detections": 14,
+    "total_debris_area_km2": 0.0123,
+    "n_dates": 3,
+    "n_drift": 3,
+    "n_confirmed_latest": 1,
+    "n_zones": 9
+   },
+   {
     "id": "lagos",
     "name": "Лагос (вход в лагуну, порт Апапа)",
     "country": "Нигерия",
@@ -1231,6 +1563,64 @@
     "n_drift": 5,
     "n_confirmed_latest": 1,
     "n_zones": 7
+   },
+   {
+    "id": "mekong",
+    "name": "Дельта Меконга (устья Тьеу и Дай)",
+    "country": "Вьетнам",
+    "tile": "48PXS",
+    "dates": [
+     "2026-03-02"
+    ],
+    "latest_date": "2026-03-02",
+    "model": "mdd",
+    "index_permille": 0.9277,
+    "n_detections": 82,
+    "total_debris_area_km2": 0.368,
+    "n_dates": 1,
+    "n_drift": 1,
+    "n_confirmed_latest": 9,
+    "n_zones": 10
+   },
+   {
+    "id": "mumbai",
+    "name": "Мумбаи (устье Ульхаса, крики Васаи и Малад)",
+    "country": "Индия",
+    "tile": "43QBB",
+    "dates": [
+     "2025-01-31",
+     "2025-12-17",
+     "2026-01-01"
+    ],
+    "latest_date": "2026-01-01",
+    "model": "mdd",
+    "index_permille": 0.2071,
+    "n_detections": 19,
+    "total_debris_area_km2": 0.068,
+    "n_dates": 3,
+    "n_drift": 3,
+    "n_confirmed_latest": 5,
+    "n_zones": 10
+   },
+   {
+    "id": "nile",
+    "name": "Дельта Нила (устье Розетты)",
+    "country": "Египет",
+    "tile": "36RTV",
+    "dates": [
+     "2025-11-11",
+     "2026-01-05",
+     "2026-03-16"
+    ],
+    "latest_date": "2026-01-05",
+    "model": "mdd",
+    "index_permille": 0.4062,
+    "n_detections": 45,
+    "total_debris_area_km2": 0.1886,
+    "n_dates": 3,
+    "n_drift": 3,
+    "n_confirmed_latest": 31,
+    "n_zones": 10
    },
    {
     "id": "santo_domingo",
@@ -1572,8 +1962,8 @@
   "spearman_median": 0.068
  },
  "drift": {
-  "n_scenes": 28,
-  "n_regions": 10,
+  "n_scenes": 44,
+  "n_regions": 16,
   "hours": 72,
   "currents": "HYCOM ESPC-D-V02 1/12°",
   "wind": "NCEP GFS 0.5°",
@@ -1697,6 +2087,84 @@
     ]
    },
    {
+    "region": "ganges",
+    "date": "2025-11-19",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 17.95,
+    "stranded_pct": 61.7,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   },
+   {
+    "region": "ganges",
+    "date": "2026-01-13",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 35.22,
+    "stranded_pct": 90.3,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   },
+   {
+    "region": "ganges",
+    "date": "2026-02-12",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 35.34,
+    "stranded_pct": 96.0,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   },
+   {
+    "region": "guanabara",
+    "date": "2025-06-26",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 6.35,
+    "stranded_pct": 99.3,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   },
+   {
+    "region": "guanabara",
+    "date": "2025-09-04",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 9.09,
+    "stranded_pct": 99.7,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   },
+   {
+    "region": "guanabara",
+    "date": "2026-07-16",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 3.65,
+    "stranded_pct": 97.0,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   },
+   {
     "region": "honduras",
     "date": "2025-01-30",
     "hours": 72,
@@ -1775,6 +2243,45 @@
     ]
    },
    {
+    "region": "karachi",
+    "date": "2025-11-11",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 8.35,
+    "stranded_pct": 56.7,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   },
+   {
+    "region": "karachi",
+    "date": "2026-01-15",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 11.48,
+    "stranded_pct": 99.7,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   },
+   {
+    "region": "karachi",
+    "date": "2026-02-14",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 32.4,
+    "stranded_pct": 29.7,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   },
+   {
     "region": "lagos",
     "date": "2025-11-10",
     "hours": 72,
@@ -1846,6 +2353,97 @@
     "n_particles": 300,
     "mean_displacement_km": 15.49,
     "stranded_pct": 12.0,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   },
+   {
+    "region": "mekong",
+    "date": "2026-03-02",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 11.51,
+    "stranded_pct": 100.0,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   },
+   {
+    "region": "mumbai",
+    "date": "2025-01-31",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 39.19,
+    "stranded_pct": 0.0,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   },
+   {
+    "region": "mumbai",
+    "date": "2025-12-17",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 52.39,
+    "stranded_pct": 10.3,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   },
+   {
+    "region": "mumbai",
+    "date": "2026-01-01",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 23.57,
+    "stranded_pct": 37.7,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   },
+   {
+    "region": "nile",
+    "date": "2025-11-11",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 14.32,
+    "stranded_pct": 72.0,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   },
+   {
+    "region": "nile",
+    "date": "2026-01-05",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 9.07,
+    "stranded_pct": 30.7,
+    "wind_drift_factors": [
+     "0.01",
+     "0.02",
+     "0.03"
+    ]
+   },
+   {
+    "region": "nile",
+    "date": "2026-03-16",
+    "hours": 72,
+    "n_particles": 300,
+    "mean_displacement_km": 18.69,
+    "stranded_pct": 60.0,
     "wind_drift_factors": [
      "0.01",
      "0.02",
