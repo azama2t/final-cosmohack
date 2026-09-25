@@ -82,3 +82,42 @@ profiles:
 consistency:
   rel_tol: 0.02     # 2 %: округление площади/концентрации в источнике
   abs_tol: 0.05     # шт./км²
+
+# Отложенный финальный test концентрации (L68) — зафиксирован ДО моделей концентрации L68,
+# метки test не читаются до приёмки 26.09 12:00: единственный читатель — scripts/case/final_test_conc.py
+# (однократно, отказ при существующем reports/case_conc/final_test.json). Модели и интервалы
+# выбираются только на dev (CV route_buf1 внутри dev). Честная оговорка: L60 смотрел CV по всем
+# событиям профиля (в т.ч. будущему test) — но только бейзлайны median/mean/kNN/wind_lin.
+final_test:
+  frozen_at: "2026-09-25T17:51:00"
+  seed: 42
+  k_blocks: 5
+  buffer_days: 1
+  rule: "дни рейса по порядку → k_blocks непрерывных участков с ~равным числом событий (splits.route_block_groups); test = участок sha256('<seed>|<profile>') mod k_blocks; буфер = дни рейса в пределах buffer_days кал. суток от test-дней (не test и не dev); sha256 = sha256 отсортированных строк 'sample_id,event_id'"
+  not_before: "2026-09-26T12:00"
+  result: reports/case_conc/final_test.json
+  profiles:
+    S2_visual_total_plastic:
+      block: 1
+      n_test: 14
+      n_buffer: 5
+      n_dev: 44
+      test_days: "2015-04-06..2015-04-10"
+      test_cruise_days: 5
+      min_dt_days: 1.557
+      min_dist_km: 90.3
+      test_sha256: "a2d8256d667e2e21d626ef6802236523bda5567249007071612a532ef35e29f6"
+      dev_sha256: "f033f95c9860aab97719b6944488601f0ae2dfd3e1a8b348068f3694a9015992"
+      file: "data/case/splits/final_test_S2_visual_total_plastic.csv"
+    S1_trawl_total_plastic:
+      block: 1
+      n_test: 19
+      n_buffer: 6
+      n_dev: 58
+      test_days: "2015-07-31..2015-08-04"
+      test_cruise_days: 5
+      min_dt_days: 1.249
+      min_dist_km: 107.1
+      test_sha256: "fa417104719141bb47313d5a82425b385f8756466e38f6ac7297ee0bb92a0917"
+      dev_sha256: "b1e2ccb49dacdc03460c66c4478d3c50d3caec7658c1b56341eed779259f8e2f"
+      file: "data/case/splits/final_test_S1_trawl_total_plastic.csv"

@@ -1,0 +1,108 @@
+# Модель концентрации шт./км² (L68). protocol записан ДО первого запуска CV (предрегистрация);
+# selected — результат scripts/case/conc_model_cv.py (CV на dev). Финальный test — scripts/case/final_test_conc.py (однократно, после 26.09 12:00).
+protocol:
+  written_before_cv: 2026-09-25T17:52 (файл протокола создан до первого запуска CV; время 18:25 в первой версии было опечаткой)
+  profiles:
+  - S2_visual_total_plastic
+  - S1_trawl_total_plastic
+  data: 'только dev-часть (configs/case_selection.yaml: final_test, role=dev); test и буфер не читаются'
+  cv:
+    method: route
+    k_blocks: 5
+    buffer_days: 1.0
+    inner_blocks: 4
+  baseline: median
+  candidates:
+  - mean
+  - geomean
+  - pooled
+  - knn5_log
+  - ridge_log
+  - poisson_glm
+  - tweedie_glm
+  - lgbm_log
+  hyperparameters:
+    knn5_log:
+      k: 5
+      exclude_days: 1.0
+    ridge_log:
+      alpha: 1.0
+    poisson_glm:
+      alpha: 0.1
+      link: log
+      weight: sampled_area_km2
+    tweedie_glm:
+      power: 1.5
+      alpha: 0.1
+      link: log
+      weight: sampled_area_km2
+    lgbm_log:
+      n_estimators: 100
+      learning_rate: 0.05
+      num_leaves: 4
+      min_child_samples: 5
+      seed: 42
+  features_raw:
+  - latitude
+  - longitude
+  - date_utc
+  - datetime_start_iso
+  - wind_speed_kn
+  - sea_state_beaufort
+  - platform
+  - sampling_method
+  features_note: X = lat, lon, день года sin/cos, местное солнечное время sin/cos; ветер/Бофорт — если заполнены ≥ 80 % train (только S1); platform/sampling_method — one-hot, если в train > 1 значения (внутри
+    профиля константа → отбрасываются). sampled_area_km2 — только вес/offset GLM, не признак. Утечные поля (selection.LEAK_EXPLICIT) запрещены.
+  primary_metric: mae
+  extra_metrics:
+  - rmse
+  - median_ae
+  - log1p_mae
+  acceptance_rule: Кандидат принимается, если верхняя граница 95 % ДИ разности MAE(кандидат) − MAE(медиана) < 0 (бутстреп по дням рейса, 2000 повторов, seed 0). Из принятых основной — с наименьшим CV-MAE
+    на dev. Если принятых нет — основной объявляется медиана обучающего профиля (честный результат).
+  interval: '90 %: квантили q05/q95 лог-остатков log1p(y) − log1p(ŷ) из вложенной CV на обучающей части (для оценки покрытия); для применения — q05/q95 out-of-fold остатков всей dev-CV. q05 ≤ 0 ≤ q95.'
+selected:
+  S2_visual_total_plastic:
+    model: ridge_log
+    reason: 'ridge_log: MAE 28.5 < медианы, ДИ разности [-31.6; -0.3] не содержит 0'
+    params:
+      alpha: 1.0
+    features:
+    - latitude
+    - longitude
+    - doy_sin
+    - doy_cos
+    - hour_sin
+    - hour_cos
+    weights: weights/case_conc/S2_visual_total_plastic.json
+    interval:
+      level: 0.9
+      q_lo: -1.4713
+      q_hi: 1.1643
+    dev_cv:
+      mae: 28.51
+      rmse: 41.43
+      log1p_mae: 0.6116
+      coverage90: 0.841
+      baseline_mae: 44.2
+  S1_trawl_total_plastic:
+    model: knn5_log
+    reason: 'knn5_log: MAE 434.0 < медианы, ДИ разности [-189.6; -9.9] не содержит 0'
+    params:
+      k: 5
+      exclude_days: 1.0
+    features:
+    - latitude
+    - longitude
+    weights: weights/case_conc/S1_trawl_total_plastic.json
+    interval:
+      level: 0.9
+      q_lo: -1.7179
+      q_hi: 0.9795
+    dev_cv:
+      mae: 434.05
+      rmse: 531.16
+      log1p_mae: 0.6916
+      coverage90: 0.741
+      baseline_mae: 527.42
+selected_at: '2026-09-25T17:54:25'

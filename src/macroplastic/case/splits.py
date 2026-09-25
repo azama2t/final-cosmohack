@@ -293,3 +293,46 @@ def assert_no_overlap(split: pd.DataFrame, cruise_day: bool = False) -> None:
         bad = pd.concat([bad, chk[chk.get("shared_cruise_days", 0) > 0]])
     if len(bad):
         raise AssertionError(f"пересечение групп между фолдами:\n{bad}")
+
+
+# ---------------------------------------------------------------- отложенный финальный test (L68)
+def final_test_block_index(profile: str, seed: int = 42, k_blocks: int = 5) -> int:
+    """Какой участок маршрута уходит в отложенный test: sha256("<seed>|<profile>") mod k_blocks.
+    Правило не зависит от значений C (выбор до моделей, без просмотра меток)."""
+    import hashlib
+    return int(hashlib.sha256(f"{seed}|{profile}".encode("utf-8")).hexdigest(), 16) % k_blocks
+
+
+def final_test_split(df: pd.DataFrame, profile: str, seed: int = 42, k_blocks: int = 5,
+                     buffer_days: int = 1) -> pd.DataFrame:
+    """Отложенный test = один непрерывный участок маршрута (~1/k_blocks событий, route_block_groups),
+    индекс участка — final_test_block_index(profile, seed). Буфер: дни рейса в пределах buffer_days
+    календарных суток от любого test-дня того же рейса не входят ни в test, ни в dev (role=buffer).
+    → DataFrame(sample_id, event_id, cruise_day, date_utc, block, role ∈ {test, buffer, dev}).
+    Метки (C) не читаются."""
+    _, block = route_block_groups(df, k_blocks)
+    b = final_test_block_index(profile, seed, k_blocks)
+    ck = cruise_keys(df).to_numpy()
+    date = pd.to_datetime(df["date_utc"]).dt.normalize().to_numpy()
+    role = np.where(block == b, "test", "dev").astype(object)
+    for c in np.unique(ck):
+        m = ck == c
+        tdates = np.unique(date[m & (role == "test")])
+        if len(tdates) == 0:
+            continue
+        gap = np.abs((date[m][:, None] - tdates[None, :]) / np.timedelta64(1, "D")).min(axis=1)
+        idx = np.nonzero(m)[0]
+        buf = (gap > 0) & (gap <= buffer_days)
+        role[idx[buf]] = "buffer"
+    return pd.DataFrame({"sample_id": df["sample_id"].to_numpy(), "event_id": df["event_id"].to_numpy(),
+                         "cruise_day": cruise_day_keys(df).to_numpy(),
+                         "date_utc": df["date_utc"].astype(str).to_numpy(),
+                         "block": block, "role": role})
+
+
+def composition_sha256(ft: pd.DataFrame, role: str = "test") -> str:
+    """sha256 состава части: отсортированные строки «sample_id,event_id» через \n."""
+    import hashlib
+    sub = ft[ft["role"] == role]
+    lines = sorted(f"{s},{e}" for s, e in zip(sub["sample_id"], sub["event_id"]))
+    return hashlib.sha256("\n".join(lines).encode("utf-8")).hexdigest()
