@@ -51,15 +51,38 @@ PC_ASSET = {b: ("B8A" if b == "B8A" else f"B{int(b[1:]):02d}") for b in BANDS} |
 # Regions: centre = median of MARIDA Marine-Debris pixels on that tile (computed from data/MARIDA.zip _cl.tif,
 # see out/l6/marida_md_scenes.csv). md_px = MD pixels of MARIDA on the tile (all dates).
 REGIONS = {
-    "honduras": dict(region_name="Gulf of Honduras (Omoa / Puerto Cortes / Motagua mouth)", tile="16PCC",
-                     center=(-88.22, 15.80), md_px=1496,  # between MD median (15.90) and Motagua/Omoa coast
+    "honduras": dict(region_name="Гондурасский залив (Омоа – Пуэрто-Кортес – устье Мотагуа)",
+                     region_name_en="Gulf of Honduras (Omoa / Puerto Cortes / Motagua mouth)", country="Гондурас / Гватемала",
+                     tile="16PCC", center=(-88.22, 15.80), md_px=1496,  # between MD median (15.90) and Motagua/Omoa coast
                      marida_dates=["2016-09-04", "2020-09-18", "2020-09-23", "2019-01-27", "2016-11-03"]),
-    "haiti": dict(region_name="Port-au-Prince Bay, Haiti", tile="18QYF", center=(-72.55, 18.72), md_px=1112,
+    "haiti": dict(region_name="Залив Порт-о-Пренс (Гаити)", region_name_en="Port-au-Prince Bay, Haiti", country="Гаити",
+                  tile="18QYF", center=(-72.55, 18.72), md_px=1112,
                   marida_dates=["2020-12-29", "2020-03-14", "2020-09-15", "2020-03-19", "2021-01-03"]),
-    "durban": dict(region_name="Durban, South Africa", tile="36JUN", center=(31.09, -29.83), md_px=46,
-                   marida_dates=["2019-04-24"]),
-    "jakarta": dict(region_name="Jakarta Bay, Indonesia", tile="48MXU", center=(106.50, -5.89), md_px=208,
-                    marida_dates=["2018-12-06"]),
+    "durban": dict(region_name="Дурбан", region_name_en="Durban, South Africa", country="ЮАР",
+                   tile="36JUN", center=(31.09, -29.83), md_px=46, marida_dates=["2019-04-24"]),
+    "jakarta": dict(region_name="Джакартский залив", region_name_en="Jakarta Bay, Indonesia", country="Индонезия",
+                    tile="48MXU", center=(106.50, -5.89), md_px=232,  # 48MXU 208 + 48MYU 24
+                    marida_dates=["2018-12-06", "2019-05-25"]),
+    # L6b additions. centre = middle of the MARIDA MD bbox of the tile (reports/marida_regions.md), nudged to water.
+    "manila": dict(region_name="Манильский залив", region_name_en="Manila Bay, Philippines", country="Филиппины",
+                   tile="51PTS", center=(120.82, 14.60), md_px=38, marida_dates=["2016-07-17", "2019-05-18"]),
+    "danang": dict(region_name="Дананг (устье Тхубон, Хойан)", region_name_en="Da Nang / Hoi An, Vietnam",
+                   country="Вьетнам", tile="48PZC", center=(108.50, 15.84), md_px=24,
+                   marida_dates=["2018-01-18", "2018-11-14", "2019-11-24"]),
+    "bali": dict(region_name="Бали (пролив Бадунг)", region_name_en="Bali (Badung Strait), Indonesia", country="Индонезия",
+                 tile="50LLR", center=(115.35, -8.83), md_px=41, marida_dates=["2018-03-04"]),
+    "scotland": dict(region_name="Шотландия (Ферт-оф-Форт)", region_name_en="Firth of Forth, Scotland", country="Великобритания",
+                     tile="30VWH", center=(-2.46, 56.18), md_px=27, marida_dates=["2018-04-20"]),
+    "santo_domingo": dict(region_name="Санто-Доминго (устье Осамы)", region_name_en="Santo Domingo (Ozama mouth)",
+                          country="Доминиканская Республика", tile="19QDA", center=(-69.82, 18.40), md_px=0,
+                          marida_dates=["2019-01-11"]),
+    # reserve regions without MARIDA labels (fresh scenes only); boxes at large river mouths / ports
+    "tiber": dict(region_name="Средиземное море: устье Тибра (Рим, Остия)", region_name_en="Tiber mouth, Rome (Mediterranean)",
+                  country="Италия", tile="33TTG", center=(12.22, 41.72), md_px=0, marida_dates=[]),
+    "accra": dict(region_name="Аккра (лагуна Корле, порт Тема)", region_name_en="Accra (Korle Lagoon), Ghana", country="Гана",
+                  tile="30NZM", center=(-0.14, 5.50), md_px=0, marida_dates=[]),
+    "lagos": dict(region_name="Лагос (вход в лагуну, порт Апапа)", region_name_en="Lagos harbour entrance, Nigeria",
+                  country="Нигерия", tile="31NEG", center=(3.40, 6.30), md_px=0, marida_dates=[]),
 }
 
 # SCL classes (Sen2Cor): 0 nodata, 1 saturated/defective, 2 dark area, 3 cloud shadow, 4 vegetation,
@@ -363,7 +386,8 @@ def write_scene(outdir: Path, region: str, item, crop: dict, extra: dict | None 
     bw = transform_bounds(crs, "EPSG:4326", b[0], b[1], b[2], b[3])
     p = item.properties
     reg = REGIONS.get(region, {})
-    meta = dict(region=region, region_name=reg.get("region_name", region), date=p["datetime"][:10],
+    meta = dict(region=region, region_name=reg.get("region_name", region), region_name_en=reg.get("region_name_en"),
+                country=reg.get("country"), date=p["datetime"][:10],
                 datetime=p["datetime"], scene_id=item.id, tile=tile_of(item),
                 cloud_cover=p.get("eo:cloud_cover"), crop_cloud_frac=stats["crop_cloud_frac"],
                 crop_shadow_frac=stats["crop_shadow_frac"], water_frac=stats["water_frac"],

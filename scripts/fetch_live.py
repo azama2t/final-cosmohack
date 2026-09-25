@@ -103,6 +103,8 @@ def main():
                     help="order of OK candidates: glint = lowest median B8A over SCL water (less sun glint/haze)")
     ap.add_argument("--source-policy", default="auto", choices=["auto", "screening-source"],
                     help="auto: write pixels from PC for baseline>=04 dates and from original ES _0 before 2022")
+    ap.add_argument("--allow-es-clamped", action="store_true",
+                    help="allow Earth Search pixels for dates >= 2022-01-25 when PC lacks the item (dark water clamped)")
     ap.add_argument("--refetch-existing", action="store_true",
                     help="rebuild every data/live/*/*/ from its scene.json (same item id and UTM bounds)")
     a = ap.parse_args()
@@ -130,11 +132,18 @@ def main():
             ok_items.append((gl if a.rank == "glint" else cf, it, epsg, bounds, gl))
     ok_items.sort(key=lambda t: (np.nan_to_num(t[0], nan=9.0)))
     written = 0
-    for _, it, epsg, bounds, gl in ok_items[: a.n] if not a.dry_run else []:
+    for _, it, epsg, bounds, gl in ok_items if not a.dry_run else []:
+        if written >= a.n:
+            break
         if a.source_policy == "auto":  # screening on Earth Search, pixels from the unclamped source (see pick_item)
-            it2 = pick_item(it.properties["datetime"][:10], stac.tile_of(it), lon, lat)
+            d = it.properties["datetime"][:10]
+            it2 = pick_item(d, stac.tile_of(it), lon, lat)
             if stac.item_epsg(it2) == epsg:
                 it = it2
+            if d >= "2022-01-25" and stac.source_of(it) != "planetary-computer" and not a.allow_es_clamped:
+                # L6b: e.g. S2C 48MXU 2026-05-28 is missing on PC -> ES pixels would have dark water clamped at DN=1
+                print(f"  skip {it.id}: no Planetary Computer item for {d} (ES pixels clamped at DN=1)", flush=True)
+                continue
         crop = stac.read_crop(it, epsg, bounds)
         outdir = Path(a.out) / a.region / it.properties["datetime"][:10]
         meta = stac.write_scene(outdir, a.region, it, crop, extra=dict(

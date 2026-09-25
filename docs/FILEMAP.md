@@ -71,3 +71,4 @@
 | `reports/mados_overlap.csv`, `reports/mados_overlap_with_marida_test.csv` | пересечения сцен MADOS с MARIDA train/val/test | отчёт |
 | `reports/l13_mados.{md,json}`, `reports/experiments_l13.md` | итог MARIDA+MADOS (принято) | отчёт |
 | `weights/lgbm/` | **итоговая модель: LightGBM на MARIDA train + MADOS** (без сцен val MARIDA), порог 0.63; прежняя (только MARIDA) — `weights_exp/lgbm/l3_final_backup/` | inference.py |
+| `scripts/relabel_live_regions.py` | обновляет region_name (рус.), region_name_en, country, marida_dates в существующих scene.json из `stac.REGIONS` | после правки списка регионов |
