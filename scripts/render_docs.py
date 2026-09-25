@@ -368,21 +368,54 @@ def derived(fn: dict) -> dict:
 
     # --- regions on the map (generated from the service manifest, never by hand)
     sv = fn.get("service") or {}
-    rr = ["| Район | Тайл | Дат | Последняя дата | Индекс, ‰ | Пятен | из них уверенных | Площадь пятен, га | Дрейф |",
-          "|---|---|---|---|---|---|---|---|---|"]
-    regs = sorted(sv.get("regions") or [], key=lambda r: -(r.get("index_permille") or 0))
+    # L40: order as on the site (rankRegions): reliable regions by index, then unreliable ones (latest scene with
+    # haze/glint or clouds > 50 %) by index, marked in the column «Последний снимок».
+    rr = ["| Район | Тайл | Дат | Последний снимок | Дата индекса | Индекс, ‰ | Пятен | из них уверенных | Площадь пятен, га | Дрейф |",
+          "|---|---|---|---|---|---|---|---|---|---|"]
+    all_regs = sv.get("regions") or []
+    by_id = {r.get("id"): r for r in all_regs}
+    if sv.get("ranking_reliable") is not None:
+        regs = [by_id[i] for i in (sv.get("ranking_reliable") or []) + (sv.get("ranking_unreliable") or []) if i in by_id]
+    else:
+        regs = sorted(all_regs, key=lambda r: -(r.get("index_permille") or 0))
     for r in regs:
+        rel = r.get("reliable")
+        last_s = (f"{fmt(r.get('last_date'), None)} · "
+                  f"{'надёжен' if rel else ('**' + fmt(r.get('unreliable_reason'), None) + '**')}") if rel is not None else DASH
         area = r.get("total_debris_area_km2")
         idx = r.get("index_permille")
         idx_s = DASH if idx is None else ("< 0.001" if (0 < idx < 0.001 or (idx == 0 and (r.get("n_detections") or 0) > 0)) else f"{idx:.3f}")
         rr.append(f"| {fmt(r.get('name'), None)} | {fmt(r.get('tile'), None)} | {fmt(r.get('n_dates'), 'int')} | "
-                  f"{fmt(r.get('latest_date'), None)} | {idx_s} | {fmt(r.get('n_detections'), 'int')} | "
+                  f"{last_s} | {fmt(r.get('latest_date'), None)} | {idx_s} | {fmt(r.get('n_detections'), 'int')} | "
                   f"{fmt(r.get('n_confirmed_latest'), 'int')} | "
                   f"{DASH if area is None else f'{100 * area:.2f}'} | "
                   f"{'есть' if r.get('n_drift') else 'нет'} |")
     if len(rr) == 2:
-        rr.append(f"| {DASH} | | | | | | | | |")
+        rr.append(f"| {DASH} | | | | | | | | | |")
     regions_table = "\n".join(rr)
+
+    # L40: leaders of the rating in prose — only reliable regions (as the site's rating)
+    def _short(nm):
+        nm = nm or DASH
+        i = nm.find(" (")
+        return nm[:i] if i > 0 else nm
+    top = [by_id[i] for i in (sv.get("ranking_reliable") or [])[:3] if i in by_id]
+    bad = [by_id[i] for i in (sv.get("ranking_unreliable") or []) if i in by_id]
+    if top:
+        lead = " → ".join(f"{_short(r.get('name'))} {fmt(r.get('index_permille'), 'f3')} ‰" for r in top)
+        regions_leaders_short = lead
+        regions_leaders = (f"Лидеры рейтинга по надёжным снимкам: {lead}. "
+                           f"Надёжных районов {fmt(sv.get('n_reliable'), None)} из {fmt(sv.get('n_regions'), None)}; "
+                           f"у {fmt_pl(len(bad), 'остального/остальных/остальных')} последний снимок с дымкой/бликом "
+                           f"или облачностью > 50 %: они в конце таблицы, а на сайте — в блоке «ненадёжные снимки»")
+        if bad and (bad[0].get("index_permille") or 0) > (top[0].get("index_permille") or 0):
+            hi = [r for r in bad if (r.get("index_permille") or 0) > (top[0].get("index_permille") or 0)]
+            regions_leaders += (". Индекс выше, чем у лидера, есть среди ненадёжных ("
+                                + ", ".join(f"{_short(r.get('name'))} {fmt(r.get('index_permille'), 'f3')} ‰" for r in hi)
+                                + "), но он посчитан по снимку с дымкой/бликом или по снимку старше последнего")
+        regions_leaders += "."
+    else:
+        regions_leaders, regions_leaders_short = "", DASH
 
     live = fn.get("live") or {}
     lr = ["| Район | Дата | Сцена | Облачность вырезки | Доля воды | Модели |", "|---|---|---|---|---|---|"]
@@ -432,7 +465,8 @@ def derived(fn: dict) -> dict:
         parts.append(f"ошибок в консоли {ui['console_errors']}")
     ui_txt = "; ".join(parts) if parts else DASH
 
-    return {"metrics_table": metrics_table, "models_table": models_table, "regions_table": regions_table,
+    return {"metrics_table": metrics_table, "models_table": models_table, "regions_table": regions_table, "regions_leaders": regions_leaders,
+            "regions_leaders_short": regions_leaders_short,
             "live_table": "\n".join(lr), "l3_noise": noise_txt, "test_sentence": test_txt, "lro_text": lro_txt,
             "speed_block": speed_block, "ui_perf_text": ui_txt, "baselines_table": baselines_table(fn),
             "l23_channels_table": l23_channels_table(fn), "threads_table": threads_table(fn),

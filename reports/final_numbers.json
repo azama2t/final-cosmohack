@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-25T10:01:29+03:00",
+ "generated": "2026-09-25T10:09:12+03:00",
  "note": "генерируется scripts/final_numbers.py; руками не править; null = ещё не посчитано",
  "l3_lgbm": {
   "available": true,
@@ -1328,7 +1328,10 @@
     "n_dates": 1,
     "n_drift": 1,
     "n_confirmed_latest": 0,
-    "n_zones": 4
+    "n_zones": 4,
+    "last_date": "2025-10-21",
+    "reliable": false,
+    "unreliable_reason": "дымка/блик"
    },
    {
     "id": "bali",
@@ -1351,7 +1354,10 @@
     "n_dates": 6,
     "n_drift": 4,
     "n_confirmed_latest": 0,
-    "n_zones": 0
+    "n_zones": 0,
+    "last_date": "2026-07-05",
+    "reliable": true,
+    "unreliable_reason": null
    },
    {
     "id": "danang",
@@ -1370,7 +1376,10 @@
     "n_dates": 2,
     "n_drift": 1,
     "n_confirmed_latest": 0,
-    "n_zones": 1
+    "n_zones": 1,
+    "last_date": "2025-09-15",
+    "reliable": true,
+    "unreliable_reason": null
    },
    {
     "id": "durban",
@@ -1395,7 +1404,10 @@
     "n_dates": 8,
     "n_drift": 3,
     "n_confirmed_latest": 0,
-    "n_zones": 0
+    "n_zones": 0,
+    "last_date": "2026-07-03",
+    "reliable": true,
+    "unreliable_reason": null
    },
    {
     "id": "ganges",
@@ -1415,7 +1427,10 @@
     "n_dates": 3,
     "n_drift": 3,
     "n_confirmed_latest": 2,
-    "n_zones": 3
+    "n_zones": 3,
+    "last_date": "2026-02-12",
+    "reliable": false,
+    "unreliable_reason": "дымка/блик"
    },
    {
     "id": "guanabara",
@@ -1435,7 +1450,10 @@
     "n_dates": 3,
     "n_drift": 3,
     "n_confirmed_latest": 2,
-    "n_zones": 10
+    "n_zones": 10,
+    "last_date": "2026-07-16",
+    "reliable": true,
+    "unreliable_reason": null
    },
    {
     "id": "haiti",
@@ -1456,7 +1474,10 @@
     "n_dates": 4,
     "n_drift": 0,
     "n_confirmed_latest": 0,
-    "n_zones": 0
+    "n_zones": 0,
+    "last_date": "2026-01-09",
+    "reliable": true,
+    "unreliable_reason": null
    },
    {
     "id": "honduras",
@@ -1481,7 +1502,10 @@
     "n_dates": 8,
     "n_drift": 6,
     "n_confirmed_latest": 1,
-    "n_zones": 6
+    "n_zones": 6,
+    "last_date": "2026-05-30",
+    "reliable": true,
+    "unreliable_reason": null
    },
    {
     "id": "jakarta",
@@ -1500,7 +1524,10 @@
     "n_dates": 2,
     "n_drift": 0,
     "n_confirmed_latest": 8,
-    "n_zones": 10
+    "n_zones": 10,
+    "last_date": "2026-04-03",
+    "reliable": false,
+    "unreliable_reason": "дымка/блик"
    },
    {
     "id": "karachi",
@@ -1520,7 +1547,10 @@
     "n_dates": 3,
     "n_drift": 3,
     "n_confirmed_latest": 0,
-    "n_zones": 6
+    "n_zones": 6,
+    "last_date": "2026-02-14",
+    "reliable": false,
+    "unreliable_reason": "дымка/блик"
    },
    {
     "id": "lagos",
@@ -1538,7 +1568,10 @@
     "n_dates": 1,
     "n_drift": 1,
     "n_confirmed_latest": 0,
-    "n_zones": 6
+    "n_zones": 6,
+    "last_date": "2025-11-10",
+    "reliable": true,
+    "unreliable_reason": null
    },
    {
     "id": "manila",
@@ -1562,7 +1595,10 @@
     "n_dates": 7,
     "n_drift": 5,
     "n_confirmed_latest": 1,
-    "n_zones": 5
+    "n_zones": 5,
+    "last_date": "2026-04-01",
+    "reliable": false,
+    "unreliable_reason": "дымка/блик"
    },
    {
     "id": "mekong",
@@ -1580,7 +1616,10 @@
     "n_dates": 1,
     "n_drift": 1,
     "n_confirmed_latest": 9,
-    "n_zones": 10
+    "n_zones": 10,
+    "last_date": "2026-03-02",
+    "reliable": false,
+    "unreliable_reason": "дымка/блик"
    },
    {
     "id": "mumbai",
@@ -1600,7 +1639,10 @@
     "n_dates": 3,
     "n_drift": 3,
     "n_confirmed_latest": 5,
-    "n_zones": 9
+    "n_zones": 9,
+    "last_date": "2026-01-01",
+    "reliable": true,
+    "unreliable_reason": null
    },
    {
     "id": "nile",
@@ -1620,7 +1662,10 @@
     "n_dates": 3,
     "n_drift": 3,
     "n_confirmed_latest": 28,
-    "n_zones": 10
+    "n_zones": 10,
+    "last_date": "2026-03-16",
+    "reliable": false,
+    "unreliable_reason": "дымка/блик"
    },
    {
     "id": "santo_domingo",
@@ -1643,7 +1688,10 @@
     "n_dates": 6,
     "n_drift": 5,
     "n_confirmed_latest": 1,
-    "n_zones": 1
+    "n_zones": 1,
+    "last_date": "2026-02-18",
+    "reliable": true,
+    "unreliable_reason": null
    },
    {
     "id": "scotland",
@@ -1662,7 +1710,10 @@
     "n_dates": 2,
     "n_drift": 1,
     "n_confirmed_latest": 0,
-    "n_zones": 1
+    "n_zones": 1,
+    "last_date": "2026-07-19",
+    "reliable": true,
+    "unreliable_reason": null
    },
    {
     "id": "tiber",
@@ -1680,9 +1731,35 @@
     "n_dates": 1,
     "n_drift": 1,
     "n_confirmed_latest": 0,
-    "n_zones": 4
+    "n_zones": 4,
+    "last_date": "2025-11-05",
+    "reliable": true,
+    "unreliable_reason": null
    }
-  ]
+  ],
+  "ranking_reliable": [
+   "guanabara",
+   "mumbai",
+   "lagos",
+   "honduras",
+   "danang",
+   "santo_domingo",
+   "tiber",
+   "scotland",
+   "bali",
+   "durban",
+   "haiti"
+  ],
+  "ranking_unreliable": [
+   "mekong",
+   "nile",
+   "jakarta",
+   "karachi",
+   "accra",
+   "ganges",
+   "manila"
+  ],
+  "n_reliable": 11
  },
  "ui_perf": {
   "available": true,
@@ -1791,7 +1868,10 @@
     "n_dates": 2,
     "n_drift": 2,
     "n_confirmed_latest": 28,
-    "n_zones": 10
+    "n_zones": 10,
+    "last_date": "2026-01-05",
+    "reliable": true,
+    "unreliable_reason": null
    },
    {
     "id": "guanabara",
@@ -1810,7 +1890,10 @@
     "n_dates": 2,
     "n_drift": 2,
     "n_confirmed_latest": 2,
-    "n_zones": 10
+    "n_zones": 10,
+    "last_date": "2026-07-16",
+    "reliable": true,
+    "unreliable_reason": null
    },
    {
     "id": "mumbai",
@@ -1829,9 +1912,19 @@
     "n_dates": 2,
     "n_drift": 2,
     "n_confirmed_latest": 5,
-    "n_zones": 9
+    "n_zones": 9,
+    "last_date": "2026-01-01",
+    "reliable": true,
+    "unreliable_reason": null
    }
-  ]
+  ],
+  "ranking_reliable": [
+   "nile",
+   "guanabara",
+   "mumbai"
+  ],
+  "ranking_unreliable": [],
+  "n_reliable": 3
  },
  "lgbm_live": {
   "available": true,

@@ -666,13 +666,41 @@ def collect_service(roots=None) -> dict:
             "n_dates": len(dates), "n_drift": sum(1 for d in dates if d.get("drift")),
             "n_confirmed_latest": latest_conf,
             "n_zones": _count_zones(res["data_root"], r.get("id"), summ.get("latest_date"), summ.get("model")),
+            **_region_reliability(dates),
         })
     res["n_regions"] = len(res["regions"])
+    # L40: ranking as on the site (rankRegions in service/frontend/src/lib/data.ts): reliable regions by index desc,
+    # then unreliable ones by index desc
+    by_idx = sorted(res["regions"], key=lambda x: -(x.get("index_permille") if x.get("index_permille") is not None else -1))
+    res["ranking_reliable"] = [x["id"] for x in by_idx if x.get("reliable")]
+    res["ranking_unreliable"] = [x["id"] for x in by_idx if not x.get("reliable")]
+    res["n_reliable"] = len(res["ranking_reliable"])
     res["n_detections_total"] = tot if any_det else None
     if any_conf:
         res["n_confirmed_total"], res["n_dates_with_confirmed"] = conf_tot, conf_dates
         res["n_confirmed_latest_total"] = conf_latest
     return res
+
+
+def _date_unreliable(d) -> str:
+    """'' if the date is fine for ranking, else the reason. Same rule as isUnreliableDate / regionReliability in
+    service/frontend/src/lib/data.ts: haze/glint flag or cloud > 50 %."""
+    if not isinstance(d, dict):
+        return "нет снимков"
+    q = d.get("quality") or {}
+    if q.get("haze") or q.get("glint_or_haze"):
+        return "дымка/блик"
+    if (d.get("cloud_frac") or 0) > 0.5:
+        return "облачность > 50 %"
+    return ""
+
+
+def _region_reliability(dates) -> dict:
+    """L40: a region is unreliable if its latest scene is unreliable (as on the site)."""
+    ds = sorted((d for d in dates if isinstance(d, dict)), key=lambda d: d.get("date") or "")
+    last = ds[-1] if ds else None
+    why = _date_unreliable(last)
+    return {"last_date": last.get("date") if last else None, "reliable": not why, "unreliable_reason": why or None}
 
 
 def _count_zones(root, region, date, model):

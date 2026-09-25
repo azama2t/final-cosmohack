@@ -11,6 +11,7 @@ import {
   loadTimeseries,
   loadZones,
   modelPath,
+  rankRegions,
 } from './lib/data';
 import { useAsync } from './lib/hooks';
 import { makeScale } from './lib/style';
@@ -359,10 +360,15 @@ export default function App() {
     const r = region ?? bestRegion(manifest);
     if (!r) return null;
     const a = { region: r.id, date: date && region ? date : summaryDate(r)!.date };
-    // B: the other region with most detections (a comparison with an empty scene tells little)
-    const other = manifest.regions
-      .filter((x) => x.id !== r.id)
-      .sort((x, y) => (y.summary?.n_detections ?? 0) - (x.summary?.n_detections ?? 0))[0];
+    // L40: B = the best reliable region other than A, in the order of the rating (rankRegions: reliable by index).
+    // A region whose latest scene has haze/glint or > 50 % clouds is never offered by default (was: Mekong, haze).
+    // Fallback when no other reliable region has detections: the other region with most detections.
+    const reliable = rankRegions(manifest.regions).ok.filter((x) => x.id !== r.id && (x.summary?.n_detections ?? 0) > 0);
+    const other =
+      reliable[0] ??
+      manifest.regions
+        .filter((x) => x.id !== r.id)
+        .sort((x, y) => (y.summary?.n_detections ?? 0) - (x.summary?.n_detections ?? 0))[0];
     if (other) return { a, b: { region: other.id, date: summaryDate(other)!.date } };
     const prev = r.dates.filter((d) => d.date !== a.date).at(-1);
     return { a, b: { region: r.id, date: prev?.date ?? a.date } };
