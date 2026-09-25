@@ -1,0 +1,32 @@
+# Lane L3: pixel LightGBM for Marine Debris (MARIDA). Used by scripts/train_lgbm.py.
+# Selection ONLY on the official val split (SPEC 1.7). Test is never read here.
+# Final (accepted on val, reports/experiments_l3.md): binary + win features, seed 0 -> weights/lgbm (thr 0.37, F1 MD val 0.908).
+seed: 0
+features: win            # min = 11 bands + 8 indices; win = + window mean/std 3/7/15 + contrast with local median
+task: binary             # binary (MD vs rest) | multiclass (MARIDA scheme 12-15 -> 7, P(MD) = softmax[MD])
+merge_water: true        # MARIDA baseline: classes 12..15 -> 7 (used for multiclass labels and sampling groups)
+conf_weights: {1: 1.0, 2: 1.0, 3: 1.0}   # per-pixel weight by annotation confidence (1 High, 2 Moderate, 3 Low)
+
+sampling:                # training pixels: all labelled MD + stratified cap per ORIGINAL class (hard negatives + water)
+  md: all
+  cap_per_class: 30000   # classes 2..15 each capped at this many pixels (random, seeded)
+  cap_overrides: {7: 60000}  # more open water
+
+pos_weight: 3.0          # binary only: weight of MD pixels
+class_weight_power: 0.5  # multiclass only: weight_c = (n_max / n_c) ** power
+
+lgbm:
+  num_leaves: 63
+  learning_rate: 0.05
+  num_boost_round: 400
+  min_data_in_leaf: 20
+  feature_fraction: 0.8
+  bagging_fraction: 0.8
+  bagging_freq: 1
+  lambda_l2: 1.0
+  max_bin: 255
+
+threshold_grid: [0.02, 0.98, 0.01]
+postprocess_min_px: 0    # 0 = off; >0 = drop connected MD components smaller than this (8-connectivity)
+augment: null            # e.g. {copies: 1, offset: 0.01, gain: 0.1, blue_mult: 1.5, clip0: true}: extra photometrically
+                         # perturbed copy of train (L2A-like: negative per-band offsets, gain, clip at 0)
