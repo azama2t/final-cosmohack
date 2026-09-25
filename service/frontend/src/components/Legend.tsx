@@ -9,9 +9,11 @@ interface Props {
   layers: Layers;
   date: string | null;
   scale: H3Scale;
+  /** L15: confirmation data exists for the current date */
+  confAvail?: boolean;
 }
 
-export default function Legend({ manifest, model, threshold, layers, scale }: Props) {
+export default function Legend({ manifest, model, threshold, layers, scale, confAvail }: Props) {
   const [open, setOpen] = useState(true);
   const idx = manifest.index;
   return (
@@ -29,6 +31,14 @@ export default function Legend({ manifest, model, threshold, layers, scale }: Pr
               </span>
               <span>
                 <b>Находка</b> — вероятность ≥ {fmtThr(threshold)} ({modelLabel(model, manifest.models[model]?.name)}); кольцо ~ площадь
+              </span>
+            </div>
+          )}
+          {layers.detections && confAvail && (
+            <div className="lg-row" data-testid="legend-confirmed">
+              <span className="sw-double" aria-hidden />
+              <span>
+                <b>Двойное кольцо</b> — вторая модель видит объект в радиусе 20 м; согласие моделей, не проверка на месте
               </span>
             </div>
           )}

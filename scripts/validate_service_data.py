@@ -135,6 +135,14 @@ def check_detections(v: V, rel, region, date, model):
                 v.err(w, "negative area")
             if (pr["region"], pr["date"], pr["model"]) != (region, date, model):
                 v.err(w, f"region/date/model mismatch {pr['region']}/{pr['date']}/{pr['model']}")
+            if "confirmed" in pr:  # optional (L15): cross-model confirmation within 20 m
+                cb = pr.get("confirmed_by")
+                if not isinstance(pr["confirmed"], bool):
+                    v.err(w, "confirmed must be bool")
+                elif pr["confirmed"] and (not isinstance(cb, str) or cb == model):
+                    v.err(w, f"confirmed_by must be the other model's id, got {cb!r}")
+                elif not pr["confirmed"] and cb is not None:
+                    v.err(w, "confirmed_by must be null when confirmed is false")
         if i > 5000:
             break
     return len(fc["features"])
@@ -195,6 +203,9 @@ def check_zones(v: V, rel, region, date, model):
                           "lon": NUM, "lat": NUM, "repeat_dates": (int,), "mean_prob": NUM + (None,)}):
             if zz["rank"] != i + 1:
                 v.err(w, f"rank {zz['rank']} != {i + 1}")
+            if "n_confirmed" in zz and (not isinstance(zz["n_confirmed"], int) or isinstance(zz["n_confirmed"], bool)
+                                        or zz["n_confirmed"] < 0):
+                v.err(w, "n_confirmed must be a non-negative int")  # optional (L15)
             if not (-180 <= zz["lon"] <= 180 and -90 <= zz["lat"] <= 90):
                 v.err(w, "lon/lat out of range")
 
@@ -327,6 +338,11 @@ def validate(root: Path) -> V:
                         v.err(dm["thumb"], f"{tp.stat().st_size} bytes > 30 KB")
                     if max(Image.open(tp).size) > 256:
                         v.err(dm["thumb"], "thumb larger than 256 px")
+            nc = dm.get("n_confirmed")  # optional (L15): {model: confirmed detections}, only with >= 2 models
+            if nc is not None:
+                if not isinstance(nc, dict) or set(nc) != set(dm["models"]) or not all(
+                        isinstance(x, int) and not isinstance(x, bool) and x >= 0 for x in nc.values()):
+                    v.err(dw, f"n_confirmed must be {{model: int>=0}} for models {dm['models']}, got {nc!r}")
             for m in dm["models"]:
                 if m not in man["models"]:
                     v.err(dw, f"model '{m}' not in manifest.models")

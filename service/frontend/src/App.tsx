@@ -28,6 +28,7 @@ import DriftPlayer from './components/DriftPlayer';
 import Footer from './components/Footer';
 import EmptyState from './components/EmptyState';
 import { runTour, type TourApi } from './tour';
+import { hasConfirm, nConfirmed, onlyConfirmed as filterConfirmed } from './lib/confirm';
 
 const CompareView = lazy(() => import('./components/CompareView'));
 
@@ -48,6 +49,7 @@ export default function App() {
   const [rightCollapsed, setRightCollapsed] = useState(false);
   const [geoReady, setGeoReady] = useState(false);
   const [zonePopup, setZonePopup] = useState<Zone | null>(null);
+  const [onlyConf, setOnlyConf] = useState<boolean>(!!url.confirmed);
   const camera = useRef<Camera | undefined>(url.camera);
   const tourAbort = useRef<AbortController | null>(null);
 
@@ -109,6 +111,11 @@ export default function App() {
     [h3],
   );
   const drift = useMemo(() => (driftRaw ? prepareDrift(driftRaw) : null), [driftRaw]);
+  // L15: «только подтверждённые обеими моделями» (old data without `confirmed`: switch disabled, all shown)
+  const confAvail = hasConfirm(dateEntry, detections);
+  const nConf = scene ? nConfirmed(dateEntry, model, detections) : null;
+  const confOn = onlyConf && confAvail;
+  const shownDet = useMemo(() => (confOn ? filterConfirmed(detections) : detections), [confOn, detections]);
   const timeseries = useAsync(region ? () => loadTimeseries(region.id) : null, [region?.id]);
 
   // when drift is switched on, frame the whole forecast (particles leave the scene bounds)
@@ -135,8 +142,9 @@ export default function App() {
       basemap,
       camera: camera.current,
       compare: compare ? `${compare.a.region}:${compare.a.date},${compare.b.region}:${compare.b.date}` : undefined,
+      confirmed: onlyConf || undefined,
     });
-  }, [regionId, date, model, layers, basemap, compare]);
+  }, [regionId, date, model, layers, basemap, compare, onlyConf]);
   useEffect(syncUrl, [syncUrl]);
 
   // ---- actions ----
@@ -298,11 +306,14 @@ export default function App() {
       h3Ready: !!h3 && geoReady,
       driftReady: !!drift && geoReady,
       nDetections: detections?.features.length ?? 0,
+      nConfirmed: nConf,
+      onlyConfirmed: confOn,
+      nShown: shownDet?.features.length ?? 0,
       bestRegion: manifest ? bestRegion(manifest)?.id ?? null : null,
       hasEnsemble: !!driftRaw?.ensemble?.length,
       largestDetectionScreen: () => {
-        if (!detections?.features.length || !ctl.map) return null;
-        const f = [...detections.features].sort((a, b) => b.properties.area_m2 - a.properties.area_m2)[0];
+        if (!shownDet?.features.length || !ctl.map) return null;
+        const f = [...shownDet.features].sort((a, b) => b.properties.area_m2 - a.properties.area_m2)[0];
         const p = ctl.map.project(centroid(f) as any);
         const r = ctl.map.getContainer().getBoundingClientRect();
         return { x: p.x + r.left, y: p.y + r.top, id: f.properties.id };
@@ -362,7 +373,7 @@ export default function App() {
           bounds={dateEntry?.bounds ?? region?.bounds ?? null}
           rgbImg={rgbImg}
           probImg={probImg}
-          detections={detections}
+          detections={shownDet}
           h3={h3}
           h3Scale={h3Scale}
           h3Max={h3Max}
@@ -411,6 +422,15 @@ export default function App() {
           }}
           onLayer={toggleLayer}
           onBasemap={setBasemap}
+          confAvail={confAvail}
+          onlyConfirmed={onlyConf}
+          nConfirmed={nConf}
+          nDetections={detections?.features.length ?? null}
+          onOnlyConfirmed={(v) => {
+            setSelected(null);
+            setHover(null);
+            setOnlyConf(v);
+          }}
         />
         <RightPanel
           manifest={manifest}
@@ -422,6 +442,8 @@ export default function App() {
           detections={detections}
           zones={zones}
           h3={h3}
+          nConfirmed={nConf}
+          onlyConfirmed={confOn}
           collapsed={rightCollapsed}
           onCollapse={() => setRightCollapsed((v) => !v)}
           onRegion={selectRegion}
@@ -442,6 +464,7 @@ export default function App() {
             layers={layers}
             date={date}
             scale={h3Scale}
+            confAvail={confAvail}
           />
         )}
 
@@ -473,6 +496,13 @@ export default function App() {
               Зона №{zonePopup.rank} <span className="muted">· {zonePopup.index === null ? '—' : zonePopup.index.toFixed(2)} ‰</span>
             </div>
             <div className="zp-reason">{zonePopup.reason}</div>
+            {typeof zonePopup.n_confirmed === 'number' && (
+              <div className="zp-conf" data-testid="zone-popup-confirmed">
+                <span className="sw-double small" aria-hidden />
+                подтверждено обеими моделями: <b>{zonePopup.n_confirmed}</b>{' '}
+                <span className="muted">· согласие моделей, не проверка на месте</span>
+              </div>
+            )}
             <div className="zp-coords mono">
               {zonePopup.lat.toFixed(5)}, {zonePopup.lon.toFixed(5)}
             </div>

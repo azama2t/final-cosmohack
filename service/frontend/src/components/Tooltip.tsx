@@ -1,5 +1,6 @@
 import type { DetProps, H3Props, Manifest } from '../types';
 import type { HoverInfo } from '../map/layers';
+import { agreeText } from '../lib/confirm';
 import { fmtArea, fmtDate, fmtNum, fmtPct, fmtPermille, modelLabel } from '../lib/style';
 
 export default function Tooltip({ hover, manifest }: { hover: HoverInfo; manifest: Manifest }) {
@@ -14,6 +15,9 @@ export default function Tooltip({ hover, manifest }: { hover: HoverInfo; manifes
         <div className="tt-row"><span>Вероятность ср. / макс.</span><b>{p.mean_prob.toFixed(2)} / {p.max_prob.toFixed(2)}</b></div>
         <div className="tt-row"><span>Дата</span><b>{fmtDate(p.date)}</b></div>
         <div className="tt-row"><span>Модель</span><b>{modelLabel(p.model, manifest.models[p.model]?.name)}</b></div>
+        {agreeText(p) && (
+          <div className="tt-row"><span>Согласие моделей</span><b className={p.confirmed ? 'conf-text' : ''}>{p.confirmed ? '✓ ' : ''}{agreeText(p)}</b></div>
+        )}
         <div className="tt-hint">Клик — карточка с вырезкой снимка</div>
       </div>
     );

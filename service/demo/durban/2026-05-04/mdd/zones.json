@@ -22,7 +22,8 @@
    "flagged_water_px": 2,
    "observed_frac": 0.9985,
    "n_detections": 1,
-   "score": 1.027
+   "score": 1.027,
+   "n_confirmed": 0
   }
  ]
 }

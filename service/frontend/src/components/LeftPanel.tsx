@@ -18,6 +18,12 @@ interface Props {
   onModel: (m: string) => void;
   onLayer: (k: LayerKey, on?: boolean) => void;
   onBasemap: (b: Basemap) => void;
+  /** L15: confirmation data exists for this date (both models) */
+  confAvail?: boolean;
+  onlyConfirmed?: boolean;
+  nConfirmed?: number | null;
+  nDetections?: number | null;
+  onOnlyConfirmed?: (v: boolean) => void;
 }
 
 const LAYER_DEFS: { key: LayerKey; label: string; hint: string; testid: string }[] = [
@@ -157,6 +163,32 @@ export default function LeftPanel(p: Props) {
                 <div className="model-note muted small">
                   {p.manifest.models[p.model]?.name} · порог {fmtThr(p.manifest.models[p.model]?.threshold)}
                   {p.manifest.models[p.model]?.note ? ` · ${p.manifest.models[p.model]?.note}` : ''}
+                </div>
+                <div className={`layer-row conf-row ${p.confAvail ? '' : 'disabled'}`}>
+                  <button
+                    className={`switch ${p.onlyConfirmed && p.confAvail ? 'on' : ''}`}
+                    role="switch"
+                    aria-checked={!!(p.onlyConfirmed && p.confAvail)}
+                    disabled={!p.confAvail}
+                    onClick={() => p.onOnlyConfirmed?.(!p.onlyConfirmed)}
+                    data-testid="confirmed-only-toggle"
+                  >
+                    <span className="knob" />
+                  </button>
+                  <span
+                    className="layer-label"
+                    onClick={() => p.confAvail && p.onOnlyConfirmed?.(!p.onlyConfirmed)}
+                    title="Объект одной модели, рядом с которым (≤ 20 м) вторая модель тоже видит признаки. Согласие моделей, не проверка на месте."
+                  >
+                    Только подтверждённые обеими моделями
+                    <small>
+                      {!p.confAvail
+                        ? 'для этой даты нет второй модели'
+                        : p.nConfirmed !== null && p.nConfirmed !== undefined
+                          ? `вторая модель в радиусе 20 м · ${fmtNum(p.nConfirmed)} из ${fmtNum(p.nDetections ?? 0)}`
+                          : 'вторая модель в радиусе 20 м'}
+                    </small>
+                  </span>
                 </div>
               </section>
 

@@ -19,6 +19,8 @@ export interface UrlState {
   basemap?: Basemap;
   tour?: boolean;
   compare?: string; // "regionA:date,regionB:date"
+  /** L15: only detections confirmed by both models */
+  confirmed?: boolean;
 }
 
 const LAYER_KEYS = Object.keys(DEFAULT_LAYERS) as LayerKey[];
@@ -44,6 +46,7 @@ export function readUrl(): UrlState {
   if (b === 'dark' || b === 'satellite' || b === 'none') s.basemap = b;
   if (q.get('tour') === '1') s.tour = true;
   if (q.get('cmp')) s.compare = q.get('cmp')!;
+  if (q.get('cf') === '1') s.confirmed = true;
   return s;
 }
 
@@ -59,6 +62,7 @@ export function writeUrl(s: UrlState) {
   }
   if (s.basemap) q.set('b', s.basemap);
   if (s.compare) q.set('cmp', s.compare);
+  if (s.confirmed) q.set('cf', '1');
   const qs = q.toString().replace(/%2C/g, ',').replace(/%3A/g, ':');
   history.replaceState(null, '', `${location.pathname}${qs ? '?' + qs : ''}`);
 }

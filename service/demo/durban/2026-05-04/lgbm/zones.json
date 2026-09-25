@@ -22,7 +22,8 @@
    "flagged_water_px": 113,
    "observed_frac": 0.6739,
    "n_detections": 11,
-   "score": 199.761
+   "score": 199.761,
+   "n_confirmed": 0
   },
   {
    "rank": 2,
@@ -37,7 +38,8 @@
    "flagged_water_px": 78,
    "observed_frac": 0.6787,
    "n_detections": 10,
-   "score": 144.596
+   "score": 144.596,
+   "n_confirmed": 0
   },
   {
    "rank": 3,
@@ -52,7 +54,8 @@
    "flagged_water_px": 13,
    "observed_frac": 0.7253,
    "n_detections": 1,
-   "score": 29.598
+   "score": 29.598,
+   "n_confirmed": 0
   },
   {
    "rank": 4,
@@ -67,7 +70,8 @@
    "flagged_water_px": 16,
    "observed_frac": 0.999,
    "n_detections": 3,
-   "score": 27.254
+   "score": 27.254,
+   "n_confirmed": 0
   },
   {
    "rank": 5,
@@ -82,7 +86,8 @@
    "flagged_water_px": 2,
    "observed_frac": 0.9987,
    "n_detections": 1,
-   "score": 1.749
+   "score": 1.749,
+   "n_confirmed": 0
   }
  ]
 }

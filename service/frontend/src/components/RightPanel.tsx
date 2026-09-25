@@ -17,6 +17,9 @@ interface Props {
   detections: FC<DetProps> | null;
   zones: ZonesFile | null;
   h3: FC<H3Props> | null;
+  /** L15: confirmed detections of this model on this date (null = no data: old files / one model) */
+  nConfirmed?: number | null;
+  onlyConfirmed?: boolean;
   collapsed: boolean;
   onCollapse: () => void;
   onRegion: (id: string) => void;
@@ -131,7 +134,11 @@ function RegionView(p: Props & { region: Region; dateEntry: DateEntry }) {
     const t = setTimeout(() => setChartOn(true), 60);
     return () => clearTimeout(t);
   }, []);
-  const top = zones[0];
+  // with «only confirmed» on, the verdict points to the best zone that has a confirmed detection (if any)
+  const top =
+    p.onlyConfirmed && zones.some((z) => typeof z.n_confirmed === 'number')
+      ? zones.find((z) => (z.n_confirmed ?? 0) > 0)
+      : zones[0];
   const empty = !!p.detections && det.length === 0 && n === 0;
 
   return (
@@ -159,10 +166,26 @@ function RegionView(p: Props & { region: Region; dateEntry: DateEntry }) {
           <button className="verdict" onClick={() => p.onZone(top)} data-testid="verdict">
             <span className="verdict-dot" />
             <span>
-              <b>Куда отправить обследование:</b> зона №1 — {fmtPermille(top.index)} ‰, {top.lat.toFixed(4)},{' '}
+              <b>Куда отправить обследование:</b> зона №{top.rank} — {fmtPermille(top.index)} ‰, {top.lat.toFixed(4)},{' '}
               {top.lon.toFixed(4)}
             </span>
           </button>
+        )}
+        {!empty && p.onlyConfirmed && p.nConfirmed === 0 && (
+          <div className="empty-scene conf-empty" data-testid="confirmed-empty">
+            <div className="es-icon" aria-hidden>
+              ○
+            </div>
+            <div>
+              <div className="es-title">
+                Уверенных находок нет, возможных — {fmtNum(n)}
+              </div>
+              <div className="es-text muted small">
+                Ни одна находка модели «{modelLabel(p.model, p.manifest.models[p.model]?.name)}» не подтверждена второй моделью в
+                радиусе 20 м. Выключите «Только подтверждённые», чтобы увидеть возможные находки одной модели.
+              </div>
+            </div>
+          </div>
         )}
         {empty && (
           <EmptyScene
@@ -175,7 +198,13 @@ function RegionView(p: Props & { region: Region; dateEntry: DateEntry }) {
 
       <section className="section kpi-grid" data-testid="kpis">
         <Kpi label="Индекс, ‰" value={fmtPermille(idx)} hint="средний по ячейкам H3" accent />
-        <Kpi label="Обнаружений" value={fmtNum(n)} hint="пятен на снимке" />
+        <Kpi
+          label="Обнаружений"
+          value={fmtNum(n)}
+          hint={typeof p.nConfirmed === 'number' ? `из них подтверждено: ${fmtNum(p.nConfirmed)}` : 'пятен на снимке'}
+          hintTitle={typeof p.nConfirmed === 'number' ? 'вторая модель видит признаки в радиусе 20 м — согласие моделей, не проверка на месте' : undefined}
+          testid="kpi-detections"
+        />
         <Kpi label="Площадь пятен" value={av} unit={au} hint="помеченная область" />
         <Kpi label="Облачность" value={fmtPct(cloud)} hint="доля сцены" warn={(cloud ?? 0) > 0.3} />
       </section>
@@ -226,6 +255,11 @@ function RegionView(p: Props & { region: Region; dateEntry: DateEntry }) {
                   <tr key={z.rank} data-testid={`zone-row-${z.rank}`} title={z.reason}>
                     <td>
                       <span className={`rank-badge ${z.rank <= 3 ? 'top' : ''}`}>{z.rank}</span>
+                      {(z.n_confirmed ?? 0) > 0 && (
+                        <span className="conf-badge" title={`подтверждено обеими моделями: ${z.n_confirmed} (согласие моделей, не проверка на месте)`}>
+                          ✓{z.n_confirmed}
+                        </span>
+                      )}
                     </td>
                     <td className="num">{fmtPermille(z.index)}</td>
                     <td className="num">
@@ -265,6 +299,8 @@ export function Kpi({
   hint,
   accent,
   warn,
+  hintTitle,
+  testid,
 }: {
   label: string;
   value: string;
@@ -272,9 +308,11 @@ export function Kpi({
   hint?: string;
   accent?: boolean;
   warn?: boolean;
+  hintTitle?: string;
+  testid?: string;
 }) {
   return (
-    <div className={`kpi ${accent ? 'accent' : ''} ${warn ? 'warn' : ''}`}>
+    <div className={`kpi ${accent ? 'accent' : ''} ${warn ? 'warn' : ''}`} data-testid={testid} title={hintTitle}>
       <div className="kpi-label">{label}</div>
       <div className="kpi-value">
         {value}

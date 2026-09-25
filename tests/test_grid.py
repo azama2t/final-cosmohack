@@ -204,3 +204,30 @@ def test_prob_palette_fixed_colors():
 def test_edge_zone(tmp_path):
     z = _build_module().edge_zone(tmp_path, (20, 30), 4)
     assert z[:4].all() and z[:, -4:].all() and not z[4:16, 4:26].any()
+
+
+def test_confirmed_components_radius_2px():
+    """L15: an object is confirmed when the other model has a pixel >= its threshold within 2 px (disk)."""
+    from macroplastic.grid.confirm import confirmed_components, disk, label_of_records
+
+    assert disk(2).sum() == 13  # Euclidean disk r=2: corners (2,1),(2,2) excluded
+    prob = np.zeros((60, 60), np.uint8)
+    water = np.ones((60, 60), np.uint8)
+    prob[10, 10:13] = 250                   # object A
+    prob[40, 40:43] = 250                   # object B
+    prob[20, 50:52] = 250                   # object C
+    labels, n, _ = clean_mask(prob, water, 0.5)
+    assert n == 3
+    partner = np.zeros((60, 60), bool)
+    partner[12, 12] = True                  # 2 px below A's end -> within radius 2: A confirmed
+    partner[43, 45] = True                  # dy=3 from B -> not within 2 px: B not confirmed
+    partner[22, 53] = True                  # dy=2, dx=2 from C's end: distance 2.83 > 2 -> not confirmed
+    conf = confirmed_components(labels, n, partner, 2)
+    recs = [{"pixel": (10, 11)}, {"pixel": (40, 41)}, {"pixel": (20, 51)}]
+    labs = label_of_records(labels, recs)
+    assert [bool(conf[k - 1]) for k in labs] == [True, False, False]
+    partner[22, 52] = True                  # dy=2, dx=1: distance 2.24 > 2 -> still not
+    assert not confirmed_components(labels, n, partner, 2)[labels[20, 51] - 1]
+    partner[21, 52] = True                  # dy=1, dx=1 -> confirmed
+    assert confirmed_components(labels, n, partner, 2)[labels[20, 51] - 1]
+    assert not confirmed_components(labels, n, np.zeros_like(partner), 2).any()

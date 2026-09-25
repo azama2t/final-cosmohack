@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { DateEntry, DetProps, Feature, FC, H3Props, Manifest } from '../types';
 import { centroid, featureBBox } from '../map/layers';
+import { agreeText, AGREE_NOTE } from '../lib/confirm';
 import { ACCENT, fmtThr, fmtNum, fmtArea, fmtDate, fmtPct, fmtPermille, modelLabel } from '../lib/style';
 
 interface Props {
@@ -111,6 +112,15 @@ export default function DetectionCard({ feature, dateEntry, rgbImg, h3, manifest
       <div className="dc-title">
         {fmtDate(p.date)} · {modelLabel(p.model, manifest.models[p.model]?.name)}
       </div>
+      {agreeText(p) && (
+        <div className={`dc-agree ${p.confirmed ? 'on' : ''}`} data-testid="detection-agreement">
+          <span className={p.confirmed ? 'sw-double small' : 'sw-single small'} aria-hidden />
+          <span>
+            <b>Согласие моделей:</b> {agreeText(p)}
+            <small className="muted"> · {AGREE_NOTE}</small>
+          </span>
+        </div>
+      )}
       <div className="dc-crop">
         <canvas ref={canvas} style={{ width: SIZE, height: SIZE }} />
         <div className="dc-crop-cap">

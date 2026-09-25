@@ -30,6 +30,8 @@ export interface DateEntry {
   drift: string | null;
   /** optional (newer data): scene quality flags */
   quality?: DateQuality;
+  /** optional (L15, dates with >= 2 models): detections confirmed by the other model within 20 m, per model */
+  n_confirmed?: Record<string, number>;
 }
 
 export interface DateQuality {
@@ -82,6 +84,10 @@ export interface DetProps {
   mean_prob: number;
   max_prob: number;
   model: string;
+  /** optional (L15): the other model has a pixel >= its threshold within 2 px (20 m) of this object */
+  confirmed?: boolean;
+  /** optional (L15): id of the confirming model, null if not confirmed */
+  confirmed_by?: string | null;
 }
 
 export interface H3Props {
@@ -119,6 +125,8 @@ export interface Zone {
   lat: number;
   repeat_dates?: number;
   mean_prob?: number;
+  /** optional (L15): confirmed detections in this cell */
+  n_confirmed?: number;
 }
 
 export interface ZonesFile {

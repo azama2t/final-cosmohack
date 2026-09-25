@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generated": "2026-09-25T02:22:09+00:00",
+ "generated": "2026-09-25T02:27:41+00:00",
  "kind": "demo",
  "index": {
   "name": "доля наблюдаемой воды с признаками мусора",
@@ -74,6 +74,10 @@
       "glint_or_haze": false,
       "haze": false,
       "note": ""
+     },
+     "n_confirmed": {
+      "lgbm": 5,
+      "mdd": 8
      }
     },
     {
@@ -98,6 +102,10 @@
       "glint_or_haze": false,
       "haze": false,
       "note": ""
+     },
+     "n_confirmed": {
+      "lgbm": 1,
+      "mdd": 1
      }
     }
    ]
@@ -151,6 +159,10 @@
       "glint_or_haze": false,
       "haze": false,
       "note": ""
+     },
+     "n_confirmed": {
+      "lgbm": 0,
+      "mdd": 0
      }
     },
     {
@@ -175,6 +187,10 @@
       "glint_or_haze": false,
       "haze": false,
       "note": ""
+     },
+     "n_confirmed": {
+      "lgbm": 0,
+      "mdd": 0
      }
     }
    ]

@@ -11,6 +11,9 @@ Output: <out>/manifest.json, <out>/<region>/timeseries.json, <out>/<region>/<dat
 
 rgb.png / prob.png are warped to a regular lon/lat grid over `bounds` (so the map image overlay is aligned),
 <= 2048 px per side. prob.tif is the model raster on the scene UTM grid (uint8 = P*255, no nodata).
+L15 "confirmed" detections: on dates with >= 2 models every detection gets `confirmed` (bool) and `confirmed_by`
+(partner model or null): the other model has a pixel >= its threshold on observed water within 2 px (20 m) of the
+object (macroplastic.grid.confirm). Also manifest dates[].n_confirmed {model: k} and zones[].n_confirmed.
 Idempotent: region folders being built are recreated; with --regions, other regions of an existing
 manifest are kept.
 """
@@ -36,6 +39,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from macroplastic.grid import H3_RES  # noqa: E402
+from macroplastic.grid.confirm import CONFIRM_RADIUS_PX, confirmed_components, label_of_records  # noqa: E402
 from macroplastic.grid.h3index import cell_raster, h3_feature_collection, h3_stats, raster_bounds  # noqa: E402
 from macroplastic.grid.timeseries import sort_rows, timeseries_row  # noqa: E402
 from macroplastic.grid.vectorize import clean_mask, dumps_compact, fit_geojson_size, vectorize_detections  # noqa: E402
@@ -239,6 +243,7 @@ def process_scene(region: str, date: str, sdir: Path, models: list[str], out: Pa
         drift = f"{region}/{date}/drift.json"
     cellr, cells = cell_raster(s_transform, s_crs, shape, H3_RES)
     res = {"date": date, "scene": scene, "bounds": bounds, "cloud": cloud, "drift": drift, "models": {}}
+    masks: dict[str, tuple] = {}
     for m in models:
         prob, p_transform, p_crs, prof = read_band(sdir / f"prob_{m}.tif")
         if prob.shape != shape or p_transform != s_transform:
@@ -258,21 +263,49 @@ def process_scene(region: str, date: str, sdir: Path, models: list[str], out: Pa
         pd = warp(np.where(water, prob, 0).astype(np.uint8), s_transform, s_crs, (H, W), d_transform,
                   Resampling.max if max(shape) > max(W, H) else Resampling.nearest)
         Image.fromarray(prob_palette(pd.astype(np.float32) / 255.0, thr), "RGBA").save(mdir / "prob.png", optimize=True)
-        # detections
+        # detections (detections.geojson is written after all models: `confirmed` needs the other model)
         labels, n, raw = clean_mask(prob, water, thr, min_px=2, buffer_px=1)
         recs = vectorize_detections(labels, n, prob, s_transform, s_crs, region, date, m)
-        text, ginfo = fit_geojson_size(recs, s_crs)
-        (mdir / "detections.geojson").write_text(text, encoding="utf-8")
+        masks[m] = (labels, n, raw)
         # H3 index (flagged = pixels of kept components, i.e. after SPEC §5.4 post-processing)
         stats = h3_stats(cellr, cells, water, labels > 0, prob, [r["pixel"] for r in recs])
         # cells without any observed water (land / fully clouded / outside) are not written (map clutter)
         write_json(mdir / "h3.geojson", h3_feature_collection([s for s in stats if s["observed_water_px"] > 0],
                                                               date, m, thr), compact=True)
-        res["models"][m] = {"threshold": thr, "stats": stats, "recs": recs, "geo": ginfo,
+        res["models"][m] = {"threshold": thr, "stats": stats, "recs": recs,
                             "raw_flagged": int(raw.sum()), "clean_flagged": int((labels > 0).sum()),
                             "ts": timeseries_row(date, m, recs, stats, cloud), "meta": pj}
-        log(f"  {region}/{date}/{m}: thr={thr} raw_flagged={int(raw.sum())} kept={int((labels > 0).sum())} px, "
-            f"{len(recs)} det, {len(stats)} cells, geojson tol={ginfo['tolerance_m']} dropped={ginfo['dropped']}")
+    # L15: cross-model confirmation (rule D, reports/model_agreement.md) — only when >= 2 models on this date
+    done = list(res["models"])
+    for m in done:
+        r = res["models"][m]
+        if len(done) >= 2:
+            labels, n, _ = masks[m]
+            lab_of = label_of_records(labels, r["recs"])
+            by = {}
+            for o in done:
+                if o == m:
+                    continue
+                conf = confirmed_components(labels, n, masks[o][2], CONFIRM_RADIUS_PX)
+                for i, k in enumerate(lab_of):
+                    if k > 0 and conf[k - 1] and i not in by:
+                        by[i] = o
+            per_cell: dict[str, int] = {}
+            for i, rec in enumerate(r["recs"]):
+                rec["props"]["confirmed"] = i in by
+                rec["props"]["confirmed_by"] = by.get(i)
+                if i in by:
+                    k = int(cellr[rec["pixel"][0], rec["pixel"][1]])
+                    if k > 0:
+                        per_cell[cells[k - 1]] = per_cell.get(cells[k - 1], 0) + 1
+            r["n_confirmed"], r["confirmed_cells"] = len(by), per_cell
+        text, ginfo = fit_geojson_size(r["recs"], s_crs)
+        (odir / m / "detections.geojson").write_text(text, encoding="utf-8")
+        r["geo"] = ginfo
+        log(f"  {region}/{date}/{m}: thr={r['threshold']} raw_flagged={r['raw_flagged']} kept={r['clean_flagged']} px, "
+            f"{len(r['recs'])} det, confirmed={r.get('n_confirmed', '-')}, {len(r['stats'])} cells, "
+            f"geojson tol={ginfo['tolerance_m']} dropped={ginfo['dropped']}")
+    masks.clear()
     res["seconds"] = round(time.time() - t0, 2)
     log(f"  {region}/{date}: {shape[1]}x{shape[0]} px, {len(cells)} cells, {res['seconds']} s")
     return res
@@ -322,6 +355,9 @@ def build_region(region: str, scenes: list[dict], out: Path, model_meta: dict) -
             if sc["quality"]["haze"]:
                 for z in zones:
                     z["reason"] += "; " + HAZE_NOTE
+            if "n_confirmed" in r:  # L15: confirmed detections (max-prob pixel) in the zone's H3 cell
+                for z in zones:
+                    z["n_confirmed"] = int(r["confirmed_cells"].get(z["h3"], 0))
             r["zones"] = zones
             write_json(out / region / sc["date"] / m / "zones.json",
                        {"region": region, "date": sc["date"], "model": m, "threshold": r["threshold"],
@@ -356,7 +392,10 @@ def build_region(region: str, scenes: list[dict], out: Path, model_meta: dict) -
                        "source": sc["scene"].get("source", "earth-search sentinel-2-l2a"),
                        "cloud_frac": None if sc["cloud"] is None else round(sc["cloud"], 4), "bounds": sc["bounds"],
                        "rgb": f"{region}/{sc['date']}/rgb.png", "thumb": f"{region}/{sc['date']}/thumb.jpg",
-                       "models": sorted(sc["models"]), "drift": sc["drift"], "quality": sc["quality"]}
+                       "models": sorted(sc["models"]), "drift": sc["drift"], "quality": sc["quality"],
+                       **({"n_confirmed": {m: r["n_confirmed"] for m, r in sorted(sc["models"].items())}}
+                          if all("n_confirmed" in r for r in sc["models"].values()) and len(sc["models"]) >= 2
+                          else {})}
                       for sc in scenes]}
 
 
@@ -411,7 +450,8 @@ def main(argv=None):
         for sc in scenes:
             for m, r in sc["models"].items():
                 z = r["zones"][0] if r["zones"] else None
-                summary_rows.append((region, sc["date"], m, r["ts"]["n_detections"], r["ts"]["total_debris_area_m2"],
+                summary_rows.append((region, sc["date"], m, r["ts"]["n_detections"], r.get("n_confirmed", "-"),
+                                     r["ts"]["total_debris_area_m2"],
                                      r["ts"]["mean_index"], (z["h3"], z["index"]) if z else None, sc["seconds"]))
     if old and regions:  # keep regions not rebuilt in this run
         keep = [r for r in old.get("regions", []) if r["id"] not in {x["id"] for x in man_regions}]
@@ -427,7 +467,7 @@ def main(argv=None):
                   "min_observed_frac": 0.5},
         "models": model_meta, "regions": man_regions, "sources": SOURCES}
     write_json(out / "manifest.json", manifest)
-    print("\nregion | date | model | n_det | area_m2 | mean_index | top zone | s")
+    print("\nregion | date | model | n_det | n_confirmed | area_m2 | mean_index | top zone | s")
     for row in summary_rows:
         print(" | ".join(str(x) for x in row))
     print(f"\nbuilt {out} in {time.time() - t_all:.1f} s")

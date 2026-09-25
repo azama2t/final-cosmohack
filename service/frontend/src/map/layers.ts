@@ -231,6 +231,28 @@ export function buildLayers(c: LayerCtx): Layer[] {
         updateTriggers: { getFillColor: hot },
       }),
     );
+    // L15: confirmed by the other model within 20 m -> second (outer) ring in pale cream; stays visible at high zoom
+    const conf = feats.filter((f) => f.properties.confirmed === true);
+    if (conf.length) {
+      const cf = Math.max(0.55, fade);
+      out.push(
+        new ScatterplotLayer<Feature<DetProps>>({
+          id: 'detections-confirmed',
+          data: conf,
+          getPosition: (f) => centroid(f),
+          getRadius: (f) => (f.properties.id === hot ? haloR(f) + 3 : haloR(f)) + 5,
+          radiusUnits: 'pixels',
+          stroked: true,
+          filled: false,
+          getLineColor: [255, 236, 196, Math.round(255 * cf)],
+          lineWidthUnits: 'pixels',
+          getLineWidth: 2,
+          pickable: false,
+          parameters: { depthTest: false } as any,
+          updateTriggers: { getLineColor: cf, getRadius: hot },
+        }),
+      );
+    }
     if (c.selectedId) {
       const sel = feats.find((f) => f.properties.id === c.selectedId);
       if (sel)

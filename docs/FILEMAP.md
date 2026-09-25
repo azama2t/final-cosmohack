@@ -81,3 +81,4 @@
 | `src/macroplastic/drift/run.py` | старты по детекциям MDD (пропорционально площади), OpenDrift OceanDrift 72 ч, ансамбль ветра 0.01/0.03, drift.json + превью | run_drift |
 | `scripts/run_drift.py`, `tests/test_drift.py`, `reports/drift.md`, `reports/drift_*.png` | CLI дрейфа (`--region/--date`, `--all-fresh`); офлайн-тест контракта; метод и ограничения; превью треков | вручную / отчёт |
 | `scripts/model_agreement.py`, `reports/model_agreement.{md,json}`, `reports/figures/` | согласие MDD и LightGBM на живых сценах, калибровка LightGBM на val, карты согласия | отчёт |
+| `src/macroplastic/grid/confirm.py` | «уверенная находка»: объект одной модели, подтверждённый пикселем другой модели ≥ порога в радиусе 20 м (поля confirmed/confirmed_by, n_confirmed) | build_service_data |
