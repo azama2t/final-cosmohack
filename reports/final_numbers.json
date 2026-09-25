@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-25T08:48:34+03:00",
+ "generated": "2026-09-25T09:57:18+03:00",
  "note": "генерируется scripts/final_numbers.py; руками не править; null = ещё не посчитано",
  "l3_lgbm": {
   "available": true,
@@ -1300,7 +1300,7 @@
   "kind": "real",
   "n_regions": 18,
   "n_dates": 64,
-  "n_detections_total": 263,
+  "n_detections_total": 214,
   "models": [
    "lgbm",
    "mdd"
@@ -1308,9 +1308,9 @@
   "mdd_threshold": 0.5,
   "lgbm_threshold_map": 0.64,
   "n_drift": 44,
-  "n_confirmed_total": 360,
-  "n_dates_with_confirmed": 42,
-  "n_confirmed_latest_total": 64,
+  "n_confirmed_total": 297,
+  "n_dates_with_confirmed": 38,
+  "n_confirmed_latest_total": 57,
   "regions": [
    {
     "id": "accra",
@@ -1322,13 +1322,13 @@
     ],
     "latest_date": "2025-10-21",
     "model": "mdd",
-    "index_permille": 0.0198,
-    "n_detections": 7,
-    "total_debris_area_km2": 0.0094,
+    "index_permille": 0.0122,
+    "n_detections": 5,
+    "total_debris_area_km2": 0.0057,
     "n_dates": 1,
     "n_drift": 1,
     "n_confirmed_latest": 0,
-    "n_zones": 6
+    "n_zones": 4
    },
    {
     "id": "bali",
@@ -1345,13 +1345,13 @@
     ],
     "latest_date": "2026-07-05",
     "model": "mdd",
-    "index_permille": 0.0003,
-    "n_detections": 1,
-    "total_debris_area_km2": 0.0002,
+    "index_permille": 0.0,
+    "n_detections": 0,
+    "total_debris_area_km2": 0.0,
     "n_dates": 6,
     "n_drift": 4,
     "n_confirmed_latest": 0,
-    "n_zones": 1
+    "n_zones": 0
    },
    {
     "id": "danang",
@@ -1364,13 +1364,13 @@
     ],
     "latest_date": "2025-09-15",
     "model": "mdd",
-    "index_permille": 0.014,
-    "n_detections": 2,
-    "total_debris_area_km2": 0.0061,
+    "index_permille": 0.0114,
+    "n_detections": 1,
+    "total_debris_area_km2": 0.0051,
     "n_dates": 2,
     "n_drift": 1,
     "n_confirmed_latest": 0,
-    "n_zones": 2
+    "n_zones": 1
    },
    {
     "id": "durban",
@@ -1409,13 +1409,13 @@
     ],
     "latest_date": "2026-01-13",
     "model": "mdd",
-    "index_permille": 0.0087,
-    "n_detections": 6,
-    "total_debris_area_km2": 0.0045,
+    "index_permille": 0.0083,
+    "n_detections": 5,
+    "total_debris_area_km2": 0.0043,
     "n_dates": 3,
     "n_drift": 3,
     "n_confirmed_latest": 2,
-    "n_zones": 4
+    "n_zones": 3
    },
    {
     "id": "guanabara",
@@ -1429,9 +1429,9 @@
     ],
     "latest_date": "2026-07-16",
     "model": "mdd",
-    "index_permille": 0.4238,
-    "n_detections": 14,
-    "total_debris_area_km2": 0.1347,
+    "index_permille": 0.2374,
+    "n_detections": 9,
+    "total_debris_area_km2": 0.0753,
     "n_dates": 3,
     "n_drift": 3,
     "n_confirmed_latest": 2,
@@ -1494,12 +1494,12 @@
     ],
     "latest_date": "2019-05-30",
     "model": "mdd",
-    "index_permille": 0.2608,
-    "n_detections": 24,
-    "total_debris_area_km2": 0.1569,
+    "index_permille": 0.0489,
+    "n_detections": 18,
+    "total_debris_area_km2": 0.0297,
     "n_dates": 2,
     "n_drift": 0,
-    "n_confirmed_latest": 9,
+    "n_confirmed_latest": 8,
     "n_zones": 10
    },
    {
@@ -1514,13 +1514,13 @@
     ],
     "latest_date": "2026-01-15",
     "model": "mdd",
-    "index_permille": 0.0295,
-    "n_detections": 14,
-    "total_debris_area_km2": 0.0123,
+    "index_permille": 0.0153,
+    "n_detections": 9,
+    "total_debris_area_km2": 0.0072,
     "n_dates": 3,
     "n_drift": 3,
-    "n_confirmed_latest": 1,
-    "n_zones": 9
+    "n_confirmed_latest": 0,
+    "n_zones": 6
    },
    {
     "id": "lagos",
@@ -1532,13 +1532,13 @@
     ],
     "latest_date": "2025-11-10",
     "model": "mdd",
-    "index_permille": 0.0604,
-    "n_detections": 11,
-    "total_debris_area_km2": 0.019,
+    "index_permille": 0.0555,
+    "n_detections": 9,
+    "total_debris_area_km2": 0.0176,
     "n_dates": 1,
     "n_drift": 1,
     "n_confirmed_latest": 0,
-    "n_zones": 8
+    "n_zones": 6
    },
    {
     "id": "manila",
@@ -1556,13 +1556,13 @@
     ],
     "latest_date": "2025-01-06",
     "model": "mdd",
-    "index_permille": 0.0185,
-    "n_detections": 17,
-    "total_debris_area_km2": 0.0115,
+    "index_permille": 0.0047,
+    "n_detections": 9,
+    "total_debris_area_km2": 0.0029,
     "n_dates": 7,
     "n_drift": 5,
     "n_confirmed_latest": 1,
-    "n_zones": 7
+    "n_zones": 5
    },
    {
     "id": "mekong",
@@ -1574,9 +1574,9 @@
     ],
     "latest_date": "2026-03-02",
     "model": "mdd",
-    "index_permille": 0.9277,
-    "n_detections": 82,
-    "total_debris_area_km2": 0.368,
+    "index_permille": 0.8684,
+    "n_detections": 81,
+    "total_debris_area_km2": 0.3446,
     "n_dates": 1,
     "n_drift": 1,
     "n_confirmed_latest": 9,
@@ -1594,13 +1594,13 @@
     ],
     "latest_date": "2026-01-01",
     "model": "mdd",
-    "index_permille": 0.2071,
-    "n_detections": 19,
-    "total_debris_area_km2": 0.068,
+    "index_permille": 0.149,
+    "n_detections": 12,
+    "total_debris_area_km2": 0.0477,
     "n_dates": 3,
     "n_drift": 3,
     "n_confirmed_latest": 5,
-    "n_zones": 10
+    "n_zones": 9
    },
    {
     "id": "nile",
@@ -1614,12 +1614,12 @@
     ],
     "latest_date": "2026-01-05",
     "model": "mdd",
-    "index_permille": 0.4062,
-    "n_detections": 45,
-    "total_debris_area_km2": 0.1886,
+    "index_permille": 0.2986,
+    "n_detections": 41,
+    "total_debris_area_km2": 0.1383,
     "n_dates": 3,
     "n_drift": 3,
-    "n_confirmed_latest": 31,
+    "n_confirmed_latest": 28,
     "n_zones": 10
    },
    {
@@ -1656,13 +1656,13 @@
     ],
     "latest_date": "2026-07-19",
     "model": "mdd",
-    "index_permille": 0.002,
-    "n_detections": 2,
-    "total_debris_area_km2": 0.0008,
+    "index_permille": 0.0006,
+    "n_detections": 1,
+    "total_debris_area_km2": 0.0002,
     "n_dates": 2,
     "n_drift": 1,
-    "n_confirmed_latest": 1,
-    "n_zones": 2
+    "n_confirmed_latest": 0,
+    "n_zones": 1
    },
    {
     "id": "tiber",
@@ -1674,13 +1674,13 @@
     ],
     "latest_date": "2025-11-05",
     "model": "mdd",
-    "index_permille": 0.1039,
-    "n_detections": 9,
-    "total_debris_area_km2": 0.0276,
+    "index_permille": 0.0039,
+    "n_detections": 4,
+    "total_debris_area_km2": 0.0015,
     "n_dates": 1,
     "n_drift": 1,
-    "n_confirmed_latest": 1,
-    "n_zones": 7
+    "n_confirmed_latest": 0,
+    "n_zones": 4
    }
   ]
  },
@@ -1759,113 +1759,76 @@
  "service_demo": {
   "data_root": "service/demo",
   "kind": "demo",
-  "n_regions": 5,
-  "n_dates": 9,
-  "n_detections_total": 61,
+  "n_regions": 3,
+  "n_dates": 6,
+  "n_detections_total": 62,
   "models": [
    "lgbm",
    "mdd"
   ],
   "mdd_threshold": 0.5,
   "lgbm_threshold_map": 0.64,
-  "n_drift": 9,
-  "n_confirmed_total": 33,
-  "n_dates_with_confirmed": 6,
-  "n_confirmed_latest_total": 19,
+  "n_drift": 6,
+  "n_confirmed_total": 37,
+  "n_dates_with_confirmed": 5,
+  "n_confirmed_latest_total": 35,
   "regions": [
    {
-    "id": "honduras",
-    "name": "Гондурасский залив (Омоа – Пуэрто-Кортес – устье Мотагуа)",
-    "country": "Гондурас",
-    "tile": "16PCC",
+    "id": "nile",
+    "name": "Дельта Нила (устье Розетты)",
+    "country": "Египет",
+    "tile": "36RTV",
     "dates": [
-     "2025-01-30",
-     "2025-12-28"
+     "2025-11-11",
+     "2026-01-05"
     ],
-    "latest_date": "2025-12-28",
+    "latest_date": "2026-01-05",
     "model": "mdd",
-    "index_permille": 0.0729,
-    "n_detections": 31,
-    "total_debris_area_km2": 0.0377,
+    "index_permille": 0.2986,
+    "n_detections": 41,
+    "total_debris_area_km2": 0.1383,
     "n_dates": 2,
     "n_drift": 2,
-    "n_confirmed_latest": 17,
+    "n_confirmed_latest": 28,
     "n_zones": 10
    },
    {
-    "id": "durban",
-    "name": "Дурбан",
-    "country": "ЮАР",
-    "tile": "36JUN",
+    "id": "guanabara",
+    "name": "Залив Гуанабара (Рио-де-Жанейро)",
+    "country": "Бразилия",
+    "tile": "23KPQ",
     "dates": [
-     "2025-09-26",
-     "2026-05-04"
+     "2025-06-26",
+     "2026-07-16"
     ],
-    "latest_date": "2026-05-04",
+    "latest_date": "2026-07-16",
     "model": "mdd",
-    "index_permille": 0.0006,
-    "n_detections": 1,
-    "total_debris_area_km2": 0.0002,
+    "index_permille": 0.2374,
+    "n_detections": 9,
+    "total_debris_area_km2": 0.0753,
     "n_dates": 2,
     "n_drift": 2,
-    "n_confirmed_latest": 0,
-    "n_zones": 1
-   },
-   {
-    "id": "manila",
-    "name": "Манильский залив",
-    "country": "Филиппины",
-    "tile": "51PTS",
-    "dates": [
-     "2025-01-06",
-     "2025-12-27"
-    ],
-    "latest_date": "2025-01-06",
-    "model": "mdd",
-    "index_permille": 0.0185,
-    "n_detections": 17,
-    "total_debris_area_km2": 0.0115,
-    "n_dates": 2,
-    "n_drift": 2,
-    "n_confirmed_latest": 1,
-    "n_zones": 7
-   },
-   {
-    "id": "bali",
-    "name": "Бали (пролив Бадунг)",
-    "country": "Индонезия",
-    "tile": "50LLR",
-    "dates": [
-     "2025-07-20",
-     "2026-07-05"
-    ],
-    "latest_date": "2026-07-05",
-    "model": "mdd",
-    "index_permille": 0.0003,
-    "n_detections": 1,
-    "total_debris_area_km2": 0.0002,
-    "n_dates": 2,
-    "n_drift": 2,
-    "n_confirmed_latest": 0,
-    "n_zones": 1
-   },
-   {
-    "id": "santo_domingo",
-    "name": "Санто-Доминго (устье Осамы)",
-    "country": "Доминиканская Республика",
-    "tile": "19QDA",
-    "dates": [
-     "2025-10-18"
-    ],
-    "latest_date": "2025-10-18",
-    "model": "mdd",
-    "index_permille": 0.075,
-    "n_detections": 11,
-    "total_debris_area_km2": 0.0323,
-    "n_dates": 1,
-    "n_drift": 1,
-    "n_confirmed_latest": 1,
+    "n_confirmed_latest": 2,
     "n_zones": 10
+   },
+   {
+    "id": "mumbai",
+    "name": "Мумбаи (устье Ульхаса, крики Васаи и Малад)",
+    "country": "Индия",
+    "tile": "43QBB",
+    "dates": [
+     "2025-01-31",
+     "2026-01-01"
+    ],
+    "latest_date": "2026-01-01",
+    "model": "mdd",
+    "index_permille": 0.149,
+    "n_detections": 12,
+    "total_debris_area_km2": 0.0477,
+    "n_dates": 2,
+    "n_drift": 2,
+    "n_confirmed_latest": 5,
+    "n_zones": 9
    }
   ]
  },

@@ -88,6 +88,8 @@ export interface DetProps {
   confirmed?: boolean;
   /** optional (L15): id of the confirming model, null if not confirmed */
   confirmed_by?: string | null;
+  /** optional (L38): the build marked the object as an artifact — not in the index and zones */
+  artifact?: 'seam' | 'wake' | 'ship' | string | false | null;
 }
 
 export interface H3Props {
@@ -132,6 +134,8 @@ export interface Zone {
   observed_frac?: number;
   n_detections?: number;
   score?: number;
+  /** optional (L38): terms of the priority score (base × agreement × date penalty); shape normalised in lib/priority */
+  score_terms?: unknown;
 }
 
 export interface ZonesFile {
@@ -167,6 +171,8 @@ export interface TsRow {
   mean_index: number | null;
   n_detections: number;
   cloud_frac: number | null;
+  /** optional (L37/L38 build): objects excluded as artifacts (not in n_detections / area) */
+  n_artifacts?: number;
 }
 
 export type LayerKey = 'rgb' | 'prob' | 'detections' | 'h3' | 'h3_3d' | 'zones' | 'drift';

@@ -26,11 +26,28 @@ LIVE_ENV = "MACROPLASTIC_LIVE"
 ACCENT = (255, 107, 74)  # #ff6b4a, same as prob.png "P >= threshold"
 H3_RES = 8
 REPEAT_BONUS = 0.5  # = macroplastic.grid.zones.REPEAT_BONUS
-FORMULA = "score = flagged_water_px × mean_prob × (1 + 0.5 × (repeat_dates − 1))"
-FORMULA_TEXT = ("Приоритет обследования = число пикселей воды с признаками мусора в ячейке × средняя уверенность "
-                "модели на этих пикселях × бонус повторяемости (1 + 0.5 за каждую дополнительную дату, на которой в "
-                "ячейке тоже были находки). Ранжируются только ячейки с наблюдаемой водой ≥ 50 %. Это порядок "
+BASE_EXPR = "flagged_water_px × mean_prob × (1 + 0.5 × (repeat_dates − 1))"
+AGREE_W = 1.0       # = macroplastic.grid.zones.AGREE_W
+HAZE_PENALTY = 0.5  # = macroplastic.grid.zones.HAZE_PENALTY
+# L38b: current build formula (src/macroplastic/grid/zones.py): base × agreement × date_penalty
+FORMULA_BASE = "base = " + BASE_EXPR
+FORMULA_MULTS = "agreement = 1 + confirmed_share;  date_penalty = 0.5 при дымке/блике, иначе 1"
+FORMULA = "score = base × agreement × date_penalty;  " + FORMULA_BASE + ";  " + FORMULA_MULTS
+FORMULA_LEGACY = "score = " + BASE_EXPR  # zones.json without score_terms (older builds)
+FORMULA_TERMS = FORMULA
+FORMULA_TERMS_SUB = "score = base × agreement − date_penalty;  " + FORMULA_BASE
+FORMULA_TEXT_LEGACY = ("Приоритет обследования = число пикселей воды с признаками мусора в ячейке × средняя "
+                       "уверенность модели на этих пикселях × бонус повторяемости (1 + 0.5 за каждую дополнительную "
+                       "дату, на которой в ячейке тоже были находки). Ранжируются только ячейки с наблюдаемой водой "
+                       "≥ 50 %. Это порядок обследования, а не измеренная опасность и не масса пластика.")
+FORMULA_TEXT = ("Приоритет обследования = базовый балл × множитель согласия моделей × штраф за ненадёжную дату. "
+                "Базовый балл = число пикселей воды с признаками мусора в ячейке × средняя уверенность модели на этих "
+                "пикселях × бонус повторяемости (1 + 0.5 за каждую дополнительную надёжную дату — без дымки/блика — "
+                "с находками в ячейке). Множитель согласия = 1 + доля пикселей ячейки, подтверждённых второй моделью "
+                "(от 1 до 2). Штраф даты = 0.5 при дымке/блике на снимке, иначе 1. Артефакты (шов детекторов, "
+                "кильватер, судно) в балл не входят. Ранжируются только ячейки с наблюдаемой водой ≥ 50 %. Это порядок "
                 "обследования, а не измеренная опасность и не масса пластика.")
+FORMULA_TERMS_TEXT = (" Слагаемые записаны сборкой данных в zones.json (score_terms).")
 LIMITATIONS = [
     "Индекс — доля наблюдаемой воды с признаками мусора на одном снимке (‰), не масса и не концентрация пластика.",
     "Приоритет обследования — ранжирование по формуле, не измеренная экологическая опасность.",
@@ -144,19 +161,34 @@ def det_lonlat(f: dict) -> tuple[Optional[float], Optional[float]]:
     return core.centroid(f.get("geometry"))
 
 
-def detections_in_cell(st: core.Store, rid: str, date: str, model: str, h3id: str) -> list[dict]:
+def detections_in_cell(st: core.Store, rid: str, date: str, model: str, h3id: str,
+                       artifacts: bool = False) -> list[dict]:
+    """Detections whose centre lies in the cell. L38: objects with properties.artifact (seam / wake / ship) are not
+    findings (not in the index and zones) - skipped by default; artifacts=True returns only them."""
     fc = st._optional(rid, date, model, "detections")
     out = []
     for f in _features(fc):
+        p = f["properties"]
+        art = core.artifact_of(p)
+        if bool(art) != artifacts:
+            continue
         lon, lat = det_lonlat(f)
         if lon is None:
             continue
         if cell_of(lon, lat) == h3id:
-            p = f["properties"]
-            out.append({"id": p.get("id"), "date": date, "model": model, "lon": lon, "lat": lat,
-                        "area_m2": p.get("area_m2"), "mean_prob": p.get("mean_prob"), "max_prob": p.get("max_prob"),
-                        "confirmed": p.get("confirmed"), "confirmed_by": p.get("confirmed_by")})
+            d = {"id": p.get("id"), "date": date, "model": model, "lon": lon, "lat": lat,
+                 "area_m2": p.get("area_m2"), "mean_prob": p.get("mean_prob"), "max_prob": p.get("max_prob"),
+                 "confirmed": p.get("confirmed"), "confirmed_by": p.get("confirmed_by")}
+            if art:
+                d["artifact"] = art
+                d["artifact_ru"] = core.artifact_ru(art)
+            out.append(d)
     return out
+
+
+def n_artifacts(st: core.Store, rid: str, date: str, model: str) -> int:
+    fc = st._optional(rid, date, model, "detections")
+    return sum(1 for f in _features(fc) if core.artifact_of(f.get("properties")))
 
 
 def h3_cell(st: core.Store, rid: str, date: str, model: str, h3id: str) -> Optional[dict]:
@@ -172,38 +204,182 @@ def zone_score(flagged_px, mean_prob, repeat_dates) -> float:
     return float(flagged_px or 0) * float(mean_prob or 0.0) * (1.0 + REPEAT_BONUS * max(int(repeat_dates or 1) - 1, 0))
 
 
+# L38: zones.json zones[].score_terms (optional) - terms of the priority formula written by the data build.
+# Accepted shapes (the build's exact format may differ; unknown numeric keys are shown as info, not multiplied):
+#   {"base": 812.3, "agreement": 1.5, "date_penalty": 0.5, "score": 609.2}
+#   {"base": {"value": 812.3, "label": "..."}, ...}
+#   [{"name": "base", "value": 812.3, "label": "..."}, ...]
+# base = flagged_water_px x mean_prob x repeat factor; agreement - multiplier (>= 1) for findings confirmed by the
+# second model; date_penalty - multiplier (<= 1) for an unreliable date (haze/glint, clouds, little water).
+TERM_ALIASES = {
+    "base": ("base", "base_score", "score_base", "raw", "raw_score", "base_px_prob_repeat"),
+    "agreement": ("agreement", "agree", "agreement_mult", "agree_mult", "agreement_factor", "agree_factor",
+                  "confirm_mult", "confirmed_mult", "consensus", "consensus_mult", "models_agreement"),
+    "date_penalty": ("date_penalty", "unreliable_penalty", "penalty", "date_mult", "reliability", "reliability_mult",
+                     "unreliable", "unreliable_date", "date_factor", "quality_penalty", "unreliable_mult"),
+    "score": ("score", "total", "final", "final_score", "score_final"),
+}
+TERM_LABELS = {
+    "base": "базовый балл (пиксели × уверенность × повторяемость)",
+    "agreement": "множитель согласия моделей",
+    "date_penalty": "штраф за ненадёжную дату",
+}
+_ALIAS = {a: k for k, al in TERM_ALIASES.items() for a in al}
+
+
+def _term_num(v) -> Optional[float]:
+    if isinstance(v, dict):
+        for k in ("value", "factor", "mult", "contribution", "v"):
+            x = v.get(k)
+            if isinstance(x, (int, float)) and not isinstance(x, bool):
+                return float(x)
+        return None
+    if isinstance(v, (int, float)) and not isinstance(v, bool):
+        return float(v)
+    return None
+
+
+def score_terms(zone: dict) -> Optional[dict]:
+    """Normalise zone['score_terms'] -> {"terms": [{name, label, value, kind, present?, note?}], "base", "agreement",
+    "date_penalty", "score", "mode"}; None when absent/unusable (no base). kind: base | mult | sub | info.
+    A missing agreement / date_penalty is 1 (no effect). mode 'mult': score = base x agreement x date_penalty;
+    mode 'sub' (only when the build's score equals base x agreement - penalty): the penalty is subtracted."""
+    raw = zone.get("score_terms")
+    if not raw:
+        return None
+    items: list[tuple[str, Any, Optional[str], Optional[str]]] = []  # (key, value, label, note)
+    if isinstance(raw, dict):
+        for k, v in raw.items():
+            lab = v.get("label") if isinstance(v, dict) else None
+            note = v.get("note") if isinstance(v, dict) else None
+            items.append((str(k), v, lab, note))
+    elif isinstance(raw, list):
+        for it in raw:
+            if isinstance(it, dict):
+                k = it.get("name") or it.get("key") or it.get("id")
+                if k:
+                    items.append((str(k), it, it.get("label"), it.get("note")))
+    known: dict[str, float] = {}
+    labels: dict[str, str] = {}
+    notes: dict[str, str] = {}
+    extra = []
+    for k, v, lab, note in items:
+        canon = _ALIAS.get(k.lower())
+        num = _term_num(v)
+        if canon and num is not None and canon not in known:
+            known[canon] = num
+            if lab:
+                labels[canon] = str(lab)
+            if note:
+                notes[canon] = str(note)
+        elif num is not None:
+            extra.append({"name": k, "label": str(lab or k), "value": round(num, 4), "kind": "info"})
+    if "base" not in known:
+        return None
+    base = known["base"]
+    agree = known.get("agreement", 1.0)
+    pen = known.get("date_penalty", 1.0)
+    mode = "mult"
+    total = known.get("score")
+    if total is None:
+        total = base * agree * pen
+    elif "date_penalty" in known:
+        tol = 0.01 * max(1.0, abs(total))
+        if abs(base * agree * pen - total) > tol and abs(base * agree - pen - total) <= tol:
+            mode = "sub"
+    terms = [{"name": "base", "label": labels.get("base", TERM_LABELS["base"]), "value": round(base, 3),
+              "kind": "base", "present": True},
+             {"name": "agreement", "label": labels.get("agreement", TERM_LABELS["agreement"]), "value": round(agree, 3),
+              "kind": "mult", "present": "agreement" in known},
+             {"name": "date_penalty", "label": labels.get("date_penalty", TERM_LABELS["date_penalty"]),
+              "value": round(pen, 3), "kind": "sub" if mode == "sub" else "mult", "present": "date_penalty" in known}]
+    for t in terms:
+        if t["name"] in notes:
+            t["note"] = notes[t["name"]]
+    return {"terms": terms + extra, "base": round(base, 3), "agreement": round(agree, 3),
+            "date_penalty": round(pen, 3), "score": round(float(total), 3), "mode": mode}
+
+
+def final_score(z: dict) -> float:
+    """Ranking score of a zone: score_terms total > zones.json score > recomputed base formula."""
+    stt = score_terms(z)
+    if stt:
+        return stt["score"]
+    if isinstance(z.get("score"), (int, float)):
+        return float(z["score"])
+    return zone_score(z.get("flagged_water_px") or 0, z.get("mean_prob"), z.get("repeat_dates") or 1)
+
+
 def explain(zone: dict, zones: list[dict], n_dates: int, quality: Optional[dict] = None) -> dict:
     px = int(zone.get("flagged_water_px") or 0)
     mp = float(zone.get("mean_prob") or 0.0)
     rep = int(zone.get("repeat_dates") or 1)
     rep_f = 1.0 + REPEAT_BONUS * max(rep - 1, 0)
     score = zone_score(px, mp, rep)
+    base = score
+    stt = score_terms(zone)
+    if stt:
+        score = stt["score"]
     terms = [
         {"name": "flagged_water_px", "label": "пиксели воды с признаками мусора (10×10 м)", "value": px,
          "weight": 1.0, "contribution": float(px)},
         {"name": "mean_prob", "label": "средняя уверенность модели на этих пикселях", "value": round(mp, 4),
          "weight": 1.0, "contribution": round(mp, 4)},
-        {"name": "repeat_dates", "label": "на скольких датах района в ячейке были находки", "value": rep,
-         "weight": REPEAT_BONUS, "contribution": round(rep_f, 3)},
+        {"name": "repeat_dates", "label": ("на скольких надёжных датах района (без дымки/блика) в ячейке были находки"
+                                           if stt else "на скольких датах района в ячейке были находки"),
+         "value": rep, "weight": REPEAT_BONUS, "contribution": round(rep_f, 3)},
     ]
+    if stt and stt["mode"] == "mult":
+        # L38b: all multipliers of the final score -> product of terms[].contribution == score
+        share = zone.get("confirmed_share")
+        if not isinstance(share, (int, float)) or isinstance(share, bool):
+            share = (stt["agreement"] - 1.0) / AGREE_W
+        by = {t["name"]: t for t in stt["terms"]}
+        terms.append({"name": "agreement", "label": by["agreement"]["label"],
+                      "value": round(float(share), 4), "weight": AGREE_W,
+                      "contribution": round(stt["agreement"], 4),
+                      "note": by["agreement"].get("note") or "1 + доля пикселей, подтверждённых второй моделью"})
+        terms.append({"name": "date_penalty", "label": by["date_penalty"]["label"],
+                      "value": round(stt["date_penalty"], 3), "weight": 1.0,
+                      "contribution": round(stt["date_penalty"], 3),
+                      "note": by["date_penalty"].get("note") or ("дата надёжна" if stt["date_penalty"] == 1
+                                                                 else "дымка/блик на снимке")})
+        # the build's base may differ from px × mean_prob × repeat by rounding of mean_prob; if it differs more
+        # (another repeat rule), the repeat factor is taken from the build so that the product stays = score
+        if base > 0 and abs(stt["base"] - base) > 0.01 * max(1.0, stt["base"]):
+            rf = stt["base"] / (px * mp) if px * mp > 0 else rep_f
+            terms[2]["contribution"] = round(rf, 4)
+            terms[2]["note"] = "множитель повторяемости из сборки (zones.json score_terms.base)"
     rank = zone.get("rank")
-    scored = sorted((zone_score(z.get("flagged_water_px") or 0, z.get("mean_prob"), z.get("repeat_dates") or 1),
-                     z.get("rank")) for z in zones)
+    zscore = final_score if stt else (lambda z: zone_score(z.get("flagged_water_px") or 0, z.get("mean_prob"),
+                                                            z.get("repeat_dates") or 1))
+    scored = sorted((zscore(z), z.get("rank")) for z in zones)
     text = []
     area_ha = px * 100 / 1e4
     head = (f"{px} пикс. × {mp:.2f} × {rep_f:.1f} = {score:.1f}")
+    if stt and stt["mode"] == "mult":
+        head = (f"{px} пикс. × {mp:.2f} × повтор {terms[2]['contribution']:.1f} × согласие моделей "
+                f"{stt['agreement']:.2f} × дата {stt['date_penalty']:.1f} = {score:.1f}")
+    elif stt:
+        head = f"базовый балл {stt['base']:.1f}"
+        if stt["agreement"] != 1:
+            head += f" × согласие моделей ×{stt['agreement']:.2f}"
+        if stt["date_penalty"] != 1:
+            head += (f" − штраф даты {stt['date_penalty']:.1f}" if stt["mode"] == "sub"
+                     else f" × штраф даты ×{stt['date_penalty']:.2f}")
+        head += f" = {score:.1f}"
     if rank == 1:
         others = [s for s, r in scored if r != 1]
         if others:
             second = max(others)
             ratio = score / second if second > 0 else None
-            text.append(f"Первая в списке: {head}" + (f" — в {ratio:.1f} раза больше, чем у второй зоны ({second:.1f})."
+            rtxt = f"{ratio:.2f}" if ratio and ratio < 1.1 else f"{ratio or 0:.1f}"
+            text.append(f"Первая в списке: {head}" + (f" — в {rtxt} раза больше, чем у второй зоны ({second:.1f})."
                                                    if ratio else "."))
         else:
             text.append(f"Единственная зона на эту дату: {head}.")
     elif rank:
-        prev = next((zone_score(z.get("flagged_water_px") or 0, z.get("mean_prob"), z.get("repeat_dates") or 1)
-                     for z in zones if z.get("rank") == rank - 1), None)
+        prev = next((zscore(z) for z in zones if z.get("rank") == rank - 1), None)
         text.append(f"{rank}-я в списке: {head}" + (f"; у зоны выше — {prev:.1f}." if prev is not None else "."))
     else:
         text.append(f"Ячейка не входит в топ зон на эту дату: {head}.")
@@ -218,14 +394,37 @@ def explain(zone: dict, zones: list[dict], n_dates: int, quality: Optional[dict]
     elif n_dates > 1:
         parts.append(f"находки только на этой дате из {n_dates} (без бонуса повторяемости)")
     text.append("; ".join(parts).capitalize() + ".")
-    if zone.get("n_confirmed"):
-        text.append(f"{zone['n_confirmed']} находк(и) в ячейке подтверждены второй моделью (согласие моделей, "
-                    "не проверка на месте).")
-    if quality and (quality.get("haze") or quality.get("glint_or_haze")):
+    if stt and stt["agreement"] > 1:
+        text.append(f"Согласие моделей повышает балл в {stt['agreement']:.2f} раза (согласие, не проверка на месте).")
+    haze = bool(quality and (quality.get("haze") or quality.get("glint_or_haze")))
+    penalised = bool(stt and stt["date_penalty"] != 1 and (stt["mode"] == "sub" or stt["date_penalty"] < 1))
+    if penalised:
+        text.append("Дата ненадёжна (дымка/блик на снимке) — балл снижен штрафом "
+                    + (f"−{stt['date_penalty']:.1f}" if stt["mode"] == "sub" else f"×{stt['date_penalty']:.2f}")
+                    + ("; находки могут быть завышены." if haze else "."))
+    nc = zone.get("n_confirmed")
+    if nc:
+        nc = int(nc)
+        n10, n100 = nc % 10, nc % 100
+        if n10 == 1 and n100 != 11:
+            w = "находка в ячейке подтверждена"
+        elif 2 <= n10 <= 4 and not 12 <= n100 <= 14:
+            w = "находки в ячейке подтверждены"
+        else:
+            w = "находок в ячейке подтверждены"
+        text.append(f"{nc} {w} второй моделью (согласие моделей, не проверка на месте).")
+    if haze and not penalised:
         text.append("Внимание: на снимке дымка/блик — находки могут быть завышены.")
     text.append("Это приоритет обследования (ранжирование по формуле), а не измеренная опасность и не масса пластика.")
-    return {"formula": FORMULA, "formula_text": FORMULA_TEXT, "score": round(score, 3), "terms": terms,
-            "text": " ".join(text)}
+    out = {"formula": FORMULA_LEGACY, "formula_text": FORMULA_TEXT_LEGACY, "score": round(score, 3), "terms": terms,
+           "text": " ".join(text)}
+    if stt:  # L38b: terms[] = all multipliers (mode 'mult'), product = score; base_score = first three
+        out["base_score"] = stt["base"]
+        out["score_terms"] = stt["terms"]
+        out["score_mode"] = stt["mode"]
+        out["formula"] = FORMULA_TERMS_SUB if stt["mode"] == "sub" else FORMULA_TERMS
+        out["formula_text"] = FORMULA_TEXT + FORMULA_TERMS_TEXT
+    return out
 
 
 def zone_info(st: core.Store, rid: str, date: Optional[str], model: Optional[str], h3id: str) -> dict:
@@ -245,6 +444,7 @@ def zone_info(st: core.Store, rid: str, date: Optional[str], model: Optional[str
                 "repeat_dates": 1, "observed_frac": cell.get("observed_frac"),
                 "n_detections": cell.get("n_detections") or 0}
     dets = detections_in_cell(st, rid, date, model, h3id)
+    arts = detections_in_cell(st, rid, date, model, h3id, artifacts=True)
     probs = [d["max_prob"] for d in dets if d.get("max_prob") is not None]
     n_dates = sum(1 for d in st.region_dates(rid) if model in (d.get("models") or [model]))
     quality = zj.get("quality") or st.date_entry(rid, date).get("quality")
@@ -267,6 +467,11 @@ def zone_info(st: core.Store, rid: str, date: Optional[str], model: Optional[str
         "place": f"/api/place?region={rid}&h3={h3id}&model={model}",
         "pdf": f"/api/place_report.pdf?region={rid}&h3={h3id}&model={model}&date={date}",
     }
+    if arts:  # L38: excluded objects in this cell (not in the index and the zone score)
+        out["artifacts"] = arts
+        out["n_artifacts"] = len(arts)
+    if zone.get("score_terms") is not None:
+        out["score_terms"] = zone["score_terms"]
     if "n_confirmed" in zone:
         out["n_confirmed"] = zone["n_confirmed"]
     elif dets and any(d.get("confirmed") is not None for d in dets):
@@ -320,6 +525,9 @@ def place_info(st: core.Store, rid: str, h3id: str, model: Optional[str] = None)
                        zone_rank=(z or {}).get("rank"))
             if any(x.get("confirmed") is not None for x in dets):
                 row["n_confirmed"] = sum(1 for x in dets if x.get("confirmed"))
+            arts = detections_in_cell(st, rid, date, model, h3id, artifacts=True)
+            if arts:
+                row["n_artifacts"] = len(arts)
             others = {}
             for om in models:
                 if om == model:
@@ -404,9 +612,11 @@ def calendar(st: core.Store, rid: str, model: Optional[str] = None) -> list[dict
             row.update(status="no_image", reason=f"нет слоя модели {model} на эту дату")
             out.append(row)
             continue
-        det = _features(st._optional(rid, date, model, "detections"))
+        det, arts = core.split_artifacts(_features(st._optional(rid, date, model, "detections")))
         row["observed_frac_water"] = rel["observed_frac_water"]
         row["n_detections"] = len(det)
+        if arts:
+            row["n_artifacts"] = len(arts)
         if any("confirmed" in (f.get("properties") or {}) for f in det):
             row["n_confirmed"] = sum(1 for f in det if f["properties"].get("confirmed"))
         if rel["unreliable"]:
@@ -561,6 +771,7 @@ def render_crop(st: core.Store, rid: str, date: Optional[str], lon: float, lat: 
         for m in models:
             fc = st._optional(rid, date, m, "detections")
             for f in _features(fc):
+                col = (170, 178, 189, 200) if core.artifact_of(f.get("properties")) else ACCENT + (255,)
                 for ring in _polys(f.get("geometry") or {}):
                     ring = np.asarray(ring, float)
                     if not len(ring):
@@ -571,7 +782,7 @@ def render_crop(st: core.Store, rid: str, date: Optional[str], lon: float, lat: 
                         continue
                     pts = list(zip(xs.tolist(), ys.tolist()))
                     if len(pts) >= 2:
-                        dr.line(pts + [pts[0]], fill=ACCENT + (255,), width=2)
+                        dr.line(pts + [pts[0]], fill=col, width=2 if col[3] == 255 else 1)
     if cell:
         ring = np.asarray([(x, y) for y, x in _h3().cell_to_boundary(cell)], float)
         xs, ys = to_px(ring[:, 0], ring[:, 1])

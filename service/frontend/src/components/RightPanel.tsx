@@ -22,6 +22,10 @@ interface Props {
   h3: FC<H3Props> | null;
   /** L15: confirmed detections of this model on this date (null = no data: old files / one model) */
   nConfirmed?: number | null;
+  /** L38: objects excluded as artifacts (seam / wake / ship) on this scene; 0 for old data */
+  nArtifacts?: number;
+  /** L38: detections incl. artifacts (export keeps them, with the `artifact` column) */
+  detectionsAll?: FC<DetProps> | null;
   onlyConfirmed?: boolean;
   collapsed: boolean;
   onCollapse: () => void;
@@ -148,8 +152,11 @@ function Overview({ manifest, onRegion, onCompare }: { manifest: Manifest; onReg
 
 function RegionView(p: Props & { region: Region; dateEntry: DateEntry }) {
   const det = p.detections?.features ?? [];
-  const area = p.tsRow?.total_debris_area_m2 ?? det.reduce((a, f) => a + f.properties.area_m2, 0);
-  const n = p.tsRow?.n_detections ?? det.length;
+  // L38: a timeseries row written before the artifact filter (no n_artifacts) still counts artifacts — then the
+  // client numbers (artifacts already removed from p.detections) are used
+  const tsRow = p.nArtifacts && p.tsRow && p.tsRow.n_artifacts === undefined ? null : p.tsRow;
+  const area = tsRow?.total_debris_area_m2 ?? det.reduce((a, f) => a + f.properties.area_m2, 0);
+  const n = tsRow?.n_detections ?? det.length;
   const idx = p.tsRow?.mean_index ?? null;
   const cloud = p.dateEntry.cloud_frac ?? p.tsRow?.cloud_frac ?? null;
   const [av, au] = fmtArea(area);
@@ -266,6 +273,17 @@ function RegionView(p: Props & { region: Region; dateEntry: DateEntry }) {
           hint={typeof p.nConfirmed === 'number' ? `из них подтверждено: ${fmtNum(p.nConfirmed)}` : 'пятен на снимке'}
           hintTitle={typeof p.nConfirmed === 'number' ? 'вторая модель видит признаки в радиусе 20 м — согласие моделей, не проверка на месте' : undefined}
           testid="kpi-detections"
+          extra={
+            p.nArtifacts ? (
+              <div
+                className="kpi-hint kpi-arts"
+                data-testid="kpi-artifacts"
+                title="вероятно шов детекторов Sentinel-2, кильватер или судно — не входят в число обнаружений, индекс и зоны; показать на карте — переключатель в легенде"
+              >
+                исключено как артефакты: {fmtNum(p.nArtifacts)}
+              </div>
+            ) : null
+          }
         />
         <Kpi label="Площадь пятен" value={av} unit={au} hint="помеченная область" />
         <Kpi label="Облачность" value={fmtPct(cloud)} hint="доля сцены" warn={(cloud ?? 0) > 0.3} />
@@ -396,7 +414,7 @@ function RegionView(p: Props & { region: Region; dateEntry: DateEntry }) {
         <button className="btn block accent-outline" onClick={p.onCompare} data-testid="compare-button">
           Сравнить с другим районом / датой
         </button>
-        <ExportBox region={p.region.id} date={p.dateEntry.date} model={p.model} detections={p.detections} zones={p.zones} onToast={p.onToast} />
+        <ExportBox region={p.region.id} date={p.dateEntry.date} model={p.model} detections={p.detectionsAll ?? p.detections} zones={p.zones} onToast={p.onToast} />
       </section>
     </>
   );
@@ -411,6 +429,7 @@ export function Kpi({
   warn,
   hintTitle,
   testid,
+  extra,
 }: {
   label: string;
   value: string;
@@ -420,6 +439,7 @@ export function Kpi({
   warn?: boolean;
   hintTitle?: string;
   testid?: string;
+  extra?: import('react').ReactNode;
 }) {
   return (
     <div className={`kpi ${accent ? 'accent' : ''} ${warn ? 'warn' : ''}`} data-testid={testid} title={hintTitle}>
@@ -429,6 +449,7 @@ export function Kpi({
         {unit && <small> {unit}</small>}
       </div>
       {hint && <div className="kpi-hint">{hint}</div>}
+      {extra}
     </div>
   );
 }

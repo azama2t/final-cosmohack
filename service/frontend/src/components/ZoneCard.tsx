@@ -3,7 +3,7 @@ import type { DateEntry, DetProps, FC, H3Props, Manifest, Region, Zone } from '.
 import { apiGet, hasApi, apiUrl, type Why, type ZoneApi } from '../lib/api';
 import { drawCrop, geomPolys } from '../lib/crop';
 import { centroid } from '../map/layers';
-import { localWhy, PRIORITY_NOTE, repeatFactor, zonePx, zoneScore } from '../lib/priority';
+import { localWhy, PRIORITY_NOTE, repeatFactor, scoreTerms, zonePx, zoneScore, type ScoreTerm } from '../lib/priority';
 import { AGREE_NOTE } from '../lib/confirm';
 import { isFlagged } from '../lib/data';
 import { fmtArea, fmtDate, fmtNum, fmtPct, fmtPermille, fmtThr, modelLabel } from '../lib/style';
@@ -88,6 +88,25 @@ export default function ZoneCard(p: Props) {
 
   const nDates = api?.n_dates ?? p.region.dates.filter((d) => d.models.includes(p.model)).length;
   const why: Why | null = api?.why ?? localWhy(z, p.zones, nDates);
+  // L38: score_terms — from /api/zone (normalised by the backend) or, with an older backend, from zones.json
+  const terms = useMemo(() => {
+    if (why?.score_terms?.length) {
+      const get = (n: string) => why.score_terms!.find((t) => t.name === n);
+      return {
+        list: why.score_terms,
+        base: why.base_score ?? get('base')?.value ?? 0,
+        agreement: get('agreement')?.value ?? 1,
+        penalty: get('date_penalty')?.value ?? 1,
+        mode: why.score_mode ?? 'mult',
+        score: why.score,
+      };
+    }
+    const st = scoreTerms(z);
+    return st
+      ? { list: st.terms, base: st.base, agreement: st.agreement, penalty: st.date_penalty, mode: st.mode, score: st.score }
+      : null;
+  }, [why, z]);
+  const nArts = api?.n_artifacts ?? 0;
   const obs = api?.observed_frac ?? z.observed_frac ?? p.h3?.features.find((f) => f.properties.h3 === z.h3)?.properties.observed_frac ?? null;
   const maxProb = api?.max_prob ?? local?.maxProb ?? null;
   const nDet = api?.n_detections ?? z.n_detections ?? local?.n ?? null;
@@ -160,6 +179,15 @@ export default function ZoneCard(p: Props) {
           ≈ {fmtNum(SIZE_M / 1000, 1)} × {fmtNum(SIZE_M / 1000, 1)} км · коралловый контур — пятна, пунктир — ячейка H3
         </div>
       </div>
+      {nArts > 0 && (
+        <div className="dc-art zc-art" data-testid="zone-artifacts">
+          <span className="sw-art" aria-hidden />
+          <span>
+            В ячейке исключено как артефакты: <b>{nArts}</b>{' '}
+            <small className="muted">· вероятно шов детекторов, кильватер или судно — не входят в индекс и балл зоны</small>
+          </span>
+        </div>
+      )}
       {typeof nConf === 'number' && (
         <div className={`dc-agree zc-agree ${nConf > 0 ? 'on' : ''}`} data-testid="zone-confirmed">
           <span className={nConf > 0 ? 'sw-double small' : 'sw-single small'} aria-hidden />
@@ -244,8 +272,9 @@ export default function ZoneCard(p: Props) {
                 <span className="op">×</span>
                 <Term v={`×${(why.terms[2]?.contribution ?? repeatFactor(z.repeat_dates)).toFixed(1)}`} l={`повтор: ${why.terms[2]?.value ?? z.repeat_dates ?? 1} дат`} />
                 <span className="op">=</span>
-                <Term v={fmtNum(why.score, 1)} l="балл" accent />
+                <Term v={fmtNum(terms ? terms.base : why.score, 1)} l={terms ? 'базовый балл' : 'балл'} accent={!terms} />
               </div>
+              {terms && <TermsBlock t={terms} />}
               <div className="why-bars" aria-label="Балл зон этой даты">
                 {ranked.list.map((x) => (
                   <div key={x.rank} className={`wb-row ${x.rank === z.rank ? 'on' : ''}`}>
@@ -270,6 +299,87 @@ export default function ZoneCard(p: Props) {
 
       </div>
       </div>
+    </div>
+  );
+}
+
+interface TermsView {
+  list: ScoreTerm[];
+  base: number;
+  agreement: number;
+  penalty: number;
+  mode: 'mult' | 'sub';
+  score: number;
+}
+
+/** L38: final score = base × agreement × date penalty, and the contribution of each term in points. */
+function TermsBlock({ t }: { t: TermsView }) {
+  const afterAgree = t.base * t.agreement;
+  const dAgree = afterAgree - t.base;
+  const dPen = t.mode === 'sub' ? -t.penalty : afterAgree * (t.penalty - 1);
+  const sign = (v: number) => (v > 0.05 ? '+' : v < -0.05 ? '−' : '±') + fmtNum(Math.abs(v), 1);
+  const lab = (n: string, d: string) => t.list.find((x) => x.name === n)?.label ?? d;
+  const note = (n: string) => t.list.find((x) => x.name === n)?.note;
+  const info = t.list.filter((x) => x.kind === 'info');
+  const rows = [
+    { k: 'base', l: lab('base', 'базовый балл'), v: fmtNum(t.base, 1), d: fmtNum(t.base, 1), cls: '' },
+    {
+      k: 'agreement',
+      l: lab('agreement', 'множитель согласия моделей'),
+      v: `×${fmtNum(t.agreement, 2)}`,
+      d: sign(dAgree),
+      cls: dAgree > 0.05 ? 'up' : '',
+    },
+    {
+      k: 'date_penalty',
+      l: lab('date_penalty', 'штраф за ненадёжную дату'),
+      v: t.mode === 'sub' ? `−${fmtNum(t.penalty, 1)}` : `×${fmtNum(t.penalty, 2)}`,
+      d: sign(dPen),
+      cls: dPen < -0.05 ? 'down' : '',
+    },
+  ];
+  return (
+    <div className="why-terms" data-testid="zone-why-terms">
+      <div className="why-eq why-eq2">
+        <Term v={fmtNum(t.base, 1)} l="базовый балл" />
+        <span className="op">×</span>
+        <Term v={`×${fmtNum(t.agreement, 2)}`} l="согласие моделей" />
+        <span className="op">{t.mode === 'sub' ? '−' : '×'}</span>
+        <Term v={t.mode === 'sub' ? fmtNum(t.penalty, 1) : `×${fmtNum(t.penalty, 2)}`} l="штраф даты" />
+        <span className="op">=</span>
+        <Term v={fmtNum(t.score, 1)} l="итоговый балл" accent />
+      </div>
+      <table className="wt-table">
+        <thead>
+          <tr>
+            <th>слагаемое</th>
+            <th>значение</th>
+            <th>вклад, баллов</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.k} className={r.cls} data-testid={`zone-term-${r.k}`}>
+              <td>
+                {r.l}
+                {note(r.k) && <small className="wt-note">{note(r.k)}</small>}
+              </td>
+              <td className="mono">{r.v}</td>
+              <td className={`mono ${r.cls}`}>{r.d}</td>
+            </tr>
+          ))}
+          <tr className="total">
+            <td>итоговый балл (ранжирование)</td>
+            <td />
+            <td className="mono">{fmtNum(t.score, 1)}</td>
+          </tr>
+        </tbody>
+      </table>
+      {info.length > 0 && (
+        <div className="muted tiny-text">
+          {info.map((x) => `${x.label}: ${fmtNum(x.value, 2)}`).join(' · ')}
+        </div>
+      )}
     </div>
   );
 }

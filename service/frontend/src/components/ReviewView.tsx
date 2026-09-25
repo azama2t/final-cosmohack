@@ -24,6 +24,7 @@ const REASON_RU: Record<string, string> = {
   user_flag: 'отмечено «ложное?»',
   disagreement: 'расхождение моделей',
   near_threshold: 'около порога',
+  artifact_conflict: 'артефакт? спор',
 };
 
 export default function ReviewView({ manifest, initialRegion, onToast, onShowOnMap }: Props) {
@@ -185,6 +186,12 @@ export default function ReviewView({ manifest, initialRegion, onToast, onShowOnM
         </div>
         <p className="muted small rv-rules">
           В очередь попадают: находки около порога (|max P − порог| ≤ 0,15), расхождения MDD и нашей модели, отмеченные «ложное?» на карте.
+          {queue?.n_artifacts_excluded ? (
+            <span data-testid="review-artifacts-note">
+              {' '}Исключённые артефакты (шов детекторов, кильватер, судно: {fmtNum(queue.n_artifacts_excluded)}) в очередь не идут, кроме
+              отмеченных «ложное?» и тех, что подтверждает вторая модель.
+            </span>
+          ) : null}
         </p>
         <div className="rv-list" data-testid="review-list">
           {queue === undefined && <div className="muted small">Загрузка…</div>}
@@ -233,6 +240,7 @@ export default function ReviewView({ manifest, initialRegion, onToast, onShowOnM
             </div>
             <div className="rv-reason" data-testid="review-reason">
               <b>Почему в очереди:</b> {it.reason}
+              {it.artifact_ru && <span className="muted"> · сборка пометила как «{it.artifact_ru}» (исключено из индекса и зон)</span>}
             </div>
             <div className="rv-imgs">
               <figure>

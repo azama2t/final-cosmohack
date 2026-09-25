@@ -2,9 +2,10 @@
 
 Usage: python scripts/make_demo.py [--src service/data] [--out service/demo] [--regions a,b] [--n-regions 5]
                                    [--max-dates 2] [--max-px 1024] [--max-mb 19] [--rgb-colors 256]
-Default regions: up to `--n-regions` (with detections first, then with drift, then most (date, model) pairs, then
-least cloudy); per region the `--max-dates` most interesting dates (drift, both models, cloud < 30 %, more
-detections, newer). If the set is larger than --max-mb, the least-interesting extra date of the region with the most
+Default regions (L37): the top `--n-top` (3) regions of the rating on reliable dates (manifest summary without
+haze, by index_permille, as the front's rating) plus the best-rated regions with a drift date until >= `--n-drift` (2)
+regions of the set have drift (they may coincide with the top). Per region the `--max-dates` most interesting dates
+(drift, reliable, both models, cloud < 30 %, more detections, newer); the default date is reliable when possible. If the set is larger than --max-mb, the least-interesting extra date of the region with the most
 dates is dropped (never below 1 date) until it fits.
 PNGs are downscaled to <= max-px (prob.png with a 3x3 max filter first so small detections stay visible);
 rgb.png is palette-quantized to --rgb-colors colours (0 = keep truecolour) to fit 5 regions into the budget.
@@ -54,7 +55,9 @@ def main(argv=None):
     ap.add_argument("--max-dates", type=int, default=2)
     ap.add_argument("--max-px", type=int, default=1024)
     ap.add_argument("--max-mb", type=float, default=19.0)
-    ap.add_argument("--n-regions", type=int, default=5)
+    ap.add_argument("--n-regions", type=int, default=5, help="upper bound on the number of regions")
+    ap.add_argument("--n-top", type=int, default=3)
+    ap.add_argument("--n-drift", type=int, default=2)
     ap.add_argument("--rgb-colors", type=int, default=256)
     a = ap.parse_args(argv)
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -65,21 +68,29 @@ def main(argv=None):
         want = a.regions.split(",")
         regs = [r for r in regs if r["id"] in want]
     else:
-        def cloud(r):
-            v = [d["cloud_frac"] for d in r["dates"] if d.get("cloud_frac") is not None]
-            return sum(v) / len(v) if v else 1.0
-        def ndet(r):
-            return sum(x["n_detections"] for x in read_json(src / r["id"] / "timeseries.json"))
-        regs = sorted(regs, key=lambda r: (-(ndet(r) > 0), -any(d.get("drift") for d in r["dates"]),
-                                           -sum(len(d["models"]) for d in r["dates"]), cloud(r)))[:a.n_regions]
+        def rating(r):  # reliable summary first, by index (as the front's rating); hazy summaries last
+            sm = r.get("summary") or {}
+            return (bool(sm.get("haze")), -(sm.get("index_permille") or 0.0), r["id"])
+
+        def has_drift(r):
+            return any(d.get("drift") and not (d.get("quality") or {}).get("haze") for d in r["dates"])
+        ranked = sorted(regs, key=rating)
+        chosen = [r for r in ranked if not (r.get("summary") or {}).get("haze")][:a.n_top]
+        for r in ranked:
+            if sum(has_drift(x) for x in chosen) >= a.n_drift or len(chosen) >= a.n_regions:
+                break
+            if has_drift(r) and r not in chosen:
+                chosen.append(r)
+        regs = chosen
+        print("demo regions:", [(r["id"], (r.get("summary") or {}).get("index_permille"), has_drift(r)) for r in regs])
 
     def interest_fn(rid):
         ts_all = read_json(src / rid / "timeseries.json")
 
-        def interest(d):  # drift first, then both models, then clear sky, then more detections, then newer
+        def interest(d):  # reliable first, then drift, then both models, then clear sky, then more detections, then newer
             ndet = sum(x["n_detections"] for x in ts_all if x["date"] == d["date"])
             haze = bool((d.get("quality") or {}).get("haze"))
-            return (bool(d.get("drift")), not haze, len(d["models"]), (d.get("cloud_frac") or 0) < 0.3, ndet > 0,
+            return (not haze, bool(d.get("drift")), len(d["models"]), (d.get("cloud_frac") or 0) < 0.3, ndet > 0,
                     ndet, d["date"])
         return interest
     n_dates = {r["id"]: min(a.max_dates, len(r["dates"])) for r in regs}

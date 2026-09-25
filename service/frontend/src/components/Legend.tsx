@@ -11,9 +11,13 @@ interface Props {
   scale: H3Scale;
   /** L15: confirmation data exists for the current date */
   confAvail?: boolean;
+  /** L38: objects excluded as artifacts on this scene (0 / undefined: old data — no switch) */
+  nArtifacts?: number;
+  showArtifacts?: boolean;
+  onShowArtifacts?: (v: boolean) => void;
 }
 
-export default function Legend({ manifest, model, threshold, layers, scale, confAvail }: Props) {
+export default function Legend({ manifest, model, threshold, layers, scale, confAvail, nArtifacts, showArtifacts, onShowArtifacts }: Props) {
   const [open, setOpen] = useState(true);
   const idx = manifest.index;
   return (
@@ -39,6 +43,26 @@ export default function Legend({ manifest, model, threshold, layers, scale, conf
               <span className="sw-double" aria-hidden />
               <span>
                 <b>Двойное кольцо</b> — вторая модель видит объект в радиусе 20 м; согласие моделей, не проверка на месте
+              </span>
+            </div>
+          )}
+          {layers.detections && !!nArtifacts && (
+            <div className="lg-row lg-arts" data-testid="legend-artifacts">
+              <button
+                className={`switch small ${showArtifacts ? 'on' : ''}`}
+                role="switch"
+                aria-checked={!!showArtifacts}
+                aria-label="Показывать исключённые артефакты"
+                onClick={() => onShowArtifacts?.(!showArtifacts)}
+                data-testid="artifacts-toggle"
+              >
+                <span className="knob" />
+              </button>
+              <span className="lg-arts-label" onClick={() => onShowArtifacts?.(!showArtifacts)}>
+                Показывать исключённые артефакты <b>({nArtifacts})</b>
+                <small className="muted">
+                  <span className="sw-art" aria-hidden /> серый контур — шов детекторов, кильватер или судно; не входят в индекс и зоны
+                </small>
               </span>
             </div>
           )}

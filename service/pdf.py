@@ -22,6 +22,27 @@ def _wrap(s: str, width: int = 105) -> str:
     return "\n".join(textwrap.fill(p, width) for p in s.split("\n"))
 
 
+def artifacts_line(st: core.Store, rid: str, date: Optional[str], model: str, zone: Optional[dict]) -> Optional[str]:
+    """L38: one line about objects excluded as artifacts (seam / wake / ship) on the reference date; None if none."""
+    if not date:
+        return None
+    try:
+        n_scene = place.n_artifacts(st, rid, date, model)
+    except (core.NotFound, core.BadRequest):
+        return None
+    if not n_scene:
+        return None
+    cell = (zone or {}).get("artifacts") or []
+    kinds: dict[str, int] = {}
+    for a in cell:
+        k = core.artifact_ru(a.get("artifact"))
+        kinds[k] = kinds.get(k, 0) + 1
+    in_cell = (f"в этой ячейке — {len(cell)} ({', '.join(f'{k}: {v}' for k, v in kinds.items())})" if cell
+               else "в этой ячейке — 0")
+    return (f"Исключено как артефакты на {date}: {n_scene} объект(ов) на снимке, {in_cell}; вероятно шов детекторов "
+            "Sentinel-2, кильватер или судно — не входят в индекс и зоны приоритета.")
+
+
 def build_place_pdf(st: core.Store, rid: str, h3id: str, model: Optional[str] = None, date: Optional[str] = None,
                     version: str = "") -> bytes:
     import matplotlib
@@ -78,6 +99,29 @@ def build_place_pdf(st: core.Store, rid: str, h3id: str, model: Optional[str] = 
                 facecolor="#eef3f8", edgecolor="#d5dee8", linewidth=0.6))
             fig.text(x + 0.012, 0.873, k, fontsize=7.5, color=MUTED, va="top")
             fig.text(x + 0.012, 0.852, v, fontsize=13, weight="bold", color=INK, va="top")
+        # L38b: "why" text first - its height decides the size of the crops, so that nothing runs off the page
+        why = (zone or {}).get("why") or {}
+        f_lines = (why.get("formula") or place.FORMULA).split(";  ")  # full formula, one part per line
+        body = why.get("formula_text") or place.FORMULA_TEXT
+        if zone:
+            terms = "; ".join(f"{t['label']}: ×{t['contribution']}" if t["name"] in ("agreement", "date_penalty")
+                              else f"{t['label']}: {t['value']}" for t in zone["why"]["terms"])
+            if zone["why"].get("score_terms") and zone["why"].get("score_mode") != "mult":  # legacy 'sub' shape
+                terms += "; " + "; ".join(f"{t['label']}: {t['value']}" for t in zone["why"]["score_terms"]
+                                          if t.get("kind") != "info")
+            body += f"\n\nНа дату {ref}: {terms}; score = {zone['why']['score']:.1f}.\n{zone['why']['text']}"
+            if zone.get("n_confirmed") is not None and "второй моделью" not in zone["why"]["text"]:
+                body += (f"\nПодтверждено второй моделью: {zone['n_confirmed']} "
+                         "(согласие моделей, не проверка на месте).")
+        else:
+            body += "\n\nНа выбранную дату у ячейки нет данных для расчёта приоритета."
+        art_line = artifacts_line(st, rid, ref, model, zone)
+        if art_line:
+            body += "\n" + art_line
+        body = _wrap(body, 112)
+        line_h = 8 * 1.35 / 72 / 11.69  # 8 pt, linespacing 1.35, A4 height in inches
+        text_h = 0.012 + 0.035 + 0.025 + 0.0135 * (len(f_lines) - 1) + 0.025 + (body.count("\n") + 1) * line_h
+        foot = 0.085  # red footer note starts at 0.06 and goes down
         # crops: up to 4 dates, prefer dates with findings, then latest observed
         pick = [h for h in hist if h["status"] == "found"][-4:]
         rest = [h for h in reversed(hist) if h not in pick and h["status"] != "no_image"]
@@ -88,6 +132,10 @@ def build_place_pdf(st: core.Store, rid: str, h3id: str, model: Optional[str] = 
         size = 0.42 if rows == 1 else 0.36  # width fraction; images are square
         ah = size * 8.27 / 11.69
         top = 0.79
+        room = top - foot - text_h - (rows - 1) * 0.03  # height left for the crops
+        if rows * ah > room:  # shrink the crops, not the text
+            ah = max(room / rows, 0.08)
+            size = ah * 11.69 / 8.27
         for i, h in enumerate(pick):
             r, c = divmod(i, cols)
             try:
@@ -109,24 +157,19 @@ def build_place_pdf(st: core.Store, rid: str, h3id: str, model: Optional[str] = 
                 lab += f", пятен: {h['n_detections']}"
             if h.get("index") is not None:
                 lab += f", индекс {h['index']:.1f} ‰"
-            ax.set_title(lab, fontsize=8, color=INK, pad=3)
+            if size < 0.3:  # shrunk crops: date and status on two lines, so neighbouring titles do not overlap
+                lab = lab.replace(" — ", "\n", 1)
+            ax.set_title(lab, fontsize=8 if size >= 0.3 else 7, color=INK, pad=3)
         y = top - rows * ah - (rows - 1) * 0.03 - 0.012
         fig.text(0.06, y, "Контур — пятна модели (#ff6b4a), белый шестиугольник — ячейка H3, вырезка 1,5 × 1,5 км; "
                  "RGB по каналам B4/B3/B2 (10 м).", fontsize=7, color=MUTED, va="top")
         # formula + why
         y -= 0.035
         fig.text(0.06, y, "Почему место в списке обследования", fontsize=11, weight="bold", color=INK, va="top")
-        fig.text(0.06, y - 0.025, place.FORMULA, fontsize=9, family="DejaVu Sans Mono", color=INK, va="top")
-        body = place.FORMULA_TEXT
-        if zone:
-            terms = "; ".join(f"{t['label']}: {t['value']}" for t in zone["why"]["terms"])
-            body += f"\n\nНа дату {ref}: {terms}; score = {zone['why']['score']:.1f}.\n{zone['why']['text']}"
-            if zone.get("n_confirmed") is not None:
-                body += (f"\nПодтверждено второй моделью: {zone['n_confirmed']} "
-                         "(согласие моделей, не проверка на месте).")
-        else:
-            body += "\n\nНа выбранную дату у ячейки нет данных для расчёта приоритета."
-        fig.text(0.06, y - 0.05, _wrap(body, 112), fontsize=8, color=INK, va="top", linespacing=1.35)
+        fig.text(0.06, y - 0.025, "\n".join(f_lines), fontsize=8.5, family="DejaVu Sans Mono", color=INK, va="top",
+                 linespacing=1.3)
+        y -= 0.0135 * (len(f_lines) - 1)
+        fig.text(0.06, y - 0.05, body, fontsize=8, color=INK, va="top", linespacing=1.35)
         fig.text(0.06, 0.06, _wrap("Индекс по снимку, не масса пластика; согласие моделей ≠ проверка на месте. "
                                     "Приоритет обследования — ранжирование по формуле, не измеренная экологическая "
                                     "опасность.", 100), fontsize=8, color=ACCENT, weight="bold", va="top")
@@ -145,7 +188,8 @@ def build_place_pdf(st: core.Store, rid: str, h3id: str, model: Optional[str] = 
             rows_t.append([
                 h["date"], STATUS_RU.get(h["status"], h["status"]),
                 "—" if h.get("index") is None else f"{h['index']:.2f}",
-                str(h.get("n_detections") or 0) + (f" ({h['n_confirmed']} подтв.)" if h.get("n_confirmed") else ""),
+                str(h.get("n_detections") or 0) + (f" ({h['n_confirmed']} подтв.)" if h.get("n_confirmed") else "")
+                + (f" +{h['n_artifacts']} искл." if h.get("n_artifacts") else ""),
                 "—" if h.get("max_prob") is None else f"{h['max_prob']:.2f}",
                 "—" if h.get("observed_frac") is None else f"{h['observed_frac'] * 100:.0f} %",
                 "—" if h.get("cloud_frac") is None else f"{h['cloud_frac'] * 100:.1f} %",

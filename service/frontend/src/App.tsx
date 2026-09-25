@@ -30,6 +30,7 @@ import Footer from './components/Footer';
 import EmptyState from './components/EmptyState';
 import { runTour, type TourApi } from './tour';
 import { hasConfirm, nConfirmed, onlyConfirmed as filterConfirmed } from './lib/confirm';
+import { splitArtifacts } from './lib/artifacts';
 import { hasApi, type ReviewItem } from './lib/api';
 import ZoneCard from './components/ZoneCard';
 import PlaceCard from './components/PlaceCard';
@@ -61,6 +62,8 @@ export default function App() {
   const [geoReady, setGeoReady] = useState(false);
   const [zonePopup, setZonePopup] = useState<Zone | null>(null);
   const [onlyConf, setOnlyConf] = useState<boolean>(!!url.confirmed);
+  // L38: «показывать исключённые артефакты» (legend switch, off by default)
+  const [showArts, setShowArts] = useState(false);
   // L20: place card (H3 cell history), header tab «Проверка»
   const [place, setPlace] = useState<{ h3: string; fromZone: boolean } | null>(url.place ? { h3: url.place, fromZone: false } : null);
   const [tab, setTab] = useState<'map' | 'review'>(url.tab ?? 'map');
@@ -114,7 +117,12 @@ export default function App() {
     scene && layers.prob ? () => getImage(modelPath(scene.r, scene.d, scene.m, 'prob.png')) : null,
     [sk, layers.prob],
   );
-  const detections = useAsync(scene ? () => loadDetections(scene.r, scene.d, scene.m) : null, [sk]);
+  const detectionsAll = useAsync(scene ? () => loadDetections(scene.r, scene.d, scene.m) : null, [sk]);
+  // L38: objects with properties.artifact are not findings — everything below (KPI, zones, cards, tour) uses `detections`
+  const artSplit = useMemo(() => splitArtifacts(detectionsAll), [detectionsAll]);
+  const detections = artSplit.real;
+  const nArts = artSplit.n;
+  const shownArts = showArts && layers.detections ? artSplit.arts : null;
   const zones = useAsync(scene ? () => loadZones(scene.r, scene.d, scene.m) : null, [sk]);
   const noDet = !!detections && detections.features.length === 0;
   const needH3 = layers.h3 || !!selected || noDet;
@@ -295,6 +303,7 @@ export default function App() {
 
   const openZone = useCallback((z: Zone) => {
     setSelected(null);
+    setHover(null);
     setPlace(null);
     setZonePopup(z);
   }, []);
@@ -441,6 +450,16 @@ export default function App() {
       nConfirmed: nConf,
       onlyConfirmed: confOn,
       nShown: shownDet?.features.length ?? 0,
+      nArtifacts: nArts,
+      showArtifacts: showArts,
+      setShowArtifacts: (v: boolean) => setShowArts(v),
+      artifactScreen: (i = 0) => {
+        const f = artSplit.arts?.features[i];
+        if (!f || !ctl.map) return null;
+        const p = ctl.map.project(centroid(f) as any);
+        const r = ctl.map.getContainer().getBoundingClientRect();
+        return { x: p.x + r.left, y: p.y + r.top, id: f.properties.id, lonlat: centroid(f) };
+      },
       bestRegion: manifest ? bestRegion(manifest)?.id ?? null : null,
       hasEnsemble: !!driftRaw?.ensemble?.length,
       largestDetectionScreen: () => {
@@ -527,6 +546,7 @@ export default function App() {
           rgbImg={rgbImg}
           probImg={probImg}
           detections={shownDet}
+          artifacts={shownArts}
           h3={h3}
           h3Scale={h3Scale}
           h3Max={h3Max}
@@ -601,6 +621,8 @@ export default function App() {
           zones={zones}
           h3={h3}
           nConfirmed={nConf}
+          nArtifacts={nArts}
+          detectionsAll={detectionsAll}
           onlyConfirmed={confOn}
           collapsed={rightCollapsed}
           onCollapse={() => setRightCollapsed((v) => !v)}
@@ -626,6 +648,13 @@ export default function App() {
             date={date}
             scale={h3Scale}
             confAvail={confAvail}
+            nArtifacts={nArts}
+            showArtifacts={showArts}
+            onShowArtifacts={(v) => {
+              setShowArts(v);
+              setHover(null);
+              if (!v && selected?.properties.artifact) setSelected(null);
+            }}
           />
         )}
 

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { DateEntry, DetProps, Feature, FC, H3Props, Manifest } from '../types';
 import { centroid, featureBBox } from '../map/layers';
 import { agreeText, AGREE_NOTE } from '../lib/confirm';
+import { artifactOf, artifactText } from '../lib/artifacts';
 import { apiPaths, apiPost } from '../lib/api';
 import { ACCENT, fmtThr, fmtNum, fmtArea, fmtDate, fmtPct, fmtPermille, modelLabel } from '../lib/style';
 
@@ -20,6 +21,7 @@ const SIZE = 344; // css px of the crop
 
 export default function DetectionCard({ feature, dateEntry, rgbImg, h3, manifest, threshold, onClose, onToast }: Props) {
   const p = feature.properties;
+  const art = artifactOf(p); // L38: excluded artifact (seam / wake / ship)
   const canvas = useRef<HTMLCanvasElement>(null);
   const [cell, setCell] = useState<H3Props | null | undefined>(undefined);
   const [cropM, setCropM] = useState(0);
@@ -69,8 +71,8 @@ export default function DetectionCard({ feature, dateEntry, rgbImg, h3, manifest
     const g = feature.geometry;
     const polys: number[][][][] = g.type === 'MultiPolygon' ? g.coordinates : [g.coordinates];
     ctx.lineWidth = 2 * dpr;
-    ctx.strokeStyle = ACCENT;
-    ctx.fillStyle = 'rgba(255,107,74,0.18)';
+    ctx.strokeStyle = art ? '#9ea8b4' : ACCENT;
+    ctx.fillStyle = art ? 'rgba(158,168,180,0.14)' : 'rgba(255,107,74,0.18)';
     ctx.shadowColor = 'rgba(0,0,0,0.6)';
     ctx.shadowBlur = 4 * dpr;
     for (const poly of polys) {
@@ -97,7 +99,7 @@ export default function DetectionCard({ feature, dateEntry, rgbImg, h3, manifest
     ctx.fillRect(bx, by, barPx, 3 * dpr);
     ctx.font = `${11 * dpr}px Inter, sans-serif`;
     ctx.fillText(`${barM} м`, bx, by - 5 * dpr);
-  }, [rgbImg, feature, dateEntry.bounds, lat, lon]);
+  }, [rgbImg, feature, dateEntry.bounds, lat, lon, art]);
 
   // «ложное?» → review queue: POST /api/review/flag (or, on an older backend, /api/review/label with label «other»)
   const [flagMode, setFlagMode] = useState<'flag' | 'label' | null>(null);
@@ -127,14 +129,27 @@ export default function DetectionCard({ feature, dateEntry, rgbImg, h3, manifest
   const coords = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
 
   return (
-    <div className="det-card glass" data-testid="detection-card">
+    <div className={`det-card glass ${art ? 'is-artifact' : ''}`} data-testid="detection-card">
       <button className="icon-btn close" onClick={onClose} aria-label="Закрыть" data-testid="detection-card-close">
         ×
       </button>
-      <div className="eyebrow accent-text">Находка · признаки плавающего мусора</div>
+      {art ? (
+        <div className="eyebrow muted">Исключённый объект · не находка</div>
+      ) : (
+        <div className="eyebrow accent-text">Находка · признаки плавающего мусора</div>
+      )}
       <div className="dc-title">
         {fmtDate(p.date)} · {modelLabel(p.model, manifest.models[p.model]?.name)}
       </div>
+      {art && (
+        <div className="dc-art" data-testid="detection-artifact">
+          <span className="sw-art" aria-hidden />
+          <span>
+            <b>{artifactText(art).replace(/^в/, 'В')}</b>
+            <small className="muted"> · объект модели оставлен на карте для прозрачности; в KPI, индекс ячеек и приоритет обследования не входит</small>
+          </span>
+        </div>
+      )}
       {agreeText(p) && (
         <div className={`dc-agree ${p.confirmed ? 'on' : ''}`} data-testid="detection-agreement">
           <span className={p.confirmed ? 'sw-double small' : 'sw-single small'} aria-hidden />
@@ -153,7 +168,7 @@ export default function DetectionCard({ feature, dateEntry, rgbImg, h3, manifest
       <div className="dc-grid">
         <div className="dc-kpi">
           <div className="kpi-label">Площадь помеченной области</div>
-          <div className="kpi-value accent-text">
+          <div className={`kpi-value ${art ? '' : 'accent-text'}`}>
             {a}
             <small> {u}</small>
           </div>

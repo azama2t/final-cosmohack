@@ -111,6 +111,7 @@ def queue(st: core.Store, rid: str, model: Optional[str] = None, limit: int = 50
     flagged = {(r.get("region"), r.get("date"), r.get("model"), r.get("id")): r
                for r in recs if r.get("kind") == "flag_false"}
     items = []
+    n_art_excl = 0
     for d in st.region_dates(rid):
         date = d["date"]
         models = d.get("models") or []
@@ -126,17 +127,30 @@ def queue(st: core.Store, rid: str, model: Optional[str] = None, limit: int = 50
                 if key in labeled and not include_labeled:
                     continue
                 reasons, codes, prio = [], [], 0.0
+                art = core.artifact_of(p)
                 if key in flagged:
                     reasons.append("отмечено «ложное» на карте")
                     codes.append("user_flag")
                     prio += 3
-                if len(models) > 1 and p.get("confirmed") is False:
+                if art:
+                    # L38: artifacts (seam / wake / ship) are excluded from the index and zones and do not go to the
+                    # queue - except a user flag (above) or a conflict: the second model confirms the object, so the
+                    # artifact filter may have removed a real finding.
+                    if p.get("confirmed") is True:
+                        reasons.append(f"помечено как «{core.artifact_ru(art)}», но вторая модель тоже видит объект — "
+                                       "проверьте, не исключена ли настоящая находка")
+                        codes.append("artifact_conflict")
+                        prio += 1.5
+                    if not codes:
+                        n_art_excl += 1
+                        continue
+                elif len(models) > 1 and p.get("confirmed") is False:
                     other = ", ".join(x for x in models if x != m)
                     reasons.append(f"расхождение моделей: {other} здесь ничего не видит")
                     codes.append("disagreement")
                     prio += 2
                 mp = p.get("max_prob")
-                if mp is not None and abs(float(mp) - thr) <= NEAR_THR:
+                if not art and mp is not None and abs(float(mp) - thr) <= NEAR_THR:
                     reasons.append(f"около порога: max P {float(mp):.2f} при пороге {thr:.2f}")
                     codes.append("near_threshold")
                     prio += 1 + (NEAR_THR - abs(float(mp) - thr)) / NEAR_THR
@@ -153,6 +167,9 @@ def queue(st: core.Store, rid: str, model: Optional[str] = None, limit: int = 50
                         "crop_rgb": place.crop_url(rid, date, lon, lat, size_m=1000, model=m),
                         "crop_false_color": (place.crop_url(rid, date, lon, lat, size_m=1000, model=m, bands="false")
                                              if has_bands else None)}
+                if art:
+                    item["artifact"] = art
+                    item["artifact_ru"] = core.artifact_ru(art)
                 if key in labeled:
                     item["label"] = labeled[key].get("label")
                 items.append(item)
@@ -160,9 +177,16 @@ def queue(st: core.Store, rid: str, model: Optional[str] = None, limit: int = 50
     n = len(items)
     return {"region": rid, "region_name": reg.get("name"), "model": model, "n_total": n,
             "n_labeled": sum(1 for k in labeled if k[0] == rid), "labels": list(LABELS), "labels_ru": LABELS_RU,
+            "n_artifacts_excluded": n_art_excl,
             "rules": {"near_threshold": f"|max_prob − порог| ≤ {NEAR_THR}",
                       "disagreement": "confirmed = false при наличии второй модели на эту дату",
-                      "user_flag": "запись kind=flag_false (POST /api/review/flag)"},
+                      "user_flag": "запись kind=flag_false (POST /api/review/flag)",
+                      "artifact": "объекты с properties.artifact (шов детекторов / кильватер / судно) исключены из "
+                                  "индекса и зон и в очередь не попадают; исключения: отметка «ложное» с карты "
+                                  "(user_flag) или вторая модель подтверждает объект (artifact_conflict — фильтр "
+                                  "артефактов мог убрать настоящую находку). Для артефактов причины «около порога» "
+                                  "и «расхождение моделей» не применяются",
+                      "artifact_conflict": "artifact задан и confirmed = true"},
             "items": items[:max(1, min(int(limit), 1000))]}
 
 

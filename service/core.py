@@ -23,6 +23,28 @@ KPI_KEYS = ("total_debris_area_m2", "n_detections", "mean_index", "max_index",
 LAYERS = ("detections", "h3", "zones")
 _NAME_RE = re.compile(r"^[A-Za-z0-9_\-]+$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+# L38: detections.geojson properties.artifact (optional) - objects excluded from the index and zones
+ARTIFACT_RU = {"seam": "шов детекторов", "wake": "кильватер", "ship": "судно"}
+
+
+def artifact_of(props: Optional[dict]) -> Optional[str]:
+    """'seam' | 'wake' | 'ship' | other non-empty string, or None for a normal detection."""
+    a = (props or {}).get("artifact")
+    if a is None or a is False or (isinstance(a, str) and not a.strip()):
+        return None
+    return str(a).strip() if isinstance(a, str) else "artifact"
+
+
+def artifact_ru(a: Optional[str]) -> str:
+    return ARTIFACT_RU.get(a or "", "артефакт")
+
+
+def split_artifacts(feats: list[dict]) -> tuple[list[dict], list[dict]]:
+    """(detections, artifacts) by properties.artifact."""
+    real, arts = [], []
+    for f in feats:
+        (arts if artifact_of(f.get("properties")) else real).append(f)
+    return real, arts
 
 
 class NotFound(LookupError):
@@ -170,7 +192,7 @@ class Store:
     # ---- KPI
     def kpi(self, rid: str, date: Optional[str], model: Optional[str]) -> dict:
         rid, date, model = self.resolve(rid, date, model)
-        det = _features(self._optional(rid, date, model, "detections"))
+        det, arts = split_artifacts(_features(self._optional(rid, date, model, "detections")))
         cells = _features(self._optional(rid, date, model, "h3"))
         areas = [_num(f["properties"].get("area_m2")) for f in det]
         shares = [_num(f["properties"].get("share_permille")) for f in cells
@@ -191,6 +213,8 @@ class Store:
             "observed_cells": len(shares),
             "flagged_cells": sum(1 for s in shares if s > 0),
         }
+        if arts:  # L38: excluded from n_detections / area (not in the index and zones)
+            kpi["n_artifacts"] = len(arts)
         return {"region": rid, "date": date, "model": model, "kpi": kpi}
 
     def _optional(self, rid, date, model, layer):

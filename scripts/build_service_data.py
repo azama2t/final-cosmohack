@@ -18,6 +18,11 @@ L28 cloud guards (macroplastic.grid.cloudmask, reports/cloud_edge.md), same for 
 water pixels missed by SCL (B2 >= 0.06 & B11 >= 0.03, blobs >= 100 px) are not observed; components within 5 px
 (Euclidean) of a cloud/shadow (SCL 3, 8, 9, 10 or spectral cloud) are dropped; cloud-shadow artefacts (no NIR
 excess over the 3..10 px water ring AND ring visible brightness < 0.8 x scene water median) are dropped.
+L37 artefacts (macroplastic.grid.artifacts, reports/artifacts.md): straight lines on a brightness boundary
+(detector seam / plume edge), long straight strips (wakes) and bright targets (ships) get properties.artifact
+"seam"|"wake"|"ship" in detections.geojson; they are not counted in h3 flagged_water_px, zones, timeseries
+n_detections / area (timeseries n_artifacts) and n_confirmed. Zones: score x (1 + share of confirmed pixels)
+x 0.5 on a haze/glint date; repeat_dates counts reliable dates only (grid.zones); zones[].score_terms / why.
 Idempotent: region folders being built are recreated; with --regions, other regions of an existing
 manifest are kept.
 """
@@ -43,13 +48,14 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from macroplastic.grid import H3_RES  # noqa: E402
+from macroplastic.grid.artifacts import RULES_TEXT, classify as classify_artifacts  # noqa: E402
 from macroplastic.grid.cloudmask import (CLOUD_BUFFER_PX, drop_components, near_cloud_components,  # noqa: E402
                                          shadow_components, spectral_cloud)
 from macroplastic.grid.confirm import CONFIRM_RADIUS_PX, confirmed_components, label_of_records  # noqa: E402
 from macroplastic.grid.h3index import cell_raster, h3_feature_collection, h3_stats, raster_bounds  # noqa: E402
 from macroplastic.grid.timeseries import sort_rows, timeseries_row  # noqa: E402
 from macroplastic.grid.vectorize import clean_mask, dumps_compact, fit_geojson_size, vectorize_detections  # noqa: E402
-from macroplastic.grid.zones import rank_zones  # noqa: E402
+from macroplastic.grid.zones import FORMULA as ZONE_FORMULA, rank_zones  # noqa: E402
 
 MAX_PX = 2048
 THUMB_PX, THUMB_MAX_BYTES = 256, 30_000
@@ -299,22 +305,40 @@ def process_scene(region: str, date: str, sdir: Path, models: list[str], out: Pa
         labels, n = drop_components(labels, n, near | shadow)
         if n0 != n:
             log(f"  {region}/{date}/{m}: cloud guard dropped {n0 - n} of {n0} components {guard}")
+        # L37: linear artefacts / ships are marked (kept in detections.geojson), not counted in H3 index and zones
+        art, _ = classify_artifacts(labels, n, bands, water, raw)
+        is_art = np.zeros(n + 1, bool)
+        is_art[1:] = [a is not None for a in art]
         recs = vectorize_detections(labels, n, prob, s_transform, s_crs, region, date, m)
-        masks[m] = (labels, n, raw)
-        # H3 index (flagged = pixels of kept components, i.e. after SPEC §5.4 post-processing)
-        stats = h3_stats(cellr, cells, water, labels > 0, prob, [r["pixel"] for r in recs])
+        for rec, k in zip(recs, label_of_records(labels, recs)):
+            if k > 0 and art[k - 1]:
+                rec["props"]["artifact"] = art[k - 1]
+        real = [rec for rec in recs if not rec["props"].get("artifact")]
+        art_px = is_art[labels]
+        a_stat = {"seam": 0, "wake": 0, "ship": 0}
+        for rec in recs:
+            if rec["props"].get("artifact"):
+                a_stat[rec["props"]["artifact"]] += 1
+        a_stat["px"] = int(art_px.sum())
+        if a_stat["px"]:
+            log(f"  {region}/{date}/{m}: artefacts {a_stat} of {len(recs)} det / {int((labels > 0).sum())} px")
+        masks[m] = (labels, n, raw, is_art)
+        # H3 index (flagged = pixels of kept, non-artefact components, i.e. after SPEC §5.4 post-processing + L37)
+        stats = h3_stats(cellr, cells, water, (labels > 0) & ~art_px, prob, [r["pixel"] for r in real])
         # cells without any observed water (land / fully clouded / outside) are not written (map clutter)
         write_json(mdir / "h3.geojson", h3_feature_collection([s for s in stats if s["observed_water_px"] > 0],
                                                               date, m, thr), compact=True)
+        ts_row = timeseries_row(date, m, real, stats, cloud)
+        ts_row["n_artifacts"] = len(recs) - len(real)
         res["models"][m] = {"threshold": thr, "stats": stats, "recs": recs,
-                            "raw_flagged": int(raw.sum()), "clean_flagged": int((labels > 0).sum()),
-                            "ts": timeseries_row(date, m, recs, stats, cloud), "meta": pj, "cloud_guard": guard}
+                            "raw_flagged": int(raw.sum()), "clean_flagged": int(((labels > 0) & ~art_px).sum()),
+                            "ts": ts_row, "meta": pj, "cloud_guard": guard, "artifacts": a_stat}
     # L15: cross-model confirmation (rule D, reports/model_agreement.md) — only when >= 2 models on this date
     done = list(res["models"])
     for m in done:
         r = res["models"][m]
         if len(done) >= 2:
-            labels, n, _ = masks[m]
+            labels, n, _, is_art = masks[m]
             lab_of = label_of_records(labels, r["recs"])
             by = {}
             for o in done:
@@ -325,14 +349,24 @@ def process_scene(region: str, date: str, sdir: Path, models: list[str], out: Pa
                     if k > 0 and conf[k - 1] and i not in by:
                         by[i] = o
             per_cell: dict[str, int] = {}
+            conf_lab = np.zeros(n + 1, bool)
+            n_conf = n_conf_art = 0
             for i, rec in enumerate(r["recs"]):
                 rec["props"]["confirmed"] = i in by
                 rec["props"]["confirmed_by"] = by.get(i)
-                if i in by:
+                if i in by and rec["props"].get("artifact"):  # L37: artefacts are not "уверенные находки"
+                    n_conf_art += 1
+                elif i in by:
+                    n_conf += 1
+                    conf_lab[lab_of[i]] = True
                     k = int(cellr[rec["pixel"][0], rec["pixel"][1]])
                     if k > 0:
                         per_cell[cells[k - 1]] = per_cell.get(cells[k - 1], 0) + 1
-            r["n_confirmed"], r["confirmed_cells"] = len(by), per_cell
+            conf_lab[0] = False
+            cm = conf_lab[labels] & ~is_art[labels] & water
+            cpx = np.bincount(cellr[cm], minlength=len(cells) + 1)
+            r["confirmed_px"] = {cells[k - 1]: int(cpx[k]) for k in np.flatnonzero(cpx[1:]) + 1}
+            r["n_confirmed"], r["confirmed_cells"], r["n_confirmed_artifacts"] = n_conf, per_cell, n_conf_art
         text, ginfo = fit_geojson_size(r["recs"], s_crs)
         (odir / m / "detections.geojson").write_text(text, encoding="utf-8")
         r["geo"] = ginfo
@@ -379,13 +413,18 @@ def build_region(region: str, scenes: list[dict], out: Path, model_meta: dict) -
         for m, r in sc["models"].items():
             by_model.setdefault(m, []).append((sc, r))
     for m, lst in by_model.items():
-        repeat: dict[str, int] = {}
-        for _, r in lst:
+        repeat: dict[str, int] = {}  # L37: persistence counts reliable (no haze/glint) dates only
+        for sc, r in lst:
+            if sc["quality"]["haze"]:
+                continue
             for s in r["stats"]:
                 if s["flagged_water_px"] > 0:
                     repeat[s["h3"]] = repeat.get(s["h3"], 0) + 1
         for sc, r in lst:
-            zones = rank_zones(r["stats"], repeat, n_dates=len(lst))
+            haze = bool(sc["quality"]["haze"])
+            rep = repeat if not haze else {h: v + 1 for h, v in repeat.items()}  # the (hazy) date itself counts
+            zones = rank_zones(r["stats"], rep, n_dates=len(lst), confirmed_px=r.get("confirmed_px"),
+                               unreliable=haze)
             if sc["quality"]["haze"]:
                 for z in zones:
                     z["reason"] += "; " + HAZE_NOTE
@@ -458,7 +497,7 @@ def main(argv=None):
     out.mkdir(parents=True, exist_ok=True)
     old = read_json(out / "manifest.json") if (out / "manifest.json").exists() else None
     model_meta: dict = {}
-    man_regions, summary_rows, guard_rows = [], [], []
+    man_regions, summary_rows, guard_rows, art_rows = [], [], [], []
     for region, items in sorted(found.items()):
         rdir = out / region
         if rdir.exists() and rdir.resolve().parent == out.resolve():
@@ -485,6 +524,8 @@ def main(argv=None):
             for m, r in sc["models"].items():
                 z = r["zones"][0] if r["zones"] else None
                 guard_rows.append((region, sc["date"], m, r.get("cloud_guard", {})))
+                art_rows.append((region, sc["date"], m, dict(r.get("artifacts", {}),
+                                                             confirmed_artifacts=r.get("n_confirmed_artifacts", 0))))
                 summary_rows.append((region, sc["date"], m, r["ts"]["n_detections"], r.get("n_confirmed", "-"),
                                      r["ts"]["total_debris_area_m2"],
                                      r["ts"]["mean_index"], (z["h3"], z["index"]) if z else None, sc["seconds"]))
@@ -499,7 +540,10 @@ def main(argv=None):
                   "formula": "flagged_water_px / observed_water_px", "note": "индекс по снимку, не масса пластика",
                   "flagged": "пиксели prob ≥ порога на наблюдаемой воде после постобработки (компоненты ≥ 2 px, "
                              "не касаются облаков/суши в буфере 1 px, не ближе 5 px к облаку/тени, "
-                             "не тень облака — L28)",
+                             "не тень облака — L28; без объектов-артефактов: шов/граница яркости, кильватер, "
+                             "судно — L37, detections.geojson properties.artifact)",
+                  "artifacts": RULES_TEXT,
+                  "zone_score": ZONE_FORMULA,
                   "min_observed_frac": 0.5},
         "models": model_meta, "regions": man_regions, "sources": SOURCES}
     write_json(out / "manifest.json", manifest)
@@ -512,6 +556,12 @@ def main(argv=None):
             tot.setdefault(m, {}).setdefault(k, 0)
             tot[m][k] += v
     print(f"\ncloud guard (L28), totals per model over {len({r[:2] for r in guard_rows})} scenes: {tot}")
+    atot: dict = {}
+    for reg, date, m, g in art_rows:
+        for k, v in g.items():
+            atot.setdefault(m, {}).setdefault(k, 0)
+            atot[m][k] += v
+    print(f"artefacts (L37), totals per model: {atot}")
     print(f"\nbuilt {out} in {time.time() - t_all:.1f} s")
     return 0
 

@@ -1,6 +1,7 @@
 import type { DetProps, H3Props, Manifest } from '../types';
 import type { HoverInfo } from '../map/layers';
 import { agreeText } from '../lib/confirm';
+import { artifactOf, artifactRu, ARTIFACT_NOTE } from '../lib/artifacts';
 import { fmtArea, fmtDate, fmtNum, fmtPct, fmtPermille, modelLabel } from '../lib/style';
 
 export default function Tooltip({ hover, manifest }: { hover: HoverInfo; manifest: Manifest }) {
@@ -8,6 +9,16 @@ export default function Tooltip({ hover, manifest }: { hover: HoverInfo; manifes
   if (hover.kind === 'det') {
     const p = hover.props as DetProps;
     const [a, u] = fmtArea(p.area_m2);
+    const art = artifactOf(p);
+    if (art)
+      return (
+        <div className="tooltip tt-art" style={style} data-testid="tooltip">
+          <div className="tt-title">Исключено · вероятно {artifactRu(art)}</div>
+          <div className="tt-row"><span>Площадь</span><b>{fmtNum(p.area_m2)} м²{u === 'га' ? ` (${a} га)` : ''}</b></div>
+          <div className="tt-row"><span>Вероятность ср. / макс.</span><b>{p.mean_prob.toFixed(2)} / {p.max_prob.toFixed(2)}</b></div>
+          <div className="tt-hint">{ARTIFACT_NOTE[0].toUpperCase() + ARTIFACT_NOTE.slice(1)} · клик — карточка</div>
+        </div>
+      );
     return (
       <div className="tooltip" style={style} data-testid="tooltip">
         <div className="tt-title accent-text">Пятно · признаки мусора</div>

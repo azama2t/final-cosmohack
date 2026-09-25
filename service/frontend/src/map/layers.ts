@@ -37,6 +37,8 @@ export interface LayerCtx {
   rgbImg: HTMLImageElement | null;
   probImg: HTMLImageElement | null;
   detections: FC<DetProps> | null;
+  /** L38: excluded artifacts (seam / wake / ship) — drawn muted only when the legend switch is on */
+  artifacts?: FC<DetProps> | null;
   h3: FC<H3Props> | null;
   h3Scale: H3Scale;
   /** max non-zero share_permille of the scene (normalises 3D heights) */
@@ -164,6 +166,74 @@ export function buildLayers(c: LayerCtx): Layer[] {
         },
       }) as any,
     );
+  }
+
+  // L38: excluded artifacts — grey outline, no glow/halo, under the findings; a small thin grey ring keeps them
+  // findable at region zoom (fades out where the polygons themselves are visible)
+  if (L.detections && c.artifacts?.features.length) {
+    const arts = c.artifacts.features;
+    const hotA = c.hoverId ?? c.selectedId;
+    const fadeA = Math.min(1, Math.max(0, (14.6 - c.zoom) / 1.8));
+    const onHoverArt = (info: PickingInfo) => {
+      const o = info.object as any;
+      c.onHover(o ? { x: info.x, y: info.y, kind: 'det', props: o.properties } : null);
+    };
+    const onClickArt = (info: PickingInfo) => {
+      if (info.object) c.onClickDet(info.object as any);
+    };
+    if (fadeA > 0.05)
+      out.push(
+        new ScatterplotLayer<Feature<DetProps>>({
+          id: 'artifacts-ring',
+          data: arts,
+          getPosition: (f) => centroid(f),
+          getRadius: (f) => (f.properties.id === hotA ? 7 : 5),
+          radiusUnits: 'pixels',
+          stroked: true,
+          filled: true,
+          getFillColor: [0, 0, 0, 1],
+          getLineColor: (f) => (f.properties.id === hotA ? [226, 232, 240, 255] : [158, 168, 180, Math.round(210 * fadeA)]),
+          lineWidthUnits: 'pixels',
+          getLineWidth: 1.25,
+          pickable: fadeA > 0.3,
+          onHover: onHoverArt,
+          onClick: onClickArt,
+          parameters: { depthTest: false } as any,
+          updateTriggers: { getLineColor: [fadeA, hotA], getRadius: hotA },
+        }),
+      );
+    out.push(
+      new GeoJsonLayer<DetProps>({
+        id: 'artifacts',
+        data: c.artifacts as any,
+        stroked: true,
+        filled: true,
+        getFillColor: (f: any) => (f.properties.id === hotA ? [200, 208, 218, 70] : [158, 168, 180, 28]),
+        getLineColor: [158, 168, 180, 220],
+        lineWidthUnits: 'pixels',
+        getLineWidth: 1.25,
+        lineWidthMinPixels: 1,
+        pickable: true,
+        parameters: { depthTest: false } as any,
+        onHover: onHoverArt,
+        onClick: onClickArt,
+        updateTriggers: { getFillColor: hotA },
+      }),
+    );
+    const selA = c.selectedId ? arts.find((f) => f.properties.id === c.selectedId) : undefined;
+    if (selA)
+      out.push(
+        new GeoJsonLayer({
+          id: 'artifact-selected',
+          data: selA as any,
+          stroked: true,
+          filled: false,
+          getLineColor: [226, 232, 240, 255],
+          lineWidthUnits: 'pixels',
+          getLineWidth: 2,
+          parameters: { depthTest: false } as any,
+        }),
+      );
   }
 
   if (L.detections && c.detections) {

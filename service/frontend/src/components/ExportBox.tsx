@@ -39,7 +39,7 @@ export default function ExportBox(p: Props) {
     else if (layer === 'zones') rows = (p.zones?.zones ?? []).map((z) => ({ ...z }));
     else rows = ((await loadH3(p.region, p.date, p.model))?.features ?? []).map((f) => ({ ...f.properties }));
     if (!rows.length) return p.onToast('Нет строк для выгрузки');
-    const cols = Object.keys(rows[0]);
+    const cols = [...new Set(rows.flatMap((r) => Object.keys(r)))]; // L38: optional fields (artifact) of later rows too
     const esc = (v: unknown) => {
       const s = v === null || v === undefined ? '' : String(v);
       return /[",;\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;

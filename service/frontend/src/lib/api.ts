@@ -84,6 +84,10 @@ export interface Why {
   score: number;
   terms: WhyTerm[];
   text: string;
+  /** L38 (zones.json score_terms present): base score = product of terms[]; score = final */
+  base_score?: number;
+  score_terms?: import('./priority').ScoreTerm[];
+  score_mode?: 'mult' | 'sub';
 }
 export interface ZoneApi {
   region: string;
@@ -107,6 +111,8 @@ export interface ZoneApi {
   quality?: { haze?: boolean; glint_or_haze?: boolean; note?: string } | null;
   reason?: string;
   n_confirmed?: number;
+  /** L38: objects excluded as artifacts whose centre is in this cell */
+  n_artifacts?: number;
   why: Why;
   crop: string;
   crop_false_color: string | null;
@@ -196,6 +202,9 @@ export interface ReviewItem {
   crop_rgb: string;
   crop_false_color: string | null;
   label?: string;
+  /** L38: the build marked the object as an artifact (only user_flag / artifact_conflict items) */
+  artifact?: string;
+  artifact_ru?: string;
 }
 export interface ReviewQueue {
   region: string;
@@ -203,6 +212,8 @@ export interface ReviewQueue {
   model: string | null;
   n_total: number;
   n_labeled: number;
+  /** L38: artifacts left out of the queue */
+  n_artifacts_excluded?: number;
   labels: string[];
   labels_ru: Record<string, string>;
   rules?: Record<string, string>;

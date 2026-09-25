@@ -143,6 +143,8 @@ def check_detections(v: V, rel, region, date, model):
                     v.err(w, f"confirmed_by must be the other model's id, got {cb!r}")
                 elif not pr["confirmed"] and cb is not None:
                     v.err(w, "confirmed_by must be null when confirmed is false")
+            if "artifact" in pr and pr["artifact"] not in (None, "seam", "wake", "ship"):  # optional (L37)
+                v.err(w, f"artifact must be seam|wake|ship|null, got {pr['artifact']!r}")
         if i > 5000:
             break
     return len(fc["features"])
@@ -206,6 +208,20 @@ def check_zones(v: V, rel, region, date, model):
             if "n_confirmed" in zz and (not isinstance(zz["n_confirmed"], int) or isinstance(zz["n_confirmed"], bool)
                                         or zz["n_confirmed"] < 0):
                 v.err(w, "n_confirmed must be a non-negative int")  # optional (L15)
+            st = zz.get("score_terms")  # optional (L37): base x agreement x date_penalty = score
+            if st is not None:
+                try:
+                    vals = {k: (st[k]["value"] if isinstance(st[k], dict) else st[k])
+                            for k in ("base", "agreement", "date_penalty", "score")}
+                    prod = vals["base"] * vals["agreement"] * vals["date_penalty"]
+                    if abs(prod - vals["score"]) > 0.01 + 1e-3 * abs(vals["score"]):
+                        v.err(w, f"score_terms: base*agreement*date_penalty {prod:.3f} != score {vals['score']}")
+                    if not 1 <= vals["agreement"] <= 2 or vals["date_penalty"] not in (0.5, 1, 1.0):
+                        v.err(w, f"score_terms out of range {vals}")
+                    if "score" in zz and abs(zz["score"] - vals["score"]) > 0.01:
+                        v.err(w, "score_terms.score != score")
+                except (KeyError, TypeError) as e:
+                    v.err(w, f"score_terms malformed: {e}")
             if not (-180 <= zz["lon"] <= 180 and -90 <= zz["lat"] <= 90):
                 v.err(w, "lon/lat out of range")
 

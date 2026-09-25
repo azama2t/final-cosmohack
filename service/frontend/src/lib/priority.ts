@@ -62,7 +62,114 @@ export function verdictZone(zones: Zone[]): { zone: Zone; unconfirmed: boolean; 
 /** flagged px of a zone: explicit field, else area / 100 m² (one 10 m pixel). */
 export const zonePx = (z: Zone) => z.flagged_water_px ?? Math.round((z.area_m2 ?? 0) / 100);
 export const repeatFactor = (rep: number | null | undefined) => 1 + REPEAT_BONUS * Math.max((rep ?? 1) - 1, 0);
-export const zoneScore = (z: Zone) => zonePx(z) * (z.mean_prob ?? 0) * repeatFactor(z.repeat_dates);
+export const baseScore = (z: Zone) => zonePx(z) * (z.mean_prob ?? 0) * repeatFactor(z.repeat_dates);
+/** Ranking score: score_terms total (L38) > zones.json score > recomputed base formula. */
+export const zoneScore = (z: Zone) => scoreTerms(z)?.score ?? (typeof z.score === 'number' ? z.score : baseScore(z));
+
+// ---- L38: zones.json zones[].score_terms (same normalisation as service/place.py score_terms()) ----
+export interface ScoreTerm {
+  name: string;
+  label: string;
+  value: number;
+  kind: 'base' | 'mult' | 'sub' | 'info';
+  present?: boolean;
+  note?: string;
+}
+export interface ScoreTerms {
+  terms: ScoreTerm[];
+  base: number;
+  agreement: number;
+  date_penalty: number;
+  score: number;
+  mode: 'mult' | 'sub';
+}
+const TERM_ALIASES: Record<string, string[]> = {
+  base: ['base', 'base_score', 'score_base', 'raw', 'raw_score', 'base_px_prob_repeat'],
+  agreement: ['agreement', 'agree', 'agreement_mult', 'agree_mult', 'agreement_factor', 'agree_factor', 'confirm_mult',
+    'confirmed_mult', 'consensus', 'consensus_mult', 'models_agreement'],
+  date_penalty: ['date_penalty', 'unreliable_penalty', 'penalty', 'date_mult', 'reliability', 'reliability_mult',
+    'unreliable', 'unreliable_date', 'date_factor', 'quality_penalty', 'unreliable_mult'],
+  score: ['score', 'total', 'final', 'final_score', 'score_final'],
+};
+const ALIAS: Record<string, string> = Object.fromEntries(
+  Object.entries(TERM_ALIASES).flatMap(([k, al]) => al.map((a) => [a, k])),
+);
+export const TERM_LABELS: Record<string, string> = {
+  base: 'базовый балл (пиксели × уверенность × повторяемость)',
+  agreement: 'множитель согласия моделей',
+  date_penalty: 'штраф за ненадёжную дату',
+};
+const num = (v: unknown): number | null => {
+  if (typeof v === 'number' && Number.isFinite(v)) return v;
+  if (v && typeof v === 'object') {
+    for (const k of ['value', 'factor', 'mult', 'contribution', 'v']) {
+      const x = (v as any)[k];
+      if (typeof x === 'number' && Number.isFinite(x)) return x;
+    }
+  }
+  return null;
+};
+
+/** Normalised score_terms of a zone (dict / nested dict / list forms), null when absent or without a base. */
+export function scoreTerms(z: Pick<Zone, 'score_terms'> | null | undefined): ScoreTerms | null {
+  const raw = z?.score_terms as any;
+  if (!raw) return null;
+  const items: [string, unknown, string | undefined, string | undefined][] = [];
+  if (Array.isArray(raw)) {
+    for (const it of raw) {
+      const k = it && typeof it === 'object' ? it.name ?? it.key ?? it.id : null;
+      if (k) items.push([String(k), it, it.label, it.note]);
+    }
+  } else if (typeof raw === 'object') {
+    for (const [k, v] of Object.entries(raw))
+      items.push([k, v, v && typeof v === 'object' ? (v as any).label : undefined, v && typeof v === 'object' ? (v as any).note : undefined]);
+  }
+  const known: Record<string, number> = {};
+  const labels: Record<string, string> = {};
+  const notes: Record<string, string> = {};
+  const extra: ScoreTerm[] = [];
+  for (const [k, v, lab, note] of items) {
+    const canon = ALIAS[k.toLowerCase()];
+    const n = num(v);
+    if (canon && n !== null && !(canon in known)) {
+      known[canon] = n;
+      if (lab) labels[canon] = String(lab);
+      if (note) notes[canon] = String(note);
+    } else if (n !== null) extra.push({ name: k, label: String(lab ?? k), value: n, kind: 'info' });
+  }
+  if (!('base' in known)) return null;
+  const base = known.base;
+  const agree = known.agreement ?? 1;
+  const pen = known.date_penalty ?? 1;
+  let mode: 'mult' | 'sub' = 'mult';
+  let total = known.score;
+  if (total === undefined) total = base * agree * pen;
+  else if ('date_penalty' in known) {
+    const tol = 0.01 * Math.max(1, Math.abs(total));
+    if (Math.abs(base * agree * pen - total) > tol && Math.abs(base * agree - pen - total) <= tol) mode = 'sub';
+  }
+  const t = (name: string, value: number, kind: ScoreTerm['kind'], present: boolean): ScoreTerm => ({
+    name,
+    label: labels[name] ?? TERM_LABELS[name],
+    value,
+    kind,
+    present,
+    ...(notes[name] ? { note: notes[name] } : {}),
+  });
+  return {
+    terms: [
+      t('base', base, 'base', true),
+      t('agreement', agree, 'mult', 'agreement' in known),
+      t('date_penalty', pen, mode === 'sub' ? 'sub' : 'mult', 'date_penalty' in known),
+      ...extra,
+    ],
+    base,
+    agreement: agree,
+    date_penalty: pen,
+    score: total,
+    mode,
+  };
+}
 
 const f1 = (v: number) => v.toLocaleString('ru-RU', { maximumFractionDigits: 1, minimumFractionDigits: 1 });
 const f2 = (v: number) => v.toLocaleString('ru-RU', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
@@ -74,8 +181,16 @@ export function localWhy(z: Zone, zones: Zone[], nDates: number): Why | null {
   const mp = z.mean_prob ?? 0;
   const rep = z.repeat_dates ?? 1;
   const rf = repeatFactor(rep);
-  const score = px * mp * rf;
-  const head = `${px} пикс. × ${f2(mp)} × ${f1(rf)} = ${f1(score)}`;
+  const base = px * mp * rf;
+  const st = scoreTerms(z);
+  const score = st ? st.score : base;
+  let head = `${px} пикс. × ${f2(mp)} × ${f1(rf)} = ${f1(base)}`;
+  if (st) {
+    head = `базовый балл ${f1(st.base)}`;
+    if (st.agreement !== 1) head += ` × согласие моделей ×${f2(st.agreement)}`;
+    if (st.date_penalty !== 1) head += st.mode === 'sub' ? ` − штраф даты ${f1(st.date_penalty)}` : ` × штраф даты ×${f2(st.date_penalty)}`;
+    head += ` = ${f1(score)}`;
+  }
   const text: string[] = [];
   if (z.rank === 1) {
     const second = Math.max(0, ...zones.filter((x) => x.rank !== 1).map(zoneScore));
@@ -95,7 +210,13 @@ export function localWhy(z: Zone, zones: Zone[], nDates: number): Why | null {
   else if (nDates > 1) parts.push(`находки только на этой дате из ${nDates} (без бонуса повторяемости)`);
   const p = parts.join('; ');
   text.push(p.charAt(0).toUpperCase() + p.slice(1) + '.');
+  if (st && st.agreement > 1) text.push(`Согласие моделей повышает балл в ${f2(st.agreement)} раза (согласие, не проверка на месте).`);
+  if (st && st.date_penalty !== 1 && (st.mode === 'sub' || st.date_penalty < 1))
+    text.push(
+      `Дата ненадёжна (дымка/блик, облака или мало воды) — балл снижен штрафом ${st.mode === 'sub' ? `−${f1(st.date_penalty)}` : `×${f2(st.date_penalty)}`}.`,
+    );
   return {
+    ...(st ? { base_score: base, score_terms: st.terms, score_mode: st.mode } : {}),
     formula: FORMULA,
     formula_text: FORMULA_TEXT,
     score,

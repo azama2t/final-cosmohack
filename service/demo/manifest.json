@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generated": "2026-09-25T04:08:45+00:00",
+ "generated": "2026-09-25T06:39:51+00:00",
  "kind": "demo",
  "index": {
   "name": "доля наблюдаемой воды с признаками мусора",
@@ -8,7 +8,13 @@
   "h3_res": 8,
   "formula": "flagged_water_px / observed_water_px",
   "note": "индекс по снимку, не масса пластика",
-  "flagged": "пиксели prob ≥ порога на наблюдаемой воде после постобработки (компоненты ≥ 2 px, не касаются облаков/суши в буфере 1 px, не ближе 5 px к облаку/тени, не тень облака — L28)",
+  "flagged": "пиксели prob ≥ порога на наблюдаемой воде после постобработки (компоненты ≥ 2 px, не касаются облаков/суши в буфере 1 px, не ближе 5 px к облаку/тени, не тень облака — L28; без объектов-артефактов: шов/граница яркости, кильватер, судно — L37, detections.geojson properties.artifact)",
+  "artifacts": {
+   "ship": "у яркой малой цели (судно, платформа, буй, островок; B8 ≥ 0.06 и B2,B3,B4 ≥ 0.04, ≤ 150 px) — ≥ 50 % пикселей в ≤ 3 px",
+   "wake": "прямая узкая полоса (кильватер): у яркой цели и ≥ 500 м, или ≥ 1 км без цели",
+   "seam": "прямая линия по резкой границе яркости воды (шов детекторов / край мутного шлейфа) или ≥ 1,5 км вдоль трека S2"
+  },
+  "zone_score": "score = flagged_water_px × mean_prob × (1 + 0.5 × (repeat_dates − 1)) × (1 + 1 × confirmed_share) × (0.5 при дымке/блике)",
   "min_observed_frac": 0.5
  },
  "models": {
@@ -26,398 +32,256 @@
  },
  "regions": [
   {
-   "id": "honduras",
-   "name": "Гондурасский залив (Омоа – Пуэрто-Кортес – устье Мотагуа)",
-   "name_en": "Gulf of Honduras (Omoa / Puerto Cortes / Motagua mouth)",
-   "country": "Гондурас",
-   "tile": "16PCC",
+   "id": "nile",
+   "name": "Дельта Нила (устье Розетты)",
+   "name_en": "Nile Delta (Rosetta mouth), Egypt",
+   "country": "Египет",
+   "tile": "36RTV",
    "center": [
-    -88.220111,
-    15.800046
+    30.379688,
+    31.484904
    ],
    "bounds": [
-    -88.337553,
-    15.686044,
-    -88.102668,
-    15.914048
+    30.244659,
+    31.369391,
+    30.514717,
+    31.600418
    ],
    "zoom": 11,
-   "default_date": "2025-12-28",
+   "default_date": "2026-01-05",
    "summary": {
-    "latest_date": "2025-12-28",
+    "latest_date": "2026-01-05",
     "model": "mdd",
     "haze": false,
-    "index_permille": 0.0729,
-    "n_detections": 31,
-    "total_debris_area_m2": 37700.0
+    "index_permille": 0.2986,
+    "n_detections": 41,
+    "total_debris_area_m2": 138300.0
    },
    "dates": [
     {
-     "date": "2025-01-30",
-     "scene_id": "S2C_MSIL2A_20250130T161541_R140_T16PCC_20250130T190910",
+     "date": "2025-11-11",
+     "scene_id": "S2C_MSIL2A_20251111T084221_R064_T36RTV_20251111T121910",
      "source": "planetary-computer",
-     "cloud_frac": 0.008,
+     "cloud_frac": 0.0017,
      "bounds": [
-      -88.337553,
-      15.686044,
-      -88.102668,
-      15.914048
+      30.244659,
+      31.369391,
+      30.514717,
+      31.600418
      ],
-     "rgb": "honduras/2025-01-30/rgb.png",
-     "thumb": "honduras/2025-01-30/thumb.jpg",
+     "rgb": "nile/2025-11-11/rgb.png",
+     "thumb": "nile/2025-11-11/thumb.jpg",
      "models": [
       "lgbm",
       "mdd"
      ],
-     "drift": "honduras/2025-01-30/drift.json",
+     "drift": "nile/2025-11-11/drift.json",
      "quality": {
       "glint_or_haze": false,
       "haze": false,
       "note": ""
      },
      "n_confirmed": {
-      "lgbm": 5,
-      "mdd": 8
+      "lgbm": 1,
+      "mdd": 0
      }
     },
     {
-     "date": "2025-12-28",
-     "scene_id": "S2A_MSIL2A_20251228T161721_R140_T16PCC_20251228T202011",
+     "date": "2026-01-05",
+     "scene_id": "S2B_MSIL2A_20260105T084239_R064_T36RTV_20260105T123702",
      "source": "planetary-computer",
-     "cloud_frac": 0.0601,
+     "cloud_frac": 0.0,
      "bounds": [
-      -88.337553,
-      15.686044,
-      -88.102668,
-      15.914048
+      30.244659,
+      31.369391,
+      30.514717,
+      31.600418
      ],
-     "rgb": "honduras/2025-12-28/rgb.png",
-     "thumb": "honduras/2025-12-28/thumb.jpg",
+     "rgb": "nile/2026-01-05/rgb.png",
+     "thumb": "nile/2026-01-05/thumb.jpg",
      "models": [
       "lgbm",
       "mdd"
      ],
-     "drift": "honduras/2025-12-28/drift.json",
+     "drift": "nile/2026-01-05/drift.json",
      "quality": {
       "glint_or_haze": false,
       "haze": false,
       "note": ""
      },
      "n_confirmed": {
-      "lgbm": 17,
-      "mdd": 17
+      "lgbm": 38,
+      "mdd": 28
      }
     }
    ]
   },
   {
-   "id": "durban",
-   "name": "Дурбан",
-   "name_en": "Durban, South Africa",
-   "country": "ЮАР",
-   "tile": "36JUN",
+   "id": "guanabara",
+   "name": "Залив Гуанабара (Рио-де-Жанейро)",
+   "name_en": "Guanabara Bay, Rio de Janeiro",
+   "country": "Бразилия",
+   "tile": "23KPQ",
    "center": [
-    31.175059,
-    -29.782913
+    -43.14975,
+    -22.819959
    ],
    "bounds": [
-    30.958242,
-    -29.945,
-    31.391876,
-    -29.620825
+    -43.273417,
+    -22.934629,
+    -43.026083,
+    -22.705289
    ],
-   "zoom": 10,
-   "default_date": "2026-05-04",
+   "zoom": 11,
+   "default_date": "2026-07-16",
    "summary": {
-    "latest_date": "2026-05-04",
+    "latest_date": "2026-07-16",
     "model": "mdd",
     "haze": false,
-    "index_permille": 0.0006,
-    "n_detections": 1,
-    "total_debris_area_m2": 200.0
+    "index_permille": 0.2374,
+    "n_detections": 9,
+    "total_debris_area_m2": 75300.0
    },
    "dates": [
     {
-     "date": "2025-09-26",
-     "scene_id": "S2A_MSIL2A_20250926T074031_R092_T36JUN_20250926T110619",
+     "date": "2025-06-26",
+     "scene_id": "S2C_MSIL2A_20250626T130311_R095_T23KPQ_20250626T172059",
      "source": "planetary-computer",
-     "cloud_frac": 0.001,
+     "cloud_frac": 0.0002,
      "bounds": [
-      30.958242,
-      -29.945,
-      31.221421,
-      -29.714976
+      -43.273417,
+      -22.934629,
+      -43.026083,
+      -22.705289
      ],
-     "rgb": "durban/2025-09-26/rgb.png",
-     "thumb": "durban/2025-09-26/thumb.jpg",
+     "rgb": "guanabara/2025-06-26/rgb.png",
+     "thumb": "guanabara/2025-06-26/thumb.jpg",
      "models": [
       "lgbm",
       "mdd"
      ],
-     "drift": "durban/2025-09-26/drift.json",
+     "drift": "guanabara/2025-06-26/drift.json",
      "quality": {
       "glint_or_haze": false,
       "haze": false,
       "note": ""
      },
      "n_confirmed": {
-      "lgbm": 0,
-      "mdd": 0
+      "lgbm": 1,
+      "mdd": 1
      }
     },
     {
-     "date": "2026-05-04",
-     "scene_id": "S2A_MSIL2A_20260504T074021_R092_T36JUN_20260504T132359",
+     "date": "2026-07-16",
+     "scene_id": "S2B_MSIL2A_20260716T130249_R095_T23KPQ_20260716T162506",
+     "source": "planetary-computer",
+     "cloud_frac": 0.0003,
+     "bounds": [
+      -43.273417,
+      -22.934629,
+      -43.026083,
+      -22.705289
+     ],
+     "rgb": "guanabara/2026-07-16/rgb.png",
+     "thumb": "guanabara/2026-07-16/thumb.jpg",
+     "models": [
+      "lgbm",
+      "mdd"
+     ],
+     "drift": "guanabara/2026-07-16/drift.json",
+     "quality": {
+      "glint_or_haze": false,
+      "haze": false,
+      "note": ""
+     },
+     "n_confirmed": {
+      "lgbm": 1,
+      "mdd": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "mumbai",
+   "name": "Мумбаи (устье Ульхаса, крики Васаи и Малад)",
+   "name_en": "Mumbai (Ulhas / Vasai Creek), India",
+   "country": "Индия",
+   "tile": "43QBB",
+   "center": [
+    72.779919,
+    19.200027
+   ],
+   "bounds": [
+    72.659206,
+    19.085621,
+    72.900632,
+    19.314433
+   ],
+   "zoom": 11,
+   "default_date": "2026-01-01",
+   "summary": {
+    "latest_date": "2026-01-01",
+    "model": "mdd",
+    "haze": false,
+    "index_permille": 0.149,
+    "n_detections": 12,
+    "total_debris_area_m2": 47700.0
+   },
+   "dates": [
+    {
+     "date": "2025-01-31",
+     "scene_id": "S2C_MSIL2A_20250131T054121_R005_T43QBB_20250131T124701",
      "source": "planetary-computer",
      "cloud_frac": 0.0001,
      "bounds": [
-      30.958242,
-      -29.945,
-      31.221421,
-      -29.714976
+      72.659206,
+      19.085621,
+      72.900632,
+      19.314433
      ],
-     "rgb": "durban/2026-05-04/rgb.png",
-     "thumb": "durban/2026-05-04/thumb.jpg",
+     "rgb": "mumbai/2025-01-31/rgb.png",
+     "thumb": "mumbai/2025-01-31/thumb.jpg",
      "models": [
       "lgbm",
       "mdd"
      ],
-     "drift": "durban/2026-05-04/drift.json",
-     "quality": {
-      "glint_or_haze": false,
-      "haze": false,
-      "note": ""
-     },
-     "n_confirmed": {
-      "lgbm": 0,
-      "mdd": 0
-     }
-    }
-   ]
-  },
-  {
-   "id": "manila",
-   "name": "Манильский залив",
-   "name_en": "Manila Bay, Philippines",
-   "country": "Филиппины",
-   "tile": "51PTS",
-   "center": [
-    120.819828,
-    14.599823
-   ],
-   "bounds": [
-    120.702351,
-    14.485386,
-    120.937304,
-    14.714259
-   ],
-   "zoom": 11,
-   "default_date": "2025-01-06",
-   "summary": {
-    "latest_date": "2025-01-06",
-    "model": "mdd",
-    "haze": false,
-    "index_permille": 0.0185,
-    "n_detections": 17,
-    "total_debris_area_m2": 11500.0
-   },
-   "dates": [
-    {
-     "date": "2025-01-06",
-     "scene_id": "S2B_MSIL2A_20250106T022009_R003_T51PTS_20250106T041630",
-     "source": "planetary-computer",
-     "cloud_frac": 0.0026,
-     "bounds": [
-      120.702351,
-      14.485386,
-      120.937304,
-      14.714259
-     ],
-     "rgb": "manila/2025-01-06/rgb.png",
-     "thumb": "manila/2025-01-06/thumb.jpg",
-     "models": [
-      "lgbm",
-      "mdd"
-     ],
-     "drift": "manila/2025-01-06/drift.json",
-     "quality": {
-      "glint_or_haze": false,
-      "haze": false,
-      "note": ""
-     },
-     "n_confirmed": {
-      "lgbm": 2,
-      "mdd": 1
-     }
-    },
-    {
-     "date": "2025-12-27",
-     "scene_id": "S2C_MSIL2A_20251227T022121_R003_T51PTS_20251227T053810",
-     "source": "planetary-computer",
-     "cloud_frac": 0.0038,
-     "bounds": [
-      120.702351,
-      14.485386,
-      120.937304,
-      14.714259
-     ],
-     "rgb": "manila/2025-12-27/rgb.png",
-     "thumb": "manila/2025-12-27/thumb.jpg",
-     "models": [
-      "lgbm",
-      "mdd"
-     ],
-     "drift": "manila/2025-12-27/drift.json",
+     "drift": "mumbai/2025-01-31/drift.json",
      "quality": {
       "glint_or_haze": false,
       "haze": true,
-      "note": "дымка/блик — находки могут быть завышены (медиана B8 воды 0.0088)"
+      "note": "дымка/блик — находки могут быть завышены (медиана B8 воды 0.0186)"
      },
      "n_confirmed": {
-      "lgbm": 4,
-      "mdd": 5
-     }
-    }
-   ]
-  },
-  {
-   "id": "bali",
-   "name": "Бали (пролив Бадунг)",
-   "name_en": "Bali (Badung Strait), Indonesia",
-   "country": "Индонезия",
-   "tile": "50LLR",
-   "center": [
-    115.350028,
-    -8.829906
-   ],
-   "bounds": [
-    115.235529,
-    -8.943511,
-    115.464527,
-    -8.716301
-   ],
-   "zoom": 11,
-   "default_date": "2026-07-05",
-   "summary": {
-    "latest_date": "2026-07-05",
-    "model": "mdd",
-    "haze": false,
-    "index_permille": 0.0003,
-    "n_detections": 1,
-    "total_debris_area_m2": 200.0
-   },
-   "dates": [
-    {
-     "date": "2025-07-20",
-     "scene_id": "S2C_MSIL2A_20250720T021631_R003_T50LLR_20250720T061715",
-     "source": "planetary-computer",
-     "cloud_frac": 0.0337,
-     "bounds": [
-      115.235529,
-      -8.943511,
-      115.464527,
-      -8.716301
-     ],
-     "rgb": "bali/2025-07-20/rgb.png",
-     "thumb": "bali/2025-07-20/thumb.jpg",
-     "models": [
-      "lgbm",
-      "mdd"
-     ],
-     "drift": "bali/2025-07-20/drift.json",
-     "quality": {
-      "glint_or_haze": false,
-      "haze": false,
-      "note": ""
-     },
-     "n_confirmed": {
-      "lgbm": 1,
+      "lgbm": 5,
       "mdd": 1
      }
     },
     {
-     "date": "2026-07-05",
-     "scene_id": "S2C_MSIL2A_20260705T021531_R003_T50LLR_20260705T062607",
+     "date": "2026-01-01",
+     "scene_id": "S2B_MSIL2A_20260101T054139_R005_T43QBB_20260101T074000",
      "source": "planetary-computer",
-     "cloud_frac": 0.0418,
+     "cloud_frac": 0.0001,
      "bounds": [
-      115.235529,
-      -8.943511,
-      115.464527,
-      -8.716301
+      72.659206,
+      19.085621,
+      72.900632,
+      19.314433
      ],
-     "rgb": "bali/2026-07-05/rgb.png",
-     "thumb": "bali/2026-07-05/thumb.jpg",
+     "rgb": "mumbai/2026-01-01/rgb.png",
+     "thumb": "mumbai/2026-01-01/thumb.jpg",
      "models": [
       "lgbm",
       "mdd"
      ],
-     "drift": "bali/2026-07-05/drift.json",
+     "drift": "mumbai/2026-01-01/drift.json",
      "quality": {
       "glint_or_haze": false,
       "haze": false,
       "note": ""
      },
      "n_confirmed": {
-      "lgbm": 0,
-      "mdd": 0
-     }
-    }
-   ]
-  },
-  {
-   "id": "santo_domingo",
-   "name": "Санто-Доминго (устье Осамы)",
-   "name_en": "Santo Domingo (Ozama mouth)",
-   "country": "Доминиканская Республика",
-   "tile": "19QDA",
-   "center": [
-    -69.819981,
-    18.399833
-   ],
-   "bounds": [
-    -69.939213,
-    18.286191,
-    -69.70075,
-    18.513476
-   ],
-   "zoom": 11,
-   "default_date": "2025-10-18",
-   "summary": {
-    "latest_date": "2025-10-18",
-    "model": "mdd",
-    "haze": false,
-    "index_permille": 0.075,
-    "n_detections": 11,
-    "total_debris_area_m2": 32300.0
-   },
-   "dates": [
-    {
-     "date": "2025-10-18",
-     "scene_id": "S2A_MSIL2A_20251018T151731_R125_T19QDA_20251018T175307",
-     "source": "planetary-computer",
-     "cloud_frac": 0.1879,
-     "bounds": [
-      -69.939213,
-      18.286191,
-      -69.70075,
-      18.513476
-     ],
-     "rgb": "santo_domingo/2025-10-18/rgb.png",
-     "thumb": "santo_domingo/2025-10-18/thumb.jpg",
-     "models": [
-      "lgbm",
-      "mdd"
-     ],
-     "drift": "santo_domingo/2025-10-18/drift.json",
-     "quality": {
-      "glint_or_haze": false,
-      "haze": false,
-      "note": ""
-     },
-     "n_confirmed": {
-      "lgbm": 1,
-      "mdd": 1
+      "lgbm": 8,
+      "mdd": 5
      }
     }
    ]
@@ -450,5 +314,5 @@
    "license": "Apache-2.0"
   }
  ],
- "demo_note": "подмножество service/data: 5 регион(а), ≤ 2 даты, PNG ≤ 1024 px"
+ "demo_note": "подмножество service/data: 3 регион(а), ≤ 2 даты, PNG ≤ 1024 px"
 }

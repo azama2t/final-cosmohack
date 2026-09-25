@@ -1421,3 +1421,109 @@ button.verdict-alt:hover {
 .rank-row.unreliable .rank-n .q-dot {
   margin: 0;
 }
+
+/* ---- L38: excluded artifacts (seam / wake / ship) and score_terms ---- */
+.sw-art {
+  display: inline-block;
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.25px solid #9ea8b4;
+  background: rgba(158, 168, 180, 0.1);
+  vertical-align: -2px;
+  margin-right: 4px;
+}
+.lg-arts {
+  align-items: flex-start;
+  padding-top: 6px;
+  border-top: 1px solid var(--line);
+}
+.lg-arts .switch {
+  margin-top: 1px;
+}
+.lg-arts-label {
+  cursor: pointer;
+  line-height: 1.3;
+}
+.lg-arts-label small {
+  display: block;
+  font-size: 10.5px;
+  margin-top: 2px;
+}
+.kpi-hint.kpi-arts {
+  color: #aab4c0;
+}
+.tooltip.tt-art .tt-title {
+  color: #c3ccd6;
+}
+.dc-art {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: -4px 0 12px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: rgba(158, 168, 180, 0.08);
+  border: 1px dashed rgba(158, 168, 180, 0.5);
+  color: var(--text-2);
+  font-size: 12.5px;
+  line-height: 1.35;
+}
+.dc-art .sw-art {
+  margin-top: 1px;
+}
+.zc-art {
+  margin: 8px 0 0;
+}
+.det-card.is-artifact .dc-crop canvas {
+  filter: saturate(0.6);
+}
+.why-terms {
+  margin: -4px 0 12px;
+}
+.why-eq.why-eq2 {
+  margin-bottom: 8px;
+}
+.wt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11.5px;
+}
+.wt-table th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--faint);
+  font-size: 10.5px;
+  padding: 2px 4px;
+  border-bottom: 1px solid var(--line);
+}
+.wt-table td {
+  padding: 3px 4px;
+  color: var(--text-2);
+  border-bottom: 1px solid var(--line);
+}
+.wt-table td.mono {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.wt-table th:nth-child(n + 2) {
+  text-align: right;
+}
+.wt-table td.up {
+  color: #ffecc4;
+}
+.wt-table td.down {
+  color: #f6ad55;
+}
+.wt-table tr.total td {
+  font-weight: 700;
+  color: var(--text);
+  border-bottom: 0;
+}
+.wt-note {
+  display: block;
+  font-size: 10px;
+  color: var(--faint);
+}

@@ -289,3 +289,116 @@ def test_shadow_component_dark_ring_no_nir_excess():
     # a dark patch on bright (non-shadowed) water is not called shadow (ring not darkened)
     b2[10:50, 10:50], b3[10:50, 10:50], b4[10:50, 10:50] = 0.03, 0.02, 0.01
     assert shadow_components(lab, 2, b2, b3, b4, b8, water).tolist() == [False, False]
+
+
+# ---------------------------------------------------------------- L37: linear artefacts and ships
+from scipy import ndimage as _ndi  # noqa: E402
+
+from macroplastic.grid.artifacts import classify, component_shape  # noqa: E402
+
+
+def _bands(shape, vis=0.03, b8=0.004):
+    return {k: np.full(shape, vis, np.float32) for k in ("B2", "B3", "B4")} | {"B8": np.full(shape, b8, np.float32)}
+
+
+def _label(mask):
+    lab, n = _ndi.label(mask, structure=np.ones((3, 3), bool))
+    return lab.astype(np.int32), n
+
+
+def test_artifact_straight_long_line_is_wake_and_track_line_is_seam():
+    m = np.zeros((300, 300), bool)
+    for i in range(150):  # diagonal NE-SW (azimuth +45 deg), 3 px thick, ~2.1 km
+        m[50 + i, 200 - i:203 - i] = True
+    m[40:260, 20:22] = True  # vertical line 2.2 km, 2 px: along the S2 track
+    lab, n = _label(m)
+    art, f = classify(lab, n, _bands(m.shape), np.ones(m.shape, bool))
+    k_diag, k_vert = lab[50, 200] - 1, lab[100, 20] - 1
+    assert art[k_diag] == "wake" and art[k_vert] == "seam"
+    assert abs(f["azimuth_deg"][k_diag] - 45) < 3 and abs(f["azimuth_deg"][k_vert]) < 2
+    assert f["dev"][k_diag] < 0.02
+
+
+def test_artifact_short_line_on_brightness_step_is_seam_but_not_in_uniform_water():
+    shape = (120, 120)
+    m = np.zeros(shape, bool)
+    m[30:55, 60] = True  # 250 m, 1 px, right on the boundary column
+    lab, n = _label(m)
+    b = _bands(shape)
+    for k in ("B2", "B3", "B4"):
+        b[k][:, 61:] = 0.045  # brighter water mass to the east: step ~ 0.5 x median
+    art, f = classify(lab, n, b, np.ones(shape, bool))
+    assert art == ["seam"] and f["step_rel"][0] > 0.3 and f["step_cons"][0] > 0.9
+    art2, f2 = classify(lab, n, _bands(shape), np.ones(shape, bool))
+    assert art2 == [None] and f2["step_rel"][0] < 0.01
+    # a bright filament ON the step is material, not an edge response: brighter than both sides
+    for k in ("B2", "B3", "B4"):
+        b[k][30:55, 60] = 0.09
+    art3, _ = classify(lab, n, b, np.ones(shape, bool))
+    assert art3 == [None]
+
+
+def test_artifact_curved_filament_untouched():
+    shape = (300, 300)
+    m = np.zeros(shape, bool)
+    for c in range(20, 280):  # 2.6 km long wavy filament, 2 px thick, amplitude 12 px
+        r = int(150 + 12 * np.sin(c / 25.0))
+        m[r:r + 2, c] = True
+    lab, n = _label(m)
+    assert n == 1
+    art, f = classify(lab, n, _bands(shape), np.ones(shape, bool))
+    assert art == [None] and f["dev"][0] > 0.08 and f["length_px"][0] > 200
+
+
+def test_artifact_bright_ship_and_ship_with_tail():
+    shape = (200, 200)
+    b = _bands(shape)
+    water = np.ones(shape, bool)
+    for r0, c0 in ((50, 50), (150, 40)):  # two ships 3x6 px: bright in all visible bands and NIR
+        for k in ("B2", "B3", "B4"):
+            b[k][r0:r0 + 3, c0:c0 + 6] = 0.15
+        b["B8"][r0:r0 + 3, c0:c0 + 6] = 0.2
+    m = np.zeros(shape, bool)
+    m[53:55, 52:56] = True        # 8 px fringe right next to ship 1
+    m[151, 47:127] = True         # 800 m straight tail starting at ship 2
+    m[100:104, 150:154] = True    # 16 px blob far away from both ships
+    lab, n = _label(m)
+    art, f = classify(lab, n, b, water)
+    assert art[lab[53, 53] - 1] == "ship"
+    assert art[lab[151, 80] - 1] == "wake"
+    assert art[lab[101, 151] - 1] is None
+    # bright shore (big bright area, ring not water) is not a ship
+    b2 = _bands(shape)
+    for k in ("B2", "B3", "B4", "B8"):
+        b2[k][:, :30] = 0.2
+    w2 = np.ones(shape, bool)
+    w2[:, :30] = False
+    m2 = np.zeros(shape, bool)
+    m2[60:62, 31:35] = True
+    lab2, n2 = _label(m2)
+    art2, _ = classify(lab2, n2, b2, w2)
+    assert art2 == [None]
+
+
+def test_component_shape_basic():
+    m = np.zeros((50, 50), bool)
+    m[10, 5:45] = True  # horizontal 40 px line
+    lab, n = _label(m)
+    f = component_shape(lab, n)
+    assert f["length_px"][0] == 40 and f["thick_px"][0] == 1
+    assert abs(abs(f["azimuth_deg"][0]) - 90) < 1e-6
+
+
+def test_zone_score_agreement_and_haze_penalty():
+    stats = [{"h3": h, "flagged_water_px": px, "share_permille": 1.0, "mean_prob": 0.5, "n_detections": 1,
+              "lon": 0.0, "lat": 0.0, "observed_frac": 1.0} for h, px in (("a", 100), ("b", 80))]
+    z = rank_zones(stats, n_dates=1)
+    assert [x["h3"] for x in z] == ["a", "b"]
+    z = rank_zones(stats, n_dates=1, confirmed_px={"b": 80})  # b fully confirmed: 80*0.5*2 = 80 > 50
+    assert [x["h3"] for x in z] == ["b", "a"] and z[0]["score"] == 80.0
+    t = z[0]["score_terms"]
+    assert t["agreement"]["value"] == 2.0 and t["date_penalty"]["value"] == 1.0 and t["score"] == 80.0
+    assert "согласие 2.00" in z[0]["why"]
+    zh = rank_zones(stats, n_dates=1, unreliable=True)
+    assert zh[0]["score"] == 25.0 and zh[0]["score_terms"]["date_penalty"]["value"] == 0.5
+    assert zone_score(10, 0.5, 1, 0.5, True) == 10 * 0.5 * 1.5 * 0.5
