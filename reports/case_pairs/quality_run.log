@@ -1,0 +1,30 @@
+S4:DOORS3:T14: reject glint cov=1.0 water=1.0 cloud=0.0 n_det=1 pmax=0.7135 16.9 s
+S4:DOORS3:T20: reject glint cov=1.0 water=0.9577 cloud=0.0423 n_det=0 pmax=0.6069 11.9 s
+S4:DOORS3:T21: reject glint cov=1.0 water=1.0 cloud=0.0 n_det=1 pmax=0.9729 10.0 s
+S4:DOORS3:T30: accept  cov=1.0 water=1.0 cloud=0.0 n_det=0 pmax=0.0008 12.6 s
+S4:DOORS3:T31: accept  cov=1.0 water=1.0 cloud=0.0 n_det=0 pmax=0.0 6.4 s
+S4:DOORS3:T32: accept  cov=1.0 water=1.0 cloud=0.0 n_det=0 pmax=0.0007 7.0 s
+S4:DOORS3:T11: accept  cov=1.0 water=1.0 cloud=0.0 n_det=0 pmax=0.0004 9.0 s
+S4:DOORS3:T12: reject glint cov=1.0 water=1.0 cloud=0.0 n_det=0 pmax=0.0225 16.7 s
+S4:DOORS3:T13: reject glint cov=1.0 water=1.0 cloud=0.0 n_det=0 pmax=0.0117 6.7 s
+S4:DOORS3:T15: reject glint cov=1.0 water=1.0 cloud=0.0 n_det=0 pmax=0.0094 8.0 s
+S4:DOORS3:T16: reject glint cov=1.0 water=1.0 cloud=0.0 n_det=0 pmax=0.0001 11.6 s
+S4:DOORS3:T17: accept  cov=1.0 water=1.0 cloud=0.0 n_det=0 pmax=0.0 6.1 s
+S4:DOORS3:T3: reject glint cov=1.0 water=0.0 cloud=0.0 n_det=0 pmax=None 9.6 s
+S4:DOORS3:T4: reject glint cov=1.0 water=0.0 cloud=0.0 n_det=0 pmax=None 6.2 s
+S4:DOORS3:T5: reject glint cov=1.0 water=0.0 cloud=0.0 n_det=0 pmax=None 5.7 s
+S3:HE460_MarLitter_transect01: reject cloud cov=1.0 water=0.2622 cloud=0.7353 n_det=0 pmax=0.2316 7.6 s
+S4:DOORS3:T18: accept  cov=1.0 water=1.0 cloud=0.0 n_det=0 pmax=0.0 9.5 s
+S4:DOORS3:T19: accept  cov=1.0 water=1.0 cloud=0.0 n_det=0 pmax=0.0 7.0 s
+S4:DOORS3:T1: accept  cov=1.0 water=1.0 cloud=0.0 n_det=0 pmax=0.0 10.0 s
+S4:DOORS3:T2: accept  cov=1.0 water=1.0 cloud=0.0 n_det=0 pmax=0.0 6.5 s
+S3:HE460_MarLitter_transect03: accept  cov=1.0 water=1.0 cloud=0.0 n_det=3 pmax=0.8936 15.6 s
+S4:DOORS3:T25: accept  cov=1.0 water=1.0 cloud=0.0 n_det=0 pmax=0.0 9.5 s
+S4:DOORS3:T33: accept  cov=1.0 water=1.0 cloud=0.0 n_det=None pmax=None 3.5 s
+S3:HE419_MarLitter_transect32: reject insufficient_coverage cov=0.5695 water=0.0 cloud=1.0 n_det=None pmax=None 1.4 s
+S4:DOORS3:T6: reject cloud(qa_suspect:red_sr<0.03) cov=1.0 water=0.0 cloud=1.0 n_det=None pmax=None 1.3 s
+S4:DOORS3:T7: reject cloud(qa_suspect:red_sr<0.03) cov=1.0 water=0.0 cloud=1.0 n_det=None pmax=None 1.0 s
+S4:DOORS3:T8: reject cloud(qa_suspect:red_sr<0.03) cov=1.0 water=0.0 cloud=1.0 n_det=None pmax=None 1.3 s
+S3:HE419_MarLitter_transect30: reject cloud(qa_suspect:red_sr<0.03) cov=0.8068 water=0.0 cloud=1.0 n_det=None pmax=None 1.7 s
+S3:HE419_MarLitter_transect29: reject cloud cov=1.0 water=0.0 cloud=1.0 n_det=None pmax=None 1.9 s
+{'reject': 17, 'accept': 12} {'glint': 10, 'cloud(qa_suspect:red_sr<0.03)': 4, 'cloud': 2, 'insufficient_coverage': 1}
