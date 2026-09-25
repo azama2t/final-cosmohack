@@ -1,0 +1,188 @@
+mados_scene,sensor,mados_n_crops,mados_splits,marida_scene,tile,date,marida_split,kind,n_mados_crops_overlapping,overlap_px_sum,min_votes,max_votes,use_in_training
+Scene_0,S2B,9,train:9,,,,,none,0,0,0,0,yes
+Scene_1,S2A,57,train:57,S2_4-9-16_16PCC,16PCC,2016-09-04,train,same_acquisition,56,1902320,92,10900,yes (same acquisition as MARIDA train)
+Scene_2,S2B,4,train:4,,,,,none,0,0,0,0,yes
+Scene_3,S2A,42,train:42,S2_13-12-18_16PCC,16PCC,2018-12-13,train,same_acquisition,42,1215696,238,9840,yes (same acquisition as MARIDA train)
+Scene_4,S2B,33,train:33,S2_18-9-20_16PCC,16PCC,2020-09-18,val,same_acquisition,2,35832,137,1053,NO (same acquisition as MARIDA val)
+Scene_4,S2B,33,train:33,S2_18-9-20_16PDC,16PDC,2020-09-18,train,same_acquisition,33,1076976,28,11123,NO (same acquisition as MARIDA val)
+Scene_4,S2B,33,train:33,S2_28-9-20_16PDC,16PDC,2020-09-28,val,same_place_other_date,2,73536,8,11,NO (same acquisition as MARIDA val)
+Scene_5,S2B,25,train:25,,,,,none,0,0,0,0,yes
+Scene_6,S2A,39,train:39,,,,,none,0,0,0,0,yes
+Scene_7,S2B,32,train:32,,,,,none,0,0,0,0,yes
+Scene_8,S2A,6,train:6,,,,,none,0,0,0,0,yes
+Scene_9,S2A,61,train:61,S2_12-1-19_16PEC,16PEC,2019-01-12,train,same_acquisition,61,2389648,64,12625,yes (same acquisition as MARIDA train)
+Scene_10,S2A,10,train:10,S2_15-9-20_18QYF,18QYF,2020-09-15,train,same_acquisition,10,278800,1799,5351,yes (same acquisition as MARIDA train)
+Scene_11,S2B,21,train:21,,,,,none,0,0,0,0,yes
+Scene_12,S2A,68,train:68,S2_18-9-20_16PCC,16PCC,2020-09-18,val,same_place_other_date,3,140520,10,52,"yes (same place as MARIDA val, other date; excluded only in variant excl_place_val)"
+Scene_12,S2A,68,train:68,S2_23-9-20_16PCC,16PCC,2020-09-23,train,same_acquisition,68,2281396,42,10841,"yes (same place as MARIDA val, other date; excluded only in variant excl_place_val)"
+Scene_13,S2B,4,train:4,S2_20-10-20_18QYF,18QYF,2020-10-20,train,same_acquisition,4,113504,1573,7405,yes (same acquisition as MARIDA train)
+Scene_14,S2B,3,train:3,S2_6-12-17_48MYU,48MYU,2017-12-06,train,same_acquisition,3,114776,1317,11455,yes (same acquisition as MARIDA train)
+Scene_15,S2B,7,train:7,S2_29-11-20_18QYF,18QYF,2020-11-29,train,same_acquisition,7,275264,2820,7522,yes (same acquisition as MARIDA train)
+Scene_16,S2A,22,train:22,S2_24-10-18_16PDC,16PDC,2018-10-24,train,same_acquisition,22,839524,110,10113,yes (same acquisition as MARIDA train)
+Scene_17,S2A,9,train:9,S2_11-1-19_19QDA,19QDA,2019-01-11,train,same_acquisition,9,196388,786,7094,yes (same acquisition as MARIDA train)
+Scene_18,S2B,18,train:18,S2_4-9-19_16PCC,16PCC,2019-09-04,train,same_acquisition,18,744960,149,12024,yes (same acquisition as MARIDA train)
+Scene_19,S2B,14,train:14,S2_24-4-19_36JUN,36JUN,2019-04-24,train,same_acquisition,14,601080,28,12102,yes (same acquisition as MARIDA train)
+Scene_20,S2A,8,train:8,S2_24-11-19_48PZC,48PZC,2019-11-24,train,same_acquisition,8,292248,1427,6444,yes (same acquisition as MARIDA train)
+Scene_21,S2A,3,train:3,S2_25-5-19_48MXU,48MXU,2019-05-25,train,same_acquisition,3,105312,1819,4446,yes (same acquisition as MARIDA train)
+Scene_22,S2A,9,train:9,S2_4-12-20_18QYF,18QYF,2020-12-04,train,same_acquisition,9,245440,1781,5980,yes (same acquisition as MARIDA train)
+Scene_23,S2A,6,train:6,S2_23-1-21_18QYF,18QYF,2021-01-23,train,same_acquisition,6,133936,704,6679,yes (same acquisition as MARIDA train)
+Scene_24,S2B,2,train:2,,,,,none,0,0,0,0,yes
+Scene_25,S2A,37,train:37,S2_3-11-18_16PDC,16PDC,2018-11-03,train,same_acquisition,37,1121164,197,8833,yes (same acquisition as MARIDA train)
+Scene_26,S2A,9,train:9,,,,,none,0,0,0,0,yes
+Scene_27,S2B,9,train:9,,,,,none,0,0,0,0,yes
+Scene_28,S2B,8,train:8,,,,,none,0,0,0,0,yes
+Scene_29,S2A,6,train:6,S2_1-12-19_48MYU,48MYU,2019-12-01,train,same_acquisition,6,240160,400,10230,yes (same acquisition as MARIDA train)
+Scene_30,S2B,10,train:10,,,,,none,0,0,0,0,yes
+Scene_31,S2A,31,train:31,,,,,none,0,0,0,0,yes
+Scene_32,S2A,13,train:13,S2_8-3-18_16PEC,16PEC,2018-03-08,train,same_acquisition,13,335744,64,8759,yes (same acquisition as MARIDA train)
+Scene_32,S2A,13,train:13,S2_8-3-18_16QED,16QED,2018-03-08,train,same_acquisition,1,21004,828,828,yes (same acquisition as MARIDA train)
+Scene_33,S2A,10,train:10,,,,,none,0,0,0,0,yes
+Scene_34,S2B,5,train:5,,,,,none,0,0,0,0,yes
+Scene_35,S2B,2,train:2,,,,,none,0,0,0,0,yes
+Scene_36,S2A,27,train:27,S2_26-2-18_16PCC,16PCC,2018-02-26,train,same_acquisition,27,877596,168,10449,yes (same acquisition as MARIDA train)
+Scene_37,S2A,8,train:8,,,,,none,0,0,0,0,yes
+Scene_38,S2A,32,train:32,,,,,none,0,0,0,0,yes
+Scene_39,S2B,10,train:10,,,,,none,0,0,0,0,yes
+Scene_40,S2B,8,train:8,,,,,none,0,0,0,0,yes
+Scene_41,S2A,13,train:13,,,,,none,0,0,0,0,yes
+Scene_42,S2A,13,train:13,S2_15-10-20_18QYF,18QYF,2020-10-15,train,same_acquisition,13,417564,59,9717,yes (same acquisition as MARIDA train)
+Scene_43,S2A,4,train:4,S2_19-3-20_18QYF,18QYF,2020-03-19,train,same_acquisition,4,132228,973,8679,yes (same acquisition as MARIDA train)
+Scene_44,S2A,4,train:4,S2_14-12-20_18QYF,18QYF,2020-12-14,train,same_acquisition,4,230400,13,12541,yes (same acquisition as MARIDA train)
+Scene_45,S2A,5,train:5,,,,,none,0,0,0,0,yes
+Scene_46,S2A,7,train:7,,,,,none,0,0,0,0,yes
+Scene_47,S2A,5,train:5,,,,,none,0,0,0,0,yes
+Scene_48,S2A,4,train:4,,,,,none,0,0,0,0,yes
+Scene_49,S2B,6,train:6,,,,,none,0,0,0,0,yes
+Scene_50,S2A,37,train:37,S2_24-8-20_16PCC,16PCC,2020-08-24,train,same_acquisition,37,1241128,95,11528,yes (same acquisition as MARIDA train)
+Scene_51,S2A,53,train:53,S2_9-10-17_16PEC,16PEC,2017-10-09,train,same_acquisition,53,2006924,14,11331,yes (same acquisition as MARIDA train)
+Scene_52,S2B,6,train:6,,,,,none,0,0,0,0,yes
+Scene_53,S2B,10,train:10,,,,,none,0,0,0,0,yes
+Scene_54,S2A,30,train:30,S2_12-1-17_16PCC,16PCC,2017-01-12,train,same_acquisition,30,1160000,16,12618,yes (same acquisition as MARIDA train)
+Scene_54,S2A,30,train:30,S2_12-1-17_16PCC,16PCC,2017-01-12,train,same_place_other_date,1,14100,8,8,yes (same acquisition as MARIDA train)
+Scene_55,S2A,11,train:11,,,,,none,0,0,0,0,yes
+Scene_56,S2B,12,train:12,,,,,none,0,0,0,0,yes
+Scene_57,S2B,7,train:7,,,,,none,0,0,0,0,yes
+Scene_58,S2A,12,train:12,,,,,none,0,0,0,0,yes
+Scene_59,S2A,8,train:8,,,,,none,0,0,0,0,yes
+Scene_60,S2B,2,train:2,,,,,none,0,0,0,0,yes
+Scene_61,S2B,4,train:4,,,,,none,0,0,0,0,yes
+Scene_62,S2A,16,train:16,,,,,none,0,0,0,0,yes
+Scene_63,S2B,4,train:4,,,,,none,0,0,0,0,yes
+Scene_64,S2A,5,train:5,,,,,none,0,0,0,0,yes
+Scene_65,S2B,3,train:3,,,,,none,0,0,0,0,yes
+Scene_66,S2A,4,train:4,S2_3-1-21_18QYF,18QYF,2021-01-03,train,same_acquisition,4,162944,514,6270,yes (same acquisition as MARIDA train)
+Scene_67,S2A,6,train:6,S2_22-3-20_18QWF,18QWF,2020-03-22,train,same_acquisition,6,208112,1693,4946,yes (same acquisition as MARIDA train)
+Scene_68,S2B,12,train:12,,,,,none,0,0,0,0,yes
+Scene_69,S2A,18,train:18,,,,,none,0,0,0,0,yes
+Scene_70,S2A,12,train:12,,,,,none,0,0,0,0,yes
+Scene_71,S2B,18,train:18,S2_7-10-18_52SDD,52SDD,2018-10-07,train,same_acquisition,18,758144,191,11191,yes (same acquisition as MARIDA train)
+Scene_72,S2B,15,train:15,,,,,none,0,0,0,0,yes
+Scene_73,S2A,12,train:12,S2_29-11-15_16PEC,16PEC,2015-11-29,train,same_acquisition,12,381424,178,11109,yes (same acquisition as MARIDA train)
+Scene_74,S2B,1,train:1,,,,,none,0,0,0,0,yes
+Scene_75,S2A,19,train:19,,,,,none,0,0,0,0,yes
+Scene_76,S2A,4,train:4,,,,,none,0,0,0,0,yes
+Scene_77,S2A,25,train:25,S2_30-8-17_16PCC,16PCC,2017-08-30,train,same_acquisition,25,1045376,91,11672,yes (same acquisition as MARIDA train)
+Scene_78,S2B,7,train:7,,,,,none,0,0,0,0,yes
+Scene_79,S2A,9,train:9,,,,,none,0,0,0,0,yes
+Scene_80,S2A,10,train:10,S2_20-4-18_30VWH,30VWH,2018-04-20,train,same_acquisition,10,305760,377,7328,yes (same acquisition as MARIDA train)
+Scene_81,S2B,30,train:30,,,,,none,0,0,0,0,yes
+Scene_82,S2A,2,train:2,,,,,none,0,0,0,0,yes
+Scene_83,S2A,22,train:22,S2_8-3-18_16PEC,16PEC,2018-03-08,train,same_acquisition,2,34528,2646,3990,yes (same acquisition as MARIDA train)
+Scene_83,S2A,22,train:22,S2_8-3-18_16QED,16QED,2018-03-08,train,same_acquisition,22,683360,328,11538,yes (same acquisition as MARIDA train)
+Scene_84,S2A,30,train:30,S2_21-2-17_16PCC,16PCC,2017-02-21,train,same_acquisition,30,1108260,23,12244,yes (same acquisition as MARIDA train)
+Scene_85,S2A,2,train:2,,,,,none,0,0,0,0,yes
+Scene_86,S2A,5,train:5,,,,,none,0,0,0,0,yes
+Scene_87,S2A,11,train:11,,,,,none,0,0,0,0,yes
+Scene_88,S2B,31,train:31,,,,,none,0,0,0,0,yes
+Scene_89,S2B,9,train:9,,,,,none,0,0,0,0,yes
+Scene_90,S2A,27,train:27,S2_6-12-18_48MXU,48MXU,2018-12-06,train,same_acquisition,27,1063192,175,11647,yes (same acquisition as MARIDA train)
+Scene_91,S2B,7,train:7,,,,,none,0,0,0,0,yes
+Scene_92,S2A,6,train:6,,,,,none,0,0,0,0,yes
+Scene_93,S2B,6,train:6,,,,,none,0,0,0,0,yes
+Scene_94,S2B,19,train:19,,,,,none,0,0,0,0,yes
+Scene_95,S2A,36,train:36,,,,,none,0,0,0,0,yes
+Scene_96,S2B,7,val:7,,,,,none,0,0,0,0,yes
+Scene_97,S2B,15,val:15,,,,,none,0,0,0,0,yes
+Scene_98,S2B,27,val:27,S2_18-1-18_48PZC,48PZC,2018-01-18,val,same_acquisition,27,846512,377,11031,NO (same acquisition as MARIDA val)
+Scene_99,S2B,94,val:94,S2_18-9-20_16PCC,16PCC,2020-09-18,val,same_acquisition,94,3199252,8,11612,NO (same acquisition as MARIDA val)
+Scene_99,S2B,94,val:94,S2_18-9-20_16PDC,16PDC,2020-09-18,train,same_acquisition,3,49160,1291,5690,NO (same acquisition as MARIDA val)
+Scene_99,S2B,94,val:94,S2_23-9-20_16PCC,16PCC,2020-09-23,train,same_place_other_date,5,151078,10,43,NO (same acquisition as MARIDA val)
+Scene_99,S2B,94,val:94,S2_28-9-20_16PCC,16PCC,2020-09-28,test,same_place_other_date,1,53760,11,11,NO (same acquisition as MARIDA val)
+Scene_100,S2A,13,val:13,,,,,none,0,0,0,0,yes
+Scene_101,S2B,6,val:6,S2_29-8-17_51RVQ,51RVQ,2017-08-29,val,same_acquisition,6,175268,1940,7860,NO (same acquisition as MARIDA val)
+Scene_102,S2B,2,val:2,,,,,none,0,0,0,0,yes
+Scene_103,S2A,2,val:2,,,,,none,0,0,0,0,yes
+Scene_104,S2A,12,val:12,,,,,none,0,0,0,0,yes
+Scene_105,S2B,13,val:13,,,,,none,0,0,0,0,yes
+Scene_106,S2A,8,val:8,,,,,none,0,0,0,0,yes
+Scene_107,S2B,8,val:8,,,,,none,0,0,0,0,yes
+Scene_108,S2B,41,val:41,S2_19-9-18_16PCC,16PCC,2018-09-19,val,same_acquisition,41,1576688,140,10473,NO (same acquisition as MARIDA val)
+Scene_109,S2A,32,val:32,,,,,none,0,0,0,0,yes
+Scene_110,S2A,12,val:12,,,,,none,0,0,0,0,yes
+Scene_111,S2B,11,val:11,,,,,none,0,0,0,0,yes
+Scene_112,S2B,30,val:30,,,,,none,0,0,0,0,yes
+Scene_113,S2B,14,val:14,S2_29-12-20_18QYF,18QYF,2020-12-29,val,same_acquisition,14,597948,859,6091,NO (same acquisition as MARIDA val)
+Scene_114,S2B,29,val:29,S2_18-9-20_16PDC,16PDC,2020-09-18,train,same_place_other_date,3,59320,12,21,NO (same acquisition as MARIDA val)
+Scene_114,S2B,29,val:29,S2_28-9-20_16PDC,16PDC,2020-09-28,val,same_acquisition,29,1036736,206,8915,NO (same acquisition as MARIDA val)
+Scene_115,S2B,16,val:16,,,,,none,0,0,0,0,yes
+Scene_116,S2A,7,val:7,,,,,none,0,0,0,0,yes
+Scene_117,S2B,14,val:14,S2_21-2-18_16PCC,16PCC,2018-02-21,val,same_acquisition,14,345856,937,5930,NO (same acquisition as MARIDA val)
+Scene_118,S2A,23,val:23,,,,,none,0,0,0,0,yes
+Scene_119,S2B,1,val:1,S2_24-3-20_18QYF,18QYF,2020-03-24,val,same_acquisition,1,35040,3263,3283,NO (same acquisition as MARIDA val)
+Scene_120,S2A,43,val:43,S2_12-1-17_16PEC,16PEC,2017-01-12,val,same_acquisition,43,1425316,65,10230,NO (same acquisition as MARIDA val)
+Scene_121,S2B,24,val:24,,,,,none,0,0,0,0,yes
+Scene_122,S2B,3,val:3,,,,,none,0,0,0,0,yes
+Scene_123,S2A,5,val:5,,,,,none,0,0,0,0,yes
+Scene_124,S2B,4,val:4,,,,,none,0,0,0,0,yes
+Scene_125,S2B,21,val:21,S2_7-3-20_18QYG,18QYG,2020-03-07,val,same_acquisition,21,941760,149,11318,NO (same acquisition as MARIDA val)
+Scene_126,S2A,3,val:3,,,,,none,0,0,0,0,yes
+Scene_127,S2B,65,val:65,S2_11-6-18_16PCC,16PCC,2018-06-11,val,same_acquisition,65,2434336,167,11736,NO (same acquisition as MARIDA val)
+Scene_128,S2B,7,val:7,S2_14-3-20_18QYF,18QYF,2020-03-14,val,same_acquisition,7,220000,867,4952,NO (same acquisition as MARIDA val)
+Scene_129,S2B,3,val:3,,,,,none,0,0,0,0,yes
+Scene_130,S2A,5,val:5,,,,,none,0,0,0,0,yes
+Scene_131,S2A,22,val:22,,,,,none,0,0,0,0,yes
+Scene_132,S2A,19,test:19,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)
+Scene_133,S2A,3,test:3,S2_17-7-16_51PTS,51PTS,2016-07-17,test,same_acquisition,3,111312,94,11089,NO (MADOS test split: never used in L13)
+Scene_134,S2A,14,test:14,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)
+Scene_135,S2A,38,test:38,S2_14-9-18_16PCC,16PCC,2018-09-14,test,same_acquisition,38,1379072,166,8217,NO (MADOS test split: never used in L13)
+Scene_135,S2A,38,test:38,S2_19-9-18_16PCC,16PCC,2018-09-19,val,same_place_other_date,1,32398,28,28,NO (MADOS test split: never used in L13)
+Scene_136,S2A,30,test:30,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)
+Scene_137,S2A,6,test:6,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)
+Scene_138,S2B,3,test:3,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)
+Scene_139,S2A,30,test:30,S2_16-2-18_16PEC,16PEC,2018-02-16,test,same_acquisition,30,910000,346,8652,NO (MADOS test split: never used in L13)
+Scene_140,S2B,21,test:21,S2_14-11-18_48PZC,48PZC,2018-11-14,test,same_acquisition,21,640896,278,8415,NO (MADOS test split: never used in L13)
+Scene_141,S2B,48,test:48,S2_30-8-18_16PCC,16PCC,2018-08-30,test,same_acquisition,48,1929552,78,10849,NO (MADOS test split: never used in L13)
+Scene_142,S2B,19,test:19,S2_27-1-19_16QED,16QED,2019-01-27,test,same_acquisition,19,668544,152,8462,NO (MADOS test split: never used in L13)
+Scene_143,S2B,2,test:2,S2_22-12-20_18QYF,18QYF,2020-12-22,test,same_acquisition,2,61440,521,5754,NO (MADOS test split: never used in L13)
+Scene_144,S2A,13,test:13,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)
+Scene_145,S2B,26,test:26,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)
+Scene_146,S2A,8,test:8,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)
+Scene_147,S2A,4,test:4,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)
+Scene_148,S2A,8,test:8,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)
+Scene_149,S2B,2,test:2,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)
+Scene_150,S2A,15,test:15,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)
+Scene_151,S2B,7,test:7,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)
+Scene_152,S2A,28,test:28,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)
+Scene_153,S2B,14,test:14,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)
+Scene_154,S2A,15,test:15,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)
+Scene_155,S2B,7,test:7,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)
+Scene_156,S2A,17,test:17,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)
+Scene_157,S2A,45,test:45,S2_3-11-16_16PDC,16PDC,2016-11-03,test,same_acquisition,45,1705416,116,11170,NO (MADOS test split: never used in L13)
+Scene_158,S2B,4,test:4,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)
+Scene_159,S2A,10,test:10,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)
+Scene_160,S2B,37,test:37,S2_4-3-18_50LLR,50LLR,2018-03-04,test,same_acquisition,37,1074792,140,11038,NO (MADOS test split: never used in L13)
+Scene_161,S2A,14,test:14,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)
+Scene_162,S2A,26,test:26,S2_12-12-20_16PCC,16PCC,2020-12-12,test,same_acquisition,26,920448,33,8063,NO (MADOS test split: never used in L13)
+Scene_163,S2B,35,test:35,S2_27-1-19_16PCC,16PCC,2019-01-27,test,same_acquisition,34,1088608,209,9513,NO (MADOS test split: never used in L13)
+Scene_164,S2A,20,test:20,S2_15-11-20_16PCC,16PCC,2020-11-15,test,same_acquisition,20,617632,69,11780,NO (MADOS test split: never used in L13)
+Scene_165,S2B,9,test:9,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)
+Scene_166,S2B,16,test:16,S2_18-9-20_16PCC,16PCC,2020-09-18,val,same_place_other_date,1,55200,19,20,NO (MADOS test split: never used in L13)
+Scene_166,S2B,16,test:16,S2_23-9-20_16PCC,16PCC,2020-09-23,train,same_place_other_date,1,22560,8,8,NO (MADOS test split: never used in L13)
+Scene_166,S2B,16,test:16,S2_28-9-20_16PCC,16PCC,2020-09-28,test,same_acquisition,16,718208,23,10932,NO (MADOS test split: never used in L13)
+Scene_167,S2A,13,test:13,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)
+Scene_168,S2B,13,test:13,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)
+Scene_169,S2B,31,test:31,S2_19-9-18_16PDC,16PDC,2018-09-19,test,same_acquisition,31,1143168,44,8915,NO (MADOS test split: never used in L13)
+Scene_170,S2B,3,test:3,S2_18-5-19_51PTS,51PTS,2019-05-18,test,same_acquisition,3,156960,34,7677,NO (MADOS test split: never used in L13)
+Scene_171,S2A,27,test:27,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)
+Scene_172,S2B,21,test:21,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)
+Scene_173,S2A,7,test:7,,,,,none,0,0,0,0,NO (MADOS test split: never used in L13)

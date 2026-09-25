@@ -1,0 +1,8 @@
+{
+ "val": {"f1_md": 0.8935, "iou_md": 0.8075, "precision_md": 0.8821, "recall_md": 0.9051, "threshold": 0.34},
+ "noise": {"n_seeds": 3, "f1_mean": 0.8909, "f1_std": 0.0061},
+ "stack": {"method": "weighted mean 0.4*P_unet + 0.6*P_lgbm (UNet bin_r34_ema, L3 weights/lgbm); weight and threshold picked on val; f1/iou = mean over 3 UNet seeds, threshold of seed 0 (seeds: 0.57/0.48/0.42)",
+           "f1_md": 0.9161, "iou_md": 0.8452, "threshold": 0.57, "gain_vs_lgbm": 0.0102},
+ "decision": "rejected",
+ "reason": "Validation only (SPEC 1.7). Best UNet (bin_r34_ema, 3 seeds) F1 MD val 0.8909 +- 0.0061 < L3 0.9059 +- 0.0025. Acceptance bar = 0.9059 + max(0.01, 2*max(0.0025, 0.0061)) = 0.9181. UNet alone 0.8909 and stack 0.9161 +- 0.0015 (gain +0.0102 vs L3 3-seed mean, +0.0083 vs the shipped L3 model 0.9078) are both below the bar. Base UNet (no EMA) 0.8887 +- 0.0108, multiclass UNet 0.8631 +- 0.0073, their stacks 0.9149 / 0.9099 - also below. Weights stay in weights_exp/unet; nothing copied to weights/unet."
+}

@@ -63,3 +63,11 @@
 | `scripts/run_lgbm_live.py` | наша модель (`weights/lgbm_live`, гармонизация water_median) по папкам сцен, CPU | вручную |
 | `scripts/list_live.py`, `scripts/diagnose_live.py`, `scripts/rebuild_live_masks.py` | таблица сцен; где сидят срабатывания (берег/мутность/SCL/блик); пересчёт масок воды | диагностика |
 | `tests/test_live_harmonize.py` | сетевой тест гармонизации масштаба/смещения S2 L2A до/после 2022 | pytest |
+| `src/macroplastic/models/unet/` | предиктор UNet (smp resnet34, 19 каналов), тайлинг с перекрытием; в реестре как 'unet' (в финал не принят) | эксперименты |
+| `scripts/train_unet.py`, `configs/unet.yaml` | UNet: cache / train (GPU-очередь) / evalpred / stack | эксперименты |
+| `reports/l4_unet.{md,json}`, `reports/experiments_l4.md` | итог UNet и стека (отклонено) | отчёт |
+| `src/macroplastic/data/mados.py` | загрузчик MADOS в формат MARIDA (11 каналов, 10 м, схема классов MARIDA) | train_lgbm_mados |
+| `scripts/train_lgbm_mados.py` | дедупликация MADOS↔MARIDA по содержимому (overlap), обучение LightGBM на MARIDA/MADOS/обоих | вручную |
+| `reports/mados_overlap.csv`, `reports/mados_overlap_with_marida_test.csv` | пересечения сцен MADOS с MARIDA train/val/test | отчёт |
+| `reports/l13_mados.{md,json}`, `reports/experiments_l13.md` | итог MARIDA+MADOS (принято) | отчёт |
+| `weights/lgbm/` | **итоговая модель: LightGBM на MARIDA train + MADOS** (без сцен val MARIDA), порог 0.63; прежняя (только MARIDA) — `weights_exp/lgbm/l3_final_backup/` | inference.py |

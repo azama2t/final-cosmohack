@@ -41,6 +41,7 @@ _REGISTRY: dict[str, Callable[..., Predictor]] = {}
 LAZY_MODULES = {
     "lgbm": "macroplastic.models.lgbm_predict",
     "mdd": "macroplastic.models.mdd_predict",
+    "unet": "macroplastic.models.unet.model",
 }
 
 

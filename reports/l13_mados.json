@@ -1,0 +1,22 @@
+{
+ "val_f1": {
+  "marida_only": 0.9059,
+  "mados_only": 0.9206,
+  "combined": 0.9228
+ },
+ "val_f1_std": {"marida_only": 0.0025, "mados_only": 0.0018, "combined": 0.0005},
+ "val_iou": {"marida_only": 0.8280, "mados_only": 0.8528, "combined": 0.8567},
+ "configs": {
+  "marida_only": "L3 binary+win, MARIDA train (same code, reproduces weights/lgbm to 4 decimals), seeds 0/1/2",
+  "mados_only": "b_noextra: MADOS train+val minus 13 scenes = same acquisition as MARIDA val; MADOS-only classes (oil spill, oil platform, jellyfish, sea snot) -> unlabelled; seeds 0/1/2",
+  "combined": "c_noextra_exclplace: MARIDA train + MADOS train+val minus 16 scenes (13 same acquisition as MARIDA val + 3 same place as MARIDA val, other date); MADOS-only classes -> unlabelled; seeds 0/1/2"
+ },
+ "val_f1_with_madosonly_classes_as_negatives": {"mados_only": 0.9054, "combined": 0.9153},
+ "baseline_f1": 0.906,
+ "noise_std": 0.0025,
+ "acceptance_threshold": 0.916,
+ "paired_scene_bootstrap_combined_minus_marida_seed0": {"mean": 0.0168, "std": 0.0092, "ci95": [0.0073, 0.0392]},
+ "final_weights": "weights_exp/mados/final (combined c_noextra_exclplace, seed 0: F1 0.9226, IoU 0.8564, threshold 0.63)",
+ "decision": "ACCEPTED: combined (MARIDA train + MADOS)",
+ "reason": "combined F1 MD val 0.9228 +- 0.0005 >= 0.906 + max(0.01, 2*0.0025) = 0.916 (also mados_only 0.9206 passes; combined chosen as best and most stable). Gain comes from fewer false positives (FP 104 -> 74 at the same recall). Only with MADOS-only classes mapped to unlabelled (strict MARIDA scheme); with them as negatives combined = 0.9153 < 0.916 (not accepted). Caveats: 12 configurations were compared on the same val (selection optimism ~0.001-0.002, well below the margin); on L2A (Durban, 46 MD px) raw recall 24/46 vs 33/46 for weights/lgbm, with harmonize water_median(SCL) 36/46 vs 27/46."
+}

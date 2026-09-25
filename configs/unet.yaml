@@ -1,0 +1,31 @@
+# Lane L4: smp UNet for Marine Debris (MARIDA). Used by scripts/train_unet.py.
+# Selection ONLY on the official val split (SPEC 1.7). Test is never read.
+# Output: weights_exp/unet/<exp>_s<seed>/{model.pt, meta.json}; val probabilities out/l4_unet/val_prob_<exp>_s<seed>.npy
+exp: bin_r34
+seed: 0
+task: binary            # binary: MD (class 1) vs every other labelled class (2..15); class 0 = ignore
+model:
+  arch: Unet
+  encoder: resnet34
+  encoder_weights: imagenet   # smp adapts the first conv to 19 input channels
+  classes: 2
+inputs: bands+indices    # 11 bands + 8 indices (FDI, FAI, NDVI, NDWI, NDMI, SI, BSI, NRD) = 19 channels
+norm:                    # per-channel clip to train percentiles, then (x - mean) / std on train valid pixels
+  p_lo: 0.1
+  p_hi: 99.9
+  sample_px: 3000000
+train:
+  epochs: 60
+  batch: 16
+  lr: 0.0005
+  weight_decay: 0.0001
+  warmup_epochs: 2
+  md_patch_oversample: 3   # patches containing MD appear this many times per epoch
+  augment: d4              # random flips + 90-degree rotations (dihedral group), per sample
+  eval_every: 10           # val curve for the log only; the reported model is the LAST epoch (no early stopping)
+  max_minutes: 20          # hard stop (GPU queue budget)
+  ema: 0                   # >0 (e.g. 0.998): evaluate and save an EMA of the weights instead of the raw last weights
+loss:
+  ce_md_weight: 5.0        # CE class weights [other=1, MD=ce_md_weight], ignore = unlabelled
+  dice_weight: 1.0         # + soft Dice on MD over labelled pixels of the batch
+threshold_grid: [0.02, 0.98, 0.01]
