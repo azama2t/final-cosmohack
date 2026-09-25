@@ -4,10 +4,22 @@ import type { Zone } from '../types';
 import type { Why } from './api';
 
 export const REPEAT_BONUS = 0.5;
-export const FORMULA = 'score = flagged_water_px × mean_prob × (1 + 0.5 × (repeat_dates − 1))';
-export const FORMULA_TEXT =
+export const FORMULA_LEGACY = 'score = flagged_water_px × mean_prob × (1 + 0.5 × (repeat_dates − 1))';
+export const FORMULA_LEGACY_TEXT =
   'Приоритет обследования = число пикселей воды с признаками мусора в ячейке × средняя уверенность модели на этих пикселях × ' +
   'бонус повторяемости (1 + 0.5 за каждую дополнительную дату, на которой в ячейке тоже были находки). ' +
+  'Ранжируются только ячейки с наблюдаемой водой ≥ 50 %.';
+/** L39: current build formula (service/place.py FORMULA / FORMULA_TEXT), used when zones.json has score_terms */
+export const DATE_PENALTY = 0.5;
+export const FORMULA =
+  'score = base × agreement × date_penalty;  base = flagged_water_px × mean_prob × (1 + 0.5 × (repeat_dates − 1));  ' +
+  'agreement = 1 + confirmed_share;  date_penalty = 0.5 при дымке/блике, иначе 1';
+export const FORMULA_TEXT =
+  'Приоритет обследования = базовый балл × множитель согласия моделей × штраф за ненадёжную дату. ' +
+  'Базовый балл = число пикселей воды с признаками мусора в ячейке × средняя уверенность модели на этих пикселях × ' +
+  'бонус повторяемости (1 + 0.5 за каждую дополнительную надёжную дату — без дымки/блика — с находками в ячейке). ' +
+  'Множитель согласия = 1 + доля пикселей ячейки, подтверждённых второй моделью (от 1 до 2). ' +
+  'Штраф даты = 0.5 при дымке/блике на снимке, иначе 1. Артефакты (шов детекторов, кильватер, судно) в балл не входят. ' +
   'Ранжируются только ячейки с наблюдаемой водой ≥ 50 %.';
 export const PRIORITY_NOTE = 'приоритет обследования — ранжирование по снимку, не измеренная опасность';
 
@@ -97,7 +109,7 @@ const ALIAS: Record<string, string> = Object.fromEntries(
 export const TERM_LABELS: Record<string, string> = {
   base: 'базовый балл (пиксели × уверенность × повторяемость)',
   agreement: 'множитель согласия моделей',
-  date_penalty: 'штраф за ненадёжную дату',
+  date_penalty: 'штраф за ненадёжную дату (×0.5 при дымке/блике)',
 };
 const num = (v: unknown): number | null => {
   if (typeof v === 'number' && Number.isFinite(v)) return v;
@@ -196,7 +208,7 @@ export function localWhy(z: Zone, zones: Zone[], nDates: number): Why | null {
     const second = Math.max(0, ...zones.filter((x) => x.rank !== 1).map(zoneScore));
     text.push(
       second > 0
-        ? `Первая в списке: ${head} — в ${f1(score / second)} раза больше, чем у второй зоны (${f1(second)}).`
+        ? `Первая в списке: ${head} — в ${score / second < 1.1 ? f2(score / second) : f1(score / second)} раза больше, чем у второй зоны (${f1(second)}).`
         : `Единственная зона на эту дату: ${head}.`,
     );
   } else {
@@ -213,12 +225,13 @@ export function localWhy(z: Zone, zones: Zone[], nDates: number): Why | null {
   if (st && st.agreement > 1) text.push(`Согласие моделей повышает балл в ${f2(st.agreement)} раза (согласие, не проверка на месте).`);
   if (st && st.date_penalty !== 1 && (st.mode === 'sub' || st.date_penalty < 1))
     text.push(
-      `Дата ненадёжна (дымка/блик, облака или мало воды) — балл снижен штрафом ${st.mode === 'sub' ? `−${f1(st.date_penalty)}` : `×${f2(st.date_penalty)}`}.`,
+      `Дата ненадёжна (дымка/блик на снимке) — балл снижен штрафом ${st.mode === 'sub' ? `−${f1(st.date_penalty)}` : `×${f2(st.date_penalty)}`}` +
+        ` (итог = базовый балл × (1 + доля подтверждённых) × ${f1(DATE_PENALTY)}); находки могут быть завышены.`,
     );
   return {
     ...(st ? { base_score: base, score_terms: st.terms, score_mode: st.mode } : {}),
-    formula: FORMULA,
-    formula_text: FORMULA_TEXT,
+    formula: st ? FORMULA : FORMULA_LEGACY,
+    formula_text: st ? FORMULA_TEXT : FORMULA_LEGACY_TEXT,
     score,
     text: text.join(' '),
     terms: [

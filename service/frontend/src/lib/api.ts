@@ -84,7 +84,8 @@ export interface Why {
   score: number;
   terms: WhyTerm[];
   text: string;
-  /** L38 (zones.json score_terms present): base score = product of terms[]; score = final */
+  /** L38b (zones.json score_terms present): base_score = product of the first three terms[] (px × prob × repeat);
+   *  product of all terms[] (incl. agreement, date_penalty) = score (final) */
   base_score?: number;
   score_terms?: import('./priority').ScoreTerm[];
   score_mode?: 'mult' | 'sub';

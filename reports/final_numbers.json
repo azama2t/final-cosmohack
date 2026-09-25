@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-25T09:57:18+03:00",
+ "generated": "2026-09-25T10:01:29+03:00",
  "note": "генерируется scripts/final_numbers.py; руками не править; null = ещё не посчитано",
  "l3_lgbm": {
   "available": true,
@@ -1706,7 +1706,8 @@
    "detection_card.jpg",
    "drift.jpg",
    "overview.jpg",
-   "region.jpg"
+   "region.jpg",
+   "zone_card.jpg"
   ]
  },
  "models": {

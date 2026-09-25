@@ -11,7 +11,9 @@ Usage (from repo root):
 
 Numbers are never typed by hand: every figure below is a placeholder filled from final_numbers.json
 (missing -> "—"). When final_numbers.json is regenerated (new main model, test computed), rerun this script.
-Screenshots: reports/screens/iter8 (if present), else iter7, else docs/img; crops are made in memory.
+Screenshots: reports/screens/final (L39 fresh set, scripts/screenshots.py --extra --l20), else docs/img; crops are
+made in memory. Demo region = best_region of reports/screens/final/result.json (same bestRegion rule as the tour),
+fallback: the same rule recomputed from service/data/manifest.json.
 Slide rules: the title states the conclusion; one big number; <= 25 words of body; captions on images; >= 18 pt body.
 """
 from __future__ import annotations
@@ -32,7 +34,12 @@ from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
 from pptx.util import Emu, Inches, Pt
 
 ROOT = Path(__file__).resolve().parents[1]
-SCREEN_DIRS = [ROOT / "reports" / "screens" / "iter8", ROOT / "reports" / "screens" / "iter7"]
+SHOTS = ROOT / "reports" / "screens" / "final"
+SCREEN_DIRS = [SHOTS]
+# README copies of the same frames (docs/img, JPG): fallback when reports/screens/final is absent (clean clone)
+IMG_FALLBACK = {"01_overview_1920.png": "overview.jpg", "02_region.png": "region.jpg",
+                "03_detection_card.png": "detection_card.jpg", "09_drift.png": "drift.jpg",
+                "21_zone_card.png": "zone_card.jpg"}
 
 BG = RGBColor(0x0A, 0x11, 0x1F)
 PANEL = RGBColor(0x12, 0x1C, 0x2E)
@@ -91,6 +98,75 @@ def plural(n, one, few, many):
 
 def pct(v):
     return DASH if v is None else f"{100 * float(v):.0f}\u00a0%"
+
+
+def _flagged(d: dict | None) -> bool:
+    q = (d or {}).get("quality") or {}
+    return bool(q.get("haze") or q.get("glint_or_haze"))
+
+
+def best_region_manifest() -> tuple[str | None, str | None]:
+    """Python copy of bestRegion() (service/frontend/src/lib/data.ts): latest scene reliable (no haze/glint,
+    clouds <= 50 %) and with detections, prefer drift, then most detections / drift / index.
+    Returns (best id, id for the drift frame or None)."""
+    mp = ROOT / "service" / "data" / "manifest.json"
+    if not mp.exists():
+        return None, None
+    regs = json.loads(mp.read_text(encoding="utf-8")).get("regions") or []
+
+    def summ(r):
+        return r.get("summary") or {}
+
+    def sdate(r):
+        ld = summ(r).get("latest_date")
+        return next((d for d in r["dates"] if d.get("date") == ld), r["dates"][-1] if r["dates"] else None)
+
+    def det(r):
+        return summ(r).get("n_detections") or 0
+
+    def idx(r):
+        v = summ(r).get("index_permille")
+        return -1 if v is None else v
+
+    def drift(r):
+        return 1 if (sdate(r) or {}).get("drift") else 0
+
+    clean = [r for r in regs if r.get("dates") and sdate(r) is not None and not _flagged(sdate(r))
+             and ((sdate(r) or {}).get("cloud_frac") or 0) <= 0.5 and not summ(r).get("haze")
+             and sdate(r) is r["dates"][-1] and det(r) > 0]
+    pool = [r for r in clean if drift(r)] or clean
+    if pool:
+        best = sorted(pool, key=lambda r: (-det(r), -drift(r), -idx(r)))[0]
+    else:
+        best = sorted(regs, key=lambda r: (-det(r), -idx(r)))[0] if regs else None
+    if not best:
+        return None, None
+    return best.get("id"), (best.get("id") if drift(best) else None)
+
+
+def demo_region(fn: dict) -> dict:
+    """Region the demo tour opens (the deck, the speech and DEMO.md talk about the same one)."""
+    best = drift_id = None
+    res = SHOTS / "result.json"
+    if res.exists():
+        try:
+            r = json.loads(res.read_text(encoding="utf-8"))
+            best, drift_id = r.get("best_region"), r.get("drift_region")
+        except (OSError, ValueError):
+            pass
+    if not best:
+        best, drift_id = best_region_manifest()
+    regs = {r.get("id"): r for r in (g(fn, "service.regions", []) or [])}
+
+    def info(rid):
+        r = regs.get(rid) or {}
+        full = r.get("name") or (rid or DASH)
+        date = r.get("latest_date")
+        dd = f"{date[8:10]}.{date[5:7]}.{date[:4]}" if isinstance(date, str) and len(date) == 10 else DASH
+        return {"id": rid, "name": full, "short": full.split(" (")[0], "date": dd,
+                "n_det": r.get("n_detections"), "index": r.get("index_permille")}
+
+    return {"best": info(best), "drift": info(drift_id or best)}
 
 
 def numbers(fn: dict) -> dict:
@@ -188,6 +264,12 @@ def numbers(fn: dict) -> dict:
         "reh_lab": num(g(fn, "rehearsal.labelled_no_seasnot_f1")),
         "reh_human": "–".join(str(x) for x in (g(fn, "rehearsal.human_min", []) or [])) or DASH,
     }
+    dr = demo_region(fn)
+    N["demo_id"], N["demo_name"], N["demo_short"], N["demo_date"] = (dr["best"]["id"], dr["best"]["name"],
+                                                                    dr["best"]["short"], dr["best"]["date"])
+    N["demo_ndet"] = num(dr["best"]["n_det"], 0)
+    N["demo_index"] = num(dr["best"]["index"], 3)
+    N["drift_short"], N["drift_date"] = dr["drift"]["short"], dr["drift"]["date"]
     N["demo_regions_w"] = f"{N['demo_regions']} {plural(g(fn, 'service_demo.n_regions'), 'района', 'районов', 'районов')}"
     if N["test_computed"]:
         N["test_line"] = f"F1 на test MARIDA (посчитан один раз): {N['test_f1']}."
@@ -229,12 +311,13 @@ SPEECH = [
      "Покажу вживую. [Alt+Tab в браузер, пауза 2 с]"),
     (6, "1:50–2:20",
      "[Обзор уже на экране] {n_regions_txt}, {n_dates_txt}, справа рейтинг «где искать в первую очередь». "
-     "[клик: Манильский залив] Снимок Sentinel-2, кольца — найденные пятна. На живых снимках L2A основной слой — "
+     "[клик: {demo_short} в надёжном рейтинге] Снимок Sentinel-2 от {demo_date}, кольца — найденные пятна. На живых снимках L2A основной слой — "
      "открытая модель marinedebrisdetector, наша модель — второй слой. [клик по крупному пятну] Карточка находки: "
      "вырезка снимка, площадь помеченной области, уверенность модели."),
     (7, "2:20–2:45",
      "[Слои → Приоритет обследования → клик по зоне №1] Зоны — ответ на вопрос «куда плыть». Каждая объясняет, почему "
-     "она первая: пиксели с признаками, умноженные на уверенность и на повторяемость по датам. Двойное кольцо — "
+     "она первая: пиксели с признаками, умноженные на уверенность, повторяемость по датам и согласие моделей; снимок "
+     "с дымкой или бликом получает половину балла, а шов детекторов, кильватер и суда в балл не входят. Двойное кольцо — "
      "уверенная находка: пятно видят две разные модели в радиусе {agr_r} метров, таких {conf_total} по всем датам. Это согласие "
      "моделей, не проверка на месте."),
     (8, "2:45–3:05",
@@ -358,8 +441,8 @@ def find_shot(names):
             p = d / nm
             if p.exists():
                 return p
-    for nm in names:  # README images as the last resort
-        p = ROOT / "docs" / "img" / nm
+    for nm in names:  # README images (same frames, JPG) as the last resort
+        p = ROOT / "docs" / "img" / IMG_FALLBACK.get(nm, nm)
         if p.exists():
             return p
     return None
@@ -471,7 +554,7 @@ def build(fn: dict, only: int | None = None) -> Presentation:
         big_number(s, M, TOP + Inches(0.2), Inches(4.0), N["f1"],
                    f"F1 «мусор», val MARIDA\nпорог {N['thr']}; точность {N['prec_pct']}")
         cw, gap = Inches(2.65), Inches(0.2)
-        x0 = Inches(4.6)
+        x0 = Inches(4.4)  # L39: 3 cards end at the right margin (were 0.2" past it)
         card(s, x0, TOP, cw, Inches(2.2), f"{N['ci_lo']}–{N['ci_hi']}", "95 % интервал\nпо сценам val",
              tsize=24)
         card(s, x0 + cw + gap, TOP, cw, Inches(2.2), N["lro"],
@@ -496,23 +579,23 @@ def build(fn: dict, only: int | None = None) -> Presentation:
             [("Индекс по снимку,", CORAL, True), (" не килограммы", MUTED, False)],
         ], size=22, line_spacing=1.6)
         picture(s, Inches(7.3), TOP - Inches(0.1), Inches(5.43), Inches(4.35),
-                ["05_h3_2d.png"], "Манильский залив: индекс по ячейкам H3", crop=(336, 120, 1360, 1040))
+                ["05_h3_2d.png"], f"{N['demo_short']}: индекс по ячейкам H3", crop=(336, 120, 1360, 1040))
     slides.append(s5)
 
     def s6(s, n, t):
         header(s, n, t, f"{N['n_regions']} {plural(N['n_regions'], 'район', 'района', 'районов')}, {N['n_dates']} {plural(N['n_dates'], 'дата', 'даты', 'дат')}: карта показывает, где искать первым",
                "Живая карта")
         picture(s, M, TOP - Inches(0.35), Inches(7.75), Inches(4.9), ["01_overview_1920.png"],
-                "Обзор: рейтинг «где искать первым»")
+                f"Обзор: {N['n_regions']} {plural(N['n_regions'], 'район', 'района', 'районов')}, рейтинг «где искать первым»")
         picture(s, M + Inches(7.95), TOP - Inches(0.35), CW - Inches(7.95), Inches(4.9), ["03_detection_card.png"],
-                "Карточка находки", crop=(336, 70, 1180, 970))
+                f"Находка: {N['demo_short']}, {N['demo_date']}", crop=(336, 70, 1180, 970))
     slides.append(s6)
 
     def s7(s, n, t):
         header(s, n, t, "Зона №1 объясняет, почему она первая; двойное кольцо — видят обе модели",
                "Зоны обследования")
         picture(s, M, TOP - Inches(0.15), Inches(5.6), Inches(4.75), ["21_zone_card.png"],
-                "Зона №1: «почему это место первое»", crop=(336, 70, 1136, 900), left=True)
+                f"{N['demo_short']}, зона №1: «почему она первая»", crop=(336, 70, 1136, 900), left=True)
         big_number(s, Inches(5.5), TOP + Inches(0.1), Inches(7.2), N["conf_total"],
                    f"пятен видят обе модели в радиусе {N['agr_r']} м\n(на {N['conf_dates']} из {N['n_dates']} {plural(N['n_dates'], 'даты', 'дат', 'дат')})\n"
                    "Это согласие моделей, не проверка на месте", size=88)
@@ -522,7 +605,8 @@ def build(fn: dict, only: int | None = None) -> Presentation:
         header(s, n, t, f"Дрейф на {N['drift_h']} ч показывает, куда унесёт пятно — демонстрация без валидации",
                "Дрейф")
         picture(s, M, TOP - Inches(0.15), Inches(5.6), Inches(4.75), ["09_drift.png"],
-                "Манильский залив, T+36 ч", crop=(600, 115, 1450, 1040), left=True)
+                f"{N['drift_short']}: дрейф от пятен {N['drift_date']}, T+36 ч", crop=(620, 115, 1540, 1040),
+                left=True)
         big_number(s, Inches(5.5), TOP + Inches(0.1), Inches(7.2), N["drift_n"],
                    "снимков с прогнозом дрейфа\nOpenDrift + течения HYCOM + ветер GFS\n"
                    "облако — разброс ветрового сноса 1–3 %", size=88)
@@ -623,7 +707,7 @@ def speech_md(N: dict) -> str:
         "| Время | Действие | Соответствует DEMO.md §1 |",
         "|---|---|---|",
         "| 1:50 | Alt+Tab в браузер, обзор уже открыт (http://127.0.0.1:8000, F11) | 0:00–0:30 |",
-        "| 2:00 | Левая панель → Манильский залив → клик по крупному пятну | 0:30–1:10 |",
+        f"| 2:00 | Левая панель → {N['demo_short']} ({N['demo_date']}) → клик по крупному пятну | 0:30–1:10 |",
         "| 2:20 | Слои → Приоритет обследования → клик по зоне №1, блок «Почему это место первое» | 1:40–2:10 |",
         "| 2:45 | Слои → Дрейф 0→72 ч → ▶ | 2:10–2:50 |",
         "| 3:05 | Alt+Tab в презентацию, набрать 9 и Enter | — |",
@@ -696,9 +780,11 @@ def qa_items(N: dict) -> list:
      "Сетка одинакова для любых дат и районов, сравнение идёт ячейка к ячейке. Ячейка ≈ 0,7 км² — участок, который "
      "реально обследовать за один заход; пикселей в ней достаточно, чтобы доля не прыгала от одного пикселя."),
     ("Как выбираются зоны обследования и почему зона №1 первая?",
-     "Балл = пиксели воды с признаками × средняя уверенность модели × бонус повторяемости по датам. Карточка зоны "
-     "показывает это произведение и сравнение со следующими зонами текстом. Отдельно помечаем зоны с уверенными "
-     "находками — поэтому плашка «куда отправить» может указывать не на №1, а на подтверждённую зону."),
+     "Базовый балл = пиксели воды с признаками × средняя уверенность модели × бонус повторяемости по надёжным датам; "
+     "он умножается на (1 + доля пикселей, подтверждённых второй моделью) и на 0,5, если на снимке дымка или блик. "
+     "Шов детекторов, кильватер и суда отфильтрованы как артефакты и в балл не входят. Карточка зоны показывает все "
+     "множители и сравнение со следующими зонами; если №1 не подтверждена, плашка «куда отправить» называет и "
+     "лучшую подтверждённую зону."),
     # --- метод
     ("Почему LightGBM, а не UNet?",
      f"Пятна крошечные: медиана {N['md_med_px']} пикселя, около {N['md_single_pct']} % пятен — одиночные пиксели. "
