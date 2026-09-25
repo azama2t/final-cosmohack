@@ -1,0 +1,374 @@
+FRONTEND CONTRACTS v3 — кейс «Макропластик», финал КосмоХакатона (25–26.09.2026)
+Команда SAMARKAND. Для независимого (запасного) фронтенда. Бэкенд реализует ровно это.
+Версия контракта: 3.0 (25.09 17:15). Изменения — только добавлением полей, не переименованием.
+
+====================================================================
+0. КОРОТКО: ЧТО ДОЛЖЕН УМЕТЬ ФРОНТ (из постановки + критериев)
+====================================================================
+Веб-карта обязана показать (Постановка, раздел «веб-карта»):
+  [ ] исходный спутниковый снимок (сцена) + маски качества (облака/блики/nodata)
+  [ ] полевые наблюдения (точки/трансекты из CSV организаторов)
+  [ ] зоны детекции (полигоны) с морским фоном
+  [ ] для зоны: концентрация + ЕДИНИЦА (шт./км²) + РАЗМЕРНЫЙ ПРОФИЛЬ + НЕОПРЕДЕЛЁННОСТЬ (интервал)
+  [ ] площадь зоны — ОТДЕЛЬНО от концентрации (это разные величины!)
+  [ ] измерения (поле) и оценки модели визуально различимы (разная форма/обводка + подпись)
+  [ ] легенда
+  [ ] фильтры: по дате (диапазон) и по статусу
+  [ ] статусы: «Обнаружено», «Не обнаружено», «Недостаточно данных», «Исследовательская оценка»,
+      «Концентрация недоступна»
+  [ ] экспорт GeoJSON и CSV (того, что сейчас отфильтровано)
+  [ ] сохранить запрос и перезапустить сохранённый запрос
+  [ ] пустые/некорректные входы — понятное сообщение, а не белый экран
+  [ ] (желательно) реестр пар «наблюдение ↔ снимок» с причинами принятия/отказа
+Баллы за UI малы (О4 = 5, Т5 = 3 из 105), жюри: «алгоритмы и достоверность важнее оформления».
+Значит: честно, понятно, без лишнего текста, без лагов. Не выдумывать цифры.
+
+====================================================================
+1. ОБЩИЕ ПРАВИЛА
+====================================================================
+Base URL:          http://127.0.0.1:8000   (настраиваемо: ?api=http://host:port или .env VITE_API)
+Префикс:           /api/v3/
+Формат:            JSON, UTF-8. Гео — GeoJSON (RFC 7946), координаты [lon, lat], EPSG:4326.
+Даты:              "YYYY-MM-DD" (date), "YYYY-MM-DDTHH:MM:SSZ" (datetime, UTC).
+Числа:             null = неизвестно/неприменимо. НИКОГДА не рисовать null как 0.
+Единицы:           концентрация — "items/km2" (шт./км²); масса — "g/km2"; площадь — "km2";
+                   расстояние — "km"; сдвиг времени — "hours".
+CORS:              бэкенд отдаёт Access-Control-Allow-Origin: * (фронт можно держать на другом порту).
+Ошибки (всегда такой вид, HTTP 400/404/422/500/503):
+  { "error": { "code": "BAD_BBOX", "message": "Человеческий текст на русском", "details": {...} } }
+  Коды: BAD_BBOX, BAD_DATE, EMPTY_RESULT(не ошибка, см. ниже), NOT_FOUND, NO_SCENE,
+        MODEL_NOT_READY, INTERNAL.
+Пустой результат — это НЕ ошибка: HTTP 200 и пустой FeatureCollection / пустой список
+  + поле "empty_reason" (строка) — показать её пользователю.
+Мок-режим: если API недоступен — фронт грузит файлы из /mock (см. раздел 10) и пишет
+  маленькую плашку «демо-данные».
+
+====================================================================
+2. СЛОВАРИ (enum) — GET /api/v3/meta
+====================================================================
+Ответ:
+{
+  "version": "3.0",
+  "generated_at": "2026-09-26T12:00:00Z",
+  "units": { "concentration": "items/km2", "mass": "g/km2", "area": "km2" },
+  "date_range": { "min": "2014-04-03", "max": "2024-06-18" },     // поле
+  "scene_date_range": { "min": "...", "max": "..." },              // снимки
+  "statuses": [
+    { "id": "detected",                  "label": "Обнаружено",               "color": "#d9480f" },
+    { "id": "not_detected",              "label": "Не обнаружено",            "color": "#2b8a3e" },
+    { "id": "insufficient_data",         "label": "Недостаточно данных",      "color": "#868e96" },
+    { "id": "research_estimate",         "label": "Исследовательская оценка", "color": "#7048e8" },
+    { "id": "concentration_unavailable", "label": "Концентрация недоступна",  "color": "#adb5bd" }
+  ],
+  "sources": [
+    { "id": "S1_GPGP2018",         "label": "Большое тихоокеанское мусорное пятно, 2018", "n": 350 },
+    { "id": "S2_SARGASSO_MSM41",   "label": "Саргассово море, MSM41",                     "n": 330 },
+    { "id": "S3_SE_NORTH_SEA",     "label": "Юго-восток Северного моря",                  "n": 222 },
+    { "id": "S4_BLACK_SEA_DOORS3", "label": "Чёрное море, DOORS",                         "n": 33 }
+  ],
+  "measurement_profiles": [          // «размерный профиль» — показывать рядом с каждой концентрацией
+    { "id": "S1_trawl_5_to_50", "label": "Трал, 5–50 см",        "size_class": "5-50 cm" },
+    { "id": "S1_trawl_GT5_H",   "label": "Трал, >5 см (H)",      "size_class": ">5 cm" },
+    { "id": "S1_trawl_GT5_N",   "label": "Трал, >5 см (N)",      "size_class": ">5 cm" },
+    { "id": "S1_trawl_GT5_F",   "label": "Трал, >5 см (F)",      "size_class": ">5 cm" },
+    { "id": "S1_aerial_GT50",   "label": "Авиасъёмка, >50 см",   "size_class": ">50 cm" },
+    { "id": "S2_visual_GT2",    "label": "Визуально с судна, >2 см", "size_class": ">2 cm" },
+    { "id": "S3_visual_GT2",    "label": "Визуально с судна, >2 см", "size_class": ">2 cm" },
+    { "id": "S4_visual_GT2_5",  "label": "Визуально с судна, >2.5 см", "size_class": ">2.5 cm" }
+  ],
+  "target_scopes": [
+    { "id": "total_plastic",             "label": "Весь пластик" },
+    { "id": "plastic_category",          "label": "Категория пластика" },
+    { "id": "fisheries_litter_category", "label": "Рыболовный мусор" },
+    { "id": "all_litter",                "label": "Весь мусор (не только пластик)" },
+    { "id": "object_context",            "label": "Отдельный объект (не плотность)" }
+  ],
+  "record_types": [
+    { "id": "transect_density", "label": "Плотность на трансекте" },
+    { "id": "item_observation", "label": "Отдельный объект" }
+  ],
+  "missions": ["Sentinel-2", "Landsat-8", "Landsat-9"]
+}
+Фронт берёт подписи и цвета ТОЛЬКО отсюда (не хардкодить; в моке — тот же файл).
+
+====================================================================
+3. ПОЛЕВЫЕ НАБЛЮДЕНИЯ (измерения) — GET /api/v3/observations
+====================================================================
+Query (все необязательные):
+  bbox=minLon,minLat,maxLon,maxLat
+  date_from=YYYY-MM-DD & date_to=YYYY-MM-DD
+  source=S1_GPGP2018,S3_SE_NORTH_SEA       (через запятую)
+  profile=S2_visual_GT2,...
+  scope=total_plastic,...
+  record_type=transect_density|item_observation
+  geometry=point|line   (line — трансекта от start к end, если есть; иначе точка)
+  limit=5000
+Ответ: GeoJSON FeatureCollection
+{
+  "type": "FeatureCollection",
+  "kind": "measurement",
+  "count": 935,
+  "empty_reason": null,
+  "features": [
+    {
+      "type": "Feature",
+      "id": "MPL-0001",
+      "geometry": { "type": "Point", "coordinates": [7.659, 54.084] },
+      "properties": {
+        "kind": "measurement",                 // ВСЕГДА measurement для этого слоя
+        "sample_id": "MPL-0001",
+        "event_id": "S3:HE419_MarLitter_transect01",
+        "source_id": "S3_SE_NORTH_SEA",
+        "region": "South-eastern North Sea (German Bight)",
+        "sea_area": "North Sea",
+        "record_type": "transect_density",
+        "date_utc": "2014-04-03",
+        "time_start_utc": "14:39:00", "time_end_utc": "16:00:00",
+        "target_scope": "all_litter",
+        "measurement_profile": "S3_visual_GT2",
+        "size_class": ">2 cm (macro)",
+        "concentration_items_km2": 15.9,       // null для item_observation/без плотности
+        "concentration_g_km2": null,           // только S1
+        "sampled_area_km2": 0.251,
+        "transect": { "lat_start": 54.1292, "lon_start": 7.8357, "lat_end": 54.039, "lon_end": 7.4821,
+                      "length_km": 25.143, "width_m": 10 },
+        "position_role": "published_transect_center",
+        "quality_flags": ["all_litter_not_plastic"],   // массив (в CSV через ';')
+        "zero_scope": null,                   // если не null — это ИЗМЕРЕННЫЙ НОЛЬ (важно отличать от «нет данных»)
+        "missions_calendar_eligible": ["Landsat-8"],
+        "litter_item_type": "total floating marine macrolitter",
+        "material": "mixed (predominantly plastic)",
+        "notes": "...",
+        "source_doi": "10.1594/PANGAEA.890782",
+        "linked_scenes": ["S2B_...", "..."]   // из реестра пар (раздел 5), может быть []
+      }
+    }
+  ]
+}
+Отрисовка: круг с белой обводкой, размер ~ log10(concentration+1); item_observation — маленький
+ромб/крестик (нет плотности). zero_scope != null — полый кружок «0 шт./км²». Подпись в
+тултипе: «Измерение · 15.9 шт./км² · визуально >2 см · 03.04.2014». Флаг all_litter_not_plastic —
+пометка «весь мусор, не только пластик».
+
+GET /api/v3/observations/{sample_id} → один Feature (то же) + "pairs": [PairRecord...] (раздел 5).
+
+====================================================================
+4. СНИМКИ (сцены) — GET /api/v3/scenes
+====================================================================
+Query: bbox, date_from, date_to, mission=Sentinel-2,Landsat-8, status=accepted|rejected|all
+Ответ:
+{
+  "count": 42, "empty_reason": null,
+  "scenes": [
+    {
+      "scene_id": "S2A_MSIL2A_20180812T..._T10SEG",
+      "mission": "Sentinel-2",                    // Sentinel-2 | Landsat-8 | Landsat-9
+      "source": "earth-search" ,                  // откуда взяли (STAC)
+      "datetime": "2018-08-12T19:03:21Z",
+      "footprint": { "type": "Polygon", "coordinates": [[...]] },
+      "bounds": [minLon, minLat, maxLon, maxLat], // для imageOverlay
+      "cloud_pct": 12.5,                          // по сцене
+      "valid_water_fraction": 0.81,               // доля чистых морских пикселей в зоне интереса
+      "preview_url": "/api/v3/scenes/{scene_id}/rgb.png",    // PNG, EPSG:4326, растянут на bounds
+      "quality_url": "/api/v3/scenes/{scene_id}/quality.png",// PNG RGBA: маска качества (см. ниже)
+      "prob_url":    "/api/v3/scenes/{scene_id}/prob.png",   // вероятность мусора (0..1 → палитра), может быть null
+      "tiles": "/api/v3/scenes/{scene_id}/tiles/{z}/{x}/{y}.png",  // может быть null — тогда PNG overlay
+      "n_zones": 3,
+      "n_linked_samples": 7,
+      "status": "accepted",                       // accepted | rejected
+      "reject_reasons": []                        // коды раздела 5
+    }
+  ]
+}
+GET /api/v3/scenes/{scene_id} → один объект + "zones": FeatureCollection (раздел 6) + "pairs": [...].
+Маска качества quality.png — цвета (легенда фронта):
+  прозрачный = пригодная вода; #ffffff α0.6 = облако; #74c0fc α0.6 = тень облака;
+  #ffd43b α0.6 = блики (sunglint); #495057 α0.8 = суша; #000000 α0.4 = nodata.
+  Расшифровка также в GET /api/v3/meta → "quality_classes" (если есть — брать оттуда).
+
+====================================================================
+5. РЕЕСТР ПАР «наблюдение ↔ снимок» — GET /api/v3/pairs
+====================================================================
+Query: sample_id, scene_id, status=accepted|rejected|all, max_dt_hours, date_from, date_to, source
+Ответ:
+{
+  "count": 120, "empty_reason": null,
+  "pairs": [
+    {
+      "pair_id": "MPL-0001__S2A_..._T10SEG",
+      "sample_id": "MPL-0001",
+      "event_id": "S3:HE419_MarLitter_transect01",
+      "scene_id": "S2A_...",
+      "mission": "Sentinel-2",
+      "scene_datetime": "2018-08-12T19:03:21Z",
+      "obs_datetime": "2018-08-12T17:10:00Z",
+      "dt_hours": 1.9,                     // сцена минус наблюдение, со знаком
+      "distance_km": 0.0,                  // от точки/трансекты до ближайшего валидного пикселя
+      "drift_shift_km": 0.6,               // оценка смещения за dt (если считали), может быть null
+      "geometry": { "type": "LineString", "coordinates": [[...],[...]] },  // трансекта или точка
+      "cloud_pct_local": 3.2,              // в буфере вокруг наблюдения
+      "valid_fraction_local": 0.95,
+      "status": "accepted",                // accepted | rejected
+      "reject_reasons": [],                // коды ниже
+      "split": "train"                     // train | val | test (группировка по event/scene)
+    }
+  ]
+}
+Коды отказа (reject_reasons) и подписи:
+  NO_SCENE_IN_WINDOW   «Нет снимка в окне ±N ч»
+  CLOUD                «Облачность над точкой»
+  GLINT                «Солнечные блики»
+  NODATA               «Нет данных/край снимка»
+  LAND_OR_COAST        «Суша/берег рядом»
+  DT_TOO_LARGE         «Слишком большой разрыв по времени»
+  POSITION_UNCERTAIN   «Неточная позиция наблюдения»
+  NOT_DENSITY          «Отдельный объект, а не плотность»
+  SCOPE_MISMATCH       «Другая целевая совокупность (не пластик)»
+Полный словарь — GET /api/v3/meta → "reject_reasons": [{id,label}] (фронт берёт оттуда, если есть).
+
+====================================================================
+6. ЗОНЫ ДЕТЕКЦИИ + КОНЦЕНТРАЦИЯ (оценки модели) — GET /api/v3/zones
+====================================================================
+Query: bbox, date_from, date_to, scene_id, status=detected,research_estimate,...
+       profile (размерный профиль, для которого считать концентрацию), min_area_km2
+Ответ: GeoJSON FeatureCollection
+{
+  "type": "FeatureCollection",
+  "kind": "model_estimate",
+  "count": 17, "empty_reason": null,
+  "model": { "detector": "lgbm_v3", "concentration": "calib_v1", "trained_at": "2026-09-26T08:00:00Z" },
+  "features": [
+    {
+      "type": "Feature",
+      "id": "Z-000123",
+      "geometry": { "type": "Polygon", "coordinates": [[...]] },   // может быть MultiPolygon
+      "properties": {
+        "kind": "model_estimate",             // ВСЕГДА model_estimate для этого слоя
+        "zone_id": "Z-000123",
+        "scene_id": "S2A_...",
+        "mission": "Sentinel-2",
+        "datetime": "2018-08-12T19:03:21Z",
+        "status": "detected",                 // enum раздела 2
+        "status_reason": "Детекция уверенная, 3 полевых наблюдения рядом",  // коротко, для тултипа
+        "area_km2": 0.84,                     // ПЛОЩАДЬ ЗОНЫ — отдельная величина
+        "detected_area_m2": 12400,            // площадь пикселей мусора внутри зоны
+        "detector": { "prob_mean": 0.71, "prob_max": 0.96, "n_pixels": 124 },
+        "concentration": {                    // null, если status=concentration_unavailable/insufficient_data
+          "value": 60.0,                      // точечная оценка
+          "lo": 22.0, "hi": 140.0,            // интервал неопределённости
+          "interval": "p10-p90",              // или "95% CI"
+          "unit": "items/km2",
+          "measurement_profile": "S2_visual_GT2",   // для КАКОГО размерного класса оценка
+          "size_class": ">2 cm",
+          "target_scope": "total_plastic",
+          "method": "калибровка по полевым данным (гр. сплит по событиям)",
+          "basis": "model_estimate"
+        },
+        "quality": {
+          "valid_fraction": 0.93, "cloud_fraction": 0.02, "glint_fraction": 0.0,
+          "flags": ["near_ship_wake"]         // возможные ложные: ship_wake, foam, sargassum, cloud_edge
+        },
+        "support": {                          // связь с полем
+          "n_linked_samples": 3,
+          "linked_sample_ids": ["MPL-0412", "MPL-0413", "MPL-0420"],
+          "nearest_measurement_km": 1.2
+        }
+      }
+    }
+  ]
+}
+GET /api/v3/zones/{zone_id} → Feature + "crop_url" (PNG вырезка снимка вокруг зоны),
+  "prob_crop_url", "linked_observations": FeatureCollection (раздел 3), "explain": [строки ≤ 12 слов].
+
+Отрисовка: полигон, заливка по статусу (цвета из meta), ПУНКТИРНАЯ обводка = модель
+(у измерений — сплошная). Тултип: «Оценка модели · 60 шт./км² (22–140) · >2 см · площадь 0.84 км²».
+Если concentration=null — «Концентрация недоступна» + status_reason. research_estimate — подпись
+«исследовательская оценка» курсивом.
+
+====================================================================
+7. МЕТРИКИ / ДОСТОВЕРНОСТЬ — GET /api/v3/metrics
+====================================================================
+{
+  "split": { "type": "grouped", "group_by": ["event_id", "scene_id"], "n_train": 0, "n_val": 0, "n_test": 0 },
+  "detector":      { "baseline": { "name": "FDI threshold", "f1": 0.0, "iou": 0.0 },
+                     "main":     { "name": "LightGBM",     "f1": 0.0, "iou": 0.0 } },
+  "concentration": { "baseline": { "name": "median by profile", "mae": 0.0, "mae_log": 0.0, "coverage": 0.0 },
+                     "main":     { "name": "...", "mae": 0.0, "mae_log": 0.0, "coverage": 0.0 },
+                     "unit": "items/km2" },
+  "control_example": { "items": 12, "area_km2": 0.20, "expected": 60.0, "computed": 60.0 }
+}
+Фронт: маленькая панель «Достоверность» (baseline vs основной, на одном сплите). coverage =
+доля истинных значений, попавших в интервал.
+
+====================================================================
+8. СОХРАНЁННЫЕ ЗАПРОСЫ
+====================================================================
+Query-объект (одинаковый везде, в URL и в POST):
+{
+  "bbox": [minLon, minLat, maxLon, maxLat] | null,
+  "date_from": "2018-01-01" | null, "date_to": "2018-12-31" | null,
+  "statuses": ["detected", "research_estimate"],
+  "sources": ["S1_GPGP2018"],
+  "profiles": ["S1_trawl_5_to_50"],
+  "layers": ["scene", "quality", "observations", "zones"],
+  "scene_id": null
+}
+POST /api/v3/queries            body: { "name": "ГПМП август 2018", "query": {...} }
+   → 201 { "query_id": "q_7f3a", "name": "...", "created_at": "...", "query": {...} }
+GET  /api/v3/queries            → { "queries": [ {query_id, name, created_at, query} ] }
+GET  /api/v3/queries/{id}/run   → { "query_id", "ran_at", "query", "observations": FC, "zones": FC,
+                                    "scenes": [...], "summary": { "n_obs", "n_zones", "by_status": {...} } }
+DELETE /api/v3/queries/{id}     → 204
+Фронт ДОЛЖЕН также: сериализовать текущий query в URL (?q=<base64url JSON>) — ссылка = повтор
+запроса без бэкенда; и держать список сохранённых в localStorage (в try/catch) как запасной вариант.
+
+====================================================================
+9. ЭКСПОРТ
+====================================================================
+GET /api/v3/export?layer=zones|observations|pairs&format=geojson|csv&<те же фильтры>|query_id=q_7f3a
+  → файл (Content-Disposition: attachment; filename="zones_2026-09-26.geojson")
+CSV зон — колонки (порядок фиксирован):
+  zone_id,scene_id,mission,datetime,status,area_km2,detected_area_m2,concentration_items_km2,
+  conc_lo,conc_hi,interval,unit,measurement_profile,size_class,target_scope,prob_mean,
+  valid_fraction,cloud_fraction,flags,n_linked_samples,linked_sample_ids,centroid_lon,centroid_lat,kind
+CSV наблюдений — колонки исходного CSV организаторов (как есть) + kind=measurement + linked_scenes.
+CSV пар — все поля раздела 5 (geometry → WKT).
+Фронтовый запасной экспорт: если /export недоступен — собрать GeoJSON/CSV из того, что уже
+загружено на клиенте (Blob + download), с теми же колонками.
+
+====================================================================
+10. МОК-ДАННЫЕ (чтобы начать без бэкенда)
+====================================================================
+В архиве FRONTEND_MOCKS.zip:
+  meta.json                 — раздел 2 (реальные словари)
+  observations.geojson      — ВСЕ 935 реальных строк CSV организаторов в формате раздела 3
+                              (без linked_scenes). Это настоящие данные, их можно показывать.
+  zones.mock.geojson        — ВЫДУМАННЫЕ зоны рядом с реальными точками (по 1–3 на событие,
+                              все 5 статусов). Только для вёрстки! На защите — только реальные.
+  pairs.mock.json, scenes.mock.json, metrics.mock.json — структура разделов 4, 5, 7, цифры фейковые.
+Исходник: case/data/macroplastic_marine_samples.csv (+ README_macroplastic_dataset.md).
+
+====================================================================
+11. UX-ТРЕБОВАНИЯ КОМАНДЫ (из прошлых ревью)
+====================================================================
+- Подложка по умолчанию: спутник (+ глобус, если делаешь 3D). Если тайлы не грузятся —
+  автоматически офлайн-подложка (простая заливка суша/вода из локального GeoJSON), без ошибок.
+- Выбор пользователя (подложка, слои, фильтры, позиция карты) сохраняется: URL + localStorage (try/catch).
+- Первый экран — не больше ~15 слов текста. Цифры и подписи — по наведению/клику.
+- ≥ 55 fps при панорамировании: GeoJSON > 2000 фич — через WebGL-слой (deck.gl / MapLibre circle layer),
+  не DOM-маркеры.
+- Никаких «сгенерированных» деталей (не писать «бутылка», если модель этого не знает).
+- Пустой результат фильтра → «Нет наблюдений за выбранные даты» + кнопка «Сбросить фильтры».
+- Ошибка API → плашка с error.message, карта остаётся рабочей.
+- Легенда всегда видна (компактно): цвета статусов, «сплошная = измерение, пунктир = модель»,
+  шкала концентрации с единицей шт./км².
+- Стек на твой выбор; советуем React + MapLibre GL (+ deck.gl). Без внешних платных ключей.
+- Запуск: `npm i && npm run dev`; сборка в dist/, которую бэкенд может отдать статикой (/app).
+
+====================================================================
+12. ГДЕ ЛЕЖИТ И КАК СИНХРОНИЗИРУЕМСЯ
+====================================================================
+- Репо: github.com/azama2t/final-cosmohack (private). Твой фронт — папка frontend_alt/ (отдельно,
+  наш не трогаем, наш — service/frontend_v2). Коммиты только в свою папку, push в main, без force.
+- Контракт в репо: docs/CONTRACTS_V3.md (этот текст). Если нужно поле — пиши, добавим (не переименуем).
+- Проверка бэка: GET /health → {"ok": true}; GET /api/v3/meta.
