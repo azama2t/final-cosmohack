@@ -2,14 +2,17 @@ import { useEffect, useRef } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { MapboxOverlay } from '@deck.gl/mapbox';
-import type { Basemap, Camera, Region, Zone } from '../types';
+import type { Basemap, Camera, Projection, Region, Zone } from '../types';
 import { buildLayers, type LayerCtx } from './layers';
-import { anim, ctl, darkStyle, fitOverview, offlineStyle, satelliteStyle } from './controller';
+import { anim, ctl, darkStyle, fitOverview, offlineStyle, satelliteStyle, withProjection } from './controller';
+import { fmtKm } from '../lib/route';
 import { fmtPermille } from '../lib/style';
 import { shortName } from '../lib/data';
 
 export interface MapViewProps extends Omit<LayerCtx, 'hour' | 'zoom' | 'spread'> {
   basemap: Basemap;
+  /** L27: «Карта | Глобус» */
+  projection: Projection;
   initialCamera?: Camera;
   zones: Zone[] | null;
   showZones: boolean;
@@ -32,15 +35,17 @@ export default function MapView(p: MapViewProps) {
   props.current = p;
   const regionMarkers = useRef<maplibregl.Marker[]>([]);
   const zoneMarkers = useRef<maplibregl.Marker[]>([]);
+  const routeMarkers = useRef<maplibregl.Marker[]>([]);
   const loaded = useRef(false);
 
   // ---- init once ----
   useEffect(() => {
     const regions = p.regions;
     const init = p.initialCamera;
+    ctl.projection = p.projection;
     const map = new maplibregl.Map({
       container: el.current!,
-      style: offlineStyle(),
+      style: offlineStyle(p.projection),
       center: init ? [init.lon, init.lat] : [0, 10],
       zoom: init ? init.zoom : 1.6,
       pitch: init?.pitch ?? 0,
@@ -99,6 +104,7 @@ export default function MapView(p: MapViewProps) {
     return () => {
       regionMarkers.current.forEach((m) => m.remove());
       zoneMarkers.current.forEach((m) => m.remove());
+      routeMarkers.current.forEach((m) => m.remove());
       map.remove();
       ctl.map = null;
       ctl.overlay = null;
@@ -110,16 +116,39 @@ export default function MapView(p: MapViewProps) {
   useEffect(() => {
     const map = ctl.map!;
     let cancelled = false;
-    if (p.basemap === 'none') map.setStyle(offlineStyle(), { diff: false });
-    else if (p.basemap === 'satellite') map.setStyle(satelliteStyle(), { diff: false });
+    if (p.basemap === 'none') map.setStyle(offlineStyle(ctl.projection), { diff: false });
+    else if (p.basemap === 'satellite') map.setStyle(satelliteStyle(ctl.projection), { diff: false });
     else
       darkStyle()
-        .then((s) => !cancelled && map.setStyle(s, { diff: false }))
+        .then((s) => !cancelled && map.setStyle(withProjection(s, ctl.projection), { diff: false }))
         .catch(() => !cancelled && props.current.onBasemapFailed('dark'));
     return () => {
       cancelled = true;
     };
   }, [p.basemap]);
+
+  // ---- L27: projection (map ⇄ globe) without reloading the basemap ----
+  const firstProj = useRef(true);
+  useEffect(() => {
+    const map = ctl.map!;
+    ctl.projection = p.projection;
+    if (firstProj.current) {
+      firstProj.current = false; // the initial style already carries the projection
+      return;
+    }
+    const apply = () => {
+      const s = withProjection({}, p.projection);
+      map.setProjection(s.projection);
+      try {
+        map.setSky(s.sky ?? {});
+      } catch {
+        /* older style without sky support */
+      }
+      ctl.render();
+    };
+    if ((map as any).style?._loaded) apply();
+    else map.once('style.load', apply);
+  }, [p.projection]);
 
   // ---- deck layers ----
   ctl.render = () => {
@@ -156,6 +185,12 @@ export default function MapView(p: MapViewProps) {
     // label layout without overlaps, in index order (highest first, drawn on top):
     // 1) label to the right of the dot; 2) if it overlaps a placed label/dot or runs under a panel — label to the left;
     // 3) otherwise the marker collapses to a dot, its label is shown on hover.
+    // L27: on the globe some regions are on the far side — say so (the list on the left has all of them)
+    const hint = document.createElement('div');
+    hint.className = 'globe-hint';
+    hint.setAttribute('data-testid', 'globe-hint');
+    hint.style.display = 'none';
+    map.getContainer().appendChild(hint);
     const layout = () => {
       type Box = { x0: number; y0: number; x1: number; y1: number };
       const placed: Box[] = [];
@@ -172,6 +207,12 @@ export default function MapView(p: MapViewProps) {
       regionMarkers.current.forEach((mk, i) => {
         const el = els[i];
         el.style.zIndex = String(10 + n - i);
+        // globe: a label on the far side of the sphere takes no space (MapLibre marks it as covered)
+        if ((map as any).transform?.isLocationOccluded?.(mk.getLngLat())) {
+          el.classList.add('occluded');
+          return;
+        }
+        el.classList.remove('occluded');
         const pt = map.project(mk.getLngLat());
         const [w, h] = sizes[i];
         const y0 = pt.y - h / 2 - 2,
@@ -193,14 +234,24 @@ export default function MapView(p: MapViewProps) {
         }
       });
     };
-    layout();
-    const t = setTimeout(layout, 300); // after fonts
-    map.on('zoomend', layout);
-    map.on('resize', layout);
+    const layoutAll = () => {
+      layout();
+      const n = regionMarkers.current.filter((m) => m.getElement().classList.contains('occluded')).length;
+      const w = n % 10 === 1 && n % 100 !== 11 ? 'район' : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? 'района' : 'районов';
+      hint.textContent = n ? `Ещё ${n} ${w} на обратной стороне глобуса — потяните глобус или выберите в списке слева` : '';
+      hint.style.display = n ? '' : 'none';
+    };
+    layoutAll();
+    const t = setTimeout(layoutAll, 300); // after fonts
+    map.on('zoomend', layoutAll);
+    map.on('moveend', layoutAll); // globe rotation changes which labels are visible
+    map.on('resize', layoutAll);
     return () => {
       clearTimeout(t);
-      map.off('zoomend', layout);
-      map.off('resize', layout);
+      hint.remove();
+      map.off('moveend', layoutAll);
+      map.off('zoomend', layoutAll);
+      map.off('resize', layoutAll);
     };
   }, [p.activeRegion, p.regions]);
 
@@ -223,6 +274,54 @@ export default function MapView(p: MapViewProps) {
       zoneMarkers.current.push(new maplibregl.Marker({ element: d }).setLngLat([z.lon, z.lat]).addTo(map));
     }
   }, [p.zones, p.showZones]);
+
+  // ---- L27: «Порядок посещения зон» — port pin + visit numbers at the middle of each leg ----
+  useEffect(() => {
+    const map = ctl.map!;
+    routeMarkers.current.forEach((m) => m.remove());
+    routeMarkers.current = [];
+    const r = p.route;
+    if (!r) return;
+    const port = document.createElement('div');
+    port.className = 'route-port';
+    port.setAttribute('data-testid', 'route-port');
+    port.innerHTML = `<span class="rp-dot"></span><span class="rp-name">${esc(r.port.name)}</span>`;
+    routeMarkers.current.push(new maplibregl.Marker({ element: port, anchor: 'left', offset: [-6, 0] }).setLngLat([r.port.lon, r.port.lat]).addTo(map));
+    for (const l of r.legs) {
+      const d = document.createElement('div');
+      d.className = 'route-num';
+      d.title = `${l.n}-й по порядку: зона №${l.zone.rank}, ${fmtKm(l.km)} км по прямой от предыдущей точки`;
+      d.textContent = String(l.n);
+      const mid: [number, number] = [(l.from[0] + l.to[0]) / 2, (l.from[1] + l.to[1]) / 2];
+      routeMarkers.current.push(new maplibregl.Marker({ element: d }).setLngLat(mid).addTo(map));
+    }
+    // a visit number on a leg shorter than ~46 px would cover the zone markers: hide it at this zoom
+    const fit = () => {
+      // port label: to the left of the pin when it would run under the right panel
+      const pm = routeMarkers.current[0];
+      if (pm) {
+        const el = pm.getElement();
+        const pt = map.project(pm.getLngLat());
+        const cont = map.getContainer().getBoundingClientRect();
+        const rp = document.querySelector('.panel-right:not(.collapsed)')?.getBoundingClientRect();
+        const maxX = (rp ? rp.left : cont.right) - cont.left - 8;
+        const flip = pt.x + el.offsetWidth > maxX;
+        el.classList.toggle('flip', flip);
+        pm.setOffset(flip ? [6 - el.offsetWidth, 0] : [-6, 0]);
+      }
+      r.legs.forEach((l, i) => {
+        const a = map.project(l.from as any),
+          b = map.project(l.to as any);
+        const el = routeMarkers.current[i + 1]?.getElement();
+        if (el) el.style.visibility = Math.hypot(a.x - b.x, a.y - b.y) < 46 ? 'hidden' : '';
+      });
+    };
+    fit();
+    map.on('moveend', fit);
+    return () => {
+      map.off('moveend', fit);
+    };
+  }, [p.route]);
 
   return <div ref={el} className="map" data-testid="map" />;
 }

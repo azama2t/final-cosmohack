@@ -172,6 +172,8 @@ export interface TsRow {
 export type LayerKey = 'rgb' | 'prob' | 'detections' | 'h3' | 'h3_3d' | 'zones' | 'drift';
 export type Layers = Record<LayerKey, boolean>;
 export type Basemap = 'dark' | 'satellite' | 'none';
+/** L27: MapLibre projection — flat map or 3D globe */
+export type Projection = 'mercator' | 'globe';
 
 export interface Camera {
   lon: number;

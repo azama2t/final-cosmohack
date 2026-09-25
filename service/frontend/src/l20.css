@@ -321,6 +321,14 @@
   background: rgba(95, 201, 168, 0.7);
   border-radius: 2px;
 }
+.pcs-col.st-unreliable .pcs-bar {
+  background: rgba(242, 193, 78, 0.35);
+  border: 1px dashed var(--warn);
+  border-radius: 2px;
+}
+.pcs-col.st-unreliable.has-find .pcs-bar {
+  background: repeating-linear-gradient(135deg, rgba(242, 193, 78, 0.65) 0 3px, rgba(242, 193, 78, 0.25) 3px 6px);
+}
 .pcs-none {
   width: 16px;
   height: 16px;
@@ -382,6 +390,11 @@
 .st-chip.st-clean {
   color: #9fe0cb;
   border-color: rgba(95, 201, 168, 0.4);
+}
+.st-chip.st-unreliable {
+  color: var(--warn);
+  border-color: rgba(242, 193, 78, 0.45);
+  background: rgba(242, 193, 78, 0.07);
 }
 .st-chip.st-no_observation,
 .st-chip.st-no_image {
@@ -1024,4 +1037,203 @@ button.cal-dot:hover:not(:disabled) {
 /* the large zone / place cards cover the legend's corner: hide the legend while they are open */
 .app.big-card .legend {
   display: none;
+}
+
+/* ================= L27 ================= */
+/* «Карта | Глобус» under the basemap switch */
+.proj-seg {
+  margin-top: 8px;
+}
+/* overview labels: hidden on the far side of the globe and while the comparison is open */
+.region-marker.occluded,
+.maplibregl-marker-covered.region-marker {
+  visibility: hidden;
+  pointer-events: none;
+}
+.app.comparing .region-marker,
+.app.comparing .zone-marker,
+.app.comparing .route-port,
+.app.comparing .route-num {
+  display: none;
+}
+
+/* verdict: zone №1 + badge; confirmed alternative as the second line */
+.verdict-box {
+  margin-top: 16px;
+}
+.verdict-box .verdict {
+  margin-top: 0;
+}
+.verdict-badge {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 1px 8px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 18px;
+}
+.verdict-badge.conf {
+  color: #ffecc4;
+  border: 1px solid rgba(255, 236, 196, 0.45);
+  background: rgba(255, 236, 196, 0.06);
+}
+.verdict-badge.unconf {
+  color: var(--warn);
+  border: 1px solid rgba(242, 193, 78, 0.5);
+  background: rgba(242, 193, 78, 0.08);
+}
+.verdict-alt {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  width: 100%;
+  margin-top: 4px;
+  padding: 8px 12px 8px 34px;
+  border-radius: 8px;
+  text-align: left;
+  font-size: 12.5px;
+  color: var(--text-2);
+  background: var(--card);
+  border: 1px solid var(--line);
+}
+.verdict-alt .conf-badge {
+  margin-left: -22px;
+  flex: none;
+}
+button.verdict-alt:hover {
+  background: rgba(40, 64, 100, 0.35);
+}
+.verdict-alt.none {
+  color: var(--muted);
+}
+
+/* «Порядок посещения зон» */
+.route-box {
+  margin-bottom: 8px;
+}
+.route-btn.on {
+  border-color: rgba(255, 214, 140, 0.6);
+  color: #ffd68c;
+}
+.route-info {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(255, 214, 140, 0.05);
+  border: 1px solid rgba(255, 214, 140, 0.28);
+  font-size: 12.5px;
+  color: var(--text-2);
+}
+.route-caption {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #ffd68c;
+  margin-bottom: 4px;
+}
+.route-order {
+  line-height: 1.9;
+}
+.route-port-name {
+  font-weight: 600;
+  color: var(--text);
+}
+.route-step {
+  white-space: nowrap;
+}
+.route-stop {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px 0 2px;
+  border-radius: 10px;
+  border: 1px solid var(--line-2);
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--text);
+}
+.route-stop:hover {
+  background: rgba(40, 64, 100, 0.4);
+}
+.route-stop i {
+  font-style: normal;
+  display: inline-grid;
+  place-items: center;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  background: #ffd68c;
+  color: #1c1402;
+  font-size: 10.5px;
+  font-weight: 800;
+}
+.route-total {
+  margin-top: 4px;
+}
+.route-total b {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.route-note {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--faint);
+}
+/* map markers of the route */
+.route-num {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: #ffd68c;
+  color: #1c1402;
+  font: 800 11.5px/1 Inter, system-ui, sans-serif;
+  box-shadow: 0 0 0 2px rgba(7, 17, 31, 0.85);
+  pointer-events: auto;
+  cursor: default;
+}
+.route-port {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+}
+.route-port .rp-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: #07111f;
+  border: 2px solid #ffd68c;
+  transform: rotate(45deg);
+}
+.route-port .rp-name {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(7, 17, 31, 0.85);
+  border: 1px solid rgba(255, 214, 140, 0.4);
+  color: #ffd68c;
+  font: 600 12px/1.4 Inter, system-ui, sans-serif;
+  white-space: nowrap;
+}
+.globe-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 72px;
+  transform: translateX(-50%);
+  z-index: 3;
+  padding: 4px 12px;
+  border-radius: 12px;
+  background: rgba(7, 17, 31, 0.8);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.route-port.flip {
+  flex-direction: row-reverse;
 }

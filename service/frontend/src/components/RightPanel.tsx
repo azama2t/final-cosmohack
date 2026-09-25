@@ -5,7 +5,8 @@ import ExportBox from './ExportBox';
 import { isFlagged, regionHaze, shortName } from '../lib/data';
 import ComparePanel from './ComparePanel';
 import ObsCalendar from './ObsCalendar';
-import { verdictZone } from '../lib/priority';
+import { verdict } from '../lib/priority';
+import { fmtKm, haversineKm, type RoutePlan } from '../lib/route';
 
 const TsChart = lazy(() => import('./TsChart'));
 
@@ -27,6 +28,10 @@ interface Props {
   onRegion: (id: string) => void;
   onDate: (d: string) => void;
   onZone: (z: Zone) => void;
+  /** L27: «Порядок посещения зон» */
+  route?: RoutePlan | null;
+  routeOn?: boolean;
+  onRoute?: (on: boolean) => void;
   onCompare: () => void;
   compareActive: boolean;
   compare: { a: SceneRef; b: SceneRef } | null;
@@ -139,9 +144,10 @@ function RegionView(p: Props & { region: Region; dateEntry: DateEntry }) {
   // with «only confirmed» on, the verdict points to the best zone that has a confirmed detection (if any)
   // L20: the best zone with a finding confirmed by the second model, else zone №1 marked «не подтверждена»
   // (with «only confirmed» on and no confirmed zone the verdict is hidden)
-  const vz = verdictZone(zones);
-  const top = vz && !(p.onlyConfirmed && vz.unconfirmed) ? vz.zone : undefined;
-  const topUnconf = !!vz?.unconfirmed;
+  // L27: zone №1 is always the main line (same as the table); a confirmed alternative goes to the second line
+  const vd = verdict(zones);
+  const top = vd?.top;
+  const alt = vd?.alt ?? null;
   const empty = !!p.detections && det.length === 0 && n === 0;
 
   return (
@@ -165,24 +171,48 @@ function RegionView(p: Props & { region: Region; dateEntry: DateEntry }) {
             </span>
           </div>
         )}
-        {top && (
-          <button className="verdict" onClick={() => p.onZone(top)} data-testid="verdict">
-            <span className="verdict-dot" />
-            <span>
-              <b>Куда отправить обследование:</b> зона №{top.rank} — {fmtPermille(top.index)} ‰, {top.lat.toFixed(4)},{' '}
-              {top.lon.toFixed(4)}
-              {topUnconf ? (
-                <small className="verdict-note unconf" data-testid="verdict-unconfirmed" title="Ни одна находка в зонах этой даты не подтверждена второй моделью — согласие моделей, не проверка на месте">
-                  не подтверждена второй моделью
-                </small>
-              ) : typeof top.n_confirmed === 'number' ? (
-                <small className="verdict-note" title="согласие моделей, не проверка на месте">
-                  ✓ уверенная: подтверждена второй моделью ({top.n_confirmed})
-                  {top.rank !== 1 ? ' · зона №1 не подтверждена' : ''}
-                </small>
-              ) : null}
-            </span>
-          </button>
+        {top && vd && (
+          <div className="verdict-box" data-testid="verdict-box">
+            <button className="verdict" onClick={() => p.onZone(top)} data-testid="verdict">
+              <span className="verdict-dot" />
+              <span>
+                <b>Куда отправить обследование:</b> зона №{top.rank} — {fmtPermille(top.index)} ‰, {top.lat.toFixed(4)},{' '}
+                {top.lon.toFixed(4)}
+                {vd.topConfirmed === false ? (
+                  <small
+                    className="verdict-badge unconf"
+                    data-testid="verdict-unconfirmed"
+                    title="в этой ячейке вторая модель не видит признаков в радиусе 20 м — согласие моделей, не проверка на месте"
+                  >
+                    не подтверждена второй моделью
+                  </small>
+                ) : vd.topConfirmed ? (
+                  <small className="verdict-badge conf" data-testid="verdict-confirmed" title="согласие моделей, не проверка на месте">
+                    ✓ подтверждена второй моделью ({top.n_confirmed})
+                  </small>
+                ) : null}
+              </span>
+            </button>
+            {alt && (
+              <button
+                className="verdict-alt"
+                onClick={() => p.onZone(alt)}
+                data-testid="verdict-alt"
+                title="лучшая по рангу зона, где находку подтверждает вторая модель (согласие моделей, не проверка на месте) — клик: карточка зоны"
+              >
+                <span className="conf-badge">✓{alt.n_confirmed}</span>
+                <span>
+                  ближайшая подтверждённая: <b>№{alt.rank}</b> ({fmtPermille(alt.index)} ‰, {fmtArea(alt.area_m2).join(' ')}) ·{' '}
+                  {fmtKm(haversineKm([top.lon, top.lat], [alt.lon, alt.lat]))} км от №{top.rank}
+                </span>
+              </button>
+            )}
+            {vd.topConfirmed === false && !alt && (
+              <div className="verdict-alt none" data-testid="verdict-no-alt">
+                подтверждённых второй моделью зон на этой дате нет
+              </div>
+            )}
+          </div>
         )}
         {!empty && p.onlyConfirmed && p.nConfirmed === 0 && (
           <div className="empty-scene conf-empty" data-testid="confirmed-empty">
@@ -252,6 +282,45 @@ function RegionView(p: Props & { region: Region; dateEntry: DateEntry }) {
           <h3>Приоритет обследования</h3>
           <span className="muted small">топ {zones.length}</span>
         </div>
+        {zones.length > 0 && p.onRoute && (
+          <div className="route-box">
+            <button
+              className={`btn small block route-btn ${p.routeOn ? 'on' : ''}`}
+              onClick={() => p.onRoute!(!p.routeOn)}
+              data-testid="route-toggle"
+              aria-pressed={!!p.routeOn}
+            >
+              {p.routeOn ? 'Скрыть порядок посещения' : 'Порядок посещения зон'}
+            </button>
+            {p.routeOn && p.route && (
+              <div className="route-info" data-testid="route-info">
+                <div className="route-caption">черновой порядок, не навигационный маршрут</div>
+                <div className="route-order">
+                  <span className="route-port-name">{p.route.port.name}</span>
+                  {p.route.legs.map((l) => (
+                    <span key={l.n} className="route-step">
+                      {' → '}
+                      <button
+                        className="route-stop"
+                        onClick={() => p.onZone(l.zone)}
+                        title={`${l.n}-я по порядку · ${fmtKm(l.km)} км от предыдущей точки`}
+                      >
+                        <i>{l.n}</i>№{l.zone.rank}
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <div className="route-total">
+                  <b data-testid="route-km">{fmtKm(p.route.totalKm)} км</b> по прямой · {p.route.legs.length} зон · жадный «ближайший
+                  сосед» от ближайшего порта
+                </div>
+                <div className="route-note">
+                  Без учёта берега, глубин, судоходства и погоды. Порт — из небольшого справочника в коде (координаты ±1 км).
+                </div>
+              </div>
+            )}
+          </div>
+        )}
         {zones.length ? (
           <table className="zones-table" data-testid="zones-table">
             <thead>

@@ -114,7 +114,7 @@ export interface ZoneApi {
   pdf: string;
 }
 
-export type PlaceStatus = 'found' | 'clean' | 'no_observation' | 'no_image';
+export type PlaceStatus = 'found' | 'clean' | 'no_observation' | 'no_image' | 'unreliable';
 export interface PlaceRow {
   date: string;
   scene_id?: string;
@@ -122,6 +122,10 @@ export interface PlaceRow {
   quality?: { haze?: boolean; glint_or_haze?: boolean; note?: string } | null;
   model: string;
   status: PlaceStatus;
+  /** L27: why the date is «ненадёжно» (same rule as /api/calendar) */
+  reason?: string;
+  /** L27: the cell had findings on an «ненадёжно» date */
+  has_findings?: boolean;
   index: number | null;
   observed_frac?: number | null;
   flagged_water_px?: number | null;

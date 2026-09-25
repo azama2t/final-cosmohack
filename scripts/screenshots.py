@@ -169,6 +169,7 @@ def run(args) -> dict:
         except Exception:
             res["notes"].append("networkidle timeout on overview (external tiles?)")
         page.wait_for_timeout(1200)
+        res["projection_default"] = page.evaluate("window.__app && window.__app.projection")
         shot(page, out, "01_overview_1920", res["shots"])
 
         manifest = page.evaluate("fetch('/data/manifest.json').then(r => r.json())")
@@ -181,6 +182,14 @@ def run(args) -> dict:
         best_id = page.evaluate("window.__app && window.__app.bestRegion")
         best = next((r for r in regions if r["id"] == best_id), regions[0])
         res["best_region"] = best["id"]
+        if args.only_l27:  # quick iteration on the L27 frames only
+            ctx.close()
+            shoot_l27(browser, base, out, res, con, best["id"], regions)
+            browser.close()
+            res["console_errors"] = con.errors
+            res["external_errors"] = sorted(set(con.external))[:20]
+            res["console_warnings"] = con.warnings[:20]
+            return res
         if args.only_l20:  # quick iteration on the L20 frames only
             ctx.close()
             shoot_l20(browser, base, out, res, con, best["id"], regions, args)
@@ -193,8 +202,12 @@ def run(args) -> dict:
         if args.extra:
             compact = page.locator(".region-marker.compact")
             res["overview_compact_labels"] = compact.count()
-            if compact.count():
-                compact.first.hover()
+            # L27: on the globe a collapsed dot can sit under a neighbour's dot — hover the first reachable one
+            idx = page.evaluate("""(() => [...document.querySelectorAll('.region-marker.compact')].findIndex(el => {
+                const r = el.getBoundingClientRect(); const t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+                return t && el.contains(t); }))()""")
+            if compact.count() and idx >= 0:
+                compact.nth(idx).hover()
                 page.wait_for_timeout(400)
                 shot(page, out, "17_overview_hover_dot", res["shots"])
                 page.mouse.move(5, 500)
@@ -425,6 +438,10 @@ def run(args) -> dict:
         if args.l20 or args.only_l20:
             shoot_l20(browser, base, out, res, con, best["id"], regions, args)
 
+        # L27: globe, route, offline coastline, compare opened by a link from the overview ------
+        if args.extra:
+            shoot_l27(browser, base, out, res, con, best["id"], regions)
+
         # optional: record demo tour ---------------------------------------------
         if args.video:
             vdir = out / "_video"
@@ -649,6 +666,120 @@ def shoot_l20(browser, base: str, out: Path, res: dict, con: "Console", best_id:
     ctx.close()
 
 
+def _goto_scene(page: Page, url: str, res: dict, tries: int = 2):
+    """L27: open a region URL and wait for the scene; one retry (reload) if it did not come up."""
+    for i in range(tries):
+        page.goto(url, wait_until="load")
+        try:
+            page.wait_for_function("window.__app && window.__app.sceneReady", timeout=20000)
+            return
+        except Exception:
+            st = page.evaluate("JSON.stringify(window.__app ? {r: window.__app.region, d: window.__app.date, "
+                               "ready: window.__app.sceneReady} : null) + ' mapReady=' + window.__mapReady")
+            res["notes"].append(f"scene not ready ({url.split('?')[-1]}, try {i + 1}): {st}")
+    raise TimeoutError("scene not ready: " + url)
+
+
+def shoot_l27(browser, base: str, out: Path, res: dict, con: "Console", best_id: str, regions: list):
+    """L27 frames: 30 globe (+ fps), 31 route + verdicts, 32 offline coastline, 33 compare by link."""
+    ctx = browser.new_context(viewport={"width": 1920, "height": 1080}, device_scale_factor=1)
+    page = ctx.new_page()
+    con.attach(page)
+    # 30 globe overview, rotation fps, fly to the best region on the globe
+    page.goto(base + "/?pr=globe", wait_until="domcontentloaded")
+    page.wait_for_function("window.__mapReady === true", timeout=30000)
+    try:
+        page.wait_for_load_state("networkidle", timeout=6000)
+    except Exception:
+        pass
+    page.wait_for_timeout(1500)
+    shot(page, out, "30_globe", res["shots"])
+    res["globe_far_side_hint"] = page.locator("[data-testid='globe-hint']").inner_text() if page.locator(
+        "[data-testid='globe-hint']").is_visible() else None
+    page.evaluate("""(() => { const m = window.__ctl.map; const c = m.getCenter();
+        m.easeTo({ center: [c.lng + 90, c.lat], duration: 3000, easing: (t) => t }); })()""")
+    res["fps_globe_rotate"] = measure_fps(page, 2800)
+    page.wait_for_timeout(600)
+    page.evaluate("window.__ctl.map.stop()")
+    click(page, f"region-item-{best_id}")
+    res["fps_globe_flyto"] = fps_while_moving(page, 8000)
+    page.wait_for_function("window.__app && window.__app.sceneReady", timeout=15000)
+    wait_idle(page, 1500)
+    shot(page, out, "30b_globe_region", res["shots"])
+    # same flight on the flat map for comparison
+    page.goto(base + "/?pr=map", wait_until="domcontentloaded")
+    page.wait_for_function("window.__mapReady === true", timeout=30000)
+    page.wait_for_timeout(800)
+    click(page, f"region-item-{best_id}")
+    res["fps_map_flyto"] = fps_while_moving(page, 8000)
+    wait_idle(page, 600)
+
+    # 31 route (Manila) + verdicts (Manila, Honduras: №1 unconfirmed → confirmed alternative)
+    ids = {r["id"] for r in regions}
+    rid = "manila" if "manila" in ids else best_id
+    _goto_scene(page, base + f"/?r={rid}&pr=map", res)
+    wait_idle(page, 1200)
+    shot(page, out, "31a_verdict_" + rid, res["shots"])
+    if page.locator("[data-testid='route-toggle']").count():
+        click(page, "route-toggle")
+        page.wait_for_timeout(600)
+        wait_idle(page, 1200)
+        page.evaluate("""(() => { const e = document.querySelector("[data-testid='route-info']");
+            if (e) e.scrollIntoView({ block: 'center' }); })()""")
+        page.wait_for_timeout(400)
+        res["route"] = page.evaluate("window.__app.route")
+        shot(page, out, "31_route", res["shots"])
+    else:
+        res["notes"].append("no zones → no route button")
+    if "honduras" in ids:
+        _goto_scene(page, base + "/?r=honduras&pr=map", res)
+        wait_idle(page, 1200)
+        res["verdict_honduras"] = page.locator("[data-testid='verdict-box']").inner_text() if page.locator(
+            "[data-testid='verdict-box']").count() else None
+        shot(page, out, "31b_verdict_honduras", res["shots"])
+
+    # 33 compare opened by a link straight from the overview (no overview labels on top)
+    other = next((r for r in regions if r["id"] != best_id and r.get("dates")), None)
+    best = next(r for r in regions if r["id"] == best_id)
+    if other:
+        cmp = f"{best_id}:{best['dates'][-1]['date']},{other['id']}:{other['dates'][-1]['date']}"
+        page.goto(base + f"/?cmp={cmp}", wait_until="domcontentloaded")
+        try:
+            page.wait_for_function("window.__compareReady_a && window.__compareReady_b", timeout=15000)
+        except Exception:
+            res["notes"].append("compare by link not ready")
+        page.wait_for_timeout(1500)
+        res["cmp_link_overview_labels_visible"] = page.evaluate(
+            "[...document.querySelectorAll('.region-marker')].filter(e => e.offsetParent !== null).length")
+        shot(page, out, "33_compare_link", res["shots"])
+    ctx.close()
+
+    # 32 offline: every non-local request is aborted; basemap «Без» with the local land outline
+    ctx = browser.new_context(viewport={"width": 1920, "height": 1080}, device_scale_factor=1)
+
+    def block(route):
+        u = route.request.url
+        if u.startswith(("http://127.0.0.1", "http://localhost", "data:", "blob:")):
+            return route.continue_()
+        return route.abort("internetdisconnected")
+
+    ctx.route("**/*", block)
+    page = ctx.new_page()
+    off = Console()
+    off.attach(page)
+    page.goto(base + "/?b=none&pr=map", wait_until="domcontentloaded")
+    page.wait_for_function("window.__mapReady === true", timeout=30000)
+    page.wait_for_timeout(1500)
+    res["offline_land_layer"] = page.evaluate("!!(window.__ctl.map && window.__ctl.map.getLayer('land'))")
+    shot(page, out, "32_offline_coast", res["shots"])
+    page.goto(base + "/?b=none&pr=globe", wait_until="domcontentloaded")
+    page.wait_for_function("window.__mapReady === true", timeout=30000)
+    page.wait_for_timeout(1500)
+    shot(page, out, "32b_offline_globe", res["shots"])
+    res["offline_console_errors"] = off.errors
+    ctx.close()
+
+
 def append_perf(res: dict):
     PERF_MD.parent.mkdir(parents=True, exist_ok=True)
     if not PERF_MD.exists():
@@ -665,6 +796,9 @@ def append_perf(res: dict):
     errs = res.get("console_errors") or []
     err_cell = str(len(errs)) + ("" if not errs else ": " + "; ".join(e.replace("|", "/")[:120] for e in errs[:3]))
     notes = [f"gl={res.get('gl')}", res.get("gpu", "")] + res.get("notes", [])
+    if res.get("fps_globe_flyto") is not None:  # L27
+        notes.insert(1, "globe: rotate {} fps, flyTo {} fps (map flyTo {}); default={}".format(
+            res.get("fps_globe_rotate"), res.get("fps_globe_flyto"), res.get("fps_map_flyto"), res.get("projection_default")))
     row = "| {} | {} | {} | {} | {} | {} | {} | {} |\n".format(
         dt.datetime.now().strftime("%Y-%m-%d %H:%M"),
         res["base_url"],
@@ -693,6 +827,7 @@ def main():
     ap.add_argument("--l20", action="store_true",
                     help="also shoot L20 frames 21-25 (zone card, place card, calendar, review tab)")
     ap.add_argument("--only-l20", action="store_true", help="only the L20 frames (fast iteration)")
+    ap.add_argument("--only-l27", action="store_true", help="only the L27 frames 30-33 (globe, route, offline, compare link)")
     ap.add_argument("--review-write", action="store_true",
                     help="L20: allow POST labels / «ложное?» / retrain (writes the backend labels file!) "
                          "for frames 24b and 25; use with a backend started with MACROPLASTIC_LABELS=<scratch dir>")
@@ -718,7 +853,7 @@ def main():
     out = Path(args.out) if Path(args.out).is_absolute() else ROOT / args.out
     (out / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")
     print(json.dumps({k: v for k, v in res.items() if k != "shots"}, ensure_ascii=False, indent=1))
-    ok = (args.only_l20 or len(res["shots"]) >= 10) and not res["console_errors"]
+    ok = (args.only_l20 or args.only_l27 or len(res["shots"]) >= 10) and not res["console_errors"]
     sys.exit(0 if ok else 1)
 
 

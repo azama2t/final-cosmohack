@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { Basemap, Camera, DetProps, Feature, LayerKey, Layers, Manifest, Region, SceneRef, Zone } from './types';
+import type { Basemap, Camera, DetProps, Feature, LayerKey, Layers, Manifest, Projection, Region, SceneRef, Zone } from './types';
 import {
   bestRegion,
   getImage,
@@ -16,7 +16,8 @@ import { useAsync } from './lib/hooks';
 import { makeScale } from './lib/style';
 import { DEFAULT_LAYERS, readUrl, writeUrl } from './lib/url';
 import MapView from './map/MapView';
-import { anim, ctl, fitOverview, flyToBounds, flyToPoint, getCamera, waitIdle } from './map/controller';
+import { anim, ctl, defaultProjection, fitOverview, flyToBounds, flyToPoint, getCamera, waitIdle } from './map/controller';
+import { planRoute } from './lib/route';
 import { centroid, loadGeo, prepareDrift, type HoverInfo } from './map/layers';
 import Header from './components/Header';
 import LeftPanel from './components/LeftPanel';
@@ -33,9 +34,10 @@ import { hasApi, type ReviewItem } from './lib/api';
 import ZoneCard from './components/ZoneCard';
 import PlaceCard from './components/PlaceCard';
 import './l20.css';
+import { lazyRetry } from './lib/reload';
 
-const CompareView = lazy(() => import('./components/CompareView'));
-const ReviewView = lazy(() => import('./components/ReviewView'));
+const CompareView = lazy(lazyRetry(() => import('./components/CompareView')));
+const ReviewView = lazy(lazyRetry(() => import('./components/ReviewView')));
 
 export default function App() {
   const url = useMemo(readUrl, []);
@@ -45,6 +47,10 @@ export default function App() {
   const [model, setModel] = useState<string>(url.model ?? 'mdd');
   const [layers, setLayers] = useState<Layers>(url.layers ?? DEFAULT_LAYERS);
   const [basemap, setBasemap] = useState<Basemap>(url.basemap ?? 'dark');
+  // L27: «Карта | Глобус»; default — globe on hardware WebGL (fps ≥ 50 measured), flat map on software GL
+  const [projection, setProjection] = useState<Projection>(() => url.projection ?? defaultProjection());
+  const projUser = useRef(!!url.projection);
+  const [routeOn, setRouteOn] = useState<boolean>(!!url.route);
   const [selected, setSelected] = useState<Feature<DetProps> | null>(null);
   const [hover, setHover] = useState<HoverInfo | null>(null);
   const [compare, setCompare] = useState<{ a: SceneRef; b: SceneRef } | null>(null);
@@ -67,6 +73,8 @@ export default function App() {
   useEffect(() => {
     loadManifest().then((m) => {
       if (!m || !m.regions.length) return setManifest(null);
+      const br = bestRegion(m);
+      if (br) ctl.overviewFocus = br.center as [number, number];
       setManifest(m);
       const r = url.region ? m.regions.find((x) => x.id === url.region) : undefined;
       if (r) {
@@ -121,6 +129,11 @@ export default function App() {
     [h3],
   );
   const drift = useMemo(() => (driftRaw ? prepareDrift(driftRaw) : null), [driftRaw]);
+  // L27: «Порядок посещения зон» over the zones of the table (top 10)
+  const route = useMemo(
+    () => (routeOn && region && zones?.zones.length ? planRoute(region.id, zones.zones.slice(0, 10)) : null),
+    [routeOn, region, zones],
+  );
   // L15: «только подтверждённые обеими моделями» (old data without `confirmed`: switch disabled, all shown)
   const confAvail = hasConfirm(dateEntry, detections);
   const nConf = scene ? nConfirmed(dateEntry, model, detections) : null;
@@ -167,6 +180,8 @@ export default function App() {
       model,
       layers,
       basemap,
+      projection: projUser.current ? projection : undefined,
+      route: regionId && routeOn ? true : undefined,
       camera: camera.current,
       compare: compare ? `${compare.a.region}:${compare.a.date},${compare.b.region}:${compare.b.date}` : undefined,
       confirmed: onlyConf || undefined,
@@ -174,7 +189,7 @@ export default function App() {
       zone: regionId && zonePopup ? zonePopup.rank : undefined,
       place: regionId && place ? place.h3 : undefined,
     });
-  }, [regionId, date, model, layers, basemap, compare, onlyConf, tab, zonePopup, place]);
+  }, [regionId, date, model, layers, basemap, projection, routeOn, compare, onlyConf, tab, zonePopup, place]);
   useEffect(syncUrl, [syncUrl]);
 
   // ---- actions ----
@@ -189,6 +204,7 @@ export default function App() {
       setHover(null);
       setZonePopup(null);
       setPlace(null);
+      setRouteOn(false);
       if (!manifest) return;
       if (!id) {
         setRegionId(null);
@@ -225,6 +241,39 @@ export default function App() {
       return n;
     });
   }, []);
+
+  // L27: map ⇄ globe; re-frame the current view (the globe overview is sized differently)
+  const changeProjection = useCallback(
+    (pr: Projection) => {
+      projUser.current = true;
+      setProjection(pr);
+      ctl.projection = pr;
+      setTimeout(() => {
+        if (!manifest) return;
+        if (!regionId) fitOverview(manifest.regions.map((r) => r.bounds), 1400);
+        else if (dateEntry) flyToBounds(dateEntry.bounds ?? region!.bounds, { duration: 1400 });
+      }, 60);
+    },
+    [manifest, regionId, dateEntry, region],
+  );
+
+  // L27: route on → zones layer on, frame port + zones
+  const toggleRoute = useCallback(
+    (on: boolean) => {
+      setRouteOn(on);
+      if (on && !layers.zones) toggleLayer('zones', true);
+    },
+    [layers.zones, toggleLayer],
+  );
+  useEffect(() => {
+    if (!route) return;
+    const xs = route.path.map((p) => p[0]),
+      ys = route.path.map((p) => p[1]);
+    // keep the whole route above the legend (it sits over the bottom-left of the map)
+    const lg = document.querySelector('.legend')?.getBoundingClientRect();
+    const mb = lg ? window.innerHeight - lg.top + 24 : 0;
+    flyToBounds([Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)], { duration: 1400, extra: 48, minBottom: mb });
+  }, [route]);
 
   const selectDate = useCallback(
     (d: string) => {
@@ -408,6 +457,8 @@ export default function App() {
       placeCard: place?.h3 ?? null,
       tab,
       reviewAvail,
+      projection,
+      route: route ? { port: route.port.name, km: route.totalKm, order: route.legs.map((l) => l.zone.rank) } : null,
       setDriftHour: (h: number) => {
         anim.hour = h;
         anim.listeners.forEach((l) => l(h));
@@ -481,9 +532,11 @@ export default function App() {
           onClickDet={openDetection}
           onClickRegion={selectRegion}
           basemap={basemap}
+          projection={projection}
+          route={route}
           initialCamera={url.camera}
           zones={zones?.zones ?? null}
-          showZones={layers.zones && !!region}
+          showZones={(layers.zones || !!route) && !!region}
           onCamera={(c) => {
             camera.current = c;
             syncUrl();
@@ -519,6 +572,8 @@ export default function App() {
           }}
           onLayer={toggleLayer}
           onBasemap={setBasemap}
+          projection={projection}
+          onProjection={changeProjection}
           confAvail={confAvail}
           onlyConfirmed={onlyConf}
           nConfirmed={nConf}
@@ -546,6 +601,9 @@ export default function App() {
           onRegion={selectRegion}
           onDate={selectDate}
           onZone={showZone}
+          route={route}
+          routeOn={routeOn}
+          onRoute={toggleRoute}
           onCompare={openCompare}
           compareActive={!!compare}
           compare={compare}

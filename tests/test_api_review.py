@@ -133,9 +133,11 @@ def test_place(client, data_root):
     dates = [d["date"] for d in _manifest(data_root)["regions"][[x["id"] for x in _manifest(data_root)["regions"]]
                                                                   .index(rid)]["dates"]]
     assert [h["date"] for h in j["history"]] == sorted(dates)
-    assert {h["status"] for h in j["history"]} <= {"found", "clean", "no_observation", "no_image"}
+    assert {h["status"] for h in j["history"]} <= {"found", "clean", "no_observation", "no_image", "unreliable"}
     row = next(h for h in j["history"] if h["date"] == date)
-    assert row["status"] == "found"
+    # the zone's own date: found, or «ненадёжно» by the calendar rule but with findings in the cell
+    assert row["status"] == "found" or (row["status"] == "unreliable" and row["has_findings"])
+    assert set(j["status_rules"]) >= {"found", "clean", "unreliable", "no_image", "no_observation"}
     assert j["sources"] and j["limitations"] and j["formula"]
     assert len(j["boundary"]) == 6
 
@@ -167,6 +169,45 @@ def test_calendar(client, data_root):
         assert set(c) >= {"date", "status", "n_detections", "cloud_frac", "quality_flags", "reason"}
         if c["status"] == "detected":
             assert c["n_detections"] > 0
+
+
+def _same_rule(client, rid: str, h3: str, model: str):
+    place = client.get("/api/place", params={"region": rid, "h3": h3, "model": model}).json()
+    cal = {c["date"]: c for c in client.get("/api/calendar", params={"region": rid, "model": model}).json()}
+    assert set(cal) == {h["date"] for h in place["history"]}
+    for h in place["history"]:
+        c = cal[h["date"]]
+        assert (h["status"] == "unreliable") == (c["status"] == "unreliable"), (h["date"], h["status"], c["status"])
+        assert (h["status"] == "no_image") == (c["status"] == "no_image"), (h["date"], h["status"], c["status"])
+        if h["status"] == "unreliable":
+            assert h["reason"] == c["reason"]
+    return place, cal
+
+
+def test_place_calendar_same_unreliable_rule(client, data_root):
+    """L27: /api/place and /api/calendar share place.date_reliability() → identical «ненадёжно» per date."""
+    rid, _date, model, z = _first_zone(data_root)
+    _same_rule(client, rid, z["h3"], model)
+
+
+def test_haze_date_unreliable_in_both(tmp_path):
+    """A date with a haze flag is «ненадёжно» in the calendar AND in the place history (was «чисто»/«найдено»)."""
+    root = tmp_path / "demo"
+    shutil.copytree(DEMO, root, ignore=shutil.ignore_patterns("drift.json"))
+    rid, date, model, z = _first_zone(root)
+    m = _manifest(root)
+    reg = next(r for r in m["regions"] if r["id"] == rid)
+    d = next(x for x in reg["dates"] if x["date"] == date)
+    d["quality"] = {**(d.get("quality") or {}), "haze": True}
+    (root / "manifest.json").write_text(json.dumps(m, ensure_ascii=False), encoding="utf-8")
+    from service.app import create_app
+
+    c = TestClient(create_app(root))
+    place, cal = _same_rule(c, rid, z["h3"], model)
+    row = next(h for h in place["history"] if h["date"] == date)
+    assert row["status"] == "unreliable" and cal[date]["status"] == "unreliable"
+    assert "дымка" in row["reason"] and row["has_findings"] is True
+    assert place["summary"]["n_unreliable"] >= 1
 
 
 # ---------------------------------------------------------------- review

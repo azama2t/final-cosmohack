@@ -11,7 +11,8 @@ from typing import Optional
 
 from . import core, place
 
-STATUS_RU = {"found": "найдено", "clean": "чисто", "no_observation": "нет наблюдения", "no_image": "нет снимка"}
+STATUS_RU = {"found": "найдено", "clean": "чисто", "no_observation": "нет наблюдения", "no_image": "нет снимка",
+             "unreliable": "ненадёжно"}  # L27: same date rule as /api/calendar
 ACCENT = "#ff6b4a"
 INK = "#13263a"
 MUTED = "#5b6b7c"

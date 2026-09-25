@@ -71,6 +71,8 @@ function dataPlugin(): Plugin {
     mw.use('/data', serveData);
     mw.use('/api', proxyApi);
     mw.use('/health', proxyApi);
+    // L27: the UI detects optional endpoints via /openapi.json (lib/api.ts: apiPaths)
+    mw.use('/openapi.json', proxyApi);
   };
   return {
     name: 'macroplastic-data-root',

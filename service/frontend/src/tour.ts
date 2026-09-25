@@ -95,11 +95,14 @@ export async function runTour(apiRef: MutableRefObject<TourApi>, signal: AbortSi
     await wait(8000);
 
     if (hasDet) {
-      cap('Приоритет обследования: топ ячеек по помеченной воде с учётом повторяемости по датам и уверенности.');
+      const zcap = 'Приоритет обследования: топ ячеек по помеченной воде с учётом повторяемости по датам и уверенности.';
+      cap(zcap);
       api().toggleLayer('h3', false);
       api().toggleLayer('zones', true);
       await wait(400);
-      const z = verdictZone(api().get().zones?.zones ?? [])?.zone;
+      const vz = verdictZone(api().get().zones?.zones ?? []);
+      const z = vz?.zone;
+      if (vz) api().caption(step, TOTAL, `${zcap} ${vz.why}`);
       if (z) api().showZone(z);
       await wait(z ? 7000 : 3000);
       api().closeZone();

@@ -49,6 +49,15 @@ CAL_RULES = {
 }
 CLOUD_MAX = 0.5
 OBS_WATER_MIN = 0.3
+# /api/place statuses: date-level rule is the same as the calendar (date_reliability), then the cell itself
+PLACE_RULES = {
+    "no_image": CAL_RULES["no_image"],
+    "unreliable": CAL_RULES["unreliable"] + " — то же правило, что в календаре; has_findings показывает, были ли "
+                  "признаки в ячейке",
+    "no_observation": "дата надёжна, но сама ячейка не наблюдалась (облако/тень над ней)",
+    "found": "надёжное наблюдение и в ячейке есть пиксели с признаками мусора или пятно",
+    "clean": "надёжное наблюдение ячейки, признаков нет",
+}
 
 
 # ---------------------------------------------------------------- small helpers
@@ -280,17 +289,26 @@ def place_info(st: core.Store, rid: str, h3id: str, model: Optional[str] = None)
         models = d.get("models") or []
         row = {"date": date, "scene_id": d.get("scene_id"), "cloud_frac": d.get("cloud_frac"),
                "quality": d.get("quality"), "model": model}
-        if models and model not in models:
+        rel = date_reliability(st, rid, d, model)
+        row.update(quality_flags=rel["quality_flags"], observed_frac_water=rel["observed_frac_water"])
+        if (models and model not in models) or not rel["has_layer"]:
             row.update(status="no_image", index=None, n_detections=0, detections=[])
         else:
             cell = h3_cell(st, rid, date, model, h3id)
             dets = detections_in_cell(st, rid, date, model, h3id)
-            if cell is None or cell.get("share_permille") is None:
+            has_find = bool(cell and cell.get("share_permille") is not None
+                            and ((cell.get("flagged_water_px") or 0) > 0 or dets))
+            if rel["unreliable"]:
+                # same rule as /api/calendar: the date as a whole is not trusted (haze/glint, clouds, little water)
+                status = "unreliable"
+                row["reason"] = "; ".join(rel["reasons"])
+            elif cell is None or cell.get("share_permille") is None:
                 status = "no_observation"
-            elif (cell.get("flagged_water_px") or 0) > 0 or dets:
+            elif has_find:
                 status = "found"
             else:
                 status = "clean"
+            row["has_findings"] = has_find or bool(dets)
             zj = st._optional(rid, date, model, "zones") or {}
             z = next((z for z in zj.get("zones") or [] if z.get("h3") == h3id), None)
             row.update(status=status, index=(cell or {}).get("share_permille"),
@@ -313,6 +331,7 @@ def place_info(st: core.Store, rid: str, h3id: str, model: Optional[str] = None)
         history.append(row)
     found = [h for h in history if h["status"] == "found"]
     observed = [h for h in history if h["status"] in ("found", "clean")]
+    unreliable = [h for h in history if h["status"] == "unreliable"]
     man = st.manifest()
     return {
         "region": rid, "region_name": reg.get("name"), "country": reg.get("country"), "h3": h3id, "res": H3_RES,
@@ -320,6 +339,8 @@ def place_info(st: core.Store, rid: str, h3id: str, model: Optional[str] = None)
         "model": model, "model_name": ((man.get("models") or {}).get(model) or {}).get("name"),
         "threshold": model_threshold(st, model),
         "summary": {"n_dates": len(history), "n_observed": len(observed), "n_found": len(found),
+                    "n_unreliable": len(unreliable),
+                    "n_unreliable_with_findings": sum(1 for h in unreliable if h.get("has_findings")),
                     "first_found": found[0]["date"] if found else None,
                     "last_found": found[-1]["date"] if found else None,
                     "n_detections_total": sum(h.get("n_detections") or 0 for h in history),
@@ -328,11 +349,46 @@ def place_info(st: core.Store, rid: str, h3id: str, model: Optional[str] = None)
         "formula": FORMULA, "formula_text": FORMULA_TEXT,
         "sources": man.get("sources") or [],
         "limitations": LIMITATIONS,
+        "status_rules": PLACE_RULES,
         "pdf": f"/api/place_report.pdf?region={rid}&h3={h3id}&model={model}",
     }
 
 
 # ---------------------------------------------------------------- calendar
+def date_reliability(st: core.Store, rid: str, d: dict, model: str) -> dict:
+    """ONE rule for «ненадёжно» (used by /api/calendar AND /api/place, L27).
+
+    A date is `unreliable` when any of: cloud_frac > 50 %; quality flag glint_or_haze / haze; observed water < 30 %
+    (share of water H3 cells where the index is defined). `has_layer` is False when the model has no layer on the
+    date (→ status `no_image` in both endpoints).
+    """
+    date = d["date"]
+    models = d.get("models") or []
+    q = d.get("quality") or {}
+    flags = [k for k in ("glint_or_haze", "haze") if q.get(k)]
+    cloud = date_cloud(st, rid, date)
+    cells = _features(st._optional(rid, date, model, "h3")) if (not models or model in models) else []
+    out = {"cloud_frac": cloud, "quality_flags": flags, "observed_frac_water": None, "has_layer": bool(cells),
+           "reasons": [], "unreliable": False}
+    if not cells:
+        return out
+    water = [c["properties"] for c in cells if (c["properties"].get("observed_water_px") or 0) > 0
+             or c["properties"].get("share_permille") is not None]
+    obs = [c for c in water if c.get("share_permille") is not None]
+    ofw = round(len(obs) / len(water), 3) if water else 0.0
+    out["observed_frac_water"] = ofw
+    reasons = []
+    if cloud is not None and cloud > CLOUD_MAX:
+        reasons.append(f"облачность {cloud * 100:.0f} % > 50 %")
+    if flags:
+        reasons.append("дымка/блик — находки могут быть завышены")
+    if ofw < OBS_WATER_MIN:
+        reasons.append(f"наблюдаемой воды {ofw * 100:.0f} % < 30 %")
+    out["reasons"] = reasons
+    out["unreliable"] = bool(reasons)
+    return out
+
+
 def calendar(st: core.Store, rid: str, model: Optional[str] = None) -> list[dict]:
     dates = st.region_dates(rid)
     if not model:
@@ -341,35 +397,20 @@ def calendar(st: core.Store, rid: str, model: Optional[str] = None) -> list[dict
     out = []
     for d in dates:
         date = d["date"]
-        models = d.get("models") or []
-        q = d.get("quality") or {}
-        flags = [k for k in ("glint_or_haze", "haze") if q.get(k)]
-        cloud = date_cloud(st, rid, date)
-        row = {"date": date, "model": model, "scene_id": d.get("scene_id"), "cloud_frac": cloud,
-               "quality_flags": flags, "n_detections": 0, "observed_frac_water": None}
-        cells = _features(st._optional(rid, date, model, "h3")) if (not models or model in models) else []
-        det = _features(st._optional(rid, date, model, "detections")) if cells else []
-        if not cells:
+        rel = date_reliability(st, rid, d, model)
+        row = {"date": date, "model": model, "scene_id": d.get("scene_id"), "cloud_frac": rel["cloud_frac"],
+               "quality_flags": rel["quality_flags"], "n_detections": 0, "observed_frac_water": None}
+        if not rel["has_layer"]:
             row.update(status="no_image", reason=f"нет слоя модели {model} на эту дату")
             out.append(row)
             continue
-        water = [c["properties"] for c in cells if (c["properties"].get("observed_water_px") or 0) > 0
-                 or c["properties"].get("share_permille") is not None]
-        obs = [c for c in water if c.get("share_permille") is not None]
-        ofw = round(len(obs) / len(water), 3) if water else 0.0
-        row["observed_frac_water"] = ofw
+        det = _features(st._optional(rid, date, model, "detections"))
+        row["observed_frac_water"] = rel["observed_frac_water"]
         row["n_detections"] = len(det)
         if any("confirmed" in (f.get("properties") or {}) for f in det):
             row["n_confirmed"] = sum(1 for f in det if f["properties"].get("confirmed"))
-        reasons = []
-        if cloud is not None and cloud > CLOUD_MAX:
-            reasons.append(f"облачность {cloud * 100:.0f} % > 50 %")
-        if flags:
-            reasons.append("дымка/блик — находки могут быть завышены")
-        if ofw < OBS_WATER_MIN:
-            reasons.append(f"наблюдаемой воды {ofw * 100:.0f} % < 30 %")
-        if reasons:
-            row.update(status="unreliable", reason="; ".join(reasons))
+        if rel["unreliable"]:
+            row.update(status="unreliable", reason="; ".join(rel["reasons"]))
         elif det:
             row.update(status="detected", reason=f"{len(det)} находок модели {model}")
         else:

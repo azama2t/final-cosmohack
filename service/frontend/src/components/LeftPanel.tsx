@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import type { Basemap, LayerKey, Layers, Manifest, Region } from '../types';
+import type { Basemap, LayerKey, Layers, Manifest, Projection, Region } from '../types';
 import { dataUrl, isFlagged, regionHaze, shortName, summaryDate } from '../lib/data';
 import { fmtThr, fmtDate, fmtDateShort, fmtNum, fmtPermille, modelLabel } from '../lib/style';
 
@@ -18,6 +18,9 @@ interface Props {
   onModel: (m: string) => void;
   onLayer: (k: LayerKey, on?: boolean) => void;
   onBasemap: (b: Basemap) => void;
+  /** L27: «Карта | Глобус» */
+  projection: Projection;
+  onProjection: (p: Projection) => void;
   /** L15: confirmation data exists for this date (both models) */
   confAvail?: boolean;
   onlyConfirmed?: boolean;
@@ -250,6 +253,24 @@ export default function LeftPanel(p: Props) {
                   className={`seg ${p.basemap === id ? 'on' : ''}`}
                   onClick={() => p.onBasemap(id)}
                   data-testid={`basemap-${id}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div className="segmented proj-seg" role="group" aria-label="Проекция">
+              {(
+                [
+                  ['mercator', 'Карта'],
+                  ['globe', 'Глобус'],
+                ] as [Projection, string][]
+              ).map(([id, label]) => (
+                <button
+                  key={id}
+                  className={`seg ${p.projection === id ? 'on' : ''}`}
+                  onClick={() => p.projection !== id && p.onProjection(id)}
+                  data-testid={`projection-${id}`}
+                  title={id === 'globe' ? '3D-глобус (MapLibre globe)' : 'Плоская карта (Web Mercator)'}
                 >
                   {label}
                 </button>

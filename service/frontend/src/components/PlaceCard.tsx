@@ -22,6 +22,7 @@ export const STATUS_RU: Record<PlaceStatus, string> = {
   clean: 'чисто',
   no_observation: 'нет наблюдения',
   no_image: 'нет слоя модели',
+  unreliable: 'ненадёжно',
 };
 
 const LIMITATIONS = [
@@ -50,12 +51,26 @@ async function localPlace(manifest: Manifest, region: Region, model: string, h3i
       const [lo, la] = centroid(f);
       return latLngToCell(la, lo, 8) === h3id;
     });
-    const status: PlaceStatus =
-      !cell || cell.share_permille === null ? 'no_observation' : cell.flagged_water_px > 0 || dets.length ? 'found' : 'clean';
+    // same date rule as /api/calendar and /api/place (service/place.py: date_reliability)
+    const water = (h3fc?.features ?? []).filter((f) => (f.properties.observed_water_px ?? 0) > 0 || f.properties.share_permille !== null);
+    const ofw = water.length ? water.filter((f) => f.properties.share_permille !== null).length / water.length : 0;
+    const reasons: string[] = [];
+    if ((d.cloud_frac ?? 0) > 0.5) reasons.push(`облачность ${Math.round((d.cloud_frac ?? 0) * 100)} % > 50 %`);
+    if (d.quality?.haze || d.quality?.glint_or_haze) reasons.push('дымка/блик — находки могут быть завышены');
+    if (ofw < 0.3) reasons.push(`наблюдаемой воды ${Math.round(ofw * 100)} % < 30 %`);
+    const hasFind = !!cell && cell.share_permille !== null && (cell.flagged_water_px > 0 || dets.length > 0);
+    const status: PlaceStatus = reasons.length
+      ? 'unreliable'
+      : !cell || cell.share_permille === null
+        ? 'no_observation'
+        : hasFind
+          ? 'found'
+          : 'clean';
     const conf = dets.some((f) => typeof f.properties.confirmed === 'boolean');
     history.push({
       ...base,
       status,
+      ...(reasons.length ? { reason: reasons.join('; '), has_findings: hasFind || dets.length > 0 } : {}),
       index: cell?.share_permille ?? null,
       observed_frac: cell?.observed_frac ?? null,
       flagged_water_px: cell?.flagged_water_px ?? null,
@@ -170,13 +185,18 @@ export default function PlaceCard(p: Props) {
           </div>
           <div className="pc-strip" data-testid="place-strip">
             {hist.map((h) => {
-              const hgt = h.status === 'found' ? 8 + 44 * Math.sqrt(Math.max(0, h.index ?? 0) / maxIdx) : h.status === 'clean' ? 3 : 0;
+              const hgt =
+                h.status === 'found' || (h.status === 'unreliable' && h.has_findings)
+                  ? 8 + 44 * Math.sqrt(Math.max(0, h.index ?? 0) / maxIdx)
+                  : h.status === 'clean' || h.status === 'unreliable'
+                    ? 3
+                    : 0;
               return (
                 <button
                   key={h.date}
-                  className={`pcs-col st-${h.status} ${h.date === p.date ? 'cur' : ''}`}
+                  className={`pcs-col st-${h.status} ${h.has_findings ? 'has-find' : ''} ${h.date === p.date ? 'cur' : ''}`}
                   onClick={() => p.onDate(h.date)}
-                  title={`${fmtDate(h.date)}: ${STATUS_RU[h.status]}${h.index !== null ? `, индекс ${fmtPermille(h.index)} ‰` : ''}${flaggedQ(h.quality) ? ' · дымка/блик' : ''}`}
+                  title={`${fmtDate(h.date)}: ${STATUS_RU[h.status]}${h.reason ? ` (${h.reason})` : ''}${h.has_findings ? ' · в ячейке были признаки' : ''}${h.index !== null ? `, индекс ${fmtPermille(h.index)} ‰` : ''}${flaggedQ(h.quality) && !h.reason ? ' · дымка/блик' : ''}`}
                   disabled={h.status === 'no_image'}
                 >
                   <span className="pcs-bar-wrap">
@@ -205,6 +225,12 @@ export default function PlaceCard(p: Props) {
             </div>
           )}
 
+          {hist.some((h) => h.status === 'unreliable') && (
+            <p className="cal-caption" data-testid="place-unreliable-note">
+              <b>Ненадёжно</b> — то же правило, что в календаре: облака &gt; 50 %, дымка или блик, или наблюдаемой воды &lt; 30 %. Такие даты
+              не входят в «k из n».
+            </p>
+          )}
           <table className="zones-table pc-table" data-testid="place-table">
             <thead>
               <tr>
@@ -232,7 +258,10 @@ export default function PlaceCard(p: Props) {
                     )}
                   </td>
                   <td>
-                    <span className={`st-chip st-${h.status}`}>{STATUS_RU[h.status]}</span>
+                    <span className={`st-chip st-${h.status}`} title={h.reason || undefined}>
+                      {STATUS_RU[h.status]}
+                    </span>
+                    {h.status === 'unreliable' && h.has_findings ? <span className="muted small"> · были признаки</span> : null}
                     {h.zone_rank ? <span className="muted small"> · зона №{h.zone_rank}</span> : null}
                   </td>
                   <td className="num">{fmtPermille(h.index)}</td>

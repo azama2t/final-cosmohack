@@ -11,16 +11,52 @@ export const FORMULA_TEXT =
   'Ранжируются только ячейки с наблюдаемой водой ≥ 50 %.';
 export const PRIORITY_NOTE = 'приоритет обследования — ранжирование по снимку, не измеренная опасность';
 
+export interface Verdict {
+  /** zone №1 by rank — always the main recommendation (L27, orchestrator decision) */
+  top: Zone;
+  /** true / false when confirmation data exist; null for old files without n_confirmed */
+  topConfirmed: boolean | null;
+  /** when №1 is not confirmed: the best-ranked zone confirmed by the second model (closest to №1 in the ranking) */
+  alt: Zone | null;
+}
+
 /**
- * Zone for «Куда отправить обследование» and the tour: the best-ranked zone with a finding confirmed by the second
- * model (n_confirmed > 0) if there is one; otherwise zone №1, flagged `unconfirmed` when confirmation data exist
- * (dates with two models) but the zone has none. Old files without n_confirmed → zone №1, no flag.
+ * «Куда отправить обследование» (L27): zone №1 by rank with a badge «подтверждена / не подтверждена второй моделью»;
+ * if №1 is not confirmed — the best-ranked confirmed zone as a second line. The ranking table and the verdict
+ * therefore never disagree on which zone is first.
  */
-export function verdictZone(zones: Zone[]): { zone: Zone; unconfirmed: boolean } | null {
+export function verdict(zones: Zone[]): Verdict | null {
   if (!zones.length) return null;
-  const conf = zones.find((z) => (z.n_confirmed ?? 0) > 0);
-  if (conf) return { zone: conf, unconfirmed: false };
-  return { zone: zones[0], unconfirmed: typeof zones[0].n_confirmed === 'number' };
+  const top = [...zones].sort((a, b) => a.rank - b.rank)[0];
+  const known = typeof top.n_confirmed === 'number';
+  const topConfirmed = known ? (top.n_confirmed ?? 0) > 0 : null;
+  const alt =
+    topConfirmed === false
+      ? zones.filter((z) => z !== top && (z.n_confirmed ?? 0) > 0).sort((a, b) => a.rank - b.rank)[0] ?? null
+      : null;
+  return { top, topConfirmed, alt };
+}
+
+/**
+ * Zone for the tour step: №1 if confirmed (or no confirmation data), else the best-ranked confirmed zone,
+ * else №1 marked as unconfirmed. `why` is the explicit caption for the tour.
+ */
+export function verdictZone(zones: Zone[]): { zone: Zone; unconfirmed: boolean; why: string } | null {
+  const v = verdict(zones);
+  if (!v) return null;
+  if (v.topConfirmed !== false)
+    return {
+      zone: v.top,
+      unconfirmed: false,
+      why: v.topConfirmed ? 'Зона №1 подтверждена второй моделью (согласие моделей, не проверка на месте).' : 'Зона №1.',
+    };
+  if (v.alt)
+    return {
+      zone: v.alt,
+      unconfirmed: false,
+      why: `Зона №1 не подтверждена второй моделью — показываем подтверждённую зону №${v.alt.rank}.`,
+    };
+  return { zone: v.top, unconfirmed: true, why: 'Зона №1 не подтверждена второй моделью; подтверждённых зон на этой дате нет.' };
 }
 
 /** flagged px of a zone: explicit field, else area / 100 m² (one 10 m pixel). */

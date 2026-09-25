@@ -1,4 +1,4 @@
-import type { Basemap, Camera, LayerKey, Layers } from '../types';
+import type { Basemap, Camera, LayerKey, Layers, Projection } from '../types';
 
 export const DEFAULT_LAYERS: Layers = {
   rgb: true,
@@ -17,6 +17,10 @@ export interface UrlState {
   layers?: Layers;
   camera?: Camera;
   basemap?: Basemap;
+  /** L27: «Карта | Глобус» */
+  projection?: Projection;
+  /** L27: «Порядок посещения зон» on */
+  route?: boolean;
   tour?: boolean;
   compare?: string; // "regionA:date,regionB:date"
   /** L15: only detections confirmed by both models */
@@ -49,6 +53,9 @@ export function readUrl(): UrlState {
   }
   const b = q.get('b');
   if (b === 'dark' || b === 'satellite' || b === 'none') s.basemap = b;
+  const pr = q.get('pr');
+  if (pr === 'globe' || pr === 'map') s.projection = pr === 'globe' ? 'globe' : 'mercator';
+  if (q.get('route') === '1') s.route = true;
   if (q.get('tour') === '1') s.tour = true;
   if (q.get('cmp')) s.compare = q.get('cmp')!;
   if (q.get('cf') === '1') s.confirmed = true;
@@ -70,6 +77,8 @@ export function writeUrl(s: UrlState) {
     q.set('c', [c.lon.toFixed(5), c.lat.toFixed(5), c.zoom.toFixed(2), c.pitch.toFixed(0), c.bearing.toFixed(0)].join(','));
   }
   if (s.basemap) q.set('b', s.basemap);
+  if (s.projection) q.set('pr', s.projection === 'globe' ? 'globe' : 'map');
+  if (s.route) q.set('route', '1');
   if (s.compare) q.set('cmp', s.compare);
   if (s.confirmed) q.set('cf', '1');
   if (s.tab) q.set('tab', s.tab);

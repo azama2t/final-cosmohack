@@ -3,6 +3,7 @@ import type { Layer, PickingInfo } from '@deck.gl/core';
 import type { Bounds, DetProps, Feature, FC, H3Props, Layers, Region } from '../types';
 import { ACCENT_RGB, h3Color, h3Elevation, h3LineColor, type H3Scale } from '../lib/style';
 import type { DriftFile } from '../types';
+import type { RoutePlan } from '../lib/route';
 
 type GeoModule = typeof import('@deck.gl/geo-layers');
 let geo: GeoModule | null = null;
@@ -54,6 +55,8 @@ export interface LayerCtx {
   onClickRegion: (id: string) => void;
   /** L20: click on an H3 cell → place card */
   onClickH3?: (p: H3Props) => void;
+  /** L27: «Порядок посещения зон» (draft order, straight lines) */
+  route?: RoutePlan | null;
 }
 
 const boundsPoly = (b: Bounds) => [
@@ -342,6 +345,31 @@ export function buildLayers(c: LayerCtx): Layer[] {
         getFillColor: [220, 245, 255, 235],
         updateTriggers: { getPosition: c.hour },
         parameters: { depthTest: false } as any,
+      }),
+    );
+  }
+  // L27: draft visiting order — casing + line; numbers and the port are DOM markers (MapView)
+  if (c.route && c.route.path.length > 1) {
+    out.push(
+      new PathLayer({
+        id: 'route-casing',
+        data: [{ path: c.route.path }],
+        getPath: (d: any) => d.path,
+        getColor: [7, 17, 31, 200],
+        getWidth: 6,
+        widthUnits: 'pixels',
+        capRounded: true,
+        jointRounded: true,
+      }),
+      new PathLayer({
+        id: 'route',
+        data: [{ path: c.route.path }],
+        getPath: (d: any) => d.path,
+        getColor: [255, 214, 140, 235],
+        getWidth: 2.5,
+        widthUnits: 'pixels',
+        capRounded: true,
+        jointRounded: true,
       }),
     );
   }
