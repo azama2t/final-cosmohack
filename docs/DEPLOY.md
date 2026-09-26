@@ -1,0 +1,51 @@
+# DEPLOY — запуск с нуля и демо-стенд
+
+Короткий указатель. Порядок шагов маршрута и их время — [CASE_RUN.md](CASE_RUN.md); сбои и починки — [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
+
+## Docker (любая ОС)
+
+<!--DOCKER-->Статус: не проверено из чистого клона (проверка идёт; результат — `reports/selfcheck/docker_check.md`).<!--/DOCKER-->
+
+```bash
+git clone https://github.com/azama2t/final-cosmohack
+cd final-cosmohack
+docker compose up --build -d      # образ python:3.12-slim, CPU; сервис на http://localhost:8070
+docker compose logs -f web        # логи
+docker compose down               # остановить
+```
+
+Другой порт: `PORT=18070 docker compose up --build -d`. Образ linux/amd64; на Mac с процессором Apple — через эмуляцию, не проверено.
+
+## Windows 10/11 — проверено
+
+Python 3.12 (py launcher), CPU, без GPU и без ключей. Первый запуск ставит пакеты (нужен интернет).
+
+```powershell
+git clone https://github.com/azama2t/final-cosmohack
+cd final-cosmohack
+powershell -ExecutionPolicy Bypass -File run.ps1 -Case all -Offline -Cpu   # .venv + пакеты + маршрут кейса
+powershell -ExecutionPolicy Bypass -File run.ps1 -Cpu                      # сервис: http://127.0.0.1:8000, API — /docs
+```
+
+Ключи `run.ps1`: `-Port 8080` — другой порт, `-NoBrowser` — не открывать браузер, `-DataRoot <папка>` — данные прежнего режима живых снимков (по умолчанию `service\demo`; для режима кейса не нужен), `-Case all -Force` — пересчёт с сетью. Собранный фронтенд лежит в git (`service/static/`), Node.js не нужен.
+
+Проверка на настоящем чистом клоне: [reports/selfcheck/clean_clone_1941.md](../reports/selfcheck/clean_clone_1941.md) — от `git clone` до карты ≈ 7,5 мин на CPU, числа совпали с основным репозиторием.
+
+## Linux / macOS
+
+Те же шаги без `run.ps1` (Python 3.12, CPU):
+
+```bash
+git clone https://github.com/azama2t/final-cosmohack
+cd final-cosmohack
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -r requirements-cpu.txt
+CUDA_VISIBLE_DEVICES="" .venv/bin/python scripts/case/run_all.py all --offline   # маршрут кейса
+.venv/bin/python -m service --port 8000                                          # сервис: http://127.0.0.1:8000
+```
+
+**Статус проверки:** Linux — проверка на чистом сервере запланирована, результат будет в `reports/selfcheck/`; до неё команды считаются непроверенными. macOS — не проверялось.
+
+## Демо-стенд
+
+https://5-231-59-204.sslip.io:8443 (запасной http://5.231.59.204) — сервер команды за обратным прокси Caddy (HTTPS). Стенд работает, пока включён наш сервер; воспроизводимость не зависит от него — всё запускается локально командами выше.

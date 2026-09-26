@@ -961,3 +961,51 @@ VIIRS 2026-09-26 z6/29/53 (Филиппины) → 200 image/jpeg 17 012 бай�
 Набор 26.09: Тибр 2026-09-16 (S2B, облачность вырезки 0, ветер 1,3 м/с) — «не обнаружено» (12 пикселей P ≥ 0,63,
 кластеров ≥ 5 пикс. нет); дельта Нила 2026-09-17 (S2C) — «недостаточно данных» (ветер 5,9 м/с > 5, правило Cózar 2024).
 Тибр 2026-09-26 (снят сегодня) есть в Earth Search, но нет в Planetary Computer → пропущен (у ES тёмная вода обрезана на DN = 1).
+
+### «Реальное время» (§55 п.1) — Sentinel-2, обработано нашей моделью (расширение /api/v3/fresh_s2)
+
+Что и почему (честно): детекция идёт на КАЖДОМ новом снимке Sentinel-2 L2A (10 м; новый снимок каждого места раз в
+2–5 дней) по всем 19 районам кейса (18 районов + акватория демо Cózar 2024), окно 30 суток, облачность вырезки района
+≤ 40 %. Ежедневные снимки NASA MODIS/VIIRS — 250–375 м на пиксель; детектор обучен на Sentinel-2 10 м, на таком пикселе
+скопления физически не видны, поэтому модель на кадрах NASA НЕ запускается (NASA — ежедневный контекст: облака,
+цветение, пятна; папка «NASA · ежедневный обзор», /api/v3/nasa/*). NASA HLS 30 м — модель не запускается (не сделано;
+было бы только экспериментом: модель обучена на 10 м). Количества (шт., масса, шт./км²) по спутниковому снимку нет.
+
+Обработка: scripts/case/live_batch.py (STAC Earth Search — поиск и отбор по облачности вырезки, пиксели — Planetary
+Computer; сцены, которых ещё нет в PC, пропускаются до следующего запуска) → studio_detector_current.run_scene
+(weights/lgbm, порог 0.63, маска облаков/блика/суши) → scene_zones.build_scene (суда, пена, ветер > 5 м/с, блик) →
+data/case/fresh_s2/<key>/ + index.json + runs.json. Растры — data_cache/fresh_s2 (вне git). Ежедневно:
+scripts/live_daily.ps1 (окно 3 сут.), задача Планировщика `MacroplasticLiveDaily` (06:30). Параллельный запуск
+исключён lock-файлом data_cache/fresh_s2/refresh.lock.
+
+- `GET /api/v3/fresh_s2` → прежние поля + `{folder: "Реальное время", subfolder: "Sentinel-2 · обработано нашей моделью",
+  stac, honesty {detector_on, nasa, hls, quantity, class}, last_update, new_scenes_last_run, scenes_30d, zones_30d,
+  finds_30d, regions_30d, counter: "за 30 дней обработано N снимков, найдено M зон, из них находок K", counting,
+  refresh {running, endpoint, daily}, regions: [{id, label, n_scenes, n_zones, n_finds, last_date, bbox, center,
+  dates: [scene…] (свежие первыми)}], scenes: [{…, n_zones, n_finds, whole_crop_status, processed_at, processing_s,
+  crop_cloud_frac, wind_high, label: "автоматически, не проверено человеком", human_checked: false,
+  in_case_numbers: false, source, mission: "Sentinel-2", rgb_url, zones_url}]}`.
+  Счёт: зона = кластер пикселей детектора ≥ 5 пикс. (правила основного слоя); запись «вся вырезка» (…-000) зоной не
+  считается; находка = зона со статусом «обнаружено» (detected).
+- `POST /api/v3/fresh_s2/refresh?days=3` → `{started: true, running: true, since, days}`; обработка фоном
+  (live_batch.py, CPU); если уже идёт (свой процесс или lock другого запуска < 3 ч) → 409 `{started: false, running: true, detail}`.
+- `GET /api/v3/fresh_s2/{key}/crops/{name}` → jpg вырезки зоны (`crop_file` в свойствах зоны). 404 для чужих путей.
+Тест: tests/test_fresh_s2_api.py (без сети, обработка подменена).
+
+#### §57/§58: воронка, каталог каждого снимка, окно поиска, продолжение после сбоя
+- `GET /api/v3/fresh_s2` дополнительно: `search_window {days, label: "поиск за: 1 мес | 3 мес | 6 мес | год"}`,
+  `funnel {window_days, window_label, complete, status_note, found, downloaded, passed_quality, excluded,
+  excluded_reasons {причина: N}, processed, pending, not_in_pc, no_disk, errors, with_finds, finds,
+  zone_status {detected, not_detected, insufficient_data}, scenes_by_result {with_finds, not_detected,
+  insufficient_data}, coverage [{region, region_name, months {YYYY-MM: {found, processed, pending, excluded}}}], steps}`,
+  `funnel_30d` (то же за 30 сут.), `funnel_label` (строка «поиск за: …: найдено → скачано → исключено → обработано →
+  снимков с находками → находок → зон «не обнаружено» / «недостаточно данных»; не проверено человеком»),
+  `last_success`, `last_success_label` («последняя успешная обработка: YYYY-MM-DD HH:MM UTC»), `counter_note`
+  (зона ≠ случай мусора), у снимка `age_days`, `age_label` («снят N сут. назад»; «сегодня» — только для age 0).
+- `GET /api/v3/fresh_s2/catalog[?region=&status=]` → `{funnel, search_window, status_labels, n, scenes: [{region,
+  region_name, date, stac_item, tile, source, tile_cloud_pct, crop_cloud_frac, crop_valid_frac, suitable, reason,
+  status: processed | rejected_quality | not_in_pc | error | screen_error | pending | no_disk, status_label,
+  processed_at, processing_s, n_zones, n_finds, key, zones_url, age_days}]}` — КАЖДЫЙ найденный снимок.
+- Скачано = маска облаков SCL 20 м вырезки получена (отбор); обработано = пиксели 10 м + детектор + фильтры.
+- Продолжение: `live_batch.py --days 180 --reuse-screen` не повторяет отбор и обработанные снимки; растры снимка
+  удаляются сразу после обработки; свободно < 3 ГБ или кэш > 1 ГБ → статус no_disk («остановлено: нет места на диске»).

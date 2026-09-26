@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-26T20:39:11+03:00",
+ "generated": "2026-09-27T00:12:42+03:00",
  "note": "генерируется scripts/final_numbers.py; руками не править; null = ещё не посчитано",
  "l3_lgbm": {
   "available": true,
@@ -5223,15 +5223,15 @@
   "selfcheck": {
    "available": true,
    "file": "reports/selfcheck/consistency_latest.json",
-   "when": "2026-09-26T15:33:38",
-   "checks": 284,
-   "ok": 268,
+   "when": "2026-09-26T20:58:35",
+   "checks": 259,
+   "ok": 257,
    "fail": 0,
-   "warn": 16,
-   "seconds": 269.0,
+   "warn": 2,
+   "seconds": 59.0,
    "invalid_ok": 46,
    "invalid_total": 46,
-   "p95_max_ms": 4304.0
+   "p95_max_ms": 1128.0
   },
   "control": {
    "n": 12,
@@ -6616,6 +6616,659 @@
     "card_tabs_found": true,
     "drift_sources": "HYCOM ESPC-D-V02 + NCEP GFS",
     "card_text": "вкладки «Главное | Качество | Подробно | Дрейф | Выгрузка»"
+   },
+   "report": {
+    "available": true,
+    "source": "task/macroplastic_marine_samples.csv; reports/organic/{val_flag,zones_flag}.json; docs/research/pairs/drift_shift_48h.csv; docs/research/marine_quantity/results/resolution_physics.json; reports/report_extra/service_card.json (scripts/case/report_figs.py)",
+    "protocol": "только чтение файлов в git; снимок сервиса пересобирает scripts/case/report_figs.py офлайн теми же функциями service/case_store.py, что отдают /api/v3; ничего не калибруется",
+    "organizers": {
+     "S1_GPGP2018": {
+      "short": "Lebreton et al. 2018, Sci Rep 8:4666",
+      "doi": "10.6084/m9.figshare.5873142",
+      "license": "CC BY 4.0",
+      "region": "North Pacific Subtropical Gyre",
+      "rows": 350,
+      "d0": "2015-07-25",
+      "d1": "2016-10-06",
+      "events": 181
+     },
+     "S2_SARGASSO_MSM41": {
+      "short": "Gutow et al. 2021 (cruise MSM41), PANGAEA",
+      "doi": "10.1594/PANGAEA.931833",
+      "license": "CC BY 4.0",
+      "region": "Sargasso Sea (subtropical NW Atlantic)",
+      "rows": 330,
+      "d0": "2015-04-01",
+      "d1": "2015-04-26",
+      "events": 63
+     },
+     "S3_SE_NORTH_SEA": {
+      "short": "Gutow et al. 2018, Mar Pollut Bull 131:763-772",
+      "doi": "10.1594/PANGAEA.890782",
+      "license": "CC BY 3.0",
+      "region": "South-eastern North Sea (German Bight)",
+      "rows": 222,
+      "d0": "2014-04-03",
+      "d1": "2016-04-10",
+      "events": 41
+     },
+     "S4_BLACK_SEA_DOORS3": {
+      "short": "Floating marine macro litter, DOORS cruise 3 (2024), Zenodo",
+      "doi": "10.5281/zenodo.15129753",
+      "license": "CC BY 4.0",
+      "region": "Black Sea (Bulgarian, Turkish and Georgian waters)",
+      "rows": 33,
+      "d0": "2024-06-02",
+      "d1": "2024-06-18",
+      "events": 33
+     }
+    },
+    "organizers_rows": 935,
+    "organizers_events": 318,
+    "organic": {
+     "rule": "NDVI ≥ 0,20 и FAI > 0 (медианы по пикселям детекции зоны)",
+     "split": "MARIDA val (официальный), test не читался",
+     "n_patches": 328,
+     "threshold": 0.63,
+     "classes": [
+      {
+       "key": "Marine Debris",
+       "name": "мусор",
+       "pixels": 1075,
+       "objects": 418,
+       "flag_obj": 1,
+       "flag_px_share": 0.002,
+       "flag_obj_ci95": [
+        0.0,
+        0.013
+       ],
+       "det_md_px": 984,
+       "det_md_flagged": 2,
+       "det_md_share": 0.915
+      },
+      {
+       "key": "Dense Sargassum",
+       "name": "саргассум плотный",
+       "pixels": 1167,
+       "objects": 16,
+       "flag_obj": 16,
+       "flag_px_share": 1.0,
+       "flag_obj_ci95": [
+        0.806,
+        1.0
+       ],
+       "det_md_px": 0,
+       "det_md_flagged": 0,
+       "det_md_share": 0.0
+      },
+      {
+       "key": "Sparse Sargassum",
+       "name": "саргассум редкий",
+       "pixels": 385,
+       "objects": 60,
+       "flag_obj": 42,
+       "flag_px_share": 0.652,
+       "flag_obj_ci95": [
+        0.575,
+        0.801
+       ],
+       "det_md_px": 6,
+       "det_md_flagged": 1,
+       "det_md_share": 0.016
+      },
+      {
+       "key": "Natural Organic Material",
+       "name": "прочая органика",
+       "pixels": 92,
+       "objects": 46,
+       "flag_obj": 0,
+       "flag_px_share": 0.033,
+       "flag_obj_ci95": [
+        0.0,
+        0.077
+       ],
+       "det_md_px": 53,
+       "det_md_flagged": 0,
+       "det_md_share": 0.576
+      }
+     ],
+     "zones_scenes": 83,
+     "zones": 255,
+     "zones_flagged": 2
+    },
+    "drift48": {
+     "pairs": [
+      {
+       "id": "32-ER604",
+       "transect": "604 (ER604)",
+       "items": 16,
+       "before_m": 85.0,
+       "after_m": 66.4,
+       "items_le50": 0,
+       "dt_h": [
+        0.2,
+        -1.8
+       ]
+      },
+      {
+       "id": "29",
+       "transect": "0222-MS01380_TR12",
+       "items": 7,
+       "before_m": 1030.0,
+       "after_m": 1784.7,
+       "items_le50": 0,
+       "dt_h": [
+        3.5,
+        1.5
+       ]
+      },
+      {
+       "id": "36",
+       "transect": "PLM1",
+       "items": 32,
+       "before_m": 554.0,
+       "after_m": 460.4,
+       "items_le50": 0,
+       "dt_h": [
+        1.2,
+        -0.8
+       ]
+      },
+      {
+       "id": "55",
+       "transect": "1_ABR_VA13",
+       "items": 12,
+       "before_m": 964.0,
+       "after_m": 219.8,
+       "items_le50": 0,
+       "dt_h": [
+        -0.4,
+        -2.4
+       ]
+      },
+      {
+       "id": "80",
+       "transect": "SMTS_S0518_LitA",
+       "items": 18,
+       "before_m": 293.0,
+       "after_m": 154.5,
+       "items_le50": 0,
+       "dt_h": [
+        0.8,
+        -1.2
+       ]
+      },
+      {
+       "id": "94",
+       "transect": "NAPA_S012_Lita",
+       "items": 19,
+       "before_m": 1354.0,
+       "after_m": 1742.7,
+       "items_le50": 0,
+       "dt_h": [
+        6.9,
+        4.9
+       ]
+      },
+      {
+       "id": "114",
+       "transect": "8PC03_S009_LitB",
+       "items": 47,
+       "before_m": 209.0,
+       "after_m": 94.1,
+       "items_le50": 0,
+       "dt_h": [
+        -3.4,
+        -5.4
+       ]
+      },
+      {
+       "id": "117",
+       "transect": "9PN04_S009_LitA",
+       "items": 65,
+       "before_m": 392.0,
+       "after_m": 435.2,
+       "items_le50": 0,
+       "dt_h": [
+        0.7,
+        -1.3
+       ]
+      }
+     ],
+     "n_pairs": 8,
+     "threshold_m": 50,
+     "n_pass": 0,
+     "best_after_m": 66.4,
+     "dt_abs_max_h": 6.9,
+     "n_closer": 5,
+     "source": "docs/research/pairs/drift_shift_48h.{csv,md}"
+    },
+    "physics": {
+     "n_objects": 22642,
+     "median_item_m2": 0.27,
+     "s2_share_fill20_pct": 0.076,
+     "s2_median_fill_pct": 0.27,
+     "share_area_ge_20m2_pct": 0.076,
+     "s2_C": 53.9,
+     "items_per_pixel": 0.0054,
+     "pixels_per_item": 186,
+     "coverage_ppm": 14.6,
+     "gap_to_fill20": 14000.0
+    },
+    "service": {
+     "source": "service/case_store.py: scene_zones_all, sz_scene_stats, sz_regions, region_dynamics, defense_examples (те же функции, что у /api/v3/scene_zones*, /api/v3/defense_examples); пороги — configs/zone_estimate.yaml",
+     "command": ".venv\\Scripts\\python.exe scripts\\case\\report_figs.py",
+     "n_zones": 286,
+     "n_finds": 77,
+     "large_km2": 0.1,
+     "large_axis_m": 500.0,
+     "n_large_finds": 25,
+     "alerts": {
+      "слабый": 24,
+      "средний": 53,
+      "высокий": 0
+     },
+     "shore_n": 77,
+     "shore_km_min": 0.1,
+     "shore_km_median": 11.3,
+     "shore_km_max": 27.9,
+     "n_finds_with_drift": 33,
+     "stranded_pct_median": 12.7,
+     "stranded_pct_max": 99.7,
+     "n_finds_stranded_pos": 24,
+     "n_organic_finds": 2,
+     "n_field_estimate": 29,
+     "field_estimate_units": [
+      "items/km2"
+     ],
+     "quantity_by_image_values": [
+      "не определено (принятых пар 0)"
+     ],
+     "demo": {
+      "key": "demo-cozar-2021-03-11",
+      "n_finds": 23,
+      "n_large": 10,
+      "large_area_km2": 9.8949,
+      "total_find_area_km2": 11.738,
+      "find_mask_area_km2": 0.1903,
+      "valid_water_km2": 197.964,
+      "coverage_pct": 0.0961
+     },
+     "n_regions": 19,
+     "n_regions_multi_date": 14,
+     "total_find_area_km2_all": 21.77,
+     "dynamics_region": "honduras",
+     "dynamics": {
+      "label": "Гондурас · Омоа",
+      "n_dates": 9,
+      "rows": [
+       {
+        "date": "2019-01-12",
+        "evaluable": true,
+        "n_finds": 2,
+        "n_large": 1,
+        "total_find_area_km2": 0.4526,
+        "coverage_pct": 0.0003,
+        "field_items_km2": null
+       },
+       {
+        "date": "2020-08-29",
+        "evaluable": true,
+        "n_finds": 4,
+        "n_large": 1,
+        "total_find_area_km2": 0.6067,
+        "coverage_pct": 0.0008,
+        "field_items_km2": null
+       },
+       {
+        "date": "2025-01-30",
+        "evaluable": true,
+        "n_finds": 8,
+        "n_large": 3,
+        "total_find_area_km2": 1.4702,
+        "coverage_pct": 0.0013,
+        "field_items_km2": null
+       },
+       {
+        "date": "2025-02-19",
+        "evaluable": true,
+        "n_finds": 1,
+        "n_large": 0,
+        "total_find_area_km2": 0.0774,
+        "coverage_pct": 0.0001,
+        "field_items_km2": null
+       },
+       {
+        "date": "2025-12-28",
+        "evaluable": true,
+        "n_finds": 5,
+        "n_large": 1,
+        "total_find_area_km2": 1.0107,
+        "coverage_pct": 0.0009,
+        "field_items_km2": null
+       },
+       {
+        "date": "2026-02-14",
+        "evaluable": true,
+        "n_finds": 3,
+        "n_large": 1,
+        "total_find_area_km2": 0.5386,
+        "coverage_pct": 0.0007,
+        "field_items_km2": null
+       },
+       {
+        "date": "2026-02-19",
+        "evaluable": true,
+        "n_finds": 3,
+        "n_large": 3,
+        "total_find_area_km2": 1.2043,
+        "coverage_pct": 0.0019,
+        "field_items_km2": null
+       },
+       {
+        "date": "2026-04-10",
+        "evaluable": true,
+        "n_finds": 4,
+        "n_large": 0,
+        "total_find_area_km2": 0.6029,
+        "coverage_pct": 0.0009,
+        "field_items_km2": null
+       },
+       {
+        "date": "2026-05-30",
+        "evaluable": true,
+        "n_finds": 2,
+        "n_large": 0,
+        "total_find_area_km2": 0.1728,
+        "coverage_pct": 0.0002,
+        "field_items_km2": null
+       }
+      ]
+     },
+     "defense_examples": [
+      {
+       "kind": "success",
+       "label": "Правильное обнаружение скопления",
+       "title": "30SXE · зона 16",
+       "verdict": "правильно",
+       "reference": "каталог Cózar 2024, уровень B (нити проверены людьми по снимку)",
+       "basis": "контур зоны пересекает 2 нит(и) Cózar; ни один фильтр артефактов не сработал; сцена отложена (не в обучении детектора)",
+       "zone_id": "SZ-demo-cozar-2021-03-11-016",
+       "scene_key": "demo-cozar-2021-03-11",
+       "crop": "/api/v3/scene_zones/scenes/demo-cozar-2021-03-11/crops/SZ-demo-cozar-2021-03-11-016.jpg"
+      },
+      {
+       "kind": "miss",
+       "label": "Пропуск скопления",
+       "title": "30SXE · нить Cózar 9602",
+       "verdict": "пропуск (большая часть нити не отмечена)",
+       "reference": "каталог Cózar 2024, уровень B: нить 9602, 124 пикс.",
+       "basis": "в нити 124 пикс. по каталогу; детектор отметил в её прямоугольнике 14 (≤ 11 %) → пропущено не менее 110 пикс.; вода в рамке пригодна (6630 из 6630 пикс.), ветер 2.48 м/с. По всему размеченному набору доля найденных пикселей B — 2,8 %: пропуски для этого детектора — норма",
+       "zone_id": null,
+       "scene_key": "demo-cozar-2021-03-11",
+       "crop": "/api/v3/scene_zones/scenes/demo-cozar-2021-03-11/crops/SZ-demo-cozar-2021-03-11-miss-9602.jpg"
+      },
+      {
+       "kind": "false_alarm",
+       "label": "Ложное обнаружение судна или следа",
+       "title": "Гондурас · Омоа · зона 7",
+       "verdict": "ложное срабатывание",
+       "reference": "независимой разметки нет — качественный разбор по снимку",
+       "basis": "пиксели детектора у яркой цели и её кильватера (доля 1.0); сработало правило судна/кильватера",
+       "zone_id": "SZ-drift-honduras-2026-02-19-007",
+       "scene_key": "drift-honduras-2026-02-19",
+       "crop": "/api/v3/scene_zones/scenes/drift-honduras-2026-02-19/crops/SZ-drift-honduras-2026-02-19-007.jpg"
+      },
+      {
+       "kind": "background_error",
+       "label": "Ошибка на пене, блике или другом сложном фоне",
+       "title": "Манила · зона 1",
+       "verdict": "ошибка модели на сложном фоне (поймана фильтром)",
+       "reference": "независимой разметки нет — качественный разбор по снимку",
+       "basis": "детектор уверен (P max 1.0), но пена: «белый» спектр, прирост B2 к B8 = 1.309 ≥ 0.8 (ветер 2.44 м/с) — пена/блик, а не плавающий мусор",
+       "zone_id": "SZ-live-manila-2025-06-15-001",
+       "scene_key": "live-manila-2025-06-15",
+       "crop": "/api/v3/scene_zones/scenes/live-manila-2025-06-15/crops/SZ-live-manila-2025-06-15-001.jpg"
+      },
+      {
+       "kind": "no_analysis",
+       "label": "Область, где анализ невозможен из-за качества",
+       "title": "Дурбан · 2025-07-31",
+       "verdict": "анализ невозможен",
+       "reference": "не нужен: вывод по правилу освещённости, до модели",
+       "basis": "низкое солнце: зенит 59.8° ≥ 58°; условия вне обучения детектора — его 146 пикс. не учитываются (правило освещённости, общее со студией)",
+       "zone_id": null,
+       "scene_key": "drift-durban-2025-07-31",
+       "crop": "/api/v3/scene_zones/scenes/drift-durban-2025-07-31/rgb.jpg"
+      }
+     ],
+     "n_defense_kinds": 5
+    },
+    "late": {
+     "log_ready": {
+      "54.1": "21:20",
+      "54.2": "21:13",
+      "54.4": "21:21",
+      "54.5": "21:26",
+      "54.3": "21:31",
+      "55.2": "22:24"
+     },
+     "nasa_res_m_min": 250,
+     "nasa_res_m_max": 375,
+     "nasa_area_ratio_min": 625.0,
+     "nasa_area_ratio_max": 1406.25,
+     "drones_n_sets": 6,
+     "drones_n_frames": 81,
+     "fresh": {
+      "n_scenes": 202,
+      "n_regions": 20,
+      "date_min": "2026-06-09",
+      "date_max": "2026-09-26",
+      "n_evaluable": 201,
+      "n_zones": 631,
+      "n_finds": 19,
+      "generated": "2026-09-26T21:11:49Z",
+      "label": "автоматически, не проверено человеком",
+      "model_sha": "0eeebf43fccc"
+     },
+     "prime_metrics": null,
+     "prime_counter": {
+      "n_rows": 220,
+      "n_events": 187,
+      "n_items": 3372,
+      "n_tiles": 3910,
+      "threshold": 0.8,
+      "retrained": false,
+      "rows": [
+       {
+        "gsd": 0.05,
+        "recall_pct": 23.6,
+        "recall_tiles_pct": 48.2,
+        "fp_per_tile": 0.268,
+        "fp_per_km2": 1637.0,
+        "mae": 1529.9,
+        "bias": 1529.9
+       },
+       {
+        "gsd": 0.2,
+        "recall_pct": 4.6,
+        "recall_tiles_pct": 4.8,
+        "fp_per_tile": 0.0,
+        "fp_per_km2": 0.0,
+        "mae": 132.8,
+        "bias": -132.8
+       },
+       {
+        "gsd": 0.5,
+        "recall_pct": 0.7,
+        "recall_tiles_pct": 0.7,
+        "fp_per_tile": 0.0,
+        "fp_per_km2": 0.0,
+        "mae": 138.4,
+        "bias": -138.4
+       },
+       {
+        "gsd": 1.0,
+        "recall_pct": 0.1,
+        "recall_tiles_pct": 0.1,
+        "fp_per_tile": 0.0,
+        "fp_per_km2": 0.0,
+        "mae": 139.2,
+        "bias": -139.2
+       },
+       {
+        "gsd": 3.0,
+        "recall_pct": 0.0,
+        "recall_tiles_pct": 0.0,
+        "fp_per_tile": 0.0,
+        "fp_per_km2": 0.0,
+        "mae": 139.4,
+        "bias": -139.4
+       },
+       {
+        "gsd": 10.0,
+        "recall_pct": 0.0,
+        "recall_tiles_pct": 0.0,
+        "fp_per_tile": 0.0,
+        "fp_per_km2": 0.0,
+        "mae": 139.4,
+        "bias": -139.4
+       }
+      ],
+      "mean_csv": 139.4,
+      "gsd_list": "0.05, 0.2, 0.5, 1, 3, 10",
+      "source": "reports/prime/metrics.json (scripts/case/prime_csv.py gen|infer|score)"
+     },
+     "drones_pred": {
+      "total": {
+       "found": 274,
+       "labelled": 444,
+       "false": 257,
+       "n_pred": 536
+      },
+      "sets": {
+       "ucwd": {
+        "trained": false,
+        "frames": 16,
+        "found": 44,
+        "labelled": 78,
+        "false": 139,
+        "n_pred": 183
+       },
+       "tun_marinelitter": {
+        "trained": false,
+        "frames": 16,
+        "found": 29,
+        "labelled": 67,
+        "false": 33,
+        "n_pred": 62
+       },
+       "martin2021": {
+        "trained": false,
+        "frames": 5,
+        "found": null,
+        "labelled": null,
+        "false": null,
+        "n_pred": 5
+       },
+       "maharjan2022": {
+        "trained": false,
+        "frames": 16,
+        "found": 19,
+        "labelled": 48,
+        "false": 30,
+        "n_pred": 49
+       },
+       "winans2023": {
+        "trained": true,
+        "frames": 16,
+        "found": 110,
+        "labelled": 165,
+        "false": 47,
+        "n_pred": 157
+       },
+       "fml": {
+        "trained": true,
+        "frames": 12,
+        "found": 72,
+        "labelled": 86,
+        "false": 8,
+        "n_pred": 80
+       }
+      },
+      "threshold": 0.8,
+      "out_found": 92,
+      "out_labelled": 193,
+      "out_false": 202,
+      "in_found": 182,
+      "in_labelled": 251,
+      "in_false": 55,
+      "source": "data/case/drones/pred.json (scripts/case/drones_pred.py)"
+     },
+     "prime_n_scenes": 6,
+     "realtime_text": "Фактическая воронка на момент сборки: найдено 1077 → скачано 1077 → прошло качество 476 → обработано 202 → снимков с находками 10 → зон 477 (находок 19; исключено по качеству 600; нет пикселей в Planetary Computer 4; ошибки обработки 0; ещё в очереди 271; облачность вырезки > 40 %: 339; вырезка на краю тайла (мало валидных пикселей): 261; пикселей ещё нет в Planetary Computer: 4). Окно поиска — последние 180 сут (даты съёмки снимков в индексе — с 2026-06-09 по 2026-09-26). Последняя успешная обработка — 2026-09-26T20:47:23Z (UTC). Модель — weights/lgbm (sha256 0eeebf43fccc), те же фильтры качества, что у архивных сцен. Снимки с нулём находок показаны тоже: «0 находок» — это результат. Подпись у каждого снимка — «автоматически, не проверено человеком»; эти зоны не входят в числа кейса. Источник — `data/case/fresh_s2/index.json`.",
+     "rt_processed": 202,
+     "prime_text": "Отдельно от демо проведён эксперимент со счётчиком на синтетических кадрах строк CSV при разном разрешении — он описан в разделе о физическом пределе разрешения и к демо-карточкам не относится.",
+     "status": {
+      "nasa": "готово по журналу (21:20)",
+      "drones": "готово по журналу (21:13)",
+      "timeline": "готово по журналу (21:31)",
+      "drift": "готово по журналу (21:21)",
+      "realtime": "работает; массовый прогон продолжается, на момент сборки обработано 202 снимков",
+      "prime": "готово по журналу (22:24)"
+     }
+    }
+   },
+   "s54": {
+    "source": "service/routes_nasa.py; data/case/drones/index.json; data/case/prime/index.json",
+    "nasa_res_m_min": 250,
+    "nasa_res_m_max": 375,
+    "drones_n_sets": 6,
+    "drones_n_frames": 81,
+    "drones_n_sets_drone": 4,
+    "prime_n_scenes": 6
+   },
+   "s55": {
+    "source": "data/case/fresh_s2/index.json; data/case/prime_csv/index.json",
+    "rt_days": 30,
+    "rt_last_update": "2026-09-26T20:47:23Z",
+    "rt_n_scenes": 84,
+    "rt_n_zones": 342,
+    "rt_n_finds": 9,
+    "rt_n_regions": 20,
+    "prime_demo_n_scenes": 220,
+    "prime_quality_metrics": null,
+    "rt_funnel": {
+     "window_days": 180,
+     "window_label": "поиск за: 6 мес",
+     "complete": false,
+     "status_note": "архив обработан не полностью: 271 пригодных снимков не обработаны, 0 найденных не проверены по облачности (обработка на CPU ~1,5–2 мин на снимок); показан уже полученный результат, продолжение — live_batch.py --reuse-screen",
+     "found": 1077,
+     "downloaded": 1077,
+     "found_note": "найдено = все снимки Sentinel-2 L2A в каталоге STAC (Earth Search) по центру района, одна сцена на дату",
+     "passed_quality": 476,
+     "processed": 202,
+     "with_finds": 10,
+     "zones": 477,
+     "finds": 19,
+     "not_in_pc": 4,
+     "errors": 0,
+     "pending": 271,
+     "not_checked": 0,
+     "rejected_quality": 600,
+     "excluded": 604,
+     "not_processed": 271,
+     "no_disk": 271,
+     "steps": "найдено (STAC, снимки района, одна сцена на дату) → скачано (маска облаков SCL 20 м вырезки) → прошло качество (облачность вырезки ≤ 40 %, валидно ≥ 75–90 %, есть вода) → обработано (пиксели 10 м из Planetary Computer + детектор + фильтры) → снимков с находками → зон"
+    }
+   },
+   "s56": {
+    "source": "data/case/drones/pred.json",
+    "match_rule": "жадно по уверенности, IoU ≥ 0.5 с рамкой разметки (полигон → его рамка)",
+    "drones_pred_tp": 274,
+    "drones_n_labels": 444,
+    "drones_pred_fp": 257,
+    "drones_n_pred": 536
    }
   },
   "clean_clone": {
@@ -6732,14 +7385,14 @@
   "tests": {
    "available": true,
    "source": "reports/case_run/case_tests.json",
-   "passed": 255,
+   "passed": 252,
    "skipped": 2,
-   "failed": 0,
-   "seconds": 37.7,
-   "when": "26.09.2026 20:39",
+   "failed": 3,
+   "seconds": 41.5,
+   "when": "27.09.2026 00:12",
    "command": "python -m pytest -q tests/test_case_conc_model.py tests/test_case_concentration.py tests/test_case_consistency.py tests/test_case_coverage.py tests/test_case_docs_numbers.py tests/test_case_expert_check.py tests/test_case_field_intervals.py tests/test_case_geometry.py tests/test_case_geometry_integration.py tests/test_case_pairfinder.py tests/test_case_run_all.py tests/test_api_v3.py"
   },
   "n_test_funcs": 166,
-  "n_tests": 255
+  "n_tests": 252
  }
 }

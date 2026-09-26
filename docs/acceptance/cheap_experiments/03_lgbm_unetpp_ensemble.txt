@@ -1,0 +1,110 @@
+ТЫ — senior ML engineer. Выполняй эту задачу ТОЛЬКО если уже существует отчёт:
+reports/cheap_experiments/unetpp_pretrained/REPORT.md
+и в нём есть основания считать ошибки pretrained U-Net++ и текущего LightGBM комплементарными.
+
+ЗАДАЧА
+Проверить несколько ПРОСТЫХ ансамблей текущего weights/lgbm и уже рассчитанного pretrained U-Net++ БЕЗ обучения новой тяжёлой модели.
+
+ЦЕЛЬ
+Снизить false positives на судах/пене/облаках/блике и/или увеличить перенос на реальные скопления, не разрушив MARIDA val.
+
+НЕ НАДО
+- не fine-tune U-Net++;
+- не обучать transformer/CNN;
+- не менять исходный weights/lgbm;
+- не использовать MARIDA final test для выбора;
+- не делать сотни комбинаций параметров.
+
+ВХОДЫ
+Используй СОХРАНЁННЫЕ probability predictions обеих моделей, чтобы эксперимент был дешёвым:
+P_lgbm(x)
+P_cnn(x)
+
+Если spatial grids различаются — сначала корректно привести CNN probability к сетке LightGBM/MARIDA nearest/bilinear способом, подходящим для probability raster. Геометрию не сдвигать. Проверить alignment несколькими точками/масками.
+
+ПОДБОР ТОЛЬКО НА MARIDA VAL
+Проверь небольшой заранее ограниченный набор вариантов.
+
+1. AND FILTER
+positive = (P_lgbm >= t_lgbm) AND (P_cnn >= t_cnn)
+Где t_lgbm по умолчанию 0.63, а t_cnn взять из эксперимента 02.
+Допускается проверить не более 3 значений t_cnn вокруг val-optimal.
+
+2. SOFT AVERAGE
+P = a*P_lgbm + (1-a)*P_cnn
+Проверить только a in {0.25, 0.5, 0.75}.
+Для каждого a threshold подобрать только на MARIDA val.
+
+3. CNN VETO
+Основной detector остаётся LightGBM:
+positive = P_lgbm >= 0.63,
+но удаляем candidate, если P_cnn < t_veto.
+Проверить максимум 3 t_veto, выбранных заранее по распределению CNN scores на MARIDA val, например quantiles/round thresholds. Не делать широкий grid search.
+
+4. OPTIONAL OBJECT-LEVEL VETO
+Только если уже существуют connected components текущего LightGBM и легко получить mean/max CNN probability внутри каждого компонента:
+оставлять компонент, если mean(P_cnn) или max(P_cnn) выше порога.
+Проверить максимум 2 простых правила.
+
+ПРОТОКОЛ
+1. Все варианты выбираются ТОЛЬКО по MARIDA val.
+2. Основной metric: F1 Marine Debris.
+3. Одновременно считать Precision, Recall, IoU, TP/FP/FN.
+4. После фиксации 1 лучшего ансамбля прогнать БЕЗ перенастройки на domain-stress:
+   - ships;
+   - foam;
+   - clouds;
+   - glint;
+   - Cózar/external positives;
+   - real L2A crops, если доступны.
+5. Сравнить с исходным weights/lgbm и standalone U-Net++.
+
+ПРАВИЛО ВЫБОРА
+Не выбирать ансамбль только по F1, если он резко ломает recall настоящих скоплений.
+Кандидат практически интересен, если выполняется хотя бы одно:
+A. MARIDA val F1 >= current_F1 + 0.01 без ухудшения domain metrics;
+ИЛИ
+B. MARIDA val F1 падает не более чем на 0.005, но ships/foam/cloud/glint FP падают существенно (ориентир >=20% relative) и external-positive recall не падает существенно;
+ИЛИ
+C. external/domain recall заметно растёт при сопоставимом FP и MARIDA val остаётся в пределах разумного разброса.
+
+Если ни один вариант не проходит — вердикт REJECT и production не менять.
+
+FINAL TEST
+MARIDA final test уже открыт. Не использовать его в выборе. После полной фиксации одного варианта можно сделать только post-hoc regression benchmark и явно подписать, что это не новый независимый test.
+
+АРТЕФАКТЫ
+Создай:
+reports/cheap_experiments/ensemble/grid.csv
+reports/cheap_experiments/ensemble/best_config.json
+reports/cheap_experiments/ensemble/domain_results.csv
+reports/cheap_experiments/ensemble/REPORT.md
+reports/cheap_experiments/ensemble/run_commands.txt
+
+В grid.csv:
+method, params, threshold, precision, recall, f1, iou, tp, fp, fn
+
+В best_config.json:
+- exact formula;
+- thresholds/weights;
+- source model hashes;
+- split used for tuning;
+- timestamp;
+- decision KEEP/REJECT.
+
+REPORT.md:
+1. baseline LightGBM;
+2. standalone U-Net++;
+3. все дешёвые ensemble variants;
+4. лучший вариант на val;
+5. domain stress comparison;
+6. почему KEEP/REJECT;
+7. production model НЕ изменять автоматически.
+
+В КОНЦЕ ВЫВЕДИ
+- лучшую формулу ансамбля;
+- MARIDA val delta F1 vs weights/lgbm;
+- ships/foam/cloud/glint FP delta;
+- external-positive recall delta;
+- KEEP или REJECT;
+- путь к REPORT.md.

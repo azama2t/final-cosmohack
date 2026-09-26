@@ -1,0 +1,136 @@
+ТЫ — senior CV/remote-sensing ML engineer. Работаешь внутри существующего репозитория проекта по обнаружению морского макропластика Sentinel-2.
+
+ЗАДАЧА
+Не обучая новую нейросеть, подключи ГОТОВУЮ pretrained модель из open-source проекта MarcCoru/marinedebrisdetector (предпочтительно их рекомендованный U-Net++/segmentation checkpoint) и честно сравни её с нашим текущим weights/lgbm на тех же доступных сценах/выборках.
+
+ЦЕЛЬ
+Ответить только на один вопрос:
+"Даёт ли пространственный контекст CNN полезный сигнал, которого нет у пиксельного LightGBM?"
+
+НЕ НАДО
+- не переписывать production;
+- не тренировать U-Net++ с нуля;
+- не fine-tune сеть на наших данных в этой задаче;
+- не подбирать архитектуру;
+- не подбирать параметры по final test;
+- не заменять weights/lgbm.
+
+ПЕРЕД НАЧАЛОМ
+1. Изучи существующий repo и найди:
+   - текущий inference weights/lgbm;
+   - MARIDA train/val/test split;
+   - готовые внешние L2A/domain datasets и их пути;
+   - detector_v2 B/D наборы;
+   - правила water/cloud/land masks.
+2. Зафиксируй commit/hash/версию внешней MarineDebrisDetector модели и способ получения весов.
+3. Зафиксируй, какие Sentinel-2 bands ожидает pretrained модель и в каком порядке/масштабе.
+
+КРИТИЧЕСКИ ВАЖНО
+Нельзя молча скормить модели несовместимые данные.
+Проверь:
+- L1C или L2A;
+- число каналов;
+- порядок bands;
+- spatial resolution/resampling;
+- reflectance scaling (например x1e-4);
+- nodata;
+- нормализацию;
+- CRS/геотрансформ.
+Все преобразования опиши в отчёте.
+
+ПРОТОКОЛ
+Этап 1 — sanity check.
+Запусти pretrained модель на 1–2 известных сценах/patches и проверь:
+- output shape;
+- диапазон probability;
+- отсутствие NaN/сдвига каналов;
+- географическое совпадение маски с входом.
+
+Этап 2 — MARIDA validation.
+На ТОЙ ЖЕ MARIDA val, которая использовалась в проекте:
+- получить probability для класса debris;
+- выбрать threshold ТОЛЬКО на val;
+- посчитать P/R/F1/IoU;
+- сохранить predictions.
+
+Если pretrained repo уже содержит собственный threshold, посчитай ДВА режима:
+A. author_threshold — как рекомендуют авторы;
+B. local_val_threshold — threshold, выбранный только на нашей MARIDA val.
+
+Этап 3 — domain stress test БЕЗ перенастройки.
+С зафиксированным threshold прогнать по уже подготовленным наборам, если они локально доступны:
+- Cózar positives;
+- FloatingObjects;
+- PLP;
+- суда;
+- foam;
+- cloud;
+- glint;
+- реальные L2A pair crops / live scenes.
+
+Для всех domain-наборов использовать тот же preprocessing и НИЧЕГО по ним не подбирать.
+
+Этап 4 — сравнение с текущим LightGBM.
+Сделай одну таблицу:
+
+dataset | metric | LightGBM | pretrained U-Net++ | delta
+
+Минимум:
+MARIDA val: Precision, Recall, F1, IoU
+Cózar/external positives: recall
+ships: object FP rate + pixel FP rate
+foam/cloud/glint: FP rate
+real L2A crops: число/доля срабатываний, если есть доступная разметка — precision/recall, если нет — только описательные числа без объявления качества.
+
+MARIDA FINAL TEST
+Он уже был открыт в проекте.
+Разрешается прогнать на нём pretrained U-Net++ ТОЛЬКО как post-hoc reference benchmark после полной фиксации модели и threshold на val. Нельзя менять ничего после просмотра test и потом считать его новым независимым final test.
+В отчёте явно назвать это "historical/opened test benchmark", а не новый lockbox.
+
+АРТЕФАКТЫ
+Создай:
+reports/cheap_experiments/unetpp_pretrained/model_source.json
+reports/cheap_experiments/unetpp_pretrained/preprocess.md
+reports/cheap_experiments/unetpp_pretrained/marida_val.csv
+reports/cheap_experiments/unetpp_pretrained/domain_results.csv
+reports/cheap_experiments/unetpp_pretrained/predictions/   (только компактные маски/probability, если размер разумный)
+reports/cheap_experiments/unetpp_pretrained/REPORT.md
+reports/cheap_experiments/unetpp_pretrained/run_commands.txt
+
+В model_source.json сохранить:
+repository/url, commit_or_release, checkpoint_name, sha256_if_possible, expected_bands, expected_product_level, threshold_author.
+
+REPORT.md должен ответить:
+1. модель технически совместима с нашими L2A или нет;
+2. сильнее/слабее она на MARIDA val;
+3. что происходит на судах;
+4. что происходит на foam/cloud/glint;
+5. помогает ли spatial context на внешних positives;
+6. является ли сигнал комплементарным LightGBM.
+
+КАК ОЦЕНИТЬ КОМПЛЕМЕНТАРНОСТЬ
+Если есть пиксельные predictions обеих моделей, дополнительно посчитай на MARIDA val и доступном domain-dev:
+- долю TP, найденных обеими;
+- TP только LightGBM;
+- TP только U-Net++;
+- FP обеими;
+- FP только LightGBM;
+- FP только U-Net++.
+
+Сохрани это в overlap.json.
+
+КРИТЕРИЙ ДЛЯ ПЕРЕХОДА К ENSEMBLE
+Не объявлять U-Net++ победителем просто из-за одного F1.
+Эксперимент 03 имеет смысл, если есть хотя бы один из признаков:
+- U-Net++ ловит заметную долю TP, которые пропускает LightGBM;
+- U-Net++ заметно режет ships/foam false positives;
+- ошибки двух моделей явно не совпадают;
+- на domain positives U-Net++ лучше при приемлемом FP.
+
+В КОНЦЕ ВЫВЕДИ
+- MARIDA val F1 обеих моделей;
+- ships FP обеих моделей;
+- external/domain recall обеих моделей;
+- overlap TP/FP;
+- вердикт: ENSEMBLE_WORTH_TRYING = YES/NO;
+- путь к REPORT.md.

@@ -1,0 +1,189 @@
+{
+ "source": "service/case_store.py: scene_zones_all, sz_scene_stats, sz_regions, region_dynamics, defense_examples (те же функции, что у /api/v3/scene_zones*, /api/v3/defense_examples); пороги — configs/zone_estimate.yaml",
+ "command": ".venv\\Scripts\\python.exe scripts\\case\\report_figs.py",
+ "n_zones": 286,
+ "n_finds": 77,
+ "large_km2": 0.1,
+ "large_axis_m": 500.0,
+ "n_large_finds": 25,
+ "alerts": {
+  "слабый": 24,
+  "средний": 53,
+  "высокий": 0
+ },
+ "shore_n": 77,
+ "shore_km_min": 0.1,
+ "shore_km_median": 11.3,
+ "shore_km_max": 27.9,
+ "n_finds_with_drift": 33,
+ "stranded_pct_median": 12.7,
+ "stranded_pct_max": 99.7,
+ "n_finds_stranded_pos": 24,
+ "n_organic_finds": 2,
+ "n_field_estimate": 29,
+ "field_estimate_units": [
+  "items/km2"
+ ],
+ "quantity_by_image_values": [
+  "не определено (принятых пар 0)"
+ ],
+ "demo": {
+  "key": "demo-cozar-2021-03-11",
+  "n_finds": 23,
+  "n_large": 10,
+  "large_area_km2": 9.8949,
+  "total_find_area_km2": 11.738,
+  "find_mask_area_km2": 0.1903,
+  "valid_water_km2": 197.964,
+  "coverage_pct": 0.0961
+ },
+ "n_regions": 19,
+ "n_regions_multi_date": 14,
+ "total_find_area_km2_all": 21.77,
+ "dynamics_region": "honduras",
+ "dynamics": {
+  "label": "Гондурас · Омоа",
+  "n_dates": 9,
+  "rows": [
+   {
+    "date": "2019-01-12",
+    "evaluable": true,
+    "n_finds": 2,
+    "n_large": 1,
+    "total_find_area_km2": 0.4526,
+    "coverage_pct": 0.0003,
+    "field_items_km2": null
+   },
+   {
+    "date": "2020-08-29",
+    "evaluable": true,
+    "n_finds": 4,
+    "n_large": 1,
+    "total_find_area_km2": 0.6067,
+    "coverage_pct": 0.0008,
+    "field_items_km2": null
+   },
+   {
+    "date": "2025-01-30",
+    "evaluable": true,
+    "n_finds": 8,
+    "n_large": 3,
+    "total_find_area_km2": 1.4702,
+    "coverage_pct": 0.0013,
+    "field_items_km2": null
+   },
+   {
+    "date": "2025-02-19",
+    "evaluable": true,
+    "n_finds": 1,
+    "n_large": 0,
+    "total_find_area_km2": 0.0774,
+    "coverage_pct": 0.0001,
+    "field_items_km2": null
+   },
+   {
+    "date": "2025-12-28",
+    "evaluable": true,
+    "n_finds": 5,
+    "n_large": 1,
+    "total_find_area_km2": 1.0107,
+    "coverage_pct": 0.0009,
+    "field_items_km2": null
+   },
+   {
+    "date": "2026-02-14",
+    "evaluable": true,
+    "n_finds": 3,
+    "n_large": 1,
+    "total_find_area_km2": 0.5386,
+    "coverage_pct": 0.0007,
+    "field_items_km2": null
+   },
+   {
+    "date": "2026-02-19",
+    "evaluable": true,
+    "n_finds": 3,
+    "n_large": 3,
+    "total_find_area_km2": 1.2043,
+    "coverage_pct": 0.0019,
+    "field_items_km2": null
+   },
+   {
+    "date": "2026-04-10",
+    "evaluable": true,
+    "n_finds": 4,
+    "n_large": 0,
+    "total_find_area_km2": 0.6029,
+    "coverage_pct": 0.0009,
+    "field_items_km2": null
+   },
+   {
+    "date": "2026-05-30",
+    "evaluable": true,
+    "n_finds": 2,
+    "n_large": 0,
+    "total_find_area_km2": 0.1728,
+    "coverage_pct": 0.0002,
+    "field_items_km2": null
+   }
+  ]
+ },
+ "defense_examples": [
+  {
+   "kind": "success",
+   "label": "Правильное обнаружение скопления",
+   "title": "30SXE · зона 16",
+   "verdict": "правильно",
+   "reference": "каталог Cózar 2024, уровень B (нити проверены людьми по снимку)",
+   "basis": "контур зоны пересекает 2 нит(и) Cózar; ни один фильтр артефактов не сработал; сцена отложена (не в обучении детектора)",
+   "zone_id": "SZ-demo-cozar-2021-03-11-016",
+   "scene_key": "demo-cozar-2021-03-11",
+   "crop": "/api/v3/scene_zones/scenes/demo-cozar-2021-03-11/crops/SZ-demo-cozar-2021-03-11-016.jpg"
+  },
+  {
+   "kind": "miss",
+   "label": "Пропуск скопления",
+   "title": "30SXE · нить Cózar 9602",
+   "verdict": "пропуск (большая часть нити не отмечена)",
+   "reference": "каталог Cózar 2024, уровень B: нить 9602, 124 пикс.",
+   "basis": "в нити 124 пикс. по каталогу; детектор отметил в её прямоугольнике 14 (≤ 11 %) → пропущено не менее 110 пикс.; вода в рамке пригодна (6630 из 6630 пикс.), ветер 2.48 м/с. По всему размеченному набору доля найденных пикселей B — 2,8 %: пропуски для этого детектора — норма",
+   "zone_id": null,
+   "scene_key": "demo-cozar-2021-03-11",
+   "crop": "/api/v3/scene_zones/scenes/demo-cozar-2021-03-11/crops/SZ-demo-cozar-2021-03-11-miss-9602.jpg"
+  },
+  {
+   "kind": "false_alarm",
+   "label": "Ложное обнаружение судна или следа",
+   "title": "Гондурас · Омоа · зона 7",
+   "verdict": "ложное срабатывание",
+   "reference": "независимой разметки нет — качественный разбор по снимку",
+   "basis": "пиксели детектора у яркой цели и её кильватера (доля 1.0); сработало правило судна/кильватера",
+   "zone_id": "SZ-drift-honduras-2026-02-19-007",
+   "scene_key": "drift-honduras-2026-02-19",
+   "crop": "/api/v3/scene_zones/scenes/drift-honduras-2026-02-19/crops/SZ-drift-honduras-2026-02-19-007.jpg"
+  },
+  {
+   "kind": "background_error",
+   "label": "Ошибка на пене, блике или другом сложном фоне",
+   "title": "Манила · зона 1",
+   "verdict": "ошибка модели на сложном фоне (поймана фильтром)",
+   "reference": "независимой разметки нет — качественный разбор по снимку",
+   "basis": "детектор уверен (P max 1.0), но пена: «белый» спектр, прирост B2 к B8 = 1.309 ≥ 0.8 (ветер 2.44 м/с) — пена/блик, а не плавающий мусор",
+   "zone_id": "SZ-live-manila-2025-06-15-001",
+   "scene_key": "live-manila-2025-06-15",
+   "crop": "/api/v3/scene_zones/scenes/live-manila-2025-06-15/crops/SZ-live-manila-2025-06-15-001.jpg"
+  },
+  {
+   "kind": "no_analysis",
+   "label": "Область, где анализ невозможен из-за качества",
+   "title": "Дурбан · 2025-07-31",
+   "verdict": "анализ невозможен",
+   "reference": "не нужен: вывод по правилу освещённости, до модели",
+   "basis": "низкое солнце: зенит 59.8° ≥ 58°; условия вне обучения детектора — его 146 пикс. не учитываются (правило освещённости, общее со студией)",
+   "zone_id": null,
+   "scene_key": "drift-durban-2025-07-31",
+   "crop": "/api/v3/scene_zones/scenes/drift-durban-2025-07-31/rgb.jpg"
+  }
+ ],
+ "n_defense_kinds": 5
+}

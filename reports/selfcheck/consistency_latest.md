@@ -1,16 +1,16 @@
-# Самопроверка согласованности API v3 (2026-09-26T15:33:38)
+# Самопроверка согласованности API v3 (2026-09-26T20:58:35)
 
-Проверок: 284; ok: 268, warn: 16; 268.8 с. Изоляция: case_store.PATHS['queries'] -> C:\Users\User\AppData\Local\Temp\selfcheck_nn1kbpv8\queries.jsonl.
+Проверок: 259; ok: 257, warn: 2; 59.2 с. Изоляция: case_store.PATHS['queries'] -> C:\Users\User\AppData\Local\Temp\selfcheck_6rs64svl\queries.jsonl.
 
 ## Запросы
 
 | запрос | query_id | набл. | зон | сцен | пар (принято) | ok | fail | SHA-256 run |
 |---|---|---|---|---|---|---|---|---|
-| S2 Саргассово море (total_plastic — через selection) | q_e345810c | 330 | 0 | 0 | 1320 (0) | 39 | 0 | 035663bd5907 |
-| Чёрное море, все пары | q_b6a09105 | 33 | 24 | 217 | 596 (0) | 34 | 0 | 14b2fbc2dc4f |
-| Северное море, 2016 | q_987297be | 27 | 2 | 9 | 193 (0) | 34 | 0 | e1b56af7023e |
-| ГПМП, трал 5–50 см | q_963be847 | 83 | 0 | 0 | 1400 (0) | 39 | 0 | dd86b76a9dbe |
-| Пустой bbox (Южная Атлантика, наблюдений нет) | q_e2408403 | 0 | 0 | 0 | — (—) | 29 | 0 | c1c7c55f9da8 |
+| S2 Саргассово море (total_plastic — через selection) | q_e2398283 | 330 | 0 | 0 | 1320 (0) | 39 | 0 | 2511ea5ee6a8 |
+| Чёрное море, все пары | q_e8d76b54 | 33 | 24 | 217 | 596 (0) | 34 | 0 | a41e466a20cb |
+| Северное море, 2016 | q_6148d9f6 | 27 | 2 | 9 | 193 (0) | 34 | 0 | 289435c10c95 |
+| ГПМП, трал 5–50 см | q_2ee71e5e | 83 | 0 | 0 | 1400 (0) | 39 | 0 | fb93b19326ee |
+| Пустой bbox (Южная Атлантика, наблюдений нет) | q_8328dac9 | 0 | 0 | 0 | — (—) | 29 | 0 | 1e1c44f548d0 |
 | Некорректные даты (задом наперёд) | — | — | — | — | — (—) | 1 | 0 | — |
 
 ## Расхождения (для владельцев)
@@ -24,10 +24,10 @@
 | S2_sargasso | POST /queries 201 | ok | 201 |
 | S2_sargasso | GET /queries/{id} = POST | ok |  |
 | S2_sargasso | run.http_200 | ok | 200/200 |
-| S2_sargasso | run.sha256_repeat | ok | 035663bd5907f8fa vs 035663bd5907f8fa |
+| S2_sargasso | run.sha256_repeat | ok | 2511ea5ee6a8ca02 vs 2511ea5ee6a8ca02 |
 | S2_sargasso | summary.counts | ok | n_obs=330 n_zones=0 n_scenes=0 |
 | S2_sargasso | summary.by_status | ok | {} |
-| S2_sargasso | empty.zones_reason | ok | Нет зон под выбранные фильтры |
+| S2_sargasso | empty.zones_reason | ok | Нет полос обследования под выбранные фильтры |
 | S2_sargasso | obs.ids algo=api | ok | {"only_left": [], "only_right": [], "n_left": 330, "n_right": 330} |
 | S2_sargasso | obs.sorted_by_id | ok |  |
 | S2_sargasso | obs.numbers algo=api (conc, area) | ok |  |
@@ -63,7 +63,7 @@
 | S4_black_sea | POST /queries 201 | ok | 201 |
 | S4_black_sea | GET /queries/{id} = POST | ok |  |
 | S4_black_sea | run.http_200 | ok | 200/200 |
-| S4_black_sea | run.sha256_repeat | ok | 14b2fbc2dc4f476c vs 14b2fbc2dc4f476c |
+| S4_black_sea | run.sha256_repeat | ok | a41e466a20cb5642 vs a41e466a20cb5642 |
 | S4_black_sea | summary.counts | ok | n_obs=33 n_zones=24 n_scenes=217 |
 | S4_black_sea | summary.by_status | ok | {"insufficient_data": 24} |
 | S4_black_sea | obs.ids algo=api | ok | {"only_left": [], "only_right": [], "n_left": 33, "n_right": 33} |
@@ -97,7 +97,7 @@
 | S3_north_sea_2016 | POST /queries 201 | ok | 201 |
 | S3_north_sea_2016 | GET /queries/{id} = POST | ok |  |
 | S3_north_sea_2016 | run.http_200 | ok | 200/200 |
-| S3_north_sea_2016 | run.sha256_repeat | ok | e1b56af7023e0e86 vs e1b56af7023e0e86 |
+| S3_north_sea_2016 | run.sha256_repeat | ok | 289435c10c95f0b9 vs 289435c10c95f0b9 |
 | S3_north_sea_2016 | summary.counts | ok | n_obs=27 n_zones=2 n_scenes=9 |
 | S3_north_sea_2016 | summary.by_status | ok | {"insufficient_data": 2} |
 | S3_north_sea_2016 | obs.ids algo=api | ok | {"only_left": [], "only_right": [], "n_left": 27, "n_right": 27} |
@@ -131,10 +131,10 @@
 | S1_gpgp_trawl | POST /queries 201 | ok | 201 |
 | S1_gpgp_trawl | GET /queries/{id} = POST | ok |  |
 | S1_gpgp_trawl | run.http_200 | ok | 200/200 |
-| S1_gpgp_trawl | run.sha256_repeat | ok | dd86b76a9dbec936 vs dd86b76a9dbec936 |
+| S1_gpgp_trawl | run.sha256_repeat | ok | fb93b19326eedee6 vs fb93b19326eedee6 |
 | S1_gpgp_trawl | summary.counts | ok | n_obs=83 n_zones=0 n_scenes=0 |
 | S1_gpgp_trawl | summary.by_status | ok | {} |
-| S1_gpgp_trawl | empty.zones_reason | ok | Нет зон под выбранные фильтры |
+| S1_gpgp_trawl | empty.zones_reason | ok | Нет полос обследования под выбранные фильтры |
 | S1_gpgp_trawl | obs.ids algo=api | ok | {"only_left": [], "only_right": [], "n_left": 83, "n_right": 83} |
 | S1_gpgp_trawl | obs.sorted_by_id | ok |  |
 | S1_gpgp_trawl | obs.numbers algo=api (conc, area) | ok |  |
@@ -170,11 +170,11 @@
 | empty_bbox | POST /queries 201 | ok | 201 |
 | empty_bbox | GET /queries/{id} = POST | ok |  |
 | empty_bbox | run.http_200 | ok | 200/200 |
-| empty_bbox | run.sha256_repeat | ok | c1c7c55f9da8065e vs c1c7c55f9da8065e |
+| empty_bbox | run.sha256_repeat | ok | 1e1c44f548d0c79d vs 1e1c44f548d0c79d |
 | empty_bbox | summary.counts | ok | n_obs=0 n_zones=0 n_scenes=0 |
 | empty_bbox | summary.by_status | ok | {} |
 | empty_bbox | empty.reason | ok | Нет наблюдений под выбранные фильтры |
-| empty_bbox | empty.zones_reason | ok | Нет зон под выбранные фильтры |
+| empty_bbox | empty.zones_reason | ok | Нет полос обследования под выбранные фильтры |
 | empty_bbox | obs.ids algo=api | ok | {"only_left": [], "only_right": [], "n_left": 0, "n_right": 0} |
 | empty_bbox | obs.sorted_by_id | ok |  |
 | empty_bbox | obs.numbers algo=api (conc, area) | ok |  |
@@ -248,74 +248,49 @@
 | invalid | POST /api/v3/queries {"name": "x", "query": {"profiles": ["XYZ"]}} | ok | 400 BAD_PARAM: profiles: неизвестные значения XYZ |
 | invalid | POST /api/v3/queries {"name": "x", "query": {"scope": ["total_plastic"]}} | ok | 422 BAD_PARAM: query: неизвестные поля scope |
 | empty | GET /api/v3/observations?bbox=-30,-50,-29,-49 | ok | 200: Нет наблюдений под выбранные фильтры |
-| empty | GET /api/v3/zones?bbox=-30,-50,-29,-49 | ok | 200: Нет зон под выбранные фильтры |
+| empty | GET /api/v3/zones?bbox=-30,-50,-29,-49 | ok | 200: В рамке района нет полос обследования: они есть только там, где есть полевые пробы (Юго-восток Северного моря; Чёрное море, DOORS). Спутниковые зоны района — слой «Спутниковые зоны» (scene_zones) |
 | empty | GET /api/v3/scenes?date_from=2030-01-01 | ok | 200: Нет снимков под выбранные фильтры |
 | empty | GET /api/v3/pairs?sample_id=MPL-99999 | ok | 200: Нет пар под выбранные фильтры |
-| empty | GET /api/v3/zones?status=research_estimate | ok | 200: Нет зон под выбранные фильтры |
-| empty | GET /api/v3/export?layer=zones&format=geojson&bbox=-30,-50,-29,-49 | ok | 200: Нет зон под выбранные фильтры |
+| empty | GET /api/v3/zones?status=research_estimate | ok | 200: Нет полос обследования под выбранные фильтры |
+| empty | GET /api/v3/export?layer=zones&format=geojson&bbox=-30,-50,-29,-49 | ok | 200: В рамке района нет полос обследования: они есть только там, где есть полевые пробы (Юго-восток Северного моря; Чёрное море, DOORS). Спутниковые зоны района — слой «Спутниковые зоны» (scene_zones) |
 | empty | GET /api/v3/export?layer=observations&format=csv&bbox=-30,-50,-29,-49 | ok | 200: только заголовок CSV |
 | empty | GET /api/v3/export?layer=pairs&format=csv&sample_id=MPL-99999 | ok | 200: только заголовок CSV |
-| live | live run sha256 repeat | ok | dbeff34d8f40c567 |
-| isolation | service/labels/queries.jsonl не изменён | ok | sha256 d285399114d44b37 |
+| isolation | service/labels/queries.jsonl не изменён | ok | sha256 34a542a36d1bca52 |
 
 ## Скорость: TestClient
 
 | эндпоинт | n | холодный, мс | p50, мс | p95, мс | max, мс | цель | ок | байт |
 |---|---|---|---|---|---|---|---|---|
-| GET /meta | 20 | 299.0 | 436.0 | 983.9 | 3163.0 | <300 | НЕТ | 17272 |
-| GET /observations (все 935) | 20 | 241.5 | 529.2 | 1647.6 | 3195.9 | <300 | НЕТ | 2019167 |
-| GET /observations?source=S2 | 20 | 74.9 | 308.1 | 1459.0 | 1508.5 | <300 | НЕТ | 776718 |
-| GET /observations/{id} | 20 | 2088.0 | 22.5 | 542.3 | 1034.6 | <300 | НЕТ | 5177 |
-| GET /pairs (все) | 20 | 200.4 | 395.8 | 1268.8 | 2258.0 | <300 | НЕТ | 3801991 |
-| GET /pairs?status=accepted | 20 | 9.8 | 27.3 | 200.4 | 598.1 | <300 | да | 130 |
-| GET /scenes | 20 | 42.2 | 53.3 | 193.0 | 512.7 | <300 | да | 130878 |
-| GET /scenes/{id} | 20 | 97.8 | 73.8 | 226.6 | 227.5 | <3000 | да | 31823 |
-| GET /scenes/{id}/rgb.png | 20 | 8.2 | 18.8 | 876.4 | 1190.1 | <3000 | да | 165 |
-| GET /scenes/{id}/quality.png | 20 | 912.4 | 3.5 | 87.0 | 93.9 | <3000 | да | 2443 |
-| GET /scenes/{id}/mask.png | 20 | 3.9 | 70.3 | 270.3 | 576.0 | <3000 | да | 166 |
-| GET /zones | 20 | 24.1 | 15.7 | 59.6 | 168.2 | <300 | да | 103914 |
-| GET /zones/{id} | 20 | 19.3 | 17.1 | 65.2 | 76.1 | <300 | да | 16316 |
-| GET /metrics | 20 | 26.6 | 41.5 | 539.4 | 576.9 | <300 | НЕТ | 22078 |
-| GET /export observations csv | 20 | 804.8 | 615.6 | 1124.0 | 1406.4 | <300 | НЕТ | 959949 |
-| GET /export zones geojson | 20 | 270.6 | 175.8 | 333.5 | 433.4 | <300 | НЕТ | 109613 |
-| GET /export pairs csv | 20 | 101.6 | 769.7 | 1965.4 | 2418.3 | <300 | НЕТ | 1416475 |
-| GET /export zones csv query_id | 20 | 50.7 | 48.7 | 78.3 | 109.4 | <300 | да | 15378 |
-| GET /queries | 20 | 4.9 | 4.0 | 6.6 | 6.6 | <300 | да | 1457 |
-| GET /queries/{id} | 20 | 3.2 | 4.5 | 11.8 | 22.5 | <300 | да | 265 |
-| GET /queries/{id}/run | 20 | 206.2 | 294.8 | 1099.2 | 1150.4 | <300 | НЕТ | 268222 |
-| POST /queries | 20 | 25.1 | 28.2 | 257.9 | 306.5 | <300 | да | 242 |
-| DELETE /queries/{id} | 20 | 789.3 | 23.3 | 534.7 | 1044.4 | <300 | НЕТ | 0 |
-| GET /observations?bbox=1,2,3 (400) | 20 | 342.8 | 58.4 | 392.5 | 525.6 | <300 | НЕТ | 126 |
+| GET /meta | 20 | 589.6 | 610.9 | 649.9 | 666.8 | <300 | НЕТ | 30871 |
+| GET /observations (все 935) | 20 | 118.4 | 61.8 | 95.5 | 100.4 | <300 | да | 2019167 |
+| GET /observations?source=S2 | 20 | 24.4 | 24.3 | 35.7 | 37.7 | <300 | да | 776718 |
+| GET /observations/{id} | 20 | 4.6 | 3.1 | 4.0 | 4.0 | <300 | да | 5177 |
+| GET /pairs (все) | 20 | 61.0 | 53.8 | 68.8 | 71.8 | <300 | да | 3801991 |
+| GET /pairs?status=accepted | 20 | 2.9 | 2.1 | 2.3 | 2.8 | <300 | да | 130 |
+| GET /scenes | 20 | 19.1 | 18.5 | 21.9 | 22.9 | <300 | да | 130878 |
+| GET /scenes/{id} | 20 | 19.8 | 19.9 | 34.6 | 53.5 | <3000 | да | 32299 |
+| GET /scenes/{id}/rgb.png | 20 | 1.9 | 1.6 | 2.0 | 2.1 | <3000 | да | 165 |
+| GET /scenes/{id}/quality.png | 20 | 172.1 | 1.7 | 2.7 | 2.8 | <3000 | да | 2443 |
+| GET /scenes/{id}/mask.png | 20 | 2.0 | 1.9 | 4.1 | 5.6 | <3000 | да | 166 |
+| GET /zones | 20 | 7.0 | 6.9 | 7.2 | 7.3 | <300 | да | 104411 |
+| GET /zones/{id} | 20 | 6.4 | 6.1 | 6.5 | 6.6 | <300 | да | 16316 |
+| GET /metrics | 20 | 3.0 | 3.0 | 5.6 | 6.4 | <300 | да | 22078 |
+| GET /export observations csv | 20 | 37.8 | 39.9 | 49.2 | 105.5 | <300 | да | 959949 |
+| GET /export zones geojson | 20 | 7.7 | 8.5 | 12.1 | 14.7 | <300 | да | 110114 |
+| GET /export pairs csv | 20 | 60.3 | 55.2 | 73.3 | 136.3 | <300 | да | 1416475 |
+| GET /export zones csv query_id | 20 | 39.8 | 38.7 | 62.0 | 76.5 | <300 | да | 15378 |
+| GET /queries | 20 | 3.3 | 3.1 | 4.5 | 5.4 | <300 | да | 1457 |
+| GET /queries/{id} | 20 | 2.3 | 2.8 | 4.1 | 5.1 | <300 | да | 265 |
+| GET /queries/{id}/run | 20 | 1242.8 | 658.0 | 1128.1 | 1175.9 | <300 | НЕТ | 269257 |
+| POST /queries | 20 | 4.3 | 1.6 | 3.6 | 7.0 | <300 | да | 242 |
+| DELETE /queries/{id} | 20 | 3.1 | 7.0 | 10.2 | 11.7 | <300 | да | 0 |
+| GET /observations?bbox=1,2,3 (400) | 20 | 1.7 | 1.6 | 2.0 | 2.1 | <300 | да | 126 |
 
 ## Скорость: живой экземпляр
 
-http://127.0.0.1:8097 старт 12.9 с. 
+ старт ? с. порт 8091 занят — живой замер пропущен
 
 | эндпоинт | n | холодный, мс | p50, мс | p95, мс | max, мс | цель | ок | байт |
 |---|---|---|---|---|---|---|---|---|
-| GET /meta | 20 | 24570.5 | 1376.9 | 4304.5 | 10130.8 | <300 | НЕТ | 18808 |
-| GET /observations (все 935) | 20 | 4440.1 | 507.8 | 3819.8 | 3929.3 | <300 | НЕТ | 2019167 |
-| GET /observations?source=S2 | 20 | 141.7 | 100.7 | 581.5 | 821.3 | <300 | НЕТ | 776718 |
-| GET /observations/{id} | 20 | 32.0 | 5.8 | 29.4 | 30.6 | <300 | да | 5177 |
-| GET /pairs (все) | 20 | 72.3 | 80.2 | 146.1 | 169.7 | <300 | да | 3801991 |
-| GET /pairs?status=accepted | 20 | 4.2 | 3.3 | 24.0 | 37.4 | <300 | да | 130 |
-| GET /scenes | 20 | 34.3 | 63.2 | 1292.8 | 1705.5 | <300 | НЕТ | 130878 |
-| GET /scenes/{id} | 20 | 85.0 | 66.9 | 274.1 | 402.2 | <3000 | да | 31823 |
-| GET /scenes/{id}/rgb.png | 20 | 3.2 | 2.7 | 23.9 | 31.9 | <3000 | да | 165 |
-| GET /scenes/{id}/quality.png | 20 | 1790.1 | 2.3 | 29.3 | 162.9 | <3000 | да | 2443 |
-| GET /scenes/{id}/mask.png | 20 | 2.0 | 2.1 | 39.2 | 94.1 | <3000 | да | 166 |
-| GET /zones | 20 | 15.2 | 30.8 | 137.1 | 144.5 | <300 | да | 103914 |
-| GET /zones/{id} | 20 | 38.5 | 29.3 | 60.3 | 155.9 | <300 | да | 16316 |
-| GET /metrics | 20 | 5.2 | 6.2 | 33.4 | 42.4 | <300 | да | 22078 |
-| GET /export observations csv | 20 | 89.6 | 73.8 | 127.2 | 136.2 | <300 | да | 959949 |
-| GET /export zones geojson | 20 | 8.4 | 17.9 | 32.9 | 36.2 | <300 | да | 109613 |
-| GET /export pairs csv | 20 | 88.9 | 88.8 | 147.3 | 158.0 | <300 | да | 1416475 |
-| GET /export zones csv query_id | 20 | 165.0 | 61.3 | 86.5 | 91.1 | <300 | да | 15378 |
-| GET /queries | 20 | 2.1 | 2.1 | 25.9 | 30.1 | <300 | да | 255 |
-| GET /queries/{id} | 20 | 3.0 | 3.5 | 26.0 | 27.8 | <300 | да | 241 |
-| GET /queries/{id}/run | 20 | 138.1 | 113.3 | 193.7 | 246.6 | <300 | да | 268757 |
-| POST /queries | 20 | 13.3 | 13.8 | 16.3 | 21.7 | <300 | да | 242 |
-| DELETE /queries/{id} | 20 | 20.1 | 20.2 | 29.9 | 30.3 | <300 | да | 0 |
-| GET /observations?bbox=1,2,3 (400) | 20 | 24.5 | 14.7 | 16.1 | 16.1 | <300 | да | 126 |
 
 UI: {'status': 'skipped', 'reason': '--ui-url не задан'}
