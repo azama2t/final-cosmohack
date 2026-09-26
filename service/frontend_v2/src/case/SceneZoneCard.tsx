@@ -189,12 +189,18 @@ export default function SceneZoneCard({
                   в зоне {nItemsTxt(est)}
                 </span>
               )}
+              {est.calibration && (
+                <span className="sz-est-note" data-testid="sz-est-calib">
+                  действующая калибровка: {est.calibration}
+                </span>
+              )}
               <span className="sz-est-note" data-testid="sz-est-note">
-                {RES_CAPTION}
+                {est.scenario ?? RES_CAPTION}
                 {est.muted ? '; находка не подтверждена разметкой Cózar — требует проверки' : ''}{' '}
                 <Info label="Как получено" align="right" testid="sz-est-info">
+                  {est.formula ? `${est.formula.charAt(0).toUpperCase()}${est.formula.slice(1)}. ` : ''}
                   {est.essence ? `${est.essence.charAt(0).toUpperCase()}${est.essence.slice(1)}. ` : ''}
-                  {RES_NOTE}
+                  {est.scenario ? `${est.scenario}. ` : RES_NOTE}
                   {est.basis ? ` Площадь — ${est.basis}.` : ''}
                   {est.spread ? ` ${est.spread.charAt(0).toUpperCase()}${est.spread.slice(1)}.` : ''}
                   {est.notWhat ? ` ${est.notWhat}.` : ''}

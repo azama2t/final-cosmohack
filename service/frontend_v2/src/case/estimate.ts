@@ -30,6 +30,13 @@ export interface ResEst {
   nItemsLower: boolean;
   essence: string | null;
   spread: string | null;
+  /** «пиксели маски × 470–670 / площадь контура = пересчёт доли покрытия» */
+  formula: string | null;
+  /** the calibration in force («плоская калибровка по мишеням PLP …») */
+  calibration: string | null;
+  /** §36 п.2: the wording of the 470–670 scenario from the API (full / short), if given */
+  scenario: string | null;
+  scenarioShort: string | null;
 }
 
 /** §34 (оркестратор 13:5x): context next to every estimate */
@@ -37,14 +44,14 @@ export const RES_CONTEXT = 'плотность внутри нити, в пер�
 
 /** the short caption required next to every estimate (§34 п.3) */
 export const RES_CAPTION =
-  'исследовательская оценка · калибровка на искусственных мишенях PLP (2 пикселя, 2 даты), для природных скоплений не проверена; на площадь контура зоны; нижняя граница (пиксели ниже порога не учтены)';
+  'исследовательский сценарий по искусственным мишеням PLP (допущения: предметы размера бутылки PET 1,5 л, покрытие 28–40 %) — не доверительный интервал, на природе не проверено; на площадь контура зоны; нижняя граница (пиксели ниже порога не учтены)';
 /** the list caption (the card and the «i» carry the full one) */
-export const RES_CAPTION_LIST = 'исследовательская оценка · калибровка на искусственных мишенях PLP (2 пикселя, 2 даты), для природных скоплений не проверена';
-/** the full caption (§34 п.2) — card «i» / details */
+export const RES_CAPTION_LIST = 'исследовательский сценарий по искусственным мишеням PLP (бутылки PET 1,5 л, покрытие 28–40 %), на природе не проверено';
+/** the full caption (§34 п.2, §36 п.2) — card «i» / details (fallback when the API gives no wording) */
 export const RES_NOTE =
-  'Исследовательская оценка, не измерение: калибровка на искусственных мишенях PLP (бутылки PET 1,5 л) — детектор отмечает пиксель 10 м при покрытии ' +
-  '28–40 % ≈ 470–670 предметов на 100 м²; N зоны = пиксели детектора × [470; 670], C = N / площадь зоны. Для природных скоплений не проверена; ' +
-  'мелкие предметы → больше штук.';
+  'Исследовательская оценка, не измерение. Сценарий по искусственным мишеням PLP: детектор отмечает пиксель 10 м при покрытии 28–40 % ≈ 470–670 ' +
+  'предметов размера бутылки PET 1,5 л на 100 м²; N зоны = пиксели детектора × [470; 670], C = N / площадь контура зоны. 470–670 — допущение ' +
+  'сценария, не доверительный интервал; на природных скоплениях не проверено; мелкие предметы → больше штук.';
 
 const n = (x: any): number | null => (typeof x === 'number' && Number.isFinite(x) ? x : null);
 
@@ -84,6 +91,10 @@ export function researchEst(p: any): ResEst | null {
     nItemsLower: n(r.n_items_display) !== null,
     essence: str(r.method_essence),
     spread: str(r.calibration_spread?.label),
+    formula: str(r.formula_short),
+    calibration: str(r.calibration_name),
+    scenario: str(r.scenario) ?? str(r.scenario_label) ?? str(r.scenario?.label) ?? str(r.caption),
+    scenarioShort: str(r.scenario_label_short) ?? str(r.scenario?.short) ?? str(r.caption_short),
   };
 }
 

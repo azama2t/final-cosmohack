@@ -1357,7 +1357,8 @@ function SceneZones({
   const numbered = zones.filter((z) => z.n > 0);
   const whole = zones.find((z) => z.n === 0)?.f ?? null;
   const finds = numbered.filter((z) => isFind(z.f.properties)).length;
-  const anyEst = numbered.some((z) => !!researchEst(z.f.properties));
+  const est0 = numbered.map((z) => researchEst(z.f.properties)).find((e) => !!e) ?? null;
+  const anyEst = !!est0;
   return (
     <div data-testid="scene-zones">
       <div className="c-scene-head">
@@ -1392,10 +1393,12 @@ function SceneZones({
       {anyEst && (
         <div className="c-list-note c-est-cap" data-testid="est-caption">
           <span>
-            <span className="c-est-sw" aria-hidden /> шт./км² — нижняя граница, {RES_CONTEXT}; {RES_CAPTION_LIST}
+            <span className="c-est-sw" aria-hidden /> шт./км² — нижняя граница, {RES_CONTEXT}; {est0?.scenarioShort ?? est0?.scenario ?? RES_CAPTION_LIST}
           </span>
           <Info label="Как получено" align="left">
-            {RES_CAPTION}. {RES_NOTE}
+            {est0?.formula ? `${est0.formula}. ` : ''}
+            {est0?.scenario ? `${est0.scenario}. ` : `${RES_CAPTION}. ${RES_NOTE}`}
+            {est0?.calibration ? ` Действующая калибровка: ${est0.calibration}.` : ''}
           </Info>
         </div>
       )}
