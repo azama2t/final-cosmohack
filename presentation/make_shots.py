@@ -1,10 +1,11 @@
-r"""Скрины сервиса v2 для деки (основная часть, слайды «Сервис»): http://localhost:8070, 1920×1080, без фикстур.
+r"""Скрины сервиса v2 для деки (слайды «Сервис»): http://localhost:8070, 1920×1080, без фикстур. Интерфейс §34.
 
-Путь §33: обзор Земли (наведение на находку — тултип) → клик по точке → сцена и карточка зоны → «В студию» →
-«← Назад» → «Выгрузка» → режим «Фото». Пишет presentation/img/{earth,card,studio,metrics,export,photo}.jpg; затем
+Путь: обзор (слева список снимков «район · дата · N находок · облачность») → снимок Альборан/Cózar (нумерованные зоны
+с исследовательской оценкой шт./км²) → зона 16 → карточка → «В студию» → назад → «Проверка качества» → «Выгрузка» →
+режим «Фото». Пишет presentation/img/{earth,scene,card,studio,metrics,export,photo}.jpg; затем
     .venv\Scripts\python.exe scripts\make_deck_case.py --pdf
 вставит их в presentation/deck.pptx и reports/case_deck.pptx (кандидаты — IMAGES_MAIN в make_deck_case.py).
-Сервис не перезапускает. Ошибки консоли печатает; при ошибках код возврата 1 (такие скрины в деку не годятся).
+Сервис не перезапускает, только чтение. При ошибках консоли код возврата 1 (такие скрины в деку не годятся).
 
     .venv\Scripts\python.exe presentation\make_shots.py [--base http://localhost:8070] [--out out/l126/try]
 """
@@ -15,13 +16,14 @@ import sys
 from pathlib import Path
 
 OUT = Path(__file__).resolve().parent / "img"
+SCENE_TEXT = "Альборан"       # демо-снимок: отложенная сцена Cózar, 30SXE 11.03.2021
+DEMO_ZONE = "SZ-demo-cozar-2021-03-11-016"   # демо-зона (в списке снимка — номер 16)
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--base", default="http://localhost:8070")
     ap.add_argument("--out", default=str(OUT), help="папка скринов (для пробы — не presentation/img)")
-    ap.add_argument("--by-map", action="store_true", help="открыть карточку кликом по точке карты, а не из списка")
     a = ap.parse_args(argv)
     out = Path(a.out)
     from playwright.sync_api import sync_playwright
@@ -33,82 +35,71 @@ def main(argv=None) -> int:
         b = p.chromium.launch()
         pg = b.new_page(viewport={"width": 1920, "height": 1080})
         pg.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
+
+        def shot(name):
+            pg.screenshot(path=str(out / f"{name}.jpg"), type="jpeg", quality=90)
+            made.append(name)
+
         pg.goto(a.base + "/", wait_until="networkidle", timeout=90000)
+        pg.wait_for_selector("[data-testid=scene-item]", timeout=60000)
+        pg.wait_for_timeout(5000)
+        shot("earth")
+        # снимок → нумерованные зоны
+        sc = pg.locator("[data-testid=scene-item]", has_text=SCENE_TEXT)
+        found = sc.count() > 0
+        (sc.first if found else pg.locator("[data-testid=scene-item]").first).click()
+        if not found:
+            notes.append(f"снимка «{SCENE_TEXT}» нет — открыт первый в списке")
+        pg.wait_for_selector("[data-testid=sz-item]", timeout=30000)
         pg.wait_for_timeout(6000)
-        box = pg.locator("[data-testid=main]").bounding_box()
-        pts = []
-        for _ in range(20):
-            pts = pg.evaluate("() => (window.__app && window.__app.findPoints) ? window.__app.findPoints() : null") or []
-            if pts:
-                break
-            pg.wait_for_timeout(1000)
-        # 1. Земля: наведение на одиночную находку (тултип: статус + дата снимка)
-        single = [q for q in pts if not q.get("cluster") and 0 < q["x"] < box["width"] - 380 and 0 < q["y"] < box["height"]]
-        if single:
-            pg.mouse.move(box["x"] + single[0]["x"], box["y"] + single[0]["y"])
-            pg.wait_for_timeout(900)
-        else:
-            notes.append("точек-находок через __app.findPoints нет — Земля без тултипа")
-        pg.screenshot(path=str(out / "earth.jpg"), type="jpeg", quality=90); made.append("earth")
-        # 2. точка → сцена и карточка. Для деки — находка отложенной сцены Cózar (первая в списке «Находки», уровень B);
-        #    клик по точке карты проверен L111 (scripts/case/s33_path.py), здесь — --by-map
-        opened = False
-        for _ in range(6 if a.by_map else 0):
-            pts = pg.evaluate("() => window.__app && window.__app.findPoints ? window.__app.findPoints() : null") or []
-            if not pts:
-                break
-            single = [q for q in pts if not q.get("cluster") and 0 < q["x"] < box["width"] - 380 and 0 < q["y"] < box["height"]]
-            tgt = single[0] if single else pts[0]
-            pg.mouse.click(box["x"] + tgt["x"], box["y"] + tgt["y"])
-            pg.wait_for_timeout(2500)
-            if pg.locator("[data-testid=scene-zone-card]").count():
-                opened = True
-                break
-        if not opened:  # запасной путь — первая находка списка (отложенная сцена Cózar)
-            notes.append("карточка открыта из списка «Находки» (первая — отложенная сцена Cózar)")
-            if pg.locator("[data-testid=tab-zones]").count():
-                pg.click("[data-testid=tab-zones]")
+        shot("scene")
+        # зона → карточка
+        ok = pg.evaluate(f"() => !!(window.__app && window.__app.selectZone && (window.__app.selectZone('{DEMO_ZONE}'), true))")
+        if not ok:
             pg.locator("[data-testid=sz-item]").first.click()
+            notes.append("selectZone недоступен — открыта первая зона списка")
         pg.wait_for_selector("[data-testid=scene-zone-card]", timeout=30000)
         pg.wait_for_timeout(6000)
-        pg.screenshot(path=str(out / "card.jpg"), type="jpeg", quality=90); made.append("card")
-        # 3. студия → назад
-        st = pg.locator("[data-testid=sz-studio]")
-        if not st.count():
-            st = pg.get_by_role("button", name="В студию")
-        if st.count():
-            st.first.click()
+        shot("card")
+        # студия → назад
+        if pg.locator("[data-testid=sz-studio]").count():
+            pg.click("[data-testid=sz-studio]")
             pg.wait_for_timeout(6000)
-            pg.screenshot(path=str(out / "studio.jpg"), type="jpeg", quality=90); made.append("studio")
-            bk = pg.locator("[data-testid=studio-back]")
-            if bk.count():
-                bk.first.click()
+            shot("studio")
+            if pg.locator("[data-testid=studio-back]").count():
+                pg.click("[data-testid=studio-back]")
                 pg.wait_for_timeout(2500)
         else:
             notes.append("кнопки «В студию» нет")
-        if pg.locator("[data-testid=sz-back]").count():
-            pg.click("[data-testid=sz-back]")
-            pg.wait_for_timeout(2500)
-        # 3б. «Метрики» (левая колонка): F1 детектора и отложенный test концентрации
-        if pg.locator("[data-testid=tab-metrics]").count():
-            pg.click("[data-testid=tab-metrics]")
-            pg.wait_for_timeout(2500)
-            pg.screenshot(path=str(out / "metrics.jpg"), type="jpeg", quality=90); made.append("metrics")
-            pg.click("[data-testid=tab-zones]")
-            pg.wait_for_timeout(800)
-        # 4. выгрузка
+        for back in ("sz-back", "scene-back"):
+            if pg.locator(f"[data-testid={back}]").count():
+                pg.click(f"[data-testid={back}]")
+                pg.wait_for_timeout(2000)
+        # «Проверка качества» (метрики)
+        if pg.locator("[data-testid=act-qc]").count():
+            pg.click("[data-testid=act-qc]")
+            pg.wait_for_timeout(3000)
+            shot("metrics")
+            if pg.locator("[data-testid=qc-close]").count():
+                pg.click("[data-testid=qc-close]")
+            else:
+                pg.keyboard.press("Escape")
+            pg.wait_for_timeout(1000)
+        else:
+            notes.append("кнопки «Проверка качества» нет")
+        # выгрузка
         pg.click("[data-testid=act-export]")
         pg.wait_for_timeout(1500)
-        pg.screenshot(path=str(out / "export.jpg"), type="jpeg", quality=90); made.append("export")
+        shot("export")
         pg.keyboard.press("Escape")
-        # 5. «Фото»: пример уже открыт — ждём конца счёта
+        # «Фото»: пример уже открыт — ждём конца счёта
         pg.click("[data-testid=mode-photo]")
         for _ in range(90):
             pg.wait_for_timeout(1000)
             if "Считаю" not in pg.inner_text("body"):
                 break
         pg.wait_for_timeout(1500)
-        pg.screenshot(path=str(out / "photo.jpg"), type="jpeg", quality=90); made.append("photo")
+        shot("photo")
         b.close()
     print("скрины:", ", ".join(made), "->", out)
     for n in notes:

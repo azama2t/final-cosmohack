@@ -52,12 +52,13 @@ IMAGES = {
 # свежие скрины v2 (http://localhost:8070, 1920×1080) кладутся в presentation/img/; пока их нет — прежние скрины
 IMAGES_MAIN = {
     "photo": (("presentation/img/photo.jpg", "reports/photo_count/ui_photo_v2.png"), "20_photo.jpg", None),
-    "svc_earth": (("presentation/img/earth.jpg",), "21_svc_earth.jpg", (336, 0, 1920, 1080)),
+    "svc_earth": (("presentation/img/earth.jpg",), "21_svc_earth.jpg", None),
+    "scene": (("presentation/img/scene.jpg",), "28_scene.jpg", None),
     "sz_card": (("presentation/img/card.jpg", "reports/case_demo/1920_02_zone_card.png"), "26_sz_card.jpg", (336, 0, 1920, 1080)),
     "svc_card": (("presentation/img/card.jpg", "reports/case_demo/1920_02_zone_card.png"), "22_svc_card.jpg", None),
     "svc_studio": (("presentation/img/studio.jpg",), "25_svc_studio.jpg", (336, 0, 1920, 1080)),
     "svc_photo": (("presentation/img/photo.jpg", "reports/photo_count/ui_photo_v2.png"), "23_svc_photo.jpg", None),
-    "svc_metrics": (("presentation/img/metrics.jpg",), "27_svc_metrics.jpg", (0, 410, 700, 1080)),
+    "svc_metrics": (("presentation/img/metrics.jpg",), "27_svc_metrics.jpg", (680, 60, 1580, 1080)),
     "svc_export": (("presentation/img/export.jpg", "reports/case_demo/1920_07_export_menu.png"), "24_svc_export.jpg", None),
 }
 
@@ -81,6 +82,15 @@ class Src:
     def __init__(self, data: dict, name: str):
         self.d = data
         self.name = name
+
+    def has(self, path: str) -> bool:
+        """Есть ли путь (без записи в MISSING) — для разделов, которые появляются в final_numbers по ходу работы."""
+        cur = self.d
+        for part in path.split("."):
+            if not isinstance(cur, dict) or part not in cur:
+                return False
+            cur = cur[part]
+        return cur is not None
 
     def __call__(self, path: str):
         cur = self.d
@@ -411,6 +421,16 @@ def load() -> dict:
     k["mt_n_scenes"] = N(c + "sections.marida_test.n_scenes")
     k["S2_dev_median_c"] = N(c + "conc.S2.dev_median_c")
     k["sz_wind_ms"] = N(sz + "wind_zero_ms")
+    # §34 п.2: исследовательская оценка шт./км² зон (калибровка по мишеням PLP) — слайд и вопрос, когда раздел есть
+    k["re_on"] = N.has(sz + "research_estimate.items_per_pixel_lo")
+    if k["re_on"]:
+        re_ = sz + "research_estimate."
+        for key in ("items_per_pixel_lo", "items_per_pixel_hi", "calibration_n_dates", "n_zones_with_estimate",
+                    "lower_bound_median", "lower_bound_min", "lower_bound_max", "c_pooled_lo", "status", "method", "note"):
+            k["re_" + key] = N(re_ + key)
+        k["re_dates"] = N(re_ + "calibration_dates")
+        for key in ("n_pixels", "area_km2", "lower_bound"):
+            k["re_ex_" + key] = N(re_ + "example." + key)
     k["sz_n_finds"] = N(sz + "n_finds"); k["sz_n_finds_training"] = N(sz + "n_finds_training")
     return k
 
@@ -711,7 +731,9 @@ def main_slides(k: dict) -> list[dict]:
                f"на снимках из обучения MARIDA не считаем — {num(k['sz_n_finds_training'], 0)}); ещё {num(k['sz_by_insufficient'], 0)} — "
                f"недостаточно данных или ложные, {num(k['sz_by_not_detected'], 0)} — не обнаружено")],
         image="sz_card",
-        caption=f"Вывод: снимок даёт место, площадь и статус зоны; шт./км² — «{k['sz_zone_main_status']}»",
+        caption=(f"Вывод: снимок даёт место, площадь и статус зоны; шт./км² — только {k['re_status']} (нижняя граница, "
+                 f"следующий слайд)" if k["re_on"] else
+                 f"Вывод: снимок даёт место, площадь и статус зоны; шт./км² — «{k['sz_zone_main_status']}»"),
         source="data/case/scene_zones; reports/case_demo/heldout_check.json, demo_path.json (final_numbers → case.sections.scene_zones)",
         speech=(f"Теперь спутник на сцене, которую модель не видела. На отложенной сцене {k['sz_demo_tile']} "
                 f"{num(k['sz_demo_n_zones_cozar'], 0)} из {num(k['sz_demo_n_zones'], 0)} зон совпали с нитями, найденными людьми. "
@@ -720,18 +742,48 @@ def main_slides(k: dict) -> list[dict]:
                f"ветер {num(k['sz_demo_wind'], 1)} м/с. Пример зоны {k['sz_example_zone_id']}: {num(k['sz_example_area_km2'], 2)} км², "
                f"вероятность {num(k['sz_example_prob_mean'], 2)}, модель sha256 {k['sz_example_sha256_short']}."),
     ))
+    if k["re_on"]:
+        lo_, hi_ = k["re_items_per_pixel_lo"], k["re_items_per_pixel_hi"]
+        S.append(dict(
+            kind="main", layout="left", section="Как получаем шт./км² по снимку и насколько этому верить",
+            title=(f"шт./км² по снимку — исследовательский сценарий по искусственным мишеням PLP "
+                   f"({pl(k['re_calibration_n_dates'], 'дата', 'даты', 'дат')}): нижняя граница внутри нити"),
+            kpis=[(f"{num(lo_, 0)}–{num(hi_, 0)}", "бутылок PET 1.5 л на сработавший пиксель мишени PLP "
+                                                  f"({', '.join(k['re_dates'])}) — допущение, не доверительный интервал"),
+                  (f"≥ {num(k['re_lower_bound_median'], 0)}", f"шт./км² — медиана нижней границы по "
+                                                             f"{num(k['re_n_zones_with_estimate'], 0)} находкам (разброс "
+                                                             f"{num(k['re_lower_bound_min'], 0)}–{num(k['re_lower_bound_max'], 0)})")],
+            bullets=[f"C ≥ n_пикселей × {num(lo_, 0)} / площадь зоны; зона 16: {num(k['re_ex_n_pixels'], 0)} пикс. на "
+                     f"{num(k['re_ex_area_km2'], 2)} км² → ≥ {num(k['re_ex_lower_bound'], 0)} шт./км²",
+                     f"С полем ({num(k['q_pooled_C'], 1)} шт./км² — средняя по маршруту) напрямую не сравниваем"],
+            image="scene",
+            caption=("Вывод: порядок величины, не измерение; на природной паре ISPRA (16.09.2019) посчитанные с судна предметы "
+                     "не рядом с пикселями детектора — для природы не проверено"),
+            source="configs/zone_estimate.yaml; reports/count_datasets/115_bridge_s2.md (final_numbers → case.sections.scene_zones.research_estimate)",
+            speech=(f"Как мы всё-таки получаем штуки по снимку. На мишенях PLP из бутылок детектор срабатывает, когда в пикселе "
+                    f"{num(lo_, 0)}–{num(hi_, 0)} бутылок. Отсюда нижняя граница: пиксели зоны, умноженные на это число, делённые на "
+                    f"площадь. Медиана по находкам — не меньше {num(k['re_lower_bound_median'], 0)} штук на квадратный километр внутри нити. "
+                    f"Это сценарий по искусственным мишеням: для природного мусора не проверен, и на природной паре ISPRA "
+                    f"посчитанные предметы лежат не там, где пиксели детектора."),
+            notes=(f"Метод: {k['re_method']}. Протокол ISPRA MSFD Modulo 2bis: предметы 2.5–50 см, ширина полосы в файле 2019 г. "
+                   f"не записана, часовой пояс не указан — пара не калибровочная. Точек калибровки {num(k['re_calibration_n_dates'], 0)} (по пикселю на дату). Почему "
+                   f"«нижняя граница»: пиксели ниже порога детектора не учтены. Почему не сравнивать с полем: поле — средняя по "
+                   f"километрам маршрута и предметы > 2 см, здесь — плотность внутри нити в пересчёте на бутылки."),
+        ))
     S.append(dict(
         kind="main", layout="grid", section="Сервис: путь эколога",
-        title="Сервис: Земля с находками → точка → сцена и карточка зоны → студия → назад к следующей точке",
-        images=[("svc_earth", "1. Обзор Земли: находки обработанных сцен сразу, без формы"),
-                ("svc_card", "2. Точка → сцена и карточка: что найдено, когда, площадь, уверенность"),
-                ("svc_studio", "3. «В студию» — работа с зоной; «Назад к карте» — к той же точке обзора")],
-        caption="Вывод: путь эколога — Земля → точка → карточка → студия → назад к следующей находке",
+        title="Сервис: снимки с находками → снимок и нумерованные зоны → карточка зоны → студия → назад",
+        images=[("svc_earth", "1. Обзор: Земля и снимки «район · дата · N находок · облачность» — сразу, без формы"),
+                ("scene", "2. Снимок: зоны по номерам, площадь, статус, оценка шт./км²"),
+                ("svc_card", "3. Карточка: что найдено, когда, площадь, уверенность, источник каждого числа"),
+                ("svc_studio", "4. «В студию» — снимок, маска, объекты; «Назад» — к тому же месту")],
+        caption="Вывод: путь эколога — снимок → зона → карточка → студия → назад к следующей находке",
         source="presentation/img/*.jpg (presentation/make_shots.py, http://localhost:8070, 1920×1080, без фикстур); docs/DEMO.md",
-        speech=("Сервис. При открытии — Земля с реальными находками обработанных сцен. Клик по точке — сцена и карточка зоны: "
-                "что найдено, когда, площадь, уверенность и откуда каждое число. Из карточки — в студию, кнопкой «Назад» — "
-                "к той же точке обзора и к следующей находке."),
-        notes="Показ вживую — docs/DEMO.md. Полевые шт./км² другого места не выдаются за плотность зоны: «не определено по этому снимку».",
+        speech=("Сервис. При открытии — Земля и список снимков с находками. Клик по снимку — зоны по номерам с площадью и "
+                "оценкой. Клик по зоне — карточка: что найдено, когда, уверенность и откуда каждое число. Из карточки — в студию, "
+                "кнопкой «Назад» — к следующей находке."),
+        notes=("Показ вживую — docs/DEMO.md; запасное видео — presentation/demo.mp4. Полевые шт./км² другого места не выдаются "
+               "за плотность зоны."),
     ))
     S.append(dict(
         kind="main", layout="grid", section="Сервис: фото, метрики, выгрузка",
@@ -750,7 +802,9 @@ def main_slides(k: dict) -> list[dict]:
     S.append(dict(
         kind="main", layout="text", section="Ограничения: что мы НЕ утверждаем",
         title="Что мы НЕ утверждаем",
-        bullets=[f"шт./км² по снимку — не выдаём: калибровочных пар {num(k['ql_calibration_pairs'], 0)}; «концентрация по снимку не подтверждена»",
+        bullets=[(f"шт./км² по снимку — не измерение: {k['re_status']}, нижняя граница по мишеням PLP; природных калибровочных пар "
+                  f"{num(k['ql_calibration_pairs'], 0)}" if k["re_on"] else
+                  f"шт./км² по снимку — не выдаём: калибровочных пар {num(k['ql_calibration_pairs'], 0)}; «концентрация по снимку не подтверждена»"),
                  f"«Пластик» по снимку — нет: детектор видит любой плавающий мусор; суда — известная слабость ({num(k['v2_reference_vessels_pct'], 0)} % судов)",
                  f"Предел обнаружения не доказан: на {num(k['ad_A_with_items'], 0)} отрезках ADIS с единичными предметами детектор их не увидел — "
                  f"согласуется с физикой, но общий предел для всех скоплений не задаёт",
@@ -758,7 +812,9 @@ def main_slides(k: dict) -> list[dict]:
                  f"Поле: S2 — один рейс; интервал одного нового места широкий ({rng(k['qf_event_lo95'], k['qf_event_hi95'], 0)} шт./км²)",
                  "Счётчик по фото на реку и спутник без дообучения не переносится"],
         source="README.md «Ограничения»; reports/report.md; docs/QUANTITY.md",
-        speech=("Что мы не утверждаем. Штук по снимку — нет, калибровочных пар ноль. Пластик по снимку — нет, детектор видит любой "
+        speech=(("Что мы не утверждаем. Штуки по снимку — только исследовательская оценка, природных калибровочных пар ноль. Пластик"
+                 if k["re_on"] else "Что мы не утверждаем. Штук по снимку — нет, калибровочных пар ноль. Пластик")
+                + " по снимку — нет, детектор видит любой "
                 "мусор и путает суда. Предел обнаружения не доказан. При сильном ветре — «недостаточно данных». Поле — один рейс, "
                 "а счётчик по фото без дообучения на реку не переносится."),
         notes=(f"Test концентрации не абсолютно нетронутый: {k['ft_limitation']}. Порог ветра — {num(k['sz_wind_ms'], 0)} м/с из Methods Cózar 2024, "
@@ -1029,6 +1085,11 @@ def slides(k: dict) -> list[dict]:
     ss = search_slides(k)
     appendix = [s for s in ss if s["section"] != "Разбор ошибок на сложном фоне"] + [s for s in S if s["section"] in APPENDIX_KEEP]
     S = main_slides(k)
+    # лимит основной части: первым в приложение уходит «Разбор ошибок на сложном фоне» (§15 — слайд остаётся в деке)
+    for sec_ in ("Разбор ошибок на сложном фоне", "Развитие"):
+        if len(S) > MAIN_MAX_SLIDES:
+            appendix = [s for s in S if s["section"] == sec_] + appendix
+            S = [s for s in S if s["section"] != sec_]
     # тайминг основной части по объёму речи (≈ 130 слов в минуту), минимум 12 с на слайд; регламент — SPEC-GAPS.md
     t0 = 0
     for s in S:
@@ -1479,6 +1540,26 @@ def qa_items(k: dict) -> list[tuple[str, str, str]]:
          f"Калибровочных пар «снимок → шт./км²» {num(k['ql_calibration_pairs'], 0)}, и не только у нас: авторы крупнейшего каталога "
          f"полос пишут «{k['q_quote_short']}» (Cózar и др., 2024, doi {k['q_quote_doi']}).",
          "README.md «Главное», §6; reports/case_pairs/summary.md; reports/case_pairs/experiment.md; docs/QUANTITY.md"),
+        *([("На снимке у зоны ≥ десятков тысяч шт./км², а в поле 54 — почему такая разница?",
+            f"Это разные величины, сравнивать их напрямую нельзя. На снимке — {k['re_status'] if k['re_on'] else ''}: плотность "
+            f"ВНУТРИ нити, где детектор сработал, в пересчёте на бутылки PET 1.5 л — C ≥ n_пикселей × "
+            f"{num(k['re_items_per_pixel_lo'], 0) if k['re_on'] else '—'} / площадь зоны; медиана нижней границы по находкам ≥ "
+            f"{num(k['re_lower_bound_median'], 0) if k['re_on'] else '—'} шт./км². Калибровка — "
+            f"{pl(k['re_calibration_n_dates'], 'пиксель', 'пикселя', 'пикселей') if k['re_on'] else '—'} на "
+            f"{pl(k['re_calibration_n_dates'], 'дате', 'датах', 'датах') if k['re_on'] else '—'} мишеней PLP; для природного мусора "
+            f"не проверена, мелкие предметы дали бы больше штук. В поле {num(k['q_pooled_C'], 1)} шт./км² — средняя по километрам "
+            f"маршрута судна, где нитей почти нет, и предметы > 2 см любого размера. Плотность внутри полосы и средняя по морю "
+            f"различаются на порядки — так и должно быть; поэтому в интерфейсе оценка подписана «с полевыми шт./км² не сравнивать».",
+            "configs/zone_estimate.yaml; reports/count_datasets/115_bridge_s2.md; docs/QUANTITY.md")] if k["re_on"] else []),
+        *([("Как получены 470–670 предметов на пиксель?",
+            f"Из эксперимента Plastic Litter Project 2019 (Лесбос, мишени из бутылок PET 1.5 л известной площади, дрон в тот же "
+            f"день). Мы взяли пиксели Sentinel-2 L2A, где наш детектор сработал над мишенью, и по доле покрытия с дрона пересчитали "
+            f"бутылки в пикселе: {num(k['re_items_per_pixel_lo'], 0)} и {num(k['re_items_per_pixel_hi'], 0)} — по одному пикселю на "
+            f"каждой из {pl(k['re_calibration_n_dates'], 'даты', 'дат', 'дат')} ({', '.join(k['re_dates'])}). Это сценарий-допущение "
+            f"(предметы размера бутылки), а не доверительный интервал; пиксели мишеней, где детектор не сработал, говорят о полноте, "
+            f"а не о числе. На природной паре ISPRA (Порто-Гарибальди, 16.09.2019) посчитанные с судна предметы не лежат рядом с "
+            f"пикселями детектора — сигнал нити дают не посчитанные предметы, поэтому для природного мусора сценарий не проверен.",
+            "configs/zone_estimate.yaml; reports/count_datasets/115_bridge_s2.md; docs/research/pairs/CRITIC.md")] if k["re_on"] else []),
         ("Какой у вас главный количественный результат и насколько он точен?",
          f"Полевая концентрация C = N/A. Для суммарного пластика {size_ru(k['pr_S2_size'])} (S2): {num(k['q_pooled_N'], 0)} шт. на "
          f"{num(k['q_pooled_A_km2'], 2)} км² = {num(k['q_pooled_C'], 1)} шт./км². Интервал Пуассона [{rng(k['q_lo95'], k['q_hi95'])}] — "
@@ -1915,11 +1996,17 @@ def main(argv=None) -> int:
         return 0
     build_pptx(S, imgs, Path(a.out))
     OUT_PRES.mkdir(parents=True, exist_ok=True)
-    build_pptx(S, imgs, OUT_PRES / "deck.pptx")
     for p, t in texts.items():
         p.write_text(t, encoding="utf-8")
-    if a.pdf:
-        to_pdf(OUT_PRES / "deck.pptx")
+    # §41: presentation/deck.pptx (основная часть) и deck_checkpoint.pptx собирает presentation/make_deck_checkpoint.py
+    # (стиль пожарной деки); здесь — только reports/case_deck.pptx и тексты
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("make_deck_checkpoint", OUT_PRES / "make_deck_checkpoint.py")
+    ck = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(ck)
+    rc = ck.main(["--pdf"] if a.pdf else [])
+    if rc:
+        print("[deck_case] ВНИМАНИЕ: presentation/make_deck_checkpoint.py завершился с ошибкой — дека не пересобрана")
     if a.preview or a.preview_main:
         preview([s for s in S if not s.get("appendix")] if a.preview_main else S, imgs)
     print(f"[deck_case] {Path(a.out).relative_to(ROOT)}: {len(S)} слайдов; docs/SPEECH.md, docs/DEMO.md, "

@@ -1,9 +1,10 @@
 r"""Запасное видео демо (на случай, если сервис не поднимется на приёмке): запись Playwright с http://localhost:8070,
 1920×1080, без фикстур, 2–3 мин, паузы 2–3 с на ключевых экранах.
 
-Путь: Обзор Земли → кластер у Испании → отложенная сцена 30SXE, зона 16 → карточка → «В студию» → «Назад» → другая
-находка (требует проверки) → «Цифры» → «Метрики» → «Фото» (пример) → «Выгрузка» → «Запросы» (сохранить →
-сбросить → повторить). Пишет presentation/demo.webm; если > 45 МБ и есть ffmpeg — presentation/demo.mp4 (H.264, CRF 30).
+Путь (интерфейс §34): обзор — список снимков → снимок Альборан (отложенная сцена Cózar 30SXE) → нумерованные зоны
+с исследовательской оценкой шт./км² → зона 16 → карточка → «В студию» → «Назад» → другой снимок и находка →
+«Цифры» → «Проверка качества» → слой «Полевые измерения» → «Фото» (пример) → «Выгрузка» → «Запросы» (сохранить →
+повторить). Пишет presentation/demo.webm и, если есть ffmpeg, presentation/demo.mp4 (H.264, CRF 30; цель < 45 МБ).
 Сервис не перезапускает; только чтение.
 
     .venv\Scripts\python.exe presentation\make_demo_video.py [--base http://localhost:8070]
@@ -19,6 +20,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 DEMO_ZONE = "SZ-demo-cozar-2021-03-11-016"
+SCENE_TEXT = "Альборан"
 QNAME = "Демо-видео: отложенная сцена Cózar"
 FFMPEG = Path(r"C:\ffmpeg\bin\ffmpeg.exe")
 
@@ -61,6 +63,8 @@ def main(argv=None) -> int:
                             record_video_size={"width": 1920, "height": 1080})
         pg = ctx.new_page()
         pg.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
+        bad_http: list[str] = []
+        pg.on("response", lambda r: bad_http.append(f"{r.status} {r.url}") if r.status >= 400 else None)
         pause = lambda ms: pg.wait_for_timeout(int(ms * 1.4))  # noqa: E731 — темп для зрителя
 
         def main_box():
@@ -76,63 +80,68 @@ def main(argv=None) -> int:
             pg.mouse.click(box["x"] + x, box["y"] + y)
 
         pg.goto(a.base + "/", wait_until="networkidle", timeout=90000)
-        pg.wait_for_function("() => window.__app && window.__app.ready && window.__app.szReady", timeout=60000)
-        step("обзор Земли"); pause(4000)
+        pg.wait_for_selector("[data-testid=scene-item]", timeout=60000)
+        step("обзор: Земля и список снимков"); pause(4500)
 
-        # кластер у Испании → зона 16 отложенной сцены Cózar (клик по точкам; запасной путь — selectZone)
-        opened = False
-        for _ in range(5):
-            pts = points()
-            hit = [q for q in pts if q.get("id") == DEMO_ZONE]
-            if hit:
-                glide_click(hit[0]["x"], hit[0]["y"]); pause(3000)
-                opened = pg.locator("[data-testid=scene-zone-card]").count() > 0
-                break
-            cl = [q for q in pts if q.get("cluster")]
-            if not cl:
-                break
-            box = main_box()
-            # кластер ближе всего к Гибралтару на экране: самый правый из крупных на обзоре Атлантики
-            tgt = max(cl, key=lambda q: (q["cluster"] >= 10, -abs(q["x"] - box["width"] * 0.55)))
-            glide_click(tgt["x"], tgt["y"]); pause(2500)
-        if not opened:
-            pg.evaluate(f"() => window.__app.selectZone('{DEMO_ZONE}')")
-            pause(3000)
-        pg.wait_for_selector("[data-testid=scene-zone-card]", timeout=30000)
-        step("карточка зоны 16"); pause(5000)
+        def back_to_scenes():
+            for bk in ("sz-back", "scene-back"):
+                if pg.locator(f"[data-testid={bk}]").count():
+                    pg.click(f"[data-testid={bk}]"); pause(2000)
+
+        def open_zone(zone_id=None):
+            """Зона — клик по строке списка (номер N = строка N); запасной путь — selectZone."""
+            items = pg.locator("[data-testid=sz-item]")
+            n = int(zone_id.rsplit("-", 1)[1]) if zone_id else 1
+            if items.count() >= n:
+                it = items.nth(n - 1)
+                it.scroll_into_view_if_needed(); it.hover(); pause(1200); it.click()
+            elif zone_id:
+                pg.evaluate(f"() => window.__app.selectZone('{zone_id}')")
+            pg.wait_for_selector("[data-testid=scene-zone-card]", timeout=30000)
+
+        # снимок Альборан (отложенная сцена Cózar) → нумерованные зоны → зона 16 → карточка
+        sc = pg.locator("[data-testid=scene-item]", has_text=SCENE_TEXT)
+        (sc.first if sc.count() else pg.locator("[data-testid=scene-item]").first).hover(); pause(1200)
+        (sc.first if sc.count() else pg.locator("[data-testid=scene-item]").first).click()
+        pg.wait_for_selector("[data-testid=sz-item]", timeout=30000)
+        step("снимок: зоны с исследовательской оценкой"); pause(6000)
+        open_zone(DEMO_ZONE)
+        step("карточка зоны 16"); pause(6000)
         card = pg.locator("[data-testid=scene-zone-card]")
-        card.hover(); pg.mouse.wheel(0, 500); pause(3000); pg.mouse.wheel(0, -500); pause(1500)
-
+        card.hover(); pg.mouse.wheel(0, 500); pause(3500); pg.mouse.wheel(0, -500); pause(1500)
         if pg.locator("[data-testid=sz-studio]").count():
-            pg.click("[data-testid=sz-studio]"); step("студия"); pause(5000)
+            pg.click("[data-testid=sz-studio]"); step("студия"); pause(5500)
             if pg.locator("[data-testid=studio-back]").count():
                 pg.click("[data-testid=studio-back]"); step("назад к карточке"); pause(2500)
-        if pg.locator("[data-testid=sz-back]").count():
-            pg.click("[data-testid=sz-back]"); step("назад к обзору"); pause(3000)
+        back_to_scenes(); step("назад к списку снимков"); pause(2000)
 
-        # другая находка: «требует проверки»
-        pg.click("[data-testid=act-earth]"); pause(3000)
-        other = [q for q in points() if not q.get("cluster") and q.get("ds") == "unverified"]
-        if other:
-            glide_click(other[0]["x"], other[0]["y"]); pause(3000)
-        else:
-            ids = pg.evaluate("() => window.__app.szIds || []") or []
-            oid = next((i for i in ids if i != DEMO_ZONE and "demo" not in i), None)
-            if oid:
-                pg.evaluate(f"() => window.__app.selectZone('{oid}')"); pause(3000)
-        if pg.locator("[data-testid=scene-zone-card]").count():
-            step("другая находка — карточка"); pause(5000)
-            if pg.locator("[data-testid=sz-back]").count():
-                pg.click("[data-testid=sz-back]"); pause(2500)
+        # другой снимок и находка (требует проверки)
+        items = pg.locator("[data-testid=scene-item]")
+        oth = [i for i in range(items.count()) if SCENE_TEXT not in items.nth(i).inner_text()]
+        if oth:
+            items.nth(oth[0]).hover(); pause(1000); items.nth(oth[0]).click()
+            pg.wait_for_selector("[data-testid=sz-item]", timeout=30000); step("другой снимок"); pause(4000)
+            open_zone(); step("другая находка — карточка"); pause(5500)
+            back_to_scenes()
 
-        # «Цифры» и «Метрики»
+        # «Цифры», «Проверка качества», слой «Полевые измерения»
         if pg.locator("[data-testid=headline-open]").count():
-            pg.click("[data-testid=headline-open]"); step("Цифры"); pause(5000)
+            pg.click("[data-testid=headline-open]"); step("Цифры"); pause(6000)
             if pg.locator("[data-testid=headline-close]").count():
                 pg.click("[data-testid=headline-close]")
+            else:
+                pg.keyboard.press("Escape")
             pause(1000)
-        pg.click("[data-testid=tab-metrics]"); step("Метрики"); pause(5000)
-        pg.click("[data-testid=tab-zones]"); pause(1000)
+        if pg.locator("[data-testid=act-qc]").count():
+            pg.click("[data-testid=act-qc]"); step("Проверка качества"); pause(6000)
+            if pg.locator("[data-testid=qc-close]").count():
+                pg.click("[data-testid=qc-close]")
+            else:
+                pg.keyboard.press("Escape")
+            pause(1000)
+        if pg.locator("[data-testid=act-field]").count():
+            pg.click("[data-testid=act-field]"); step("слой «Полевые измерения»"); pause(5000)
+            pg.click("[data-testid=act-field]"); pause(1500)
 
         # «Фото»: пример уже открыт
         pg.click("[data-testid=mode-photo]"); step("Фото")
@@ -169,11 +178,14 @@ def main(argv=None) -> int:
     size = out.stat().st_size / 1e6
     print("\n".join(log))
     print(f"видео: {out} ({size:.1f} МБ, {time.time() - t0:.0f} с записи)")
-    if size > 45 and FFMPEG.exists():
+    if FFMPEG.exists():  # mp4 H.264 — играет везде (PowerPoint, Windows); webm остаётся исходником
         mp4 = out.with_suffix(".mp4")
         subprocess.run([str(FFMPEG), "-y", "-i", str(out), "-c:v", "libx264", "-crf", "30", "-preset", "medium",
                         "-pix_fmt", "yuv420p", "-an", str(mp4)], check=True, capture_output=True)
         print(f"сжато: {mp4} ({mp4.stat().st_size / 1e6:.1f} МБ)")
+    print("HTTP ≥ 400:", len(bad_http))
+    for u in bad_http[:10]:
+        print("   ", u[:200])
     print("ошибок консоли:", len(errs))
     for e in errs[:10]:
         print("   ", e[:200])
