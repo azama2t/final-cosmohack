@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -444,6 +445,25 @@ def load() -> dict:
         for key in ("n_pixels", "area_km2", "value"):
             k["re_ex_" + key] = N(re_ + "example." + key)
     k["sz_n_finds"] = N(sz + "n_finds"); k["sz_n_finds_training"] = N(sz + "n_finds_training")
+    # §54: дрейф у находки на карте (≤ 72 ч, HYCOM/GFS на дату сцены) и ключи функций §54, если они уже в final_numbers
+    k["dr_hours"] = N("drift.hours")
+    k["dr_n_finds"] = N(c + "sections.report.service.n_finds_with_drift")
+    k["dr_n_all"] = N(c + "sections.report.service.n_finds")
+    for key in ("nasa_res_m_min", "nasa_res_m_max", "drones_n_sets", "drones_n_frames", "drones_n_sets_drone",
+                "prime_n_scenes"):
+        p = c + "sections.s54." + key
+        k["s54_" + key] = N(p) if N.has(p) else None
+    # §55: реальное время (наша модель на свежих Sentinel-2) — ключи, если уже в final_numbers
+    for key in ("rt_days", "rt_n_scenes", "rt_n_zones", "rt_n_finds", "rt_n_catalog", "rt_n_downloaded",
+                "rt_n_excluded"):  # PRIME (§55а) — демо, метрик нет
+        p = c + "sections.s55." + key
+        k["s55_" + key] = N(p) if N.has(p) else None
+    # §56: наш счётчик на кадрах «Дронов» (разметка авторов против нашего результата)
+    for key in ("drones_pred_tp", "drones_n_labels", "drones_pred_fp"):
+        p = c + "sections.s56." + key
+        k["s56_" + key] = N(p) if N.has(p) else None
+    p = c + "sections.resolution_physics.pixel_m"
+    k["rp_pixel_m"] = N(p) if N.has(p) else None
     return k
 
 
@@ -1689,6 +1709,104 @@ def _s51_items(k: dict) -> list[tuple[str, str, str]]:
     return Q
 
 
+def _log_has(pat: str) -> bool:
+    """Строка docs/LOG.md совпадает с регулярным выражением pat (готовность пунктов §54 — только по LOG)."""
+    log = ROOT / "docs" / "LOG.md"
+    if not log.exists():
+        return False
+    rx = re.compile(pat)
+    return any(rx.search(line) for line in log.read_text(encoding="utf-8").splitlines()
+               if "L126" not in line)  # свои строки деки (просьбы, статус) — не готовность пункта
+
+
+def _s54_done(n: int) -> bool:
+    """Строка LOG «§54 п.N … готов» (NASA 1, дроны 2, таймлайн 3, дрейф 4, PRIME 5)."""
+    return _log_has(rf"§54 п\.{n}\b[^|]*готов")
+
+
+def nasa_res(k: dict) -> str:
+    a, b = k.get("s54_nasa_res_m_min"), k.get("s54_nasa_res_m_max")
+    if a is not None and b is not None:
+        return f"с пикселем {num(a, 0)}–{num(b, 0)} м"
+    return "с пикселем в десятки раз крупнее, чем у Sentinel-2"
+
+
+def _s55_done(n: int) -> bool:
+    """§55: п.1 реальное время — строка LOG «§55 п.1 … готов(о)»; п.2 PRIME по CSV — «§55 п.2 PRIME данные … готов(о)»."""
+    return _log_has(r"§55 п\.1\b[^|]*готов") if n == 1 else _log_has(r"§55[^|]*PRIME[^|]*готов")
+
+
+def rt_ready(k: dict) -> bool:
+    """Реальное время готово: строка LOG «§55 п.1 … готов» или счётчики прогона уже в final_numbers (s55.rt_n_scenes)."""
+    return _s55_done(1) or k.get("s55_rt_n_scenes") is not None
+
+
+def rt_counts(k: dict) -> str:
+    """«За 30 дней обработано N снимков Sentinel-2: M зон, из них K находок» — только из final_numbers (s55.*)."""
+    d, ns, nz, nf = (k.get("s55_rt_" + x) for x in ("days", "n_scenes", "n_zones", "n_finds"))
+    if ns is None:
+        return ""
+    per = f"за {pl(d, 'день', 'дня', 'дней')} " if d is not None else ""
+    nc, ne = k.get("s55_rt_n_catalog"), k.get("s55_rt_n_excluded")
+    pre = (f"в каталогах {nc}, исключено по качеству {ne}, " if nc is not None and ne is not None else "")
+    out = f"{per}{pre}обработано моделью {pl(ns, 'снимок', 'снимка', 'снимков')} Sentinel-2"
+    if nz is not None:
+        out += f": {pl(nz, 'зона', 'зоны', 'зон')}"
+        if nf is not None:
+            out += f", из них находок {nf}; остальные — «не обнаружено» или «недостаточно данных»"
+    return out
+
+
+def _s54_items(k: dict) -> list[tuple[str, str, str]]:
+    """§54/§55: вопросы про новые функции (реальное время, NASA-обзор, дроны, PRIME) — только для пунктов со строкой
+    LOG «готов». Честно: NASA-обзор ≠ обнаружение, дрон ≠ спутник, синтетика ≠ наблюдение."""
+    Q = []
+    px = f" {num(k['rp_pixel_m'], 0)} м" if k.get("rp_pixel_m") is not None else ""
+    nasa_ctx = ("Ежедневный снимок NASA (VIIRS и MODIS) " + nasa_res(k) + " — только контекст: облака, цветение, "
+                f"пятна. Наш детектор обучен на Sentinel-2{px}, на таком разрешении пластик физически не виден, "
+                "поэтому модель на кадрах NASA мы не запускаем — это была бы подделка.")
+    if rt_ready(k) or _s54_done(1):
+        if rt_ready(k):
+            cnt = rt_counts(k)
+            a = ("Модель. Реальные снимки Sentinel-2 наших районов прошли ту же детекцию и те же фильтры качества"
+                 + (f": {cnt}" if cnt else "") + "; положительных точек ради показа не добавляли, у каждого результата "
+                 "подпись «автоматически, не проверено человеком» и дата съёмки. " + nasa_ctx)
+        else:
+            a = ("Сейчас реальное время — это ежедневный обзор NASA и отдельные свежие снимки Sentinel-2 с нашей "
+                 "детекцией. " + nasa_ctx)
+        Q.append(("Реальное время — это модель или просто NASA?", a, "service/routes_nasa.py; docs/LOG.md"))
+    if _s54_done(2):
+        Q.append(("Дрон считает предметы — а спутник?",
+                  "Спутник предметы не считает: предмет в сотни раз меньше пикселя. Группа «Дроны» — реальные детальные "
+                  "кадры открытых наборов с разметкой предметов, и карточка всегда пишет «дрон, не спутник», источник, "
+                  "лицензию и сенсор. Штуки на квадратный метр — только где известна площадь кадра, иначе штуки на кадр. "
+                  f"Наш счётчик по фото проверен на отложенных сессиях FML: ошибка {num(k['pc_mae'], 2)} шт. на кадр. "
+                  + (f"На кадрах «Дронов» он нашёл {k['s56_drones_pred_tp']} из {k['s56_drones_n_labels']} размеченных "
+                     f"авторами предметов, ложных срабатываний {k['s56_drones_pred_fp']} — вне своих обучающих наборов он "
+                     "ошибается, и мы показываем разметку авторов и наш результат раздельно."
+                     if k.get("s56_drones_pred_tp") is not None and k.get("s56_drones_n_labels") is not None
+                     and k.get("s56_drones_pred_fp") is not None else
+                     "На кадрах «Дронов» разметка авторов и результат нашего счётчика показаны раздельно; вне своих "
+                     "обучающих наборов счётчик ошибается."),
+                  "service/routes_drones.py; data/case/drones/index.json; docs/COUNT_DATASETS.md"))
+    if _s55_done(2):  # §55а: демо-режим по просьбе жюри — без метрик качества
+        Q.append(("PRIME MODE — это ваш результат?",
+                  "Нет. Это демо-режим, который жюри попросило на чекпоинте: как сервис будет выглядеть, если дадут "
+                  "снимки детального разрешения. В точках событий CSV организаторов — демонстрационные снимки из "
+                  "реальной воды и вырезок предметов с дронов, числа — из строк CSV. Плашка на весь режим: изображения "
+                  "и числа демонстрационные, не результат модели. Выключен — ни одного демо-объекта; в метрики и "
+                  "выводы PRIME не входит.",
+                  "docs/LOG.md"))
+    elif _s54_done(5):
+        Q.append(("PRIME MODE — это ваш результат?",
+                  "Нет, это демонстрация на синтетике: как работал бы сервис при детальной съёмке. Фон — реальная вода "
+                  "Sentinel-2, предметы вставлены нами. Всё в PRIME окрашено отдельно, с плашкой «СИНТЕТИКА — не "
+                  "наблюдение», реальные слои при этом скрыты; тумблер выключен по умолчанию, и тогда на экране нет ни "
+                  "одного синтетического объекта. В выводы проекта PRIME не входит.",
+                  "data/case/prime/index.json; docs/LOG.md"))
+    return Q
+
+
 def qa_items(k: dict) -> list[tuple[str, str, str]]:
     ft2 = k
     st, rb = k["S2_sch_st"], k["S2_sch_route_buf1"]
@@ -1696,6 +1814,8 @@ def qa_items(k: dict) -> list[tuple[str, str, str]]:
     Q = [
         # --- §51 п.1: замечания эксперта чекпоинта
         *_s51_items(k),
+        # --- §54: новые функции карты (честные ответы: обзор ≠ обнаружение, дрон ≠ спутник, синтетика ≠ наблюдение)
+        *_s54_items(k),
         # --- главное
         ("Почему вы не выдаёте концентрацию шт./км² по снимку?",
          f"Потому что перенос не доказан. Синхронных пар «снимок ↔ полевое измерение» при типичном дрейфе — "

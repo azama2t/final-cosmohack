@@ -1,261 +1,593 @@
 # Детектирование и оценка концентрации макропластика в морских акваториях
 
-**Отчёт команды по кейсу КосмоХакатона 2026.** Разделы следуют критериям оценки: отраслевые О1–О6 и технические Т1–Т5. Все числа подставлены из `reports/final_numbers.json` (собирают `scripts/final_numbers.py` и `scripts/case/collect_search.py`); руками числа не пишутся. Отпечаток прогона — `{{case.run.outputs_fingerprint_short}}`. Подробный рабочий отчёт — `reports/report.md`, запуск — `README.md`.
+**Научный отчёт команды по кейсу «Макропластик», КосмоХакатон 2026.** Команда: Кашин Глеб, Закон Марк, Панин Матвей, Ожигов Егор, Ведерников Фёдор.
 
-**Коротко.**
+Каждое число отчёта подставлено из `reports/final_numbers.json`, руками числа не пишутся. Файл собирают `scripts/final_numbers.py` и `scripts/case/collect_search.py`, у каждого раздела чисел указаны источник и протокол. Несколько чисел из журналов экспериментов приведены с путём к файлу, где они записаны. Отпечаток прогона маршрута — `{{case.run.outputs_fingerprint_short}}`. Графики строит `scripts/case/report_figs.py`, PDF собирает `scripts/case/report_export.py`. Запуск описан в `README.md`, рабочий отчёт с полной хронологией — `reports/report.md`.
 
-- Детектор скоплений плавающего мусора по Sentinel-2: F1 **{{case.detector.test.lgbm.f1|f3}}** на отложенном test MARIDA против RandomForest {{case.detector.test.rf_argmax.f1|f3}} и U-Net MARIDA {{case.sections.baselines.test.unet_argmax.f1|f3}}.
-- Концентрация шт./км² — по полевым данным: C = N/A с интервалом. Это главный количественный результат (Т3 допускает отдельную проверку на поле). S2: {{case.sections.quantity.field_S2.pooled_C|f1}} [{{case.sections.quantity.field_S2.boot_lo95|f1}}–{{case.sections.quantity.field_S2.boot_hi95|f1}}] шт./км². На отложенном test модель не лучше медианы, поэтому на карте — медиана профиля.
-- Связь «снимок → шт./км²» не подтверждена. Калибровочных пар {{case.sections.quantity.levels.calibration_pairs}}: у событий CSV пар уровня A {{case.sections.search.csv_A}}; в найденных нами данных ADIS — {{case.sections.adis_pairs.A}} пар по месту и времени, но на всех с предметами снимок ничего не показывает.
+## Краткий проверяемый итог
+
+| Что утверждаем | Число | Выборка и протокол | Как проверить |
+|---|---|---|---|
+| Детектор скоплений плавающего материала по Sentinel-2 лучше бейзлайнов | F1 **{{case.detector.test.lgbm.f1|f3}}** [{{case.detector.test.lgbm.ci95_f1.0|f3}}–{{case.detector.test.lgbm.ci95_f1.1|f3}}]; RandomForest {{case.detector.test.rf_argmax.f1|f3}}, U-Net MARIDA {{case.sections.baselines.test.unet_argmax.f1|f3}}, FDI × NDVI {{case.detector.test.fdi_ndvi_box.f1|f3}} | отложенный test MARIDA: {{case.detector.test_n_scenes}} сцен, {{case.detector.test_md_px|pl:пиксель/пикселя/пикселей}} мусора; посчитан один раз | `run_all.py eval` → `reports/case_run/detector_recomputed.json` |
+| Концентрация шт./км² считается по полю: C = N/A с интервалом | S2 (пластик > 2 см): ΣN/ΣA = **{{case.sections.quantity.field_S2.pooled_C|f1}}** шт./км², 95 % [{{case.sections.quantity.field_S2.boot_lo95|f1}}–{{case.sections.quantity.field_S2.boot_hi95|f1}}] | {{case.sections.quantity.field_S2.n|pl:событие/события/событий}}, {{case.sections.quantity.field_S2.pooled_N|pl:предмет/предмета/предметов}} на {{case.sections.quantity.field_S2.pooled_A_km2|f2}} км²; бутстреп по дням рейса | `expert_check.py --n {{case.sections.quantity.field_S2.pooled_N}} --area {{case.sections.quantity.field_S2.pooled_A_km2|f2}}`, `field_interval_check.py` |
+| Модель по полевым данным на отложенном test не лучше медианы, поэтому карта показывает медиану | S2: {{case.sections.field_test.S2.main_mae|f1}} против {{case.sections.field_test.S2.median_mae|f1}} шт./км² (MAE) | {{case.sections.field_test.S2.n_test}} событий, участок маршрута с буфером 1 сут; правило записано до открытия test | `reports/case_conc/final_test_predictions.csv` |
+| Шт./км² по снимку не определяются | калибровочных пар **{{case.sections.quantity.levels.calibration_pairs}}**, нужно {{case.sections.quantity.calibration.n_pairs_k_x2_min}}–{{case.sections.quantity.calibration.n_pairs_k_x2_max}} | {{case.sections.adis_pairs.A}} пар ADIS по месту и времени; на всех синхронных отрезках с предметами детектор дал 0 пикселей | `collect_search.py` → `reports/search/search_numbers.json` |
+| Пары с разрывом до 48 ч и сдвигом полевого учёта дрейфом не помогли | порог ≤ {{case.sections.report.drift48.threshold_m}} м прошли **{{case.sections.report.drift48.n_pass}} из {{case.sections.report.drift48.n_pairs}}** пар ISPRA | лучшие пары из {{case.sections.ispra.n_transects}} трансект ISPRA; OpenDrift, две гипотезы часового пояса | `docs/research/pairs/drift_shift_48h.csv` |
+| Отдельные предметы на пикселе 10 м не различимы физически | ≥ 2×2 пикселя при 10 м занимают {{case.sections.resolution_physics.countable_pct_10m|f0}} % из {{case.sections.resolution_physics.n_objects|int}} предметов ADIS; при 0,3 м — {{case.sections.resolution_physics.countable_pct_03m|f0}} % | размеры предметов судовой камеры ADIS | `docs/research/marine_quantity/results/resolution_physics.json` |
+
+Разделение по типу знания. **Подтверждено измерением:** метрики детектора на размеченном test, полевые C = N/A и их интервалы, отрицательные результаты связи «снимок ↔ поле». **Сценарий:** перевод площади маски в штуки по мишеням PLP. Он свёрнут в карточке, подписан «исследовательская оценка» и не является результатом. **Синтетика:** синтетический перенос P3 проверен и отвергнут (раздел 9). **Неудавшийся поиск:** пары для профилей пластика (S1, S2) не найдены. Снимка над полосами нет.
+
+**Где в отчёте каждый критерий.** О1 — разделы 1–3. О2 — 7, 8, 15. О3 — 6, 11. О4 — 12. О5 — 8.5, 9, 16, 18. О6 — 12.4, 13, 14. Т1 — 3, 4. Т2 — 5, 6. Т3 — 7. Т4 — 10, 17. Т5 — 12.3.
 
 ---
 
-## О1. Корректность предметной постановки
+## 1. Постановка: пользователь, целевая величина, размерный профиль, единицы
 
-**Целевая величина** — суммарный плавающий пластик, предметы > 2 см, шт./км², визуальная полоса 10 м с судна: профиль `S2_visual_GT2`, {{case.conc.S2.target.n_events|pl:событие/события/событий}} Саргассова моря. Второй профиль, только для полевой проверки, — трал 5–50 см в Тихом океане ({{case.conc.S1.target.n_events|pl:событие/события/событий}}).
+**Пользователь** — специалист по экологическому мониторингу. Он выбирает акваторию и дату, находит вероятные зоны скопления и сравнивает их с полевыми измерениями. Ему нужно видеть качество и неопределённость каждого числа и выгружать результат.
 
-**Различение совокупностей.** «Весь мусор» (`all_litter`, Северное и Чёрное моря) пластиком не считается и используется только в экспериментах. Объектные строки — не плотности. Категории пластика не суммируются: пустое значение ≠ 0. Класс детектора Marine Debris MARIDA — любой плавающий мусор, не только пластик; маска подписана «вероятное скопление плавающего мусора».
+**Целевая величина** — суммарный плавающий пластик, предметы > 2 см, шт./км². Учёт визуальный, полоса 10 м с борта судна. Это профиль `S2_visual_GT2 / total_plastic`: {{case.conc.S2.target.n_events|pl:событие/события/событий}} Саргассова моря. Контрольный пример постановки «12 предметов на 0,20 км²» совпадает именно с этим профилем. Второй профиль нужен только для полевой проверки: трал 5–50 см в Тихом океане, {{case.conc.S1.target.n_events|pl:событие/события/событий}}. Профили не смешиваются: у них разные метод, размерный класс и площадь.
 
-**Отбор.** Из {{case.csv.rows}} строк реестра ({{case.csv.events}} событий) в профиль S2 входят {{case.selection.S2.accepted_rows}}. У каждого отказа записана причина: объектная строка — {{case.selection.S2.rej_item_observation}}, категория пластика — {{case.selection.S2.rej_plastic_category}}, другой профиль — {{case.selection.S2.rej_other_source}}, весь мусор — {{case.selection.S2.rej_all_litter}}, промысловый мусор — {{case.selection.S2.rej_fisheries}}, аэросъёмка > 50 см — {{case.selection.S2.rej_aerial}}.
+**Совокупности не путаем.**
+- Весь мусор (`all_litter`, Северное и Чёрное моря) — не пластик.
+- Объектная строка — не плотность.
+- Категория пластика — не сумма пластика. Пустое значение ≠ 0.
+- Класс детектора Marine Debris (MARIDA) — любой плавающий мусор, не только пластик. Поэтому маска подписана «вероятное скопление плавающего материала».
 
-**Целевая совокупность = материал + размерный класс + единица** (что именно считает каждая ступень; `docs/LABELS.md`):
+**Формулы и единицы.**
+
+| Величина | Формула | Единица | Контроль |
+|---|---|---|---|
+| Полевая концентрация | `C = N / A` | шт./км² | {{case.control.n}} / {{case.control.area_km2|f2}} км² = {{case.control.value|f1}} шт./км² |
+| Интервал счёта (Гарвуд, точный пуассоновский) | `C_lo = χ²(0,025; 2N) / (2A)`, `C_hi = χ²(0,975; 2N+2) / (2A)` | шт./км² | [{{case.control.lower|f1}}–{{case.control.upper|f1}}] для того же примера |
+| Средняя по профилю | `C̄ = ΣN_i / ΣA_i` | шт./км² | совпала с опубликованной у {{case.conc.consistency.match}} из {{case.conc.consistency.rows}} строк |
+| Ошибка прогноза | `MAE = (1/n) · Σ abs(Ĉ_i − C_i)` | шт./км² | бейзлайн — медиана обучающих событий на том же сплите |
+| Доля покрытия по снимку | `S = A_маски / A_пригодной воды` | м²/км² (как LWD у Cózar 2024) | это не шт./км² и не масса |
+| Калибровка «снимок → шт./км²» (если бы были пары) | `ln C = ln k + b · ln S` | — | пар с ненулевым S — {{case.sections.quantity.levels.calibration_pairs}} |
+
+**Целевая совокупность = материал + размерный класс + единица.** Таблица показывает, что считает каждая ступень (`docs/LABELS.md`):
 
 {{derived.case_targets_table}}
 
-**Лестница единиц** — у каждой ступени своя проверка и метрика; перевода между ступенями без калибровки нет:
+Лестница единиц. У каждой ступени своя проверка и своя метрика. Без калибровки перейти с одной ступени на другую нельзя:
 
-![Лестница единиц](../docs/img/units_ladder.png)
+![Лестница единиц: предмет на кадре → плотность на кадре → поле → спутниковая зона](../docs/img/units_ladder.png)
 
-## О2. Достоверность количественных выводов
+## 2. Данные и происхождение каждого набора
 
-**Измерение ≠ оценка.** Измерение — C = N/A по трансекте с интервалом. Оценка по полевым данным — медиана профиля с подписью «не по снимку». Доля покрытия со снимка (м² маски на км² пригодной воды) — не мусор и не шт./км².
+### 2.1 Реестр организаторов
 
-{{derived.case_field_table}}
+`task/macroplastic_marine_samples.csv`: **{{case.sections.report.organizers_rows}} строк, {{case.sections.report.organizers_events}} событий** (`event_id`), {{case.csv.fields}} полей. Числа прочитаны из самого файла и совпадают с `case.csv`.
 
-**Три числа Саргассова моря (профиль S2, пластик > 2 см) — не путать:** {{case.sections.quantity.field_S2.pooled_C|f1}} шт./км² — среднее профиля ΣN/ΣA по всем событиям (измерение, 95 % с разбросом между днями [{{case.sections.quantity.field_S2.boot_lo95|f1}}–{{case.sections.quantity.field_S2.boot_hi95|f1}}]); {{case.conc.S2.dev_median_c|f1}} шт./км² — медиана события, её карта показывает как оценку для нового места; {{case.sections.field_test.S2.median_mae|f1}} шт./км² — средняя ошибка этой медианы на отложенном test.
+| Код | Источник | Район | Период | Строк | Событий | Лицензия, DOI |
+|---|---|---|---|---:|---:|---|
+| S1 | {{case.sections.report.organizers.S1_GPGP2018.short}} | Тихий океан, мусорное пятно | {{case.sections.report.organizers.S1_GPGP2018.d0}} – {{case.sections.report.organizers.S1_GPGP2018.d1}} | {{case.sections.report.organizers.S1_GPGP2018.rows}} | {{case.sections.report.organizers.S1_GPGP2018.events}} | {{case.sections.report.organizers.S1_GPGP2018.license}}, {{case.sections.report.organizers.S1_GPGP2018.doi}} |
+| S2 | {{case.sections.report.organizers.S2_SARGASSO_MSM41.short}} | Саргассово море | {{case.sections.report.organizers.S2_SARGASSO_MSM41.d0}} – {{case.sections.report.organizers.S2_SARGASSO_MSM41.d1}} | {{case.sections.report.organizers.S2_SARGASSO_MSM41.rows}} | {{case.sections.report.organizers.S2_SARGASSO_MSM41.events}} | {{case.sections.report.organizers.S2_SARGASSO_MSM41.license}}, {{case.sections.report.organizers.S2_SARGASSO_MSM41.doi}} |
+| S3 | {{case.sections.report.organizers.S3_SE_NORTH_SEA.short}} | Северное море | {{case.sections.report.organizers.S3_SE_NORTH_SEA.d0}} – {{case.sections.report.organizers.S3_SE_NORTH_SEA.d1}} | {{case.sections.report.organizers.S3_SE_NORTH_SEA.rows}} | {{case.sections.report.organizers.S3_SE_NORTH_SEA.events}} | {{case.sections.report.organizers.S3_SE_NORTH_SEA.license}}, {{case.sections.report.organizers.S3_SE_NORTH_SEA.doi}} |
+| S4 | {{case.sections.report.organizers.S4_BLACK_SEA_DOORS3.short}} | Чёрное море | {{case.sections.report.organizers.S4_BLACK_SEA_DOORS3.d0}} – {{case.sections.report.organizers.S4_BLACK_SEA_DOORS3.d1}} | {{case.sections.report.organizers.S4_BLACK_SEA_DOORS3.rows}} | {{case.sections.report.organizers.S4_BLACK_SEA_DOORS3.events}} | {{case.sections.report.organizers.S4_BLACK_SEA_DOORS3.license}}, {{case.sections.report.organizers.S4_BLACK_SEA_DOORS3.doi}} |
 
-- **Интервалы.** Для среднего профиля S2 даны два интервала:
-  - только ошибка счёта (Пуассон) — [{{case.sections.quantity.field_S2.lo95|f1}}–{{case.sections.quantity.field_S2.hi95|f1}}];
-  - с разбросом между днями рейса (кластерный бутстреп) — [{{case.sections.quantity.field_S2.boot_lo95|f1}}–{{case.sections.quantity.field_S2.boot_hi95|f1}}].
+Состав строк по охвату: суммарный пластик — {{case.csv.rows_by_scope.total_plastic}}, категория пластика — {{case.csv.rows_by_scope.plastic_category}}, объектные строки — {{case.csv.rows_by_scope.object_context}}, весь мусор — {{case.csv.rows_by_scope.all_litter}}, промысловый мусор — {{case.csv.rows_by_scope.fisheries_litter_category}}.
 
-  Для одного нового места 95 % — {{case.sections.quantity.field_S2.event_lo95|f1}}–{{case.sections.quantity.field_S2.event_hi95|f0}} шт./км².
-- **Полевой прогноз ADIS** (> 10 см, {{case.sections.quantity.adis_forecast.n_segments|int}} отрезков):
-  - ΣN/ΣA = {{case.sections.quantity.adis_forecast.C|f2}} [{{case.sections.quantity.adis_forecast.lo|f2}}–{{case.sections.quantity.adis_forecast.hi|f2}}], нулевых отрезков {{case.sections.quantity.adis_forecast.zero_pct|f0}} %;
-  - {{case.sections.quantity.adis_forecast.verdict}};
-  - на отложенных регионах у медианы MAE {{case.sections.quantity.adis_forecast.test_mae_median|f2}} шт./км².
-- **Три уровня связи «снимок ↔ поле»:**
+### 2.2 Внешние наборы: роль, уровень доказательности, лицензия
 
-{{derived.case_quantity_levels_table}}
+Уровни: **A** — снимок и независимое полевое число совпадают по времени, месту, площади и категории. **B** — подтверждённая разметка скопления без числа предметов. **C** — кандидат. **D** — отвергнутый или отрицательный пример. Детектор учится только на B + D. Перевод «снимок → шт./км²» допустим только на A.
 
-- **Почему нет калибровки.** Модель ln C = ln k + b · ln S требует пар с ненулевым сигналом снимка — их {{case.sections.quantity.levels.calibration_pairs}}. Для множителя k в пределах ×/÷2 нужно {{case.sections.quantity.calibration.n_pairs_k_x2_min}}–{{case.sections.quantity.calibration.n_pairs_k_x2_max}} таких пар. Калибровка по ячейкам — {{case.sections.quantity.cell_calibration.verdict}}. Авторы крупнейшего каталога мусорных полос пишут: «{{case.sections.quantity.cozar2024_quote.text}}» ({{case.sections.quantity.cozar2024_quote.ref}}).
+| Набор | Что даёт | Уровень | Объём у нас | Роль в работе | Лицензия |
+|---|---|---|---|---|---|
+| MARIDA (Kikaki et al. 2022) | пиксельная разметка 15 классов, Sentinel-2 | B + D | train + val + test; test — {{case.detector.test_n_scenes}} сцен | обучение, порог (val), итоговая оценка (test, один раз) | CC BY 4.0 |
+| MADOS | разметка мусора и нефти | B + D | {{l3_lgbm.mados.n_scenes}} сцен, {{l3_lgbm.mados.n_md_px}} пикселей мусора; исключено {{l3_lgbm.mados.n_excluded_scenes}} сцен, совпадающих с val MARIDA | обучение (+ голова нефти, эксперимент) | CC BY 4.0 |
+| Cózar et al. 2024, каталог нитей | нити плавучего материала по снимкам | B | {{case.sections.labeled_data.cozar.windows|int}} окон | проверка полноты на L2A, подтверждение зон демо-сцены | CC BY 4.0 |
+| PLP (Plastic Litter Project) | искусственные мишени известного состава | B | {{case.sections.labeled_data.b_new_acq}} съёмок PLP и FloatingObjects вместе | мост «доля покрытия ↔ срабатывание»; сценарий PLP | CC BY 4.0 |
+| FloatingObjects + Refined | естественные скопления | B (+ D) | в тех же {{case.sections.labeled_data.b_new_acq}} съёмках | дообучение детектора v2 (не принято) | Apache-2.0 / MIT |
+| ADIS, The Ocean Cleanup (4TU) | судовая камера: отрезки 10 км со временем GPS, площадью и счётом по размерам | A (по месту и времени) | {{case.sections.adis_pairs.adis_segments_total|int}} отрезков; {{case.sections.adis_pairs.segments}} проверено со снимком; {{case.sections.adis_pairs.A}} пар A | проверка «видит ли снимок предметы», полевой прогноз | CC BY 4.0 |
+| ISPRA (итальянский мониторинг MSFD) | трансекты с координатами предметов | A 1, C {{case.sections.ispra.C}}, D {{case.sections.ispra.D}} | {{case.sections.ispra.n_transects}} трансект | пара по месту и дню; дрейф ±48 ч | условия портала ISPRA; лицензия в файлах не указана |
+| Суда у Финляндии (Zenodo 15019034) | рамки судов | D | {{case.sections.labeled_data.vessels.boxes|int}} рамок | ложные срабатывания на судах | CC BY 4.0 |
+| Cloud Mask Catalogue (Zenodo 4172871) | облака и тени | D | {{case.sections.labeled_data.clouds.scenes}} сцен | ложные на облаках | CC BY 4.0 |
+| FML (SEANOE) | фото с надводного аппарата, рамки предметов | — (кадр без площади) | {{case.sections.photo_count.frame.n_images|int}} кадров test | счётчик по фото, шт. на кадр | CC BY 4.0 |
+| Winans 2023 (Zenodo 8381113) | аэрофото берега с известной площадью кадра | — | {{case.sections.photo_count.debrisscan.n_test}} кадров test | шт./м² кадра, сравнение с DebrisScan | CC BY |
+| Sentinel-2 L2A (Earth Search, Planetary Computer), Landsat C2 L2 | снимки | — | {{case.pairs.candidate_rows|int}} строк-кандидатов | пары, живые сцены, демо | Copernicus / USGS, открыто |
+| ERA5 через Open-Meteo, HYCOM ESPC, NCEP GFS | ветер и течения | — | — | маски ветра, дрейф | открытые условия |
+| Natural Earth 1:10m | береговая линия | — | — | расстояние до берега | общественное достояние |
 
-## О3. Обоснованность зон загрязнения
+Полный реестр пар с классами A, A*, B, C и D — `docs/research/pairs/PAIRS.csv`, {{case.sections.research_log.n_pairs_registry}} строк.
 
-**Зоны на отложенной сцене.** Сцена Sentinel-2 {{case.sections.scene_zones.demo.tile}} ({{case.sections.scene_zones.demo.date}}) не участвовала ни в обучении, ни в подборе порога, ни в экспериментах. На ней {{case.sections.scene_zones.demo.n_zones}} зон, из них {{case.sections.scene_zones.demo.n_zones_cozar}} совпадают с нитями каталога Cózar 2024 (уровень B). Во всём слое {{case.sections.scene_zones.n_finds}} находок из {{case.sections.scene_zones.n_zones}} обработанных зон на {{case.sections.scene_zones.n_scenes_eval}} оцениваемых сценах:
+## 3. Подготовка и причины исключений
 
-| Статус зоны (четыре постановочных) | Подтверждение / причина | Число зон |
-|---|---|---:|
-| обнаружено | совпадает с разметкой Cózar 2024 (B) | {{case.sections.scene_zones.by_level_b}} |
-| обнаружено | независимой разметки нет (в т. ч. снимок из обучения детектора — {{case.sections.scene_zones.n_finds_training}}) | {{case.sections.scene_zones.by_unverified}} |
-| недостаточно данных | признаки пены, блика, судна, берега, мелководья | {{case.sections.scene_zones.by_insufficient}} |
-| недостаточно данных | ветер > {{case.sections.scene_zones.wind_rule_ms|f0}} м/с: ноль не информативен | {{case.sections.scene_zones.by_not_informative}} |
-| не обнаружено | детектор оценивается, объектов нет | {{case.sections.scene_zones.by_not_detected}} |
+Отбор записей написан в коде (`src/macroplastic/case/selection.py`), параметры лежат в `configs/case_selection.yaml`. Причина каждого отказа записана в `data/case/run/registry_*.csv`. Из {{case.csv.rows}} строк в профиль S2 входят {{case.selection.S2.accepted_rows}} строк: одна строка на событие.
 
-Что это у находки: {{case.sections.scene_zones.class_label}}. Количество: «{{case.sections.scene_zones.quantity_line}}»; у находок статус концентрации — «исследовательская оценка» (сценарий по мишеням PLP, свёрнут; см. раздел «Как получаем шт./км² по снимку и насколько этому верить» в [README](../README.md)).
+![Отбор строк реестра в профиль S2 и причины исключений](img/report/fig01_selection.png)
 
-![Карточка зоны на отложенной сцене: площадь и доля покрытия — оценка детектора по маске, маска качества — SCL, погода — ERA5](../reports/case_deck_img/09_demo_zone_card.jpg)
+| Наблюдение в данных | Решение |
+|---|---|
+| {{case.selection.S2.rej_item_observation}} строк — отдельные предметы, а не плотность по площади | исключены из расчёта C: у них нет площади |
+| {{case.selection.S2.rej_plastic_category}} строк — отдельная категория пластика | не суммируются в «весь пластик»: у разных событий разные наборы категорий, пусто ≠ 0 |
+| {{case.selection.S2.rej_all_litter}} строк — весь мусор (Северное, Чёрное моря) | пластиком не считаются; используются только в эксперименте «снимок ↔ поле» |
+| {{case.selection.S2.rej_aerial}} строк — аэросъёмка > 50 см | другой размерный класс; в пары S1 |
+| В 13 полях лежит ответ или его производное (`concentration_*`, `items_count`, `reported_*`, `parent_*`) | в признаки не входят; `assert_no_leak()` и тест `test_no_leak_features` |
+| Дата без времени у {{case.pairs.events_time_unknown}} событий | окно синхронизации расширено на ±{{case.pairs.unknown_time_extra_h}} ч, такие пары не считаются синхронными |
 
-**Сложный фон.** На MARIDA test ложных срабатываний на саргассуме, мутной воде и воде со взвесью — {{case.detector.fp_hard_bg}}; на судно и органику приходится {{case.detector.fp_ship_organic_pct|f0}} % всех ложных.
+## 4. Временное и географическое согласование
 
-{{derived.case_fp_table}}
+Пара «событие ↔ снимок» — это пересечение полосы обследования (линия start–end с шириной полосы) со сценой. Одной центральной точки мало. Снимок в окне ±1 сут ещё не делает пару синхронной: за это время вода с мусором сдвигается.
 
-На новых размеченных данных L2A:
-
-| Вариант детектора | Нити Cózar (≥ 1 пикс.) | Ложные на судах | Пена на снимках пар |
-|---|---:|---:|---:|
-| текущий (weights/lgbm) | {{case.sections.detector_v2.reference.cozar_pct|f0}} % | {{case.sections.detector_v2.reference.vessels_pct|f0}} % | {{case.sections.detector_v2.reference_foam_fa}}/{{case.sections.detector_v2.natural_b.foam_n}} |
-| + естественные B | {{case.sections.detector_v2.natural_b.cozar_pct_min|f0}}–{{case.sections.detector_v2.natural_b.cozar_pct_max|f0}} % | {{case.sections.detector_v2.natural_b.vessels_pct_min|f0}}–{{case.sections.detector_v2.natural_b.vessels_pct_max|f0}} % | {{case.sections.detector_v2.natural_b.foam_fa_max}}/{{case.sections.detector_v2.natural_b.foam_n}} |
-| + D судов | {{case.sections.detector_v2.vessels_d.cozar_pct|f0}} % | {{case.sections.detector_v2.vessels_d.vessels_pct|f0}} % | {{case.sections.detector_v2.vessels_d.foam_fa}}/{{case.sections.detector_v2.natural_b.foam_n}} |
-
-Итог по дообучению: {{case.sections.detector_v2.decision_note}}.
-
-**Удача и ошибка на реальных снимках.** На снимках пар кейса текущий детектор дал {{case.detector_current.n_obj}} одиночных пикселей вне полос: {{case.detector_current.n_other_single}} — пена или барашки, {{case.detector_current.n_ship}} — вероятно судно. Все они ложные, скоплений нет.
-
-В парах ADIS при полевом нуле ({{case.sections.adis_pairs.A_zero_eval}} пар с оцениваемым детектором) ложные срабатывания зависят от ветра:
-- при ветре < {{case.sections.adis_pairs.wind_split_ms|f0}} м/с — {{case.sections.adis_pairs.fa_calm.px}} пикселей на {{case.sections.adis_pairs.fa_calm.strip_km2|f1}} км² полосы;
-- при более сильном ветре — {{case.sections.adis_pairs.fa_windy.zone_obj_per_km2|f2}} объекта/км² в зоне (барашки).
-
-**Предел видимости.** На {{case.sections.adis_pairs.A_with_items}} синхронных отрезках ADIS с единичными предметами детектор предметы не увидел: оценивается на {{case.sections.adis_pairs.A_with_items_eval}} из {{case.sections.adis_pairs.A_with_items}}, на всех {{case.sections.adis_pairs.A_with_items_eval_det_px}} пикселей. Доля покрытия предметами ≈ {{case.sections.adis_pairs.coverage_frac_text}}. Это согласуется с физикой, но не задаёт общий предел для всех скоплений.
-
-![Пара по месту и времени ADIS ↔ Sentinel-2: судно-съёмщик видно на снимке, детектор в полосе пикселей не дал](../docs/img/search_adis_pair.jpg)
-
-Независимая проверка (член команды, без наших результатов): {{case.sections.independent_check.pairs.n}} наглядных пар ADIS ↔ S2 по предметам > 50 см; снимок S2 в тот же день есть у {{case.sections.independent_check.routes_same_day_s2}} из {{case.sections.independent_check.routes_gt50}} маршрутов; предметы на снимках не различимы. Выборки разные: там > 50 см, у нас > 5 см.
-
-![Независимая проверка: пары ADIS ↔ Sentinel-2 по предметам > 50 см](../docs/img/independent_adis_pairs.jpg)
-
-Чёрное море, трансекта T30 и снимок того же дня: полоса чистая, детектор объектов не дал; время и площадь трансекты не опубликованы — уровень C, не A.
-
-![Чёрное море, T30: RGB · SWIR · маска детектора](../docs/img/search_s4_t30.jpg)
-
-Северное море, HE460 т.03: полоса чистая, но между съёмкой и трансектой вода ушла дальше допуска.
-
-![Северное море, HE460 т.03](../docs/img/search_s3_he460.jpg)
-
-## О4. Польза вебкарты
-
-**Первый экран — обзор Земли с реальными находками.** При открытии карта показывает точки зон из уже обработанных спутниковых сцен (накопленный архив, у точки — дата снимка и статус обработки), без выбора региона и даты. Путь эколога: **Земля → точка → карточка зоны → «В студию» → «Назад»** к прежнему масштабу → следующая точка. У каждого числа в карточке — его происхождение: «измерено в поле», «посчитано по детальному фото», «исследовательская оценка» или «нет данных»; для спутниковой зоны в графе шт./км² — «не определено по этому снимку», полевые шт./км² другого места за плотность зоны не выдаются. Полевая концентрация, счётчик по фото и метрики — во вторичной панели, в один клик от карты.
-
-**Карта v2** (режим «Кейс» по умолчанию) показывает:
-
-- **Слои:**
-  - полевые измерения — шт./км² с интервалом, профилем, источником и признаком «пластик / весь мусор»;
-  - полосы обследования со снимками-кандидатами — {{case.run.export.zones}};
-  - спутниковые находки — {{case.sections.scene_zones.n_finds}} из {{case.sections.scene_zones.n_zones}} обработанных зон;
-  - маска качества снимка.
-- **Статусы:** у каждой полосы и зоны два статуса — детекция и концентрация. Концентрация по снимку везде «не подтверждена» или «недоступна».
-- **Навигация:** выбор акватории, дат, профиля и статуса; «Куда идти» — окно ближайшего пролёта.
-- **Выгрузка и запросы:** выгрузка GeoJSON и CSV тех же полей; сохранённые запросы.
-
-Версия модели (sha256) видна в легенде.
-
-![Обзор карты кейса](../reports/case_deck_img/01_overview.jpg)
-
-Самопроверка сравнивает по id алгоритм, JSON, CSV и GeoJSON:
-- ok {{case.selfcheck.ok}} из {{case.selfcheck.checks}} проверок, расхождений {{case.selfcheck.fail}};
-- некорректные входы — {{case.selfcheck.invalid_ok}} из {{case.selfcheck.invalid_total}} с верным кодом;
-- p95 ответа ≤ {{case.selfcheck.p95_max_ms|int}} мс.
-
-На демо-сцене выгрузка совпадает с картой: {{case.sections.scene_zones.export.ui}} зон на карте = {{case.sections.scene_zones.export.csv}} строк CSV = {{case.sections.scene_zones.export.geojson}} объектов GeoJSON.
-
-## О5. Аргументация и защита: метод, вклад, решения, ограничения
-
-**Как искали данные.** Каждая находка получает уровень доказательности:
-- **A** — снимок и полевое число связаны по времени, месту, площади и категории;
-- **B** — подтверждённая разметка скопления;
-- **C** — кандидат;
-- **D** — отвергнутый или отрицательный пример.
-
-Детектор учим только на B + D, «снимок → шт./км²» — только на A.
-
-![Воронка поиска пар](../docs/img/funnel.png)
-
-{{derived.case_search_table}}
-
-{{derived.case_labeled_table}}
-
-**Новые размеченные данные.** B: {{case.sections.labeled_data.b_new_acq}} съёмок PLP/FloatingObjects и {{case.sections.labeled_data.cozar.windows|int}} окон Cózar. D: {{case.sections.labeled_data.vessels.boxes|int}} судов и {{case.sections.labeled_data.clouds.scenes}} сцен облаков. Проверка утечек:
-- с MARIDA по тайлу и дате — {{case.sections.labeled_data.leaks_total}} совпадений;
-- с MADOS по пикселям проверены PLP и FloatingObjects — {{case.sections.labeled_data.content_match}} из {{case.sections.labeled_data.content_checked}}.
-
-**Ключевые решения** (каждое проверено экспериментом или записано до результата):
-- допуск синхронности по дрейфу вместо «±1 сут» ({{case.pairs.events_accept_meta}} пар по метаданным → {{case.pairs.events_accept_drift}} синхронных);
-- сплит по участкам маршрута с буфером — нашли утечку через соседей того же дня;
-- отложенный test открыт один раз по правилу, записанному до открытия;
-- отказ от гармонизации L2A по MARIDA val;
-- правило принятия нового детектора записано до экспериментов, его не прошёл ни один вариант;
-- один источник чисел с тестом согласованности.
-
-**Готовое, не наше:** разметка MARIDA и MADOS, протокол RandomForest MARIDA, веса U-Net MARIDA, индекс FDI, каталоги STAC.
-
-**Ограничения.**
-- Перенос «снимок → шт./км²» не доказан: для профилей пластика снимков нет, синхронных пар с сигналом снимка нет.
-- Полевая модель — один рейс S2; интервалы на CV недопокрывают.
-- Детектор на L2A по разметке проверен только на новых наборах B/D; он путает суда ({{case.sections.detector_v2.reference.vessels_pct|f0}} % судов).
-- Предметы > 2 см на пикселе 10 м не видны.
-
-**Развитие.**
-- Трансекты под пролёт Sentinel-2 с записанным временем: нужно {{case.sections.quantity.calibration.n_pairs_k_x2_min}}–{{case.sections.quantity.calibration.n_pairs_k_x2_max}} пар с сигналом.
-- Снимки высокого разрешения над полосами.
-- Больше рейсов и сезонов для полевой модели.
-- Счётчик предметов на кадрах с известной площадью.
-
-## О6. Дополнительные функции
-
-![«Подобрать снимок»: прерванная трансекта и окно пролёта](../reports/case_deck_img/04_pairfinder_transect.jpg)
-
-- **«Подобрать снимок».** Правило дрейфа превращено в инструмент планирования: окно синхронизации |dt| ≤ {{case.pairfinder.window_h|f2}} ч.
-  - Для {{case.pairfinder.cond_date_only}} событий Чёрного моря функция выдаёт окно UTC.
-  - Прогноз пролётов совпал с реальной съёмкой в {{case.pairfinder.forecast_hit}} из {{case.pairfinder.forecast_n}} случаев.
-- **Счётчик предметов по фото** — отдельный модуль, не спутник. Отложенный test FML ({{case.sections.photo_count.frame.n_images|int}} кадров, сплит по сессиям):
-  - MAE {{case.sections.photo_count.frame.mae|f2}} шт./кадр [{{case.sections.photo_count.frame.mae_ci95.0|f2}}–{{case.sections.photo_count.frame.mae_ci95.1|f2}}], AP50 {{case.sections.photo_count.frame.ap50|f3}};
-  - сравнение с готовым DebrisScan на кадрах Winans ({{case.sections.photo_count.debrisscan.n_test}} кадров): MAE {{case.sections.photo_count.debrisscan.ours_mae|f2}} против {{case.sections.photo_count.debrisscan.base_mae|f2}} шт./кадр, разность [{{case.sections.photo_count.debrisscan.diff_ci95.0|f2}}; {{case.sections.photo_count.debrisscan.diff_ci95.1|f2}}] — {{case.sections.photo_count.debrisscan.rule}};
-  - на кадрах с известной площадью (Winans, {{case.sections.photo_count.area.frame_area_m2|int}} м²) — MAE плотности {{case.sections.photo_count.area.density_mae_km2|int}} против {{case.sections.photo_count.area.baseline_density_mae_km2|int}} шт./км² у медианы.
-- **Нефтяное пятно** — эксперимент, выключен по умолчанию. На MADOS test F1 {{case.sections.oil.test_f1|f3}} против OSI {{case.sections.oil.test_osi_f1|f3}}. Известный разлив Wakashio на L2A голова не нашла — честный отказ.
-
-## Т1. Подготовка и синхронизация данных
-
-Отбор записей и сцен реализован в коде (`src/macroplastic/case/selection.py`, `scripts/case/find_pairs.py`, `pair_quality.py`), параметры — в `configs/case_selection.yaml` и `configs/case_pairs.yaml`. Реестр пар `data/case/run/registry_pairs.csv` содержит строку на каждое из {{case.pairs.events}} событий: статус, этап отказа, все причины, сцену, dt, сдвиг и допуск, решение по маскам. Повторная подготовка даёт те же sha256.
+**Правило дрейфа.** Сдвиг `d = v · abs(Δt)`. Пара синхронна, если `d ≤ w/2 + {{case.pairs.tolerance_buffer_km|f0}} км`, где w — ширина полосы. Сценарии течения — 0,05, 0,2 и 0,5 м/с. Принят типичный сценарий 0,2 м/с. Отсюда окно синхронности `abs(Δt) ≤ {{case.pairfinder.window_h|f2}} ч`.
 
 {{derived.case_pairs_table}}
 
 {{derived.case_drift_table}}
 
-Маски качества в полосе: блик — {{case.pairs.reject_glint}}, облака — {{case.pairs.reject_cloud}}, покрытие — {{case.pairs.reject_coverage}}. При типичном дрейфе синхронных пар {{case.pairs.events_accept_drift}}.
+Воронка: {{case.pairs.events}} событий → {{case.pairs.events_accept_meta}} прошли отбор по метаданным → {{case.pairs.quality_accept}} прошли маски качества в полосе → **{{case.pairs.events_accept_drift}} синхронных** при типичном дрейфе. Причины отказа по маскам: блик — {{case.pairs.reject_glint}}, облака — {{case.pairs.reject_cloud}}, покрытие — {{case.pairs.reject_coverage}}. Для профилей пластика снимков нет вообще: у S1 (181 событие) сцен нет, у S2 есть один снимок Landsat. Sentinel-2A начал съёмку после рейса. Реестр `data/case/run/registry_pairs.csv` содержит строку на каждое из {{case.pairs.events}} событий: статус, этап отказа, причины, сцену, Δt, сдвиг и допуск.
 
-## Т2. Алгоритм детектирования
+## 5. Базовые решения (бейзлайны) на тех же выборках
 
-Пиксельный LightGBM ({{l3_lgbm.n_features}} признаков): 11 каналов Sentinel-2, индексы и статистики окна. Обучен на MARIDA train + MADOS, порог {{l3_lgbm.threshold|f2}} выбран по val. Test MARIDA посчитан один раз: {{case.detector.test_n_scenes}} сцен, {{case.detector.test_md_px|pl:пиксель/пикселя/пикселей}} мусора. Неразмеченные пиксели фоном не считаются.
+| Задача | Бейзлайн | Результат бейзлайна | Наше решение | Результат | Выборка |
+|---|---|---|---|---:|---|
+| Детектор | одно правило FDI × NDVI (идея Biermann 2020), пороги по val | F1 {{case.detector.test.fdi_ndvi_box.f1|f3}} | LightGBM | **{{case.detector.test.lgbm.f1|f3}}** | test MARIDA |
+| Детектор | RandomForest по протоколу статьи MARIDA | F1 {{case.detector.test.rf_argmax.f1|f3}} | LightGBM | **{{case.detector.test.lgbm.f1|f3}}** | test MARIDA |
+| Детектор | U-Net MARIDA, веса авторов, без переобучения | F1 {{case.sections.baselines.test.unet_argmax.f1|f3}} | LightGBM | **{{case.detector.test.lgbm.f1|f3}}** | test MARIDA |
+| Концентрация, S2 | медиана обучающих событий | MAE {{case.sections.field_test.S2.median_mae|f1}} | {{case.sections.field_test.S2.main_model}} | {{case.sections.field_test.S2.main_mae|f1}} | отложенный test, {{case.sections.field_test.S2.n_test}} событий |
+| Концентрация, S1 | медиана | MAE {{case.sections.field_test.S1.median_mae|f1}} | {{case.sections.field_test.S1.main_model}} | {{case.sections.field_test.S1.main_mae|f1}} | отложенный test, {{case.sections.field_test.S1.n_test}} событий |
+| Полевой прогноз ADIS (> 10 см) | медиана профиля | MAE {{case.sections.quantity.adis_forecast.test_mae_median|f2}} | B1, M1, M2 | не прошли правило | отложенные регионы |
+| Счётчик по фото (Winans) | DebrisScan, готовая модель | MAE {{case.sections.photo_count.debrisscan.base_mae|f2}} шт./кадр | Faster R-CNN | {{case.sections.photo_count.debrisscan.ours_mae|f2}} | {{case.sections.photo_count.debrisscan.n_test}} кадров |
+
+Вывод. Детектор уверенно лучше всех бейзлайнов. Разность с RandomForest — {{case.detector.paired_vs_rf.delta_f1|f3}} [{{case.detector.paired_vs_rf.ci95.0|f3}}; {{case.detector.paired_vs_rf.ci95.1|f3}}]. Для концентрации медиана не уступила ни одной модели. Поэтому на карте стоит медиана, и это решение записано до открытия test.
+
+## 6. Детектор и сложный фон
+
+### 6.1 Метод
+
+Пиксельный LightGBM, {{l3_lgbm.n_features}} признаков: {{l3_lgbm.n_base_features}} базовых (11 каналов Sentinel-2 и спектральные индексы FDI, NDVI, FAI и др.) и {{l3_lgbm.n_window_features}} оконных (среднее, разброс и аномалия к медиане окна 3/7/15/31 пикселей). Обучение — MARIDA train + MADOS: {{l3_lgbm.n_train_px|int}} пикселей, из них {{l3_lgbm.n_train_md|int}} мусора. Порог {{l3_lgbm.threshold|f2}} подобран только по val. Задача бинарная: класс Marine Debris против остальных размеченных классов. Неразмеченные пиксели фоном не считаются. Каналы 20 м переводятся в 10 м ближайшим соседом, без искусственной детализации.
+
+Зона — это кластер срабатываний на пригодной воде (дилатация 150 м, ≥ 5 пикселей). Пригодность пикселя (облако, тень, блик, суша, нет данных) проверяется отдельно от класса.
+
+### 6.2 Качество на отложенном test
+
+![F1 детектора и бейзлайнов на test MARIDA с 95 % ДИ](img/report/fig02_detector_test.png)
 
 {{derived.case_baselines_u_table}}
 
-{{derived.case_detector_table}}
+Честность метрики проверена отдельно. Независимый пересчёт совпал с метрикой модели. Оптимизм выбора порога на val — {{metric_audit.threshold_optimism|f3}}. ДИ по сценам val — [{{metric_audit.scene_bootstrap_ci95.0|f3}}; {{metric_audit.scene_bootstrap_ci95.1|f3}}]. На новом регионе (leave-region-out, {{metric_audit.lro.n_regions}} региона) F1 {{metric_audit.lro.mean_f1|f3}} против {{metric_audit.lro.in_dist_f1|f3}} на знакомых. Для нового места честная оценка ниже на {{metric_audit.lro.drop_vs_in_dist|f3}}.
 
-![Полоса HE460 т.03 на карте: связь с полем не подтверждена, пикселей в полосе нет](../reports/case_deck_img/02_zone_he460_t03.jpg)
+### 6.3 Сложный фон: суда, пена, водоросли, мутность, блик
 
-Разница с RandomForest — {{case.detector.paired_vs_rf.delta_f1|f3}} [{{case.detector.paired_vs_rf.ci95.0|f3}}; {{case.detector.paired_vs_rf.ci95.1|f3}}] по парному бутстрепу сцен. Сохранённые предсказания 7 моделей (`data/case/detector_preds/`) позволяют пересчитать TP/FP/FN шагом `run_all eval`.
+На test MARIDA ложных срабатываний на саргассуме, мутной воде и воде со взвесью — {{case.detector.fp_hard_bg}}. На суда и природную органику приходится {{case.detector.fp_ship_organic_pct|f0}} % всех ложных.
 
-## Т3. Алгоритм оценки концентрации
+{{derived.case_fp_table}}
 
-Код `src/macroplastic/case/concentration.py`:
-- C = N/A, интервал Гарвуда, агрегация ΣN/ΣA;
-- контрольный пример {{case.control.n}} / {{case.control.area_km2|f2}} км² = {{case.control.value|f1}} шт./км² [{{case.control.lower|f1}}–{{case.control.upper|f1}}];
-- C = N/A совпала с опубликованной у {{case.conc.consistency.match}} из {{case.conc.consistency.rows}} строк.
+На новых размеченных данных L2A доля найденного считается по объектам. Нить или судно засчитаны, если хотя бы один пиксель P ≥ порога:
 
-Метрики на отложенном test — MAE и RMSE против медианы на том же сплите (таблица в О2). Кросс-валидация внутри dev (S2):
+| Вариант детектора | Нити Cózar | Ложные на судах | Пена на снимках пар |
+|---|---:|---:|---:|
+| текущий (weights/lgbm) | {{case.sections.detector_v2.reference.cozar_pct|f0}} % | {{case.sections.detector_v2.reference.vessels_pct|f0}} % | {{case.sections.detector_v2.reference_foam_fa}}/{{case.sections.detector_v2.natural_b.foam_n}} |
+| + естественные B | {{case.sections.detector_v2.natural_b.cozar_pct_min|f0}}–{{case.sections.detector_v2.natural_b.cozar_pct_max|f0}} % | {{case.sections.detector_v2.natural_b.vessels_pct_min|f0}}–{{case.sections.detector_v2.natural_b.vessels_pct_max|f0}} % | {{case.sections.detector_v2.natural_b.foam_fa_max}}/{{case.sections.detector_v2.natural_b.foam_n}} |
+| + D судов | {{case.sections.detector_v2.vessels_d.cozar_pct|f0}} % | {{case.sections.detector_v2.vessels_d.vessels_pct|f0}} % | {{case.sections.detector_v2.vessels_d.foam_fa}}/{{case.sections.detector_v2.natural_b.foam_n}} |
+
+Наблюдение → решение. На спектрах Sentinel-2 естественные нити, пена и суда разделяются плохо. Выигрыш на одном фоне оплачивается ошибками на другом. Итог по дообучению: {{case.sections.detector_v2.decision_note}}. В карточке зоны признаки судна, пены, блика, берега и мелководья переводят зону в статус «недостаточно данных».
+
+### 6.4 Органика: детектор бинарный, флаг NDVI/FAI — эксперимент
+
+У рабочего детектора один выход: «Marine Debris / нет». Саргассум и прочая природная органика в обучении были фоном. **Отдельного класса «органика» у модели нет**, и интерфейс так и пишет. Поверх детектора мы проверили спектральный флаг «вероятно органика». Правило записано до расчёта: `{{case.sections.report.organic.rule}}`, где `NDVI = (B8 − B4)/(B8 + B4)` и `FAI = B8 − [B4 + (B11 − B4)·(833 − 665)/(1614 − 665)]`. Проверка — {{case.sections.report.organic.split}}, {{case.sections.report.organic.n_patches}} патчей.
+
+![Органика: доля пикселей, которые детектор назвал мусором, и доля с флагом NDVI/FAI (MARIDA val)](img/report/fig03_organic.png)
+
+| Класс MARIDA (val) | Пикселей | Детектор назвал мусором | Объектов с флагом | 95 % (Уилсон) |
+|---|---:|---:|---:|---|
+| {{case.sections.report.organic.classes.0.name}} | {{case.sections.report.organic.classes.0.pixels}} | {{case.sections.report.organic.classes.0.det_md_px}} | {{case.sections.report.organic.classes.0.flag_obj}} / {{case.sections.report.organic.classes.0.objects}} | [{{case.sections.report.organic.classes.0.flag_obj_ci95.0|f3}}; {{case.sections.report.organic.classes.0.flag_obj_ci95.1|f3}}] |
+| {{case.sections.report.organic.classes.1.name}} | {{case.sections.report.organic.classes.1.pixels}} | {{case.sections.report.organic.classes.1.det_md_px}} | {{case.sections.report.organic.classes.1.flag_obj}} / {{case.sections.report.organic.classes.1.objects}} | [{{case.sections.report.organic.classes.1.flag_obj_ci95.0|f3}}; {{case.sections.report.organic.classes.1.flag_obj_ci95.1|f3}}] |
+| {{case.sections.report.organic.classes.2.name}} | {{case.sections.report.organic.classes.2.pixels}} | {{case.sections.report.organic.classes.2.det_md_px}} | {{case.sections.report.organic.classes.2.flag_obj}} / {{case.sections.report.organic.classes.2.objects}} | [{{case.sections.report.organic.classes.2.flag_obj_ci95.0|f3}}; {{case.sections.report.organic.classes.2.flag_obj_ci95.1|f3}}] |
+| {{case.sections.report.organic.classes.3.name}} | {{case.sections.report.organic.classes.3.pixels}} | {{case.sections.report.organic.classes.3.det_md_px}} | {{case.sections.report.organic.classes.3.flag_obj}} / {{case.sections.report.organic.classes.3.objects}} | [{{case.sections.report.organic.classes.3.flag_obj_ci95.0|f3}}; {{case.sections.report.organic.classes.3.flag_obj_ci95.1|f3}}] |
+
+Наблюдение → решение.
+- Флаг почти не задевает мусор и надёжно отмечает саргассум.
+- Но саргассум детектор и так не путает с мусором. Путает он прочую органику (древесину, растительные остатки): {{case.sections.report.organic.classes.3.det_md_px}} из {{case.sections.report.organic.classes.3.pixels}} пикселей. Её флаг **не ловит**: у неё NDVI ниже 0,2, как у мусора.
+- Флаг оставлен подсказкой «похоже на водоросли» с подписью «эксперимент». Статус зоны он не меняет. В сервисе флаг стоит у {{case.sections.report.organic.zones_flagged}} из {{case.sections.report.organic.zones}} зон на {{case.sections.report.organic.zones_scenes}} сценах.
+- Test на флаг не открывали. Сцен мало (саргассум — 3 сцены val), поэтому доли ориентировочные.
+
+## 7. Концентрация шт./км²: расчёт N/A и интервалы
+
+### 7.1 Расчёт
+
+Код — `src/macroplastic/case/concentration.py`. Для события `C = N/A`, интервал Гарвуда (раздел 1). Для профиля считается `ΣN/ΣA`. Разброс между днями рейса (сверхпуассоновский) оценивается кластерным бутстрепом: дни рейса выбираются с возвращением, 2 000 повторов, `C* = ΣN*/ΣA*`, 2,5-й и 97,5-й перцентили. Разложение разброса ln C в S2: общий SD {{case.sections.quantity.variance_S2.sd_total|f2}}, из них пуассоновский {{case.sections.quantity.variance_S2.sd_poisson|f2}} ({{case.sections.quantity.variance_S2.poisson_share_pct|f0}} %). Остальное — реальная пятнистость поля.
+
+### 7.2 Отложенный test и интервалы
+
+{{derived.case_field_table}}
+
+![Отложенный test (MAE модели против медианы) и три интервала для S2](img/report/fig04_field.png)
+
+Три числа Саргассова моря (профиль S2, пластик > 2 см) не путать:
+- {{case.sections.quantity.field_S2.pooled_C|f1}} шт./км² — среднее профиля ΣN/ΣA по всем событиям. Это измерение.
+- {{case.conc.S2.dev_median_c|f1}} шт./км² — медиана события. Карта показывает её как оценку для нового места.
+- {{case.sections.field_test.S2.median_mae|f1}} шт./км² — средняя ошибка этой медианы на отложенном test.
+
+Интервалы для среднего S2:
+- только ошибка счёта (Пуассон) — [{{case.sections.quantity.field_S2.lo95|f1}}–{{case.sections.quantity.field_S2.hi95|f1}}];
+- с разбросом между днями рейса — [{{case.sections.quantity.field_S2.boot_lo95|f1}}–{{case.sections.quantity.field_S2.boot_hi95|f1}}], в {{case.sections.quantity.field_S2.boot_width_ratio|f1}} раза шире;
+- для одного нового места — {{case.sections.quantity.field_S2.event_lo95|f1}}–{{case.sections.quantity.field_S2.event_hi95|f1}} шт./км², покрытие на test {{case.sections.quantity.field_S2.event_cov_test|pct}} %.
+
+Наблюдение → решение. Пуассоновский интервал не накрывает среднее test ({{case.sections.quantity.field_S2.test_mean|f1}}), бутстреп по дням накрывает. Поэтому на карте показан интервал с разбросом между днями.
+
+### 7.3 Модели на dev и утечка маршрута
+
+Кросс-валидация внутри dev (S2), 5 участков маршрута с буфером 1 сут. Кандидаты и правило записаны до CV (`configs/case_conc_model.yaml`):
 
 {{derived.case_conc_table_S2}}
 
-Схемы разбиения (утечка через соседей того же дня найдена до моделей):
+Схемы разбиения. Утечку через соседей того же дня нашли до выбора моделей:
 
 {{derived.case_schemes_table}}
 
-![Карточка полевого измерения: C = N/A с интервалом, профиль, источник](../reports/case_deck_img/03_observation_card.jpg)
- Эталоны и предсказания лежат в `reports/case_conc/final_test_predictions.csv`. Индекс и площадь маски концентрацию не заменяют. Перенос на снимки не заявлен (О2, «три уровня»).
+Наблюдение → решение. При разбиении «по событиям» kNN выглядел выигрышем. Но 64 % его соседей были из того же или соседнего дня рейса. На участках маршрута с буфером доля таких соседей 0 %, и выигрыш незначим. Основная схема — участки маршрута + буфер.
 
-## Т4. Эксперименты и воспроизводимость
+### 7.4 Полевой прогноз ADIS
 
-Сводка разделов чисел (каждый — со своим источником и протоколом):
+Профиль > 10 см, {{case.sections.quantity.adis_forecast.n_segments|int}} отрезков. ΣN/ΣA = {{case.sections.quantity.adis_forecast.C|f2}} [{{case.sections.quantity.adis_forecast.lo|f2}}–{{case.sections.quantity.adis_forecast.hi|f2}}] шт./км², нулевых отрезков {{case.sections.quantity.adis_forecast.zero_pct|f0}} %. Итог: {{case.sections.quantity.adis_forecast.verdict}}. Медиана на отложенных регионах — MAE {{case.sections.quantity.adis_forecast.test_mae_median|f2}} шт./км². Оговорка: в счёт ADIS входят и объекты классов «животное» и «растение» (`docs/LABELS.md`), так что это не чистый пластик.
 
-{{derived.case_sections_table}}
+## 8. Попытки связать снимок с числом: история и негативные результаты
 
-- Одна команда: `run.ps1 -Case all -Offline` — {{case.run.total_s|f1}} с без сети; {{case.run.n_outputs}} выходных таблиц с одинаковыми sha256 при повторе.
-- Чистый клон с GitHub до карты — {{case.clean_clone.total_min}} мин на CPU, числа совпали (`{{case.clean_clone.file}}`).
-- Составы всех выборок — `reports/case_splits/` ({{case.splits_files}} файлов): отложенный test, фолды по участкам маршрута, группы и сцены.
-- Тесты проверяют:
-  - непересечение групп, дней рейса и сцен;
-  - отсутствие полей-утечек в признаках;
-  - однократность test.
-- Тесты кейса: {{case.n_tests}} passed, {{case.tests.skipped}} skipped, {{case.tests.failed}} failed.
-- Команды пересчёта каждой метрики, в том числе чисел расследования данных, — README §7.
+### 8.1 Три уровня связи и воронка поиска
 
-## Т5. Интеграция прототипа
+{{derived.case_quantity_levels_table}}
 
-Сервис FastAPI (`service/`, `/api/v3/*`, контракт `docs/CONTRACTS_V3.md`) и карта v2 проходят сценарий постановки: выбор акватории и даты → расчёт и статусы → зоны на карте → выгрузка → повтор сохранённого запроса.
-- Числа, единицы, геометрия и статусы сверяются самопроверкой (О4).
-- Пустые и некорректные входы дают понятную ошибку с кодом.
-- При сбое API карта пишет «данные недоступны» и не подставляет моки.
-- Эксперт повторяет расчёт без правки кода: `scripts/case/expert_check.py` (запись поля, полоса, свои N и A).
+![Воронка поиска пар «снимок ↔ полевое число»](../docs/img/funnel.png)
 
-## Источники и лицензии
+{{derived.case_search_table}}
 
-| Что | Лицензия / условия |
+{{derived.case_labeled_table}}
+
+### 8.2 Пары ADIS по месту и времени: что видит снимок
+
+На {{case.sections.adis_pairs.A_with_items}} синхронных отрезках ADIS с единичными предметами детектор предметы не увидел. Оценить детектор можно на {{case.sections.adis_pairs.A_with_items_eval}} из {{case.sections.adis_pairs.A_with_items}}, и на всех {{case.sections.adis_pairs.A_with_items_eval_det_px}} пикселей. Плотность там {{case.sections.adis_pairs.A_with_items_density_min|f1}}–{{case.sections.adis_pairs.A_with_items_density_max|f1}} шт./км², доля покрытия предметами ≈ {{case.sections.adis_pairs.coverage_frac_text}}.
+
+При полевом нуле ({{case.sections.adis_pairs.A_zero_eval}} пар) ложные срабатывания зависят от ветра:
+- при ветре < {{case.sections.adis_pairs.wind_split_ms|f0}} м/с — {{case.sections.adis_pairs.fa_calm.px}} пикселей на {{case.sections.adis_pairs.fa_calm.strip_km2|f1}} км²;
+- при более сильном ветре — {{case.sections.adis_pairs.fa_windy.zone_obj_per_km2|f2}} объекта/км² (барашки).
+
+![Пара по месту и времени ADIS ↔ Sentinel-2: судно-съёмщик видно на снимке, детектор в полосе пикселей не дал](../docs/img/search_adis_pair.jpg)
+
+Независимая проверка. Член команды заново скачал первичные данные и не использовал наших результатов. Он нашёл {{case.sections.independent_check.pairs.n}} наглядных пар ADIS ↔ S2 по предметам > 50 см. Снимок S2 в тот же день есть у {{case.sections.independent_check.routes_same_day_s2}} из {{case.sections.independent_check.routes_gt50}} маршрутов. Предметы на снимках не различимы. На PLP2019 связь «спектр → доля покрытия» — ρ(FDI) = {{case.sections.independent_check.plp.rho_fdi|f2}}. Вердикт: {{case.sections.independent_check.plp.verdict}}.
+
+![Независимая проверка: пары ADIS ↔ Sentinel-2 по предметам > 50 см](../docs/img/independent_adis_pairs.jpg)
+
+### 8.3 ISPRA и пары с разрывом до 48 ч со сдвигом дрейфом
+
+В {{case.sections.ispra.n_transects}} трансектах ISPRA одна пара уровня A по месту и дню (трансекта 604, 16.09.2019). Остальные: C — {{case.sections.ispra.C}}, D — {{case.sections.ispra.D}}. Эксперт на чекпоинте разрешил разрыв до 2 суток при условии, что полевые точки сдвинуты течением и ветром к моменту снимка. Мы проверили 8 лучших пар. Только у них в буфере 500 м вокруг трека вообще есть пиксели детектора. Предметы учёта сдвигались OpenDrift (`src/macroplastic/drift/`) от времени учёта к времени снимка. Часовой пояс ISPRA не записан, поэтому проверены две гипотезы.
+
+![Расстояние «предмет → ближайший пиксель детектора» до и после сдвига дрейфом](img/report/fig06_drift48.png)
+
+| Пара ISPRA | Трансекта | Предметов | Δt, ч (две гипотезы пояса) | Без дрейфа, м | После дрейфа, м |
+|---|---|---:|---|---:|---:|
+| {{case.sections.report.drift48.pairs.0.id}} | {{case.sections.report.drift48.pairs.0.transect}} | {{case.sections.report.drift48.pairs.0.items}} | {{case.sections.report.drift48.pairs.0.dt_h.0|f1}} / {{case.sections.report.drift48.pairs.0.dt_h.1|f1}} | {{case.sections.report.drift48.pairs.0.before_m|f0}} | {{case.sections.report.drift48.pairs.0.after_m|f0}} |
+| {{case.sections.report.drift48.pairs.1.id}} | {{case.sections.report.drift48.pairs.1.transect}} | {{case.sections.report.drift48.pairs.1.items}} | {{case.sections.report.drift48.pairs.1.dt_h.0|f1}} / {{case.sections.report.drift48.pairs.1.dt_h.1|f1}} | {{case.sections.report.drift48.pairs.1.before_m|f0}} | {{case.sections.report.drift48.pairs.1.after_m|f0}} |
+| {{case.sections.report.drift48.pairs.2.id}} | {{case.sections.report.drift48.pairs.2.transect}} | {{case.sections.report.drift48.pairs.2.items}} | {{case.sections.report.drift48.pairs.2.dt_h.0|f1}} / {{case.sections.report.drift48.pairs.2.dt_h.1|f1}} | {{case.sections.report.drift48.pairs.2.before_m|f0}} | {{case.sections.report.drift48.pairs.2.after_m|f0}} |
+| {{case.sections.report.drift48.pairs.3.id}} | {{case.sections.report.drift48.pairs.3.transect}} | {{case.sections.report.drift48.pairs.3.items}} | {{case.sections.report.drift48.pairs.3.dt_h.0|f1}} / {{case.sections.report.drift48.pairs.3.dt_h.1|f1}} | {{case.sections.report.drift48.pairs.3.before_m|f0}} | {{case.sections.report.drift48.pairs.3.after_m|f0}} |
+| {{case.sections.report.drift48.pairs.4.id}} | {{case.sections.report.drift48.pairs.4.transect}} | {{case.sections.report.drift48.pairs.4.items}} | {{case.sections.report.drift48.pairs.4.dt_h.0|f1}} / {{case.sections.report.drift48.pairs.4.dt_h.1|f1}} | {{case.sections.report.drift48.pairs.4.before_m|f0}} | {{case.sections.report.drift48.pairs.4.after_m|f0}} |
+| {{case.sections.report.drift48.pairs.5.id}} | {{case.sections.report.drift48.pairs.5.transect}} | {{case.sections.report.drift48.pairs.5.items}} | {{case.sections.report.drift48.pairs.5.dt_h.0|f1}} / {{case.sections.report.drift48.pairs.5.dt_h.1|f1}} | {{case.sections.report.drift48.pairs.5.before_m|f0}} | {{case.sections.report.drift48.pairs.5.after_m|f0}} |
+| {{case.sections.report.drift48.pairs.6.id}} | {{case.sections.report.drift48.pairs.6.transect}} | {{case.sections.report.drift48.pairs.6.items}} | {{case.sections.report.drift48.pairs.6.dt_h.0|f1}} / {{case.sections.report.drift48.pairs.6.dt_h.1|f1}} | {{case.sections.report.drift48.pairs.6.before_m|f0}} | {{case.sections.report.drift48.pairs.6.after_m|f0}} |
+| {{case.sections.report.drift48.pairs.7.id}} | {{case.sections.report.drift48.pairs.7.transect}} | {{case.sections.report.drift48.pairs.7.items}} | {{case.sections.report.drift48.pairs.7.dt_h.0|f1}} / {{case.sections.report.drift48.pairs.7.dt_h.1|f1}} | {{case.sections.report.drift48.pairs.7.before_m|f0}} | {{case.sections.report.drift48.pairs.7.after_m|f0}} |
+
+Итог: порог {{case.sections.report.drift48.threshold_m}} м **не прошла ни одна пара ({{case.sections.report.drift48.n_pass}} из {{case.sections.report.drift48.n_pairs}})**. Лучшее сближение — {{case.sections.report.drift48.best_after_m|f0}} м. Дрейф приблизил предметы к пикселям детектора у {{case.sections.report.drift48.n_closer}} пар и отдалил у остальных. Реальные Δt не больше {{case.sections.report.drift48.dt_abs_max_h|f1}} ч, так что допуск 48 ч здесь не понадобился. Ограничение источника: до 2022 года в цепочке дрейфа нет реального поля течений. Для 6 из 8 пар это фактически дрейф только под ветром (`docs/research/pairs/drift_shift_48h.md`). Уровни не меняются: A по месту и дню для трансекты 604 (не калибровочная), C для остальных.
+
+### 8.4 Все попытки перевода «снимок → число»
+
+| Попытка | Число | Вывод | Файл |
+|---|---|---|---|
+| Ранговая связь признаков снимка с полевой плотностью всего мусора, {{case.sections.sat_experiment.n_pairs}} пар ({{case.sections.sat_experiment.n_groups}} групп «район × день») | FDI ρ = {{case.sections.sat_experiment.fdi_rho|f2}}, p Холма {{case.sections.sat_experiment.fdi_p_holm|f2}}; у случайной воды той же сцены {{case.sections.sat_experiment.fdi_null_median|f2}} | {{case.sections.sat_experiment.verdict}} | `reports/case_pairs/experiment.json` |
+| Калибровка по ячейкам 0,25° (LWD Cózar и наш детектор против полевой плотности) | общих дат в одном периоде {{case.sections.quantity.cell_calibration.same_period_common_dates}}; климатологии разных лет ρ = {{case.sections.quantity.cell_calibration.v3_rho|f2}} [{{case.sections.quantity.cell_calibration.v3_rho_ci95_shipday.0|f2}}; {{case.sections.quantity.cell_calibration.v3_rho_ci95_shipday.1|f2}}] | правило не пройдено | `reports/quantity/cell_calibration.md` |
+| Спектр пикселя → доля покрытия (PLP2019, независимая проверка) | ρ(FDI) = {{case.sections.independent_check.plp.rho_fdi|f2}}; модель по FDI на отложенной дате не лучше среднего | не подтверждено | `docs/research/gleb_quantitative_link/results/` |
+| Синтетический перенос P3 | MAE {{case.sections.synthetic_p3.mae_p3|f1}} против {{case.sections.synthetic_p3.mae_flat|f1}} у плоской калибровки и {{case.sections.synthetic_p3.mae_zero|f1}} у ответа «0» | отвергнуто | `reports/p3/p3_synth.json` |
+| Поиск оценщика (единые ворота) | методов {{case.sections.estimator.n_methods}}, прошли ворота {{case.sections.estimator.n_passed_gate}}; природных пар A {{case.sections.estimator.natural_pairs_a5}} | ни один метод не принят | `docs/research/discovery/LEADERBOARD.csv` |
+| Архивы пар (VHR, дроны, разовые кампании) | файлов {{case.sections.archives.n_files}}, кандидатов {{case.sections.archives.n_candidates}} | калибровочных пар не дали | `docs/research/pairs/archives/` |
+| Сценарий PLP в карточке: площадь маски × штук на пиксель мишени | разброс перевода при разных допущениях ×{{case.sections.quantity.scenario.spread_ratio|int}} (≈ {{case.sections.quantity.scenario.spread_orders_text}} порядка) | только свёрнутый сценарий с допущениями, не результат | `configs/zone_estimate.yaml` |
+| Регрессия «снимок → шт./км²» по парам | — | **не делали**: при 0 синхронных пар это была бы подгонка | — |
+
+Авторы крупнейшего каталога мусорных нитей пишут то же: «{{case.sections.quantity.cozar2024_quote.text}}» ({{case.sections.quantity.cozar2024_quote.ref}}).
+
+### 8.5 История ошибок: наблюдение → решение
+
+| # | Наблюдение | Решение | Где записано |
+|---|---|---|---|
+| 1 | kNN по полю «обыгрывал» медиану, но его соседи оказались из того же дня рейса | сплит по участкам маршрута с буфером 1 сут; выигрыш исчез | раздел 7.3, `reports/case_conc/baseline.md` |
+| 2 | На отложенном test модель хуже медианы ({{case.sections.field_test.S2.main_mae|f1}} против {{case.sections.field_test.S2.median_mae|f1}}) | по правилу, записанному заранее, на карте медиана; модель после test не подбиралась | `docs/DECISIONS.md` |
+| 3 | С гармонизацией L2A детектор дал {{case.sections.sat_detector_review.n_obj}} объектов на снимках пар; визуально вероятных скоплений ≈ {{case.sections.sat_detector_review.visual_precision_pct|f1}} % | гармонизация выключена (на MARIDA val она тоже хуже); текущий режим дал {{case.detector_current.n_obj}} одиночных пикселей, все ложные | `reports/case_pairs/detector_review.md` |
+| 4 | Лучшие зоны живых сцен оказались кильватером, швом детекторов и судами | фильтр линейных артефактов; зона с признаками артефакта получает статус «недостаточно данных» | `reports/artifacts.md` |
+| 5 | Береговая линия 1:110m ставила морские точки «на сушу» (расстояние 0 → ложный «высокий» алерт) | контур Natural Earth 1:10m; точка на суше даёт «нет данных», а не 0; алерты пересчитаны | `docs/ALERTS.md` |
+| 6 | Прогноз дрейфа на следующем снимке попал в {{drift_check.k_hit}}/{{drift_check.n_pairs}} — столько же, сколько «нулевой дрейф» | дрейф подписан «прогноз, эксперимент»; в ранге важности — дополнительный множитель, не решающий | `reports/drift_check.md` |
+| 7 | Перевод площади маски в штуки даёт разброс ×{{case.sections.quantity.scenario.spread_ratio|int}} | в карточке «по снимку: не определено»; сценарий PLP свёрнут и подписан | `docs/QUANTITY.md` |
+| 8 | В число ADIS входят животные и растения | ADIS — «все объекты камеры», не пластик; в таблице совокупностей указано отдельно | `docs/LABELS.md` |
+| 9 | Для дат до 2022 поле течений в цепочке дрейфа пустое | для 6 из 8 пар ISPRA это записано как дрейф только под ветром | `docs/research/pairs/drift_shift_48h.md` |
+| 10 | Детектор v2 с естественными B находит больше нитей, но путает суда и пену | правило принятия записано заранее, его не прошёл ни один вариант; в сервисе текущие веса | раздел 6.3 |
+
+## 9. Реестр гипотез
+
+Журнал экспериментов `docs/PIPELINE.md`: {{case.sections.research_log.n_experiments}} строк вида «проверка → число → решение». Ниже гипотезы разнесены по четырём статусам. Идеи, которые не проверялись, отмечены отдельно и за эксперименты не выдаются.
+
+![Строки журнала экспериментов по направлениям](img/report/fig09_registry.png)
+
+**Принято (проверено экспериментом, число и правило записаны).**
+
+| Гипотеза | Результат | Источник |
+|---|---|---|
+| Оконные признаки (аномалия к медиане окна) улучшают детектор | прирост F1 val +0.013 при пороге 0.01 | `reports/experiments.md` (H1) |
+| MADOS в обучении улучшает детектор | val {{l3_lgbm.val.f1_md|f3}}; прирост {{metric_audit.mados_gain|f3}} [{{metric_audit.mados_gain_ci95.0|f3}}; {{metric_audit.mados_gain_ci95.1|f3}}]; на новом регионе {{metric_audit.lro.mean_f1|f3}} против {{metric_audit.lro.mean_f1_marida_only|f3}} без MADOS | `final_numbers: metric_audit` |
+| C = N/A воспроизводит опубликованные плотности | {{case.conc.consistency.match}} из {{case.conc.consistency.rows}} строк | `src/macroplastic/case/concentration.py` |
+| Синхронность нужно проверять дрейфом, а не окном ±1 сут | {{case.pairs.events_accept_meta}} пар по метаданным → {{case.pairs.events_accept_drift}} синхронных | раздел 4 |
+| Интервал профиля — бутстреп по дням рейса | покрытие одного нового места на test {{case.sections.quantity.field_S2.event_cov_test|pct}} %; пуассоновский интервал среднее test не накрывает | `reports/quantity/field_intervals.md` |
+| Флаг NDVI/FAI отмечает саргассум | плотный {{case.sections.report.organic.classes.1.flag_obj}}/{{case.sections.report.organic.classes.1.objects}}, мусор {{case.sections.report.organic.classes.0.flag_obj}}/{{case.sections.report.organic.classes.0.objects}} объектов (val) | раздел 6.4 |
+
+**Отвергнуто (проверено, не подтвердилось).**
+
+| Гипотеза | Результат | Источник |
+|---|---|---|
+| U-Net сильнее бустинга на точечной разметке | val {{l4_unet.val.f1_md|f3}} против {{l3_lgbm.val.f1_md|f3}}; U-Net MARIDA на test {{case.sections.baselines.test.unet_argmax.f1|f3}} | `reports/l4_unet.md`, `reports/detector_v2/unet_test.json` |
+| Стек U-Net + LightGBM, лёгкая и средняя модели, z-оценки сцены | прирост ниже порога или хуже перенос на новый регион | `reports/experiments.md`, `docs/PIPELINE.md` D10, D14–D16 |
+| Модель по полевым признакам лучше медианы | test S2 {{case.sections.field_test.S2.main_mae|f1}} против {{case.sections.field_test.S2.median_mae|f1}}, S1 {{case.sections.field_test.S1.main_mae|f1}} против {{case.sections.field_test.S1.median_mae|f1}} | `reports/case_conc/final_test.json` |
+| Дообучение детектора на новых B + D | вариантов {{case.sections.detector_v2.n_variants}} × {{case.sections.detector_v2.n_seeds}} seed, принято {{case.sections.detector_v2.n_accept}} | `reports/detector_v2/experiments_snapshot.json` |
+| Признаки снимка ранжируют полевую плотность | {{case.sections.sat_experiment.verdict}} (ρ {{case.sections.sat_experiment.fdi_rho|f2}}, p Холма {{case.sections.sat_experiment.fdi_p_holm|f2}}) | `reports/case_pairs/experiment.json` |
+| Прогноз дрейфа точнее «нулевого дрейфа» | {{drift_check.k_hit}}/{{drift_check.n_pairs}} против {{drift_check.k_hit_baseline}}/{{drift_check.n_pairs}} | `reports/drift_check.md` |
+| Калибровка по ячейкам | {{case.sections.quantity.cell_calibration.verdict}} | `reports/quantity/cell_calibration.md` |
+| Флаг NDVI/FAI защищает от прочей органики | {{case.sections.report.organic.classes.3.flag_obj}}/{{case.sections.report.organic.classes.3.objects}} объектов, 0 из {{case.sections.report.organic.classes.3.det_md_px}} спутанных пикселей | раздел 6.4 |
+| Сдвиг полевых точек дрейфом создаёт пары (±48 ч) | {{case.sections.report.drift48.n_pass}} из {{case.sections.report.drift48.n_pairs}} | раздел 8.3 |
+| Синтетический перенос P3 | {{case.sections.synthetic_p3.verdict}} | `reports/p3/p3_synth.json` |
+| Счётчик по фото переносится на чужие наборы без дообучения | вне обучающих наборов найдено {{case.sections.report.late.drones_pred.out_found}} из {{case.sections.report.late.drones_pred.out_labelled}}, ложных {{case.sections.report.late.drones_pred.out_false}} (UCWD {{case.sections.report.late.drones_pred.sets.ucwd.found}}/{{case.sections.report.late.drones_pred.sets.ucwd.labelled}}, ложных {{case.sections.report.late.drones_pred.sets.ucwd.false}}); на своих наборах (Winans, FML) {{case.sections.report.late.drones_pred.in_found}} из {{case.sections.report.late.drones_pred.in_labelled}}, ложных {{case.sections.report.late.drones_pred.in_false}} | `data/case/drones/pred.json` |
+| Нефтяное пятно на реальных L2A | MADOS test F1 {{case.sections.oil.test_f1|f3}} против OSI {{case.sections.oil.test_osi_f1|f3}}, но разлив Wakashio не найден | `docs/OIL.md` |
+
+**Не доказано (проверка была, данных для вывода мало).**
+
+| Гипотеза | Что есть | Чего не хватает |
+|---|---|---|
+| Снимок даёт шт./км² через калибровку `ln C = ln k + b · ln S` | калибровочных пар {{case.sections.quantity.levels.calibration_pairs}} | {{case.sections.quantity.calibration.n_pairs_k_x2_min}}–{{case.sections.quantity.calibration.n_pairs_k_x2_max}} синхронных пар с ненулевым сигналом снимка |
+| Плотные нити детектор видит, единичные предметы — нет | на {{case.sections.adis_pairs.A_with_items_eval}} оцениваемых парах с предметами 0 пикселей; на нитях Cózar {{case.sections.detector_v2.reference.cozar_pct|f0}} % объектов | пар «плотная нить + полевой счёт» нет |
+| Пара ISPRA 604 годится для калибровки | одна пара A по месту и дню | ширина полосы 2019 г. не записана, часовой пояс не записан; одна пара ничего не калибрует |
+| Облако дрейфа «сдвиг назад» лучше прогноза | {{drift_check.k_hit_shift}}/{{drift_check.n_pairs}} против {{drift_check.k_hit}}/{{drift_check.n_pairs}} | проверено на {{drift_check.n_pairs}} парах одного протокола |
+
+**Не проверялось (идеи, не эксперименты).**
+- Классификация материала (пластик против других материалов) по спектру Sentinel-2. Класс детектора — «плавающий материал».
+- Масса пластика (г/км²) по снимку. Масса есть только в S1 и в продукт не входит.
+- Съёмка высокого разрешения над полосами обследования. Доступа нет: коллекций VHR в Copernicus Data Space 0, продукт Pléiades — ошибка 403 (`docs/PIPELINE.md` Q4).
+- Многовременной детектор, накопление нитей по серии снимков.
+- Трансекты, спланированные под пролёт Sentinel-2. Инструмент «Подобрать снимок» есть, полевых данных под него нет.
+
+## 10. Независимые тесты и защита от утечек
+
+| Решение | Какие данные | Использовались ли финальные ответы |
+|---|---|---|
+| Отбор записей | правила в `configs/case_selection.yaml`, причина у каждого отказа | нет |
+| Разбиение по концентрации | дни рейса → 5 участков маршрута, буфер 1 сут; test выбран по sha256 от seed | нет: состав test зафиксирован до моделей |
+| Выбор модели концентрации | CV на dev ({{case.sections.field_dev.S2.n_dev|pl:событие/события/событий}} S2, {{case.sections.field_dev.S2.dev_days}} дней), правило записано до CV | нет |
+| Показываемый прогноз | правило «модель не лучше медианы → медиана» записано до открытия test | test открыт один раз ({{case.sections.field_test.when}}) |
+| Порог детектора | только val MARIDA | test MARIDA открыт один раз, после заморозки |
+| Детектор v2 | проверка зафиксирована до экспериментов (sha256 в `configs/detector_v2_eval.yaml`) | test MARIDA не читался |
+| Демо-сцена 30SXE | не участвовала в обучении, подборе порога и экспериментах; проверено по MARIDA (тайл и дата) и MADOS (содержимое) | — |
+
+Проверки утечек в данных:
+- с MARIDA по тайлу и дате — {{case.sections.labeled_data.leaks_total}} совпадений;
+- с MADOS по пикселям (PLP, FloatingObjects) — {{case.sections.labeled_data.content_match}} из {{case.sections.labeled_data.content_checked}};
+- поля с ответом в признаках отсутствуют (`assert_no_leak()`).
+
+Составы всех выборок — `reports/case_splits/` ({{case.splits_files}} файлов). Тесты проверяют непересечение групп, дней рейса и сцен, отсутствие полей-утечек и однократность test. Тесты кейса: {{case.n_tests}} passed, {{case.tests.skipped}} skipped, {{case.tests.failed}} failed. Честная оговорка: ранняя разведка бейзлайнов видела все события профиля, включая будущий test. Поэтому test не абсолютно нетронутый.
+
+## 11. Примеры удачи и ошибки
+
+Пять обязательных типов примеров выбраны правилом, а не вручную. Их отдаёт `/api/v3/defense_examples`, в интерфейсе они лежат во вкладке «Проверка качества» → «Примеры для защиты»:
+
+![Пять типов примеров: правильное обнаружение, пропуск, ложное на судне, ошибка на сложном фоне, область без анализа](img/report/fig08_defense_examples.jpg)
+
+| Тип | Сцена | Эталон | Вывод |
+|---|---|---|---|
+| {{case.sections.report.service.defense_examples.0.label}} | {{case.sections.report.service.defense_examples.0.title}} | {{case.sections.report.service.defense_examples.0.reference}} | {{case.sections.report.service.defense_examples.0.verdict}} |
+| {{case.sections.report.service.defense_examples.1.label}} | {{case.sections.report.service.defense_examples.1.title}} | {{case.sections.report.service.defense_examples.1.reference}} | {{case.sections.report.service.defense_examples.1.verdict}} |
+| {{case.sections.report.service.defense_examples.2.label}} | {{case.sections.report.service.defense_examples.2.title}} | {{case.sections.report.service.defense_examples.2.reference}} | {{case.sections.report.service.defense_examples.2.verdict}} |
+| {{case.sections.report.service.defense_examples.3.label}} | {{case.sections.report.service.defense_examples.3.title}} | {{case.sections.report.service.defense_examples.3.reference}} | {{case.sections.report.service.defense_examples.3.verdict}} |
+| {{case.sections.report.service.defense_examples.4.label}} | {{case.sections.report.service.defense_examples.4.title}} | {{case.sections.report.service.defense_examples.4.reference}} | {{case.sections.report.service.defense_examples.4.verdict}} |
+
+На полевых парах:
+- Чёрное море, трансекта T30 и снимок того же дня: полоса чистая, детектор объектов не дал. Время и площадь трансекты не опубликованы, поэтому уровень C, а не A.
+- Северное море, HE460 т.03: полоса чистая, но за время между съёмкой и трансектой вода ушла дальше допуска.
+
+![Чёрное море, T30: RGB · SWIR · маска детектора](../docs/img/search_s4_t30.jpg)
+
+## 12. Карточка и веб-сервис
+
+### 12.1 Сценарий и слои
+
+Карта открывается обзором Земли с точками зон из уже обработанных сцен. Путь эколога: **Земля → точка → карточка зоны → «В студию» → «Назад»** к прежнему масштабу → следующая зона → выгрузка. Слои:
+- полевые измерения (шт./км² с интервалом, профилем и источником);
+- полосы обследования со снимками-кандидатами — {{case.run.export.zones}};
+- спутниковые находки — {{case.sections.scene_zones.n_finds}} из {{case.sections.scene_zones.n_zones}} обработанных зон на {{case.sections.scene_zones.n_scenes_eval}} оцениваемых сценах;
+- маска качества снимка.
+
+У каждой зоны два статуса: детекция и концентрация.
+
+| Статус зоны | Подтверждение или причина | Число зон |
+|---|---|---:|
+| обнаружено | совпадает с нитями Cózar 2024 (уровень B) | {{case.sections.scene_zones.by_level_b}} |
+| обнаружено | независимой разметки нет | {{case.sections.scene_zones.by_unverified}} |
+| недостаточно данных | признаки пены, блика, судна, берега, мелководья | {{case.sections.scene_zones.by_insufficient}} |
+| недостаточно данных | ветер > {{case.sections.scene_zones.wind_rule_ms|f0}} м/с: ноль не информативен | {{case.sections.scene_zones.by_not_informative}} |
+| не обнаружено | детектор оценивается, объектов нет | {{case.sections.scene_zones.by_not_detected}} |
+
+Статус «обнаружено» стоит у {{case.sections.scene_zones.by_level_b}} + {{case.sections.scene_zones.by_unverified}} зон. Из них {{case.sections.scene_zones.n_finds_training}} на снимке из обучения детектора и в находки не входит. Остаётся **{{case.sections.scene_zones.n_finds}} находок**.
+
+![Обзор карты кейса](../reports/case_deck_img/01_overview.jpg)
+
+### 12.2 Карточка зоны: что показано и откуда число
+
+Замечания эксперта с чекпоинта (`docs/acceptance/MATVEY_CHECKPOINT_NOTES.txt`) закрыты полями карточки. Числа ниже посчитаны теми же функциями сервиса, что отдают `/api/v3` (`reports/report_extra/service_card.json`, команда `scripts/case/report_figs.py`).
+
+| Блок карточки | Что показано | Число по всем находкам | Чего это НЕ означает |
+|---|---|---|---|
+| Оценка количества | «По снимку: {{case.sections.report.service.quantity_by_image_values.0}}». По полю — ближайшая полевая оценка шт./км² с датой, источником и расстоянием | полевая оценка есть у {{case.sections.report.service.n_field_estimate}} из {{case.sections.report.service.n_finds}} находок | полевое число другого места — не плотность зоны |
+| Крупные скопления | метка при площади маски ≥ {{case.sections.report.service.large_km2|f1}} км² или большой оси ≥ {{case.sections.report.service.large_axis_m|f0}} м | крупных {{case.sections.report.service.n_large_finds}} из {{case.sections.report.service.n_finds}} | размер пятна, не число предметов |
+| Интегральная оценка | суммарная площадь контуров находок и доля покрытия по маске | по всем районам {{case.sections.report.service.total_find_area_km2_all|f2}} км² контуров; демо-сцена — ниже | «площадь, не число предметов» |
+| Берег и алерты | расстояние до берега (Natural Earth 1:10m); уровень «слабый / средний / высокий» по правилу `docs/ALERTS.md` | берег {{case.sections.report.service.shore_km_min|f1}}–{{case.sections.report.service.shore_km_max|f1}} км, медиана {{case.sections.report.service.shore_km_median|f1}}; алерты {{case.sections.report.service.alerts.слабый}} / {{case.sections.report.service.alerts.средний}} / {{case.sections.report.service.alerts.высокий}} | материал спутниковой зоны не определяется; для навигации расстояние не годится |
+| Дрейф ≤ {{drift.hours}} ч с вероятностью | облако частиц {{drift.model}} ({{drift.currents}}, {{drift.wind}}), изолинии 50 % и 90 %, доля частиц на берегу | прогноз есть у {{case.sections.report.service.n_finds_with_drift}} из {{case.sections.report.service.n_finds}} находок; доля на берегу — медиана {{case.sections.report.service.stranded_pct_median|f1}} %, максимум {{case.sections.report.service.stranded_pct_max|f1}} % | модельный сценарий, не наблюдаемое перемещение: на следующем снимке {{drift_check.k_hit}}/{{drift_check.n_pairs}}, как у «нулевого дрейфа»; без прогноза — «нет расчёта», не 0 |
+| Динамика района | по датам: число находок, суммарная площадь, полевая концентрация, где есть | районов {{case.sections.report.service.n_regions}}, с ≥ 2 датами {{case.sections.report.service.n_regions_multi_date}} | рост площади ≠ рост количества пластика |
+| Органика | флаг NDVI/FAI с подписью «эксперимент» | флаг у {{case.sections.report.service.n_organic_finds}} находок | органика отдельно моделью не выделяется |
+
+**Интегральная оценка демо-сцены** (30SXE, 11.03.2021): {{case.sections.report.service.demo.n_finds|pl:находка/находки/находок}}, из них крупных {{case.sections.report.service.demo.n_large}}. Площадь контуров {{case.sections.report.service.demo.total_find_area_km2|f2}} км², площадь маски {{case.sections.report.service.demo.find_mask_area_km2|f3}} км² на {{case.sections.report.service.demo.valid_water_km2|f1}} км² пригодной воды. Доля покрытия {{case.sections.report.service.demo.coverage_pct|f3}} %.
+
+![Панель «Динамика»: число находок и суммарная площадь по датам одного района](img/report/fig07_dynamics.png)
+
+![Карточка зоны на отложенной сцене: площадь и доля покрытия — оценка детектора по маске, маска качества — SCL, погода — ERA5](../reports/case_deck_img/09_demo_zone_card.jpg)
+
+### 12.3 Согласованность и устойчивость
+
+Самопроверка сверяет по id алгоритм, JSON, CSV и GeoJSON:
+- ok {{case.selfcheck.ok}} из {{case.selfcheck.checks}} проверок, расхождений {{case.selfcheck.fail}};
+- некорректные входы — {{case.selfcheck.invalid_ok}} из {{case.selfcheck.invalid_total}} с верным кодом;
+- p95 ответа ≤ {{case.selfcheck.p95_max_ms|int}} мс.
+
+На демо-сцене выгрузка совпадает с картой: зон на карте {{case.sections.scene_zones.export.ui}}, строк CSV {{case.sections.scene_zones.export.csv}}, объектов GeoJSON {{case.sections.scene_zones.export.geojson}}. При сбое API карта пишет «данные недоступны» и моки не подставляет. Эксперт может повторить расчёт без правки кода: `scripts/case/expert_check.py`.
+
+### 12.4 Дополнительные функции
+
+- **«Подобрать снимок».** Правило дрейфа превращено в инструмент планирования, окно `abs(Δt) ≤ {{case.pairfinder.window_h|f2}} ч`. Для {{case.pairfinder.cond_date_only}} событий Чёрного моря функция выдаёт окно UTC. Прогноз пролётов совпал с реальной съёмкой в {{case.pairfinder.forecast_hit}} из {{case.pairfinder.forecast_n}} случаев.
+- **Счётчик предметов по фото** — отдельный модуль, не спутник. Отложенный test FML: {{case.sections.photo_count.frame.n_images|int}} кадров, MAE {{case.sections.photo_count.frame.mae|f2}} шт./кадр [{{case.sections.photo_count.frame.mae_ci95.0|f2}}–{{case.sections.photo_count.frame.mae_ci95.1|f2}}], AP50 {{case.sections.photo_count.frame.ap50|f3}}. На кадрах с известной площадью (Winans, {{case.sections.photo_count.area.frame_area_m2|int}} м²) MAE плотности {{case.sections.photo_count.area.density_mae_km2|int}} против {{case.sections.photo_count.area.baseline_density_mae_km2|int}} шт./км² у медианы.
+- **Нефтяное пятно** — эксперимент, по умолчанию выключен. MADOS test F1 {{case.sections.oil.test_f1|f3}} против порога OSI {{case.sections.oil.test_osi_f1|f3}}. На L2A разлив Wakashio не найден.
+
+**Функции последнего дня.** Статус взят из журнала `docs/LOG.md` на момент сборки отчёта. Функция считается сделанной, только если в журнале есть отметка о готовности.
+
+| Функция | Что это за источник | Чего она НЕ доказывает | Статус |
+|---|---|---|---|
+| Обзор NASA «ежедневно» (GIBS: VIIRS, MODIS) | мозаика истинных цветов на выбранную дату, пиксель {{case.sections.report.late.nasa_res_m_min}}–{{case.sections.report.late.nasa_res_m_max}} м | это не обнаружение пластика: модель на этих кадрах не запускается (раздел 13) | {{case.sections.report.late.status.nasa}} |
+| «Дроны» внутри районов | {{case.sections.report.late.drones_n_frames}} реальных детальных кадров из {{case.sections.report.late.drones_n_sets}} открытых наборов, у каждого подписан сенсор (дрон, судно, берег) | дрон — не спутник; шт./м² только там, где известна площадь кадра. Наш счётчик как есть: найдено {{case.sections.report.late.drones_pred.total.found}} из {{case.sections.report.late.drones_pred.total.labelled}} размеченных предметов, ложных {{case.sections.report.late.drones_pred.total.false}} (раздел 9) | {{case.sections.report.late.status.drones}} |
+| Дорожки таймлайна (Sentinel-2 / NASA / дроны / поле / дрейф) | навигация по датам разных источников | — | {{case.sections.report.late.status.timeline}} |
+| Кнопка «Дрейф» у находки на карте | OpenDrift с HYCOM и GFS на дату снимка, ≤ {{drift.hours}} ч | модельный сценарий, не наблюдаемое перемещение; без данных на дату — «нет расчёта» | {{case.sections.report.late.status.drift}} |
+| Реальное время: свежие Sentinel-2 нашей моделью | раздел 13 | зоны не проверены человеком | {{case.sections.report.late.status.realtime}} |
+| PRIME MODE · демо-данные (по запросу жюри) | раздел 14 | демо-макет интерфейса: изображения и числа демонстрационные, не результат модели | {{case.sections.report.late.status.prime}} |
+
+## 13. Реальное время: наша модель на каждом новом снимке Sentinel-2
+
+**Что считается «реальным временем».** Детектор запускается на каждом новом снимке Sentinel-2 L2A каждого района. Новый снимок одного места бывает раз в 2–5 дней. Порядок тот же, что и для архивных сцен: вырезка района, маски качества (облака, блик, суда, пена, ветер), детекция, зоны со статусами. У свежих зон подпись «автоматически, не проверено человеком». В числа кейса (разделы 6–12) они не входят.
+
+{{case.sections.report.late.realtime_text}}
+
+**Почему модель не запускается на ежедневных кадрах NASA.** VIIRS и MODIS дают пиксель {{case.sections.report.late.nasa_res_m_min}}–{{case.sections.report.late.nasa_res_m_max}} м. По площади это в {{case.sections.report.late.nasa_area_ratio_min|int}}–{{case.sections.report.late.nasa_area_ratio_max|int}} раз больше пикселя Sentinel-2 (10 м). Детектор обучен на 10 м и 11 каналах Sentinel-2. Даже на 10 м ≥ 20 % пикселя заполняют лишь {{case.sections.report.physics.s2_share_fill20_pct|f3}} % реальных предметов (раздел 15), а на 250 м сигнал скопления размывается ещё в сотни раз. Запуск модели на таких кадрах был бы подделкой. Поэтому NASA — ежедневный контекст: облачность, цветение, крупные пятна. Детекция идёт только на Sentinel-2.
+
+## 14. Демо-режим по запросу жюри (PRIME MODE)
+
+На чекпоинте жюри попросило показать, как сервис будет выглядеть, если появятся снимки нормального (детального) разрешения. Для этого в интерфейсе есть тумблер «PRIME MODE · демо-данные». **Это демонстрационный макет интерфейса, а не эксперимент и не результат модели.**
+
+- В точках событий CSV организаторов показаны демонстрационные детальные «снимки» скоплений: реальная вода и вырезки предметов из дрон-наборов либо простая отрисовка.
+- Карточка показывает будущий вид: класс предметов, «N шт.», шт./км², рамки. Числа берутся из самой строки CSV (N, площадь, категории) с подписью «данные CSV организаторов». Это не предсказание счётчика и не результат модели.
+- На весь режим видна плашка «ДЕМО: как сервис будет выглядеть на детальных снимках. Изображения и числа — демонстрационные, не результат модели».
+- Выключенный режим не показывает ни одного демо-объекта. С реальными слоями демо не смешивается.
+
+Метрик качества у демо-режима нет, и в этот отчёт он не добавляет ни одного числа о точности. Статус: {{case.sections.report.late.status.prime}}.
+
+{{case.sections.report.late.prime_text}}
+
+## 15. Физический предел разрешения Sentinel-2 и почему маска ≠ шт./км²
+
+Снимок в тот же день и полевое число ещё не значат, что предметы различимы на Sentinel-2. Пиксель 10 × 10 м = 100 м² = 10⁻⁴ км². Посчитаем на плотности профиля S2, C = {{case.sections.report.physics.s2_C|f1}} шт./км²:
+- предметов на пиксель: `C · 10⁻⁴ км² = {{case.sections.report.physics.items_per_pixel|f4}}`, то есть один предмет примерно на {{case.sections.report.physics.pixels_per_item}} пикселей;
+- доля площади, покрытая предметами (медианная площадь предмета ADIS s = {{case.sections.report.physics.median_item_m2|f2}} м²): `C · s / 10⁶ = {{case.sections.report.physics.coverage_ppm|f1}}·10⁻⁶`;
+- на искусственных мишенях PLP детектор срабатывал при заполнении пикселя 28–40 % (`docs/QUANTITY.md`). Даже до уровня 20 % пикселя средней доле покрытия в поле не хватает примерно {{case.sections.report.physics.gap_to_fill20|int}} раз.
+
+![Доля реальных предметов ADIS, различимых при разном размере пикселя](img/report/fig05_resolution.png)
+
+По {{case.sections.report.physics.n_objects|int}} предметам ADIS: при пикселе 10 м поштучно (≥ 2×2 пикселя) различимы {{case.sections.resolution_physics.countable_pct_10m|f0}} %, ≥ 20 % пикселя заполняют {{case.sections.report.physics.s2_share_fill20_pct|f3}} %. Медианный предмет занимает {{case.sections.report.physics.s2_median_fill_pct|f2}} % пикселя. Чтобы считать штуки, нужен пиксель 0,3–0,5 м ({{case.sections.resolution_physics.countable_pct_03m|f0}} % и {{case.sections.resolution_physics.countable_pct_05m|f0}} % предметов). Это спутники VHR или дрон, а не Sentinel-2.
+
+**Эксперимент: наш счётчик на синтетических кадрах строк CSV при разном разрешении.** Это отдельный эксперимент, не часть демо-режима. Для {{case.sections.report.late.prime_counter.n_rows}} строк CSV организаторов ({{case.sections.report.late.prime_counter.n_events}} событий, {{case.sections.report.late.prime_counter.n_items|int}} предметов) нарисованы кадры участка: реальная вода с дрона, вырезанные реальные предметы TUN-MarineLitter, число — N строки на площади A. Счётчик по фото работает как есть, без дообучения на этих кадрах, порог {{case.sections.report.late.prime_counter.threshold|f1}}. Затем кадры огрублены до {{case.sections.report.late.prime_counter.gsd_list}} м.
+
+| Размер пикселя, м | Найдено предметов | Ложных на плитку пустой воды | Смещение, шт./км² (в CSV в среднем {{case.sections.report.late.prime_counter.mean_csv|f1}}) |
+|---:|---:|---:|---:|
+| {{case.sections.report.late.prime_counter.rows.0.gsd}} | {{case.sections.report.late.prime_counter.rows.0.recall_pct|f1}} % | {{case.sections.report.late.prime_counter.rows.0.fp_per_tile|f3}} | {{case.sections.report.late.prime_counter.rows.0.bias|f1}} |
+| {{case.sections.report.late.prime_counter.rows.1.gsd}} | {{case.sections.report.late.prime_counter.rows.1.recall_pct|f1}} % | {{case.sections.report.late.prime_counter.rows.1.fp_per_tile|f3}} | {{case.sections.report.late.prime_counter.rows.1.bias|f1}} |
+| {{case.sections.report.late.prime_counter.rows.2.gsd}} | {{case.sections.report.late.prime_counter.rows.2.recall_pct|f1}} % | {{case.sections.report.late.prime_counter.rows.2.fp_per_tile|f3}} | {{case.sections.report.late.prime_counter.rows.2.bias|f1}} |
+| {{case.sections.report.late.prime_counter.rows.3.gsd}} | {{case.sections.report.late.prime_counter.rows.3.recall_pct|f1}} % | {{case.sections.report.late.prime_counter.rows.3.fp_per_tile|f3}} | {{case.sections.report.late.prime_counter.rows.3.bias|f1}} |
+| {{case.sections.report.late.prime_counter.rows.4.gsd}} | {{case.sections.report.late.prime_counter.rows.4.recall_pct|f1}} % | {{case.sections.report.late.prime_counter.rows.4.fp_per_tile|f3}} | {{case.sections.report.late.prime_counter.rows.4.bias|f1}} |
+| {{case.sections.report.late.prime_counter.rows.5.gsd}} | {{case.sections.report.late.prime_counter.rows.5.recall_pct|f1}} % | {{case.sections.report.late.prime_counter.rows.5.fp_per_tile|f3}} | {{case.sections.report.late.prime_counter.rows.5.bias|f1}} |
+
+![Счётчик на синтетических кадрах строк CSV: доля найденных предметов от размера пикселя](../reports/prime/prime_csv_resolution.png)
+
+Наблюдение → решение. Даже при 0,05 м счётчик находит меньше четверти предметов и даёт ложные срабатывания на пустой воде, поэтому шт./км² сильно завышены. При 3 м и 10 м он не находит ничего. Это числовое подтверждение физического предела: на Sentinel-2 штуки не считаются, и продукт их по снимку не выдаёт. Эксперимент не доказывает точность на реальных снимках скоплений: таких снимков у нас нет, размеры предметов взяты по допущению (`reports/prime/metrics.json`, поле `not_proven`).
+
+**Почему маску или индекс нельзя выдавать за шт./км².**
+- Маска измеряет площадь пикселей с аномальным спектром, то есть долю покрытия. Число предметов зависит от неизвестного распределения размеров: при разных допущениях разброс ×{{case.sections.quantity.scenario.spread_ratio|int}}.
+- Отклик не монотонен по числу предметов. На мишенях PLP из 9 водных пикселей с ≥ 400 бутылками детектор сработал на 2 (`docs/QUANTITY.md`).
+- Класс маски — любой плавающий материал: пена, органика, суда дают такой же сигнал (раздел 6.3).
+- Связь индекса с полем не найдена: ρ(FDI) = {{case.sections.sat_experiment.fdi_rho|f2}} на {{case.sections.sat_experiment.n_pairs}} парах, ρ = {{case.sections.independent_check.plp.rho_fdi|f2}} на PLP.
+- Калибровочных пар {{case.sections.quantity.levels.calibration_pairs}}. Даже для множителя k с точностью ×/÷2 нужно {{case.sections.quantity.calibration.n_pairs_k_x2_min}}–{{case.sections.quantity.calibration.n_pairs_k_x2_max}} пар.
+
+Поэтому в продукте нет массы и нет физической концентрации пластика по снимку. У зоны — площадь, доля покрытия, статус и подпись «количество по снимку не определено».
+
+## 16. Ограничения переноса и развитие
+
+**Ограничения.**
+- Перенос «снимок → шт./км²» не доказан (разделы 8 и 15).
+- Полевая модель построена на одном рейсе S2, и на отложенном test медиана не хуже модели. Для нового места интервал {{case.sections.quantity.field_S2.event_lo95|f1}}–{{case.sections.quantity.field_S2.event_hi95|f0}} шт./км².
+- Детектор обучен на ACOLITE (MARIDA), а сервис работает на L2A. На L2A он проверен только на новых наборах B/D: нити Cózar {{case.sections.detector_v2.reference.cozar_pct|f0}} %, ложные на {{case.sections.detector_v2.reference.vessels_pct|f0}} % судов.
+- На новом регионе F1 ниже ({{metric_audit.lro.mean_f1|f3}}), при низком Солнце (зенит ≥ 58°) анализ не выполняется.
+- Дрейф — модельный сценарий, не наблюдаемое перемещение; на следующем снимке не подтверждён.
+
+**Развитие.**
+- Трансекты под пролёт Sentinel-2 с записанным временем и шириной полосы: {{case.sections.quantity.calibration.n_pairs_k_x2_min}}–{{case.sections.quantity.calibration.n_pairs_k_x2_max}} пар с сигналом снимка.
+- Снимки 0,3–0,5 м или дрон над полосами. Тогда счётчик предметов на кадре даёт штуки на известной площади.
+- Больше рейсов и сезонов для полевой модели.
+- Разметка L2A-сцен для детектора (суда, пена, органика).
+
+## 17. Воспроизводимость
+
+Все команды — из корня репозитория, `.venv\Scripts\python.exe`, CPU, без сети (данные в git или в кэше).
+
+| Число или артефакт | Команда | Выход |
+|---|---|---|
+| весь маршрут кейса | `run.ps1 -Case all -Offline` ({{case.run.total_s|f1}} с) | `reports/case_run/run_summary.json`, {{case.run.n_outputs}} таблиц с одинаковыми sha256 при повторе |
+| метрики детектора (test) | `scripts\case\run_all.py eval` | `reports/case_run/detector_recomputed.json` = `reports/case_detector/metrics.json` |
+| C = N/A и интервал профиля | `scripts\case\expert_check.py --n {{case.sections.quantity.field_S2.pooled_N}} --area {{case.sections.quantity.field_S2.pooled_A_km2|f2}}`; `scripts\case\field_interval_check.py` | консоль; `reports/quantity/field_intervals.*` |
+| CV и отложенный test концентрации | `scripts\case\conc_model_cv.py`; test — `final_test_conc.py` (однократный, повтор отклоняется) | `reports/case_conc/{dev_cv,final_test}.json`, `final_test_predictions.csv` |
+| числа расследования, органика, пары ±48 ч, физика разрешения | `scripts\case\collect_search.py` | `reports/search/search_numbers.json` → `case.sections.*` |
+| числа карточки и графики отчёта | `scripts\case\report_figs.py` | `reports/report_extra/service_card.json`, `reports/img/report/*` |
+| единый файл чисел | `scripts\final_numbers.py` | `reports/final_numbers.json` |
+| этот отчёт | `scripts\render_docs.py`, затем `scripts\case\report_export.py` | `reports/report_final.md` → `reports/report.docx`, `reports/report.pdf` |
+| согласованность API и выгрузки | `scripts\case\consistency_check.py` | `reports/selfcheck/consistency_latest.*` |
+| тесты кейса | `-m pytest -q tests\test_case_*.py tests\test_api_v3.py` | {{case.n_tests}} passed |
+
+Чистый клон с GitHub до карты занял {{case.clean_clone.total_min}} мин на CPU, числа совпали (`{{case.clean_clone.file}}`). Сохранённые предсказания 7 моделей детектора (`data/case/detector_preds/`) позволяют пересчитать TP/FP/FN без MARIDA. Эталоны и предсказания концентрации лежат в `reports/case_conc/`. Команды для каждой метрики — в README, раздел 7.
+
+## 18. Источники, лицензии, вклад команды
+
+| Что | Лицензия или условия |
 |---|---|
+| Реестр организаторов: Lebreton 2018 (figshare), Gutow 2021 и 2018 (PANGAEA), DOORS 2024 (Zenodo) | CC BY 4.0; Gutow 2018 — CC BY 3.0 |
 | MARIDA (Zenodo 5151941), MADOS (Zenodo 10664073) | CC BY 4.0 |
 | ADIS, The Ocean Cleanup (4TU) | CC BY 4.0 |
-| Каталог нитей Cózar et al. 2024 (Zenodo 11045944) | CC BY 4.0 |
+| Каталог нитей Cózar et al. 2024 (Zenodo 11045944), DOI 10.1038/s41467-024-48674-7 | CC BY 4.0 |
 | PLP (Zenodo 3752719); FloatingObjects / Refined | CC BY 4.0 / Apache-2.0 / MIT |
 | Суда у Финляндии (Zenodo 15019034), Cloud Mask Catalogue (Zenodo 4172871) | CC BY 4.0 |
 | FML (SEANOE 10.17882/106148), Winans 2023 (Zenodo 8381113) | CC BY |
-| The Ocean Cleanup River Monitoring | CC BY-NC 4.0 — только исследовательское использование |
+| ISPRA, мониторинг плавающего мусора (MSFD) | условия портала ISPRA; лицензия в файлах не указана |
+| The Ocean Cleanup River Monitoring | CC BY-NC 4.0, только исследовательское использование |
 | DebrisScan | Apache-2.0 |
-| Sentinel-2 / Landsat (Copernicus, USGS), ERA5 через Open-Meteo, подложка Esri | открытые условия, атрибуция на карте |
+| Sentinel-2 и Landsat (Copernicus, USGS), ERA5 через Open-Meteo, HYCOM, NCEP GFS, Natural Earth, подложка Esri | открытые условия, атрибуция на карте |
+
+Литература по методу: Kikaki et al. 2022 (MARIDA, PLoS ONE 17: e0262247), Biermann et al. 2020 (FDI, Sci Rep 10: 5364), Hu 2009 (FAI, RSE 113: 2118), Cózar et al. 2024 (Nat Commun), Lebreton et al. 2018 (Sci Rep 8: 4666).
+
+**Готовое, не наше:** разметка MARIDA и MADOS, протокол RandomForest MARIDA, веса U-Net MARIDA, индексы FDI и FAI, OpenDrift, каталоги STAC.
+
+**Вклад команды.** Постановку, приоритеты и приёмку вела команда. Код и эксперименты выполнены с ИИ-ассистентами по постановкам команды, журнал работ — `docs/LOG.md`.
+
+| Участник | Вклад (по документам репозитория) |
+|---|---|
+| Кашин Глеб | независимая проверка количественной связи (`docs/research/gleb_quantitative_link/`), сравнение с DebrisScan, приёмка интерфейса (`docs/acceptance/GLEB_UX.txt`) |
+| Закон Марк | репозиторий, сборка, развёртывание сервиса |
+| Панин Матвей | приёмка решения и замечания эксперта с чекпоинта (`docs/acceptance/MATVEY_ACCEPTANCE.txt`, `MATVEY_CHECKPOINT_NOTES.txt`) |
+| Ожигов Егор | запасной интерфейс по контракту API v3 (`docs/CONTRACTS_V3.md`), ревью интерфейса (`docs/acceptance/egor_fix_pack/`) |
+| Ведерников Фёдор | постановка задач, приоритеты и план сдачи |
+
+---
+
+## Приложение А. Все детекторы на test MARIDA
+
+{{derived.case_detector_table}}
+
+## Приложение Б. Сводка разделов чисел: источник и протокол
+
+{{derived.case_sections_table}}
+
+## Приложение В. Карточка полевого измерения и прерванная трансекта
+
+![Карточка полевого измерения: C = N/A с интервалом, профиль, источник](../reports/case_deck_img/03_observation_card.jpg)
+
+![«Подобрать снимок»: прерванная трансекта и окно пролёта](../reports/case_deck_img/04_pairfinder_transect.jpg)

@@ -11,7 +11,8 @@ Only sets from docs/COUNT_DATASETS.md whose files are on disk (data/extra/count_
    (FML: MAE 0.59 шт./кадр, Winans: 1.85 шт./кадр — reports/final_numbers.json photo_count), and only on the
    held-out TEST frames of those checks.
 
-Run: CUDA_VISIBLE_DEVICES=-1 .venv/Scripts/python.exe scripts/case/drones_index.py [--no-predict]
+Run: CUDA_VISIBLE_DEVICES=-1 .venv/Scripts/python.exe scripts/case/drones_index.py
+then scripts/case/drones_pred.py (our counter on all frames -> data/case/drones/pred.json, §56).
 """
 from __future__ import annotations
 
@@ -44,7 +45,12 @@ def _r(x, k=4):
     return round(float(x), k)
 
 
+_LAST_SRC = {"p": None}
+
+
 def save_preview(src: Path | Image.Image, set_id: str, fid: str):
+    if isinstance(src, Path):
+        _LAST_SRC["p"] = src.resolve().relative_to(ROOT).as_posix()  # original file -> scripts/case/drones_pred.py
     im = src if isinstance(src, Image.Image) else Image.open(src)
     im = im.convert("RGB")
     w0, h0 = im.size
@@ -86,7 +92,7 @@ def frame_rec(set_id, fid, src_name, orig, prev, nbytes, objects, area_m2, area_
            "width": prev[0], "height": prev[1], "orig_width": orig[0], "orig_height": orig[1], "bytes": nbytes,
            "objects": objects, "n_objects": n, "n_by_group": by if objects is not None else None,
            "frame_area_m2": area_m2, "density_m2": d_m2, "density_km2": d_km2,
-           "area_note": area_note or (None if area_m2 else "площадь кадра неизвестна")}
+           "area_note": area_note or (None if area_m2 else "площадь кадра неизвестна"), "src": _LAST_SRC["p"]}
     if extra:
         rec.update(extra)
     return rec
@@ -280,8 +286,8 @@ def set_maharjan():
             "link": "https://github.com/Nisha484/Nisha", "catalog_row": "A4",
             "dataset_size": "1 000 плиток / 2 094 рамки (в наборе)", "classes_src": ["plastic"],
             "class_groups": gmap, "gsd_m": 0.0082, "frame_area_m2": 4.0,
-            "note": "Плитка 2 × 2 м (GSD 0,82 см) — шт./м² считаются на площади плитки. Наш счётчик на этом наборе "
-                    "не переносится (AP50 0,01 без дообучения) — его прогноз не показан."}
+            "note": "Плитка 2 × 2 м (GSD 0,82 см) — шт./м² считаются на площади плитки. Наш счётчик на этом наборе не обучался "
+                    "(прогон — аэро-модель без дообучения; итог «нашла X из Y» — в карточке набора)."}
     return meta, frames
 
 
@@ -402,17 +408,16 @@ def pred_rec(survey, card, boxes, orig, area_m2, n_true):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--no-predict", action="store_true")
+    ap.add_argument("--predict", action="store_true", help="old embedded prediction (Winans/FML); since §56 -> drones_pred.py")
     a = ap.parse_args()
     IMG.mkdir(parents=True, exist_ok=True)
     sets = []
     for fn in (set_ucwd, set_tun, set_martin, set_maharjan,
-               lambda: set_winans(not a.no_predict), lambda: set_fml(not a.no_predict)):
+               lambda: set_winans(a.predict), lambda: set_fml(a.predict)):
         meta, frames = fn()
         grp = sorted({g for f in frames for g in (f["n_by_group"] or {})}, key=list(GROUPS).index)
         meta.update(n_frames=len(frames), groups_labelled=grp,
-                    algae_note="водоросли в этом наборе не размечены",
-                    counter_checked=any("prediction" in f for f in frames))
+                    algae_note="водоросли в этом наборе не размечены")
         sets.append({"meta": meta, "frames": frames})
         print(meta["id"], len(frames), "frames", grp, flush=True)
     total = sum(p.stat().st_size for p in IMG.rglob("*.jpg"))

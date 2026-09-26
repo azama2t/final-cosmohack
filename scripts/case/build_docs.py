@@ -101,6 +101,7 @@ def main(argv=None) -> int:
         run([PY, "scripts/make_deck_case.py"], check=False)  # при самом первом запуске ещё нет case_tests.json
     res = pytest_case()
     docs(deck=not a.no_deck)
+    run([PY, "scripts/case/report_figs.py", "--figs"], check=False)  # графики научного отчёта reports/img/report/ из final_numbers
     run([PY, "scripts/case/report_export.py"], check=False)  # reports/report_final.md -> report.docx + report.pdf (LibreOffice)
     fin = run([PY, "-m", "pytest", "-q", "-p", "no:cacheprovider", DOCS_TEST, DOCS_TEST_SEARCH], check=False)
     ok = fin.returncode == 0 and res["failed"] == 0

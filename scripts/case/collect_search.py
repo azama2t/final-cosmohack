@@ -951,6 +951,250 @@ def collect_archives() -> dict:
     return {"available": bool(n), "source": "docs/research/pairs/archives/{FILES.csv, CANDIDATES.csv}, описание — ARCHIVES.md", **n}
 
 
+def collect_report(q: dict | None = None) -> dict:
+    """Числа научного отчёта, которых нет в других разделах (reports/report_final.md):
+    реестр организаторов по источникам, органика (флаг NDVI/FAI — эксперимент), пары ISPRA ±48 ч со сдвигом дрейфом,
+    физика разрешения, снимок карточки/сервиса (reports/report_extra/service_card.json ← scripts/case/report_figs.py)."""
+    import csv
+    out: dict = {"available": True,
+                 "source": "task/macroplastic_marine_samples.csv; reports/organic/{val_flag,zones_flag}.json; "
+                           "docs/research/pairs/drift_shift_48h.csv; docs/research/marine_quantity/results/resolution_physics.json; "
+                           "reports/report_extra/service_card.json (scripts/case/report_figs.py)",
+                 "protocol": "только чтение файлов в git; снимок сервиса пересобирает scripts/case/report_figs.py офлайн теми же "
+                             "функциями service/case_store.py, что отдают /api/v3; ничего не калибруется"}
+    # 1. реестр организаторов по источникам
+    p = ROOT / "task" / "macroplastic_marine_samples.csv"
+    if p.is_file():
+        src: dict = {}
+        with p.open(encoding="utf-8", newline="") as f:
+            for r in csv.DictReader(f):
+                k = r.get("source_id") or "?"
+                s = src.setdefault(k, {"short": r.get("source_short"), "doi": r.get("source_doi"), "license": r.get("source_license"),
+                                       "region": r.get("region"), "rows": 0, "events": set(), "d0": None, "d1": None})
+                s["rows"] += 1
+                s["events"].add(r.get("event_id"))
+                d = r.get("date_utc") or None
+                if d:
+                    s["d0"] = min(s["d0"] or d, d)
+                    s["d1"] = max(s["d1"] or d, d)
+        out["organizers"] = {k: {**{kk: vv for kk, vv in v.items() if kk != "events"}, "events": len(v["events"])}
+                             for k, v in sorted(src.items())}
+        out["organizers_rows"] = sum(v["rows"] for v in src.values())
+        out["organizers_events"] = sum(len(v["events"]) for v in src.values())
+    # 2. органика
+    vf = _load_json(ROOT / "reports" / "organic" / "val_flag.json") or {}
+    zf = _load_json(ROOT / "reports" / "organic" / "zones_flag.json") or {}
+    if vf:
+        names = {"Marine Debris": "мусор", "Dense Sargassum": "саргассум плотный", "Sparse Sargassum": "саргассум редкий",
+                 "Natural Organic Material": "прочая органика"}
+        cl = []
+        for k, nm in names.items():
+            c = (vf.get("classes") or {}).get(k) or {}
+            if not c:
+                continue
+            cl.append({"key": k, "name": nm, "pixels": _i(c.get("pixels")), "objects": _i(c.get("objects")),
+                       "flag_obj": _i(c.get("flag_obj")), "flag_px_share": _r(c.get("flag_px_share"), 3),
+                       "flag_obj_ci95": [_r(x, 3) for x in (c.get("flag_obj_ci95_wilson") or [])],
+                       "det_md_px": _i(c.get("detector_md_px")), "det_md_flagged": _i(c.get("detector_md_px_flagged")),
+                       "det_md_share": _r((c.get("detector_md_px") or 0) / c["pixels"], 3) if c.get("pixels") else None})
+        out["organic"] = {"rule": vf.get("rule"), "split": vf.get("split"), "n_patches": _i(vf.get("n_patches")),
+                          "threshold": (vf.get("detector") or {}).get("threshold"), "classes": cl,
+                          "zones_scenes": _i(zf.get("scenes")), "zones": _i(zf.get("zones")), "zones_flagged": _i(zf.get("flagged"))}
+    # 3. пары ISPRA ±48 ч со сдвигом дрейфом
+    p = ROOT / "docs" / "research" / "pairs" / "drift_shift_48h.csv"
+    if p.is_file():
+        by: dict = {}
+        with p.open(encoding="utf-8", newline="") as f:
+            for r in csv.DictReader(f):
+                k = r["id_ispra_levels"]
+                a, b = _r(r.get("мин_расстояние_после_дрейфа_м"), 1), _r(r.get("было_ближайший_м_без_дрейфа"), 1)
+                n_le = _i(r.get("предметов_ле50м_после_дрейфа")) or 0
+                e = by.setdefault(k, {"id": k, "transect": r.get("трансекта"), "items": _i(r.get("n_предметов")), "before_m": b,
+                                      "after_m": a, "items_le50": 0, "dt_h": []})
+                e["after_m"] = min(x for x in (e["after_m"], a) if x is not None) if a is not None else e["after_m"]
+                e["items_le50"] = max(e["items_le50"], n_le)
+                e["dt_h"].append(_r(r.get("Δt_ч"), 1))
+        pairs = sorted(by.values(), key=lambda e: int(e["id"]) if str(e["id"]).isdigit() else 0)
+        thr = 50
+        out["drift48"] = {"pairs": pairs, "n_pairs": len(pairs), "threshold_m": thr,
+                          "n_pass": sum(1 for e in pairs if e["items_le50"] > 0 or (e["after_m"] is not None and e["after_m"] <= thr)),
+                          "best_after_m": min(e["after_m"] for e in pairs if e["after_m"] is not None),
+                          "dt_abs_max_h": max(abs(x) for e in pairs for x in e["dt_h"] if x is not None),
+                          "n_closer": sum(1 for e in pairs if e["after_m"] is not None and e["before_m"] is not None and e["after_m"] < e["before_m"]),
+                          "source": "docs/research/pairs/drift_shift_48h.{csv,md}"}
+    # 4. физика разрешения
+    rp = _load_json(ROOT / "docs" / "research" / "marine_quantity" / "results" / "resolution_physics.json") or {}
+    if rp:
+        s2 = next((r for r in rp.get("table") or [] if abs((r.get("gsd_m") or 0) - 10) < 1e-6), {})
+        med_area = ((rp.get("size_distribution") or {}).get("area_m2_quantiles") or {}).get("0.5")
+        fS2 = ((q or {}).get("field_S2") or {}).get("pooled_C")
+        ph = {"n_objects": _i((rp.get("size_distribution") or {}).get("n_objects_total")), "median_item_m2": _r(med_area, 2),
+              "s2_share_fill20_pct": _r(100 * (s2.get("share_fill_ge_20pct") or 0), 3),
+              "s2_median_fill_pct": _r(100 * (s2.get("median_fill_fraction") or 0), 2),
+              "share_area_ge_20m2_pct": _r(100 * ((rp.get("size_distribution") or {}).get("share_area_ge_20m2") or 0), 3)}
+        if fS2 and med_area:
+            ph["s2_C"] = fS2
+            ph["items_per_pixel"] = _r(fS2 * 1e-4, 4)                       # пиксель 10 × 10 м = 1e-4 км²
+            ph["pixels_per_item"] = _i(round(1 / (fS2 * 1e-4)))
+            ph["coverage_ppm"] = _r(fS2 * med_area / 1e6 * 1e6, 1)         # доля площади × 10⁶: C [шт./км²] × s [м²] / 10⁶ [м²/км²]
+            ph["gap_to_fill20"] = _r(0.2 / (fS2 * med_area / 1e6), -3)     # во сколько раз средняя доля ниже 20 % пикселя
+        out["physics"] = ph
+    # 5. карточка и сервис (снимок)
+    sv = _load_json(REP / "report_extra" / "service_card.json")
+    if sv:
+        out["service"] = sv
+    out["late"] = collect_late()
+    return out
+
+
+def _log_ready() -> dict:
+    """docs/LOG.md: время последней отметки «готов…» по пунктам функций последнего дня (ключ «54.1», «55.2» …)."""
+    p = ROOT / "docs" / "LOG.md"
+    res: dict = {}
+    if not p.is_file():
+        return res
+    for ln in p.read_text(encoding="utf-8").splitlines():
+        m = re.match(r"^\d\d\.\d\d (\d\d:\d\d) \|", ln)
+        if not m:
+            continue
+        fields = ln.split(" | ")
+        if len(fields) > 1 and fields[1].lstrip().startswith("→"):  # запросы к другим, не отметки о готовности
+            continue
+        for f in fields[1:]:
+            for mm in re.finditer(r"(?<!«)§\s*(5[45])\s*п\.?\s*(\d)([^|]{0,120})", f):
+                tail = mm.group(3)
+                ok = (re.search(r"готов", tail) and not re.search(r"не\s+готов", tail)) or                      (mm.group(1) == "55" and mm.group(2) == "2" and tail.lstrip().startswith("PRIME данные"))
+                if ok:
+                    res[f"{mm.group(1)}.{mm.group(2)}"] = m.group(1)
+            for mm in re.finditer(r"(?<!«)§\s*55[аa]([^|]{0,120})", f):
+                if re.search(r"готов", mm.group(1)) and not re.search(r"не\s+готов", mm.group(1)):
+                    res["55a"] = m.group(1)
+    return res
+
+
+def collect_late() -> dict:
+    """Функции последнего дня: обзор NASA, дроны, дорожки таймлайна, дрейф по дате сцены, «реальное время» (свежие
+    Sentinel-2 нашей моделью), PRIME (синтетика по строкам CSV). Статус — только по отметкам «готов» в docs/LOG.md;
+    числа — из файлов данных (data/case/{drones,fresh_s2,prime}/index.json, reports/prime/metrics.json, service/routes_nasa.py)."""
+    ready = _log_ready()
+    late: dict = {"log_ready": ready}
+    rn = ROOT / "service" / "routes_nasa.py"
+    if rn.is_file():
+        res = sorted({int(x) for x in re.findall(r'"resolution_m":\s*(\d+)', rn.read_text(encoding="utf-8"))})
+        coarse = [r for r in res if r >= 100]
+        late["nasa_res_m_min"], late["nasa_res_m_max"] = (coarse[0], coarse[-1]) if coarse else (None, None)
+        if coarse:  # во сколько раз площадь пикселя NASA больше пикселя Sentinel-2 10 м
+            late["nasa_area_ratio_min"], late["nasa_area_ratio_max"] = (coarse[0] / 10) ** 2, (coarse[-1] / 10) ** 2
+    dr = _load_json(ROOT / "data" / "case" / "drones" / "index.json") or {}
+    if dr.get("sets"):
+        late["drones_n_sets"] = len(dr["sets"])
+        late["drones_n_frames"] = sum(len(s.get("frames") or []) for s in dr["sets"])
+    fr = _load_json(ROOT / "data" / "case" / "fresh_s2" / "index.json") or {}
+    sc = fr.get("scenes") or []
+    if sc:
+        dates = sorted(s.get("date") for s in sc if s.get("date"))
+
+        def _nz(s, *keys):
+            for k in keys:
+                v = s.get(k)
+                if isinstance(v, (int, float)):
+                    return v
+                if isinstance(v, list):
+                    return len(v)
+            return 0
+        late["fresh"] = {"n_scenes": len(sc), "n_regions": len({s.get("region") for s in sc}),
+                         "date_min": dates[0] if dates else None, "date_max": dates[-1] if dates else None,
+                         "n_evaluable": sum(1 for s in sc if s.get("evaluable")),
+                         "n_zones": int(sum(_nz(s, "n_zones_total", "n_zones", "zones") for s in sc)),
+                         "n_finds": int(sum(_nz(s, "n_finds", "finds") for s in sc)),
+                         "generated": fr.get("generated"), "label": fr.get("label"),
+                         "model_sha": (fr.get("model") or {}).get("sha256_short")}
+    pm = _load_json(REP / "prime" / "metrics.json")
+    late["prime_metrics"] = None
+    if isinstance(pm, dict) and pm.get("metrics_by_gsd"):
+        mt = pm.get("meta") or {}
+        rows = []
+        for g, v in sorted(pm["metrics_by_gsd"].items(), key=lambda kv: float(kv[0])):
+            fp = v.get("fp") or {}
+            rows.append({"gsd": float(g), "recall_pct": _r(100 * (v.get("recall_matched") or 0), 1),
+                         "recall_tiles_pct": _r(100 * (v.get("recall_obj_tiles") or 0), 1),
+                         "fp_per_tile": _r(fp.get("fp_per_tile"), 3), "fp_per_km2": _r(fp.get("fp_per_km2"), 0),
+                         "mae": _r(v.get("mae_items_km2"), 1), "bias": _r(v.get("bias_items_km2"), 1)})
+        late["prime_counter"] = {"n_rows": _i(mt.get("n_rows")), "n_events": _i(mt.get("n_events")), "n_items": _i(mt.get("n_items")),
+                                 "n_tiles": _i(mt.get("n_tiles")), "threshold": (mt.get("counter") or {}).get("threshold"),
+                                 "retrained": (mt.get("counter") or {}).get("retrained_on_these"), "rows": rows,
+                                 "mean_csv": _r(pm["metrics_by_gsd"].get("0.05", {}).get("mean_csv_items_km2"), 1),
+                                 "gsd_list": ", ".join(f"{r['gsd']:g}" for r in rows),
+                                 "source": "reports/prime/metrics.json (scripts/case/prime_csv.py gen|infer|score)"}
+    dp = _load_json(ROOT / "data" / "case" / "drones" / "pred.json") or {}
+    if dp.get("sets"):
+        sets = {}
+        for k, s in dp["sets"].items():
+            sm = s.get("summary") or {}
+            sets[k] = {"trained": bool(s.get("trained_on_this_set")), "frames": _i(sm.get("frames")), "found": _i(sm.get("found")),
+                       "labelled": _i(sm.get("labelled")), "false": _i(sm.get("false")), "n_pred": _i(sm.get("n_pred"))}
+        out_sets = [v for v in sets.values() if not v["trained"] and v["labelled"]]
+        in_sets = [v for v in sets.values() if v["trained"] and v["labelled"]]
+        late["drones_pred"] = {"total": dp.get("total"), "sets": sets, "threshold": 0.8,
+                               "out_found": sum(v["found"] for v in out_sets), "out_labelled": sum(v["labelled"] for v in out_sets),
+                               "out_false": sum(v["false"] for v in out_sets),
+                               "in_found": sum(v["found"] for v in in_sets), "in_labelled": sum(v["labelled"] for v in in_sets),
+                               "in_false": sum(v["false"] for v in in_sets), "source": "data/case/drones/pred.json (scripts/case/drones_pred.py)"}
+    pi = _load_json(ROOT / "data" / "case" / "prime" / "index.json") or {}
+    late["prime_n_scenes"] = len(pi.get("scenes") or []) if isinstance(pi, dict) else None
+    fz = late.get("fresh") or {}
+    if fz:
+        fun = fr.get("funnel") if isinstance(fr.get("funnel"), dict) else {}
+        labels = [("found", "найдено"), ("downloaded", "скачано"), ("quality_ok", "прошло качество"), ("passed_quality", "прошло качество"),
+                  ("processed", "обработано"), ("with_finds", "снимков с находками"), ("scenes_with_finds", "снимков с находками"),
+                  ("zones", "зон")]
+        steps, used = [], set()
+        for k, lab in labels:
+            v = fun.get(k)
+            if isinstance(v, (int, float)) and lab not in used:
+                steps.append(f"{lab} {int(v)}")
+                used.add(lab)
+        extra = {"finds": "находок", "rejected_quality": "исключено по качеству", "not_in_pc": "нет пикселей в Planetary Computer",
+                 "errors": "ошибки обработки", "pending": "ещё в очереди"}
+        ex = [f"{lab} {int(fun[k])}" for k, lab in extra.items() if isinstance(fun.get(k), (int, float))]
+        for k, v in fun.items():  # причины исключения, если воронка их хранит словарём
+            if isinstance(v, dict) and ("reason" in k or "reject" in k):
+                ex += [f"{rk}: {rv}" for rk, rv in v.items() if isinstance(rv, (int, float))]
+        if ex:
+            steps.append("(" + "; ".join(ex) + ")")
+        n_proc = fr.get("scenes_30d") if isinstance(fr.get("scenes_30d"), int) else fz["n_scenes"]
+        n_with = sum(1 for s in sc if isinstance(s.get("n_finds"), (int, float)) and s["n_finds"] > 0 or
+                     (((s.get("by_status") or {}).get("detected") or (s.get("by_status") or {}).get("обнаружено") or 0) > 0))
+        n_z = fr.get("zones_30d") if isinstance(fr.get("zones_30d"), int) else fz["n_zones"]
+        n_f = fr.get("finds_30d") if isinstance(fr.get("finds_30d"), int) else fz["n_finds"]
+        n_reg = fr.get("regions_30d")
+        n_reg = len(n_reg) if isinstance(n_reg, (list, dict)) else (n_reg or fz["n_regions"])
+        win = (fun.get("window_days") if fun else None) or (fr.get("search_window") or {}).get("days") or 30
+        txt = (f"Фактическая воронка на момент сборки: " + (" → ".join(s for s in steps if not s.startswith("(")) + " " + " ".join(s for s in steps if s.startswith("(")) if steps else
+               f"обработано {n_proc} снимков Sentinel-2 L2A в {n_reg} районах, снимков с находками {n_with}, зон {n_z}, из них находок {n_f}")
+               + f". Окно поиска — последние {win} сут (даты съёмки снимков в индексе — с {fz['date_min']} по {fz['date_max']}). "
+               f"Последняя успешная обработка — {fr.get('last_success') or fr.get('last_update') or fz.get('generated')} (UTC). "
+               f"Модель — weights/lgbm (sha256 {fz['model_sha']}), те же фильтры качества, что у архивных сцен. "
+               f"Снимки с нулём находок показаны тоже: «0 находок» — это результат. Подпись у каждого снимка — «{fz.get('label')}»; "
+               f"эти зоны не входят в числа кейса. Источник — `data/case/fresh_s2/index.json`.")
+    else:
+        txt = "Не сделано к моменту сборки отчёта: обработанных свежих снимков в `data/case/fresh_s2/index.json` нет."
+    late["realtime_text"] = txt
+    late["rt_processed"] = ((fr.get("funnel") or {}).get("processed") if isinstance(fr.get("funnel"), dict) else None) or (fz.get("n_scenes") if fz else None)
+    # PRIME = демо-режим по запросу жюри: метрик качества у демо нет; эксперимент со счётчиком — отдельно (раздел про разрешение)
+    late["prime_text"] = ("Отдельно от демо проведён эксперимент со счётчиком на синтетических кадрах строк CSV при разном разрешении — "
+                          "он описан в разделе о физическом пределе разрешения и к демо-карточкам не относится."
+                          if late.get("prime_counter") else "Прогона счётчика по демо-кадрам нет, поэтому строки «эксперимент» нет.")
+    st = lambda k: f"готово по журналу ({ready[k]})" if k in ready else "не сделано к моменту сборки"  # noqa: E731
+    late["status"] = {"nasa": st("54.1"), "drones": st("54.2"), "timeline": st("54.3"), "drift": st("54.4"),
+                      "realtime": (st("55.1") if "55.1" in ready else
+                                   (f"работает; массовый прогон продолжается, на момент сборки обработано {int(late['rt_processed'])} снимков"
+                                    if late.get("rt_processed") else st("55.1"))),
+                      "prime": (st("55a") if "55a" in ready else st("55.2") if "55.2" in ready else
+                                (st("54.5") + ", прежний вариант: 6 синтетических сцен" if "54.5" in ready else st("55a")))}
+    return late
+
+
 def collect_jury() -> dict:
     """Внутренняя проверка «жюри-человек» (docs/LOG.md): первый и последний балл. ВНУТРЕННИЙ балл, не конкурсный."""
     p = ROOT / "docs" / "LOG.md"
@@ -1158,7 +1402,7 @@ def collect() -> dict:
            "ispra": collect_ispra(), "resolution_physics": collect_resolution_physics(), "targets": collect_targets(),
            "estimator": collect_estimator(), "synthetic_p3": collect_synthetic_p3(), "archives": collect_archives(),
            "jury": collect_jury(), "defense_examples": collect_defense_examples(), "mobile": collect_mobile(),
-           "demo_tour": collect_demo_tour()}
+           "demo_tour": collect_demo_tour(), "report": collect_report(q)}
     return _clean_ids(res)
 
 

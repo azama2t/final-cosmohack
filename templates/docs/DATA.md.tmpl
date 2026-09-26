@@ -1,0 +1,19 @@
+# DATA — какие данные, где лежат, как получить
+
+Короткий указатель. Полная таблица источников и лицензий — README, раздел «Источники и лицензии»; история поиска данных — README «Как мы искали данные» и [reports/report.pdf](../reports/report.pdf).
+
+| Данные | Что это | Где в репозитории | Как используем |
+|---|---|---|---|
+| CSV организаторов | {{case.csv.rows}} строк, {{case.csv.events}} событий, источники S1–S4 | `task/macroplastic_marine_samples.csv` | эталон концентрации C = N/A, отбор, поиск пар со снимками |
+| Составы выборок | dev / отложенный test / буфер, фолды схем | `reports/case_splits/`, sha256 состава — `configs/case_selection.yaml` | протокол проверки концентрации |
+| Снимки Sentinel-2 L2A | вырезки и маски качества пар, кэш ответов STAC | `data/pairs/cache/`, `data/pairs/quality/` | пары «снимок ↔ поле», маски качества |
+| Зоны на сценах | {{case.sections.scene_zones.n_zones}} зон детектора на {{case.sections.scene_zones.n_scenes_eval}} оцениваемых сценах | `data/case/scene_zones/` | слой «Спутниковые зоны» на карте |
+| Предсказания детектора на MARIDA | вероятности и маски по патчам | `data/case/detector_preds/*.npz` | пересчёт F1 без обучения |
+| MARIDA (разметка) | патчи Sentinel-2 с классами, официальный сплит | **не в git** (4,5 ГБ): https://zenodo.org/records/5151941 → `data/MARIDA/` | обучение и test детектора |
+| Независимые метки B/D | нити Cózar 2024, PLP, FloatingObjects, суда, облака | реестры `reports/extra_data/` | подтверждение зон, проверка ложных срабатываний |
+| ADIS (The Ocean Cleanup) | судовая камера, предметы > 5 см | реестры `data/extra/field/`, `reports/search/` | пары по месту и времени, профиль акватории |
+| Фото для счётчика | FML (фото с воды), Winans 2023 (аэро 2 см) | веса `weights/photo_count/`, метрики `reports/photo_count/` | счёт предметов на фото — **не спутник** |
+
+Что без сети: кэш STAC, вырезки, реестры и предсказания лежат в git, поэтому `run.ps1 -Case all -Offline` на чистом клоне воспроизводит реестр и выгрузку. Сеть нужна только для подложки карты и пересчёта с новыми снимками.
+
+Подробно: разметка и уровни меток — [LABELS.md](LABELS.md); наборы для счёта по фото — [COUNT_DATASETS.md](COUNT_DATASETS.md); геометрия трансект — [../reports/case_geometry/summary.md](../reports/case_geometry/summary.md); журнал поиска — [SEARCH_LOG.md](SEARCH_LOG.md).

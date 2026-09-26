@@ -1,0 +1,20 @@
+# EVALUATION — как проверяли и как пересчитать
+
+Короткий указатель. Сводная таблица проверенных метрик — в начале [README](../README.md#проверенные-метрики); команда пересчёта каждой метрики — README, раздел 7; все числа — `reports/final_numbers.json`.
+
+**Протоколы (записаны до метрик):**
+- **Детектор.** Официальный сплит MARIDA; порог и настройки — только по val; test посчитан один раз ({{case.detector.test_n_scenes}} сцен). ДИ — бутстреп по сценам. Бейзлайны на тех же сценах. Файлы: `reports/case_detector/compare.md`, `metrics.json`.
+- **Концентрация.** Отложенный участок маршрута с буфером 1 сут; состав зафиксирован до моделей (sha256 в `configs/case_selection.yaml`); test посчитан один раз ({{case.sections.field_test.when}}). Правило: если модель не лучше медианы профиля, на карте медиана. Итог S2: {{case.sections.field_test.S2.verdict}}. Файл: `reports/case_conc/final_test.json`.
+- **Снимок ↔ поле.** Реестр пар: по метаданным {{case.pairs.events_accept_meta}} из {{case.pairs.events}} событий, маски качества прошли {{case.pairs.quality_accept}}, синхронных при типичном дрейфе {{case.pairs.events_accept_drift}}. Файл: `reports/case_pairs/summary.md`.
+- **Счётчик по фото.** Сплит по сессиям съёмки, порог по val, test один раз. Файл: `reports/photo_count/`.
+- **Утечки.** Тесты `tests/test_case_concentration.py`, `tests/test_case_conc_model.py` (нет общих событий, групп, сцен и дней рейса; test не читается дважды).
+
+**Быстрый пересчёт (Windows, из корня):**
+
+```powershell
+.venv\Scripts\python.exe scripts\case\run_all.py all --offline                 # весь маршрут кейса → reports/case_run/run_summary.json
+.venv\Scripts\python.exe scripts\case\expert_check.py --sample-id MPL-0197    # C = N/A одной записи, сверка с API и выгрузкой
+.venv\Scripts\python.exe -m pytest -q tests\test_case_docs_numbers.py         # числа документов = final_numbers.json
+```
+
+Тесты кейса: {{case.n_tests}} passed ({{case.tests.when}}, `reports/case_run/case_tests.json`). Независимые тесты и защита от утечек — [INDEPENDENCE.md](INDEPENDENCE.md); подробный разбор — [../reports/report.pdf](../reports/report.pdf).

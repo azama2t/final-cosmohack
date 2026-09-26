@@ -1,0 +1,73 @@
+[
+ {
+  "started": "2026-09-26T18:50:48Z",
+  "finished": "2026-09-26T18:56:10Z",
+  "trigger": "test",
+  "days": 30,
+  "stac_found": 23,
+  "already": 1,
+  "screened_ok": 2,
+  "rejected": 12,
+  "new_scenes": 1,
+  "skip_no_pc": 1,
+  "errors": 0
+ },
+ {
+  "started": "2026-09-26T19:04:25Z",
+  "finished": "2026-09-26T19:09:44Z",
+  "trigger": "mass §55 pass2 (соседние тайлы, край тайла)",
+  "days": 30,
+  "stac_new_items": 78,
+  "already_processed": 80,
+  "search_errors": {},
+  "screened_ok": 4,
+  "rejected": 74,
+  "new_scenes": 4,
+  "skip_no_pc": 0,
+  "errors": 0
+ },
+ {
+  "started": "2026-09-26T19:09:35Z",
+  "finished": "2026-09-26T19:15:06Z",
+  "trigger": "mass §55 pass3 (акватории CSV организаторов)",
+  "days": 30,
+  "stac_new_items": 26,
+  "already_processed": 20,
+  "search_errors": {},
+  "screened_ok": 5,
+  "rejected": 21,
+  "new_scenes": 4,
+  "skip_no_pc": 1,
+  "errors": 0
+ },
+ {
+  "started": "2026-09-26T20:31:20Z",
+  "finished": "2026-09-26T20:32:45Z",
+  "trigger": "§58: 6 мес, продолжение 3 (resumable)",
+  "days": 180,
+  "stac_new_items": 912,
+  "already_processed": 169,
+  "search_errors": {},
+  "screened_ok": 307,
+  "rejected": 605,
+  "new_scenes": 0,
+  "skip_no_pc": 0,
+  "errors": 0,
+  "failed": false
+ },
+ {
+  "started": "2026-09-26T20:41:39Z",
+  "finished": "2026-09-26T20:47:23Z",
+  "trigger": "§58: 6 мес, продолжение 4 (после паузы по диску)",
+  "days": 180,
+  "stac_new_items": 912,
+  "already_processed": 169,
+  "search_errors": {},
+  "screened_ok": 307,
+  "rejected": 605,
+  "new_scenes": 10,
+  "skip_no_pc": 3,
+  "errors": 0,
+  "failed": false
+ }
+]

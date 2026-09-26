@@ -25,7 +25,11 @@ ROOT = Path(__file__).resolve().parents[1]
 DASH = "—"
 PAIRS = [("templates/README.md.tmpl", "README.md"), ("templates/reports/report.md.tmpl", "reports/report.md"), ("templates/docs/PREP.md.tmpl", "docs/PREP.md"),
          ("templates/docs/QUANTITY.md.tmpl", "docs/QUANTITY.md"),
-         ("templates/reports/report_final.md.tmpl", "reports/report_final.md")]
+         ("templates/reports/report_final.md.tmpl", "reports/report_final.md"),
+         # короткие указатели для чтения «только по ссылке на GitHub»
+         ("templates/docs/DATA.md.tmpl", "docs/DATA.md"), ("templates/docs/MODELS.md.tmpl", "docs/MODELS.md"),
+         ("templates/docs/EVALUATION.md.tmpl", "docs/EVALUATION.md"), ("templates/docs/LIMITATIONS.md.tmpl", "docs/LIMITATIONS.md"),
+         ("templates/docs/DEPLOY.md.tmpl", "docs/DEPLOY.md")]
 PH = re.compile(r"\{\{\s*([A-Za-z_][\w.]*)\s*(?:\|\s*(\w+)(?::([^{}]*?))?\s*)?\}\}")
 
 
