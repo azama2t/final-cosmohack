@@ -119,3 +119,13 @@
     font-size: 14px;
   }
 }
+@media (max-width: 820px) {
+  .ph-app :is(.c-role, .c-role-sep) {
+    font-size: 14px;
+  }
+}
+@media (max-width: 820px) {
+  .ph-app .ph-h {
+    font-size: 14px;
+  }
+}

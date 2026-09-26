@@ -6,10 +6,19 @@
 // (data-testid hooks) and drives it through the same buttons a user would press, so L132 can change the card
 // freely.
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { openDynamics } from '../case/DynamicsHost';
 import './mobile.css';
 import './photo-mobile.css'; // «Фото» mode has no shell, only these rules
 
 export const MOBILE_MQ = '(max-width: 820px)';
+// §48 timeline: collapsed by default on a phone (the user's own choice, once made, is kept by Timeline itself)
+try {
+  if (typeof matchMedia !== 'undefined' && matchMedia(MOBILE_MQ).matches && localStorage.getItem('mp.case.timeline') === null) {
+    localStorage.setItem('mp.case.timeline', '0');
+  }
+} catch {
+  /* no storage */
+}
 type SheetState = 'peek' | 'half' | 'full';
 const PEEK = 64; // px, handle only
 
@@ -35,6 +44,7 @@ interface Snap {
   filtersOpen: boolean;
   modalOpen: boolean;
   menuOpen: boolean;
+  demo: boolean;
   title: string;
   sub: string;
   filtersSet: boolean;
@@ -81,6 +91,7 @@ function readSnap(): Snap {
     filtersOpen: !!$('.c-filters-body'),
     modalOpen: !!$('.c-modal-bg'),
     menuOpen: !!$('.c-menu, [data-testid="layers-panel"]'),
+    demo: !!$('[data-testid="demo-tour-card"]'),
     title,
     sub,
     filtersSet: /заданы/.test(txt('[data-testid="filters-toggle"]')),
@@ -194,6 +205,10 @@ export default function MobileShell() {
     if (!snap.scene && p.scene && !snap.rightOpen) setSheet((s) => (s === 'full' ? 'half' : s));
     if (!snap.rightOpen && p.rightOpen) setSheet((s) => (s === 'peek' ? 'half' : s));
     if (snap.rightOpen && !p.rightOpen) setLegend(false);
+    // «Демо ▶» clicks rows of the list: let them be seen
+    if (snap.demo && !p.demo) setSheet((s) => (s === 'peek' ? 'half' : s));
+    // the tour highlights rows of the list — the «Фильтры» sheet (step 1) must not cover them
+    if (snap.demo && snap.filtersOpen) click('[data-testid="filters-toggle"]');
     prev.current = snap;
   }, [snap]);
 
@@ -237,36 +252,8 @@ export default function MobileShell() {
     setSheet(target);
   };
 
-  // phone «back» gesture / button closes the card instead of leaving the site: one history entry per open card
-  const hist = useRef({ pushed: false, ignore: false });
-  useEffect(() => {
-    if (!mobile) return;
-    const h = hist.current;
-    if (snap.rightOpen && !h.pushed) {
-      history.pushState(history.state, '', location.href);
-      h.pushed = true;
-    } else if (!snap.rightOpen && h.pushed) {
-      h.pushed = false;
-      h.ignore = true;
-      history.back();
-    }
-  }, [mobile, snap.rightOpen]);
-  useEffect(() => {
-    const onPop = () => {
-      const h = hist.current;
-      if (h.ignore) {
-        h.ignore = false;
-        return;
-      }
-      if (h.pushed) {
-        h.pushed = false;
-        cardBackRef.current();
-      }
-    };
-    window.addEventListener('popstate', onPop);
-    return () => window.removeEventListener('popstate', onPop);
-  }, []);
-  const cardBackRef = useRef(() => {});
+  // phone «back»: since §47 п.3 CaseApp keeps its own history (one entry per scene/zone step, popstate restores it),
+  // so the shell does not touch history — an extra entry here re-opened the card on «Назад» (18:10).
 
   if (!mobile || !snap.ready) return null;
 
@@ -277,7 +264,6 @@ export default function MobileShell() {
     if (click('[data-testid="card-close"]')) return;
     click('.right .icon-btn[aria-label="Закрыть"]');
   };
-  cardBackRef.current = cardBack;
 
   return (
     <>
@@ -305,6 +291,19 @@ export default function MobileShell() {
               </div>
               <div className="m-handle-s">{snap.sub}</div>
             </div>
+            {snap.scene && (
+              <button
+                className="m-hbtn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openDynamics({ scene: new URLSearchParams(location.search).get('scene') });
+                }}
+                data-testid="m-dynamics"
+                title="Динамика района по датам снимков"
+              >
+                Динамика
+              </button>
+            )}
             <button
               className={`m-hbtn ${snap.filtersSet ? 'on' : ''}`}
               onClick={(e) => {

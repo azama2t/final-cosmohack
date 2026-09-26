@@ -7,8 +7,8 @@
 import { ctl, anim } from '../map/controller';
 import { loadDrift, loadManifest } from '../lib/data';
 import type { DriftFile } from '../types';
-import { renderDriftLayer, driftCaption } from './DriftLayer';
-export { driftCaption };
+import { renderDriftLayer, driftCaption, MAX_HORIZON_H } from './DriftLayer';
+export { driftCaption, MAX_HORIZON_H };
 
 let cur: DriftFile | null = null;
 
@@ -31,7 +31,8 @@ export async function openDrift(path: string): Promise<DriftFile | null> {
   const d = await loadDrift(path);
   cur = d;
   anim.hour = 0;
-  anim.maxHour = d?.hours?.length ? d.hours[d.hours.length - 1] : 72;
+  // §51 п.8: горизонт максимум 72 ч — clamp even if a future published run were longer
+  anim.maxHour = Math.min(MAX_HORIZON_H, d?.hours?.length ? d.hours[d.hours.length - 1] : MAX_HORIZON_H);
   renderDrift();
   return d;
 }

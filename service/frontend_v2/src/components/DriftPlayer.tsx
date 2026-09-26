@@ -3,13 +3,14 @@ import type { DriftFile } from '../types';
 import type { FlowField } from '../map/flow';
 import Info from './Info';
 import { anim } from '../map/controller';
-import { driftCaption } from '../case/DriftLayer';
+import { driftCaption, DRIFT_CORRIDOR_LABEL } from '../case/DriftLayer';
 
 const SPEEDS = [1, 2, 4];
 const HOURS_PER_SEC = 6; // 72 h in 12 s at 1×
 
 export default function DriftPlayer({ drift, onRender, flow, autoplay }: { drift: DriftFile; onRender: () => void; flow: FlowField[]; autoplay?: boolean }) {
-  const maxH = drift.hours?.length ? drift.hours[drift.hours.length - 1] : 72;
+  // §51 п.8: горизонт максимум 72 ч — hard cap, even if a published run were longer
+  const maxH = Math.min(72, drift.hours?.length ? drift.hours[drift.hours.length - 1] : 72);
   const [hour, setHour] = useState(anim.hour);
   // the drift view starts playing by itself: «+0 ч» with nothing moving looked like an empty layer
   const [playing, setPlaying] = useState(anim.playing || !!autoplay);
@@ -120,7 +121,7 @@ export default function DriftPlayer({ drift, onRender, flow, autoplay }: { drift
         )}
       </div>
       <div className="dp-cap" data-testid="drift-caption">
-        {driftCaption(f)}
+        {driftCaption(f)} {DRIFT_CORRIDOR_LABEL}
         {cur ? ` · +${Math.floor(hour)} ч ≈ ${cur.slice(8, 10)}.${cur.slice(5, 7)} ${cur.slice(11, 16)} UTC` : ''}
         <Info label="Источники прогноза" testid="info-drift-src">
           {f.model ?? 'OpenDrift'} · течения {shortSrc(f.currents)} · ветер {shortSrc(f.wind)} · коэф. ветра {f.wind_drift_factor ?? '—'}

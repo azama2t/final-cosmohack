@@ -164,7 +164,7 @@ export function readCaseUrl(): CaseUrl {
   };
 }
 
-export function writeCaseUrl(u: CaseUrl) {
+export function writeCaseUrl(u: CaseUrl, push = false) {
   const p = new URLSearchParams();
   const keep = new URLSearchParams(location.search);
   for (const k of ['api', 'mock']) if (keep.get(k)) p.set(k, keep.get(k)!);
@@ -176,7 +176,9 @@ export function writeCaseUrl(u: CaseUrl) {
   if (u.scene) p.set('scene', u.scene);
   if (u.cam) p.set('c', [u.cam.lon.toFixed(4), u.cam.lat.toFixed(4), u.cam.zoom.toFixed(2)].join(','));
   const s = p.toString().replace(/%2C/g, ',');
-  history.replaceState(null, '', `${location.pathname}${s ? '?' + s : ''}`);
+  const href = `${location.pathname}${s ? '?' + s : ''}`;
+  if (push) history.pushState(null, '', href);
+  else history.replaceState(null, '', href);
 }
 
 // ---- saved queries (contract object, section 8) ----

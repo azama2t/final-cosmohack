@@ -455,6 +455,20 @@ export function ObsCard({
               <div className="c-line" data-testid="obs-interval">
                 {obsInterval(p, meta)}
               </div>
+              {/* §47 п.5: исходное N, обследованная площадь A, строка расчёта N / A — N не восстанавливается из
+                  округлённой плотности: либо оно из источника (n_items, проверено против опубликованной
+                  концентрации в service/case_store.py field_poisson_ci), либо явно «в данных нет». */}
+              <div className="c-line" data-testid="obs-n-raw">
+                <span className="faint">Исходное N:</span> {obsNLabel(p)}
+              </div>
+              <div className="c-line" data-testid="obs-area-a">
+                <span className="faint">Обследованная площадь A:</span> {p.sampled_area_km2 === null ? '—' : `${num(p.sampled_area_km2, 3)} км²`}
+              </div>
+              {obsCalcLine(p) && (
+                <div className="c-line tiny faint" data-testid="obs-calc">
+                  {obsCalcLine(p)}
+                </div>
+              )}
             </>
           )}
           <div className="c-line" data-testid="obs-profile">
@@ -559,9 +573,12 @@ const poissonNote = (meta: Meta) => {
   const sd = (meta as any).quantity_levels?.patchiness?.sd_ln_c;
   return `95 % интервал счёта (Пуассон); пятнистость${typeof sd === 'number' ? ` (разброс ln C ≈ ${num(sd, 2)})` : ''} не входит`;
 };
-/** 95 % interval of a field density: from the API (ci95_lo/hi), else exact Poisson from N (numerator) and the area */
+/** 95 % interval of a field density: from the API (ci95_lo/hi), else exact Poisson from N (numerator) and the area.
+ *  §47 п.5: `n_items` is the real field (service/case_store.py field_poisson_ci) — validated against the published
+ *  concentration, never reconstructed from a rounded density. `density_numerator_items`/`items_count` are kept as
+ *  a fallback for older/mock payloads only. */
 function obsInterval(p: ObsProps, meta: Meta): string {
-  const n = p.density_numerator_items ?? p.items_count ?? null;
+  const n = p.n_items ?? p.density_numerator_items ?? p.items_count ?? null;
   const nTxt = n !== null ? `, N = ${num(n, 0)}` : '';
   if (p.ci95_lo !== null && p.ci95_lo !== undefined && p.ci95_hi !== null && p.ci95_hi !== undefined)
     return `[${num(p.ci95_lo)}; ${num(p.ci95_hi)}] шт./км² — ${poissonNote(meta)}${nTxt}`;
@@ -571,6 +588,24 @@ function obsInterval(p: ObsProps, meta: Meta): string {
   }
   return 'интервал: нет данных N';
 }
+/** raw N of the field record — §47 п.5: never reconstructed from the (rounded) published density */
+function nOf(p: ObsProps): number | null {
+  return p.n_items ?? p.density_numerator_items ?? p.items_count ?? null;
+}
+function obsNLabel(p: ObsProps): string {
+  const n = nOf(p);
+  if (n !== null) return `${num(n, 0)} предм.`;
+  if (p.ci95_reason) return `в данных нет (${p.ci95_reason})`;
+  return 'в данных нет';
+}
+/** «N / A = … шт./км²» — only when both are in the source (N already validated against the published concentration
+ *  in service/case_store.py field_poisson_ci, so this reproduces the number above, not a new estimate) */
+function obsCalcLine(p: ObsProps): string | null {
+  const n = nOf(p);
+  const a = p.sampled_area_km2;
+  if (n === null || !a) return null;
+  return `${num(n, 0)} / ${num(a, 3)} км² = ${num(n / a, 1)} шт./км²`;
+}
 
 /** «оценка по полевым данным, не по снимку» (field_estimate = profile median, interval coverage on the held-out test)
  *  and, folded, the research model (ridge / kNN): on the held-out test it was not better than the median */
@@ -579,8 +614,13 @@ function ModelEstimate({ meta, p }: { meta: Meta; p: ObsProps }) {
   const reRaw = (p as any).research_estimate ?? p.model_estimate;
   const re = typeof reRaw === 'number' ? { value: reRaw, lo: null, hi: null, unit: 'items/km2', model: null } : reRaw;
   if ((!fe || fe.value === null || fe.value === undefined) && (!re || re.value === null || re.value === undefined)) return null;
+  // §47 п.5: ориентиры профиля и оценки — свёрнуты ниже, подпись «не измерение этого участка» (это не значение,
+  // измеренное на данном месте, а ориентир по профилю метода / модельный прогноз).
   return (
-    <div className="sec" data-testid="obs-model-estimate">
+    <details className="sec" data-testid="obs-model-estimate">
+      <summary>
+        <span className="c-kind est" aria-hidden /> Ориентиры профиля и модельная оценка — <i>не измерение этого участка</i>
+      </summary>
       <div className="sec-h">
         <h3>
           <span className="c-kind est" aria-hidden /> Оценка по полевым данным, не по снимку
@@ -631,7 +671,7 @@ function ModelEstimate({ meta, p }: { meta: Meta; p: ObsProps }) {
         </details>
       )}
       <span hidden>{profileRu(meta, p.measurement_profile)}</span>
-    </div>
+    </details>
   );
 }
 

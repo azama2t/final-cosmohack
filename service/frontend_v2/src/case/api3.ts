@@ -173,6 +173,10 @@ export interface ObsProps {
   ci95_hi?: number | null;
   density_numerator_items?: number | null;
   items_count?: number | null;
+  /** §47 п.5: the real API field (service/case_store.py field_poisson_ci) — N validated against the published
+   *  concentration and sampled_area_km2; null when the source gives no N (never reconstructed from the density) */
+  n_items?: number | null;
+  ci95_reason?: string | null;
   model_estimate?: (Interval & { split?: string | null; note?: string | null }) | number | null;
 }
 

@@ -1,24 +1,7 @@
-/* §47 п.7 «Демо ▶» — own stylesheet, does not touch case.css (owned by L132). Works down to 390px (mobile, over the
-   bottom sheet): everything is position:fixed with clamped placement, so it sits above the shutter regardless of
-   the card layout underneath. */
-.dt-btn {
-  position: fixed;
-  top: 12px;
-  right: 12px;
-  z-index: 900;
-  padding: 7px 14px;
-  border-radius: 999px;
-  border: 1px solid #3a4a5a;
-  background: #123049;
-  color: #d9ecff;
-  font: 600 13px/1.2 Inter, system-ui, sans-serif;
-  cursor: pointer;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
-}
-.dt-btn:hover {
-  background: #17436a;
-}
-
+/* §47 п.7 «Демо ▶» — own stylesheet, does not touch case.css (owned by L132). The trigger button itself lives in
+   CaseApp's .toolbar now (§50 п.8 — one top-right action group with «Слои», fixed gaps, no overlap); this file only
+   styles the walkthrough overlay (ring + tooltip card), which stays position:fixed so it works above the mobile
+   bottom sheet at 390px regardless of the card layout underneath. */
 .dt-ring {
   position: fixed;
   z-index: 950;
@@ -114,12 +97,6 @@
 }
 
 @media (max-width: 480px) {
-  .dt-btn {
-    top: 8px;
-    right: 8px;
-    padding: 6px 11px;
-    font-size: 12px;
-  }
   .dt-card {
     left: 8px !important;
     right: 8px;

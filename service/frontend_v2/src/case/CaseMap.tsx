@@ -7,6 +7,8 @@ import { ctl, darkStyle, ESRI_TILES, CARTO_DARK, offlineStyle, satelliteStyle, w
 import { attachStars } from '../map/stars';
 import type { FC, Feat, Geometry, Meta, ObsProps, Scene, ZoneProps } from './api3';
 import { API_BASE } from './api3';
+import { hatchedMask } from './QualityMask'; // §50 P1-6 L142
+import { ORGANIC_COLOR } from './Alerts'; // §51 п.9 L142
 import { SEQ } from '../lib/style';
 
 /** concentration colour breaks, items/km² (log-like, fixed so the colours are comparable between filters) */
@@ -81,7 +83,7 @@ function szFeatures(fc: FC<any> | null | undefined) {
   for (const f of fc?.features ?? []) {
     if (!f.geometry) continue;
     const d = Number(String(f.properties.datetime ?? '').slice(0, 10).replace(/-/g, '')) || 0;
-    const props = { id: f.id, ds: szKey(f.properties), full: f.properties.zone_id.endsWith('-000') ? 1 : 0, d };
+    const props = { id: f.id, ds: szKey(f.properties), full: f.properties.zone_id.endsWith('-000') ? 1 : 0, d, lg: f.properties.is_large === true ? 1 : 0, org: (f.properties as any).likely_organic === true ? 1 : 0 }; // org: §51 п.9 L142
     polys.push({ type: 'Feature', geometry: f.geometry, properties: props });
     const c = geomCenter(f.geometry);
     // §33: overview points = real finds only (detection_status «detected»); «недостаточно данных», false alarms and
@@ -355,8 +357,11 @@ export default function CaseMap(p: CaseMapProps) {
     });
     // satellite scene zones: solid outline (a zone of the detector on a real scene), colour = detector verdict
     const szCol: any = ['match', ['get', 'ds'], 'detected', SZ_COLORS.detected, 'unverified', SZ_COLORS.unverified, 'not_detected', SZ_COLORS.not_detected, SZ_COLORS.insufficient_data];
-    add({ id: 'c-sz-fill', type: 'fill', source: 'c-sz', paint: { 'fill-color': szCol, 'fill-opacity': ['case', ['==', ['get', 'full'], 1], 0.04, 0.22] } });
-    add({ id: 'c-sz-line', type: 'line', source: 'c-sz', paint: { 'line-color': szCol, 'line-width': 1.8 } });
+    add({ id: 'c-sz-fill', type: 'fill', source: 'c-sz', paint: { 'fill-color': szCol, 'fill-opacity': ['case', ['==', ['get', 'full'], 1], 0.04, ['==', ['get', 'lg'], 1], 0.34, 0.22] } });
+    // §51 п.4: a large accumulation (is_large, ≥ 0.1 км²) — thicker and brighter outline
+    add({ id: 'c-sz-line', type: 'line', source: 'c-sz', paint: { 'line-color': szCol, 'line-width': ['case', ['==', ['get', 'lg'], 1], 3.4, 1.8] } });
+    // §51 п.9 (L142): «вероятно органика» (флаг NDVI/FAI, эксперимент) — green dashed outline over the zone colour
+    add({ id: 'c-sz-org', type: 'line', source: 'c-sz', filter: ['==', ['get', 'org'], 1], paint: { 'line-color': ORGANIC_COLOR, 'line-width': 2.4, 'line-dasharray': [2, 1.5] } });
     add({ id: 'c-sz-sel', type: 'line', source: 'c-sz', filter: ['==', ['get', 'id'], ''], paint: { 'line-color': '#ffffff', 'line-width': 3 } });
     // §33 overview: finds clustered at a far zoom (size ~ count), single finds up to z10 (then the contours take over)
     add({
@@ -411,7 +416,15 @@ export default function CaseMap(p: CaseMapProps) {
       if (map.getSource(w.key)) continue;
       const [x0, y0, x1, y1] = w.bounds;
       map.addSource(w.key, { type: 'image', url: w.url, coordinates: [[x0, y1], [x1, y1], [x1, y0], [x0, y0]] });
-      map.addLayer({ id: w.key, type: 'raster', source: w.key, paint: { 'raster-fade-duration': 0, 'raster-opacity': w.kind === 'q' ? 0.55 : 1 } }, 'c-scene-fp');
+      map.addLayer({ id: w.key, type: 'raster', source: w.key, paint: { 'raster-fade-duration': 0, 'raster-opacity': w.kind === 'q' ? 0.9 : 1 } }, 'c-scene-fp');
+      // §50 P1-6 (L142): the mask is re-drawn hatched (unusable pixels tinted + stripes, usable water transparent)
+      if (w.kind === 'q') {
+        const coords: [[number, number], [number, number], [number, number], [number, number]] = [[x0, y1], [x1, y1], [x1, y0], [x0, y0]];
+        hatchedMask(w.url).then(
+          (u) => (map.getSource(w.key) as maplibregl.ImageSource | undefined)?.updateImage({ url: u, coordinates: coords }),
+          () => undefined,
+        );
+      }
     }
     // keep quality above rgb when an rgb layer is added later
     for (const w of want) if (w.kind === 'q' && map.getLayer(w.key)) map.moveLayer(w.key, 'c-scene-fp');
@@ -422,7 +435,7 @@ export default function CaseMap(p: CaseMapProps) {
     for (const id of ['c-obs-lines', 'c-obs-lines-approx', 'c-obs-items', 'c-obs-zero', 'c-obs-dens', 'c-obs-sel']) vis(id, cur.layers.obs);
     // §34 п.3: survey strips of the field pairs belong to the «Полевые измерения» layer; scene zones — to «Спутниковые зоны»
     for (const id of ['c-zones-fill', 'c-zones-line', 'c-zones-sel', 'c-zone-pts']) vis(id, cur.layers.obs);
-    for (const id of ['c-sz-fill', 'c-sz-line', 'c-sz-sel', 'c-sz-pts', 'c-sz-clu']) vis(id, cur.layers.zones);
+    for (const id of ['c-sz-fill', 'c-sz-line', 'c-sz-org', 'c-sz-sel', 'c-sz-pts', 'c-sz-clu']) vis(id, cur.layers.zones);
     vis('c-scene-fp', cur.layers.scenes);
     const sel = cur.selected;
     map.setFilter('c-zones-sel', ['==', ['get', 'id'], sel?.kind === 'zone' ? sel.id : '']);

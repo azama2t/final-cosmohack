@@ -185,3 +185,376 @@
   color: var(--c-drift);
   border-color: var(--c-drift);
 }
+
+/* ---------------------------------------------------------------- §50 P1-6: «маска качества» with an honest state */
+.c-qtoggle {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.c-qtoggle label {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  cursor: pointer;
+}
+.c-qtoggle label.off {
+  color: var(--text-3);
+  cursor: not-allowed;
+}
+.c-qtoggle-why {
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--text-3);
+}
+.c-qlegend {
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--text-2);
+}
+.c-qhatch,
+.c-lb-key i {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  vertical-align: -2px;
+  border-radius: 2px;
+  border: 1px solid var(--line-2);
+}
+.c-qhatch {
+  background: repeating-linear-gradient(135deg, #ff5078 0 2px, rgba(255, 255, 255, 0.55) 2px 6px);
+}
+.app.case .c-scene-tg {
+  flex-wrap: wrap;
+}
+
+/* ---------------------------------------------------------------- §50 P1-4/5: studio previews + viewer */
+.c-studio-tri {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.c-studio-th {
+  display: grid;
+  gap: 4px;
+  padding: 0;
+  border: 1px solid var(--line-2);
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--text-2);
+  cursor: zoom-in;
+  overflow: hidden;
+  text-align: left;
+  transition: border-color var(--t) var(--ease), transform var(--t) var(--ease);
+}
+.c-studio-th:hover {
+  border-color: var(--c-sat);
+}
+.c-studio-th img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  image-rendering: pixelated;
+  display: block;
+}
+.c-studio-th.empty {
+  cursor: default;
+}
+.c-studio-th-e {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  padding: 8px;
+  font-size: 12px;
+  color: var(--text-3);
+  text-align: center;
+  background: repeating-linear-gradient(135deg, transparent 0 6px, rgba(255, 255, 255, 0.04) 6px 12px);
+}
+.c-studio-th-t {
+  padding: 2px 8px 6px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text);
+}
+.c-studio-th-z {
+  color: var(--text-3);
+  font-weight: 400;
+}
+.c-lb-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  background: rgba(0, 0, 0, 0.72);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.c-lb {
+  width: min(1100px, 100%);
+  height: min(860px, 100%);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  background: var(--panel);
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+.c-lb-h {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.c-lb-h > b {
+  margin-right: auto;
+}
+.c-lb-zoom {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+.c-lb-stage {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: #06090d;
+  cursor: grab;
+  user-select: none;
+}
+.c-lb-stage:active {
+  cursor: grabbing;
+}
+.c-lb-stage img {
+  max-width: 100%;
+  max-height: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  transform-origin: center;
+}
+.c-lb-empty {
+  max-width: 420px;
+  padding: 20px;
+  text-align: center;
+  color: var(--text-2);
+}
+.c-lb-f {
+  padding: 8px 14px 10px;
+  border-top: 1px solid var(--line);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.c-lb-key {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-left: 6px;
+}
+.c-lb-hint {
+  color: var(--text-3);
+}
+.c-studio-th-i {
+  position: relative;
+  display: block;
+  background: #06090d;
+}
+.c-studio-th img {
+  object-fit: contain;
+}
+.c-studio-th-over {
+  position: absolute;
+  inset: auto 4px 4px 4px;
+  font-size: 11px;
+  line-height: 1.3;
+  color: #cfe3ff;
+  text-shadow: 0 1px 2px #000;
+}
+
+/* ---------------------------------------------------------------- §51 п.7: alert level badge + filter */
+.c-alert {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 17px;
+  white-space: nowrap;
+  vertical-align: 1px;
+}
+.c-alert i,
+.c-alert-filter i {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.c-alert.high,
+.c-alert-filter .high {
+  color: #ff6b6b;
+}
+.c-alert.mid,
+.c-alert-filter .mid {
+  color: #ffa94d;
+}
+.c-alert.low,
+.c-alert-filter .low {
+  color: #adb5bd;
+}
+.c-alert-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 8px var(--s3);
+  border-bottom: 1px solid var(--line);
+  font-size: 12.5px;
+}
+.c-alert-filter button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+.c-alert-filter button:not(.high):not(.mid):not(.low):not(.org) {
+  color: var(--text-2);
+}
+.c-alert-filter button.on {
+  background: var(--panel-3);
+  border-color: currentColor;
+  font-weight: 600;
+}
+.c-alert-filter button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.c-alert-sec .c-line + .c-line {
+  margin-top: 2px;
+}
+
+/* ---------------------------------------------------------------- §50 P2-10: «Качество и статус» = short summary + reference */
+.c-qcs {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px 6px;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+.c-qcs-st {
+  font-size: 14.5px;
+}
+.c-qcs-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--c-sat);
+  margin-right: 8px;
+  vertical-align: 1px;
+}
+.c-qcs-l {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.c-qcs-l li {
+  display: grid;
+  grid-template-columns: 11em minmax(0, 1fr);
+  gap: 10px;
+  padding: 6px 10px;
+  background: var(--panel-2);
+  border-radius: 6px;
+}
+.c-qcs-k {
+  color: var(--text-2);
+  font-weight: 500;
+}
+.c-qcs-c {
+  padding: 8px 10px;
+  border-left: 3px solid var(--c-field);
+  background: rgba(78, 161, 255, 0.07);
+  border-radius: 0 6px 6px 0;
+}
+.c-qcs-a {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.c-qcs-more {
+  margin: 10px 16px 14px;
+  border-top: 1px solid var(--line);
+}
+.c-qcs-more > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 10px 4px;
+  font-weight: 500;
+  color: var(--text-2);
+  border-radius: 6px;
+}
+.c-qcs-more > summary::-webkit-details-marker {
+  display: none;
+}
+.c-qcs-more > summary:hover {
+  background: var(--panel-2);
+  color: var(--text);
+}
+.c-qcs-more .c-acc-arrow {
+  display: inline-block;
+  transition: transform var(--t) var(--ease);
+}
+.c-qcs-more[open] .c-acc-arrow {
+  transform: rotate(90deg);
+}
+.c-qcs-h {
+  margin: 12px 0 4px;
+  font-weight: 600;
+  font-size: 14px;
+}
+@media (max-width: 820px) {
+  .c-qcs-l li {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}
+/* one offline line per panel: the summary's line covers the blocks inside «Справка / Методика» */
+[data-testid='qc-two-layer']:has(> [data-testid='qc-offline']) .c-qcs-more .c-offline {
+  display: none;
+}
+/* §51 п.9: organic flag — green (experiment) */
+.c-org-f {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.c-alert-filter .org {
+  color: #51cf66;
+}
+.c-sw-org {
+  display: inline-block;
+  width: 12px;
+  height: 10px;
+  border: 2px dashed;
+  border-radius: 2px;
+  vertical-align: -1px;
+  margin-right: 4px;
+}

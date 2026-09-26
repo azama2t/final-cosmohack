@@ -9,11 +9,16 @@ import { API_BASE, apiUrl, ApiErr, get, MOCK, send, type FC, type Feat, type Met
 import CaseMap, { ACCENT, CONC_BREAKS, CONC_COLORS, STRIP_NO, STRIP_OK, flyToBox, geomBounds, WORLD_CENTER, worldZoom, type HoverInfo, type Pick } from './CaseMap';
 import { ObsCard, ZoneCard } from './Cards';
 import PairsDrawer from './PairsDrawer';
-import SceneZoneCard, { zoneTitle, type SceneZoneDetail, type SceneZoneProps } from './SceneZoneCard';
+import SceneZoneCard, { zoneTitle, type CardTab, type SceneZoneDetail, type SceneZoneProps } from './SceneZoneCard';
 import { SZ_COLORS, szKey, isFind, geomCenter } from './CaseMap';
-import MetricsPanel from './MetricsPanel';
-import DefenseExamples from './DefenseExamples';
+import { PhotoRolesLine } from './PhotoRoles';
+import ZoneStudio from './Studio'; // §50 P1-4/5/6 L142
+import { QualityToggle } from './QualityMask'; // §50 P1-6 L142
+import { ALERT_RU, AlertBadge, AlertFilter, byAlert, byOrganic, OrganicLegend, useAlertFilter, useOrganicFilter } from './Alerts'; // §51 п.7 L142
+import QcPanel, { HELP_EVENT } from './QcPanel'; // §50 P2 L142
 import Timeline, { type TlScene } from './Timeline';
+import { openDynamics } from './DynamicsHost';
+import { SceneIntegral } from './DynamicsPanel';
 import { plural, dateRu, eventRu, label, missionShort, num, profileRu, scopeRu, sourceShort } from './fmt';
 import { estLine, estTxt, RES_CAPTION, RES_CAPTION_LIST, RES_CONTEXT, RES_NOTE, researchEst } from './estimate';
 import { shortName } from '../lib/data';
@@ -43,7 +48,8 @@ import './case.css';
 import DriftPlayer from '../components/DriftPlayer';
 import type { DriftFile } from '../types';
 import { checkLine, closeDrift, driftBounds, driftCaption, driftKey, driftPaths, openDrift, renderDrift } from './drift';
-import DemoTour from './DemoTour';
+import { DRIFT_CORRIDOR_LABEL } from './DriftLayer';
+import DemoTour, { type DemoTourHandle } from './DemoTour';
 
 type Load<T> = { data: T | null; err: string | null; loading: boolean };
 const L0 = { data: null, err: null, loading: false };
@@ -122,6 +128,12 @@ export default function CaseApp() {
     }
   };
   const togglePanel = (v: 'filters' | 'nums' | 'qc') => setPanel(panel === v ? null : v);
+  // §50 P2-9 L142: «Справка / Методика» can be opened from the zone card
+  useEffect(() => {
+    const on = () => setPanel('qc');
+    window.addEventListener(HELP_EVENT, on);
+    return () => window.removeEventListener(HELP_EVENT, on);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   /** §34 п.3: the snapshot opened in the left list (scene_key) — its image on the map + its numbered zones */
   const [scene, setScene] = useState<string | null>(url.scene ?? null);
   const [sel, setSel] = useState<Pick | null>(() => {
@@ -230,7 +242,11 @@ export default function CaseApp() {
   }, [szones.data]);
   const szList = useMemo(() => szones.data?.features ?? [], [szones.data]);
   const selSz = selSzId ? szList.find((f) => f.id === selSzId) ?? null : null;
+  // §47 п.4: the card tab; a new zone opens on «Главное»
+  const [cardTab, setCardTab] = useState<CardTab>('main');
+  useEffect(() => setCardTab('main'), [selSzId]);
   // §44 п.3: drift forecast of the open zone's snapshot (published OpenDrift run), experiment, own style
+  const demoRef = useRef<DemoTourHandle>(null);
   const [dPaths, setDPaths] = useState<Map<string, string> | null>(null);
   const [drift, setDrift] = useState<DriftFile | null>(null);
   const [driftKeyOn, setDriftKeyOn] = useState<string | null>(null);
@@ -367,10 +383,30 @@ export default function CaseApp() {
     tab: panel === 'qc' ? 'metrics' : obsListOpen && q.layers.obs ? 'obs' : null,
     scene,
   });
+  const navKey = `${scene ?? ''}|${sel ? `${sel.kind}:${sel.id}` : ''}`;
+  const lastNav = useRef(navKey);
+  const popping = useRef(false);
   useEffect(() => {
-    writeCaseUrl(urlState(cam.current));
+    // §47 п.3: «назад» of the browser = «← к снимку» / «← к списку снимков»
+    const push = navKey !== lastNav.current && !popping.current;
+    lastNav.current = navKey;
+    popping.current = false;
+    writeCaseUrl(urlState(cam.current), push);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q, sel, activePair, drawer, panel, scene, obsListOpen]);
+  useEffect(() => {
+    const onPop = () => {
+      const u = readCaseUrl();
+      popping.current = true;
+      const m = u.sel?.match(/^(zone|obs):(.+)$/);
+      setStudio(false);
+      setSel(m ? { kind: m[1] as 'zone' | 'obs', id: m[2] } : null);
+      setScene(u.scene ?? null);
+      if (!u.scene && !m && ctl.map) ctl.map.flyTo({ center: WORLD_CENTER, zoom: worldZoom(ctl.map.getContainer().clientHeight), duration: 1200, essential: true });
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
 
   // ---- camera: акватория chosen → fly there ----
   const lastSource = useRef<string | null | undefined>(url.cam || url.scene ? q.area : undefined);
@@ -690,14 +726,16 @@ export default function CaseApp() {
     return () => cancelAnimationFrame(raf);
   }, []);
 
+  const alertTop = useAlertFilter(); // §51 п.7 L142: the level filter goes into the zone export too
+  const orgTop = useOrganicFilter(); // §51 п.9 L142: and the organic filter
   const exportHref = (layer: string, fmt: string) =>
     apiUrl('/api/v3/export', {
       layer,
       format: fmt,
-      ...(layer === 'zones' ? zP : layer === 'pairs' ? pP : layer === 'scene_zones' ? szP : { ...oP, geometry: 'line' }),
+      ...(layer === 'zones' ? zP : layer === 'pairs' ? pP : layer === 'scene_zones' ? { ...szP, alert_level: alertTop === 'all' ? null : ALERT_RU[alertTop], organic: orgTop === 'all' ? null : orgTop === 'yes' ? 'true' : 'false' } : { ...oP, geometry: 'line' }),
     });
   const exportRows: [string, string, number | undefined][] = [
-    ['scene_zones', `Спутниковые зоны (все статусы; из них находок ${szones.data ? nFinds.n : '—'})`, szones.err ? undefined : szones.data?.count],
+    ['scene_zones', alertTop !== 'all' || orgTop !== 'all' ? `Спутниковые зоны: только${alertTop !== 'all' ? ` алерт «${ALERT_RU[alertTop]}»` : ''}${orgTop !== 'all' ? (orgTop === 'yes' ? ' «вероятно органика»' : ' без флага органики') : ''}` : `Спутниковые зоны (все статусы; из них находок ${szones.data ? nFinds.n : '—'})`, szones.err ? undefined : szones.data?.count],
     ['observations', 'Полевые измерения', obs.data?.count],
     ['zones', 'Полосы обследования (поле ↔ снимок)', zones.data?.count],
     ['pairs', q.bbox && !q.source ? 'Пары снимок ↔ поле (все: рамка района к парам не применяется)' : 'Пары снимок ↔ поле', pairs.data?.count],
@@ -747,18 +785,23 @@ export default function CaseApp() {
   };
   const goStep3 = () => {
     if (panel === 'qc') setPanel(null);
+    setCardTab('main');
   };
   const selObs = sel?.kind === 'obs' ? sel.id : null;
   const sameEvent = selObs && obsById.get(selObs) ? (allObs.data?.features ?? []).filter((f) => f.properties.event_id === obsById.get(selObs)!.properties.event_id) : [];
   const hasQuality = sceneList.some((s) => s.quality_url && s.bounds);
   const nScenesImg = sceneList.filter((s) => s.bounds && (s.preview_url || s.quality_url)).length;
   const szStatuses: { id: string; label: string }[] = SZ_FILTER.map((id) => ({ id, label: SZ_FILTER_RU[id] }));
+  // §51 п.3 (L140 panel): the район of step 1, else of the open snapshot
+  const dynRegion = q.area && q.area.startsWith('r:') ? q.area.slice(2) : szScene?.region ?? null;
   const areaLabel = q.area ? [...areas.regions, ...areas.fields].find((a) => a.id === q.area)?.label ?? (q.area === 'bbox' ? 'рамка запроса' : q.area) : null;
 
   return (
     <div className={`app case ${rightOpen ? 'right-open' : ''}`} data-testid="case-app">
-      {/* §47 п.7 «Демо ▶» (L141) — own component, own fixed positioning, no layout slot needed */}
-      <DemoTour />
+      {/* §47 п.7 / §50 п.8 «Демо ▶» (L141): trigger is a normal button in .toolbar (below, next to «Слои») so the
+          two share one top-right action group with fixed gaps — a standalone fixed button used to sit at the exact
+          same corner and cover «Слои» once the card panel was closed (Егор, скрин 11). */}
+      <DemoTour ref={demoRef} />
       {/* ------------------------------------------------ left: mode, filters, snapshots → zones */}
       <aside className="left" data-panel="left">
         <div className="modebar">
@@ -791,7 +834,7 @@ export default function CaseApp() {
         <div className="c-filters" data-testid="filters">
           {/* §47 п.2: step 1 «Район и даты» — open in the left panel (the snapshot list below = the dates of the район) */}
           {(!curScene || panel === 'filters') && (
-            <div className="c-step1" data-testid="step1">
+            <div className={`c-step1 ${panel === 'filters' ? 'open' : ''}`} data-testid="step1">
               <div className="c-step1-h">
                 <span className="c-stn">1</span> Район и даты
               </div>
@@ -836,6 +879,15 @@ export default function CaseApp() {
                     </div>
                   )}
                 </div>
+              <button
+                className="btn sm ghost c-dyn-btn"
+                disabled={!dynRegion && !curScene}
+                onClick={() => openDynamics({ region: dynRegion, scene: curScene })}
+                data-testid="dynamics-open"
+                title={dynRegion || curScene ? 'Сравнение дат района: находки, площадь скоплений, поле' : 'Сначала выберите район'}
+              >
+                Динамика района по датам
+              </button>
             </div>
           )}
         <div className="c-lbar" data-testid="left-bar">
@@ -911,7 +963,9 @@ export default function CaseApp() {
               sceneKey={curScene}
               zones={sceneZones}
               sel={selSzId}
-              onPick={(id) => openZone(id)}
+              onPick={(id) => {
+                if (sel?.id !== id) openZone(id);
+              }}
               onClose={closeScene}
               layers={q.layers}
               onLayer={setLayer}
@@ -944,7 +998,18 @@ export default function CaseApp() {
           onPick={(pk) => {
             setHover(null);
             if (!pk) return;
-            if (pk.kind === 'zone') openZone(pk.id, pk.id.startsWith('SZ-'));
+            // §47 п.3: one click = one result. A find of another snapshot (or on the Earth) → that snapshot and its
+            // zone list (no card); a zone of the open snapshot → only its card; the same zone again → nothing
+            if (pk.kind === 'zone' && pk.id.startsWith('SZ-')) {
+              const f = szList.find((x) => x.id === pk.id);
+              const sk = f?.properties.scene_key ?? null;
+              if (sk && sk !== curScene) {
+                openScene(sk);
+                return;
+              }
+              if (sel?.id === pk.id) return;
+              openZone(pk.id, false);
+            } else if (pk.kind === 'zone') openZone(pk.id, false);
             else openObs(pk.id, false);
           }}
           onHover={setHover}
@@ -1118,6 +1183,10 @@ export default function CaseApp() {
         )}
 
         <div className="toolbar" ref={layerMenu.box} data-testid="toolbar">
+          {/* §50 п.8: same group as «Слои», fixed gap (flex, .toolbar) — not a separate fixed button anymore */}
+          <button className="btn" onClick={() => demoRef.current?.open()} data-testid="demo-tour-btn">
+            Демо ▶
+          </button>
           <button className={`btn ${layerMenu.open ? 'on' : ''}`} onClick={() => layerMenu.setOpen((v) => !v)} data-testid="layers-menu" aria-expanded={layerMenu.open}>
             Слои
           </button>
@@ -1275,14 +1344,16 @@ export default function CaseApp() {
                   />
                 ) : (
                   <div data-testid="metrics-wrap">
-                    <DefenseExamples
+                    {/* §50 P2-9/10 L142: short summary + «Справка / Методика» (examples, metrics) behind «Подробнее» */}
+                    <QcPanel
+                      m={metrics.data}
+                      err={metrics.err}
                       onOpen={(e) => {
                         setPanel(null);
                         if (e.zone_id) openZone(e.zone_id);
                         else openScene(e.scene_key);
                       }}
                     />
-                    <MetricsPanel m={metrics.data} err={metrics.err} />
                   </div>
                 )}
               </div>
@@ -1297,14 +1368,15 @@ export default function CaseApp() {
             if (k !== curScene) openScene(k);
           }}
           period={[q.from ? Date.parse(q.from) : null, q.to ? Date.parse(q.to) + 86400e3 - 1 : null]}
+          onDynamics={dynRegion || curScene ? () => openDynamics({ region: dynRegion, scene: curScene }) : null}
         />
         {drift && (
           <div className="c-drift-wrap" data-testid="drift-wrap">
             <div className="c-drift-tag">
-              {/* §48: текст даёт driftCaption() (DriftLayer.ts) — L141, одна строка на карте и в панели */}
-              {driftCaption(drift.forcing)} Линия — медианная траектория, заливка — коридор неопределённости ·{' '}
+              {/* §48/§51 п.8: текст даёт driftCaption()/DRIFT_CORRIDOR_LABEL (DriftLayer.ts) — L141, одна строка на карте и в панели */}
+              {driftCaption(drift.forcing)} Линия — медианная траектория. {DRIFT_CORRIDOR_LABEL} ·{' '}
               <span data-testid="drift-horizon">
-                горизонт {drift.hours?.length ? drift.hours[drift.hours.length - 1] : 72} ч, шаг расчёта {(drift.forcing as any)?.output_step_h ?? 1} ч
+                горизонт ≤ {Math.min(72, drift.hours?.length ? drift.hours[drift.hours.length - 1] : 72)} ч, шаг расчёта {(drift.forcing as any)?.output_step_h ?? 1} ч
               </span>
             </div>
             <DriftPlayer drift={drift} onRender={renderDrift} flow={[]} autoplay />
@@ -1330,6 +1402,9 @@ export default function CaseApp() {
             driftOn={!!drift}
             driftCheck={checkLine(driftSum)}
             driftScenes={nDriftScenes}
+            nPairs={(meta as any).summary?.n_confirmed_pairs ?? null}
+            tab={cardTab}
+            onTab={setCardTab}
             onStudio={() => {
               setStudio(true);
               setQ((x) => ({ ...x, layers: { ...x.layers, scenes: true } }));
@@ -1392,6 +1467,8 @@ export interface SzScene extends Scene {
   region_short?: string;
   crop_cloud_pct?: number | null;
   by_status?: Record<string, number>;
+  n_large?: number | null;
+  large_area_km2?: number | null;
 }
 
 interface SceneRow {
@@ -1628,12 +1705,19 @@ function SceneZones({
   useEffect(() => setShowAll(false), [sceneKey]);
   const selHidden = !!sel && numbered.some((z) => z.f.id === sel && !isDet(z.f.properties));
   const all = showAll || nDet === 0 || selHidden;
-  const shown = all ? numbered : numbered.filter((z) => isDet(z.f.properties));
+  const shown0 = all ? numbered : numbered.filter((z) => isDet(z.f.properties));
+  // §51 п.4: sorted by area (largest first); the number stays the zone's number on the map / in the CSV
+  const areaOf = (z: { f: Feat<SceneZoneProps> }) => z.f.properties.measured?.zone_area_km2 ?? z.f.properties.area_km2 ?? 0;
+  const alertF = useAlertFilter(); // §51 п.7 L142
+  const orgF = useOrganicFilter(); // §51 п.9 L142
+  const shown = byOrganic(byAlert([...shown0], (z) => z.f.properties, alertF), (z) => z.f.properties, orgF).sort((a, b) => areaOf(b) - areaOf(a));
+  const nLarge = s?.n_large ?? numbered.filter((z) => (z.f.properties as any).is_large).length;
+  const largeKm2 = s?.large_area_km2 ?? null;
   return (
     <div data-testid="scene-zones">
       <div className="c-scene-head">
         <button className="link c-scene-back" onClick={onClose} data-testid="scene-back">
-          ← Все снимки
+          ← к списку снимков
         </button>
         <div className="c-scene-t" data-testid="scene-title">
           {s ? sceneName(s) : sceneKey}
@@ -1646,6 +1730,7 @@ function SceneZones({
         <div className="c-scene-s">
           {plural(finds, 'находка', 'находки', 'находок')} · {plural(numbered.length, 'зона', 'зоны', 'зон')} детектора
         </div>
+        {s && <SceneIntegral s={s as any} />}
         {drift && (
           <div className="c-scene-s" data-testid="scene-drift">
             <span className="c-drift-badge">дрейф</span> прогноз 24–72 ч (эксперимент) — кнопка в карточке зоны
@@ -1660,9 +1745,7 @@ function SceneZones({
           <label>
             <input type="checkbox" checked={layers.scenes} onChange={() => onLayer('scenes')} data-testid="scene-rgb" /> снимок
           </label>
-          <label>
-            <input type="checkbox" checked={layers.quality} onChange={() => onLayer('quality')} data-testid="scene-quality" /> маска качества
-          </label>
+          <QualityToggle scene={s as any} checked={layers.quality} onChange={() => onLayer('quality')} testid="scene-quality" />
         </div>
       </div>
       {!numbered.length && <div className="empty">{whole ? 'Зон детектора на этом снимке нет' : 'Нет зон под выбранные фильтры'}</div>}
@@ -1680,6 +1763,7 @@ function SceneZones({
           )}
         </div>
       )}
+      <AlertFilter zones={numbered.map((z) => z.f.properties)} />
       {shown.map(({ f, n }) => {
         const p = f.properties;
         const est = researchEst(p);
@@ -1700,8 +1784,13 @@ function SceneZones({
                 {num(p.measured.zone_area_km2 !== null && p.measured.zone_area_km2 !== undefined ? p.measured.zone_area_km2 * 1e6 : null, 0)} м²
                 <span className="c-zi-st"> · {statusLabel(p)}</span>
               </span>
+              {(p as any).is_large && (
+                <span className="c-large c-large-row" data-testid="sz-large" title="Крупное скопление: площадь контура ≥ 0,1 км²">
+                  крупное скопление
+                </span>
+              )}
               <span className="c-zi-cls" data-testid="sz-item-class">
-                {classShort(p)}
+                {classShort(p)} <AlertBadge p={p} compact />
               </span>
             </span>
           </button>
@@ -2009,6 +2098,7 @@ function CaseLegend({
               <span className="c-lg-cl"><i className="c-sw-find" style={{ background: SZ_COLORS.unverified }} /> плавающий материал · без разметки</span>
               <span className="c-lg-cl" data-testid="legend-sz-wind"><i className="c-sw-find" style={{ background: SZ_COLORS.insufficient_data }} /> не определено: судно, пена, блик, облака, берег, ветер</span>
               <span className="c-lg-cl"><i className="c-sw-find" style={{ background: SZ_COLORS.not_detected }} /> объектов нет</span>
+              <OrganicLegend />
             </div>
           </div>
           {layers.obs && (
@@ -2127,6 +2217,7 @@ function Headline({ meta, photo, hasEst, onField, onZone }: { meta: Meta; photo:
           ))}
         </div>
       ))}
+      <PhotoRolesLine />
       {tg?.count_mae !== undefined && (
         <a className="c-head-r c-head-link" href="?mode=photo" data-testid="headline-photo">
           <span className="c-head-d">
@@ -2150,106 +2241,4 @@ function Headline({ meta, photo, hasEst, onField, onZone }: { meta: Meta; photo:
 }
 
 
-/** §33 «В студию»: work with one zone — scene image, quality mask and detections on the map + large crops */
-function ZoneStudio({
-  zone,
-  num: zoneNum,
-  detail,
-  quality,
-  scenesOn,
-  onLayer,
-  onCard,
-  onBack,
-}: {
-  zone: Feat<SceneZoneProps>;
-  num?: number;
-  detail: SceneZoneDetail | null;
-  quality: boolean;
-  scenesOn: boolean;
-  onLayer: (k: 'scenes' | 'quality') => void;
-  onCard: () => void;
-  onBack: () => void;
-}) {
-  const p = zone.properties;
-  const sc: any = (detail as any)?.scene;
-  const dets: any[] = (detail as any)?.detections?.features ?? [];
-  return (
-    <div className="right-inner" data-testid="zone-studio">
-      <div className="rp-head">
-        <div className="rp-titles">
-          <div className="rp-kicker">Студия · работа с зоной{zoneNum ? ` ${zoneNum}` : ''}</div>
-          <div className="rp-title">{zoneTitle(p)}</div>
-          <div className="rp-sub">Sentinel-2 · {dateRu(p.datetime)}</div>
-        </div>
-      </div>
-      <div className="rp-body">
-        <div className="sec c-studio-bar">
-          <button className="btn sm" onClick={onCard} data-testid="studio-card">
-            ← к карточке
-          </button>
-          <button className="btn sm ghost" onClick={onBack} data-testid="studio-back">
-            Назад к карте
-          </button>
-        </div>
-        <div className="sec">
-          <div className="sec-h">
-            <h3>На карте</h3>
-          </div>
-          <label className="c-studio-t">
-            <input type="checkbox" checked={scenesOn} onChange={() => onLayer('scenes')} data-testid="studio-rgb" /> снимок (Sentinel-2, RGB)
-          </label>
-          <label className="c-studio-t">
-            <input type="checkbox" checked={quality} onChange={() => onLayer('quality')} data-testid="studio-quality" /> маска качества (облака, блики, суша)
-          </label>
-          <div className="c-line faint">контуры объектов детектора — поверх снимка ({num(dets.length, 0)} объект., порог 0,63)</div>
-        </div>
-        {p.crop_url && (
-          <div className="sec">
-            <div className="sec-h">
-              <h3>Снимок | детекция</h3>
-              <span className="aside">по снимку</span>
-            </div>
-            <img className="c-studio-img" src={API_BASE + p.crop_url} alt="снимок и пиксели детектора" />
-          </div>
-        )}
-        {sc?.quality_url && (
-          <div className="sec">
-            <div className="sec-h">
-              <h3>Качество снимка</h3>
-            </div>
-            <div className="c-studio-pair">
-              {sc.preview_url && <img src={API_BASE + sc.preview_url} alt="снимок сцены" />}
-              <img src={API_BASE + sc.quality_url} alt="маска качества" />
-            </div>
-          </div>
-        )}
-        <div className="sec">
-          <div className="sec-h">
-            <h3>Объекты детектора</h3>
-          </div>
-          <table className="c-ptable">
-            <thead>
-              <tr>
-                <th>объект</th>
-                <th className="r">пикс.</th>
-                <th className="r">м²</th>
-                <th className="r">вер. макс.</th>
-              </tr>
-            </thead>
-            <tbody>
-              {dets.slice(0, 12).map((d: any) => (
-                <tr key={d.properties.det_id}>
-                  <td>{d.properties.det_id}</td>
-                  <td className="r">{num(d.properties.n_pixels, 0)}</td>
-                  <td className="r">{num(d.properties.area_m2, 0)}</td>
-                  <td className="r">{num(d.properties.prob_max, 2)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {dets.length > 12 && <div className="c-line faint">ещё {num(dets.length - 12, 0)}</div>}
-        </div>
-      </div>
-    </div>
-  );
-}
+// §33 «В студию» — ZoneStudio moved to ./Studio.tsx (§50 P1-4/5/6, L142)

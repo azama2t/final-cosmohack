@@ -60,7 +60,10 @@ export default function Timeline({
   cur,
   onPick,
   period,
+  onDynamics,
 }: {
+  /** §51 п.3: open the «Динамика района» panel (L140) */
+  onDynamics?: (() => void) | null;
   scenes: TlScene[];
   /** field measurement dates (ms) */
   obs: number[];
@@ -132,6 +135,21 @@ export default function Timeline({
 
   const inWin = scenes.filter((s) => s.t >= t0 - DAY && s.t <= t1 + DAY);
   const curS = scenes.find((s) => s.key === cur) ?? null;
+  // §50 P1 (7): marks closer than ~18 px merge into a cluster (by years at a coarse scale)
+  const groups = useMemo(() => {
+    const srt = [...inWin].sort((a, b) => a.t - b.t);
+    const out: { items: TlScene[] }[] = [];
+    let x0 = -Infinity;
+    for (const s of srt) {
+      const px = ((s.t - t0) / (t1 - t0)) * W;
+      if (out.length && px - x0 < 26) out[out.length - 1].items.push(s);
+      else {
+        out.push({ items: [s] });
+        x0 = px;
+      }
+    }
+    return out;
+  }, [inWin, t0, t1, W]); // eslint-disable-line react-hooks/exhaustive-deps
   const obsBins = useMemo(() => {
     const m = new Map<number, number>();
     for (const t of obs) {
@@ -173,6 +191,11 @@ export default function Timeline({
             <i className="c-tl-k-d" /> прогноз дрейфа 72 ч — эксперимент
           </span>
           {curS && <span className="c-tl-cur">выбран: {curS.label}</span>}
+          {onDynamics && (
+            <button className="link c-tl-dyn" onClick={onDynamics} data-testid="dynamics-open-tl" title="Сравнение дат района">
+              Динамика ↗
+            </button>
+          )}
         </div>
         <svg
           ref={svgRef}
@@ -198,21 +221,28 @@ export default function Timeline({
             </g>
           ))}
           {obsBins.map(([px, n]) => (
-            <rect key={'o' + px} x={px - 1} y={30} width={2} height={Math.min(9, 3 + n)} className="c-tl-obs">
+            <rect key={'o' + px} x={px - 1} y={31} width={2} height={Math.min(6, 2 + n)} className="c-tl-obs">
               <title>полевые измерения: {n}</title>
             </rect>
           ))}
           {inWin
             .filter((s) => s.drift)
             .map((s) => (
-              <line key={'d' + s.key} x1={x(s.t)} x2={Math.max(x(s.t) + 8, x(s.t + 3 * DAY))} y1={25} y2={25} className="c-tl-drift">
+              <line key={'d' + s.key} x1={x(s.t)} x2={Math.max(x(s.t) + 8, x(s.t + 3 * DAY))} y1={33} y2={33} className="c-tl-drift">
                 <title>прогноз дрейфа 24–72 ч (эксперимент) от снимка {s.label}</title>
               </line>
             ))}
-          {inWin
-            .slice()
-            .sort((a, b) => a.finds - b.finds)
-            .map((s) => {
+          {curS && curS.t >= t0 && curS.t <= t1 && (
+            <g className="c-tl-curmark" data-testid="timeline-current">
+              <line x1={x(curS.t)} x2={x(curS.t)} y1={0} y2={36} />
+              <text x={Math.min(W - 60, x(curS.t) + 12)} y={9}>
+                {new Date(curS.t).toISOString().slice(0, 10).split('-').reverse().join('.')}
+              </text>
+            </g>
+          )}
+          {groups.map((g) => {
+            if (g.items.length === 1) {
+              const s = g.items[0];
               const r = s.finds ? Math.min(11, 5 + Math.sqrt(s.finds) * 1.3) : 3.2;
               const on = s.key === cur;
               return (
@@ -224,9 +254,9 @@ export default function Timeline({
                   data-scene={s.key}
                   style={{ cursor: 'pointer' }}
                 >
-                  <circle cx={x(s.t)} cy={13} r={r + (on ? 2.5 : 0)} className="c-tl-sc" style={{ fill: s.finds ? (s.b ? '#ff8c42' : '#d9b870') : 'transparent' }} />
+                  <circle cx={x(s.t)} cy={20} r={r + (on ? 2.5 : 0)} className="c-tl-sc" style={{ fill: s.finds ? (s.b ? '#ff8c42' : '#d9b870') : 'transparent' }} />
                   {s.finds > 0 && r >= 7 && (
-                    <text x={x(s.t)} y={16.5} className="c-tl-n">
+                    <text x={x(s.t)} y={23.5} className="c-tl-n">
                       {s.finds}
                     </text>
                   )}
@@ -236,7 +266,34 @@ export default function Timeline({
                   </title>
                 </g>
               );
-            })}
+            }
+            // several snapshots closer than a mark: one cluster mark, a click zooms into them
+            const a = g.items[0].t;
+            const b = g.items[g.items.length - 1].t;
+            const nf = g.items.reduce((q, s) => q + s.finds, 0);
+            const hasCur = g.items.some((s) => s.key === cur);
+            const cx = x((a + b) / 2);
+            return (
+              <g
+                key={'g' + g.items[0].key}
+                className={`c-tl-s c-tl-g ${hasCur ? 'on' : ''}`}
+                onClick={() => {
+                  const pad = Math.max(3 * DAY, (b - a) * 0.3);
+                  setWin([a - pad, b + pad]);
+                }}
+                data-testid="timeline-cluster"
+                style={{ cursor: 'zoom-in' }}
+              >
+                <rect x={cx - 12} y={12} width={24} height={16} rx={8} className="c-tl-sc" style={{ fill: nf ? '#d9b870' : 'transparent' }} />
+                <text x={cx} y={23.5} className="c-tl-n">
+                  {g.items.length}
+                </text>
+                <title>
+                  {g.items.length} снимков ({nf} наход.) — нажмите, чтобы приблизить
+                </title>
+              </g>
+            );
+          })}
         </svg>
       </div>
       <button className="icon-btn c-tl-close" onClick={() => setOpen(false)} title="Свернуть шкалу времени" aria-label="Свернуть шкалу времени" data-testid="timeline-close">

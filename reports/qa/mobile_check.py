@@ -81,6 +81,20 @@ def run(p, name, ctx_args, mobile=True):
         page.wait_for_selector('[data-testid="scene-zone-card"]', timeout=20000)
         page.wait_for_timeout(1500)
         shot("04_card"); meas("04_card"); res["steps"].append("card")
+        tabs = page.locator('[data-testid="scene-zone-card"] [role="tab"]')
+        if tabs.count():  # §47 п.4: tabs in the sheet scroll sideways, every tab reachable
+            res["tabs"] = tabs.count()
+            res["tablist_scroll"] = page.evaluate("() => { const t = document.querySelector('[data-testid=\"scene-zone-card\"] [role=tablist]'); return t ? t.scrollWidth + '/' + t.clientWidth : null; }")
+            tabs.last.scroll_into_view_if_needed()
+            if mobile:
+                tabs.last.tap()
+            else:
+                tabs.last.click()
+            page.wait_for_timeout(600)
+            shot("04b_tab_last"); meas("04b_tab_last"); res["steps"].append("tabs")
+            tabs.first.scroll_into_view_if_needed()
+            tabs.first.tap() if mobile else tabs.first.click()
+            page.wait_for_timeout(300)
         if mobile:
             page.locator('[data-testid="scene-zone-card"]').evaluate("e => { const s = e.closest('.right') || e; s.scrollTop = s.scrollHeight; }")
             page.wait_for_timeout(300)
@@ -114,6 +128,30 @@ def run(p, name, ctx_args, mobile=True):
             page.wait_for_timeout(400)
             shot("09_legend"); res["steps"].append("legend")
             tap('[data-testid="m-legend"]')
+        if page.locator('[data-testid="act-more"]').count():  # §47 п.1 «Ещё ▾»
+            tap('[data-testid="act-more"]')
+            page.wait_for_selector('[data-testid="more-menu"]', timeout=5000)
+            page.wait_for_timeout(300)
+            shot("11_more"); meas("11_more"); res["steps"].append("more")
+            tap('[data-testid="act-more"]')
+            page.wait_for_timeout(300)
+        if page.locator('[data-testid="timeline-open"]').count() or page.locator('[data-testid="timeline"]').count():  # §48 timeline
+            res["timeline_default_open"] = page.locator('[data-testid="timeline"]').count() > 0
+            if not res["timeline_default_open"]:
+                tap('[data-testid="timeline-open"]')
+                page.wait_for_selector('[data-testid="timeline"]', timeout=5000)
+            page.wait_for_timeout(500)
+            shot("12_timeline"); meas("12_timeline"); res["steps"].append("timeline")
+            if mobile:
+                tap('[data-testid="timeline-close"]')
+                page.wait_for_timeout(300)
+        if page.locator('[data-testid="demo-tour-btn"]').count():  # §47 п.7 «Демо ▶»
+            tap('[data-testid="demo-tour-btn"]')
+            page.wait_for_selector('[data-testid="demo-tour-card"]', timeout=15000)
+            page.wait_for_timeout(2500)
+            shot("13_demo"); meas("13_demo"); res["steps"].append("demo")
+            tap('[data-testid="demo-tour-exit"]')
+            page.wait_for_timeout(500)
     except Exception as e:  # noqa: BLE001
         res["fail"] = str(e).splitlines()[0][:200]
         shot("99_fail")
@@ -158,7 +196,7 @@ def main():
             ms = r["measures"]
             worst = {k: (v["hscroll"], v["nSmall"], v["nTiny"]) for k, v in ms.items()}
             print(name, "steps=" + ",".join(r["steps"]), "FAIL=" + r.get("fail", "-"), "errs=%d" % len(r["console_errors"]),
-                  "back_card=%s" % r.get("card_after_back"), "photo=%s/%s/%s" % (r.get("photo_cam_visible"), r.get("photo_img_w"), r.get("photo_fail", "-")), json.dumps(worst, ensure_ascii=False))
+                  "back_card=%s" % r.get("card_after_back"), "photo=%s/%s/%s" % (r.get("photo_cam_visible"), r.get("photo_img_w"), r.get("photo_fail", "-")), "tabs=%s:%s tl_open=%s" % (r.get("tabs"), r.get("tablist_scroll"), r.get("timeline_default_open")), json.dumps(worst, ensure_ascii=False))
         (OUT / f"{TAG}_result.json").write_text(json.dumps(allres, ensure_ascii=False, indent=1), encoding="utf-8")
 
 

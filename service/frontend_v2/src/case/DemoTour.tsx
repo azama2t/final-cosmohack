@@ -3,11 +3,19 @@
 // tour only clicks the real scene/zone list rows already rendered from the API (data-scene / data-zone attributes,
 // CaseApp.tsx) and points at real DOM blocks (sz-measured / sz-status-chip / export menu) — every number the user
 // sees is whatever the API returned at that moment, never text authored here.
-// Mounted once, near the top of CaseApp.tsx's JSX (one import + one line — see reports/tasklog/141_ux47.md); the
-// button is position:fixed so it needs no layout slot and works over the mobile bottom sheet at 390px too.
-import { useEffect, useRef, useState } from 'react';
+// §50 п.8 (Егор, скрин 11): the trigger used to be its own position:fixed button and covered «Слои» (same top-right
+// corner once the right card panel is closed — .toolbar is absolute inside <main>, which then spans to the
+// viewport edge). Fix: no more standalone button — CaseApp renders the actual «Демо ▶» button as a normal flex
+// sibling of «Слои» inside .toolbar (one group, fixed gaps, same responsive rule), and calls this component's
+// imperative `open()` via a ref. DemoTour itself only renders the walkthrough overlay (ring + tooltip card),
+// portalled into document.body so it still works above the mobile bottom sheet at 390px.
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import './DemoTour.css';
+
+export interface DemoTourHandle {
+  open: () => void;
+}
 
 const DEMO_SCENE_KEY = 'demo-cozar-2021-03-11';
 const DEMO_ZONE_ID = 'SZ-demo-cozar-2021-03-11-001';
@@ -17,8 +25,11 @@ const SEL = {
   scene: `[data-testid="scene-item"][data-scene="${DEMO_SCENE_KEY}"]`,
   zone: `[data-testid="sz-item"][data-zone="${DEMO_ZONE_ID}"]`,
   anySzItem: '[data-testid="sz-item"]',
-  quality: '[data-testid="sz-measured"]',
-  status: '[data-testid="sz-status-chip"]',
+  // sz-measured/sz-status-chip live inside the collapsible «Подробнее» block and can sit far down the scrollable
+  // card — sz-thumb (снимок с контуром, always in the main flow) and sz-qtop (headline: что это/статус/подтверждение)
+  // are the equivalent content that's reliably on-screen right after the card opens.
+  quality: '[data-testid="sz-thumb"]',
+  status: '[data-testid="sz-qtop"]',
   exportBtn: '[data-testid="act-export"]',
   exportMenu: '[data-testid="export-menu"]',
 };
@@ -45,8 +56,8 @@ const STEPS: Step[] = [
   },
   {
     title: '3/5 · Качество',
-    what: 'Блок «По снимку: маска детектора и маска качества» — площадь зоны, подозрительные пиксели, доля воды/облаков/блика в зоне. Это метрики по изображению, не число предметов.',
-    where: 'Прокрутите карточку справа при необходимости; дальше — «Далее».',
+    what: 'Снимок зоны с контуром — то же изображение и та же маска качества, по которым детектор дал результат. Ниже в карточке (вкладка/раздел «Подробнее») — доля воды/облаков/блика и площадь пикселей: метрики по изображению, не число предметов.',
+    where: 'Дальше — «Далее».',
     target: SEL.quality,
   },
   {
@@ -140,7 +151,7 @@ function place(rect: DOMRect, cardW: number, cardH: number) {
   return { top, left };
 }
 
-export default function DemoTour() {
+export default forwardRef<DemoTourHandle>(function DemoTour(_props, ref) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
   const [rect, setRect] = useState<DOMRect | null>(null);
@@ -174,6 +185,7 @@ export default function DemoTour() {
     setOpen(true);
     await gotoStep(0);
   };
+  useImperativeHandle(ref, () => ({ open: start }));
 
   const next = async () => {
     if (step >= STEPS.length - 1) return finish();
@@ -200,9 +212,6 @@ export default function DemoTour() {
 
   return (
     <>
-      <button className="dt-btn" data-testid="demo-tour-btn" onClick={start}>
-        Демо ▶
-      </button>
       {open &&
         createPortal(
           <>
@@ -250,4 +259,4 @@ export default function DemoTour() {
         )}
     </>
   );
-}
+});

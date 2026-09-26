@@ -43,7 +43,7 @@ def main():
         drag(cdp, 195, hb["y"] + 30, hb["y"] - 420)
         page.wait_for_timeout(700)
         out["1_sheet_after_drag_up"] = st()
-        out["1_camera_unchanged"] = cam() == c0
+        out["1_camera_center_unchanged"] = cam().split(",")[:2] == c0.split(",")[:2]  # zoom may refit to the new map height
         out["1_cam"] = (c0[-60:], cam()[-60:])
         drag(cdp, 195, 250, 700)  # drag down (sheet is full: handle near the top)
         hb = page.locator('[data-testid="m-sheet-handle"]').bounding_box()

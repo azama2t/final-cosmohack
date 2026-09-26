@@ -9,7 +9,7 @@
 import { useEffect, useState } from 'react';
 import { get } from './api3';
 import { checkLine, driftKey, driftPaths } from './drift';
-import { driftCaption } from './DriftLayer';
+import { driftCaption, DRIFT_CORRIDOR_LABEL, MAX_HORIZON_H } from './DriftLayer';
 import { loadDrift } from '../lib/data';
 import type { DriftFile } from '../types';
 
@@ -96,7 +96,10 @@ export default function DriftTab({ zone, onShowOnMap, mapOn }: DriftTabProps) {
   return (
     <div className="sec sz-drift-tab" data-testid="drift-tab">
       <div className="c-line" data-testid="drift-tab-caption">
-        {driftCaption(f)}
+        {driftCaption(f)} Горизонт ≤ {MAX_HORIZON_H} ч.
+      </div>
+      <div className="c-line tiny faint" data-testid="drift-tab-corridor">
+        {DRIFT_CORRIDOR_LABEL}
       </div>
       <div className="c-line tiny" data-testid="drift-tab-status">
         Статус: <b>исследовательская оценка</b>
