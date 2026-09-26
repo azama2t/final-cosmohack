@@ -57,6 +57,7 @@ IMAGES_MAIN = {
     "svc_card": (("presentation/img/card.jpg", "reports/case_demo/1920_02_zone_card.png"), "22_svc_card.jpg", None),
     "svc_studio": (("presentation/img/studio.jpg",), "25_svc_studio.jpg", (336, 0, 1920, 1080)),
     "svc_photo": (("presentation/img/photo.jpg", "reports/photo_count/ui_photo_v2.png"), "23_svc_photo.jpg", None),
+    "svc_metrics": (("presentation/img/metrics.jpg",), "27_svc_metrics.jpg", (0, 410, 700, 1080)),
     "svc_export": (("presentation/img/export.jpg", "reports/case_demo/1920_07_export_menu.png"), "24_svc_export.jpg", None),
 }
 
@@ -409,6 +410,7 @@ def load() -> dict:
     k["sz_demo_marida_same_tile"] = N(sz + "demo.marida_same_tile"); k["sz_demo_mados_verdict"] = N(sz + "demo.mados_verdict")
     k["mt_n_scenes"] = N(c + "sections.marida_test.n_scenes")
     k["S2_dev_median_c"] = N(c + "conc.S2.dev_median_c")
+    k["sz_wind_ms"] = N(sz + "wind_zero_ms")
     k["sz_n_finds"] = N(sz + "n_finds"); k["sz_n_finds_training"] = N(sz + "n_finds_training")
     return k
 
@@ -732,10 +734,11 @@ def main_slides(k: dict) -> list[dict]:
         notes="Показ вживую — docs/DEMO.md. Полевые шт./км² другого места не выдаются за плотность зоны: «не определено по этому снимку».",
     ))
     S.append(dict(
-        kind="main", layout="grid", section="Сервис: фото и выгрузка",
-        title=f"Счётчик по фото и выгрузка: зоны отложенной сцены на карте = CSV = GeoJSON ({num(k['sz_export_ui'], 0)} = "
+        kind="main", layout="grid", section="Сервис: фото, метрики, выгрузка",
+        title=f"Фото, метрики, выгрузка: зоны отложенной сцены на карте = CSV = GeoJSON ({num(k['sz_export_ui'], 0)} = "
               f"{num(k['sz_export_csv'], 0)} = {num(k['sz_export_geojson'], 0)})",
         images=[("svc_photo", "«Фото»: рамки и число предметов, площадь кадра → шт./км²; состав не определён"),
+                ("svc_metrics", "«Метрики»: F1 детектора и отложенный test концентрации против медианы"),
                 ("svc_export", "Выгрузка GeoJSON/CSV того, что на карте; запросы сохраняются и повторяются")],
         caption="Вывод: у каждого числа подписан источник — поле, фото, снимок или «нет данных»",
         source="presentation/img/*.jpg (presentation/make_shots.py, http://localhost:8070, 1920×1080); docs/CONTRACTS_V3.md",
@@ -758,7 +761,7 @@ def main_slides(k: dict) -> list[dict]:
         speech=("Что мы не утверждаем. Штук по снимку — нет, калибровочных пар ноль. Пластик по снимку — нет, детектор видит любой "
                 "мусор и путает суда. Предел обнаружения не доказан. При сильном ветре — «недостаточно данных». Поле — один рейс, "
                 "а счётчик по фото без дообучения на реку не переносится."),
-        notes=(f"Test концентрации не абсолютно нетронутый: {k['ft_limitation']}. Порог ветра — 5 м/с из Methods Cózar 2024, "
+        notes=(f"Test концентрации не абсолютно нетронутый: {k['ft_limitation']}. Порог ветра — {num(k['sz_wind_ms'], 0)} м/с из Methods Cózar 2024, "
                "не подбирался."),
     ))
     S.append(dict(
@@ -1383,7 +1386,7 @@ def _sz_block(k: dict) -> str:
 
 Всего {num(k['sz_n_finds'], 0)} находок из {num(k['sz_n_zones'], 0)} обработанных зон на {num(k['sz_n_scenes_eval'], 0)} оцениваемых сценах из {num(k['sz_n_scenes'], 0)} (на остальных низкое солнце или слабый
 сигнал воды — детектор не оценивается): обнаружено с подтверждением уровня B — {num(k['sz_by_level_b'], 0)}, срабатываний без проверки —
-{num(k['sz_by_unverified'], 0)}, недостаточно данных (пена/блик/судно/берег/мелководье) — {num(k['sz_by_insufficient'], 0)}, не обнаружено — {num(k['sz_by_not_detected'], 0)}, ноль не информативен (ветер ≥ 5 м/с) — {num(k['sz_by_not_informative'], 0)}.
+{num(k['sz_by_unverified'], 0)}, недостаточно данных (пена/блик/судно/берег/мелководье) — {num(k['sz_by_insufficient'], 0)}, не обнаружено — {num(k['sz_by_not_detected'], 0)}, ноль не информативен (ветер > {num(k['sz_wind_ms'], 0)} м/с) — {num(k['sz_by_not_informative'], 0)}.
 На демо-сцене {num(k['sz_demo_n_zones'], 0)} зон ({num(k['sz_demo_det_pixels'], 0)} пикс. детектора), из них с нитью Cózar — {num(k['sz_demo_n_zones_cozar'], 0)}.
 Живой проход без моков (окна 1920×1080 и 1366×768): путь «Земля → находка → карточка → студия → назад» — `scripts/case/s33_path.py` → `reports/case_demo/s33_path.json`, кадры `reports/case_demo/s33_*.png`; прежний путь по списку зон — `scripts/case/demo_path_v2.py`.
 
@@ -1423,6 +1426,9 @@ def demo_md(k: dict) -> str:
 5. **Числа — на своих панелях за один клик:** поле ({num(k['q_pooled_C'], 1)} шт./км² [{rng(k['qf_boot_lo95'], k['qf_boot_hi95'])}],
    медиана на карте), режим **«Фото»** (ошибка {num(k['pc_mae'], 2)} шт./кадр), вкладка **«Метрики»** (F1 {num(k['d_lgbm_f1'], 3)}).
 6. **«Выгрузка»** GeoJSON/CSV и **«Запросы»** → сохранить → повторить.
+
+Запасное видео этого пути (1920×1080, ≈ 2 мин, без звука, на случай, если сервис не поднимется): `presentation/demo.mp4`
+(`presentation/demo.webm`), запись — `presentation/make_demo_video.py`.
 
 Подробный сценарий с репликами — ниже.
 
@@ -1500,7 +1506,7 @@ def qa_items(k: dict) -> list[tuple[str, str, str]]:
          "карточке — «всего предметов, состав не определён». На снимке Sentinel-2 никаких «бутылок»: пиксель больше предмета.",
          "docs/LABELS.md; data/labels_map.csv; docs/PHOTO_COUNT.md"),
         ("Почему при сильном ветре зона «недостаточно данных», а не «не обнаружено»?",
-         "При ветре сильнее 5 м/с мусор перемешивается в толще воды и полосы не формируются — так делают авторы каталога полос "
+         f"При ветре сильнее {num(k['sz_wind_ms'], 0)} м/с мусор перемешивается в толще воды и полосы не формируются — так делают авторы каталога полос "
          "(Cózar и др., 2024, Methods: воду с ветром выше порога они исключают из площади). Порог взят из статьи, не подбирался. "
          "Поэтому «ноль» на такой сцене не информативен: статус «недостаточно данных», сцена не входит в площадь «обследовано»; "
          f"найденные зоны и уровень B не трогаем. На демо-сцене ветер {num(k['sz_demo_wind'], 1)} м/с.",

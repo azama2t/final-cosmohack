@@ -1,7 +1,7 @@
 r"""Скрины сервиса v2 для деки (основная часть, слайды «Сервис»): http://localhost:8070, 1920×1080, без фикстур.
 
 Путь §33: обзор Земли (наведение на находку — тултип) → клик по точке → сцена и карточка зоны → «В студию» →
-«← Назад» → «Выгрузка» → режим «Фото». Пишет presentation/img/{earth,card,studio,export,photo}.jpg; затем
+«← Назад» → «Выгрузка» → режим «Фото». Пишет presentation/img/{earth,card,studio,metrics,export,photo}.jpg; затем
     .venv\Scripts\python.exe scripts\make_deck_case.py --pdf
 вставит их в presentation/deck.pptx и reports/case_deck.pptx (кандидаты — IMAGES_MAIN в make_deck_case.py).
 Сервис не перезапускает. Ошибки консоли печатает; при ошибках код возврата 1 (такие скрины в деку не годятся).
@@ -89,6 +89,13 @@ def main(argv=None) -> int:
         if pg.locator("[data-testid=sz-back]").count():
             pg.click("[data-testid=sz-back]")
             pg.wait_for_timeout(2500)
+        # 3б. «Метрики» (левая колонка): F1 детектора и отложенный test концентрации
+        if pg.locator("[data-testid=tab-metrics]").count():
+            pg.click("[data-testid=tab-metrics]")
+            pg.wait_for_timeout(2500)
+            pg.screenshot(path=str(out / "metrics.jpg"), type="jpeg", quality=90); made.append("metrics")
+            pg.click("[data-testid=tab-zones]")
+            pg.wait_for_timeout(800)
         # 4. выгрузка
         pg.click("[data-testid=act-export]")
         pg.wait_for_timeout(1500)
