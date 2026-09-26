@@ -2517,7 +2517,8 @@ def basin_profile(basin_id: str) -> Optional[dict]:
                "n_days": len(set(res["g"])), "years": f"{years[0]}–{years[-1]}" if len(years) > 1 else (years[0] if years else None),
                "pooled_items_km2": round(pooled, 3), "median_items_km2": round(float(_np.median(res["c"])), 3),
                "lo95": None if lo is None else round(lo, 3), "hi95": None if hi is None else round(hi, 3),
-               "interval_label": "95 % бутстреп по дням (ΣN/ΣA)", "_pts": _np.array(res["pts"], float)}
+               "interval_label": "95 % бутстреп по дням (ΣN/ΣA)", "_pts": _np.array(res["pts"], float),
+               "_c": list(res["c"]), "_g": list(res["g"])}
     _cache[f"basin:{basin_id}"] = (key, out)
     return out
 
@@ -2538,9 +2539,9 @@ def _sz_field_estimate(f: dict, p: dict, adis_items: list) -> dict:
           "value": None, "date": None, "distance_km": d, "profile": None, "source": None, "source_id": None,
           "sample_id": None, "in_region": False, "reason": None, "basis": None, "lo": None, "hi": None,
           "basin_profile": None, "profile_note": None,
-          "nearest": None}
+          "nearest": None, "nearest_organizer": None}
     if q:
-        fe["nearest"] = {"sample_id": q["sample_id"], "source_id": q["source_id"], "source": src.get(q["source_id"], q["source_id"]),
+        fe["nearest"] = fe["nearest_organizer"] = {"sample_id": q["sample_id"], "source_id": q["source_id"], "source": src.get(q["source_id"], q["source_id"]),
                          "date": q["date"], "distance_km": d, "value": q["c"], "profile": q["profile"]}
     if q and d is not None and d <= sc["region_km"]:
         fe.update({"basis": "nearest_record", "value": q["c"], "date": q["date"], "profile": q["profile"], "source_id": q["source_id"],
@@ -2550,13 +2551,19 @@ def _sz_field_estimate(f: dict, p: dict, adis_items: list) -> dict:
     elif lon is not None and (bp := basin_profile((_basin_for(p.get("region")) or {}).get("id", ""))) is not None:
         import numpy as _np
         pts = bp["_pts"]
-        dk = _np.hypot((pts[:, 0] - lon) * 111.32 * _np.cos(_np.radians(lat)), (pts[:, 1] - lat) * 110.57).min()
+        dd = _np.hypot((pts[:, 0] - lon) * 111.32 * _np.cos(_np.radians(lat)), (pts[:, 1] - lat) * 110.57)
+        ii = int(_np.argmin(dd))
+        dk = dd[ii]
         prof = {k: v for k, v in bp.items() if not k.startswith("_")}
         prof["nearest_km"] = round(float(dk), 1)
         itv = f" [{fmt_num(bp['lo95'])}–{fmt_num(bp['hi95'])}]" if bp["lo95"] is not None else ""
         fe.update({"value": bp["pooled_items_km2"], "lo": bp["lo95"], "hi": bp["hi95"], "basis": "basin_profile",
                    "profile": bp["size_class"], "source": bp["source"], "date": bp["years"], "distance_km": prof["nearest_km"],
-                   "basin_profile": prof, "profile_note": S51_BASIN_NOTE})
+                   "basin_profile": prof, "profile_note": S51_BASIN_NOTE,
+                   # the nearest measurement OF THE PROFILE (same basin); the organisers' nearest record stays aside
+                   "nearest": {"sample_id": None, "source_id": bp["source_kind"], "source": bp["source"],
+                               "date": bp["_g"][ii] or None, "distance_km": prof["nearest_km"],
+                               "value": round(float(bp["_c"][ii]), 3), "profile": bp["size_class"]}})
         fe["label"] = (f"По полю: {fmt_num(bp['pooled_items_km2'])}{itv} шт./км² — {S51_BASIN_NOTE} "
                        f"({bp['basin_name']}; {bp['source']}, {bp['size_class']}; n = {bp['n']}, {bp['years']}; "
                        f"ближайшее измерение — {prof['nearest_km']:g} км)")

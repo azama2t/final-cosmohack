@@ -66,6 +66,15 @@ def test_shore_km_for_a_known_point_and_honest_null_without_geometry():
     assert km2 is None and reason2 == "нет геометрии"
 
 
+def test_shore_km_uses_10m_contour_and_never_silently_zero_for_land():
+    # L142 (§51 bugfix): the coarse 1:110m contour put real sea points inside a simplified land polygon -> shore_km=0
+    # (19/77 finds). The finer 1:10m contour (data_cache/natural_earth) must be preferred, and a point genuinely on
+    # land must come back as None + a reason, never as a silent 0.
+    assert A._land()[1] == "Natural Earth 1:10m", "ne_10m_land.shp not found — run scripts/fetch_natural_earth_10m.py"
+    km, reason = A.shore_km(-3.7, 40.4)  # middle of mainland Spain
+    assert km is None and reason and "на суше" in reason
+
+
 def test_non_find_gets_honest_nulls_not_a_guessed_rank():
     out = A.zone_alert(is_find=False, is_large=True, major_axis_m=600, lon=0.0, lat=0.0, region="x", date="2024-01-01",
                        confirmed=False)

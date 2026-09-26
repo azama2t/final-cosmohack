@@ -48,9 +48,11 @@ def test_field_estimate_units_quantity_by_image(client):
             assert fe["basis"] is None and fe["value"] is None
             assert fe["reason"].startswith("в районе полевых измерений нет") and "профиля акватории нет" in fe["reason"]
         # the nearest record is a real row of the organisers' CSV at that distance
-        if fe["nearest"]:
-            r = cs.sample_row(fe["nearest"]["sample_id"])
-            assert float(r["concentration_items_km2"]) == fe["nearest"]["value"]
+        if fe["nearest_organizer"]:
+            r = cs.sample_row(fe["nearest_organizer"]["sample_id"])
+            assert float(r["concentration_items_km2"]) == fe["nearest_organizer"]["value"]
+        if fe["basis"] == "basin_profile":  # «nearest» = the nearest measurement of the profile itself
+            assert fe["nearest"]["distance_km"] == fe["distance_km"] == fe["basin_profile"]["nearest_km"]
         assert un["default"] == "items_km2" and un["area_note"] == "площадь, не предметы"
         m = p["measured"]
         if p["detected_area_m2"] is not None and (m.get("water_km2") or p["area_km2"]):
@@ -150,3 +152,17 @@ def test_region_dynamics(client):
                 assert days <= max_days
     assert client.get("/api/v3/regions/nope/dynamics").status_code == 404
     assert client.get("/api/v3/regions/honduras/dynamics", params={"x": 1}).status_code == 400
+
+
+def test_alboran_gets_mediterranean_profile(client):
+    """Альборан (30SXE, западное Средиземноморье, ~-1.6° lon, 35.5° lat): профиль Средиземного моря, а не запись
+    организаторов в Северном море за 2 000+ км."""
+    fc = client.get("/api/v3/scene_zones", params={"region": "cozar_demo", "limit": 1000}).json()
+    assert fc["features"]
+    for f in fc["features"]:
+        fe = f["properties"]["field_estimate"]
+        assert fe["basis"] == "basin_profile" and fe["basin_profile"]["basin"] == "mediterranean", f["id"]
+        assert fe["nearest"]["distance_km"] < 1000 and fe["nearest"]["source"] == fe["basin_profile"]["source"]
+        assert fe["nearest_organizer"]["distance_km"] > 2000  # kept aside, not shown as «ближайшее измерение»
+    z1 = next(f for f in fc["features"] if f["id"].endswith("-001"))["properties"]["field_estimate"]
+    assert "Средиземное море" in z1["label"] and "2109" not in z1["label"]

@@ -910,3 +910,5 @@ GET /api/v3/photo/meta: + headline {count_mae_per_frame, count_mae_ci95, n_image
     (configs/zone_estimate.yaml: field_basins; организаторы того же моря, иначе ADIS в рамке акватории; ≥ 5 измерений;
     95 % бутстреп по дням); если и профиля нет — value null и reason. dynamics — без изменений (только ±2 сут / 50 км).
     CSV: + large_reason, major_axis_m, field_basis, field_lo, field_hi.
+  (§51 п.2 — ИЗМЕНЕНИЕ) field_estimate.nearest — ближайшее измерение, на котором основано значение (при basin_profile —
+    ближайшее измерение профиля акватории: source, date, distance_km, value); запись организаторов — nearest_organizer.

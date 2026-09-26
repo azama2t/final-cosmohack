@@ -2,9 +2,12 @@
 
 Используется из service/case_store.py (боевая отдача в /api/v3/scene_zones* и выгрузку) и scripts/case/alerts.py
 (офлайн-проверка распределения по уровням на реальных зонах). Ничего не выдумывает: расстояние до берега — из
-Natural Earth 1:110m (service/frontend_v2/public/land-110m.geojson, уже используется офлайн-подложкой карты); доля
-выброса дрейфом — из уже опубликованных прогонов OpenDrift (data/live/<region>/<date>/drift.json, stats.stranded_pct,
-§47 п.6/§48); при отсутствии данных — честные None + причина, не 0 и не выдумка.
+Natural Earth 1:10m (data_cache/natural_earth/ne_10m_land.shp, вне git — см. scripts/fetch_natural_earth_10m.py;
+запасной вариант — 1:110m, service/frontend_v2/public/land-110m.geojson, тот же контур, что офлайн-подложка карты,
+но слишком грубый у берега — L142 нашёл 19 из 77 находок с shore_km=0, потому что центр зоны в море попадал внутрь
+упрощённого полигона суши); доля выброса дрейфом — из уже опубликованных прогонов OpenDrift
+(data/live/<region>/<date>/drift.json, stats.stranded_pct, §47 п.6/§48); при отсутствии данных — честные None +
+причина, не 0 и не выдумка. Точка внутри контура суши (даже уточнённого) — тоже честный None + причина, не 0.
 """
 from __future__ import annotations
 
@@ -16,7 +19,8 @@ from pathlib import Path
 from typing import Optional
 
 ROOT = Path(__file__).resolve().parents[3]
-LAND_GEOJSON = ROOT / "service" / "frontend_v2" / "public" / "land-110m.geojson"
+LAND_10M_SHP = ROOT / "data_cache" / "natural_earth" / "ne_10m_land.shp"
+LAND_GEOJSON_110M = ROOT / "service" / "frontend_v2" / "public" / "land-110m.geojson"
 
 
 def _data_root() -> Path:
@@ -87,17 +91,33 @@ def _km(lon1: float, lat1: float, lon2: float, lat2: float) -> float:
 
 
 @lru_cache(maxsize=1)
-def _land_geoms():
-    """Natural Earth 1:110m land polygons, loaded once. Returns a shapely (Multi)Polygon, or None if unavailable
-    (shapely missing / file missing) — callers must degrade to shore_km=None + a reason, never guess a distance."""
+def _land_geoms_10m():
+    """Natural Earth 1:10m land polygons (data_cache/natural_earth/ne_10m_land.shp, ~100 m–1 km accuracy at the
+    coast — the 1:110m contour used before this collapsed real sea points into land, §51 bugfix from L142:
+    19/77 finds got shore_km=0). Loaded once via geopandas. None if the file/geopandas is unavailable."""
+    if not LAND_10M_SHP.is_file():
+        return None
+    try:
+        import geopandas as gpd
+        from shapely.ops import unary_union
+        gdf = gpd.read_file(LAND_10M_SHP)
+        return unary_union(list(gdf.geometry))
+    except Exception:
+        return None
+
+
+@lru_cache(maxsize=1)
+def _land_geoms_110m():
+    """Fallback only (data_cache/natural_earth not fetched): the coarse Natural Earth 1:110m contour, the same
+    file the offline basemap uses. Returns a shapely (Multi)Polygon, or None if unavailable."""
     try:
         from shapely.geometry import shape
     except Exception:
         return None
-    if not LAND_GEOJSON.is_file():
+    if not LAND_GEOJSON_110M.is_file():
         return None
     try:
-        gj = json.loads(LAND_GEOJSON.read_text(encoding="utf-8"))
+        gj = json.loads(LAND_GEOJSON_110M.read_text(encoding="utf-8"))
         geoms = [shape(f["geometry"]) for f in gj.get("features") or [] if f.get("geometry")]
         if not geoms:
             return None
@@ -107,17 +127,31 @@ def _land_geoms():
         return None
 
 
+def _land() -> tuple:
+    """(geometry, source_label). Prefers the 1:10m contour; falls back to 1:110m with a coarser note."""
+    land = _land_geoms_10m()
+    if land is not None:
+        return land, "Natural Earth 1:10m"
+    land = _land_geoms_110m()
+    if land is not None:
+        return land, "Natural Earth 1:110m (грубо — 1:10m не скачан)"
+    return None, ""
+
+
 def shore_km(lon: Optional[float], lat: Optional[float]) -> tuple[Optional[float], Optional[str]]:
-    """docs/ALERTS.md §1: (distance_km, reason). reason is set only when distance_km is None."""
+    """docs/ALERTS.md §1: (distance_km, reason). reason is set only when distance_km is None — including the
+    honest case where the point falls on land even by the finer contour (not silently 0)."""
     if lon is None or lat is None:
         return None, "нет геометрии"
-    land = _land_geoms()
+    land, src = _land()
     if land is None:
-        return None, "контур берега (land-110m.geojson) недоступен"
+        return None, "контур берега недоступен (ни ne_10m_land.shp, ни land-110m.geojson)"
     try:
         from shapely.geometry import Point
         from shapely.ops import nearest_points
         pt = Point(lon, lat)
+        if land.contains(pt):
+            return None, f"точка на суше по контуру берега ({src})"
         near_land, _ = nearest_points(land, pt)
         d = _km(lon, lat, near_land.x, near_land.y)
         return round(d, 1), None
