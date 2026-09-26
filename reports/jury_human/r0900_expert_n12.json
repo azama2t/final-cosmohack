@@ -1,0 +1,55 @@
+{
+ "input": {
+  "sample_id": null,
+  "event_id": null,
+  "zone_id": null,
+  "n": 12.0,
+  "area": 0.2,
+  "pred": 75.0,
+  "threshold": null,
+  "min_coverage": null,
+  "max_cloud": null,
+  "max_land": null,
+  "min_water": null,
+  "glint_b11": null,
+  "rerun": false,
+  "api": null,
+  "json": "reports\\jury_human\\r0900_expert_n12.json"
+ },
+ "reports": [
+  {
+   "title": "Свои числа: N = 12, A = 0.2 км²",
+   "rows": [
+    {
+     "что": "C = N / A, шт./км²",
+     "пересчитано": 60.0,
+     "сервис": null,
+     "ok": null,
+     "примечание": "src/macroplastic/case/concentration.py"
+    },
+    {
+     "что": "C тем же делением вручную",
+     "пересчитано": 60.0,
+     "сервис": 60.0,
+     "ok": true,
+     "примечание": ""
+    },
+    {
+     "что": "95 % ДИ Пуассона, шт./км²",
+     "пересчитано": "31.0–104.8",
+     "сервис": null,
+     "ok": null,
+     "примечание": "Гарвуд: χ²-квантили для N, делённые на A"
+    },
+    {
+     "что": "абсолютная ошибка прогноза, шт./км²",
+     "пересчитано": 15.0,
+     "сервис": null,
+     "ok": null,
+     "примечание": "прогноз 75"
+    }
+   ]
+  }
+ ],
+ "mismatches": 0
+}

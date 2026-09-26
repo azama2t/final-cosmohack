@@ -661,6 +661,19 @@ def case_quantity_profiles_table(fn: dict) -> str:
     return "\n".join(rows)
 
 
+def case_targets_table(fn: dict) -> str:
+    """Целевая совокупность = материал + размерный класс + единица (генератор macroplastic.labels.targets, docs/LABELS.md)."""
+    import sys as _sys
+    src = str(ROOT / "src")
+    if src not in _sys.path:
+        _sys.path.insert(0, src)
+    try:
+        from macroplastic.labels import targets as _t  # noqa: WPS433
+        return _t.markdown()
+    except Exception as e:  # noqa: BLE001
+        return f"_таблица целевых совокупностей недоступна: {type(e).__name__}_"
+
+
 def case_field_table(fn: dict) -> str:
     """Т3: основной количественный результат — полевой алгоритм шт./км² на отложенном test (модель против медианы)."""
     ft = _sec(fn, "field_test")
@@ -847,7 +860,7 @@ def derived(fn: dict) -> dict:
             "case_final_test_text": case_final_test_text(fn), "case_sections_table": case_sections_table(fn),
             "case_search_table": case_search_table(fn), "case_labeled_table": case_labeled_table(fn),
             "case_baselines_u_table": case_baselines_u_table(fn),
-            "case_quantity_levels_table": case_quantity_levels_table(fn), "case_field_table": case_field_table(fn),
+            "case_quantity_levels_table": case_quantity_levels_table(fn), "case_field_table": case_field_table(fn), "case_targets_table": case_targets_table(fn),
             "case_quantity_profiles_table": case_quantity_profiles_table(fn)}
 
 

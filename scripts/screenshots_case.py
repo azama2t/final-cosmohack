@@ -136,6 +136,8 @@ def run(args) -> dict:
 
         def new_page(w=1920, h=1080, block_api=False, console=None):
             ctx = browser.new_context(viewport={"width": w, "height": h}, device_scale_factor=1, accept_downloads=True)
+            # §33а: filters are folded by default (map-first); the script works with them open (remembered per browser)
+            ctx.add_init_script("try { localStorage.setItem('mp.case.filtersOpen', '1') } catch (e) {}")
 
             def router(route):
                 u = route.request.url

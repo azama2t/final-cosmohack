@@ -13,396 +13,318 @@
 },
 {
 "i": 2,
-"zone_id": "SZ-drift-guanabara-2025-09-09-007",
-"px": 132,
-"cozar": 0
-},
-{
-"i": 3,
-"zone_id": "SZ-drift-guanabara-2025-09-09-009",
-"px": 10,
-"cozar": 0
-},
-{
-"i": 4,
 "zone_id": "SZ-drift-honduras-2026-02-19-002",
 "px": 29,
 "cozar": 0
 },
 {
-"i": 5,
+"i": 3,
 "zone_id": "SZ-drift-honduras-2026-02-19-003",
 "px": 15,
 "cozar": 0
 },
 {
-"i": 6,
+"i": 4,
 "zone_id": "SZ-drift-honduras-2026-02-19-004",
 "px": 56,
 "cozar": 0
 },
 {
-"i": 7,
+"i": 5,
 "zone_id": "SZ-live-bali-2018-02-27-002",
 "px": 17,
 "cozar": 0
 },
 {
-"i": 8,
+"i": 6,
 "zone_id": "SZ-live-bali-2018-02-27-004",
 "px": 7,
 "cozar": 0
 },
 {
-"i": 9,
+"i": 7,
 "zone_id": "SZ-live-bali-2026-05-31-002",
 "px": 5,
 "cozar": 0
 },
 {
-"i": 10,
-"zone_id": "SZ-live-guanabara-2025-06-26-004",
-"px": 14,
-"cozar": 0
-},
-{
-"i": 11,
-"zone_id": "SZ-live-guanabara-2025-06-26-005",
-"px": 7,
-"cozar": 0
-},
-{
-"i": 12,
+"i": 8,
 "zone_id": "SZ-live-guanabara-2025-09-04-008",
 "px": 9,
 "cozar": 0
 },
 {
-"i": 13,
+"i": 9,
 "zone_id": "SZ-live-guanabara-2026-07-16-004",
 "px": 8,
 "cozar": 0
 },
 {
-"i": 14,
-"zone_id": "SZ-live-guanabara-2026-07-16-005",
-"px": 11,
-"cozar": 0
-},
-{
-"i": 15,
+"i": 10,
 "zone_id": "SZ-live-guanabara-2026-07-16-006",
 "px": 7,
 "cozar": 0
 },
 {
-"i": 16,
+"i": 11,
 "zone_id": "SZ-live-guanabara-2026-07-16-008",
 "px": 5,
 "cozar": 0
 },
 {
-"i": 17,
-"zone_id": "SZ-live-guanabara-2026-07-16-010",
-"px": 5,
-"cozar": 0
-},
-{
-"i": 18,
+"i": 12,
 "zone_id": "SZ-live-haiti-2021-01-03-001",
 "px": 5,
 "cozar": 0
 },
 {
-"i": 19,
+"i": 13,
 "zone_id": "SZ-live-honduras-2019-01-12-001",
 "px": 5,
 "cozar": 0
 },
 {
-"i": 20,
+"i": 14,
 "zone_id": "SZ-live-honduras-2019-01-12-002",
 "px": 10,
 "cozar": 0
 },
 {
-"i": 21,
+"i": 15,
 "zone_id": "SZ-live-honduras-2020-08-29-004",
 "px": 8,
 "cozar": 0
 },
 {
-"i": 22,
-"zone_id": "SZ-live-honduras-2020-08-29-006",
-"px": 11,
-"cozar": 0
-},
-{
-"i": 23,
+"i": 16,
 "zone_id": "SZ-live-honduras-2020-08-29-008",
 "px": 16,
 "cozar": 0
 },
 {
-"i": 24,
+"i": 17,
 "zone_id": "SZ-live-honduras-2020-08-29-009",
 "px": 8,
 "cozar": 0
 },
 {
-"i": 25,
+"i": 18,
 "zone_id": "SZ-live-honduras-2020-08-29-010",
 "px": 10,
 "cozar": 0
 },
 {
-"i": 26,
+"i": 19,
 "zone_id": "SZ-live-honduras-2025-01-30-001",
 "px": 7,
 "cozar": 0
 },
 {
-"i": 27,
+"i": 20,
 "zone_id": "SZ-live-honduras-2025-01-30-002",
 "px": 28,
 "cozar": 0
 },
 {
-"i": 28,
+"i": 21,
 "zone_id": "SZ-live-honduras-2025-01-30-003",
 "px": 5,
 "cozar": 0
 },
 {
-"i": 29,
+"i": 22,
 "zone_id": "SZ-live-honduras-2025-01-30-004",
 "px": 6,
 "cozar": 0
 },
 {
-"i": 30,
+"i": 23,
 "zone_id": "SZ-live-honduras-2025-01-30-005",
 "px": 5,
 "cozar": 0
 },
 {
-"i": 31,
+"i": 24,
 "zone_id": "SZ-live-honduras-2025-01-30-006",
 "px": 6,
 "cozar": 0
 },
 {
-"i": 32,
+"i": 25,
 "zone_id": "SZ-live-honduras-2025-01-30-007",
 "px": 5,
 "cozar": 0
 },
 {
-"i": 33,
+"i": 26,
 "zone_id": "SZ-live-honduras-2025-01-30-008",
 "px": 5,
 "cozar": 0
 },
 {
-"i": 34,
+"i": 27,
 "zone_id": "SZ-live-honduras-2025-02-19-001",
 "px": 5,
 "cozar": 0
 },
 {
-"i": 35,
+"i": 28,
 "zone_id": "SZ-live-honduras-2025-12-28-003",
 "px": 18,
 "cozar": 0
 },
 {
-"i": 36,
+"i": 29,
 "zone_id": "SZ-live-honduras-2025-12-28-005",
 "px": 12,
 "cozar": 0
 },
 {
-"i": 37,
+"i": 30,
 "zone_id": "SZ-live-honduras-2025-12-28-006",
 "px": 7,
 "cozar": 0
 },
 {
-"i": 38,
+"i": 31,
 "zone_id": "SZ-live-honduras-2025-12-28-008",
 "px": 5,
 "cozar": 0
 },
 {
-"i": 39,
+"i": 32,
 "zone_id": "SZ-live-honduras-2025-12-28-009",
 "px": 5,
 "cozar": 0
 },
 {
-"i": 40,
+"i": 33,
 "zone_id": "SZ-live-honduras-2026-02-14-001",
 "px": 17,
 "cozar": 0
 },
 {
-"i": 41,
+"i": 34,
 "zone_id": "SZ-live-honduras-2026-02-14-003",
 "px": 17,
 "cozar": 0
 },
 {
-"i": 42,
+"i": 35,
 "zone_id": "SZ-live-honduras-2026-02-14-004",
 "px": 5,
 "cozar": 0
 },
 {
-"i": 43,
+"i": 36,
 "zone_id": "SZ-live-honduras-2026-04-10-001",
 "px": 5,
 "cozar": 0
 },
 {
-"i": 44,
+"i": 37,
 "zone_id": "SZ-live-honduras-2026-04-10-002",
 "px": 22,
 "cozar": 0
 },
 {
-"i": 45,
+"i": 38,
 "zone_id": "SZ-live-honduras-2026-04-10-004",
 "px": 6,
 "cozar": 0
 },
 {
-"i": 46,
+"i": 39,
 "zone_id": "SZ-live-honduras-2026-04-10-005",
 "px": 16,
 "cozar": 0
 },
 {
-"i": 47,
-"zone_id": "SZ-live-honduras-2026-04-10-006",
-"px": 9,
-"cozar": 0
-},
-{
-"i": 48,
+"i": 40,
 "zone_id": "SZ-live-honduras-2026-05-30-001",
 "px": 5,
 "cozar": 0
 },
 {
-"i": 49,
+"i": 41,
 "zone_id": "SZ-live-honduras-2026-05-30-003",
 "px": 6,
 "cozar": 0
 },
 {
-"i": 50,
+"i": 42,
 "zone_id": "SZ-live-jakarta-2026-04-03-001",
 "px": 13,
 "cozar": 0
 },
 {
-"i": 51,
+"i": 43,
 "zone_id": "SZ-live-jakarta-2026-04-03-003",
 "px": 15,
 "cozar": 0
 },
 {
-"i": 52,
-"zone_id": "SZ-live-jakarta-2026-04-03-005",
-"px": 10,
-"cozar": 0
-},
-{
-"i": 53,
+"i": 44,
 "zone_id": "SZ-live-karachi-2026-01-15-006",
 "px": 7,
 "cozar": 0
 },
 {
-"i": 54,
-"zone_id": "SZ-live-karachi-2026-02-14-005",
-"px": 6,
-"cozar": 0
-},
-{
-"i": 55,
-"zone_id": "SZ-live-karachi-2026-02-14-006",
-"px": 6,
-"cozar": 0
-},
-{
-"i": 56,
+"i": 45,
 "zone_id": "SZ-live-karachi-2026-02-14-007",
 "px": 6,
 "cozar": 0
 },
 {
-"i": 57,
+"i": 46,
 "zone_id": "SZ-live-manila-2019-05-13-001",
 "px": 5,
 "cozar": 0
 },
 {
-"i": 58,
+"i": 47,
 "zone_id": "SZ-live-manila-2019-05-13-004",
 "px": 11,
 "cozar": 0
 },
 {
-"i": 59,
+"i": 48,
 "zone_id": "SZ-live-manila-2019-05-13-005",
 "px": 5,
 "cozar": 0
 },
 {
-"i": 60,
+"i": 49,
 "zone_id": "SZ-live-manila-2019-05-13-008",
 "px": 9,
 "cozar": 0
 },
 {
-"i": 61,
+"i": 50,
 "zone_id": "SZ-live-manila-2019-05-13-009",
 "px": 6,
 "cozar": 0
 },
 {
-"i": 62,
-"zone_id": "SZ-live-manila-2025-06-15-004",
-"px": 90,
-"cozar": 0
-},
-{
-"i": 63,
+"i": 51,
 "zone_id": "SZ-live-manila-2025-11-07-002",
 "px": 29,
 "cozar": 0
 },
 {
-"i": 64,
-"zone_id": "SZ-live-manila-2025-12-27-005",
-"px": 11,
-"cozar": 0
-},
-{
-"i": 65,
+"i": 52,
 "zone_id": "SZ-live-manila-2025-12-27-009",
 "px": 5,
 "cozar": 0
 },
 {
-"i": 66,
+"i": 53,
 "zone_id": "SZ-live-manila-2026-04-01-010",
 "px": 5,
 "cozar": 0
 },
 {
-"i": 67,
+"i": 54,
 "zone_id": "SZ-live-santo_domingo-2025-12-30-001",
 "px": 5,
 "cozar": 0

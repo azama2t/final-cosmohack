@@ -5,6 +5,20 @@
 import Info from '../components/Info';
 import { API_BASE, type Feat, type FC, type Meta } from './api3';
 import { dateRu, dateTimeRu, num, pct } from './fmt';
+import { geomCenter } from './CaseMap';
+
+/** §33: the source of every number next to it */
+function Src({ k }: { k: 'image' | 'field' | 'photo' | 'research' | 'none' | 'model' }) {
+  const t = {
+    image: 'измерено по снимку',
+    model: 'оценка детектора',
+    field: 'измерено в поле',
+    photo: 'посчитано по детальному фото',
+    research: 'исследовательская оценка',
+    none: 'нет данных',
+  }[k];
+  return <span className={`c-src c-src-${k}`}>{t}</span>;
+}
 
 export interface SceneZoneProps {
   kind: 'detection_zone';
@@ -86,7 +100,7 @@ export interface SzExample {
 export interface SceneZoneDetail extends Feat<SceneZoneProps> {
   detections: FC<any> | null;
   examples?: SzExample[];
-  scene: { preview_url: string | null; quality_url: string | null; wind10m_ms?: number | null; sun_zenith_deg?: number | null; lwd_m2_km2?: number | null; water_km2?: number | null } | null;
+  scene: { preview_url: string | null; quality_url: string | null; bounds?: number[] | null; wind10m_ms?: number | null; sun_zenith_deg?: number | null; lwd_m2_km2?: number | null; water_km2?: number | null } | null;
 }
 
 export const SZ_COLOR: Record<string, string> = { detected: '#ff8c42', unverified: '#d9b870', not_detected: '#2b8a3e', insufficient_data: '#868e96' };
@@ -98,12 +112,18 @@ export default function SceneZoneCard({
   detail,
   onClose,
   onZone,
+  onBack,
+  onStudio,
+  onField,
 }: {
   meta: Meta;
   zone: Feat<SceneZoneProps>;
   detail: SceneZoneDetail | null;
   onClose: () => void;
   onZone?: (id: string) => void;
+  onBack?: () => void;
+  onStudio?: () => void;
+  onField?: (sampleId: string) => void;
 }) {
   const p = zone.properties;
   const m = p.measured;
@@ -129,8 +149,81 @@ export default function SceneZoneCard({
         </button>
       </div>
       <div className="rp-body">
+        {(onBack || onStudio) && (
+          <div className="sec c-studio-bar" data-testid="sz-nav">
+            {onBack && (
+              <button className="btn sm ghost" onClick={onBack} data-testid="sz-back" title="Вернуться к прежнему положению карты и выбрать другую находку">
+                ← Назад
+              </button>
+            )}
+            {onStudio && p.detection_status !== 'not_detected' && (
+              <button className="btn sm" onClick={onStudio} data-testid="sz-studio" title="Снимок, маска качества и детекция этой зоны">
+                В студию →
+              </button>
+            )}
+          </div>
+        )}
+        {/* ------------------------------------------------ §33а п.2: the zone card, strictly */}
+        <ZoneThumb zone={zone} scene={detail?.scene ?? null} />
+        <div className="sec sz-plain" data-testid="sz-plain">
+          <dl className="c-dl sz-plain-dl">
+            <dt>Снимок</dt>
+            <dd data-testid="sz-plain-when">
+              Sentinel-2, {dateTimeRu(p.datetime)}
+              {(() => {
+                const c = geomCenter(zone.geometry as any);
+                return c ? ` · ${num(c[1], 3)}°, ${num(c[0], 3)}°` : '';
+              })()}
+            </dd>
+            <dt>Маска качества</dt>
+            <dd data-testid="sz-plain-quality">
+              вода {pct(m.quality?.valid_water_fraction)} · облака {pct(m.quality?.cloud_fraction)} · блик {pct(m.quality?.glint_fraction)}
+              {detail?.scene?.wind10m_ms !== null && detail?.scene?.wind10m_ms !== undefined ? ` · ветер ${num(detail.scene.wind10m_ms, 1)} м/с` : ''} <Src k="image" />
+            </dd>
+            <dt>Площадь зоны</dt>
+            <dd data-testid="sz-plain-area">
+              {num(m.zone_area_km2 !== null && m.zone_area_km2 !== undefined ? m.zone_area_km2 * 1e6 : null, 0)} м² <Src k="image" />
+            </dd>
+            <dt>Доля покрытия пикселями</dt>
+            <dd data-testid="sz-plain-cover">
+              {m.water_km2 && m.suspicious_area_m2 !== null ? `${num((m.suspicious_area_m2 / (m.water_km2 * 1e6)) * 100, 2)} % воды зоны` : '—'} ({num(m.suspicious_area_m2, 0)} м², {num(m.n_pixels, 0)} пикс. по 10 м) <Src k="image" />
+            </dd>
+            <dt>Статус детекции</dt>
+            <dd data-testid="sz-plain-what">
+              <span data-testid="sz-status">{p.detection_label}</span> <Src k="model" />
+            </dd>
+            <dt>Уверенность</dt>
+            <dd data-testid="sz-plain-conf">
+              {pr.prob_mean !== null && pr.prob_mean !== undefined ? `вероятность детектора ${num(pr.prob_mean, 2)} (макс. ${num(pr.prob_max, 2)}); ` : ''}
+              {p.verification === 'level_B_cozar' ? 'совпадает с разметкой людей (каталог Cózar 2024)' : p.detection_status === 'detected' ? 'независимо не проверено' : '—'}
+            </dd>
+          </dl>
+          <div className="c-line sz-qty" data-testid="sz-plain-qty">
+            <b>Количество предметов по этому снимку не определено</b> <Src k="none" />
+          </div>
+          <div className="c-line sz-qty" data-testid="sz-plain-comp">
+            <b>Состав не определён</b> <Src k="none" />
+          </div>
+          <details className="sz-explore" data-testid="sz-explore">
+            <summary className="btn sm">Исследовать дальше</summary>
+            <ol className="sz-next-l">
+              <li>детальный снимок зоны — дрон или камера с судна (спутник даёт только площадь пятна)</li>
+              <li>
+                счёт предметов на детальном снимке — <a href="?mode=photo">счётчик в «Фото»</a> (шт. на кадр, при известной площади кадра — шт./м²)
+              </li>
+              <li>сверка с полевым измерением на этом же месте и в это же время</li>
+            </ol>
+          </details>
+          {fn?.nearest_organizer_sample && (
+            <button className="c-head-link" onClick={() => onField?.(fn.nearest_organizer_sample!.sample_id)} data-testid="sz-field-link">
+              Ближайшее полевое измерение — {num(fn.nearest_organizer_sample.distance_km, 0)} км, в слое «Полевые измерения» →
+            </button>
+          )}
+        </div>
+        <details className="sec sz-more" data-testid="sz-more">
+          <summary>Подробности: признаки ложных, модель, примеры</summary>
         <div className="sec">
-          <span className="c-chip" data-testid="sz-status">
+          <span className="c-chip" data-testid="sz-status-chip">
             <i style={{ background: SZ_COLOR[p.detection_status === 'detected' && p.verification !== 'level_B_cozar' ? 'unverified' : p.detection_status] ?? '#868e96' }} />
             {p.detection_label}
           </span>
@@ -224,94 +317,6 @@ export default function SceneZoneCard({
           </dl>
         </div>
 
-        {/* ------------------------------------------------ 3. quantity (no scenario, INBOX §23 п.2) */}
-        <div className="sec sz-block sz-quantity" data-testid="sz-quantity">
-          <div className="sec-h">
-            <h3>Количество</h3>
-            <span className="aside">шт./км² по снимку не выдаём</span>
-          </div>
-          <div className="c-line sz-qstatus" data-testid="sz-quantity-status">
-            <b>{qn?.label ?? p.concentration_label ?? 'концентрация по снимку не подтверждена'}</b>
-          </div>
-          <details className="sz-basis" data-testid="sz-quantity-more">
-            <summary>подробнее</summary>
-            <div className="c-line">{qn?.detail ?? p.scenario_reason}</div>
-          </details>
-        </div>
-
-        {/* ------------------------------------------------ what next (§31 п.2 г, no numbers) */}
-        <div className="sec sz-block sz-next" data-testid="sz-next">
-          <div className="sec-h">
-            <h3>Что дальше</h3>
-          </div>
-          <ol className="sz-next-l">
-            <li>снять детально (дрон, камера с судна) — спутник даёт только площадь</li>
-            <li>
-              посчитать предметы — <a href="?mode=photo">пример в «Фото»</a>
-            </li>
-            <li>сверить с полем рядом (ниже)</li>
-          </ol>
-        </div>
-
-        {/* ------------------------------------------------ field nearby */}
-        <div className="sec sz-block sz-field" data-testid="sz-field">
-          <div className="sec-h">
-            <h3>Поле рядом</h3>
-            <span className="aside">измерение ≠ оценка</span>
-          </div>
-          {fn?.items?.length ? (
-            <table className="c-ptable">
-              <thead>
-                <tr>
-                  <th>Отрезок</th>
-                  <th className="r">км</th>
-                  <th className="r">N / A</th>
-                  <th className="r">C = N/A, шт./км²</th>
-                </tr>
-              </thead>
-              <tbody>
-                {fn.items.map((x) => (
-                  <tr key={x.segment_id} data-testid="sz-field-row">
-                    <td title={x.source}>
-                      ADIS {x.ship} · {dateRu(x.date)}
-                    </td>
-                    <td className="r">{num(x.distance_km, 0)}</td>
-                    <td className="r">
-                      {x.n_items} / {num(x.area_km2, 3)}
-                    </td>
-                    <td className="r">
-                      {num(x.c_items_km2)} <span className="faint">[{num(x.ci95_lo)}–{num(x.ci95_hi)}]</span>
-                      {(x as any).authors_cal_10cm_items_km2 !== null && (x as any).authors_cal_10cm_items_km2 !== undefined && (
-                        <div className="faint tiny" data-testid="sz-field-cal" title="калибровка авторов ADIS (по тралу, de Vries 2026), класс > 10 см; не наша">
-                          авторы ({">"} 10 см): {num((x as any).authors_cal_10cm_items_km2)}{' '}
-                          {(x as any).authors_cal_10cm_lo95 !== null && (x as any).authors_cal_10cm_hi95 !== null
-                            ? `[${num((x as any).authors_cal_10cm_lo95)}–${num((x as any).authors_cal_10cm_hi95)}]`
-                            : '· интервал не дан'}{' '}
-                          · наше без поправок {num((x as any).raw_10cm_items_km2)}
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <div className="c-line">полевых измерений рядом нет</div>
-          )}
-          <div className="c-line faint">
-            {fn?.items?.[0]?.size_class ? `предметы ${fn.items[0].size_class}; 95 % интервал Пуассона. ` : ''}
-            {fn?.note}
-            {fn?.nearest_organizer_sample ? ` Ближайшее измерение CSV организаторов — ${fn.nearest_organizer_sample.sample_id}, ${num(fn.nearest_organizer_sample.distance_km, 0)} км.` : ''}
-          </div>
-          {fn?.authors_calibration && (
-            <div className="c-line" data-testid="sz-field-authors" title={fn.authors_calibration.source}>
-              Все отрезки ADIS ({fn.authors_calibration.size_class}): калибровка авторов ADIS (по тралу), не наша —{' '}
-              <b>{num(fn.authors_calibration.C)}</b> шт./км², типичный интервал отрезка {num(fn.authors_calibration.lo_typ)}–{num(fn.authors_calibration.hi_typ)}; наше без
-              поправки — <b>{num(fn.authors_calibration.ours_raw_C)}</b>
-            </div>
-          )}
-        </div>
-
         {!!detail?.examples?.length && (
           <div className="sec" data-testid="sz-examples">
             <div className="sec-h">
@@ -352,7 +357,41 @@ export default function SceneZoneCard({
             </div>
           </div>
         )}
+        </details>
       </div>
+    </div>
+  );
+}
+
+/** §33а: thumbnail of the source S2 scene around the zone with the zone contour on it */
+function ZoneThumb({ zone, scene }: { zone: Feat<SceneZoneProps>; scene: SceneZoneDetail['scene'] }) {
+  const b = scene?.bounds;
+  const g: any = zone.geometry;
+  if (!scene?.preview_url || !b || b.length !== 4 || !g) return null;
+  const [x0, y0, x1, y1] = b;
+  const W = 1000;
+  const H = (W * (y1 - y0)) / (x1 - x0);
+  const px = (lon: number) => ((lon - x0) / (x1 - x0)) * W;
+  const py = (lat: number) => ((y1 - lat) / (y1 - y0)) * H;
+  const rings: number[][][] = g.type === 'Polygon' ? g.coordinates : g.type === 'MultiPolygon' ? g.coordinates.flat() : [];
+  if (!rings.length) return null;
+  let mx0 = Infinity, my0 = Infinity, mx1 = -Infinity, my1 = -Infinity;
+  for (const r of rings) for (const [lo, la] of r) {
+    mx0 = Math.min(mx0, px(lo)); mx1 = Math.max(mx1, px(lo)); my0 = Math.min(my0, py(la)); my1 = Math.max(my1, py(la));
+  }
+  const side = Math.max(mx1 - mx0, my1 - my0) * 2.2 + 60;
+  const cx = (mx0 + mx1) / 2, cy = (my0 + my1) / 2;
+  const vb = `${cx - side / 2} ${cy - side / 2} ${side} ${side}`;
+  return (
+    <div className="sec" data-testid="sz-thumb">
+      <svg className="sz-thumb" viewBox={vb} preserveAspectRatio="xMidYMid slice" role="img" aria-label="Исходный снимок Sentinel-2 с контуром зоны">
+        <rect x={cx - side} y={cy - side} width={side * 2} height={side * 2} fill="#0b1a2a" />
+        <image href={API_BASE + scene.preview_url} x={0} y={0} width={W} height={H} preserveAspectRatio="none" style={{ imageRendering: 'pixelated' }} />
+        {rings.map((r, i) => (
+          <polygon key={i} points={r.map(([lo, la]) => `${px(lo)},${py(la)}`).join(' ')} fill="none" stroke="#ffffff" strokeWidth={side / 160} />
+        ))}
+      </svg>
+      <div className="c-line faint tiny">исходный снимок Sentinel-2 (10 м) · белый контур — зона</div>
     </div>
   );
 }

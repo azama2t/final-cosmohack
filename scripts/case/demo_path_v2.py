@@ -39,6 +39,7 @@ def wait(page, js, t=60000):
 def run(base: str, size: tuple[int, int], tag: str, res: dict, pw):
     b = pw.chromium.launch(args=["--use-angle=swiftshader", "--enable-unsafe-swiftshader"])
     ctx = b.new_context(viewport={"width": size[0], "height": size[1]}, locale="ru-RU", accept_downloads=True)
+    ctx.add_init_script("try { localStorage.setItem('mp.case.filtersOpen', '1') } catch (e) {}")  # filters folded by default (§33а)
     page = ctx.new_page()
     errs = []
     page.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
@@ -66,16 +67,18 @@ def run(base: str, size: tuple[int, int], tag: str, res: dict, pw):
     shot("02_zone_card")
     card = page.locator("[data-testid=scene-zone-card]")
     steps["card"] = {k: page.locator(f"[data-testid={k}]").inner_text() for k in
-                     ("sz-status", "sz-area", "sz-px-area", "sz-lwd", "sz-quality", "sz-model", "sz-prob")}
-    page.click("[data-testid=sz-quantity-more] summary")
-    steps["card"]["quantity"] = page.locator("[data-testid=sz-quantity]").inner_text()
-    page.locator("[data-testid=sz-quantity]").scroll_into_view_if_needed()
+                     ("sz-status", "sz-plain-when", "sz-plain-quality", "sz-plain-area", "sz-plain-cover", "sz-plain-conf",
+                      "sz-plain-qty", "sz-plain-comp")}
+    page.click("[data-testid=sz-explore] summary")
+    steps["card"]["explore"] = page.locator("[data-testid=sz-explore]").inner_text()
+    page.locator("[data-testid=sz-explore]").scroll_into_view_if_needed()
     shot("03_quantity")
     steps["no_scenario_numbers"] = not any(x in page.locator("[data-testid=scene-zone-card]").inner_text()
                                            for x in ("10 000", "100 млн", "500 000", "Условный диапазон", "Сценарий"))
-    page.locator("[data-testid=sz-field]").scroll_into_view_if_needed()
-    steps["field"] = page.locator("[data-testid=sz-field]").inner_text()
+    steps["field"] = page.locator("[data-testid=sz-field-link]").inner_text() if page.locator("[data-testid=sz-field-link]").count() else None
+    steps["no_far_field_numbers"] = page.locator("[data-testid=sz-field-row]").count() == 0
     shot("04_field")
+    page.click("[data-testid=sz-more] > summary")
     # difficult case: false alarm (ship) — status «ложное срабатывание … недостаточно данных»
     page.locator("[data-testid=sz-examples]").scroll_into_view_if_needed()
     shot("05_examples")
@@ -83,7 +86,7 @@ def run(base: str, size: tuple[int, int], tag: str, res: dict, pw):
     wait(page, "() => window.__app.szDetailReady && document.querySelector('[data-testid=sz-status]') && document.querySelector('[data-testid=sz-status]').innerText.startsWith('ложное')")
     page.wait_for_timeout(2500)
     steps["false_alarm"] = {"status": page.locator("[data-testid=sz-status]").inner_text(),
-                            "quantity": page.locator("[data-testid=sz-quantity-status]").inner_text()}
+                            "quantity": page.locator("[data-testid=sz-plain-qty]").inner_text()}
     shot("06_false_alarm")
     # back to the demo zone and restrict the date to the demo scene (for the saved query)
     page.fill("[data-testid=f-from]", "2021-03-11")
@@ -104,7 +107,7 @@ def run(base: str, size: tuple[int, int], tag: str, res: dict, pw):
         exp[fmt] = len(list(csv.DictReader(io.StringIO(body)))) if fmt == "csv" else len(json.loads(body)["features"])
     steps["export"] = {"ui_count": n_sz, **exp, "equal": exp["csv"] == exp["geojson"] == n_sz}
     page.keyboard.press("Escape")
-    page.mouse.click(size[0] // 2, 40)
+    page.mouse.click(100, 60)  # close the menu: the brand line of the left column (the map toolbar moved, §33)
     # save query → reset → run saved
     page.click("[data-testid=act-queries]")
     page.fill("[data-testid=q-name]", f"Демо Cózar {tag}")

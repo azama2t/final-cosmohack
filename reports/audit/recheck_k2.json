@@ -140,7 +140,8 @@
    "status": "insufficient_data",
    "concentration_status": "unavailable",
    "flags": [
-    "ship"
+    "ship",
+    "shallow"
    ],
    "detection_label": "ложное срабатывание (признаки судна / кильватера / шва) — недостаточно данных",
    "scenario_shown": null,
@@ -153,7 +154,8 @@
    "status": "insufficient_data",
    "concentration_status": "unavailable",
    "flags": [
-    "ship"
+    "ship",
+    "shallow"
    ],
    "detection_label": "ложное срабатывание (признаки судна / кильватера / шва) — недостаточно данных",
    "scenario_shown": null,
@@ -178,13 +180,11 @@
  "by_kind_status_scenario_cozar": {
   "demo|detected|False|False": 9,
   "demo|detected|False|True": 14,
-  "drift|detected|False|False": 7,
-  "drift|insufficient_data|False|False": 33,
+  "drift|detected|False|False": 5,
+  "drift|insufficient_data|False|False": 36,
   "drift|not_detected|False|False": 8,
-  "drift|not_informative|False|False": 1,
-  "live|detected|False|False": 61,
-  "live|insufficient_data|False|False": 131,
-  "live|not_detected|False|False": 20,
-  "live|not_informative|False|False": 2
+  "live|detected|False|False": 50,
+  "live|insufficient_data|False|False": 144,
+  "live|not_detected|False|False": 20
  }
 }

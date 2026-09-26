@@ -223,3 +223,8 @@
 .ph-samples button {
   white-space: nowrap;
 }
+.ph-src {
+  font-size: 11px;
+  color: var(--accent, #ffc53d);
+  opacity: 0.9;
+}

@@ -48,10 +48,25 @@ IMAGES = {
     "ladder": ("../../../../docs/img/units_ladder.png", "10_units_ladder.jpg", None),
 }
 
+# основная часть §32 Б: ключ -> (кандидаты от корня репо по приоритету, имя в reports/case_deck_img, обрезка)
+# свежие скрины v2 (http://localhost:8070, 1920×1080) кладутся в presentation/img/; пока их нет — прежние скрины
+IMAGES_MAIN = {
+    "photo": (("presentation/img/photo.png", "reports/photo_count/ui_photo_v2.png"), "20_photo.jpg", None),
+    "svc_earth": (("presentation/img/earth.png",), "21_svc_earth.jpg", None),
+    "svc_card": (("presentation/img/card.png", "reports/case_demo/1920_02_zone_card.png"), "22_svc_card.jpg", None),
+    "svc_studio": (("presentation/img/studio.png",), "25_svc_studio.jpg", None),
+    "svc_photo": (("presentation/img/photo.png", "reports/photo_count/ui_photo_v2.png"), "23_svc_photo.jpg", None),
+    "svc_export": (("presentation/img/export.png", "reports/case_demo/1920_07_export_menu.png"), "24_svc_export.jpg", None),
+}
+
 # основная часть деки и речи (SPEC-GAPS.md: ТЗ не задаёт время → основная речь ≤ 5:00, ≤ 14 слайдов); остальное — «Приложение»
 MAIN_LIMIT_S = 300
 MAIN_MAX_SLIDES = 14
 APPENDIX_FROM_MAIN = ("Данные и отбор", "Эксперимент «снимок vs all_litter»", "Дополнительные функции")
+# прежние подробные слайды, которые остаются в приложении (§32 Б: основная часть — main_slides)
+APPENDIX_KEEP = ("Реестр пар и окно синхронизации", "Данные и отбор", "Детектор", "Концентрация",
+                 "Эксперимент «снимок vs all_litter»", "Собственный вклад и ключевые решения", "Дополнительные функции")
+OUT_PRES = ROOT / "presentation"
 
 MISSING: list[str] = []
 USED: dict[str, object] = {}  # путь в final_numbers.json -> значение, подставленное в тексты
@@ -392,7 +407,15 @@ def load() -> dict:
     k["sz_demo_scene_id"] = N(sz + "demo.scene_id"); k["sz_demo_wind"] = N(sz + "demo.wind10m_ms")
     k["sz_demo_marida_same_tile"] = N(sz + "demo.marida_same_tile"); k["sz_demo_mados_verdict"] = N(sz + "demo.mados_verdict")
     k["mt_n_scenes"] = N(c + "sections.marida_test.n_scenes")
+    k["S2_dev_median_c"] = N(c + "conc.S2.dev_median_c")
     return k
+
+
+def adis_size(profile) -> str:
+    """Размерный класс из строки профиля ADIS (например «> 10 см»)."""
+    import re
+    m = re.search(r">\s?\d+(?:[.,]\d+)?\s?см", str(profile or ""))
+    return m.group(0).replace(">", "> ").replace(">  ", "> ") if m else "—"
 
 
 def size_ru(s) -> str:
@@ -527,6 +550,246 @@ def search_slides(k: dict) -> list[dict]:
         source="reports/oil/test.json, control.json; docs/OIL.md",
         speech=("Нефть — отдельный эксперимент. На разметке MADOS голова лучше простого индекса, но известный разлив Wakashio на "
                 "реальном снимке она не нашла. Поэтому слой выключен и подписан как эксперимент."),
+    ))
+    return S
+
+
+# ----------------------------------------------------------------------------------------------- основная часть (§32 Б)
+def main_slides(k: dict) -> list[dict]:
+    """Основная часть: 13 слайдов, крупные числа, минимум текста, у каждой картинки подпись-вывод.
+    kind="main": layout left (числа слева, картинка/диаграмма/таблица справа) | full (картинка во всю ширину) |
+    grid (до 3 картинок) | text (крупные тезисы). notes — «подробнее» в заметках докладчика (вслух не читается)."""
+    S = []
+    S.append(dict(
+        kind="main", layout="left", section="Задача и целевая величина",
+        title="Сколько плавающего пластика в море: шт./км² — по полю, место скопления — по снимку",
+        kpis=[("шт./км²", "целевая единица: материал + размерный класс + единица — профили не смешиваем")],
+        bullets=["Пользователь — эколог по мониторингу: карта находок → зона на снимке → полевое число рядом → выгрузка",
+                 "Детектор (класс Marine Debris MARIDA) видит любой плавающий мусор, не только пластик"],
+        table=[["Профиль", "Что считаем", "Событий"],
+               ["S2 Саргассово, с судна", f"суммарный пластик {size_ru(k['pr_S2_size'])}", num(k["pr_S2_n"], 0)],
+               ["S1 GPGP, трал", f"суммарный пластик {size_ru(k['pr_S1_size'])}", num(k["pr_S1_n"], 0)],
+               ["S3 / S4, с судна", f"весь мусор {size_ru(k['pr_S3_size'])} / {size_ru(k['pr_S4_size'])} — не пластик",
+                f"{num(k['pr_S3_n'], 0)} · {num(k['pr_S4_n'], 0)}"],
+               ["ADIS, камера судна", f"плавающие предметы {adis_size(k['af_profile'])}", num(k["af_n_segments"], 0)]],
+        table_w=(0.3, 0.52, 0.18),
+        caption="Вывод: основная целевая величина — суммарный пластик S2, шт./км²; весь мусор S3/S4 — только для экспериментов",
+        source="configs/case_selection.yaml; reports/quantity/*.json (final_numbers → case.sections.quantity.profiles)",
+        speech=("Задача — сколько плавающего пластика в море, в штуках на квадратный километр. Пользователь — эколог: он видит "
+                "находки на карте, открывает зону на снимке, сверяет с полем и выгружает результат. Целевая величина — это "
+                "материал, размер и единица вместе; профили разных методов мы не смешиваем."),
+        notes=(f"Основной профиль — S2: суммарный пластик {size_ru(k['pr_S2_size'])}, визуальный учёт с судна, {pl(k['pr_S2_n'], *EV)}. "
+               f"S1 — трал {size_ru(k['pr_S1_size'])}, только полевая проверка. S3/S4 — весь мусор, не пластик. ADIS — камера судна, "
+               f"{k['af_profile']}."),
+    ))
+    S.append(dict(
+        kind="main", layout="left", section="Данные и воронка",
+        title=(f"{num(k['p_events'], 0)} событий CSV → {num(k['p_events_accept_drift'], 0)} синхронных пар; "
+               f"калибровочных пар «снимок → шт./км²» — {num(k['ql_calibration_pairs'], 0)}"),
+        kpis=[(f"{num(k['p_events'], 0)} → {num(k['p_events_accept_meta'], 0)} → {num(k['p_quality_accept'], 0)} → "
+               f"{num(k['p_events_accept_drift'], 0)}",
+               "события CSV → по дате и облакам → по маскам качества → синхронно с учётом дрейфа"),
+              (num(k["ad_A"], 0), f"пар по месту и времени ADIS (камера судна); видимый сигнал — {num(k['ql_visible_signal'], 0)} "
+                                  f"из {num(k['ql_visible_signal_of'], 0)}"),
+              (num(k["ql_calibration_pairs"], 0), f"калибровочных пар; для коэффициента в ×/÷2 нужно "
+                                                  f"{num(k['q_n_pairs_k_x2_min'], 0)}–{num(k['q_n_pairs_k_x2_max'], 0)}")],
+        bullets=[f"Cózar и др., 2024: «{k['q_quote_short']}»"],
+        image="funnel",
+        caption="Вывод: для пластика снимков в окне нет, а где снимок и счёт совпали — предметы меньше пикселя; калибровать не на чем",
+        source="docs/img/funnel.png; reports/search/*.md; reports/case_pairs/summary.md (final_numbers → case.pairs, case.sections.search)",
+        speech=(f"Мы искали пары «снимок плюс полевой счёт». Из {num(k['p_events'], 0)} событий CSV синхронных с учётом дрейфа — "
+                f"{num(k['p_events_accept_drift'], 0)}. В открытых данных ADIS нашли {num(k['ad_A'], 0)} пар по месту и времени, но "
+                f"предметы там меньше пикселя. Калибровочных пар — {num(k['ql_calibration_pairs'], 0)}; у авторов крупнейшего "
+                f"набора полос, Cózar 2024, тоже только искусственные мишени."),
+        notes=(f"Цитата полностью: «{k['q_quote']}» — {k['q_quote_ref']}, doi {k['q_quote_doi']}. На "
+               f"{num(k['ad_A_with_items'], 0)} синхронных отрезках ADIS с единичными предметами детектор предметы не увидел; это "
+               f"согласуется с физикой (доля покрытия ≈ {k['ad_coverage_frac_text']}), но не задаёт общий предел для всех скоплений."),
+    ))
+    S.append(dict(
+        kind="main", layout="full", section="Решение: лестница единиц",
+        title="Решение — лестница единиц: предмет на фото → плотность на кадре → шт./км² маршрута → зона на снимке",
+        image="ladder",
+        caption="Вывод: у каждой ступени своя проверка и своя метрика; между ступенями без калибровки не переходим",
+        source="docs/QUANTITY.md; docs/img/units_ladder.png (final_numbers → case.sections.photo_count, quantity, scene_zones)",
+        speech=("Поэтому решение — лестница единиц. На фото счётчик считает предметы. Если известна площадь кадра — это "
+                "плотность. По маршруту судна — штуки на квадратный километр. Со спутника — место и площадь зоны. У каждой "
+                "ступени своя проверка, и без калибровки мы между ними не прыгаем."),
+        notes="Сквозной путь в сервисе: спутник находит зону → детальное фото над ней → счётчик → шт./км² кадра → сверка с полем.",
+    ))
+    S.append(dict(
+        kind="main", layout="left", section="Детектор",
+        title=f"Детектор скоплений по Sentinel-2: F1 {num(k['d_lgbm_f1'], 3)} на test MARIDA — лучше RandomForest, U-Net авторов и индексов",
+        kpis=[(num(k["d_lgbm_f1"], 3), f"F1 на test MARIDA {ci(k['d_lgbm_ci'], 3)}, {num(k['mt_n_scenes'], 0)} сцен, test один раз"),
+              (sgn(k["d_delta"], 3), f"к RandomForest по протоколу MARIDA {ci(k['d_delta_ci'], 3)}")],
+        bullets=[f"Дообучение на новых B/D: {num(k['v2_n_variants'], 0)} вариантов — правило, записанное заранее, не прошёл ни один; остаётся weights/lgbm"],
+        bars=dict(title=f"F1 Marine Debris, test MARIDA ({num(k['bl_n_scenes'], 0)} сцен)", maxv=1.0, fmt=3, items=[
+            ("LightGBM (наш)", k["bl_lgbm"], True),
+            ("RandomForest, протокол MARIDA", k["bl_rf_argmax"], False),
+            ("U-Net MARIDA, веса авторов", k["bl_unet_argmax"], False),
+            ("окно FDI × NDVI", k["d_fdi_ndvi_box_f1"], False)],
+            note="Вывод: на том же test пиксельный LightGBM лучше всех бейзлайнов; пороги индексов с val не переносятся"),
+        source="reports/case_detector/compare.md, metrics.json; reports/detector_v2/unet_test.json, decision.json",
+        speech=(f"Первая ступень со спутника — детектор скоплений. Пиксельный LightGBM на test MARIDA даёт F1 {num(k['d_lgbm_f1'], 3)}: "
+                f"RandomForest по протоколу авторов — {num(k['d_rf_argmax_f1'], 3)}, их U-Net — {num(k['bl_unet_argmax'], 3)}. "
+                f"Порог выбран на val, test посчитан один раз. Класс — любой плавающий мусор, не только пластик."),
+        notes=(f"Ошибки: из {num(k['d_fp_total'], 0)} ложных {num(k['d_fp_ship_org_pct'], 0)} % — суда и природная органика. "
+               f"Дообучение: ΔF1 val от {num(k['v2_df1_min'], 3)} до {num(k['v2_df1_max'], 3)} — {k['v2_note']}."),
+    ))
+    S.append(dict(
+        kind="main", layout="left", section="Разбор ошибок на сложном фоне",
+        title="Сложный фон: нити, пена и суда спектрально близки — выигрыш на одном ломает другое",
+        kpis=[(f"{num(k['nb_cozar_pct_max'], 0)} %", "полнота на нитях Cózar, если учить на естественных скоплениях B"),
+              (f"{num(k['nb_foam_fa_max'], 0)}/{num(k['nb_foam_n'], 0)}", "ложных на пене у того же варианта")],
+        table=[["Вариант", "Нити · суда · пена"],
+               ["В сервисе: weights/lgbm", f"{num(k['v2_reference_cozar_pct'], 0)} % · {num(k['v2_reference_vessels_pct'], 0)} % · {num(k['v2_ref_foam'], 0)}/{num(k['nb_foam_n'], 0)}"],
+               ["+ естественные B", f"{num(k['nb_cozar_pct_min'], 0)}–{num(k['nb_cozar_pct_max'], 0)} % · {num(k['nb_vessels_pct_min'], 0)}–{num(k['nb_vessels_pct_max'], 0)} % · {num(k['nb_foam_fa_max'], 0)}/{num(k['nb_foam_n'], 0)}"],
+               ["+ суда как отрицательные D", f"{num(k['v2_vessels_d_cozar_pct'], 0)} % · {num(k['v2_vessels_d_vessels_pct'], 0)} % · {num(k['v2_vd_foam'], 0)}/{num(k['nb_foam_n'], 0)}"]],
+        table_w=(0.5, 0.5),
+        caption="Вывод: правило принятия не прошёл ни один вариант — оставили прежний детектор и назвали его слабость (суда)",
+        source="reports/detector_v2/experiments.md, decision.json; configs/detector_v2_eval.yaml",
+        speech=(f"Главная трудность — сложный фон. Если учить на естественных нитях, полнота растёт до {num(k['nb_cozar_pct_max'], 0)} "
+                f"процентов, но пена и суда тоже становятся мусором. Добавим суда как отрицательные — теряются нити. Правило, "
+                f"записанное заранее, не прошёл ни один вариант, поэтому в сервисе прежний детектор, а суда мы отсеиваем фильтрами."),
+        notes=("Нить — хотя бы один пиксель детектора на окне нити каталога Cózar 2024; суда — рамки судов (D); пена — "
+               "окна пены. Test MARIDA при подборе не читался."),
+    ))
+    S.append(dict(
+        kind="main", layout="left", section="Концентрация по полю",
+        title=f"Главный количественный результат: {num(k['q_pooled_C'], 1)} шт./км² [{rng(k['qf_boot_lo95'], k['qf_boot_hi95'])}] — пластик S2 по полю",
+        kpis=[(num(k["q_pooled_C"], 1), f"шт./км², суммарный пластик {size_ru(k['pr_S2_size'])}: {num(k['q_pooled_N'], 0)} шт. / "
+                                        f"{num(k['q_pooled_A_km2'], 2)} км²; 95 % по дням рейса [{rng(k['qf_boot_lo95'], k['qf_boot_hi95'])}]"),
+              (num(k["af_C"], 2), f"шт./км², ADIS, предметы {adis_size(k['af_profile'])} [{rng(k['af_lo'], k['af_hi'], 2)}]; калибровка авторов по тралу — "
+                                  f"{num(k['afa_C'], 2)}")],
+        bullets=[f"На карте — медиана профиля {num(k['S2_dev_median_c'], 1)} шт./км² (типичное событие); "
+                 f"{num(k['q_pooled_C'], 1)} — ΣN/ΣA всех событий; ошибка медианы на отложенном test — MAE {num(k['S2_t_median_mae'], 1)}"],
+        table=[["Отложенный test", "Модель", "Медиана"],
+               [f"S2, MAE ({num(k['S2_t_n_test'], 0)} событий)", num(k["S2_t_main_mae"], 1), num(k["S2_t_median_mae"], 1)],
+               [f"S1, MAE ({num(k['S1_t_n_test'], 0)} событий)", num(k["S1_t_main_mae"], 1), num(k["S1_t_median_mae"], 1)],
+               ["S2, покрытие 90 %-интервала", f"{num(k['S2_t_main_coverage90_pct'], 0)} %", f"{num(k['S2_t_median_coverage90_pct'], 0)} %"]],
+        table_w=(0.5, 0.25, 0.25),
+        caption="Вывод: модели не лучше медианы на отложенном test → на карте медиана профиля с честным интервалом",
+        source="reports/case_conc/final_test.json; reports/quantity/field_intervals.md, adis_forecast.md",
+        speech=(f"Главный количественный результат — по полю: C равно N на A. Для пластика S2 — {num(k['q_pooled_C'], 1)} штуки на "
+                f"квадратный километр, 95 процентов по дням рейса — от {num(k['qf_boot_lo95'], 1)} до {num(k['qf_boot_hi95'], 1)}. "
+                f"На отложенном test модели не лучше медианы — {num(k['S2_t_main_mae'], 1)} против {num(k['S2_t_median_mae'], 1)}, "
+                f"поэтому на карте медиана."),
+        notes=(f"Интервал Пуассона [{rng(k['q_lo95'], k['q_hi95'])}] — только ошибка счёта; разброс между днями (sd ln C ≈ "
+               f"{num(k['q_sd_day'], 2)}) он не учитывает. Одно новое место: {rng(k['qf_event_lo95'], k['qf_event_hi95'])} шт./км². "
+               f"ADIS: модели по регионам не лучше медианы ({k['af_verdict']}). Калибровка авторов ADIS — {k['afa_source']}, "
+               f"типичный интервал отрезка {rng(k['afa_lo_typ'], k['afa_hi_typ'])}; наше число без поправки не заменяем."),
+    ))
+    S.append(dict(
+        kind="main", layout="left", section="Счётчик предметов по фото",
+        title=f"Счётчик по фото: ошибка {num(k['pc_mae'], 2)} шт./кадр на отложенных сессиях; при известной площади — шт./км² кадра",
+        kpis=[(num(k["pc_mae"], 2), f"шт./кадр — ошибка числа, {num(k['pc_n_images'], 0)} фото FML {ci(k['pc_mae_ci95'], 2)}; "
+                                    f"медиана без модели — {num(k['pc_baseline_median_count'], 2)}"),
+              (num(k["pa_density_mae_km2"], 0), f"шт./км² — ошибка плотности на кадре {num(k['pa_frame_area_m2'], 0)} м² "
+                                               f"(аэро, берег); медиана — {num(k['pa_baseline_density_mae_km2'], 0)}")],
+        bullets=["Состав: один класс «мусор» — по материалам не делим («состав не определён»)"],
+        image="photo",
+        caption="Вывод: штуки считаем там, где предмет виден — на фото; шт./км² — только при известной площади кадра",
+        source="reports/photo_count/eval_grouped.json, area_winans.json; docs/PHOTO_COUNT.md",
+        speech=(f"Штуки видно только на детальном фото. Счётчик предметов ошибается на {num(k['pc_mae'], 2)} предмета на кадр на "
+                f"отложенных сессиях съёмки, медиана без модели — {num(k['pc_baseline_median_count'], 2)}. Если площадь кадра известна, "
+                f"как у аэросъёмки, получаем штуки на квадратный километр. Состав по материалам не выдаём."),
+        notes=(f"FML (камера у воды, {k['pc_license']}): mAP@0,5 {num(k['pc_ap50'], 3)}, точное число у {num(k['pc_exact_pct'], 0)} % кадров. "
+               f"Аэро: {k['pa_dataset']}, GSD {num(k['pa_gsd_m'], 2)} м, {num(k['pa_n_test_frames'], 0)} отложенных кадров, ошибка "
+               f"числа {num(k['pa_count_mae'], 2)} шт./кадр ({k['pa_license']}). Это отдельный модуль, не спутник."),
+    ))
+    S.append(dict(
+        kind="main", layout="left", section="Спутниковые зоны на отложенной сцене",
+        title=(f"Отложенная сцена {k['sz_demo_tile']} ({k['sz_demo_date']}): {num(k['sz_demo_n_zones_cozar'], 0)} из "
+               f"{num(k['sz_demo_n_zones'], 0)} зон совпали с нитями Cózar"),
+        kpis=[(f"{num(k['sz_demo_n_zones_cozar'], 0)} / {num(k['sz_demo_n_zones'], 0)}",
+               "зон детектора совпали с разметкой Cózar (уровень B); сцена не участвовала в обучении и подборе порога"),
+              (f"{num(k['sz_by_level_b'], 0)} + {num(k['sz_by_unverified'], 0)}",
+               f"находок детектора на {num(k['sz_n_scenes_eval'], 0)} сценах: {num(k['sz_by_level_b'], 0)} совпали с Cózar, "
+               f"{num(k['sz_by_unverified'], 0)} требуют проверки; ещё {num(k['sz_by_insufficient'], 0)} — недостаточно данных или "
+               f"ложные, {num(k['sz_by_not_detected'], 0)} — не обнаружено")],
+        image="demo_card",
+        caption=f"Вывод: снимок даёт место, площадь и статус зоны; шт./км² — «{k['sz_zone_main_status']}»",
+        source="data/case/scene_zones; reports/case_demo/heldout_check.json, demo_path.json (final_numbers → case.sections.scene_zones)",
+        speech=(f"Теперь спутник на сцене, которую модель не видела. На отложенной сцене {k['sz_demo_tile']} "
+                f"{num(k['sz_demo_n_zones_cozar'], 0)} из {num(k['sz_demo_n_zones'], 0)} зон совпали с нитями, найденными людьми. "
+                f"У зоны — площадь, доля покрытия и статус; суда, пена, блик и сильный ветер — «недостаточно данных». Штук по снимку не выдаём."),
+        notes=(f"Сцена {k['sz_demo_scene_id']}: в MARIDA того же тайла нет, MADOS по содержимому — {k['sz_demo_mados_verdict']}; "
+               f"ветер {num(k['sz_demo_wind'], 1)} м/с. Пример зоны {k['sz_example_zone_id']}: {num(k['sz_example_area_km2'], 2)} км², "
+               f"вероятность {num(k['sz_example_prob_mean'], 2)}, модель sha256 {k['sz_example_sha256_short']}."),
+    ))
+    S.append(dict(
+        kind="main", layout="grid", section="Сервис: путь эколога",
+        title="Сервис: Земля с находками → точка → сцена и карточка зоны → студия → назад к следующей точке",
+        images=[("svc_earth", "1. Обзор Земли: находки обработанных сцен сразу, без формы"),
+                ("svc_card", "2. Точка → сцена и карточка: что найдено, когда, площадь, уверенность"),
+                ("svc_studio", "3. «В студию» — работа с зоной; «Назад к карте» — к той же точке обзора")],
+        caption="Вывод: путь эколога — Земля → точка → карточка → студия → назад к следующей находке",
+        source="http://localhost:8070 (v2); docs/DEMO.md",
+        speech=("Сервис. При открытии — Земля с реальными находками обработанных сцен. Клик по точке — сцена и карточка зоны: "
+                "что найдено, когда, площадь, уверенность и откуда каждое число. Из карточки — в студию, кнопкой «Назад» — "
+                "к той же точке обзора и к следующей находке."),
+        notes="Показ вживую — docs/DEMO.md. Полевые шт./км² другого места не выдаются за плотность зоны: «не определено по этому снимку».",
+    ))
+    S.append(dict(
+        kind="main", layout="grid", section="Сервис: фото и выгрузка",
+        title=f"Счётчик по фото и выгрузка: карта = CSV = GeoJSON ({num(k['sz_export_ui'], 0)} = "
+              f"{num(k['sz_export_csv'], 0)} = {num(k['sz_export_geojson'], 0)})",
+        images=[("svc_photo", "«Фото»: рамки и число предметов, площадь кадра → шт./км²; состав не определён"),
+                ("svc_export", "Выгрузка GeoJSON/CSV и повтор сохранённого запроса")],
+        caption="Вывод: у каждого числа подписан источник — поле, фото, снимок или «нет данных»",
+        source="reports/case_demo/*.png; reports/photo_count/ui_photo_v2.png; docs/CONTRACTS_V3.md",
+        speech=("В карточке у каждого числа подписан источник: измерено в поле, посчитано по фото или по снимку. Режим «Фото» "
+                "считает предметы на загруженном кадре. Выгрузка GeoJSON и CSV совпадает с картой, запрос можно сохранить и повторить."),
+        notes=f"Выгрузка сверяется тестом: UI {num(k['sz_export_ui'], 0)}, CSV {num(k['sz_export_csv'], 0)}, GeoJSON {num(k['sz_export_geojson'], 0)} строк.",
+    ))
+    S.append(dict(
+        kind="main", layout="text", section="Ограничения: что мы НЕ утверждаем",
+        title="Что мы НЕ утверждаем",
+        bullets=[f"шт./км² по снимку — не выдаём: калибровочных пар {num(k['ql_calibration_pairs'], 0)}; «концентрация по снимку не подтверждена»",
+                 f"«Пластик» по снимку — нет: детектор видит любой плавающий мусор; суда — известная слабость ({num(k['v2_reference_vessels_pct'], 0)} % судов)",
+                 f"Предел обнаружения не доказан: на {num(k['ad_A_with_items'], 0)} отрезках ADIS с единичными предметами детектор их не увидел — "
+                 f"согласуется с физикой, но общий предел для всех скоплений не задаёт",
+                 "Сильный ветер: «не обнаружено» → «недостаточно данных» (правило Cózar 2024)",
+                 f"Поле: S2 — один рейс; интервал одного нового места широкий ({rng(k['qf_event_lo95'], k['qf_event_hi95'], 0)} шт./км²)",
+                 "Счётчик по фото на реку и спутник без дообучения не переносится"],
+        source="README.md «Ограничения»; reports/report.md; docs/QUANTITY.md",
+        speech=("Что мы не утверждаем. Штук по снимку — нет, калибровочных пар ноль. Пластик по снимку — нет, детектор видит любой "
+                "мусор и путает суда. Предел обнаружения не доказан. При сильном ветре — «недостаточно данных». Поле — один рейс, "
+                "а счётчик по фото без дообучения на реку не переносится."),
+        notes=(f"Test концентрации не абсолютно нетронутый: {k['ft_limitation']}. Порог ветра — 5 м/с из Methods Cózar 2024, "
+               "не подбирался."),
+    ))
+    S.append(dict(
+        kind="main", layout="row", section="Развитие",
+        title="Развитие: спутник находит зону → детальный снимок над ней → счёт предметов → шт./км² → сверка с полем",
+        kpis=[(f"{num(k['q_n_pairs_k_x2_min'], 0)}–{num(k['q_n_pairs_k_x2_max'], 0)}",
+               "калибровочных пар «снимок → шт./км²» хватит для коэффициента в ×/÷2"),
+              (num(k["q_n_pairs_r05"], 0), "пар — чтобы увидеть связь r = 0.5")],
+        bullets=["Трансекты и пролёты дронов под пролёт Sentinel-2, время записано",
+                 "Детальные снимки (дрон, VHR) над найденными зонами → счётчик → шт./км² кадра",
+                 "Дообучить счётчик на реке и дронах; классы материалов — с матрицей ошибок",
+                 "Больше рейсов и сезонов для поля; дрейф по течениям и ветру"],
+        source="docs/QUANTITY.md; docs/research/marine_quantity/DECISION.md; reports/quantity/calibration.json",
+        speech=(f"Развитие — замкнуть лестницу. Спутник находит зону, над ней делается детальный снимок с дрона, счётчик даёт "
+                f"штуки на квадратный километр, их сверяем с полем. Для калибровки хватит {num(k['q_n_pairs_k_x2_min'], 0)}–"
+                f"{num(k['q_n_pairs_k_x2_max'], 0)} таких пар."),
+        notes="Проверено: доступа к VHR над положительными отрезками ADIS в тот же день нет; поэтому это следующий шаг, а не результат.",
+    ))
+    team = ROOT / "presentation" / "team.txt"
+    team_line = team.read_text(encoding="utf-8").strip() if team.exists() else ""
+    S.append(dict(
+        kind="main", layout="row", section="Воспроизводимость, команда, репозиторий",
+        title=f"Одна команда без сети — {num(k['run_s'], 1)} с; чистый клон до карты — {k['cc_total']} мин; числа из одного файла",
+        kpis=[(f"{num(k['run_s'], 1)} с", "run.ps1 -Case all -Offline, CPU, без сети"),
+              (f"{k['cc_total']} мин", "от git clone до карты на экране"),
+              (f"{num(k['n_tests'], 0)} passed", f"тесты кейса; skipped {num(k['t_skipped'], 0)}, failed {num(k['t_failed'], 0)}")],
+        bullets=["Репозиторий: github.com/azama2t/final-cosmohack",
+                 f"Все числа — reports/final_numbers.json; отпечаток прогона {k['fingerprint']}",
+                 *([f"Команда: {team_line}"] if team_line else []),
+                 "Спасибо! Вопросы — в приложении и в presentation/qa.md"],
+        source=f"{k['cc_file']}; reports/case_run/run_summary.json; README.md «Как пересчитать»",
+        speech=(f"Всё воспроизводится одной командой без сети за {num(k['run_s'], 1)} секунды, чистый клон до карты — "
+                f"{k['cc_total']} минуты, числа в README, отчёте и этой презентации сверяет тест. Спасибо, готовы к вопросам."),
+        notes=f"Тесты кейса ({k['t_when']}): {num(k['n_tests'], 0)} passed. Приложение — подробные слайды для вопросов.",
     ))
     return S
 
@@ -756,12 +1019,10 @@ def slides(k: dict) -> list[dict]:
         speech=(f"Всё воспроизводится одной командой без сети; чистый клон до карты — {k['cc_total']} минуты, числа совпали. "
                 f"Спасибо, готовы к вопросам."),
     ))
-    # §11: пайплайн поиска данных — 3 слайда сразу после «Реестр пар» (воронка, пары A, B/D); остальное — в приложение
+    # §32 Б: основная часть — main_slides (13 слайдов); прежние подробные слайды и «Расследование данных» §11 — приложение
     ss = search_slides(k)
-    at = next(i for i, s in enumerate(S) if s["section"].startswith("Реестр пар")) + 1
-    S[at:at] = ss[:4]
-    appendix = ss[4:] + [s for s in S if s["section"] in APPENDIX_FROM_MAIN]
-    S = [s for s in S if s["section"] not in APPENDIX_FROM_MAIN]
+    appendix = [s for s in ss if s["section"] != "Разбор ошибок на сложном фоне"] + [s for s in S if s["section"] in APPENDIX_KEEP]
+    S = main_slides(k)
     # тайминг основной части по объёму речи (≈ 130 слов в минуту), минимум 12 с на слайд; регламент — SPEC-GAPS.md
     t0 = 0
     for s in S:
@@ -784,6 +1045,19 @@ def prepare_images() -> dict:
 
     IMG_DIR.mkdir(parents=True, exist_ok=True)
     out = {}
+    for key, (cands, dst, box) in IMAGES_MAIN.items():
+        # основная часть §32 Б: первый найденный кандидат (свежий скрин presentation/img → прежний скрин); нет — слайд-заглушка
+        s = next((ROOT / c for c in cands if (ROOT / c).exists()), None)
+        d = IMG_DIR / dst
+        if s is None:
+            continue
+        im = Image.open(s).convert("RGB")
+        if box and im.width >= box[2]:
+            im = im.crop(box)
+        if im.width > 1920:
+            im = im.resize((1920, round(im.height * 1920 / im.width)), Image.LANCZOS)
+        im.save(d, "JPEG", quality=88, optimize=True)
+        out[key] = d
     for key, (src, dst, box) in IMAGES.items():
         s, d = SHOTS / src, IMG_DIR / dst
         if s.exists():
@@ -892,11 +1166,118 @@ def build_pptx(S: list[dict], imgs: dict, out: Path, start: int = 1) -> None:
                 if j == 1:
                     tf.paragraphs[0].alignment = PP_ALIGN.RIGHT
 
+    def table_n(slide, x, y, w, rows, widths):
+        n, m = len(rows), len(rows[0])
+        import math
+        hs = [0.2 + 0.3 * max(math.ceil(len(str(v)) / max(1.0, w * widths[j] * 7.2 - 1)) for j, v in enumerate(row))
+              for row in rows]
+        shp = slide.shapes.add_table(n, m, Inches(x), Inches(y), Inches(w), Inches(sum(hs)))
+        tbl = shp.table
+        for i, hh in enumerate(hs):
+            tbl.rows[i].height = Inches(hh)
+        for j in range(m):
+            tbl.columns[j].width = Inches(w * widths[j])
+        for i, row in enumerate(rows):
+            for j, val in enumerate(row):
+                cell = tbl.cell(i, j)
+                cell.fill.solid()
+                cell.fill.fore_color.rgb = rgb(PANEL if i else BASE)
+                cell.margin_left = cell.margin_right = Inches(0.08)
+                cell.margin_top = cell.margin_bottom = Inches(0.04)
+                tf = cell.text_frame
+                tf.word_wrap = True
+                tf.paragraphs[0].text = ""
+                r = tf.paragraphs[0].add_run()
+                r.text = str(val)
+                r.font.size = Pt(15)
+                r.font.name = "Segoe UI"
+                r.font.bold = i == 0 or j > 0
+                r.font.color.rgb = rgb(INK)
+                if j > 0 and m > 2:
+                    tf.paragraphs[0].alignment = PP_ALIGN.RIGHT if str(val)[:1].isdigit() else PP_ALIGN.LEFT
+        return sum(hs)
+
+    def picture(slide, key, x, y, w, hmax):
+        """Картинка по ширине w, не выше hmax, по центру колонки; возвращает её высоту. Нет файла — рамка-заглушка."""
+        from PIL import Image
+        if key not in imgs:
+            rect(slide, x, y, w, hmax, PANEL)
+            text(slide, x + 0.3, y + hmax / 2 - 0.4, w - 0.6, 0.8,
+                 "Скрин сервиса v2 (http://localhost:8070) — будет вставлен после финальной правки интерфейса",
+                 size=16, color=MUTED, align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
+            return hmax
+        p = imgs[key]
+        with Image.open(p) as im:
+            ar = im.height / im.width
+        h = min(w * ar, hmax)
+        wi = h / ar
+        slide.shapes.add_picture(str(p), Inches(x + (w - wi) / 2), Inches(y), Inches(wi), Inches(h))
+        return h
+
+    def render_main(sl, s):
+        text(sl, 0.5, 0.5, 12.3, 1.05, s["title"], size=28 if len(s["title"]) < 80 else 24, bold=True)
+        lay = s["layout"]
+        y0 = 1.75
+        if lay == "left":
+            lx, lw, rx_, rw_ = 0.5, 4.55, 5.35, 7.5
+            y = y0
+            kp = s.get("kpis", [])
+            step = min(1.6, 4.3 / max(1, len(kp)))
+            for val, lab in kp:
+                big = 40 if len(val) <= 9 else 30 if len(val) <= 16 else 24
+                text(sl, lx, y, lw, 0.72, val, size=big, bold=True, color=ACCENT)
+                text(sl, lx, y + 0.72, lw, 0.7, lab, size=13, color=INK)
+                y += step
+            if s.get("bullets"):
+                text(sl, lx, y, lw, 6.8 - y, s["bullets"], size=13, color=MUTED, bullet=True, space=6)
+            if "image" in s:
+                h = picture(sl, s["image"], rx_, y0, rw_, 4.3)
+                text(sl, rx_, y0 + h + 0.1, rw_, 0.6, s["caption"], size=15, bold=True, color=INK)
+            elif "bars" in s:
+                bars(sl, rx_, y0, rw_, s["bars"])
+            elif "table" in s:
+                h = table_n(sl, rx_, y0, rw_, s["table"], s.get("table_w", (0.5, 0.5)))
+                if s.get("caption"):
+                    text(sl, rx_, y0 + h + 0.35, rw_, 0.8, s["caption"], size=15, bold=True, color=INK)
+        elif lay == "full":
+            h = picture(sl, s["image"], 0.5, y0 - 0.1, 12.3, 4.6)
+            text(sl, 0.5, y0 + h + 0.05, 12.3, 0.5, s["caption"], size=16, bold=True, color=INK, align=PP_ALIGN.CENTER)
+        elif lay == "grid":
+            n = len(s["images"])
+            gw = (12.3 - 0.3 * (n - 1)) / n
+            hmax = 0
+            for j, (key, cap) in enumerate(s["images"]):
+                gx = 0.5 + j * (gw + 0.3)
+                h = picture(sl, key, gx, y0, gw, 3.9)
+                hmax = max(hmax, h)
+                text(sl, gx, y0 + h + 0.08, gw, 0.7, cap, size=13, color=INK)
+            text(sl, 0.5, 6.25, 12.3, 0.5, s["caption"], size=16, bold=True, color=INK, align=PP_ALIGN.CENTER)
+        elif lay == "row":
+            kp = s.get("kpis", [])
+            n = max(1, len(kp))
+            tw = (12.3 - 0.3 * (n - 1)) / n
+            for j, (val, lab) in enumerate(kp):
+                tx = 0.5 + j * (tw + 0.3)
+                rect(sl, tx, y0, tw, 1.9, PANEL)
+                text(sl, tx + 0.25, y0 + 0.15, tw - 0.5, 0.8, val, size=40 if len(val) <= 12 else 30, bold=True, color=ACCENT)
+                text(sl, tx + 0.25, y0 + 1.0, tw - 0.5, 0.8, lab, size=14, color=INK)
+            if s.get("bullets"):
+                text(sl, 0.7, y0 + 2.3, 11.9, 6.8 - y0 - 2.3, s["bullets"], size=18, bullet=True, space=10)
+        elif lay == "text":
+            text(sl, 0.7, y0, 11.9, 5.0, s["bullets"], size=20, bullet=True, space=14)
+
     for i, s in enumerate(S, start):
         sl = prs.slides.add_slide(blank)
         sl.background.fill.solid()
         sl.background.fill.fore_color.rgb = rgb(BG)
         text(sl, 0.5, 0.22, 9, 0.3, f"{i:02d} · {s['section']}", size=12, color=ACCENT, bold=True)
+        if s.get("kind") == "main":
+            render_main(sl, s)
+            text(sl, 0.5, 6.95, 11.5, 0.35, "Источник: " + s["source"], size=10, color=MUTED)
+            text(sl, 12.2, 6.95, 0.7, 0.35, f"{s['time'][0]}", size=10, color=MUTED, align=PP_ALIGN.RIGHT)
+            sl.notes_slide.notes_text_frame.text = (f"[{s['time'][0]}–{s['time'][1]}] " + s["speech"]
+                                                    + ("\n\nЕсли спросят: " + s["notes"] if s.get("notes") else ""))
+            continue
         text(sl, 0.5, 0.5, 12.3, 1.05, s["title"], size=26 if len(s["title"]) < 95 else 23, bold=True,
              anchor=MSO_ANCHOR.TOP)
         right = any(key in s for key in ("image", "big", "bars", "table"))
@@ -936,9 +1317,9 @@ def speech_md(S: list[dict], k: dict) -> str:
     S = [s for s in S if not s.get("appendix")]
     L = [f"# Речь на защите кейса ({S[-1]['time'][1]})", "",
          "Генерируется `scripts/make_deck_case.py` из `reports/final_numbers.json`; руками не править. Тот же текст — "
-         "в заметках докладчика `reports/case_deck.pptx`. Демо на карте — отдельно, `docs/DEMO.md` (2 мин); вопросы — `docs/QA.md`.",
+         "в заметках докладчика `reports/case_deck.pptx` и `presentation/deck.pptx` (там же «Если спросят» — вслух не читается). Демо на карте — отдельно, `docs/DEMO.md` (2 мин); вопросы — `docs/QA.md`.",
          "",
-         f"Темп ≈ 130 слов в минуту, всего ≈ {pl(sum(len(s['speech'].split()) for s in S), 'слово', 'слова', 'слов')}. Если отстаём больше чем на 15 с — слайды «Собственный вклад» и «Ограничения и развитие» сокращаем до заголовка. "
+         f"Темп ≈ 130 слов в минуту, всего ≈ {pl(sum(len(s['speech'].split()) for s in S), 'слово', 'слова', 'слов')}. Если отстаём больше чем на 15 с — слайды «Разбор ошибок на сложном фоне» и «Развитие» сокращаем до заголовка. "
          f"Регламент в ТЗ не задан — допущение «основная речь ≤ 5:00»; после основной части — {pl(len(A), 'слайд', 'слайда', 'слайдов')} «Приложения» для вопросов, вслух не читаются.", "",
          "| Слайд | Время | О чём |", "|---|---|---|"]
     for i, s in enumerate(S, 1):
@@ -1028,6 +1409,20 @@ def demo_md(k: dict) -> str:
 Окно 1920×1080, браузер на весь экран. Проверить: слева «{num(k['exp_obs'], 0)} наблюдений · {num(k['zones'], 0)} полос»,
 в легенде — «{num(k['zones'], 0)} обследованных участков со снимками-кандидатами; 0 подтверждённых пар; для пластика снимков нет».
 
+## Порядок показа (как на слайдах «Сервис»): Земля → точка → карточка → студия → назад → другая точка
+
+1. **Обзор Земли** (открывается сразу, без формы): точки — находки детектора на уже обработанных сценах, у точки — дата
+   снимка и статус. «Это накопленные результаты обработки архива, а не съёмка всей Земли сегодня.»
+2. **Точка → сцена и карточка зоны** (отложенная сцена {k['sz_demo_tile']}, {k['sz_demo_date']}): что найдено, когда и где снято,
+   площадь и LWD, уверенность; количество — «{k['sz_zone_main_status']}», состав — «не определён». У каждого числа подписан источник.
+3. **«В студию»** — снимок, маска качества, объекты детектора этой зоны; **«Назад к карте»** — та же точка и масштаб обзора.
+4. **Другая точка** — например, находка «требует проверки» или «недостаточно данных» (судно, пена, ветер): почему статус такой.
+5. **Числа — на своих панелях за один клик:** поле ({num(k['q_pooled_C'], 1)} шт./км² [{rng(k['qf_boot_lo95'], k['qf_boot_hi95'])}],
+   медиана на карте), режим **«Фото»** (ошибка {num(k['pc_mae'], 2)} шт./кадр), вкладка **«Метрики»** (F1 {num(k['d_lgbm_f1'], 3)}).
+6. **«Выгрузка»** GeoJSON/CSV и **«Запросы»** → сохранить → повторить.
+
+Подробный сценарий с репликами — ниже.
+
 {_sz_block(k)}
 
 ## Запасной путь: поле и полосы пар (2:00)
@@ -1071,8 +1466,52 @@ def qa_items(k: dict) -> list[tuple[str, str, str]]:
          f"{num(k['p_events_accept_drift'], 0)} из {num(k['p_events'], 0)} событий; для профилей пластика сцен нет вообще; на "
          f"{num(k['e_n_accept_s2'], 0)} парах со всем мусором связь признаков снимка с плотностью не установлена. Выдать число "
          f"значило бы выдать калибровку, которой нет. Поэтому у всех {num(k['zones'], 0)} полос статус «концентрация недоступна», "
-         f"поле `concentration` у зоны всегда `null`.",
-         "README.md «Главное», §6; reports/case_pairs/summary.md; reports/case_pairs/experiment.md"),
+         f"поле `concentration` у зоны всегда `null`, а у {num(k['sz_n_zones'], 0)} спутниковых зон — «{k['sz_zone_main_status']}». "
+         f"Калибровочных пар «снимок → шт./км²» {num(k['ql_calibration_pairs'], 0)}, и не только у нас: авторы крупнейшего каталога "
+         f"полос пишут «{k['q_quote_short']}» (Cózar и др., 2024, doi {k['q_quote_doi']}).",
+         "README.md «Главное», §6; reports/case_pairs/summary.md; reports/case_pairs/experiment.md; docs/QUANTITY.md"),
+        ("Какой у вас главный количественный результат и насколько он точен?",
+         f"Полевая концентрация C = N/A. Для суммарного пластика {size_ru(k['pr_S2_size'])} (S2): {num(k['q_pooled_N'], 0)} шт. на "
+         f"{num(k['q_pooled_A_km2'], 2)} км² = {num(k['q_pooled_C'], 1)} шт./км². Интервал Пуассона [{rng(k['q_lo95'], k['q_hi95'])}] — "
+         f"только ошибка счёта, он не накрывает среднее отложенного test ({num(k['qf_test_mean'], 1)}); поэтому правилом, записанным до "
+         f"расчёта, выбран кластерный бутстреп по дням рейса: [{rng(k['qf_boot_lo95'], k['qf_boot_hi95'])}]. Для одного нового места "
+         f"интервал {rng(k['qf_event_lo95'], k['qf_event_hi95'])} шт./км² накрывает {num(k['qf_event_cov'] * k['qf_event_n_test'], 0)} "
+         f"из {num(k['qf_event_n_test'], 0)} событий test.",
+         "reports/quantity/field_intervals.md; scripts/case/field_interval_check.py; docs/PIPELINE.md (правило C10)"),
+        ("А ADIS — какая там концентрация и почему не калибровка авторов?",
+         f"ADIS — {k['af_profile']}: ΣN/ΣA = {num(k['af_C'], 2)} [{rng(k['af_lo'], k['af_hi'], 2)}] шт./км² по "
+         f"{num(k['af_n_segments'], 0)} отрезкам, {num(k['af_zero_pct'], 0)} % отрезков с нулём. Модели по регионам (отложено по "
+         f"регионам и судам) не лучше медианы: {k['af_verdict']}. Калибровка авторов по тралу — {num(k['afa_C'], 2)} (типичный интервал "
+         f"отрезка {rng(k['afa_lo_typ'], k['afa_hi_typ'])}; {k['afa_source']}) — показываем рядом как внешнюю, наше число без поправки не заменяем.",
+         "reports/quantity/adis_forecast.md; configs/adis_forecast.yaml"),
+        ("Как вы считаете штуки, если со спутника их не видно?",
+         f"На детальном фото. Счётчик предметов (Faster R-CNN) на отложенных сессиях съёмки FML ({num(k['pc_n_images'], 0)} фото) "
+         f"ошибается на {num(k['pc_mae'], 2)} {ci(k['pc_mae_ci95'], 2)} шт./кадр против {num(k['pc_baseline_median_count'], 2)} у медианы; "
+         f"mAP@0,5 {num(k['pc_ap50'], 3)}. Если площадь кадра известна ({k['pa_dataset']}: GSD {num(k['pa_gsd_m'], 2)} м, кадр "
+         f"{num(k['pa_frame_area_m2'], 0)} м²), число переводим в шт./км²: ошибка плотности {num(k['pa_density_mae_km2'], 0)} против "
+         f"{num(k['pa_baseline_density_mae_km2'], 0)} у медианы на {num(k['pa_n_test_frames'], 0)} отложенных кадрах. Sentinel-2 так не считает.",
+         "reports/photo_count/eval_grouped.json, area_winans.json; docs/PHOTO_COUNT.md"),
+        ("Вы различаете бутылки, пакеты, пластик и дерево?",
+         "Нет, пока не проверено. Счётчик FML обучен на одном классе «мусор»; классы аэросъёмки объединены в один. Разбивку по "
+         "материалам показываем, только если класс размечен явно и есть матрица ошибок на отложенных данных; иначе в «Фото» и в "
+         "карточке — «всего предметов, состав не определён». На снимке Sentinel-2 никаких «бутылок»: пиксель больше предмета.",
+         "docs/LABELS.md; data/labels_map.csv; docs/PHOTO_COUNT.md"),
+        ("Почему при сильном ветре зона «недостаточно данных», а не «не обнаружено»?",
+         "При ветре сильнее 5 м/с мусор перемешивается в толще воды и полосы не формируются — так делают авторы каталога полос "
+         "(Cózar и др., 2024, Methods: воду с ветром выше порога они исключают из площади). Порог взят из статьи, не подбирался. "
+         "Поэтому «ноль» на такой сцене не информативен: статус «недостаточно данных», сцена не входит в площадь «обследовано»; "
+         f"найденные зоны и уровень B не трогаем. На демо-сцене ветер {num(k['sz_demo_wind'], 1)} м/с.",
+         "scripts/case/scene_zones.py; docs/CONTRACTS_V3.md (правило ветра); data/extra/cozar2024/paper.txt"),
+        ("Чем доказано, что сцена демо не участвовала в обучении?",
+         f"Сцена {k['sz_demo_scene_id']}: в MARIDA того же тайла нет; сверка с MADOS по содержимому — {k['sz_demo_mados_verdict']}; "
+         f"в экспериментах дообучения и подборе порога она не использовалась. На ней {num(k['sz_demo_n_zones_cozar'], 0)} из "
+         f"{num(k['sz_demo_n_zones'], 0)} зон детектора совпали с нитями каталога Cózar (уровень B).",
+         "reports/case_demo/heldout_check.json, mados_content_check.json"),
+        ("Какие лицензии у данных и моделей?",
+         f"Разметка MARIDA и MADOS, FloatingObjects, каталог Cózar 2024 — открытые лицензии авторов; счётчик: {k['pc_license']}, "
+         f"{k['pa_license']}. Речной набор TOCL — CC BY-NC (только исследовательская проверка, в продукт не включён). Полная таблица "
+         "с атрибуцией — README «Источники и лицензии».",
+         "README.md «Источники и лицензии»"),
         ("Модель концентрации не лучше медианы — зачем тогда модель и что это значит?",
          f"Это результат, а не провал процедуры. На dev CV S2 {k['S2_primary']} выигрывала слабо ({num(k['S2_dev_main'], 1)} против "
          f"{num(k['S2_dev_med'], 1)}, с Бонферрони ДИ {ci(k['S2_dev_bonf'])} уже содержит 0). На отложенном test — "
@@ -1388,6 +1827,28 @@ def preview(S: list[dict], imgs: dict) -> int:
     return made
 
 
+def _soffice():
+    import shutil
+    return shutil.which("soffice") or next((str(p) for p in (Path(r"C:\Program Files\LibreOffice\program\soffice.exe"),
+                                                            Path(r"C:\Program Files (x86)\LibreOffice\program\soffice.exe"))
+                                             if p.exists()), None)
+
+
+def to_pdf(pptx: Path) -> Path | None:
+    """PDF деки через LibreOffice headless (отдельный профиль, чтобы не мешать открытому LibreOffice)."""
+    so = _soffice()
+    if not so:
+        print("[deck_case] LibreOffice не найден: PDF пропущен")
+        return None
+    prof = ROOT / "out" / "lo_profile_deck"
+    cmd = [so, f"-env:UserInstallation=file:///{prof.as_posix()}", "--headless", "--convert-to", "pdf",
+           "--outdir", str(pptx.parent), str(pptx)]
+    subprocess.run(cmd, check=True, capture_output=True, timeout=300)
+    pdf = pptx.with_suffix(".pdf")
+    print(f"[deck_case] PDF: {pdf.relative_to(ROOT)} ({pdf.stat().st_size // 1024} КБ)")
+    return pdf
+
+
 # ----------------------------------------------------------------------------------------------- main
 def generate() -> tuple[list[dict], dict, dict]:
     """Слайды, тексты md и числа — без записи файлов (для тестов). MISSING и USED заполняются заново."""
@@ -1395,13 +1856,19 @@ def generate() -> tuple[list[dict], dict, dict]:
     USED.clear()
     k = load()
     S = slides(k)
-    texts = {OUT_SPEECH: speech_md(S, k), OUT_DEMO: demo_md(k), OUT_QA: qa_md(k)}
+    texts = {OUT_SPEECH: speech_md(S, k), OUT_DEMO: demo_md(k), OUT_QA: qa_md(k), OUT_PRES / "qa.md": qa_md(k)}
     return S, texts, k
 
 
 def slide_strings(s: dict) -> list[str]:
     """Все строки, которые build_pptx кладёт на слайд (и в заметки) — для сверки с файлом деки."""
-    out = [s["section"], s["title"], *s["bullets"], "Источник: " + s["source"], s["speech"]]
+    out = [s["section"], s["title"], *s.get("bullets", []), "Источник: " + s["source"], s["speech"]]
+    for val, lab in s.get("kpis", []):
+        out += [val, lab]
+    for _, cap in s.get("images", []):
+        out.append(cap)
+    if s.get("notes"):
+        out.append(s["notes"])
     if "big" in s:
         out += list(s["big"])
     if s.get("caption"):
@@ -1422,6 +1889,8 @@ def main(argv=None) -> int:
     ap.add_argument("--out", default=str(OUT_PPTX))
     ap.add_argument("--preview", action="store_true",
                     help="PNG каждого слайда через LibreOffice -> reports/case_deck_preview/ (не для git)")
+    ap.add_argument("--preview-main", action="store_true", help="превью только основной части")
+    ap.add_argument("--pdf", action="store_true", help="presentation/deck.pdf через LibreOffice headless")
     a = ap.parse_args(argv)
     sys.stdout.reconfigure(encoding="utf-8")
     S, texts, k = generate()
@@ -1436,10 +1905,14 @@ def main(argv=None) -> int:
         print(f"[deck_case] все значения найдены; слайдов {len(S)}, вопросов {len(qa_items(k))}")
         return 0
     build_pptx(S, imgs, Path(a.out))
+    OUT_PRES.mkdir(parents=True, exist_ok=True)
+    build_pptx(S, imgs, OUT_PRES / "deck.pptx")
     for p, t in texts.items():
         p.write_text(t, encoding="utf-8")
-    if a.preview:
-        preview(S, imgs)
+    if a.pdf:
+        to_pdf(OUT_PRES / "deck.pptx")
+    if a.preview or a.preview_main:
+        preview([s for s in S if not s.get("appendix")] if a.preview_main else S, imgs)
     print(f"[deck_case] {Path(a.out).relative_to(ROOT)}: {len(S)} слайдов; docs/SPEECH.md, docs/DEMO.md, "
           f"docs/QA.md ({len(qa_items(k))} вопросов); картинок {len(imgs)} в {IMG_DIR.relative_to(ROOT)}; пустых значений 0")
     return 0

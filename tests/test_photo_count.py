@@ -160,7 +160,36 @@ def test_api_count_interval_and_composition(client):
     assert j["count"] == 1 and j["count_interval"]["interval"] == [0.0, 3.0]
     assert j["density"]["items_per_km2_count_interval"] == [0.0, pytest.approx(3 / 1e-4)]
     assert j["composition"]["status"] in ("not_determined", "by_class")
+    assert j["value_source"] == "посчитано по детальному фото"
     r = client.post("/api/v3/photo/count?threshold=0.5", content=_jpeg())
     assert r.json()["count_interval"] is None  # interval is calibrated only for the default threshold
     m = client.get("/api/v3/photo/meta").json()
     assert "composition_rule" in m and "headline" in m
+
+
+def test_headline_text_format():
+    from service.routes_v3_photo import _headline
+    h = _headline({"test_grouped": {"count_mae": 0.5949, "count_mae_ci95": [0.53, 0.66], "n_images": 1190}})
+    assert h["text"] == "Счётчик предметов по фото: ошибка 0,59 шт./кадр на независимом тесте"
+    assert _headline(None) is None
+
+
+def test_clean_clone_weights_fallback(tmp_path, monkeypatch):
+    """No weights_exp/: water model comes from weights/photo_count (fp16, in git); aerial -> 503 with a reason."""
+    from macroplastic.photo_count import model as PM
+    monkeypatch.setattr(PM, "WEIGHTS_DIR", tmp_path / "none")
+    shipped = PM.SHIPPED_DIR / "model_card.json"
+    if shipped.exists():
+        card = PM.load_card("water_camera")
+        assert card is not None and card["_dir"].endswith("photo_count") and card["weights_file"].endswith("_fp16.pth")
+    assert PM.load_card("aerial") is None
+    PM.Counter._inst.clear()
+    from fastapi.testclient import TestClient
+    from service.app import create_app
+    c = TestClient(create_app())
+    r = c.post("/api/v3/photo/count?survey=aerial", content=_jpeg())
+    assert r.status_code == 503 and r.json()["error"]["code"] == "MODEL_UNAVAILABLE"
+    assert "docs/PHOTO_COUNT.md" in r.json()["error"]["message"]
+    m = c.get("/api/v3/photo/meta").json()
+    assert m["surveys"]["aerial"]["available"] is False
+    PM.Counter._inst.clear()

@@ -3,25 +3,31 @@
  "v12": {
   "SZ-live-guanabara-2026-07-16-010": {
    "group": "ship",
-   "status": "detected",
-   "flags": [],
-   "label": "обнаружено детектором · вероятный плавающий материал, требует проверки",
+   "status": "insufficient_data",
+   "flags": [
+    "ship"
+   ],
+   "label": "ложное срабатывание (признаки судна / кильватера / шва) — недостаточно данных",
    "scenario": null,
    "conc": "unavailable"
   },
   "SZ-live-karachi-2026-02-14-005": {
    "group": "ship",
-   "status": "detected",
-   "flags": [],
-   "label": "обнаружено детектором · вероятный плавающий материал, требует проверки",
+   "status": "insufficient_data",
+   "flags": [
+    "ship"
+   ],
+   "label": "ложное срабатывание (признаки судна / кильватера / шва) — недостаточно данных",
    "scenario": null,
    "conc": "unavailable"
   },
   "SZ-live-karachi-2026-02-14-006": {
    "group": "ship",
-   "status": "detected",
-   "flags": [],
-   "label": "обнаружено детектором · вероятный плавающий материал, требует проверки",
+   "status": "insufficient_data",
+   "flags": [
+    "ship"
+   ],
+   "label": "ложное срабатывание (признаки судна / кильватера / шва) — недостаточно данных",
    "scenario": null,
    "conc": "unavailable"
   },
@@ -35,33 +41,43 @@
   },
   "SZ-drift-guanabara-2025-09-09-007": {
    "group": "shoal",
-   "status": "detected",
-   "flags": [],
-   "label": "обнаружено детектором · вероятный плавающий материал, требует проверки",
+   "status": "insufficient_data",
+   "flags": [
+    "ship",
+    "shallow"
+   ],
+   "label": "ложное срабатывание (признаки судна / кильватера / шва) — недостаточно данных",
    "scenario": null,
    "conc": "unavailable"
   },
   "SZ-live-guanabara-2025-06-26-004": {
    "group": "shoal",
-   "status": "detected",
-   "flags": [],
-   "label": "обнаружено детектором · вероятный плавающий материал, требует проверки",
+   "status": "insufficient_data",
+   "flags": [
+    "ship",
+    "shallow"
+   ],
+   "label": "ложное срабатывание (признаки судна / кильватера / шва) — недостаточно данных",
    "scenario": null,
    "conc": "unavailable"
   },
   "SZ-live-guanabara-2025-06-26-005": {
    "group": "shoal",
-   "status": "detected",
-   "flags": [],
-   "label": "обнаружено детектором · вероятный плавающий материал, требует проверки",
+   "status": "insufficient_data",
+   "flags": [
+    "shallow"
+   ],
+   "label": "недостаточно данных: признаки ложного срабатывания",
    "scenario": null,
    "conc": "unavailable"
   },
   "SZ-live-guanabara-2026-07-16-005": {
    "group": "shoal",
-   "status": "detected",
-   "flags": [],
-   "label": "обнаружено детектором · вероятный плавающий материал, требует проверки",
+   "status": "insufficient_data",
+   "flags": [
+    "shallow"
+   ],
+   "label": "недостаточно данных: признаки ложного срабатывания",
    "scenario": null,
    "conc": "unavailable"
   },
@@ -75,42 +91,29 @@
   }
  },
  "v12_fail": [
-  "SZ-live-guanabara-2026-07-16-010",
-  "SZ-live-karachi-2026-02-14-005",
-  "SZ-live-karachi-2026-02-14-006",
-  "SZ-live-karachi-2026-01-15-006",
-  "SZ-drift-guanabara-2025-09-09-007",
-  "SZ-live-guanabara-2025-06-26-004",
-  "SZ-live-guanabara-2025-06-26-005",
-  "SZ-live-guanabara-2026-07-16-005"
+  "SZ-live-karachi-2026-01-15-006"
  ],
  "v13": {
-  "docs/PIPELINE.md:153": {
-   "text": "дтверждённой калибровки: пары ADIS — «по месту и времени», калибровочных пар 0; диапазон шт./км² у спутниковой зоны — только сценарий с допущением, не интервал и не измерение.",
-   "marked_cancelled": false
-  },
-  "docs/CRITERIA_CHECK.md:30": {
-   "text": "щадь зоны и LWD отдельно; статус «обнаружено / не обнаружено / не оценивается»; сценарий шт./км² — только по формулировке §15. Экспорт — тот же слой. | интегратор, демо-агент |",
+  "docs/PIPELINE.md:170": {
+   "text": "дтверждённой калибровки: пары ADIS — «по месту и времени», калибровочных пар 0; диапазон шт./км² у спутниковой зоны не показываем вовсе (сценарий убран): только площадь, LWD, маска качества и статус.",
    "marked_cancelled": false
   },
   "docs/CRITERIA_CHECK.md:45": {
-   "text": "тся с обязательной формулировкой §15; это зона L107, здесь только отмечено. (в) Спутниковый сценарий шт./км² по §15 (площадь/LWD + условный диапазон) в продукте не показан (см. П1). | (а) и (б) — интегратор по §15; (в) — П1 | 1–2 |",
-   "marked_cancelled": false
+   "text": "тся с обязательной формулировкой §15; это зона L107, здесь только отмечено. (в) Спутниковый сценарий шт./км² отменён (§23 п.2): зона показывает площадь/LWD и статус «концентрация по снимку не подтверждена». | (а) и (б) — интегратор по §15; (в) — П1 | 1–2 |",
+   "marked_cancelled": true
   },
   "docs/CONTRACTS_V3.md:707": {
-   "text": "    scenario {shown, label «Условный диапазон, ЕСЛИ это мусорная полоса», lo 1e4, typical_lo 1e6, typical_hi 1e7, hi 1e8 (шт./км²),",
+   "text": "ерждена»] scenario {shown, label «Условный диапазон, ЕСЛИ это мусорная полоса», lo 1e4, typical_lo 1e6, typical_hi 1e7, hi 1e8 (шт./км²),",
    "marked_cancelled": false
   }
  },
  "by_kind_status": {
   "demo|detected": 23,
-  "drift|detected": 7,
-  "drift|insufficient_data": 33,
+  "drift|detected": 5,
+  "drift|insufficient_data": 36,
   "drift|not_detected": 8,
-  "drift|not_informative": 1,
-  "live|detected": 61,
-  "live|insufficient_data": 131,
-  "live|not_detected": 20,
-  "live|not_informative": 2
+  "live|detected": 50,
+  "live|insufficient_data": 144,
+  "live|not_detected": 20
  }
 }

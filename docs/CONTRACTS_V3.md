@@ -762,3 +762,13 @@ GET /api/v3/photo/meta: + surveys: {water_camera: {label, available, version, li
        upload.params + "survey", "gsd_m". Прежние поля meta.model/metrics не менялись.
 Фронт v2 ?mode=photo: переключатель «Камера у воды / Аэро / дрон (надир)», поле GSD, поправка считается на клиенте по
 meta.surveys.aerial.correction (только при пороге по умолчанию).
+
+3.10.2 ФОТО: ИСТОЧНИК ЧИСЛА, ИНТЕРВАЛ, СОСТАВ (ДОБАВЛЕНИЯ, 26.09 08:40, L109, INBOX §31 п.2 в, §33 п.3; L123) — только новые поля
+POST /api/v3/photo/count 200: + value_source "посчитано по детальному фото", value_source_code "photo_count";
+  + count_interval: null | {interval:[lo, hi] (95 %, истинное число на кадр), coverage_on_test, method} — только при пороге по умолчанию
+    (квантили остатка «истина − найдено» на отложенных кадрах val, покрытие проверено на test);
+  + density.items_per_m2, density.items_per_km2_count_interval [lo, hi] (при заданной площади и count_interval);
+  + composition = macroplastic.labels.composition_for(survey, boxes, card) (L123) | {status:"not_determined", text:"всего предметов,
+    состав не определён", reason}; фронт при status=by_class группирует показанные рамки по composition.box_materials[i].
+GET /api/v3/photo/meta: + headline {count_mae_per_frame, count_mae_ci95, n_images, test, baseline_median_mae, text} — одно число для
+  блока «Главное» (L111); + composition_rule; surveys.*.count_interval.

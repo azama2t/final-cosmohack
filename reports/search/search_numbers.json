@@ -477,7 +477,7 @@
   },
   "adis_forecast": {
    "source": "reports/quantity/adis_forecast.{json,md}, configs/adis_forecast.yaml (правило записано до метрик)",
-   "profile": "ADIS, плавающий пластик > 10 см, камера судна",
+   "profile": "объекты детектора ADIS > 10 см, камера судна (7 % — животное/растение по классу модели)",
    "n_segments": 20836,
    "sum_N": 22420,
    "sum_A_km2": 14518.0,

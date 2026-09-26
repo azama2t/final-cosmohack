@@ -448,7 +448,7 @@ def collect_quantity() -> dict:
         dec = (af2.get("decision") or {}).get("gt10cm") or {}
         out["adis_forecast"] = {
             "source": "reports/quantity/adis_forecast.{json,md}, configs/adis_forecast.yaml (правило записано до метрик)",
-            "profile": "ADIS, плавающий пластик > 10 см, камера судна",
+            "profile": "объекты детектора ADIS > 10 см, камера судна (7 % — животное/растение по классу модели)",
             "n_segments": fl.get("n_segments"), "sum_N": _i(fl.get("sum_N")), "sum_A_km2": _r(fl.get("sum_A_km2"), 0),
             "C": _r(fl.get("C_pooled"), 2), "lo": _r(fl.get("C_pooled_lo"), 2), "hi": _r(fl.get("C_pooled_hi"), 2),
             "zero_pct": _r(100 * (fl.get("share_zero") or 0), 0), "seg_median": _r(fl.get("C_seg_median"), 1),

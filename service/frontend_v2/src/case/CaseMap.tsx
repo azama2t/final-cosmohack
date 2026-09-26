@@ -65,6 +65,9 @@ export const SZ_COLORS: Record<string, string> = { detected: '#ff8c42', unverifi
 /** map colour key: a detector hit without level-B evidence is «unverified», not «detected» */
 export const szKey = (p: any) => (p.detection_status === 'detected' && p.verification !== 'level_B_cozar' ? 'unverified' : p.detection_status);
 
+/** §33: field points and survey strips are not satellite finds — hidden on the Earth overview, shown when zoomed in */
+export const FIELD_MINZOOM = 3.2;
+
 function szFeatures(fc: FC<any> | null | undefined) {
   const polys: any[] = [];
   const pts: any[] = [];
@@ -73,7 +76,9 @@ function szFeatures(fc: FC<any> | null | undefined) {
     const props = { id: f.id, ds: szKey(f.properties), full: f.properties.zone_id.endsWith('-000') ? 1 : 0 };
     polys.push({ type: 'Feature', geometry: f.geometry, properties: props });
     const c = geomCenter(f.geometry);
-    if (c) pts.push({ type: 'Feature', geometry: { type: 'Point', coordinates: c }, properties: props });
+    // §33: overview points = real finds only (detection_status «detected»); «недостаточно данных», false alarms and
+    // «не обнаружено» never become points
+    if (c && f.properties.detection_status === 'detected') pts.push({ type: 'Feature', geometry: { type: 'Point', coordinates: c }, properties: props });
   }
   return { polys: { type: 'FeatureCollection', features: polys }, pts: { type: 'FeatureCollection', features: pts } };
 }
@@ -231,7 +236,11 @@ export default function CaseMap(p: CaseMapProps) {
     src('c-det', cur.detections ?? EMPTY);
     const sz = szFeatures(cur.szones);
     src('c-sz', sz.polys);
-    src('c-sz-pts', sz.pts);
+    {
+      const s0 = map.getSource('c-sz-pts') as maplibregl.GeoJSONSource | undefined;
+      if (s0) s0.setData(sz.pts as any);
+      else map.addSource('c-sz-pts', { type: 'geojson', data: sz.pts, cluster: true, clusterRadius: 38, clusterMaxZoom: 7 } as any);
+    }
     const hl = cur.pairHl;
     src('c-pair', hl?.geom ? { type: 'FeatureCollection', features: [{ type: 'Feature', geometry: hl.geom, properties: {} }] } : EMPTY);
     src(
@@ -249,6 +258,7 @@ export default function CaseMap(p: CaseMapProps) {
     add({
       id: 'c-obs-lines',
       type: 'line',
+      minzoom: FIELD_MINZOOM,
       source: 'c-obs-lines',
       filter: ['!=', ['get', 'st'], 'reconstructed_approx'],
       paint: { 'line-color': '#e7e8ea', 'line-width': 1.4, 'line-opacity': 0.75 },
@@ -257,6 +267,7 @@ export default function CaseMap(p: CaseMapProps) {
     add({
       id: 'c-obs-lines-approx',
       type: 'line',
+      minzoom: FIELD_MINZOOM,
       source: 'c-obs-lines',
       filter: ['==', ['get', 'st'], 'reconstructed_approx'],
       paint: { 'line-color': '#e7e8ea', 'line-width': 1.4, 'line-opacity': 0.75, 'line-dasharray': [1, 1.5] },
@@ -278,6 +289,7 @@ export default function CaseMap(p: CaseMapProps) {
     add({
       id: 'c-zone-pts',
       type: 'symbol',
+      minzoom: FIELD_MINZOOM,
       source: 'c-zone-pts',
       maxzoom: 10.5,
       layout: { 'icon-image': 'mp-square', 'icon-size': 1.15, 'icon-allow-overlap': true, 'icon-ignore-placement': true },
@@ -286,6 +298,7 @@ export default function CaseMap(p: CaseMapProps) {
     add({
       id: 'c-obs-items',
       type: 'symbol',
+      minzoom: FIELD_MINZOOM,
       source: 'c-obs',
       filter: ['==', ['get', 'k'], 'i'],
       layout: { 'icon-image': 'mp-diamond', 'icon-size': 0.55, 'icon-allow-overlap': true, 'icon-ignore-placement': true },
@@ -294,6 +307,7 @@ export default function CaseMap(p: CaseMapProps) {
     add({
       id: 'c-obs-zero',
       type: 'circle',
+      minzoom: FIELD_MINZOOM,
       source: 'c-obs',
       filter: ['==', ['get', 'k'], 'z'],
       paint: { 'circle-radius': 4, 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': '#e7e8ea', 'circle-stroke-width': 1.5 },
@@ -301,6 +315,7 @@ export default function CaseMap(p: CaseMapProps) {
     add({
       id: 'c-obs-dens',
       type: 'circle',
+      minzoom: FIELD_MINZOOM,
       source: 'c-obs',
       filter: ['==', ['get', 'k'], 'd'],
       paint: {
@@ -322,12 +337,27 @@ export default function CaseMap(p: CaseMapProps) {
     add({ id: 'c-sz-fill', type: 'fill', source: 'c-sz', paint: { 'fill-color': szCol, 'fill-opacity': ['case', ['==', ['get', 'full'], 1], 0.04, 0.22] } });
     add({ id: 'c-sz-line', type: 'line', source: 'c-sz', paint: { 'line-color': szCol, 'line-width': 1.8 } });
     add({ id: 'c-sz-sel', type: 'line', source: 'c-sz', filter: ['==', ['get', 'id'], ''], paint: { 'line-color': '#ffffff', 'line-width': 3 } });
+    // §33 overview: finds clustered at a far zoom (size ~ count), single finds up to z10 (then the contours take over)
+    add({
+      id: 'c-sz-clu',
+      type: 'circle',
+      source: 'c-sz-pts',
+      filter: ['has', 'point_count'],
+      paint: {
+        'circle-radius': ['step', ['get', 'point_count'], 9, 5, 12, 15, 15, 40, 19],
+        'circle-color': SZ_COLORS.detected,
+        'circle-opacity': 0.85,
+        'circle-stroke-color': '#ffffff',
+        'circle-stroke-width': 2,
+      },
+    });
     add({
       id: 'c-sz-pts',
       type: 'circle',
       source: 'c-sz-pts',
-      maxzoom: 9,
-      paint: { 'circle-radius': 5, 'circle-color': szCol, 'circle-stroke-color': '#0b0c0e', 'circle-stroke-width': 1.5 },
+      filter: ['!', ['has', 'point_count']],
+      maxzoom: 10,
+      paint: { 'circle-radius': 6.5, 'circle-color': szCol, 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 1.5 },
     });
     // suspicious detector pixels: object contours (signal colour), inside the strip solid, outside faint
     add({ id: 'c-det-fill', type: 'fill', source: 'c-det', paint: { 'fill-color': ['case', ['==', ['get', 'qr'], true], '#9aa0a8', ACCENT], 'fill-opacity': ['case', ['==', ['get', 'in_strip'], true], 0.55, 0.12] } });
@@ -453,7 +483,7 @@ export default function CaseMap(p: CaseMapProps) {
       const c = map.getCenter();
       props.current.onCamera({ lon: c.lng, lat: c.lat, zoom: map.getZoom() });
     });
-    const HIT = ['c-obs-dens', 'c-obs-zero', 'c-obs-items', 'c-zones-fill', 'c-zone-pts', 'c-sz-pts', 'c-sz-fill'];
+    const HIT = ['c-sz-clu', 'c-obs-dens', 'c-obs-zero', 'c-obs-items', 'c-zones-fill', 'c-zone-pts', 'c-sz-pts', 'c-sz-fill'];
     const hit = (pt: maplibregl.PointLike) => {
       const layers = HIT.filter((l) => map.getLayer(l));
       if (!layers.length) return null;
@@ -462,6 +492,8 @@ export default function CaseMap(p: CaseMapProps) {
         [(pt as any).x + 4, (pt as any).y + 4],
       ];
       const fs = map.queryRenderedFeatures(box, { layers });
+      const cl = fs.find((f) => f.layer.id === 'c-sz-clu');
+      if (cl) return { kind: 'zone' as const, id: `CL-${cl.properties?.cluster_id}-${cl.properties?.point_count}`, lngLat: (cl.geometry as any).coordinates };
       const o = fs.find((f) => f.layer.id.startsWith('c-obs'));
       // a small scene zone wins over the whole-crop «не обнаружено» zone and over strips
       const z = fs.find((f) => f.layer.id.startsWith('c-sz') && !f.properties?.full) ?? fs.find((f) => f.layer.id.startsWith('c-zone')) ?? fs.find((f) => f.layer.id.startsWith('c-sz'));
@@ -480,7 +512,17 @@ export default function CaseMap(p: CaseMapProps) {
       });
     });
     map.on('mouseout', () => props.current.onHover(null));
-    map.on('click', (e) => props.current.onPick(hit(e.point)));
+    map.on('click', (e) => {
+      const h: any = hit(e.point);
+      if (h && h.id.startsWith('CL-')) {
+        // a cluster of finds: zoom in until it splits
+        const cid = Number(h.id.split('-')[1]);
+        const srcP = map.getSource('c-sz-pts') as any;
+        Promise.resolve(srcP.getClusterExpansionZoom(cid)).then((zz: number) => map.easeTo({ center: h.lngLat, zoom: Math.max(zz, map.getZoom() + 1.5), duration: 900 }));
+        return;
+      }
+      props.current.onPick(h);
+    });
     const detachStars = attachStars(stars.current!, halo.current!);
     return () => {
       clearInterval(watchdog);

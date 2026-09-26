@@ -1,0 +1,116 @@
+{
+ "version": "fml-frcnn-grouped-l109-2026-09-26",
+ "weights_file": "frcnn_fml_grouped_fp16.pth",
+ "weights_sha256": "7f74cf64c6fdf7c3e750b4ad2dd63a59b780d2c980d7e39388c3a01fe35dc417",
+ "architecture": "torchvision fasterrcnn_resnet50_fpn (COCO init), 2 classes (background, garbage)",
+ "source": "trained by L109: scripts/photo_count/train.py --split grouped --epochs 6 (best epoch 4 by val_g AP50)",
+ "dataset": "FML v2 (SEANOE doi:10.17882/106148, CC BY 4.0), split by acquisition session: train_g 3271 / val_g 838 / test_g 1190 photos",
+ "weights_license": "own weights: trained from torchvision COCO weights (BSD-3) on FML (CC BY 4.0, attribution: Lazzerini, Ferreira, Ridolfi 2025)",
+ "threshold": 0.8,
+ "threshold_rule": "argmin count MAE on val_g (grid 0.05..0.95); test_g scored once",
+ "test_grouped": {
+  "n_images": 1190,
+  "n_boxes": 4324,
+  "ap50": 0.9138740799201077,
+  "ap50_ci95": [
+   0.9030691150546803,
+   0.9262782257915446
+  ],
+  "count_mae": 0.5949579831932773,
+  "count_mae_ci95": [
+   0.5352731092436974,
+   0.658844537815126
+  ],
+  "count_exact": 0.6369747899159663,
+  "count_exact_ci95": [
+   0.6092436974789915,
+   0.6630462184873949
+  ],
+  "count_bias": -0.052100840336134456,
+  "precision": 0.8829188174565932,
+  "recall": 0.870259019426457,
+  "note": "отложенные сессии съёмки (set5, set11, set12, set17 — другие дни, set20); ни один кадр не ближе 5 с к обучению"
+ },
+ "reference_published_weights": {
+  "file": "fasterrcnn_fml_published.pth",
+  "sha256": "86813d453c732a727844e8f9cfa9584de85bb6452861a6213991453afff2e0d4",
+  "source": "FML authors, Google Drive 1QTGO9rDWCKzvo5DlphT6a4IzraDRwJ4o",
+  "threshold_on_val": 0.9,
+  "test_official": {
+   "n_images": 529,
+   "n_boxes": 1648,
+   "ap50": 0.9047764966462317,
+   "ap50_ci95": [
+    0.8878168852487875,
+    0.924563296405025
+   ],
+   "count_mae": 0.5444234404536862,
+   "count_mae_ci95": [
+    0.4649810964083176,
+    0.6239130434782607
+   ],
+   "count_exact": 0.6465028355387523,
+   "count_exact_ci95": [
+    0.6068052930056711,
+    0.6880907372400756
+   ],
+   "count_bias": 0.09073724007561437,
+   "precision": 0.8573113207547169,
+   "recall": 0.8822815533980582,
+   "note": "официальный test FML: 90 % кадров в ≤ 2 с от кадра train — оптимистично"
+  }
+ },
+ "caveat": "official FML split is random over video frames (~90 % of test frames within 2 s of a train frame); the honest estimate is test_grouped",
+ "survey": "camera at the water (USV, first-person view, 1920x1080)",
+ "device": "auto",
+ "count_interval": {
+  "method": "квантили 2,5/97,5 % остатка (истина − найдено) на отложенных кадрах VAL по классам найденного числа; интервал числа кадра = [N+q025, N+q975], не меньше 0; покрытие проверено на TEST",
+  "overall_val": [
+   -2.0,
+   2.0
+  ],
+  "by_pred_count": [
+   {
+    "pred_from": 0,
+    "pred_to": 0,
+    "n_val": 290,
+    "q025": 0.0,
+    "q975": 0.0
+   },
+   {
+    "pred_from": 1,
+    "pred_to": 2,
+    "n_val": 159,
+    "q025": -1.0,
+    "q975": 2.0
+   },
+   {
+    "pred_from": 3,
+    "pred_to": 5,
+    "n_val": 235,
+    "q025": -2.0,
+    "q975": 2.0
+   },
+   {
+    "pred_from": 6,
+    "pred_to": 9,
+    "n_val": 115,
+    "q025": -2.15,
+    "q975": 3.0
+   },
+   {
+    "pred_from": 10,
+    "pred_to": 999,
+    "n_val": 39,
+    "q025": -4.05,
+    "q975": 2.049999999999997
+   }
+  ],
+  "coverage_on_test": 0.946218487394958,
+  "n_test": 1190
+ },
+ "baseline_median_mae_test": 2.86218487394958,
+ "precision": "fp16 state_dict (cast to fp32 on load)",
+ "weights_fp32_sha256": "40d80f5b51ff315e41277ceb50f914ad385ad95e9068e169ec46d34fa306ef2d",
+ "fp16_check": "test_g (1 190 фото) с весами fp16: mAP@0,5 0,914, MAE 0,595 [0,536–0,660], точное 63,7 % — совпадает с fp32 (0,914 / 0,595); reports/photo_count/eval_grouped_fp16.json"
+}

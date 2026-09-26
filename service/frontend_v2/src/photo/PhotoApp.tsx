@@ -8,7 +8,7 @@ import './photo.css';
 
 type Survey = 'water_camera' | 'aerial';
 type Box = { x1: number; y1: number; x2: number; y2: number; score: number; label: string };
-type Composition = { status: string; text: string; reason?: string; by_class?: Record<string, number> };
+type Composition = { status: string; text: string; reason?: string; by_class?: Record<string, number>; box_materials?: (string | null)[] | null };
 type CountInterval = { by_pred_count: { pred_from: number; pred_to: number; q025: number; q975: number }[]; overall_val: number[]; coverage_on_test?: number };
 type CountResp = {
   count: number;
@@ -158,7 +158,7 @@ export default function PhotoApp() {
       return URL.createObjectURL(b);
     });
     try {
-      const r = await fetch(`${API}/count?threshold=0.05&survey=${sv}`, {
+      const r = await fetch(`${API}/count?threshold=0.05${sv === 'aerial' ? '&survey=aerial' : ''}`, {
         method: 'POST',
         headers: { 'Content-Type': b.type || 'application/octet-stream' },
         body: b,
@@ -321,7 +321,14 @@ export default function PhotoApp() {
             <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => onFiles(e.target.files)} data-testid="photo-file" />
             <div className="seg ph-samples" role="tablist" aria-label="Примеры" data-testid="photo-samples">
               {SAMPLES.map((x) => (
-                <button key={x.src} className={sample?.src === x.src ? 'on' : ''} onClick={() => loadSample(x)} disabled={busy} title={x.domain} data-testid="photo-sample">
+                <button
+                  key={x.src}
+                  className={sample?.src === x.src ? 'on' : ''}
+                  onClick={() => loadSample(x)}
+                  disabled={busy || (x.survey === 'aerial' && !!aerialOff)}
+                  title={x.survey === 'aerial' && aerialOff ? 'нет весов аэро-модели на этой установке' : x.domain}
+                  data-testid="photo-sample"
+                >
                   {x.label}
                 </button>
               ))}
@@ -350,6 +357,9 @@ export default function PhotoApp() {
             <div className="ph-n">{res ? shown.length : '—'}</div>
             <div className="ph-unit">
               предметов на кадр (найдено)
+              <div className="ph-src" data-testid="photo-source">
+                {sample?.warn ? 'исследовательская оценка — модель на этот домен не перенесена' : 'посчитано по детальному фото'}
+              </div>
               {cInt && (
                 <div className="faint ph-hint" data-testid="photo-count-interval">
                   истинное число, 95 %: {f2(cInt[0], 0)}–{f2(cInt[1], 0)} (по ошибкам на отложенных кадрах)
@@ -360,8 +370,15 @@ export default function PhotoApp() {
           {res?.composition && (
             <div className="faint ph-hint" data-testid="photo-composition">
               Состав:{' '}
-              {res.composition.status === 'by_class' && res.composition.by_class
-                ? Object.entries(res.composition.by_class)
+              {res.composition.status === 'by_class' && res.composition.box_materials
+                ? Object.entries(
+                    res.boxes.reduce<Record<string, number>>((acc, b, i) => {
+                      if (b.score < t) return acc;
+                      const m = res.composition!.box_materials![i] ?? 'состав не определён';
+                      acc[m] = (acc[m] ?? 0) + 1;
+                      return acc;
+                    }, {}),
+                  )
                     .map(([k, v]) => `${k} ${v}`)
                     .join(', ')
                 : `${res.composition.text}${res.composition.reason ? ` — ${res.composition.reason}` : ''}`}
@@ -397,6 +414,9 @@ export default function PhotoApp() {
             <div className="ph-dens" data-testid="photo-density">
               <div>
                 <b>{f3(shown.length / areaM2)}</b> шт./м² · <b>{numRu(dens)}</b> шт./км² — на площади кадра, не спутник
+                <div className="ph-src">
+                  {sample?.warn ? 'исследовательская оценка — не измерение' : `посчитано по детальному фото; площадь ${area !== '' ? 'задана вручную' : 'из GSD'}`}
+                </div>
               </div>
               {cInt && (
                 <div data-testid="photo-density-interval">

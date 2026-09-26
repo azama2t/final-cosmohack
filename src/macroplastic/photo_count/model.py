@@ -6,7 +6,8 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[3]
-WEIGHTS_DIR = ROOT / "weights_exp" / "photo_count"
+WEIGHTS_DIR = ROOT / "weights_exp" / "photo_count"          # experiments (outside git)
+SHIPPED_DIR = ROOT / "weights" / "photo_count"              # product model in git (fp16 state_dict, < 100 MB)
 
 
 def build_model(num_classes=2, pretrained_backbone=False):
@@ -28,6 +29,7 @@ def load_model(weights_path, device="cpu"):
     import torch
     m = build_model()
     sd = torch.load(weights_path, map_location="cpu", weights_only=True)
+    sd = {k: (v.float() if torch.is_tensor(v) and v.is_floating_point() else v) for k, v in sd.items()}  # fp16 -> fp32
     m.load_state_dict(sd)
     return m.to(device).eval()
 
@@ -52,11 +54,21 @@ SURVEYS = {  # survey type -> model card (weights_exp/photo_count/, outside git)
 }
 
 
-def load_card(survey="water_camera"):
-    p = WEIGHTS_DIR / SURVEYS[survey]
-    if p.exists():
-        return json.loads(p.read_text(encoding="utf-8"))
+def card_dir(survey="water_camera"):
+    """weights_exp/photo_count (experiments, outside git) first, then weights/photo_count (shipped in git)."""
+    for d in (WEIGHTS_DIR, SHIPPED_DIR):
+        if (d / SURVEYS[survey]).exists():
+            return d
     return None
+
+
+def load_card(survey="water_camera"):
+    d = card_dir(survey)
+    if d is None:
+        return None
+    card = json.loads((d / SURVEYS[survey]).read_text(encoding="utf-8"))
+    card["_dir"] = str(d)
+    return card
 
 
 class Counter:
@@ -69,7 +81,10 @@ class Counter:
         self.card = card
         want = os.environ.get("MACROPLASTIC_PHOTO_DEVICE") or card.get("device", "auto")  # auto | cpu | cuda
         self.device = "cuda" if (torch.cuda.is_available() and want != "cpu") else "cpu"
-        self.model = load_model(WEIGHTS_DIR / card["weights_file"], self.device)
+        wp = Path(card.get("_dir", WEIGHTS_DIR)) / card["weights_file"]
+        if not wp.exists():
+            raise FileNotFoundError(f"weights file {wp} missing")
+        self.model = load_model(wp, self.device)
         self.threshold = float(card["threshold"])
 
     @classmethod

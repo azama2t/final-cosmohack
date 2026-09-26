@@ -42,7 +42,7 @@ def _img(src: str, alt: str, base: Path) -> str:
         return f"<p><i>[нет картинки: {html.escape(src)}]</i></p>"
     mime = mimetypes.guess_type(p.name)[0] or "image/png"
     data = base64.b64encode(p.read_bytes()).decode("ascii")
-    return (f'<p style="text-align:center"><img src="data:{mime};base64,{data}" alt="{html.escape(alt)}" width="600"/><br/>'
+    return (f'<p style="text-align:center"><img src="data:{mime};base64,{data}" alt="{html.escape(alt)}" width="{860 if any(q in src for q in ('units_ladder', 'funnel', 'independent', 'search_')) else 640}"/><br/>'
             f"<i>{html.escape(alt)}</i></p>")
 
 
@@ -67,9 +67,14 @@ def md_to_html(md: str, base: Path) -> str:
         if tbl:
             rows = [r for r in tbl if not re.match(r"^\|\s*:?-{2,}", r)]
             cells = [[c.strip() for c in r.strip().strip("|").split("|")] for r in rows]
-            h = "<tr>" + "".join(f"<th>{inline(c)}</th>" for c in cells[0]) + "</tr>"
-            b = "".join("<tr>" + "".join(f"<td>{inline(c)}</td>" for c in r) + "</tr>" for r in cells[1:])
-            out.append(f"<table>{h}{b}</table>")
+            def cell(c):  # длинные пути и ключи переносятся (zero-width space после / . _)
+                s = inline(c)
+                return re.sub(r"(?<=[/._])(?=[A-Za-z0-9])", "​", s) if len(c) > 25 else s
+            fs = "8pt" if len(cells[0]) > 5 else "9pt"
+            h = "<tr>" + "".join(f'<th bgcolor="#e8e8e8"><font style="font-size:{fs}">{cell(c)}</font></th>' for c in cells[0]) + "</tr>"
+            b = "".join("<tr>" + "".join(f'<td valign="top"><font style="font-size:{fs}">{cell(c)}</font></td>' for c in r) + "</tr>"
+                        for r in cells[1:])
+            out.append(f'<table border="1" cellspacing="0" cellpadding="3" width="100%">{h}{b}</table>')
             tbl.clear()
 
     for line in md.splitlines():

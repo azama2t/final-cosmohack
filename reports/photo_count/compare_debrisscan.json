@@ -1,0 +1,91 @@
+{
+ "rule": "ours replaces baseline iff MAE_ours <= 0.9*MAE_base AND CI95(MAE_ours-MAE_base) < 0 AND precision_ours >= precision_base - 0.02 (recorded 05:51, before the comparison)",
+ "n_test": 397,
+ "n_test_in_debrisscan_training": 291,
+ "results": {
+  "all_test": {
+   "ours": {
+    "threshold": 0.8,
+    "count_mae": 1.853904282115869,
+    "count_bias": -0.327455919395466,
+    "density_mae_km2": 11315.333753148614,
+    "ap50": 0.7195951901377767,
+    "precision": 0.6956144159791576,
+    "recall": 0.6584463625154131
+   },
+   "debrisscan_default_0.30": {
+    "threshold": 0.3,
+    "count_mae": 2.292191435768262,
+    "count_bias": 0.7909319899244333,
+    "density_mae_km2": 13990.42624370277,
+    "ap50": 0.6386074535951614,
+    "precision": 0.5926465234801602,
+    "recall": 0.6691327579120427,
+    "mae_diff_ours_minus_base": -0.43828715365239296,
+    "mae_diff_ci95": [
+     -0.6423803526448363,
+     -0.22411838790932023
+    ],
+    "ours_accepted": true
+   },
+   "debrisscan_val_thr": {
+    "threshold": 0.35,
+    "count_mae": 2.2216624685138537,
+    "count_bias": -0.48866498740554154,
+    "density_mae_km2": 13559.951590050376,
+    "ap50": 0.6386074535951614,
+    "precision": 0.6632425189816883,
+    "recall": 0.6103575832305795,
+    "mae_diff_ours_minus_base": -0.3677581863979849,
+    "mae_diff_ci95": [
+     -0.6070528967254408,
+     -0.12846347607052896
+    ],
+    "ours_accepted": true
+   },
+   "n": 397
+  },
+  "unseen_by_debrisscan": {
+   "ours": {
+    "threshold": 0.8,
+    "count_mae": 2.7264150943396226,
+    "count_bias": -0.330188679245283,
+    "density_mae_km2": 16640.717128537734,
+    "ap50": 0.653887060918649,
+    "precision": 0.6338418862690708,
+    "recall": 0.6044973544973545
+   },
+   "debrisscan_default_0.30": {
+    "threshold": 0.3,
+    "count_mae": 2.7641509433962264,
+    "count_bias": 0.7075471698113207,
+    "density_mae_km2": 16871.038472877357,
+    "ap50": 0.5871095804044045,
+    "precision": 0.5511432009626955,
+    "recall": 0.6058201058201058,
+    "mae_diff_ours_minus_base": -0.03773584905660377,
+    "mae_diff_ci95": [
+     -0.5283018867924528,
+     0.49056603773584906
+    ],
+    "ours_accepted": false
+   },
+   "debrisscan_val_thr": {
+    "threshold": 0.35,
+    "count_mae": 2.811320754716981,
+    "count_bias": -0.7924528301886793,
+    "density_mae_km2": 17158.940153301886,
+    "ap50": 0.5871095804044045,
+    "precision": 0.6279761904761905,
+    "recall": 0.5582010582010583,
+    "mae_diff_ours_minus_base": -0.08490566037735849,
+    "mae_diff_ci95": [
+     -0.6608490566037736,
+     0.5566037735849056
+    ],
+    "ours_accepted": false
+   },
+   "n": 106
+  }
+ }
+}

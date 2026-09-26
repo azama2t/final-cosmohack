@@ -5,7 +5,7 @@ import Info from '../components/Info';
 import type { Basemap, Projection } from '../types';
 import { loadPrefs, savePrefs } from '../lib/prefs';
 import { ctl } from '../map/controller';
-import { apiUrl, ApiErr, get, MOCK, send, type FC, type Feat, type Meta, type ObsProps, type Pair, type SavedQuery, type Scene, type ZoneDetail, type ZoneProps } from './api3';
+import { API_BASE, apiUrl, ApiErr, get, MOCK, send, type FC, type Feat, type Meta, type ObsProps, type Pair, type SavedQuery, type Scene, type ZoneDetail, type ZoneProps } from './api3';
 import CaseMap, { ACCENT, CONC_BREAKS, CONC_COLORS, STRIP_NO, STRIP_OK, flyToBox, geomBounds, WORLD_CENTER, worldZoom, type HoverInfo, type Pick } from './CaseMap';
 import { ObsCard, ZoneCard } from './Cards';
 import PairsDrawer from './PairsDrawer';
@@ -92,6 +92,16 @@ export default function CaseApp() {
   const [metaS, setMetaS] = useState<{ meta: Meta | null; err: ApiErr | null }>({ meta: null, err: null });
   const [metaTick, setMetaTick] = useState(0);
   const [q, setQ] = useState<CaseQuery>(url.q ?? DEFAULT_QUERY);
+  const [studio, setStudio] = useState(false);
+  const [numsOpen, setNumsOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(() => {
+    try {
+      if (localStorage.getItem('mp.case.filtersOpen') === '1') return true;
+    } catch {
+      /* no storage */
+    }
+    return false;
+  });
   const [sel, setSel] = useState<Pick | null>(() => {
     const m = url.sel?.match(/^(zone|obs):(.+)$/);
     return m ? { kind: m[1] as 'zone' | 'obs', id: m[2] } : null;
@@ -268,7 +278,28 @@ export default function CaseApp() {
     if (b) flyToBox(b, { maxZoom, duration: 1400 });
   };
 
+  /** §33: camera before a find was opened — «Назад» returns there to pick the next find */
+  const backCam = useRef<{ center: [number, number]; zoom: number } | null>(null);
+  const rememberCam = () => {
+    const m = ctl.map;
+    if (m && !sel) backCam.current = { center: [m.getCenter().lng, m.getCenter().lat], zoom: m.getZoom() };
+  };
+  const goBack = () => {
+    const b = backCam.current;
+    setStudio(false);
+    closeCard();
+    if (b && ctl.map) ctl.map.flyTo({ center: b.center, zoom: b.zoom, duration: 1200, essential: true });
+    backCam.current = null;
+  };
+  const toEarth = () => {
+    setStudio(false);
+    closeCard();
+    backCam.current = null;
+    if (ctl.map) ctl.map.flyTo({ center: WORLD_CENTER, zoom: worldZoom(ctl.map.getContainer().clientHeight), duration: 1400, essential: true });
+  };
   const openZone = (id: string, fly = true) => {
+    if (id.startsWith('SZ-')) rememberCam();
+    setStudio(false);
     setSel({ kind: 'zone', id });
     setActivePair(null);
     setPairHl(null);
@@ -406,6 +437,15 @@ export default function CaseApp() {
       pairsReady: !!pairs.data,
       metricsReady: !!metrics.data,
       isMoving: () => !!ctl.map?.isMoving(),
+      /** §33 test hook: rendered find points / clusters on the map (screen px, map-relative) */
+      findPoints: () => {
+        const m = ctl.map;
+        if (!m || !m.getLayer('c-sz-pts')) return [];
+        return m.queryRenderedFeatures(undefined as any, { layers: ['c-sz-pts', 'c-sz-clu'] }).map((f: any) => {
+          const pt = m.project(f.geometry.coordinates);
+          return { x: pt.x, y: pt.y, id: f.properties.id ?? null, cluster: f.properties.point_count ?? 0, ds: f.properties.ds ?? null };
+        });
+      },
       tiles: () => ({ loaded: !!ctl.map?.areTilesLoaded(), zoom: ctl.map?.getZoom() }),
       exportUrl: (layer: string, fmt: string) => exportHref(layer, fmt),
       selectZone: (id: string) => openZone(id),
@@ -499,6 +539,8 @@ export default function CaseApp() {
           </div>
         </div>
         <Headline
+          open={numsOpen}
+          onToggle={() => setNumsOpen((v) => !v)}
           meta={meta}
           photo={photoMeta.data}
           onField={(r) => {
@@ -517,6 +559,26 @@ export default function CaseApp() {
         )}
 
         <div className="c-filters" data-testid="filters">
+          {/* §33а п.1: map-first — filters are optional and folded; the choice is remembered in this browser */}
+          <button
+            className="c-filters-toggle"
+            onClick={() => {
+              setFiltersOpen((v) => {
+                try {
+                  localStorage.setItem('mp.case.filtersOpen', v ? '0' : '1');
+                } catch {
+                  /* no storage */
+                }
+                return !v;
+              });
+            }}
+            aria-expanded={filtersOpen}
+            data-testid="filters-toggle"
+          >
+            Фильтры (необязательно){!isDefault(q) ? ' · заданы' : ''} {filtersOpen ? '▾' : '▸'}
+          </button>
+          {filtersOpen && (
+          <div className="c-filters-body">
           <label className="c-f">
             <span>Акватория</span>
             <select value={q.source ?? ''} onChange={(e) => setFilter({ source: e.target.value || null, profile: null })} data-testid="f-source">
@@ -614,6 +676,8 @@ export default function CaseApp() {
               ))}
             </div>
           </div>
+          </div>
+          )}
           <div className="c-counts" data-testid="counts">
             <span>
               <b>{num(obs.data?.count ?? null, 0)}</b> наблюдений
@@ -716,7 +780,7 @@ export default function CaseApp() {
           initialCamera={url.cam}
           onPick={(pk) => {
             if (!pk) return;
-            if (pk.kind === 'zone') openZone(pk.id, false);
+            if (pk.kind === 'zone') openZone(pk.id, pk.id.startsWith('SZ-'));
             else openObs(pk.id, false);
           }}
           onHover={setHover}
@@ -737,6 +801,9 @@ export default function CaseApp() {
         {hover && <HoverTip meta={meta} h={hover} obs={obs.data} zones={zones.data} szones={szList} />}
 
         <div className="actions c-actions" data-testid="actions">
+          <button onClick={toEarth} data-testid="act-earth" title="Вернуться к обзору Земли со всеми находками">
+            ⊕ Обзор Земли
+          </button>
           <button className={drawer ? 'on' : ''} onClick={() => setDrawer((v) => !v)} data-testid="act-pairs">
             Реестр пар
           </button>
@@ -942,7 +1009,36 @@ export default function CaseApp() {
       </main>
 
       <aside className="right" data-testid="right-panel">
-        {sel?.kind === 'zone' && selSz && <SceneZoneCard meta={meta} zone={selSz} detail={szDetail.data} onClose={closeCard} onZone={(id) => openZone(id)} />}
+        {sel?.kind === 'zone' && selSz && !studio && (
+          <SceneZoneCard
+            meta={meta}
+            zone={selSz}
+            detail={szDetail.data}
+            onClose={goBack}
+            onZone={(id) => openZone(id)}
+            onBack={goBack}
+            onField={(sid) => {
+              setQ((qq) => ({ ...qq, layers: { ...qq.layers, obs: true } }));
+              openObs(sid);
+            }}
+            onStudio={() => {
+              setStudio(true);
+              setQ((x) => ({ ...x, layers: { ...x.layers, scenes: true } }));
+              flyToFeat(selSz, 14);
+            }}
+          />
+        )}
+        {sel?.kind === 'zone' && selSz && studio && (
+          <ZoneStudio
+            zone={selSz}
+            detail={szDetail.data}
+            quality={q.layers.quality}
+            scenesOn={q.layers.scenes}
+            onLayer={(k) => setLayer(k)}
+            onCard={() => setStudio(false)}
+            onBack={goBack}
+          />
+        )}
         {sel?.kind === 'zone' && selZone && (
           <ZoneCard
             meta={meta}
@@ -1041,12 +1137,16 @@ function HoverTip({ meta, h, obs, zones, szones }: { meta: Meta; h: HoverInfo; o
     const lo = (p as any).ci95_lo, hi = (p as any).ci95_hi;
     t = `Измерение · ${v === null ? 'без плотности' : `${num(v)} шт./км²${lo !== null && lo !== undefined && hi !== null && hi !== undefined ? ` [${num(lo)}–${num(hi)}]` : ''}`}`;
     s = `${profileRu(meta, p.measurement_profile)} · ${dateRu(p.date_utc)} · ${scopeRu(meta, p.target_scope)}`;
+  } else if (h.id.startsWith('CL-')) {
+    const n = Number(h.id.split('-')[2]);
+    t = `${plural(n, 'находка', 'находки', 'находок')} детектора рядом`;
+    s = 'нажмите — приблизить и раскрыть';
   } else if (h.id.startsWith('SZ-')) {
     const f = szones.find((x) => x.id === h.id);
     if (!f) return null;
     const p = f.properties;
-    t = `Спутниковая зона · ${p.detection_label}`;
-    s = `${p.title} · ${dateRu(p.datetime)} · подозрительные пиксели ${num(p.measured.suspicious_area_m2, 0)} м²`;
+    t = `${p.detection_status === 'detected' ? 'Находка детектора' : 'Спутниковая зона'} · ${p.detection_label}`;
+    s = `снимок Sentinel-2 ${dateRu(p.datetime)} · обработан детектором · ${p.title} · площадь пикселей ${num(p.measured.suspicious_area_m2, 0)} м²`;
   } else {
     const f = zones?.features.find((x) => x.id === h.id);
     if (!f) return null;
@@ -1176,7 +1276,11 @@ function CaseLegend({
       </div>
       {!open && (
         <button className="c-lg-compact" onClick={() => setOpen(true)} data-testid="legend-compact" title="Развернуть легенду">
-          <span className="c-lg-conc-t">Концентрация, шт./км² (полевые измерения)</span>
+          <span className="c-lg-finds" data-testid="legend-finds">
+            <i className="c-sw-find" style={{ background: SZ_COLORS.detected }} /> находка, совпадает с Cózar
+            <i className="c-sw-find" style={{ background: SZ_COLORS.unverified }} /> находка, требует проверки
+          </span>
+          <span className="c-lg-conc-t">Концентрация, шт./км² (полевые измерения, видны при приближении)</span>
           <span className="c-ramp c-ramp-mini" aria-hidden>
             {CONC_COLORS.map((c) => (
               <span key={c} style={{ background: c }} />
@@ -1191,6 +1295,10 @@ function CaseLegend({
       )}
       {open && (
         <>
+          <div className="lg-row c-lg-finds" data-testid="legend-finds">
+            <i className="c-sw-find" style={{ background: SZ_COLORS.detected }} /> находка детектора, совпадает с разметкой Cózar
+            <i className="c-sw-find" style={{ background: SZ_COLORS.unverified }} /> находка, требует проверки · кружок с белой обводкой крупнее — несколько находок рядом
+          </div>
           {layers.obs && (
             <>
               <div className="lg-row c-lg-conc-t" data-testid="legend-conc-title">
@@ -1291,13 +1399,22 @@ function CaseLegend({
 
 
 /** §31 п.2 а: «Главное» — numbers visible at once (field concentration per profile = measurement; photo counter; satellite) */
-function Headline({ meta, photo, onField, onZone }: { meta: Meta; photo: any; onField: (r: any) => void; onZone: (id: string) => void }) {
+function Headline({ open, onToggle, meta, photo, onField, onZone }: { open: boolean; onToggle: () => void; meta: Meta; photo: any; onField: (r: any) => void; onZone: (id: string) => void }) {
   const h = (meta as any).headline;
   if (!h) return null;
+  if (!open)
+    return (
+      <button className="c-head-open" onClick={onToggle} data-testid="headline-open" title="Концентрация по полевым данным, счётчик по фото, интервалы и метрики">
+        Цифры: поле (шт./км²), фото, спутник ▸
+      </button>
+    );
   const tg = photo?.model?.metrics?.test_grouped;
   const sat = h.satellite;
   return (
     <div className="c-head" data-testid="headline">
+      <button className="c-head-close" onClick={onToggle} data-testid="headline-close" aria-label="Свернуть">
+        ▾ свернуть
+      </button>
       <div className="c-head-t">
         {h.field_label}
         <Info label="Как читать" testid="headline-info">
@@ -1343,6 +1460,109 @@ function Headline({ meta, photo, onField, onZone }: { meta: Meta; photo: any; on
           </Info>
         </div>
       )}
+    </div>
+  );
+}
+
+
+/** §33 «В студию»: work with one zone — scene image, quality mask and detections on the map + large crops */
+function ZoneStudio({
+  zone,
+  detail,
+  quality,
+  scenesOn,
+  onLayer,
+  onCard,
+  onBack,
+}: {
+  zone: Feat<SceneZoneProps>;
+  detail: SceneZoneDetail | null;
+  quality: boolean;
+  scenesOn: boolean;
+  onLayer: (k: 'scenes' | 'quality') => void;
+  onCard: () => void;
+  onBack: () => void;
+}) {
+  const p = zone.properties;
+  const sc: any = (detail as any)?.scene;
+  const dets: any[] = (detail as any)?.detections?.features ?? [];
+  return (
+    <div className="right-inner" data-testid="zone-studio">
+      <div className="rp-head">
+        <div className="rp-titles">
+          <div className="rp-kicker">Студия · работа с зоной</div>
+          <div className="rp-title">{p.title}</div>
+          <div className="rp-sub">Sentinel-2 · {dateRu(p.datetime)}</div>
+        </div>
+      </div>
+      <div className="rp-body">
+        <div className="sec c-studio-bar">
+          <button className="btn sm" onClick={onCard} data-testid="studio-card">
+            ← к карточке
+          </button>
+          <button className="btn sm ghost" onClick={onBack} data-testid="studio-back">
+            Назад к карте
+          </button>
+        </div>
+        <div className="sec">
+          <div className="sec-h">
+            <h3>На карте</h3>
+          </div>
+          <label className="c-studio-t">
+            <input type="checkbox" checked={scenesOn} onChange={() => onLayer('scenes')} data-testid="studio-rgb" /> снимок (Sentinel-2, RGB)
+          </label>
+          <label className="c-studio-t">
+            <input type="checkbox" checked={quality} onChange={() => onLayer('quality')} data-testid="studio-quality" /> маска качества (облака, блики, суша)
+          </label>
+          <div className="c-line faint">контуры объектов детектора — поверх снимка ({num(dets.length, 0)} объект., порог 0,63)</div>
+        </div>
+        {p.crop_url && (
+          <div className="sec">
+            <div className="sec-h">
+              <h3>Снимок | детекция</h3>
+              <span className="aside">по снимку</span>
+            </div>
+            <img className="c-studio-img" src={API_BASE + p.crop_url} alt="снимок и пиксели детектора" />
+          </div>
+        )}
+        {sc?.quality_url && (
+          <div className="sec">
+            <div className="sec-h">
+              <h3>Качество снимка</h3>
+            </div>
+            <div className="c-studio-pair">
+              {sc.preview_url && <img src={API_BASE + sc.preview_url} alt="снимок сцены" />}
+              <img src={API_BASE + sc.quality_url} alt="маска качества" />
+            </div>
+          </div>
+        )}
+        <div className="sec">
+          <div className="sec-h">
+            <h3>Объекты детектора</h3>
+          </div>
+          <table className="c-ptable">
+            <thead>
+              <tr>
+                <th>объект</th>
+                <th className="r">пикс.</th>
+                <th className="r">м²</th>
+                <th className="r">вер. макс.</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dets.slice(0, 12).map((d: any) => (
+                <tr key={d.properties.det_id}>
+                  <td>{d.properties.det_id}</td>
+                  <td className="r">{num(d.properties.n_pixels, 0)}</td>
+                  <td className="r">{num(d.properties.area_m2, 0)}</td>
+                  <td className="r">{num(d.properties.prob_max, 2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {dets.length > 12 && <div className="c-line faint">ещё {num(dets.length - 12, 0)}</div>}
+        </div>
+      </div>
     </div>
   );
 }

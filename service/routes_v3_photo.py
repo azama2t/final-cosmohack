@@ -101,7 +101,8 @@ def _headline(card):
     return {"count_mae_per_frame": t["count_mae"], "count_mae_ci95": t.get("count_mae_ci95"),
             "n_images": t["n_images"], "test": "FML, отложенные сессии съёмки (независимый тест)",
             "baseline_median_mae": (card.get("baseline_median_mae_test") if card else None),
-            "text": f"Счётчик предметов по фото: ошибка {t['count_mae']:.2f} шт./кадр на независимом тесте".replace(".", ",")}
+            "text": "Счётчик предметов по фото: ошибка " + f"{t['count_mae']:.2f}".replace(".", ",")
+                    + " шт./кадр на независимом тесте"}
 
 
 def _meta_obj():
@@ -285,6 +286,8 @@ async def photo_count(request: Request):
         "boxes": [{"x1": round(float(b[0]), 1), "y1": round(float(b[1]), 1), "x2": round(float(b[2]), 1),
                    "y2": round(float(b[3]), 1), "score": round(float(s), 4), "label": "мусор"}
                   for b, s in zip(boxes, scores)],
+        "value_source": "посчитано по детальному фото",
+        "value_source_code": "photo_count",
         "count_interval": cint,
         "composition": _composition(survey, boxes, c.card),
         "gsd_m": gsd,
