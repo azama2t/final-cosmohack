@@ -1,0 +1,20 @@
+{
+  "downloaded_primary_files": 13,
+  "downloaded_primary_bytes": 3014989853,
+  "verified_adis_sentinel_pairs": 6,
+  "pair_segments": [
+    "335765",
+    "335766",
+    "335997",
+    "335792",
+    "335772",
+    "335694"
+  ],
+  "source_verdicts": {
+    "ADIS / The Ocean Cleanup": "A",
+    "Ruiz et al. 2020 public supplement": "D",
+    "PLP2019": "C",
+    "PLP2022/23 tested subset": "C",
+    "FML Dataset": "B"
+  }
+}

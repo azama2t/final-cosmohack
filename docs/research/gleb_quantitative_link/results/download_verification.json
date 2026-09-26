@@ -1,0 +1,175 @@
+{
+  "source_files": 13,
+  "source_bytes": 3014989853,
+  "crops": [
+    {
+      "segment_id": "335765",
+      "scene_id": "S2B_33TYE_20230409_0_L2A",
+      "path": "results/adis_pairs/335765/sentinel2_crop_12km.tif",
+      "crs": "EPSG:32633",
+      "shape": [
+        5,
+        1200,
+        1200
+      ],
+      "band_descriptions": [
+        "blue",
+        "green",
+        "red",
+        "nir",
+        "scl"
+      ],
+      "valid_fraction": 1.0,
+      "red_valid_p2_p98": [
+        109.0,
+        272.0
+      ],
+      "water_fraction": 1.0,
+      "route_inside_crop_fraction": 1.0,
+      "route_water_scl6_fraction": 1.0,
+      "bytes": 8008484,
+      "verified": true
+    },
+    {
+      "segment_id": "335766",
+      "scene_id": "S2B_33TYE_20230409_0_L2A",
+      "path": "results/adis_pairs/335766/sentinel2_crop_12km.tif",
+      "crs": "EPSG:32633",
+      "shape": [
+        5,
+        1200,
+        1200
+      ],
+      "band_descriptions": [
+        "blue",
+        "green",
+        "red",
+        "nir",
+        "scl"
+      ],
+      "valid_fraction": 1.0,
+      "red_valid_p2_p98": [
+        111.0,
+        856.0
+      ],
+      "water_fraction": 0.9408,
+      "route_inside_crop_fraction": 1.0,
+      "route_water_scl6_fraction": 1.0,
+      "bytes": 8465206,
+      "verified": true
+    },
+    {
+      "segment_id": "335997",
+      "scene_id": "S2A_32TNL_20210930_0_L2A",
+      "path": "results/adis_pairs/335997/sentinel2_crop_12km.tif",
+      "crs": "EPSG:32632",
+      "shape": [
+        5,
+        1200,
+        1200
+      ],
+      "band_descriptions": [
+        "blue",
+        "green",
+        "red",
+        "nir",
+        "scl"
+      ],
+      "valid_fraction": 1.0,
+      "red_valid_p2_p98": [
+        96.0,
+        725.0
+      ],
+      "water_fraction": 0.1424,
+      "route_inside_crop_fraction": 1.0,
+      "route_water_scl6_fraction": 0.0,
+      "bytes": 8172530,
+      "verified": true
+    },
+    {
+      "segment_id": "335792",
+      "scene_id": "S2B_33SWB_20230330_1_L2A",
+      "path": "results/adis_pairs/335792/sentinel2_crop_12km.tif",
+      "crs": "EPSG:32633",
+      "shape": [
+        5,
+        1200,
+        1200
+      ],
+      "band_descriptions": [
+        "blue",
+        "green",
+        "red",
+        "nir",
+        "scl"
+      ],
+      "valid_fraction": 1.0,
+      "red_valid_p2_p98": [
+        74.0,
+        240.0
+      ],
+      "water_fraction": 0.9461,
+      "route_inside_crop_fraction": 1.0,
+      "route_water_scl6_fraction": 0.9867,
+      "bytes": 6510970,
+      "verified": true
+    },
+    {
+      "segment_id": "335772",
+      "scene_id": "S2A_32TNN_20230324_0_L2A",
+      "path": "results/adis_pairs/335772/sentinel2_crop_12km.tif",
+      "crs": "EPSG:32632",
+      "shape": [
+        5,
+        1200,
+        1200
+      ],
+      "band_descriptions": [
+        "blue",
+        "green",
+        "red",
+        "nir",
+        "scl"
+      ],
+      "valid_fraction": 1.0,
+      "red_valid_p2_p98": [
+        30.0,
+        67.0
+      ],
+      "water_fraction": 1.0,
+      "route_inside_crop_fraction": 1.0,
+      "route_water_scl6_fraction": 1.0,
+      "bytes": 6324358,
+      "verified": true
+    },
+    {
+      "segment_id": "335694",
+      "scene_id": "S2A_32TNN_20230324_0_L2A",
+      "path": "results/adis_pairs/335694/sentinel2_crop_12km.tif",
+      "crs": "EPSG:32632",
+      "shape": [
+        5,
+        1200,
+        1200
+      ],
+      "band_descriptions": [
+        "blue",
+        "green",
+        "red",
+        "nir",
+        "scl"
+      ],
+      "valid_fraction": 1.0,
+      "red_valid_p2_p98": [
+        31.0,
+        556.0
+      ],
+      "water_fraction": 0.9184,
+      "route_inside_crop_fraction": 1.0,
+      "route_water_scl6_fraction": 1.0,
+      "bytes": 6573372,
+      "verified": true
+    }
+  ],
+  "crop_bytes": 44054920
+}

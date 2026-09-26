@@ -1,0 +1,96 @@
+{
+  "zip_images": 5490,
+  "zip_labels": 5490,
+  "sampled": [
+    {
+      "image": "results/fml_samples/frame_1459.jpg",
+      "label": "results/fml_samples/frame_1459.txt",
+      "overlay": "results/fml_samples/frame_1459_boxes.jpg",
+      "boxes": 1,
+      "size_px": [
+        1920,
+        1080
+      ],
+      "exif_count": 0,
+      "gps_exif": false,
+      "classes": [
+        "0"
+      ]
+    },
+    {
+      "image": "results/fml_samples/frame_0956.jpg",
+      "label": "results/fml_samples/frame_0956.txt",
+      "overlay": "results/fml_samples/frame_0956_boxes.jpg",
+      "boxes": 2,
+      "size_px": [
+        1920,
+        1080
+      ],
+      "exif_count": 0,
+      "gps_exif": false,
+      "classes": [
+        "0"
+      ]
+    },
+    {
+      "image": "results/fml_samples/frame_1016.jpg",
+      "label": "results/fml_samples/frame_1016.txt",
+      "overlay": "results/fml_samples/frame_1016_boxes.jpg",
+      "boxes": 3,
+      "size_px": [
+        1920,
+        1080
+      ],
+      "exif_count": 0,
+      "gps_exif": false,
+      "classes": [
+        "0"
+      ]
+    },
+    {
+      "image": "results/fml_samples/frame_0475.jpg",
+      "label": "results/fml_samples/frame_0475.txt",
+      "overlay": "results/fml_samples/frame_0475_boxes.jpg",
+      "boxes": 5,
+      "size_px": [
+        1920,
+        1080
+      ],
+      "exif_count": 0,
+      "gps_exif": false,
+      "classes": [
+        "0"
+      ]
+    },
+    {
+      "image": "results/fml_samples/image_20241004_143246_812467.jpg",
+      "label": "results/fml_samples/image_20241004_143246_812467.txt",
+      "overlay": "results/fml_samples/image_20241004_143246_812467_boxes.jpg",
+      "boxes": 8,
+      "size_px": [
+        1920,
+        1080
+      ],
+      "exif_count": 0,
+      "gps_exif": false,
+      "classes": [
+        "0"
+      ]
+    }
+  ],
+  "coco_by_split": {
+    "train": {
+      "images": 3845,
+      "boxes": 11849
+    },
+    "val": {
+      "images": 1097,
+      "boxes": 3607
+    },
+    "test": {
+      "images": 548,
+      "boxes": 1700
+    }
+  },
+  "coco_total_boxes": 17156
+}

@@ -1,0 +1,80 @@
+[
+  {
+    "path": "data/raw/adis/Readme.txt",
+    "bytes": 5379,
+    "sha256": "400d249140f471b848343b90c3e7df98c7f8bd087cc46bda70a4052bcf2bdaea",
+    "source": "https://data.4tu.nl/datasets/ddede7f5-aca5-42ae-b851-e0bbb9a2c4c2"
+  },
+  {
+    "path": "data/raw/adis/Objects.csv",
+    "bytes": 6682721,
+    "sha256": "a48abd08fb07572aaf1378326948d8f11e7d9f948cf49c8365662e0cae93c011",
+    "source": "https://data.4tu.nl/datasets/ddede7f5-aca5-42ae-b851-e0bbb9a2c4c2"
+  },
+  {
+    "path": "data/raw/adis/Segments.csv",
+    "bytes": 7968985,
+    "sha256": "813fe7420533a151c0d03fc41eb6d6380805647ee3a84c560591e335893f2a02",
+    "source": "https://data.4tu.nl/datasets/ddede7f5-aca5-42ae-b851-e0bbb9a2c4c2"
+  },
+  {
+    "path": "data/raw/adis/Segments.gpkg",
+    "bytes": 471617536,
+    "sha256": "bc5cc0a9ee692bedb15c944010d1f23439e49bfbd2be198df4c0b85d1035eebe",
+    "source": "https://data.4tu.nl/datasets/ddede7f5-aca5-42ae-b851-e0bbb9a2c4c2"
+  },
+  {
+    "path": "data/raw/adis/Object_snippets.zip",
+    "bytes": 79714775,
+    "sha256": "cd0c2325efabb30d92be6747b26e9810d16dcf3802850dd9c12d12556996717e",
+    "source": "https://data.4tu.nl/datasets/ddede7f5-aca5-42ae-b851-e0bbb9a2c4c2"
+  },
+  {
+    "path": "data/raw/ruiz/Ruiz_2020_article.pdf",
+    "bytes": 6534043,
+    "sha256": "2ed67386876255f9c0be9165d1bdcdbbf4e1bb4023d5536552f052b183b3d1d1",
+    "source": "https://doi.org/10.3389/fmars.2020.00308"
+  },
+  {
+    "path": "data/raw/ruiz/Table_1.docx",
+    "bytes": 681491,
+    "sha256": "99f28164ddb180c1b4ee936ce39b6d823270681b8d053eaf08daa32da147c297",
+    "source": "https://doi.org/10.3389/fmars.2020.00308"
+  },
+  {
+    "path": "data/raw/plp2019/PLP2019_dataset.rar",
+    "bytes": 68887501,
+    "sha256": "b205ae0481a9f02e029ba2e2be237d6074c4ed0efd70171ab6ca5485e70f1c1e",
+    "source": "https://doi.org/10.5281/zenodo.3752719"
+  },
+  {
+    "path": "data/raw/plp2022_23/S2B_MSI_2022_07_21_09_09_36_T35SMD_L2W.nc",
+    "bytes": 8652700,
+    "sha256": "311e76c899f3efb102e659282914ec1b71ee4a3687a8be808687b37ad283f3fd",
+    "source": "https://doi.org/10.5281/zenodo.10046182"
+  },
+  {
+    "path": "data/raw/plp2022_23/S2A_MSI_2023_06_21_09_09_35_T35SMD_L2W.nc",
+    "bytes": 11773897,
+    "sha256": "6a2ffdd944c33634b014362482a11096593b78261b54ca01b44ca24449726705",
+    "source": "https://doi.org/10.5281/zenodo.10046182"
+  },
+  {
+    "path": "data/raw/plp2022_23/20220721_UAS.JPG",
+    "bytes": 8249202,
+    "sha256": "27b521a83d1255db65e58c7aed4d40b4906e1c770cae1b1852c079f4a5ea2fc2",
+    "source": "https://doi.org/10.5281/zenodo.10046182"
+  },
+  {
+    "path": "data/raw/plp2022_23/20230621_UAS_RGB.JPG",
+    "bytes": 461769,
+    "sha256": "357c45ed6959bc682f0caec285446a7513013ddaa9b690de26c440af8c8b727b",
+    "source": "https://doi.org/10.5281/zenodo.10046182"
+  },
+  {
+    "path": "data/raw/fml/FML_full_dataset.zip",
+    "bytes": 2343759854,
+    "sha256": "5aff958d9dfb4a44fc64814efef37ca57f52c184ac092ca47dae0703b39a5728",
+    "source": "https://doi.org/10.17882/106148"
+  }
+]

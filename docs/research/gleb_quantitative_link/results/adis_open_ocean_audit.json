@@ -1,0 +1,83 @@
+[
+  {
+    "segment_id": "158080",
+    "count_gt50cm": "34",
+    "date": "2022-04-30",
+    "catalog": "earth-search",
+    "collection": "sentinel-2-l2a",
+    "scenes_same_day": 0,
+    "scene_ids": []
+  },
+  {
+    "segment_id": "158080",
+    "count_gt50cm": "34",
+    "date": "2022-04-30",
+    "catalog": "planetary-computer",
+    "collection": "sentinel-2-l2a",
+    "scenes_same_day": 0,
+    "scene_ids": []
+  },
+  {
+    "segment_id": "158080",
+    "count_gt50cm": "34",
+    "date": "2022-04-30",
+    "catalog": "planetary-computer",
+    "collection": "landsat-c2-l2",
+    "scenes_same_day": 0,
+    "scene_ids": []
+  },
+  {
+    "segment_id": "174202",
+    "count_gt50cm": "29",
+    "date": "2022-08-24",
+    "catalog": "earth-search",
+    "collection": "sentinel-2-l2a",
+    "scenes_same_day": 0,
+    "scene_ids": []
+  },
+  {
+    "segment_id": "174202",
+    "count_gt50cm": "29",
+    "date": "2022-08-24",
+    "catalog": "planetary-computer",
+    "collection": "sentinel-2-l2a",
+    "scenes_same_day": 0,
+    "scene_ids": []
+  },
+  {
+    "segment_id": "174202",
+    "count_gt50cm": "29",
+    "date": "2022-08-24",
+    "catalog": "planetary-computer",
+    "collection": "landsat-c2-l2",
+    "scenes_same_day": 0,
+    "scene_ids": []
+  },
+  {
+    "segment_id": "31546",
+    "count_gt50cm": "19",
+    "date": "2022-08-19",
+    "catalog": "earth-search",
+    "collection": "sentinel-2-l2a",
+    "scenes_same_day": 0,
+    "scene_ids": []
+  },
+  {
+    "segment_id": "31546",
+    "count_gt50cm": "19",
+    "date": "2022-08-19",
+    "catalog": "planetary-computer",
+    "collection": "sentinel-2-l2a",
+    "scenes_same_day": 0,
+    "scene_ids": []
+  },
+  {
+    "segment_id": "31546",
+    "count_gt50cm": "19",
+    "date": "2022-08-19",
+    "catalog": "planetary-computer",
+    "collection": "landsat-c2-l2",
+    "scenes_same_day": 0,
+    "scene_ids": []
+  }
+]

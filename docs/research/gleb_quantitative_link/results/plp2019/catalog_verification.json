@@ -1,0 +1,92 @@
+[
+  {
+    "date": "2019-04-18",
+    "collection": "sentinel-2-l1c",
+    "matches": 0,
+    "scenes": []
+  },
+  {
+    "date": "2019-04-18",
+    "collection": "sentinel-2-l2a",
+    "matches": 1,
+    "scenes": [
+      {
+        "id": "S2B_MSIL2A_20190418T085559_R007_T35SMD_20201007T034247",
+        "datetime": "2019-04-18T08:55:59.024000Z",
+        "cloud": 9.158331
+      }
+    ]
+  },
+  {
+    "date": "2019-05-03",
+    "collection": "sentinel-2-l1c",
+    "matches": 0,
+    "scenes": []
+  },
+  {
+    "date": "2019-05-03",
+    "collection": "sentinel-2-l2a",
+    "matches": 1,
+    "scenes": [
+      {
+        "id": "S2A_MSIL2A_20190503T085601_R007_T35SMD_20201006T092716",
+        "datetime": "2019-05-03T08:56:01.024000Z",
+        "cloud": 7.243987
+      }
+    ]
+  },
+  {
+    "date": "2019-05-18",
+    "collection": "sentinel-2-l1c",
+    "matches": 0,
+    "scenes": []
+  },
+  {
+    "date": "2019-05-18",
+    "collection": "sentinel-2-l2a",
+    "matches": 1,
+    "scenes": [
+      {
+        "id": "S2B_MSIL2A_20190518T085609_R007_T35SMD_20210515T181922",
+        "datetime": "2019-05-18T08:56:09.024000Z",
+        "cloud": 38.257656
+      }
+    ]
+  },
+  {
+    "date": "2019-05-28",
+    "collection": "sentinel-2-l1c",
+    "matches": 0,
+    "scenes": []
+  },
+  {
+    "date": "2019-05-28",
+    "collection": "sentinel-2-l2a",
+    "matches": 1,
+    "scenes": [
+      {
+        "id": "S2B_MSIL2A_20190528T085609_R007_T35SMD_20201006T193016",
+        "datetime": "2019-05-28T08:56:09.024000Z",
+        "cloud": 0.359647
+      }
+    ]
+  },
+  {
+    "date": "2019-06-07",
+    "collection": "sentinel-2-l1c",
+    "matches": 0,
+    "scenes": []
+  },
+  {
+    "date": "2019-06-07",
+    "collection": "sentinel-2-l2a",
+    "matches": 1,
+    "scenes": [
+      {
+        "id": "S2B_MSIL2A_20190607T085609_R007_T35SMD_20201005T232056",
+        "datetime": "2019-06-07T08:56:09.024000Z",
+        "cloud": 4.541316
+      }
+    ]
+  }
+]

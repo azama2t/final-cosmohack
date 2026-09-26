@@ -1,0 +1,128 @@
+{
+  "study_area_bbox": [
+    -1.8,
+    43.25,
+    -1.3,
+    43.65
+  ],
+  "season_interval": "2018-05-01T00:00:00Z/2018-09-30T23:59:59Z",
+  "warning": "Ruiz public supplement does not expose tow-level coordinates and dates; these are regional catalog hits, not matched observations.",
+  "results": [
+    {
+      "api": "https://earth-search.aws.element84.com/v1/search",
+      "collection": "sentinel-2-l2a",
+      "matched": 193,
+      "returned": 100,
+      "sample_scenes": [
+        {
+          "id": "S2B_30TWN_20180926_1_L2A",
+          "datetime": "2018-09-26T11:09:13.918000Z",
+          "cloud": 23.308028
+        },
+        {
+          "id": "S2B_30TXN_20180926_1_L2A",
+          "datetime": "2018-09-26T11:09:10.336000Z",
+          "cloud": 21.245915
+        },
+        {
+          "id": "S2B_30TWP_20180926_1_L2A",
+          "datetime": "2018-09-26T11:08:59.243000Z",
+          "cloud": 0.000222
+        },
+        {
+          "id": "S2B_30TXP_20180926_1_L2A",
+          "datetime": "2018-09-26T11:08:55.807000Z",
+          "cloud": 0.007558
+        },
+        {
+          "id": "S2B_30TXP_20180926_0_L2A",
+          "datetime": "2018-09-26T11:00:28.459000Z",
+          "cloud": 0.101967
+        },
+        {
+          "id": "S2B_30TXN_20180926_0_L2A",
+          "datetime": "2018-09-26T11:00:28.459000Z",
+          "cloud": 18.902333
+        },
+        {
+          "id": "S2B_30TWP_20180926_0_L2A",
+          "datetime": "2018-09-26T11:00:28.459000Z",
+          "cloud": 0.067379
+        },
+        {
+          "id": "S2B_30TWN_20180926_0_L2A",
+          "datetime": "2018-09-26T11:00:28.459000Z",
+          "cloud": 21.585101
+        },
+        {
+          "id": "S2A_30TWN_20180921_1_L2A",
+          "datetime": "2018-09-21T11:09:15.175000Z",
+          "cloud": 96.563512
+        },
+        {
+          "id": "S2A_30TWP_20180921_1_L2A",
+          "datetime": "2018-09-21T11:09:00.491000Z",
+          "cloud": 99.999928
+        }
+      ]
+    },
+    {
+      "api": "https://planetarycomputer.microsoft.com/api/stac/v1/search",
+      "collection": "landsat-c2-l2",
+      "matched": null,
+      "returned": 57,
+      "sample_scenes": [
+        {
+          "id": "LC08_L2SP_200030_20180926_02_T1",
+          "datetime": "2018-09-26T10:48:17.994398Z",
+          "cloud": 15.98
+        },
+        {
+          "id": "LE07_L2SP_201030_20180925_02_T1",
+          "datetime": "2018-09-25T10:52:28.001332Z",
+          "cloud": 7.0
+        },
+        {
+          "id": "LE07_L2SP_201029_20180925_02_T1",
+          "datetime": "2018-09-25T10:52:04.116348Z",
+          "cloud": 0.0
+        },
+        {
+          "id": "LE07_L2SP_200030_20180918_02_T2",
+          "datetime": "2018-09-18T10:46:26.943982Z",
+          "cloud": 27.0
+        },
+        {
+          "id": "LC08_L2SP_201030_20180917_02_T1",
+          "datetime": "2018-09-17T10:54:24.839180Z",
+          "cloud": 0.3
+        },
+        {
+          "id": "LC08_L2SP_201029_20180917_02_T1",
+          "datetime": "2018-09-17T10:54:00.952377Z",
+          "cloud": 0.89
+        },
+        {
+          "id": "LC08_L2SP_200030_20180910_02_T1",
+          "datetime": "2018-09-10T10:48:12.383280Z",
+          "cloud": 40.14
+        },
+        {
+          "id": "LE07_L2SP_201030_20180909_02_T1",
+          "datetime": "2018-09-09T10:52:49.882197Z",
+          "cloud": 57.0
+        },
+        {
+          "id": "LE07_L2SP_201029_20180909_02_T2",
+          "datetime": "2018-09-09T10:52:25.998297Z",
+          "cloud": 80.0
+        },
+        {
+          "id": "LE07_L2SP_200030_20180902_02_T1",
+          "datetime": "2018-09-02T10:46:48.162460Z",
+          "cloud": 1.0
+        }
+      ]
+    }
+  ]
+}

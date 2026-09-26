@@ -1,0 +1,3 @@
+date,pixel_name,utm_x,utm_y,nearest_distance_m,reason
+20190518,A3,462445.0,4328755.0,10.1624,labeled center outside published NetCDF grid
+20190518,A4,462455.0,4328755.0,10.1646,labeled center outside published NetCDF grid

@@ -1,0 +1,90 @@
+{
+  "rows": 63,
+  "dates": {
+    "20190418": {
+      "n": 6,
+      "plastic_percent_min": 0,
+      "plastic_percent_max": 38,
+      "spearman_nir": 0.48571428571428577,
+      "p_value": 0.3287230320699709,
+      "spearman_fdi": 0.6571428571428573,
+      "fdi_p_value": 0.15617492711370237
+    },
+    "20190503": {
+      "n": 25,
+      "plastic_percent_min": 0,
+      "plastic_percent_max": 43,
+      "spearman_nir": 0.10701873900041904,
+      "p_value": 0.6106364149111444,
+      "spearman_fdi": 0.024367043418409874,
+      "fdi_p_value": 0.9079580575607661
+    },
+    "20190518": {
+      "n": 10,
+      "plastic_percent_min": 0,
+      "plastic_percent_max": 40,
+      "spearman_nir": 0.5535194078346473,
+      "p_value": 0.09693110016849896,
+      "spearman_fdi": 0.5183023183212386,
+      "fdi_p_value": 0.1248384936773469
+    },
+    "20190528": {
+      "n": 10,
+      "plastic_percent_min": 0,
+      "plastic_percent_max": 35,
+      "spearman_nir": 0.6829268292682927,
+      "p_value": 0.029516797435020545,
+      "spearman_fdi": 0.7720400404736821,
+      "fdi_p_value": 0.008879536829615684
+    },
+    "20190607": {
+      "n": 12,
+      "plastic_percent_min": 0,
+      "plastic_percent_max": 55,
+      "spearman_nir": -0.38140233324845096,
+      "p_value": 0.2212123473385289,
+      "spearman_fdi": -0.4140939618126039,
+      "fdi_p_value": 0.18081165086844703
+    }
+  },
+  "pooled_spearman_nir": {
+    "rho": 0.14262969035647585,
+    "p_value": 0.2647943802352155
+  },
+  "pooled_spearman_fdi": {
+    "rho": 0.08749024090063602,
+    "p_value": 0.4953429758219762
+  },
+  "leave_one_date_out_fdi": [
+    {
+      "held_out_date": "20190418",
+      "n": 6,
+      "mae_percent_points": 16.54,
+      "mean_baseline_mae_percent_points": 16.57
+    },
+    {
+      "held_out_date": "20190503",
+      "n": 25,
+      "mae_percent_points": 9.16,
+      "mean_baseline_mae_percent_points": 9.31
+    },
+    {
+      "held_out_date": "20190518",
+      "n": 10,
+      "mae_percent_points": 8.56,
+      "mean_baseline_mae_percent_points": 8.63
+    },
+    {
+      "held_out_date": "20190528",
+      "n": 10,
+      "mae_percent_points": 8.49,
+      "mean_baseline_mae_percent_points": 7.57
+    },
+    {
+      "held_out_date": "20190607",
+      "n": 12,
+      "mae_percent_points": 11.09,
+      "mean_baseline_mae_percent_points": 10.65
+    }
+  ]
+}
