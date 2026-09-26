@@ -1368,6 +1368,23 @@ def _case_search() -> dict:
         return {"search": {"available": False, "error": f"{type(e).__name__}: {e}"}}
 
 
+def _case_s54() -> dict:
+    """INBOX §54 map layers: NASA GIBS overview (service/routes_nasa.py LAYERS), drone/aircraft/vessel frames
+    (data/case/drones/index.json), PRIME synthetic scenes (data/case/prime/index.json). Counts only, no metrics."""
+    out = {"source": "service/routes_nasa.py; data/case/drones/index.json; data/case/prime/index.json"}
+    txt = _read("service/routes_nasa.py")
+    daily = [int(m) for m in re.findall(r'"resolution_m":\s*(\d+),\s*"matrix_set":\s*"GoogleMapsCompatible_Level9"', txt)]
+    out["nasa_res_m_min"], out["nasa_res_m_max"] = (min(daily), max(daily)) if daily else (None, None)
+    dr = _load_json(ROOT / "data" / "case" / "drones" / "index.json") or {}
+    sets = dr.get("sets") or []
+    out["drones_n_sets"] = len(sets) or None
+    out["drones_n_frames"] = sum(len(s.get("frames") or []) for s in sets) or None
+    out["drones_n_sets_drone"] = sum((s.get("meta") or {}).get("sensor") == "drone" for s in sets) or None
+    pr = _load_json(ROOT / "data" / "case" / "prime" / "index.json") or {}
+    out["prime_n_scenes"] = len(pr.get("scenes") or []) or None
+    return out
+
+
 def collect_case() -> dict:
     """Case «макропластик, шт./км²»: selection, pairs, detector on MARIDA test, concentration (dev CV + frozen test),
     pairs experiment, run_all summary. Sources: reports/case_run/run_summary.json, reports/case_conc/*, configs/case_*.yaml,
@@ -1446,6 +1463,7 @@ def collect_case() -> dict:
                                                   "wo_he460_false_share_pct", "no_harmonize_n_obj")},
                                               "visual_precision_pct": (dc.get("visual_review") or {}).get("h_out_precision_pct")}
     out["sections"].update(_case_search())  # §11: search, labeled_data, adis_pairs, baselines, quantity, oil, detector_v2
+    out["sections"]["s54"] = _case_s54()
     out["splits_files"] = len(glob.glob(str(ROOT / "reports" / "case_splits" / "*.csv"))) or None
     tests = 0
     for p in glob.glob(str(ROOT / "tests" / "test_case_*.py")) + [str(ROOT / "tests" / "test_api_v3.py")]:
