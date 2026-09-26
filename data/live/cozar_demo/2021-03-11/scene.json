@@ -1,0 +1,119 @@
+{
+ "region": "cozar_demo",
+ "region_name": "\u0414\u0435\u043c\u043e C\u00f3zar 2024 (\u043e\u0442\u043b\u043e\u0436\u0435\u043d\u043d\u0430\u044f \u0441\u0446\u0435\u043d\u0430)",
+ "region_name_en": "C\u00f3zar 2024 held-out demo scene",
+ "country": "\u2014",
+ "date": "2021-03-11",
+ "datetime": "2021-03-11T11:01:15.637000Z",
+ "scene_id": "S2B_30SXE_20210311_0_L2A",
+ "tile": "30SXE",
+ "cloud_cover": 0.20832,
+ "crop_cloud_frac": 0.0,
+ "crop_shadow_frac": 0.0,
+ "water_frac": 1.0,
+ "valid_frac": 1.0,
+ "water_b8_median": 0.0002,
+ "water_b11_median": 0.0009,
+ "glint_or_haze": false,
+ "source": "earth-search",
+ "crs": "EPSG:32630",
+ "transform": [
+  10.0,
+  0.0,
+  618360.0,
+  0.0,
+  -10.0,
+  3936180.0
+ ],
+ "width": 1410,
+ "height": 1404,
+ "bounds_utm": [
+  618360.0,
+  3922140.0,
+  632460.0,
+  3936180.0
+ ],
+ "bounds_wgs84": [
+  -1.696015,
+  35.433893,
+  -1.538426,
+  35.562232
+ ],
+ "scale_offset_note": "reflectance = DN*scale + offset per asset from STAC metadata (raster:bands); offset check: raster:bands offset 0 (pre-04.00 item); scale/offset used: {\"B1\": [0.0001, 0.0], \"B2\": [0.0001, 0.0], \"B3\": [0.0001, 0.0], \"B4\": [0.0001, 0.0], \"B5\": [0.0001, 0.0], \"B6\": [0.0001, 0.0], \"B7\": [0.0001, 0.0], \"B8\": [0.0001, 0.0], \"B8A\": [0.0001, 0.0], \"B9\": [0.0001, 0.0], \"B11\": [0.0001, 0.0], \"B12\": [0.0001, 0.0]}; no date-based -1000 DN rule; no clipping (values as computed); DN==0 -> NaN; 20/60 m bands resampled to 10 m by nearest (SCL always nearest)",
+ "scale_offset": {
+  "B1": [
+   0.0001,
+   0.0
+  ],
+  "B2": [
+   0.0001,
+   0.0
+  ],
+  "B3": [
+   0.0001,
+   0.0
+  ],
+  "B4": [
+   0.0001,
+   0.0
+  ],
+  "B5": [
+   0.0001,
+   0.0
+  ],
+  "B6": [
+   0.0001,
+   0.0
+  ],
+  "B7": [
+   0.0001,
+   0.0
+  ],
+  "B8": [
+   0.0001,
+   0.0
+  ],
+  "B8A": [
+   0.0001,
+   0.0
+  ],
+  "B9": [
+   0.0001,
+   0.0
+  ],
+  "B11": [
+   0.0001,
+   0.0
+  ],
+  "B12": [
+   0.0001,
+   0.0
+  ]
+ },
+ "processing_baseline": "02.14",
+ "boa_offset_applied_property": false,
+ "band_names": [
+  "B1",
+  "B2",
+  "B3",
+  "B4",
+  "B5",
+  "B6",
+  "B7",
+  "B8",
+  "B8A",
+  "B9",
+  "B11",
+  "B12"
+ ],
+ "water_mask_rule": "1 = SCL 6, or SCL 2/7 with NDWI(B3,B8)>0; + enclosed non-water holes <=100 px (not cloud/shadow/nodata) filled as water; then 2 px buffer next to any non-water and 5 px next to cloud/shadow removed; 0 = land/cloud 8-10/shadow 3/snow/saturated/nodata/buffer",
+ "transform_order": "affine a,b,c,d,e,f (rasterio): x = a*col + b*row + c; y = d*col + e*row + f",
+ "read_s": 5.4,
+ "marida_md_px_tile": null,
+ "marida_dates": null,
+ "created": "2026-09-26T04:36:12",
+ "selection": "L111 held-out C\u00f3zar 2024 scene 30SXE_20210311 (reports/case_demo/heldout_scene.md)",
+ "cozar_l1c_product": "S2B_MSIL1C_20210311T104749_N0209_R051_T30SXE_20210311T132631",
+ "wind10m_ms": 2.48,
+ "wind_source": "ERA5 via Open-Meteo archive API, 2021-03-11T11:00 UTC (L2A sensing 11:01); 12:00 = 3.05"
+}

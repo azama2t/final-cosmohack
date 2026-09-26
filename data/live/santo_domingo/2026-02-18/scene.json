@@ -1,0 +1,119 @@
+{
+ "region": "santo_domingo",
+ "region_name": "\u0421\u0430\u043d\u0442\u043e-\u0414\u043e\u043c\u0438\u043d\u0433\u043e (\u0443\u0441\u0442\u044c\u0435 \u041e\u0441\u0430\u043c\u044b)",
+ "region_name_en": "Santo Domingo (Ozama mouth)",
+ "country": "\u0414\u043e\u043c\u0438\u043d\u0438\u043a\u0430\u043d\u0441\u043a\u0430\u044f \u0420\u0435\u0441\u043f\u0443\u0431\u043b\u0438\u043a\u0430",
+ "date": "2026-02-18",
+ "datetime": "2026-02-18T15:17:19.024000Z",
+ "scene_id": "S2B_MSIL2A_20260218T151719_R125_T19QDA_20260218T201402",
+ "tile": "19QDA",
+ "cloud_cover": 25.528413,
+ "crop_cloud_frac": 0.2097,
+ "crop_shadow_frac": 0.0429,
+ "water_frac": 0.658,
+ "valid_frac": 1.0,
+ "water_b8_median": 0.0053,
+ "water_b11_median": 0.0046,
+ "glint_or_haze": false,
+ "source": "planetary-computer",
+ "crs": "EPSG:32619",
+ "transform": [
+  10.0,
+  0.0,
+  400860.0,
+  0.0,
+  -10.0,
+  2047140.0
+ ],
+ "width": 2508,
+ "height": 2502,
+ "bounds_utm": [
+  400860.0,
+  2022120.0,
+  425940.0,
+  2047140.0
+ ],
+ "bounds_wgs84": [
+  -69.939213,
+  18.286338,
+  -69.700716,
+  18.513476
+ ],
+ "scale_offset_note": "reflectance = DN*scale + offset per asset from STAC metadata (product-metadata BOA_ADD_OFFSET); offset check: PC: offset from product metadata; scale/offset used: {\"B1\": [0.0001, -0.1], \"B2\": [0.0001, -0.1], \"B3\": [0.0001, -0.1], \"B4\": [0.0001, -0.1], \"B5\": [0.0001, -0.1], \"B6\": [0.0001, -0.1], \"B7\": [0.0001, -0.1], \"B8\": [0.0001, -0.1], \"B8A\": [0.0001, -0.1], \"B9\": [0.0001, -0.1], \"B11\": [0.0001, -0.1], \"B12\": [0.0001, -0.1]}; no date-based -1000 DN rule; no clipping (values as computed); DN==0 -> NaN; 20/60 m bands resampled to 10 m by nearest (SCL always nearest)",
+ "scale_offset": {
+  "B1": [
+   0.0001,
+   -0.1
+  ],
+  "B2": [
+   0.0001,
+   -0.1
+  ],
+  "B3": [
+   0.0001,
+   -0.1
+  ],
+  "B4": [
+   0.0001,
+   -0.1
+  ],
+  "B5": [
+   0.0001,
+   -0.1
+  ],
+  "B6": [
+   0.0001,
+   -0.1
+  ],
+  "B7": [
+   0.0001,
+   -0.1
+  ],
+  "B8": [
+   0.0001,
+   -0.1
+  ],
+  "B8A": [
+   0.0001,
+   -0.1
+  ],
+  "B9": [
+   0.0001,
+   -0.1
+  ],
+  "B11": [
+   0.0001,
+   -0.1
+  ],
+  "B12": [
+   0.0001,
+   -0.1
+  ]
+ },
+ "processing_baseline": "05.12",
+ "boa_offset_applied_property": null,
+ "band_names": [
+  "B1",
+  "B2",
+  "B3",
+  "B4",
+  "B5",
+  "B6",
+  "B7",
+  "B8",
+  "B8A",
+  "B9",
+  "B11",
+  "B12"
+ ],
+ "water_mask_rule": "1 = SCL 6, or SCL 2/7 with NDWI(B3,B8)>0; + enclosed non-water holes <=100 px (not cloud/shadow/nodata) filled as water; then 2 px buffer next to any non-water and 5 px next to cloud/shadow removed; 0 = land/cloud 8-10/shadow 3/snow/saturated/nodata/buffer",
+ "transform_order": "affine a,b,c,d,e,f (rasterio): x = a*col + b*row + c; y = d*col + e*row + f",
+ "read_s": 4.2,
+ "marida_md_px_tile": 0,
+ "marida_dates": [
+  "2019-01-11"
+ ],
+ "created": "2026-09-25T06:45:07",
+ "water_b8a_median_20m": 0.0054,
+ "selection": "2026-02-01/2026-03-31; crop cloud<=0.3, valid>=0.95; ranked by glint among 5 OK of 13 screened"
+}

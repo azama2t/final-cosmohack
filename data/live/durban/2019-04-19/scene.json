@@ -1,0 +1,119 @@
+{
+ "region": "durban",
+ "region_name": "\u0414\u0443\u0440\u0431\u0430\u043d",
+ "region_name_en": "Durban, South Africa",
+ "country": "\u042e\u0410\u0420",
+ "date": "2019-04-19",
+ "datetime": "2019-04-19T08:24:54.736000Z",
+ "scene_id": "S2A_36JUN_20190419_0_L2A",
+ "tile": "36JUN",
+ "cloud_cover": 3.828047,
+ "crop_cloud_frac": 0.0023,
+ "crop_shadow_frac": 0.0005,
+ "water_frac": 0.6302,
+ "valid_frac": 0.9165,
+ "water_b8_median": 0.0061,
+ "water_b11_median": 0.0048,
+ "glint_or_haze": false,
+ "source": "earth-search",
+ "crs": "EPSG:32736",
+ "transform": [
+  10.0,
+  0.0,
+  305880.0,
+  0.0,
+  -10.0,
+  6721550.0
+ ],
+ "width": 3843,
+ "height": 3122,
+ "bounds_utm": [
+  305880.0,
+  6690330.0,
+  344310.0,
+  6721550.0
+ ],
+ "bounds_wgs84": [
+  30.989476,
+  -29.907876,
+  31.391858,
+  -29.620825
+ ],
+ "scale_offset_note": "reflectance = DN*scale + offset per asset from STAC metadata (raster:bands); offset check: raster:bands offset 0 (pre-04.00 item); scale/offset used: {\"B1\": [0.0001, 0.0], \"B2\": [0.0001, 0.0], \"B3\": [0.0001, 0.0], \"B4\": [0.0001, 0.0], \"B5\": [0.0001, 0.0], \"B6\": [0.0001, 0.0], \"B7\": [0.0001, 0.0], \"B8\": [0.0001, 0.0], \"B8A\": [0.0001, 0.0], \"B9\": [0.0001, 0.0], \"B11\": [0.0001, 0.0], \"B12\": [0.0001, 0.0]}; no date-based -1000 DN rule; no clipping (values as computed); DN==0 -> NaN; 20/60 m bands resampled to 10 m by nearest (SCL always nearest)",
+ "scale_offset": {
+  "B1": [
+   0.0001,
+   0.0
+  ],
+  "B2": [
+   0.0001,
+   0.0
+  ],
+  "B3": [
+   0.0001,
+   0.0
+  ],
+  "B4": [
+   0.0001,
+   0.0
+  ],
+  "B5": [
+   0.0001,
+   0.0
+  ],
+  "B6": [
+   0.0001,
+   0.0
+  ],
+  "B7": [
+   0.0001,
+   0.0
+  ],
+  "B8": [
+   0.0001,
+   0.0
+  ],
+  "B8A": [
+   0.0001,
+   0.0
+  ],
+  "B9": [
+   0.0001,
+   0.0
+  ],
+  "B11": [
+   0.0001,
+   0.0
+  ],
+  "B12": [
+   0.0001,
+   0.0
+  ]
+ },
+ "processing_baseline": "02.11",
+ "boa_offset_applied_property": false,
+ "band_names": [
+  "B1",
+  "B2",
+  "B3",
+  "B4",
+  "B5",
+  "B6",
+  "B7",
+  "B8",
+  "B8A",
+  "B9",
+  "B11",
+  "B12"
+ ],
+ "water_mask_rule": "1 = SCL 6, or SCL 2/7 with NDWI(B3,B8)>0; + enclosed non-water holes <=100 px (not cloud/shadow/nodata) filled as water; then 2 px buffer next to any non-water and 5 px next to cloud/shadow removed; 0 = land/cloud 8-10/shadow 3/snow/saturated/nodata/buffer",
+ "transform_order": "affine a,b,c,d,e,f (rasterio): x = a*col + b*row + c; y = d*col + e*row + f",
+ "read_s": 31.0,
+ "marida_md_px_tile": 46,
+ "marida_dates": [
+  "2019-04-24"
+ ],
+ "created": "2026-09-25T04:13:18",
+ "water_b8a_median_20m": 0.0055,
+ "selection": "2019-03-25/2019-05-24; crop cloud<=0.3, valid>=0.95; ranked by glint among 9 OK of 10 screened"
+}

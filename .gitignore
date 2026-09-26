@@ -71,3 +71,8 @@ reports/extra_data/registry_cozar2024.csv
 /tools/
 /data/pairs/cache/
 ~$*
+# метаданные живых сцен (облачность вырезки) нужны API в чистом клоне; растры — вне git
+!/data/live/
+/data/live/**
+!/data/live/**/
+!/data/live/**/scene.json

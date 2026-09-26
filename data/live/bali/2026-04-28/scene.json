@@ -1,0 +1,119 @@
+{
+ "region": "bali",
+ "region_name": "\u0411\u0430\u043b\u0438 (\u043f\u0440\u043e\u043b\u0438\u0432 \u0411\u0430\u0434\u0443\u043d\u0433)",
+ "region_name_en": "Bali (Badung Strait), Indonesia",
+ "country": "\u0418\u043d\u0434\u043e\u043d\u0435\u0437\u0438\u044f",
+ "date": "2026-04-28",
+ "datetime": "2026-04-28T02:21:31.024000Z",
+ "scene_id": "S2A_MSIL2A_20260428T022131_R003_T50LLR_20260428T071909",
+ "tile": "50LLR",
+ "cloud_cover": 32.099986,
+ "crop_cloud_frac": 0.0256,
+ "crop_shadow_frac": 0.0006,
+ "water_frac": 0.9544,
+ "valid_frac": 0.9999,
+ "water_b8_median": 0.0008,
+ "water_b11_median": 0.0045,
+ "glint_or_haze": false,
+ "source": "planetary-computer",
+ "crs": "EPSG:32750",
+ "transform": [
+  10.0,
+  0.0,
+  306000.0,
+  0.0,
+  -10.0,
+  9036060.0
+ ],
+ "width": 2508,
+ "height": 2502,
+ "bounds_utm": [
+  306000.0,
+  9011040.0,
+  331080.0,
+  9036060.0
+ ],
+ "bounds_wgs84": [
+  115.235529,
+  -8.943519,
+  115.464512,
+  -8.716301
+ ],
+ "scale_offset_note": "reflectance = DN*scale + offset per asset from STAC metadata (product-metadata BOA_ADD_OFFSET); offset check: PC: offset from product metadata; scale/offset used: {\"B1\": [0.0001, -0.1], \"B2\": [0.0001, -0.1], \"B3\": [0.0001, -0.1], \"B4\": [0.0001, -0.1], \"B5\": [0.0001, -0.1], \"B6\": [0.0001, -0.1], \"B7\": [0.0001, -0.1], \"B8\": [0.0001, -0.1], \"B8A\": [0.0001, -0.1], \"B9\": [0.0001, -0.1], \"B11\": [0.0001, -0.1], \"B12\": [0.0001, -0.1]}; no date-based -1000 DN rule; no clipping (values as computed); DN==0 -> NaN; 20/60 m bands resampled to 10 m by nearest (SCL always nearest)",
+ "scale_offset": {
+  "B1": [
+   0.0001,
+   -0.1
+  ],
+  "B2": [
+   0.0001,
+   -0.1
+  ],
+  "B3": [
+   0.0001,
+   -0.1
+  ],
+  "B4": [
+   0.0001,
+   -0.1
+  ],
+  "B5": [
+   0.0001,
+   -0.1
+  ],
+  "B6": [
+   0.0001,
+   -0.1
+  ],
+  "B7": [
+   0.0001,
+   -0.1
+  ],
+  "B8": [
+   0.0001,
+   -0.1
+  ],
+  "B8A": [
+   0.0001,
+   -0.1
+  ],
+  "B9": [
+   0.0001,
+   -0.1
+  ],
+  "B11": [
+   0.0001,
+   -0.1
+  ],
+  "B12": [
+   0.0001,
+   -0.1
+  ]
+ },
+ "processing_baseline": "05.12",
+ "boa_offset_applied_property": null,
+ "band_names": [
+  "B1",
+  "B2",
+  "B3",
+  "B4",
+  "B5",
+  "B6",
+  "B7",
+  "B8",
+  "B8A",
+  "B9",
+  "B11",
+  "B12"
+ ],
+ "water_mask_rule": "1 = SCL 6, or SCL 2/7 with NDWI(B3,B8)>0; + enclosed non-water holes <=100 px (not cloud/shadow/nodata) filled as water; then 2 px buffer next to any non-water and 5 px next to cloud/shadow removed; 0 = land/cloud 8-10/shadow 3/snow/saturated/nodata/buffer",
+ "transform_order": "affine a,b,c,d,e,f (rasterio): x = a*col + b*row + c; y = d*col + e*row + f",
+ "read_s": 5.1,
+ "marida_md_px_tile": 41,
+ "marida_dates": [
+  "2018-03-04"
+ ],
+ "created": "2026-09-25T06:44:11",
+ "water_b8a_median_20m": 0.0023,
+ "selection": "2026-03-01/2026-04-30; crop cloud<=0.3, valid>=0.95; ranked by glint among 6 OK of 13 screened"
+}

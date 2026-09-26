@@ -6,3 +6,5 @@ data/** -text
 task/** -text
 reports/case_splits/** -text
 reports/case_conc/*.csv -text
+# конфиги входят в отпечаток прогона — байты как в репозитории на любом core.autocrlf
+configs/** -text

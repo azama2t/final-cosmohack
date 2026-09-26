@@ -1,0 +1,117 @@
+{
+ "region": "mekong",
+ "region_name": "\u0414\u0435\u043b\u044c\u0442\u0430 \u041c\u0435\u043a\u043e\u043d\u0433\u0430 (\u0443\u0441\u0442\u044c\u044f \u0422\u044c\u0435\u0443 \u0438 \u0414\u0430\u0439)",
+ "region_name_en": "Mekong Delta (Cua Tieu / Cua Dai), Vietnam",
+ "country": "\u0412\u044c\u0435\u0442\u043d\u0430\u043c",
+ "date": "2026-03-02",
+ "datetime": "2026-03-02T03:06:41.025000Z",
+ "scene_id": "S2C_MSIL2A_20260302T030641_R075_T48PXS_20260302T075908",
+ "tile": "48PXS",
+ "cloud_cover": 13.618511,
+ "crop_cloud_frac": 0.0188,
+ "crop_shadow_frac": 0.0497,
+ "water_frac": 0.6568,
+ "valid_frac": 1.0,
+ "water_b8_median": 0.0159,
+ "water_b11_median": 0.0052,
+ "glint_or_haze": false,
+ "source": "planetary-computer",
+ "crs": "EPSG:32648",
+ "transform": [
+  10.0,
+  0.0,
+  684660.0,
+  0.0,
+  -10.0,
+  1135080.0
+ ],
+ "width": 2508,
+ "height": 2508,
+ "bounds_utm": [
+  684660.0,
+  1110000.0,
+  709740.0,
+  1135080.0
+ ],
+ "bounds_wgs84": [
+  106.684885,
+  10.03597,
+  106.914987,
+  10.263948
+ ],
+ "scale_offset_note": "reflectance = DN*scale + offset per asset from STAC metadata (product-metadata BOA_ADD_OFFSET); offset check: PC: offset from product metadata; scale/offset used: {\"B1\": [0.0001, -0.1], \"B2\": [0.0001, -0.1], \"B3\": [0.0001, -0.1], \"B4\": [0.0001, -0.1], \"B5\": [0.0001, -0.1], \"B6\": [0.0001, -0.1], \"B7\": [0.0001, -0.1], \"B8\": [0.0001, -0.1], \"B8A\": [0.0001, -0.1], \"B9\": [0.0001, -0.1], \"B11\": [0.0001, -0.1], \"B12\": [0.0001, -0.1]}; no date-based -1000 DN rule; no clipping (values as computed); DN==0 -> NaN; 20/60 m bands resampled to 10 m by nearest (SCL always nearest)",
+ "scale_offset": {
+  "B1": [
+   0.0001,
+   -0.1
+  ],
+  "B2": [
+   0.0001,
+   -0.1
+  ],
+  "B3": [
+   0.0001,
+   -0.1
+  ],
+  "B4": [
+   0.0001,
+   -0.1
+  ],
+  "B5": [
+   0.0001,
+   -0.1
+  ],
+  "B6": [
+   0.0001,
+   -0.1
+  ],
+  "B7": [
+   0.0001,
+   -0.1
+  ],
+  "B8": [
+   0.0001,
+   -0.1
+  ],
+  "B8A": [
+   0.0001,
+   -0.1
+  ],
+  "B9": [
+   0.0001,
+   -0.1
+  ],
+  "B11": [
+   0.0001,
+   -0.1
+  ],
+  "B12": [
+   0.0001,
+   -0.1
+  ]
+ },
+ "processing_baseline": "05.12",
+ "boa_offset_applied_property": null,
+ "band_names": [
+  "B1",
+  "B2",
+  "B3",
+  "B4",
+  "B5",
+  "B6",
+  "B7",
+  "B8",
+  "B8A",
+  "B9",
+  "B11",
+  "B12"
+ ],
+ "water_mask_rule": "1 = SCL 6, or SCL 2/7 with NDWI(B3,B8)>0; + enclosed non-water holes <=100 px (not cloud/shadow/nodata) filled as water; then 2 px buffer next to any non-water and 5 px next to cloud/shadow removed; 0 = land/cloud 8-10/shadow 3/snow/saturated/nodata/buffer",
+ "transform_order": "affine a,b,c,d,e,f (rasterio): x = a*col + b*row + c; y = d*col + e*row + f",
+ "read_s": 3.5,
+ "marida_md_px_tile": 0,
+ "marida_dates": [],
+ "created": "2026-09-25T07:44:13",
+ "water_b8a_median_20m": 0.0127,
+ "selection": "2026-02-01/2026-03-31; crop cloud<=0.2, valid>=0.95; ranked by glint among 4 OK of 7 screened"
+}

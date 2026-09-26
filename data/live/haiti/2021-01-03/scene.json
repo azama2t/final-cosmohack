@@ -1,0 +1,122 @@
+{
+ "region": "haiti",
+ "region_name": "Залив Порт-о-Пренс (Гаити)",
+ "date": "2021-01-03",
+ "datetime": "2021-01-03T15:28:00.932000Z",
+ "scene_id": "S2A_18QYF_20210103_0_L2A",
+ "tile": "18QYF",
+ "cloud_cover": 0.275029,
+ "crop_cloud_frac": 0.0003,
+ "crop_shadow_frac": 0.0,
+ "water_frac": 0.8164,
+ "valid_frac": 1.0,
+ "water_b8_median": 0.0006,
+ "water_b11_median": 0.001,
+ "glint_or_haze": false,
+ "source": "earth-search",
+ "crs": "EPSG:32618",
+ "transform": [
+  10.0,
+  0.0,
+  745800.0,
+  0.0,
+  -10.0,
+  2084160.0
+ ],
+ "width": 2508,
+ "height": 2508,
+ "bounds_utm": [
+  745800.0,
+  2059080.0,
+  770880.0,
+  2084160.0
+ ],
+ "bounds_wgs84": [
+  -72.670518,
+  18.605186,
+  -72.429578,
+  18.834759
+ ],
+ "scale_offset_note": "reflectance = DN*scale + offset per asset from STAC metadata (raster:bands); offset check: raster:bands offset 0 (pre-04.00 item); scale/offset used: {\"B1\": [0.0001, 0.0], \"B2\": [0.0001, 0.0], \"B3\": [0.0001, 0.0], \"B4\": [0.0001, 0.0], \"B5\": [0.0001, 0.0], \"B6\": [0.0001, 0.0], \"B7\": [0.0001, 0.0], \"B8\": [0.0001, 0.0], \"B8A\": [0.0001, 0.0], \"B9\": [0.0001, 0.0], \"B11\": [0.0001, 0.0], \"B12\": [0.0001, 0.0]}; no date-based -1000 DN rule; no clipping (values as computed); DN==0 -> NaN; 20/60 m bands resampled to 10 m by nearest (SCL always nearest)",
+ "scale_offset": {
+  "B1": [
+   0.0001,
+   0.0
+  ],
+  "B2": [
+   0.0001,
+   0.0
+  ],
+  "B3": [
+   0.0001,
+   0.0
+  ],
+  "B4": [
+   0.0001,
+   0.0
+  ],
+  "B5": [
+   0.0001,
+   0.0
+  ],
+  "B6": [
+   0.0001,
+   0.0
+  ],
+  "B7": [
+   0.0001,
+   0.0
+  ],
+  "B8": [
+   0.0001,
+   0.0
+  ],
+  "B8A": [
+   0.0001,
+   0.0
+  ],
+  "B9": [
+   0.0001,
+   0.0
+  ],
+  "B11": [
+   0.0001,
+   0.0
+  ],
+  "B12": [
+   0.0001,
+   0.0
+  ]
+ },
+ "processing_baseline": "02.14",
+ "boa_offset_applied_property": false,
+ "band_names": [
+  "B1",
+  "B2",
+  "B3",
+  "B4",
+  "B5",
+  "B6",
+  "B7",
+  "B8",
+  "B8A",
+  "B9",
+  "B11",
+  "B12"
+ ],
+ "water_mask_rule": "1 = SCL 6, or SCL 2/7 with NDWI(B3,B8)>0; + enclosed non-water holes <=100 px (not cloud/shadow/nodata) filled as water; then 2 px buffer next to any non-water and 5 px next to cloud/shadow (SCL 3,8,9,10) removed; 0 = land/cloud 8-10/shadow 3/snow/saturated/nodata/buffer",
+ "transform_order": "affine a,b,c,d,e,f (rasterio): x = a*col + b*row + c; y = d*col + e*row + f",
+ "read_s": 5.9,
+ "marida_md_px_tile": 1112,
+ "marida_dates": [
+  "2020-12-29",
+  "2020-03-14",
+  "2020-09-15",
+  "2020-03-19",
+  "2021-01-03"
+ ],
+ "created": "2026-09-25T03:23:13",
+ "replaced_scene_id": "S2A_18QYF_20210103_1_L2A",
+ "region_name_en": "Port-au-Prince Bay, Haiti",
+ "country": "Гаити"
+}
