@@ -154,6 +154,12 @@ def prepare_images(shots_ok: bool) -> dict:
     out["photo"] = IMG / "photo.jpg"
     out["export"] = IMG / "export.jpg"
     out["earth"] = IMG / "earth.jpg"
+    # §54: плитки «Что ещё умеет карта» (make_shots.py; нет кадра — плитка без картинки)
+    # кадры полного окна (2732×1536) — вырезаем значимую часть под плитку 16:10
+    boxes = {"nasa": (0.0, 0.25, 0.62, 0.95), "realtime": (0.0, 0.30, 0.50, 0.80), "drones": (0.21, 0.03, 0.99, 0.80),
+             "drift_map": (0.24, 0.10, 0.72, 0.80), "prime": (0.24, 0.14, 0.76, 0.98)}
+    for key, box in boxes.items():
+        out["s54_" + key] = cover(IMG / f"{key}.jpg", CK / f"s54_{key}.jpg", box=box, size=(1600, 1000))
     return {k: v for k, v in out.items() if v and Path(v).exists()}
 
 
@@ -590,6 +596,85 @@ MAIN_LIMIT_S = 420
 DEMO_S = 90       # живой показ на слайде «Сервис» внутри 7:00
 
 
+S54_TITLE = ("Что ещё умеет карта: NASA каждый день, дроны, дрейф и PRIME — у каждого слоя подписан источник")
+S55_TITLE = ("Что ещё умеет карта: наша модель на новых снимках, дроны, дрейф и PRIME — у каждого слоя подписан "
+             "источник")
+
+
+def s54_slide(N: Numbers) -> tuple[dict, str] | None:
+    """§54/§55 (просьба жюри на чекпоинте): слайд-плитки. Плитка — только для пункта со строкой LOG «готов»
+    (§55 п.1 — реальное время, §55 п.2 — PRIME по CSV; иначе варианты §54). Числа — из final_numbers
+    (дрейф: drift.hours, report.service.n_finds_with_drift / n_finds; ключи s54/s55 — если есть), иначе словами."""
+    k = N.k
+    d = mdc._s54_done
+    rt, pr = mdc.rt_ready(k), mdc._s55_done(2)
+    tiles, say = [], []
+    ctx = "NASA " + mdc.nasa_res(k).replace("с пикселем ", "") + " — только контекст, модель на нём не запускаем."
+    if rt:
+        ns, nz, nf, dd = (k.get("s55_rt_" + x) for x in ("n_scenes", "n_zones", "n_finds", "days"))
+        fshort = mdc.rt_funnel_text(k, short=True)
+        short = fshort or (f"{mdc.pl(ns, 'снимок', 'снимка', 'снимков')} Sentinel-2"
+                 + (f" за {mdc.pl(dd, 'день', 'дня', 'дней')}" if dd is not None else "")
+                 + (f": {mdc.pl(nz, 'зона', 'зоны', 'зон')}, находок {nf}" if nz is not None and nf is not None else "")
+                 if ns is not None else "")
+        tiles.append(("Реальное время", "наша модель, автоматически", "s54_realtime",
+                      (fshort[:1].upper() + fshort[1:] + ". " if fshort else
+                       f"Обработано моделью {short}. " if short else "Реальные снимки Sentinel-2 районов. ")
+                      + "Те же фильтры; не проверено человеком. " + ctx))
+        say.append("Реальное время — это наша модель на реальных снимках Sentinel-2"
+                   + (f": {fshort}" if fshort else f": обработано {short}" if short else "") + ". NASA — только контекст.")
+    elif d(1):
+        tiles.append(("NASA · ежедневно", "обзор NASA, не обнаружение", "s54_nasa",
+                      "Снимок VIIRS или MODIS на любую дату, по умолчанию — последний полный день. Обзор "
+                      + mdc.nasa_res(k) + ": облака, цветение, пятна. Пластик на таком разрешении не обнаруживается, "
+                      "модель на нём не запускаем."))
+        say.append("Кнопка NASA — ежедневный обзорный снимок на любую дату; это обзор облаков и цветения, пластик на "
+                   "таком разрешении не виден, и модель на нём мы не запускаем.")
+    if d(2):
+        ns, nf = k.get("s54_drones_n_sets"), k.get("s54_drones_n_frames")
+        cnt = (f" — {mdc.pl(ns, 'набор', 'набора', 'наборов')}, {mdc.pl(nf, 'кадр', 'кадра', 'кадров')}"
+               if ns is not None and nf is not None else "")
+        nd = k.get("s54_drones_n_sets_drone")
+        if cnt and nd is not None:
+            cnt += f" ({nd} — дрон, остальные — самолёт и судно)"
+        tp, nl, fp = k.get("s56_drones_pred_tp"), k.get("s56_drones_n_labels"), k.get("s56_drones_pred_fp")
+        ours = (f" Наш счётчик: {tp} из {nl} размеченных, ложных {fp} — вне обучения ошибается."
+                if None not in (tp, nl, fp) else " Разметка авторов и наш счётчик — раздельно.")
+        tiles.append(("Дроны", "дрон, не спутник", "s54_drones",
+                      f"Детальные кадры открытых наборов{cnt}: рамки и классы авторов. Шт./м² — только при известной "
+                      "площади кадра." + ours))
+        say.append("«Дроны» — детальные кадры с разметкой авторов, отдельно наш счётчик; карточка пишет «дрон, не "
+                   "спутник».")
+    if d(4):
+        h, a, b = k["dr_hours"], k["dr_n_finds"], k["dr_n_all"]
+        tiles.append(("Дрейф ▶", "HYCOM + GFS на дату сцены", "s54_drift_map",
+                      f"Кнопка у находки на карте: до {n(h, 0)} ч, облако частиц с вероятностью. Расчёт есть у {a} из "
+                      f"{b} находок, у остальных — «нет расчёта» с причиной. Прогноз модели, не наблюдение."))
+        say.append(f"«Дрейф» у находки: до {n(h, 0)} часов, течения и ветер на дату сцены, расчёт у {a} из {b}.")
+    if pr:  # §55а: PRIME = демо-макет по просьбе жюри, без метрик качества
+        tiles.append(("PRIME MODE", "демо-данные, не результат модели", "s54_prime",
+                      "Как сервис будет выглядеть на детальных снимках — по просьбе жюри. В точках событий CSV "
+                      "организаторов — демо-снимки из реальной воды и вырезок предметов с дронов, числа из строк CSV. "
+                      "Выключен — ни одного демо-объекта."))
+        say.append("PRIME — демо-режим по просьбе жюри: как сервис выглядел бы на детальных снимках, не результат "
+                   "модели.")
+    elif d(5):
+        tiles.append(("PRIME MODE", "синтетика — не наблюдение", "s54_prime",
+                      "Как работал бы сервис при детальной съёмке: реальная вода Sentinel-2, предметы вставлены нами. "
+                      "Плашка «СИНТЕТИКА — не наблюдение»; тумблер выключен — синтетики на экране нет."))
+        say.append("И тумблер PRIME — как это работало бы при детальной съёмке, но на синтетике, с плашкой «не "
+                   "наблюдение».")
+    if not tiles:
+        return None
+    if d(3):
+        say.append("На таймлайне у каждого источника своя дорожка.")
+    ttl = S55_TITLE if rt else S54_TITLE
+    speech = f"{ttl}. Это просьба жюри на чекпоинте. " + " ".join(say)
+    slide = dict(kind="tiles", title=ttl, tiles=tiles,
+                 bottom=("Обзор ≠ обнаружение · дрон ≠ спутник · " + ("демо ≠ результат модели" if pr else "синтетика ≠ наблюдение")), notes=speech)
+    return slide, speech
+
+
 def regl7(M: list[dict], N: Numbers) -> tuple[list[dict], list[dict]]:
     """§51 п.1: 12 слайдов на 7:00. «Воспроизводимость» уходит в приложение; заметки — короткая речь слайда
     (первая фраза = заголовок) и тайминг [м:сс–м:сс] по объёму речи (WPM). Полная версия — notes_full."""
@@ -640,8 +725,16 @@ def regl7(M: list[dict], N: Numbers) -> tuple[list[dict], list[dict]]:
          "полю и все проверенные гипотезы записаны до сравнения. Спасибо, готовы к вопросам."),
     ]
     assert len(short) == len(M), (len(short), len(M))
+    pairs = list(zip(M, short))
+    s54 = s54_slide(N)
+    if s54:  # §54: «Что ещё умеет карта» перед финалом; «Связка снимок → штуки» — в приложение (итог есть на слайде 3)
+        link = [p for p in pairs if p[0]["title"].startswith("Мы проверили связку")]
+        pairs = [p for p in pairs if p not in link]
+        moved = [p[0] for p in link] + moved
+        pairs.insert(len(pairs) - 1, s54)
+    M = [p[0] for p in pairs]
     t0 = 0
-    for s, txt in zip(M, short):
+    for s, txt in pairs:
         s["notes_full"] = s.get("notes", "")
         dur = max(8, words_s(txt))
         if s["title"].startswith("Эколог за пять шагов"):  # живой показ «Демо ▶» в сервисе (или presentation/demo.mp4)
@@ -824,6 +917,25 @@ def build(slides: list[dict], imgs: dict, out: Path, total_main: int) -> None:
             text(sl, 0.91, 2.4, 11.5, 1.2, s["title"], size=44, bold=True, color=(0xFF, 0xFF, 0xFF))
             text(sl, 0.91, 3.7, 11.0, 1.0, s["sub"], size=20, color=DARK_TX)
             rule(sl, 0.91, 3.55, 3.0, DARK_OR)
+        elif kind == "tiles":  # §54: «Что ещё умеет карта» — плитки: заголовок · подпись источника · кадр · честная строка
+            bg(sl, BG)
+            title(sl, s["title"])
+            tl = s["tiles"]
+            gap = 0.22
+            cw = (11.9 - gap * (len(tl) - 1)) / len(tl)
+            for j, (head, tag, ik, body) in enumerate(tl):
+                x = 0.71 + j * (cw + gap)
+                text(sl, x, 1.78, cw, 0.36, head, size=17, bold=True, color=ORANGE)
+                text(sl, x, 2.14, cw, 0.3, tag, size=11, bold=True, color=GRAY)
+                yb = 2.5
+                if ik in imgs:
+                    picture(sl, imgs[ik], x, 2.5, cw, 1.6)
+                    yb = 4.2
+                text(sl, x, yb, cw, 5.8 - yb, body, size=12 if yb > 3 else 13, color=INK, space=3)
+            if s.get("bottom"):
+                rule(sl, 0.71, 5.93, 11.9)
+                text(sl, 0.71, 6.05, 11.9, 0.6, s["bottom"], size=18, bold=True)
+            pageno(sl, i, total_main if i <= total_main else len(slides))
         elif kind == "app":
             bg(sl, BG)
             title(sl, s["title"])
@@ -907,6 +1019,8 @@ def slide_texts(s: dict) -> list[str]:
     out = [s.get("title", ""), s.get("sub", ""), s.get("bottom", ""), s.get("hyp", ""), s.get("how", ""),
            s.get("dec", ""), s.get("bar_title", ""), s.get("notes", "")]
     out += list(s.get("details", []))
+    for head, tag, _ik, body in s.get("tiles", []):
+        out += [head, tag, body]
     for pair in s.get("nums", []) + ([s["num"]] if s.get("num") else []):
         out += list(pair)
     for lab, v in s.get("bars", []):

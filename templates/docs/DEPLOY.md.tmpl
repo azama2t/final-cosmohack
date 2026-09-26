@@ -4,7 +4,7 @@
 
 ## Docker (любая ОС)
 
-<!--DOCKER-->Статус: не проверено из чистого клона (проверка идёт; результат — `reports/selfcheck/docker_check.md`).<!--/DOCKER-->
+**Проверено** на Windows 10, Docker Desktop 29.2.0, linux/amd64: чистый клон → сборка → главная, API v3, CSV-выгрузка, дроны, PRIME, 0 ошибок консоли → `down` → повторный `up` ([../reports/selfcheck/docker_check.md](../reports/selfcheck/docker_check.md)). Первая сборка ≈ 12 мин, с кэшем ≈ 2 мин; образ ≈ 1,7 ГБ сжатый. На Mac и Linux Docker-путь не проверялся.
 
 ```bash
 git clone https://github.com/azama2t/final-cosmohack
@@ -44,7 +44,7 @@ CUDA_VISIBLE_DEVICES="" .venv/bin/python scripts/case/run_all.py all --offline  
 .venv/bin/python -m service --port 8000                                          # сервис: http://127.0.0.1:8000
 ```
 
-**Статус проверки:** Linux — проверка на чистом сервере запланирована, результат будет в `reports/selfcheck/`; до неё команды считаются непроверенными. macOS — не проверялось.
+**Статус проверки:** Linux нативно — не проверено ([../reports/selfcheck/clean_clone_final.md](../reports/selfcheck/clean_clone_final.md)); macOS — не проверялось. Для Linux и Mac надёжнее Docker.
 
 ## Демо-стенд
 

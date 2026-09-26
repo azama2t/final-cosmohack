@@ -26,7 +26,11 @@ def main(argv=None) -> int:
     ap.add_argument("--out", default=str(OUT), help="папка скринов (для пробы — не presentation/img)")
     ap.add_argument("--size", default="1366x768", help="окно браузера (§43: 1366×768; снимается с масштабом 2)")
     ap.add_argument("--drift-scene", default="live-guanabara-2025-09-04", help="снимок для кадра дрейфа (?scene=)")
+    ap.add_argument("--skip-s54", action="store_true", help="без кадров §54 (NASA, дроны, дрейф на карте, PRIME)")
+    ap.add_argument("--only-s54", action="store_true", help="только кадры §54")
     a = ap.parse_args(argv)
+    if a.only_s54:
+        return only_s54(a)
     out = Path(a.out)
     from playwright.sync_api import sync_playwright
 
@@ -87,14 +91,17 @@ def main(argv=None) -> int:
             pg.wait_for_timeout(3000)
             shot("metrics")
             # 5 примеров защиты (верно / пропуск / ложное / ошибка на фоне / анализ невозможен) — слайд «Сложный фон»
-            de = pg.locator("[data-testid=defense-examples]")
+            de = pg.locator("[data-testid=defense-examples]:visible")
             if de.count():
-                de.first.scroll_into_view_if_needed()
-                pg.wait_for_timeout(3000)
-                de.first.screenshot(path=str(out / "defense.png"))
-                made.append("defense")
+                try:
+                    de.first.scroll_into_view_if_needed(timeout=8000)
+                    pg.wait_for_timeout(3000)
+                    de.first.screenshot(path=str(out / "defense.png"), timeout=15000)
+                    made.append("defense")
+                except Exception as e:  # noqa: BLE001
+                    notes.append(f"примеры защиты не сняты (остаётся прежний defense.png): {e}"[:160])
             else:
-                notes.append("блока примеров защиты нет")
+                notes.append("видимого блока примеров защиты нет (остаётся прежний defense.png)")
             if pg.locator("[data-testid=qc-close]").count():
                 pg.click("[data-testid=qc-close]")
             else:
@@ -103,18 +110,24 @@ def main(argv=None) -> int:
         else:
             notes.append("кнопки «Проверка качества» нет")
         # выгрузка
-        pg.click("[data-testid=act-export]")
-        pg.wait_for_timeout(1500)
-        shot("export")
-        pg.keyboard.press("Escape")
+        try:
+            pg.click("[data-testid=act-export]", timeout=15000)
+            pg.wait_for_timeout(1500)
+            shot("export")
+            pg.keyboard.press("Escape")
+        except Exception as e:  # noqa: BLE001
+            notes.append(f"кадр выгрузки не снят: {e}"[:160])
         # «Фото»: пример уже открыт — ждём конца счёта
-        pg.click("[data-testid=mode-photo]")
-        for _ in range(90):
-            pg.wait_for_timeout(1000)
-            if "Считаю" not in pg.inner_text("body"):
-                break
-        pg.wait_for_timeout(1500)
-        shot("photo")
+        try:
+            pg.click("[data-testid=mode-photo]", timeout=15000)
+            for _ in range(90):
+                pg.wait_for_timeout(1000)
+                if "Считаю" not in pg.inner_text("body"):
+                    break
+            pg.wait_for_timeout(1500)
+            shot("photo")
+        except Exception as e:  # noqa: BLE001
+            notes.append(f"кадр «Фото» не снят: {e}"[:160])
         # дрейф: снимок Гуанабара, первая зона → «Дрейф»
         pg.goto(a.base + f"/?scene={a.drift_scene}", wait_until="networkidle", timeout=90000)
         try:
@@ -130,8 +143,133 @@ def main(argv=None) -> int:
                 notes.append("кнопки дрейфа нет у первой зоны")
         except Exception as e:  # noqa: BLE001
             notes.append(f"кадр дрейфа не снят: {e}"[:200])
+        if not a.skip_s54:
+            s54_shots(pg, a, shot, notes)
         b.close()
     print("скрины:", ", ".join(made), "->", out)
+    for n in notes:
+        print("  заметка:", n)
+    print("ошибок консоли:", len(errs))
+    for e in errs[:10]:
+        print("   ", e[:200])
+    return 1 if errs else 0
+
+
+def s54_shots(pg, a, shot, notes) -> None:
+    """§54: nasa.jpg (кнопка «NASA» → папка + слой на последнюю дату), drones.jpg (набор → кадр с рамками),
+    drift_map.jpg (находка → «Дрейф ▶» на карте), prime.jpg (тумблер PRIME → синтетическая сцена). Каждый кадр — отдельно:
+    нет элемента — заметка, остальные снимаются."""
+    def home():
+        pg.goto(a.base + "/", wait_until="networkidle", timeout=90000)
+        pg.wait_for_selector("[data-testid=scene-item]", timeout=60000)
+        pg.wait_for_timeout(2500)
+
+    def has(tid):
+        return pg.locator(f"[data-testid={tid}]").count() > 0
+
+    # NASA · ежедневно
+    try:
+        home()
+        if has("nasa-toggle"):
+            pg.locator("[data-testid=nasa-toggle]").first.click()
+            pg.wait_for_timeout(9000)
+            shot("nasa")
+            pg.locator("[data-testid=nasa-toggle]").first.click()
+            pg.wait_for_timeout(1500)
+            # §55: папка «Реальное время» (наша модель на свежих S2) — без слоя NASA, вырезка: левая панель + карта
+            rt = pg.get_by_text("Реальное время")
+            if rt.count():
+                rt.first.scroll_into_view_if_needed(timeout=8000)
+                pg.wait_for_timeout(1500)
+                shot("realtime")
+            else:
+                notes.append("папки «Реальное время» нет")
+        else:
+            notes.append("кнопки NASA нет")
+    except Exception as e:  # noqa: BLE001
+        notes.append(f"кадр NASA не снят: {e}"[:200])
+    # Дроны
+    try:
+        home()
+        if has("drones-open"):
+            pg.locator("[data-testid=drones-open]").first.click()
+        else:
+            pg.click("[data-testid=act-more]")
+            pg.wait_for_timeout(500)
+            pg.click("[data-testid=more-drones]")
+        pg.wait_for_selector("[data-testid=drones-panel]", timeout=20000)
+        pg.wait_for_timeout(1500)
+        if has("drones-setcard"):  # набор с классами предметов (TUN), иначе первый
+            cards = pg.locator("[data-testid=drones-setcard]")
+            tun = pg.locator("[data-testid=drones-setcard]", has_text="TUN")
+            (tun.first if tun.count() else cards.first).click()
+            pg.wait_for_timeout(2500)
+        if has("drones-thumb"):
+            pg.locator("[data-testid=drones-thumb]").first.click()
+            pg.wait_for_timeout(4000)
+        shot("drones")
+    except Exception as e:  # noqa: BLE001
+        notes.append(f"кадр дронов не снят: {e}"[:200])
+    # Дрейф ▶ у находки на карте
+    try:
+        pg.goto(a.base + f"/?scene={a.drift_scene}", wait_until="networkidle", timeout=90000)
+        pg.wait_for_selector("[data-testid=sz-item]", timeout=60000)
+        pg.locator("[data-testid=sz-item]").first.click()
+        pg.wait_for_timeout(3000)
+        if has("drift-map-btn"):
+            pg.locator("[data-testid=drift-map-btn]").first.click()
+            pg.wait_for_timeout(7000)
+            shot("drift_map")
+        else:
+            notes.append("кнопки «Дрейф ▶» на карте нет у первой зоны")
+    except Exception as e:  # noqa: BLE001
+        notes.append(f"кадр дрейфа на карте не снят: {e}"[:200])
+    # PRIME MODE
+    try:
+        home()
+        tg = pg.locator("[data-testid=prime-toggle-inline], [data-testid=prime-toggle]")
+        if tg.count():
+            tg.first.click()
+            pg.wait_for_selector("[data-testid=prime-panel]", timeout=20000)
+            pg.wait_for_timeout(1500)
+            import re as _re
+            items = pg.locator("[data-testid=prime-csv-item]", has_text=_re.compile(r"\d шт\./км²"))
+            if not items.count():
+                items = pg.locator("[data-testid=prime-csv-item]")
+            if items.count():  # §55а: строка CSV (с числами, если есть) → карточка демо-снимка
+                items.first.click()
+                pg.wait_for_timeout(4000)
+            elif pg.locator("[data-testid=prime-scene]").count():
+                pg.locator("[data-testid=prime-scene]").first.click()
+                pg.wait_for_timeout(3000)
+            shot("prime")
+            if pg.locator("[data-testid=prime-close]").count():
+                pg.locator("[data-testid=prime-close]").first.click()
+        else:
+            notes.append("тумблера PRIME нет")
+    except Exception as e:  # noqa: BLE001
+        notes.append(f"кадр PRIME не снят: {e}"[:200])
+
+
+def only_s54(a) -> int:
+    from playwright.sync_api import sync_playwright
+
+    out = Path(a.out)
+    out.mkdir(parents=True, exist_ok=True)
+    errs, made, notes = [], [], []
+    with sync_playwright() as p:
+        b = p.chromium.launch()
+        w, h = (int(x) for x in a.size.split("x"))
+        pg = b.new_page(viewport={"width": w, "height": h}, device_scale_factor=2)
+        pg.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
+
+        def shot(name):
+            pg.screenshot(path=str(out / f"{name}.jpg"), type="jpeg", quality=90)
+            made.append(name)
+
+        s54_shots(pg, a, shot, notes)
+        b.close()
+    print("скрины §54:", ", ".join(made), "->", out)
     for n in notes:
         print("  заметка:", n)
     print("ошибок консоли:", len(errs))

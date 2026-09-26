@@ -1,10 +1,12 @@
 # Макропластик: детектирование скоплений и концентрация шт./км²
 
-**Демо: https://5-231-59-204.sslip.io:8443** (запасной адрес: http://5.231.59.204). Это демо-стенд команды: он работает, пока включён наш сервер. Если адрес не открывается, всё запускается локально командой из раздела «Запуск с нуля» ниже. Подробный отчёт — [reports/report.pdf](reports/report.pdf), таблица критериев — [docs/CRITERIA_CHECK.md](docs/CRITERIA_CHECK.md), ограничения — [docs/LIMITATIONS.md](docs/LIMITATIONS.md).
+**Демо: https://5-231-59-204.sslip.io:8443** (запасной адрес: http://5.231.59.204). Это демо-стенд команды: он работает, пока включён наш сервер. Если адрес не открывается, всё запускается локально командой из раздела «Запуск с нуля» ниже. Первая загрузка стенда занимает до ~15 секунд: надпись «Загрузка…» — не сбой. Подробный отчёт — [reports/report.pdf](reports/report.pdf), таблица критериев — [docs/CRITERIA_CHECK.md](docs/CRITERIA_CHECK.md), ограничения — [docs/LIMITATIONS.md](docs/LIMITATIONS.md).
 
 ![Карта сервиса: снимок Sentinel-2 с зонами, найденными детектором, и карточка зоны](docs/screenshots/02_scene_zones.jpg)
 
 *Снимок Sentinel-2 (спутник, пиксель {{case.sections.resolution_physics.pixel_m}} м) с зонами-кандидатами детектора на отложенной сцене. Скриншоты интерфейса с подписями источника — [docs/screenshots/](docs/screenshots/README.md).*
+
+**Слои находок не смешивать.** Архивный слой Sentinel-2 — {{case.sections.scene_zones.n_finds}} находок из {{case.sections.scene_zones.n_zones}} обработанных зон (проверенный слой: статусы, флаги, подтверждение Cózar 2024); «Реальное время» — {{case.sections.s55.rt_funnel.finds}} находок на {{case.sections.s55.rt_funnel.processed}} обработанных новых снимках ({{case.sections.s55.rt_funnel.zones}} зон, автоматически, не проверено человеком); поле ADIS — {{case.sections.quantity.levels.pairs_place_time}} пар по месту и времени; PRIME MODE — {{case.sections.s55.prime_demo_n_scenes}} демо-сцен без метрик качества. Это разные источники с разными процедурами проверки.
 
 **Сценарий за минуту** (слева — независимые переключатели источников: Sentinel-2 архив / свежие · авто, полевые данные CSV, дроны и фото; цвет метки — источник, а не доказательство пластика):
 1. **Земля.** Обзор планеты с точками находок детектора на обработанных снимках Sentinel-2.
@@ -35,7 +37,7 @@
 
 - **Что делается.** Разовый прогон по всем районам карты: все снимки Sentinel-2 L2A, найденные в открытых каталогах за последние месяцы, проходят тот же детектор и те же фильтры качества (облака, блик, пена, суда, берег, ветер), что и основной слой. Прогон сохраняет каждый этап и продолжается после сбоя без повторного скачивания. У каждого результата — точная дата съёмки и подпись «автоматически, не проверено человеком»; в метрики качества такие зоны не входят. Снимки без находок тоже показаны: «находок нет» — тоже результат.
 - **Сколько обработано (факт, {{case.sections.s55.rt_funnel.window_label}}):** снимков найдено в каталоге {{case.sections.s55.rt_funnel.found}} → скачана маска облаков {{case.sections.s55.rt_funnel.downloaded}} → исключено по качеству {{case.sections.s55.rt_funnel.excluded}} → **обработано моделью {{case.sections.s55.rt_funnel.processed}}** (ещё в очереди {{case.sections.s55.rt_funnel.pending}}, не проверено {{case.sections.s55.rt_funnel.not_checked}}) → снимков с находками {{case.sections.s55.rt_funnel.with_finds}} → находок {{case.sections.s55.rt_funnel.finds}}; всего зон {{case.sections.s55.rt_funnel.zones}}. Зоны без находки — «не обнаружено» или «недостаточно данных», а **не** случаи мусора. Архив обработан не полностью (обработка на CPU); показан уже полученный результат. Последняя обработка: {{case.sections.s55.rt_last_update}} (UTC).
-- **Исторические находки ≠ мусор сейчас.** Пример 2021 года и другие архивные сцены показывают, где было скопление в день съёмки, а не где оно находится сегодня.
+- **Исторические находки ≠ мусор сейчас.** Демо-сцена от {{case.sections.scene_zones.demo.date}} и другие архивные сцены показывают, где было скопление в день съёмки, а не где оно находится сегодня.
 - **NASA — только контекст.** Блок «NASA · ежедневный обзор» в левой колонке (GIBS: VIIRS, MODIS Terra/Aqua) показывает район на выбранную дату обзора; эта дата не связана с периодом снимков Sentinel-2. Пиксель этих снимков — {{case.sections.s54.nasa_res_m_min}}–{{case.sections.s54.nasa_res_m_max}} м, а детектор обучен на Sentinel-2 с пикселем {{case.sections.resolution_physics.pixel_m}} м, поэтому **модель на снимках NASA не запускается**: пластик на них физически не виден, это обзор облачности, цветения и пятен. Одна кнопка скрывает всю папку.
 
 ### Другие слои карты — у каждого подписан источник
@@ -85,7 +87,7 @@ flowchart LR
 
 GPU и ключи не нужны; первый запуск скачивает пакеты, поэтому нужен интернет.
 
-**а) Docker (любая ОС) — не проверено из чистого клона** (проверка идёт; результат — `reports/selfcheck/docker_check.md`).
+**а) Docker (любая ОС) — проверено на Windows 10, Docker Desktop 29.2.0** (чистый клон → сборка → главная, API v3, CSV-выгрузка, дроны, PRIME, 0 ошибок консоли → `down` → повторный `up`; отчёт — [reports/selfcheck/docker_check.md](reports/selfcheck/docker_check.md)). Первая сборка ≈ 12 мин (скачиваются пакеты и PyTorch CPU), с кэшем ≈ 2 мин; образ ≈ 1,7 ГБ в сжатом виде (≈ 3,8 ГБ распакованный). Внутри — точные версии из `requirements-lock.txt`, веса и собранный фронтенд из git; GPU не нужен.
 
 ```bash
 git clone https://github.com/azama2t/final-cosmohack
@@ -94,7 +96,7 @@ docker compose up --build -d      # сборка образа (CPU) и запу�
 # открыть http://localhost:8070 ; остановить: docker compose down
 ```
 
-Нужен Docker Desktop или Docker Engine с Compose. Образ собирается под linux/amd64: на Mac с процессором Apple он пойдёт через эмуляцию, **на Mac не проверено**.
+Нужен Docker Desktop (Windows / macOS) или Docker Engine с Compose (Linux). Сайт — http://localhost:8070 (API — `/api/v3/meta`, документация — `/docs`). Образ linux/amd64: на Mac с процессором Apple он пойдёт через эмуляцию, **на Mac и на Linux Docker-путь не проверялся**.
 
 **б) Windows нативно — проверено** на чистом клоне ([{{case.clean_clone.file}}]({{case.clean_clone.file}}): от `git clone` до карты ≈ {{case.clean_clone.total_min}} мин на CPU). Нужны Python 3.12 (с py launcher), git и место под `.venv` (≈ {{case.clean_clone.venv_gb}} ГБ).
 
@@ -105,7 +107,7 @@ powershell -ExecutionPolicy Bypass -File run.ps1 -Case all -Offline -Cpu   # с�
 powershell -ExecutionPolicy Bypass -File run.ps1 -Cpu                      # сервис с картой: http://127.0.0.1:8000, API — /docs
 ```
 
-**в) Linux / macOS нативно — не проверено.** Команды — прямой перевод `run.ps1`; результат проверки на Linux-сервере будет в `reports/selfcheck/`.
+**в) Linux / macOS нативно — не проверено.** Команды — прямой перевод `run.ps1`; для Linux и Mac надёжнее путь «а) Docker».
 
 ```bash
 git clone https://github.com/azama2t/final-cosmohack
@@ -133,7 +135,7 @@ CUDA_VISIBLE_DEVICES="" .venv/bin/python scripts/case/run_all.py all --offline  
 - **Детектор** по снимку Sentinel-2 строит маску вероятного скопления плавающего мусора. Проверен на отложенном test MARIDA.
 - **Модель концентрации** считает шт./км² для заявленного профиля по полевым данным. Проверена кросс-валидацией на участках маршрута и один раз на отложенном test. Итог на test: у S2 — {{case.sections.field_test.S2.verdict}}, у S1 — {{case.sections.field_test.S1.verdict}}. Поэтому по правилу, записанному до открытия test, оценка по полевым данным на карте — **медиана профиля**.
 
-**Что видно сразу.** Карта открывается обзором Земли с **{{case.sections.scene_zones.n_finds}} находками детектора** из {{case.sections.scene_zones.n_zones}} обработанных спутниковых зон (из них {{case.sections.scene_zones.by_level_b}} совпали с разметкой Cózar 2024; {{case.sections.scene_zones.n_rejected}} отбракованы: пена, блик, судно, берег, не обнаружено; {{case.sections.scene_zones.n_finds_training}} — на снимке из обучения MARIDA, не считается). У точки — дата снимка и статус обработки. Путь: **Земля → находка → карточка → «В студию» → «Назад»** к прежнему масштабу → следующая находка. В карточке: что обнаружено, когда и где снято, площадь и доля покрытия по маске детектора, уверенность, и честно — «Количество предметов по этому снимку не определено» (калибровочных пар «снимок → шт./км²» {{case.sections.quantity.levels.calibration_pairs}}) и «Состав не определён». Полевая концентрация, счётчик по фото и метрики — в панели «Цифры», в один клик от карты.
+**Что видно сразу.** Карта открывается обзором Земли с **{{case.sections.scene_zones.n_finds}} находками детектора** из {{case.sections.scene_zones.n_zones}} обработанных спутниковых зон (из них {{case.sections.scene_zones.by_level_b}} совпали с разметкой Cózar 2024; {{case.sections.scene_zones.n_rejected}} отбракованы: пена, блик, судно, берег, не обнаружено; ещё {{case.sections.scene_zones.n_finds_training}} зона со статусом «обнаружено» лежит на снимке из обучения MARIDA и находкой не считается). У точки — дата снимка и статус обработки. Путь: **Земля → находка → карточка → «В студию» → «Назад»** к прежнему масштабу → следующая находка. В карточке: что обнаружено, когда и где снято, площадь и доля покрытия по маске детектора, уверенность, и честно — «Количество предметов по этому снимку не определено» (калибровочных пар «снимок → шт./км²» {{case.sections.quantity.levels.calibration_pairs}}) и «Состав не определён». Полевая концентрация, счётчик по фото и метрики — в панели «Цифры», в один клик от карты.
 
 **Три числа Саргассова моря (профиль S2, пластик > 2 см) — не путать:** {{case.sections.quantity.field_S2.pooled_C|f1}} шт./км² — среднее профиля ΣN/ΣA по всем событиям (измерение, 95 % с разбросом между днями [{{case.sections.quantity.field_S2.boot_lo95|f1}}–{{case.sections.quantity.field_S2.boot_hi95|f1}}]); {{case.conc.S2.dev_median_c|f1}} шт./км² — медиана события, её карта показывает как оценку для нового места; {{case.sections.field_test.S2.median_mae|f1}} шт./км² — средняя ошибка этой медианы на отложенном test. Пересчёт: `scripts\case\expert_check.py --n {{case.sections.quantity.field_S2.pooled_N}} --area {{case.sections.quantity.field_S2.pooled_A_km2|f2}}` (ΣN/ΣA и интервал Пуассона), `scripts\case\field_interval_check.py` (интервал между днями), отложенный test — `reports/case_conc/final_test.json` (§2, §7).
 

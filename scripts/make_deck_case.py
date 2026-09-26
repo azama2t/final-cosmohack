@@ -458,6 +458,10 @@ def load() -> dict:
                 "rt_n_excluded"):  # PRIME (§55а) — демо, метрик нет
         p = c + "sections.s55." + key
         k["s55_" + key] = N(p) if N.has(p) else None
+    # §58: воронка прогона реального времени (окно поиска, найдено → исключено по качеству → обработано → с находками)
+    for key in ("window_days", "found", "rejected_quality", "processed", "with_finds", "finds", "zones", "pending"):
+        p = c + "sections.s55.rt_funnel." + key
+        k["rtf_" + key] = N(p) if N.has(p) else None
     # §56: наш счётчик на кадрах «Дронов» (разметка авторов против нашего результата)
     for key in ("drones_pred_tp", "drones_n_labels", "drones_pred_fp"):
         p = c + "sections.s56." + key
@@ -1738,11 +1742,38 @@ def _s55_done(n: int) -> bool:
 
 def rt_ready(k: dict) -> bool:
     """Реальное время готово: строка LOG «§55 п.1 … готов» или счётчики прогона уже в final_numbers (s55.rt_n_scenes)."""
-    return _s55_done(1) or k.get("s55_rt_n_scenes") is not None
+    return _s55_done(1) or k.get("s55_rt_n_scenes") is not None or k.get("rtf_processed") is not None
+
+
+def rt_funnel_text(k: dict, short: bool = False) -> str:
+    """Воронка §58 из s55.rt_funnel: «за 180 дней: найдено 1077 снимков, по качеству исключено 600, обработано моделью
+    202, с находками 10 (находок 19)». short — для речи и плитки."""
+    f = {x: k.get("rtf_" + x) for x in ("window_days", "found", "rejected_quality", "processed", "with_finds", "finds",
+                                         "pending")}
+    if f["processed"] is None or f["found"] is None:
+        return ""
+    per = f"за {pl(f['window_days'], 'день', 'дня', 'дней')} " if f["window_days"] is not None else ""
+    if short:
+        return (per + f"обработано моделью {f['processed']} из {pl(f['found'], 'найденного снимка', 'найденных снимков', 'найденных снимков')}"
+                + (f", с находками {f['with_finds']}" if f["with_finds"] is not None else ""))
+    out = per + f"найдено {pl(f['found'], 'снимок', 'снимка', 'снимков')} Sentinel-2"
+    if f["rejected_quality"] is not None:
+        out += f", по качеству исключено {f['rejected_quality']}"
+    out += f", обработано моделью {f['processed']}"
+    if f["with_finds"] is not None:
+        out += f", с находками {f['with_finds']}"
+        if f["finds"] is not None:
+            out += f" (находок {f['finds']})"
+    if f["pending"]:
+        out += f"; ещё {f['pending']} в очереди"
+    return out
 
 
 def rt_counts(k: dict) -> str:
     """«За 30 дней обработано N снимков Sentinel-2: M зон, из них K находок» — только из final_numbers (s55.*)."""
+    ff = rt_funnel_text(k)
+    if ff:
+        return ff
     d, ns, nz, nf = (k.get("s55_rt_" + x) for x in ("days", "n_scenes", "n_zones", "n_finds"))
     if ns is None:
         return ""
