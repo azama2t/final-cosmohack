@@ -24,6 +24,10 @@
 | Демо на отложенной сцене (30SXE, 11.03.2021) | `reports/case_demo/heldout_scene.md` |
 | Нефтяное пятно (эксперимент, выключен) | `docs/OIL.md`, `reports/oil/` |
 | Независимая проверка утверждений | `reports/audit/audit.md` |
+| Независимость количественных экспериментов (что решено до test) | `docs/INDEPENDENCE.md` |
+| Мобильная и настольная вёрстка: кадры и замеры | `reports/qa/mobile/` (`final_result.json`, `*.png`) |
+| Примеры для защиты (5 случаев) | вкладка «Проверка качества», `GET /api/v3/defense_examples`, `scripts/case/defense_examples.py` |
+| Презентация: чекпоинт (основная часть + приложение «Исследование») | `presentation/deck_checkpoint.pdf` (`.pptx`), генератор `presentation/make_deck_checkpoint.py` |
 | Независимая проверка количественной связи (член команды) | `docs/research/gleb_quantitative_link/results/REPORT.md` |
 | API v3 и контракт | `service/routes_v3.py`, `service/case_store.py`, `docs/CONTRACTS_V3.md` |
 | Интерфейс: v2 — основной; v3 — рядом, не по умолчанию | `service/frontend_v2/` → `service/static_v2/`; `service/frontend_v3/` (`MACROPLASTIC_UI=v3`) |

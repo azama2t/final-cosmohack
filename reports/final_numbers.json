@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-26T16:31:21+03:00",
+ "generated": "2026-09-26T17:36:23+03:00",
  "note": "генерируется scripts/final_numbers.py; руками не править; null = ещё не посчитано",
  "l3_lgbm": {
   "available": true,
@@ -6455,14 +6455,14 @@
      "R": 11,
      "S": 6
     },
-    "n_pairs_registry": 441,
+    "n_pairs_registry": 442,
     "pairs_by_class": {
      "A": 5,
      "A*": 63,
      "B": 49,
      "C": 121,
      "D": 196,
-     "—": 7
+     "—": 8
     }
    },
    "ispra": {
@@ -6525,19 +6525,65 @@
    "archives": {
     "available": true,
     "source": "docs/research/pairs/archives/{FILES.csv, CANDIDATES.csv}, описание — ARCHIVES.md",
-    "n_files": 39,
-    "n_candidates": 16
+    "n_files": 42,
+    "n_candidates": 18
    },
    "jury": {
     "available": true,
     "source": "docs/LOG.md (строки «жюри-человек», итог NN/105); отчёты — reports/jury_human/",
     "note": "внутренний балл проверяющего по чек-листу ТЗ, не конкурсная оценка",
     "score_first": 77,
-    "score_last": 89,
+    "score_last": 90,
     "score_max": 105,
-    "n_runs": 7,
+    "n_runs": 8,
     "first_when": "26.09 08:52",
-    "last_when": "26.09 14:51"
+    "last_when": "26.09 16:56"
+   },
+   "defense_examples": {
+    "available": true,
+    "source": "service/case_store.py (DEFENSE_KINDS, defense_examples); пропуск — data/case/scene_zones/defense_examples.json (scripts/case/defense_examples.py)",
+    "api": "/api/v3/defense_examples",
+    "ui": "вкладка «Проверка качества» → «Примеры для защиты»",
+    "n_kinds": 5,
+    "kinds": [
+     "success",
+     "miss",
+     "false_alarm",
+     "background_error",
+     "no_analysis"
+    ],
+    "labels": [
+     "Правильное обнаружение скопления",
+     "Пропуск скопления",
+     "Ложное обнаружение судна или следа",
+     "Ошибка на пене, блике или другом сложном фоне",
+     "Область, где анализ невозможен из-за качества"
+    ],
+    "labels_text": "правильное обнаружение скопления; пропуск скопления; ложное обнаружение судна или следа; ошибка на пене, блике или другом сложном фоне; область, где анализ невозможен из-за качества"
+   },
+   "mobile": {
+    "available": true,
+    "source": "reports/qa/mobile/final_result.json, кадры reports/qa/mobile/*.png (reports/qa/mobile_check.py, mobile_gesture_check.py)",
+    "devices": [
+     "iphone12",
+     "pixel5",
+     "w360",
+     "w768",
+     "d1366",
+     "d1920"
+    ],
+    "widths_px": [
+     360,
+     390,
+     393,
+     768,
+     1366,
+     1920
+    ],
+    "n_devices": 6,
+    "n_hscroll": 0,
+    "n_console_errors": 0,
+    "n_steps": 10
    }
   },
   "clean_clone": {
@@ -6657,8 +6703,8 @@
    "passed": 255,
    "skipped": 2,
    "failed": 0,
-   "seconds": 75.8,
-   "when": "26.09.2026 16:31",
+   "seconds": 50.9,
+   "when": "26.09.2026 17:36",
    "command": "python -m pytest -q tests/test_case_conc_model.py tests/test_case_concentration.py tests/test_case_consistency.py tests/test_case_coverage.py tests/test_case_docs_numbers.py tests/test_case_expert_check.py tests/test_case_field_intervals.py tests/test_case_geometry.py tests/test_case_geometry_integration.py tests/test_case_pairfinder.py tests/test_case_run_all.py tests/test_api_v3.py"
   },
   "n_test_funcs": 166,

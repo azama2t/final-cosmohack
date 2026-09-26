@@ -1044,14 +1044,14 @@
    "R": 11,
    "S": 6
   },
-  "n_pairs_registry": 441,
+  "n_pairs_registry": 442,
   "pairs_by_class": {
    "A": 5,
    "A*": 63,
    "B": 49,
    "C": 121,
    "D": 196,
-   "—": 7
+   "—": 8
   }
  },
  "ispra": {
@@ -1114,18 +1114,64 @@
  "archives": {
   "available": true,
   "source": "docs/research/pairs/archives/{FILES.csv, CANDIDATES.csv}, описание — ARCHIVES.md",
-  "n_files": 39,
-  "n_candidates": 16
+  "n_files": 42,
+  "n_candidates": 18
  },
  "jury": {
   "available": true,
   "source": "docs/LOG.md (строки «жюри-человек», итог NN/105); отчёты — reports/jury_human/",
   "note": "внутренний балл проверяющего по чек-листу ТЗ, не конкурсная оценка",
   "score_first": 77,
-  "score_last": 89,
+  "score_last": 90,
   "score_max": 105,
-  "n_runs": 7,
+  "n_runs": 8,
   "first_when": "26.09 08:52",
-  "last_when": "26.09 14:51"
+  "last_when": "26.09 16:56"
+ },
+ "defense_examples": {
+  "available": true,
+  "source": "service/case_store.py (DEFENSE_KINDS, defense_examples); пропуск — data/case/scene_zones/defense_examples.json (scripts/case/defense_examples.py)",
+  "api": "/api/v3/defense_examples",
+  "ui": "вкладка «Проверка качества» → «Примеры для защиты»",
+  "n_kinds": 5,
+  "kinds": [
+   "success",
+   "miss",
+   "false_alarm",
+   "background_error",
+   "no_analysis"
+  ],
+  "labels": [
+   "Правильное обнаружение скопления",
+   "Пропуск скопления",
+   "Ложное обнаружение судна или следа",
+   "Ошибка на пене, блике или другом сложном фоне",
+   "Область, где анализ невозможен из-за качества"
+  ],
+  "labels_text": "правильное обнаружение скопления; пропуск скопления; ложное обнаружение судна или следа; ошибка на пене, блике или другом сложном фоне; область, где анализ невозможен из-за качества"
+ },
+ "mobile": {
+  "available": true,
+  "source": "reports/qa/mobile/final_result.json, кадры reports/qa/mobile/*.png (reports/qa/mobile_check.py, mobile_gesture_check.py)",
+  "devices": [
+   "iphone12",
+   "pixel5",
+   "w360",
+   "w768",
+   "d1366",
+   "d1920"
+  ],
+  "widths_px": [
+   360,
+   390,
+   393,
+   768,
+   1366,
+   1920
+  ],
+  "n_devices": 6,
+  "n_hscroll": 0,
+  "n_console_errors": 0,
+  "n_steps": 10
  }
 }

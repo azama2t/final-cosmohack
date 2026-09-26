@@ -969,6 +969,33 @@ def collect_jury() -> dict:
             "score_first": sc[0][1], "score_last": sc[-1][1], "score_max": 105, "n_runs": len(sc),
             "first_when": sc[0][0], "last_when": sc[-1][0]}
 
+def collect_defense_examples() -> dict:
+    """Примеры для защиты в «Проверке качества» (service/case_store.py DEFENSE_KINDS; API /api/v3/defense_examples)."""
+    p = ROOT / "service" / "case_store.py"
+    t = p.read_text(encoding="utf-8") if p.is_file() else ""
+    m = re.search(r"^DEFENSE_KINDS\s*=\s*\[(.*?)\]\s*$", t, re.M | re.S)
+    kinds = re.findall(r'\("(\w+)",\s*"([^"]+)"\)', m.group(1)) if m else []
+    return {"available": bool(kinds), "source": "service/case_store.py (DEFENSE_KINDS, defense_examples); пропуск — "
+                                                 "data/case/scene_zones/defense_examples.json (scripts/case/defense_examples.py)",
+            "api": "/api/v3/defense_examples", "ui": "вкладка «Проверка качества» → «Примеры для защиты»",
+            "n_kinds": len(kinds), "kinds": [k for k, _ in kinds], "labels": [lb for _, lb in kinds],
+            "labels_text": "; ".join(lb[:1].lower() + lb[1:] for _, lb in kinds)}
+
+
+def collect_mobile() -> dict:
+    """Проверка мобильной и настольной вёрстки (reports/qa/mobile/final_result.json, scripts reports/qa/mobile_check.py)."""
+    d = _load_json(REP / "qa" / "mobile" / "final_result.json")
+    if not isinstance(d, list) or not d:
+        return {"available": False}
+    return {"available": True, "source": "reports/qa/mobile/final_result.json, кадры reports/qa/mobile/*.png "
+                                         "(reports/qa/mobile_check.py, mobile_gesture_check.py)",
+            "devices": [x.get("device") for x in d],
+            "widths_px": sorted({(list((x.get("measures") or {}).values()) or [{}])[0].get("vw") for x in d} - {None}),
+            "n_devices": len(d),
+            "n_hscroll": sum(1 for x in d for mm in (x.get("measures") or {}).values() if mm.get("hscroll")),
+            "n_console_errors": sum(len(x.get("console_errors") or []) for x in d),
+            "n_steps": len(d[0].get("steps") or [])}
+
 def collect_research_log() -> dict:
     """Число проверенных гипотез/экспериментов (строки-эксперименты docs/PIPELINE.md) и реестр пар (docs/research/pairs/PAIRS.csv)."""
     import csv
@@ -1094,7 +1121,7 @@ def collect() -> dict:
            "photo_count": collect_photo_count(), "research_log": collect_research_log(),
            "ispra": collect_ispra(), "resolution_physics": collect_resolution_physics(), "targets": collect_targets(),
            "estimator": collect_estimator(), "synthetic_p3": collect_synthetic_p3(), "archives": collect_archives(),
-           "jury": collect_jury()}
+           "jury": collect_jury(), "defense_examples": collect_defense_examples(), "mobile": collect_mobile()}
     return _clean_ids(res)
 
 

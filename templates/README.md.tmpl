@@ -467,6 +467,13 @@ MAPE не используется: в реестре есть нули. Осн�
 | `GET /api/v3/metrics` | метрики детектора и концентрации из тех же файлов, что в этом README; итог отложенного test — `concentration.final_test_summary` и `concentration.final_test_status`; контрольный пример |
 | `GET /api/v3/export?layer=observations\|pairs\|zones&format=geojson\|csv` | выгрузка с теми же фильтрами или по `query_id` |
 | `POST /api/v3/queries`, `GET /api/v3/queries/{id}/run`, `DELETE …` | сохранённый запрос и его повторный запуск |
+| `GET /api/v3/defense_examples` | {{case.sections.defense_examples.n_kinds}} примеров для защиты: {{case.sections.defense_examples.labels_text}} |
+
+**Примеры для защиты.** В интерфейсе v2 во вкладке «Проверка качества» — {{case.sections.defense_examples.n_kinds}} примеров на реальных сценах: {{case.sections.defense_examples.labels_text}}. Каждый открывает зону или область на карте; те же данные — `GET /api/v3/defense_examples`.
+
+**Мобильная версия.** Интерфейс v2 проверен на {{case.sections.mobile.n_devices}} размерах экрана (ширина {{case.sections.mobile.widths_px}} px): путь из {{case.sections.mobile.n_steps}} шагов (открыть → снимок → карточка → назад → выгрузка → фильтры → «Проверка качества» → легенда → фото), горизонтальной прокрутки {{case.sections.mobile.n_hscroll}}, ошибок консоли {{case.sections.mobile.n_console_errors}}. Кадры — `reports/qa/mobile/`.
+
+**Независимость экспериментов.** Какие решения принимались до открытия test и на каких данных — таблица [docs/INDEPENDENCE.md](docs/INDEPENDENCE.md).
 
 Ошибки приходят в едином формате `{"error":{"code","message","details"}}` (400 BAD_BBOX / BAD_DATE / BAD_PARAM, 404). Пустой результат — 200 с `empty_reason`.
 

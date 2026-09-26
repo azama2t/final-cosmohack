@@ -518,7 +518,7 @@ MAPE не используется: в реестре есть нули. Осн�
 | детектор: полный прогон 7 моделей на val и test MARIDA | `scripts\case\detector_compare.py` (нужны MARIDA и кэш из предыдущей строки; RandomForest переобучается из train-кэша, если нет `data/case/detector_preds/rf_seed5.joblib`) | `reports/case_detector/*` | ≈ 130 с |
 | эксперимент на парах | `scripts\case\pairs_experiment.py --no-fetch` | `reports/case_pairs/experiment.{md,json}` | ≈ 3 мин с чтением FDI по сети |
 | согласованность API и экспорта | `scripts\case\consistency_check.py` | `reports/selfcheck/consistency_latest.md\|json` (в git; копии с датой не коммитятся) | 269 с |
-| тесты кейса | `-m pytest -q tests\test_case_*.py tests\test_api_v3.py` | 255 passed, 2 skipped, 0 failed (прогон 26.09.2026 16:31, `reports/case_run/case_tests.json`) | 76 с; вся папка `tests` — 10 мин 53 с на CPU |
+| тесты кейса | `-m pytest -q tests\test_case_*.py tests\test_api_v3.py` | 255 passed, 2 skipped, 0 failed (прогон 26.09.2026 17:36, `reports/case_run/case_tests.json`) | 51 с; вся папка `tests` — 10 мин 53 с на CPU |
 | **все документы** (README, отчёт, PREP, дека, речь, демо, вопросы) | `scripts\case\build_docs.py` — маршрут → тесты → `final_numbers.py` → `render_docs.py` → `make_deck_case.py` → сверка чисел (`tests/test_case_docs_numbers.py`) | `README.md`, `reports/report.md`, `docs/PREP.md`, `reports/case_deck.pptx`, `docs/{SPEECH,DEMO,QA}.md` | ≈ 1–2 мин |
 
 - Предсказания детектора на MARIDA (`data/case/detector_preds/*.npz`: вероятности основной модели и RandomForest, маски 7 моделей по патчам) лежат в git. Для пересчёта TP/FP/FN из них нужна разметка MARIDA (`data/MARIDA/patches/*_cl.tif`, как скачать — раздел 2). Без разметки `run_all eval` берёт числа из `reports/case_detector/metrics.json` и записывает его sha256. Полный прогон детекторов заново делает `detector_compare.py` по MARIDA.
@@ -581,6 +581,13 @@ MAPE не используется: в реестре есть нули. Осн�
 | `GET /api/v3/metrics` | метрики детектора и концентрации из тех же файлов, что в этом README; итог отложенного test — `concentration.final_test_summary` и `concentration.final_test_status`; контрольный пример |
 | `GET /api/v3/export?layer=observations\|pairs\|zones&format=geojson\|csv` | выгрузка с теми же фильтрами или по `query_id` |
 | `POST /api/v3/queries`, `GET /api/v3/queries/{id}/run`, `DELETE …` | сохранённый запрос и его повторный запуск |
+| `GET /api/v3/defense_examples` | 5 примеров для защиты: правильное обнаружение скопления; пропуск скопления; ложное обнаружение судна или следа; ошибка на пене, блике или другом сложном фоне; область, где анализ невозможен из-за качества |
+
+**Примеры для защиты.** В интерфейсе v2 во вкладке «Проверка качества» — 5 примеров на реальных сценах: правильное обнаружение скопления; пропуск скопления; ложное обнаружение судна или следа; ошибка на пене, блике или другом сложном фоне; область, где анализ невозможен из-за качества. Каждый открывает зону или область на карте; те же данные — `GET /api/v3/defense_examples`.
+
+**Мобильная версия.** Интерфейс v2 проверен на 6 размерах экрана (ширина 360, 390, 393, 768, 1366, 1920 px): путь из 10 шагов (открыть → снимок → карточка → назад → выгрузка → фильтры → «Проверка качества» → легенда → фото), горизонтальной прокрутки 0, ошибок консоли 0. Кадры — `reports/qa/mobile/`.
+
+**Независимость экспериментов.** Какие решения принимались до открытия test и на каких данных — таблица [docs/INDEPENDENCE.md](docs/INDEPENDENCE.md).
 
 Ошибки приходят в едином формате `{"error":{"code","message","details"}}` (400 BAD_BBOX / BAD_DATE / BAD_PARAM, 404). Пустой результат — 200 с `empty_reason`.
 
