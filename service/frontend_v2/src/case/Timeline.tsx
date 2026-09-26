@@ -126,9 +126,9 @@ export default function Timeline({
 }) {
   const [open, setOpen] = useState(() => {
     try {
-      return localStorage.getItem('mp.case.timeline') !== '0';
+      return localStorage.getItem('mp.case.timeline') === '1'; // §73: collapsed by default
     } catch {
-      return true;
+      return false;
     }
   });
   useEffect(() => {

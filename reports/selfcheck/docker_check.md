@@ -30,5 +30,5 @@
 
 ## Дополнение 27.09 00:44 (INBOX §72)
 - Windows 10 / Docker Desktop, linux/amd64 — **PASS** (выше).
-- Linux — сборка прошла у команды (со слов Фёдора, INBOX §72); запуск нами не проверялся.
+- Linux (Docker) — проверено командой вручную 27.09 00:38: `docker compose up --build` собрался и запустился (сообщил Фёдор, INBOX §74).
 - macOS Apple Silicon — сборка падала на шаге pip (колёса torch для linux/arm64 без метки «+cpu»). Внесена правка Dockerfile (`ARG TARGETARCH`: для arm64 метка снимается), **не проверена**. Рекомендуемый путь на Mac — `DOCKER_DEFAULT_PLATFORM=linux/amd64 docker compose up --build` (эмуляция Rosetta); на Mac нами не запускался.

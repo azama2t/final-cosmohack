@@ -96,7 +96,7 @@ docker compose up --build -d      # сборка образа (CPU) и запу�
 # открыть http://localhost:8070 ; остановить: docker compose down
 ```
 
-Нужен Docker Desktop (Windows / macOS) или Docker Engine с Compose (Linux). Сайт — http://localhost:8070 (API — `/api/v3/meta`, документация — `/docs`). Образ linux/amd64: на Mac с процессором Apple он пойдёт через эмуляцию, **на Mac и на Linux Docker-путь не проверялся**.
+Нужен Docker Desktop (Windows / macOS) или Docker Engine с Compose (Linux). Сайт — http://localhost:8070 (API — `/api/v3/meta`, документация — `/docs`). Образ linux/amd64: на Mac с процессором Apple он пойдёт через эмуляцию, **Linux (Docker) — проверено командой вручную 27.09 00:38**; на Mac Docker-путь нами не проверялся.
 
 ### macOS (Apple Silicon M1/M2/M3 и Intel)
 1. Установить и запустить Docker Desktop for Mac.
