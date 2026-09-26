@@ -1,9 +1,9 @@
 {
- "version": "winans-frcnn-spatial-l109-2026-09-26",
+ "version": "winans-frcnn-spatial-2026-09-26",
  "weights_file": "frcnn_winans_spatial_fp16.pth",
  "weights_sha256": "3b24957e53437ff95d5dcaac0ac809e908c23b3f5d8d47503220c4d3fad6df99",
  "architecture": "torchvision fasterrcnn_resnet50_fpn, 2 classes (background, item); init = our FML model",
- "source": "trained by L109: scripts/photo_count/train.py --split winans --epochs 15 (best epoch 7 by val AP50)",
+ "source": "обучено командой: scripts/photo_count/train.py --split winans --epochs 15 (best epoch 7 by val AP50)",
  "dataset": "Winans et al. 2023, Zenodo 8381113, CC BY 4.0: aerial shoreline chips 640x640 px, GSD 0.02 m (163.84 m^2), 8 classes -> 1 item; spatial-component split train 951 / val 239 / test 397",
  "weights_license": "own weights (torchvision BSD-3 + FML CC BY 4.0 + Winans CC BY 4.0, attribution)",
  "threshold": 0.8,

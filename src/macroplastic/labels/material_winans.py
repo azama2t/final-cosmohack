@@ -305,7 +305,7 @@ def score(a):
     # decision on TEST (once)
     te = out["splits"]["test"]
     me = {"classes": MATS, "confusion": te["confusion_material"], "source_dataset": "Winans2023",
-          "heldout": "отложенные участки берега Winans 2023 (397 чипов, пространственное разбиение L109)",
+          "heldout": "отложенные участки берега Winans 2023 (397 чипов, пространственное разбиение по участкам)",
           "heldout_independent": True, "other_source": False}
     ok_gate, why = accepted_classes(me)
     final, reasons = [], dict(why)

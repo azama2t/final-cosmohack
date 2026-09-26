@@ -1,9 +1,9 @@
 {
- "version": "fml-frcnn-grouped-l109-2026-09-26",
+ "version": "fml-frcnn-grouped-2026-09-26",
  "weights_file": "frcnn_fml_grouped_fp16.pth",
  "weights_sha256": "7f74cf64c6fdf7c3e750b4ad2dd63a59b780d2c980d7e39388c3a01fe35dc417",
  "architecture": "torchvision fasterrcnn_resnet50_fpn (COCO init), 2 classes (background, garbage)",
- "source": "trained by L109: scripts/photo_count/train.py --split grouped --epochs 6 (best epoch 4 by val_g AP50)",
+ "source": "обучено командой: scripts/photo_count/train.py --split grouped --epochs 6 (best epoch 4 by val_g AP50)",
  "dataset": "FML v2 (SEANOE doi:10.17882/106148, CC BY 4.0), split by acquisition session: train_g 3271 / val_g 838 / test_g 1190 photos",
  "weights_license": "own weights: trained from torchvision COCO weights (BSD-3) on FML (CC BY 4.0, attribution: Lazzerini, Ferreira, Ridolfi 2025)",
  "threshold": 0.8,
