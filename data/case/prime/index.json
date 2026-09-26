@@ -1,0 +1,271 @@
+{
+ "badge": "СИНТЕТИКА — не наблюдение",
+ "about": "Сцены сгенерированы: фон — реальная вода Sentinel-2 наших районов, предметы — синтетические, размеры из полевых наборов (ADIS, Lebreton 2018, Winans 2023). Показывают, что было бы видно при детальной съёмке (0,25 м/пикс., дрон/аэро) и во что те же предметы превращаются в пикселе 10 м. Это не наблюдение и не прогноз для реального места.",
+ "generator": "scripts/case/prime_scenes.py (компоненты П3: scripts/p3/gen_synth.py, configs/p3_synth.yaml)",
+ "created": "2026-09-26 21:07",
+ "seed": 54,
+ "scenes": [
+  {
+   "id": "p1_windrow",
+   "title": "Полоса мусора вдоль фронта течения",
+   "layout": "windrow",
+   "size_src": "adis",
+   "size_src_ru": "ADIS (буи/волокно/жёсткий пластик)",
+   "size_m": 200,
+   "detail_m": 0.25,
+   "s2_m": 10,
+   "background": {
+    "source": "Sentinel-2 L2A (реальная вода, без находок)",
+    "region": "guanabara",
+    "region_ru": "залив Гуанабара",
+    "date": "2025-06-26",
+    "lat": -22.72808,
+    "lon": -43.13726,
+    "note": "фон увеличен из пикселей 10 м; волны и блики не моделируются"
+   },
+   "truth": {
+    "n_items": 455,
+    "items_area_m2": 294.4,
+    "cover_pct_scene": 0.728,
+    "max_cover_pct_s2_pixel": 25.8,
+    "s2_pixels_cover_ge_20pct": 3,
+    "s2_pixels_cover_ge_1pct": 25,
+    "items_below_detail_px": 2
+   },
+   "count_detail": {
+    "n_components": 214,
+    "rel_err": -0.53
+   },
+   "img_detail": "/api/prime/img/p1_windrow_detail.png",
+   "img_s2": "/api/prime/img/p1_windrow_s2.png"
+  },
+  {
+   "id": "p2_cluster",
+   "title": "Плотное скопление",
+   "layout": "cluster",
+   "size_src": "lebreton",
+   "size_src_ru": "Lebreton 2018 (мусорное пятно)",
+   "size_m": 200,
+   "detail_m": 0.25,
+   "s2_m": 10,
+   "background": {
+    "source": "Sentinel-2 L2A (реальная вода, без находок)",
+    "region": "durban",
+    "region_ru": "Дурбан",
+    "date": "2026-05-04",
+    "lat": -29.78916,
+    "lon": 31.19407,
+    "note": "фон увеличен из пикселей 10 м; волны и блики не моделируются"
+   },
+   "truth": {
+    "n_items": 1208,
+    "items_area_m2": 509.8,
+    "cover_pct_scene": 1.364,
+    "max_cover_pct_s2_pixel": 34.5,
+    "s2_pixels_cover_ge_20pct": 8,
+    "s2_pixels_cover_ge_1pct": 51,
+    "items_below_detail_px": 19
+   },
+   "count_detail": {
+    "n_components": 660,
+    "rel_err": -0.454
+   },
+   "img_detail": "/api/prime/img/p2_cluster_detail.png",
+   "img_s2": "/api/prime/img/p2_cluster_s2.png"
+  },
+  {
+   "id": "p3_target",
+   "title": "Мишень 10 × 5 м (как в опытах PLP)",
+   "layout": "target_rect",
+   "size_src": "bottle",
+   "size_src_ru": "бутылка 1,5 л (0,026 м²)",
+   "size_m": 200,
+   "detail_m": 0.25,
+   "s2_m": 10,
+   "background": {
+    "source": "Sentinel-2 L2A (реальная вода, без находок)",
+    "region": "haiti",
+    "region_ru": "Гаити",
+    "date": "2026-01-09",
+    "lat": 18.68512,
+    "lon": -72.59034,
+    "note": "фон увеличен из пикселей 10 м; волны и блики не моделируются"
+   },
+   "truth": {
+    "n_items": 837,
+    "items_area_m2": 21.8,
+    "cover_pct_scene": 0.099,
+    "max_cover_pct_s2_pixel": 31.4,
+    "s2_pixels_cover_ge_20pct": 1,
+    "s2_pixels_cover_ge_1pct": 2,
+    "items_below_detail_px": 365
+   },
+   "count_detail": {
+    "n_components": 1,
+    "rel_err": -0.999
+   },
+   "img_detail": "/api/prime/img/p3_target_detail.png",
+   "img_s2": "/api/prime/img/p3_target_s2.png"
+  },
+  {
+   "id": "p4_sparse",
+   "title": "Редкий рассеянный мусор",
+   "layout": "uniform",
+   "size_src": "winans",
+   "size_src_ru": "Winans 2023 (аэросъёмка, Гавайи)",
+   "size_m": 200,
+   "detail_m": 0.25,
+   "s2_m": 10,
+   "background": {
+    "source": "Sentinel-2 L2A (реальная вода, без находок)",
+    "region": "manila",
+    "region_ru": "Манильский залив",
+    "date": "2025-08-04",
+    "lat": 14.54735,
+    "lon": 120.72902,
+    "note": "фон увеличен из пикселей 10 м; волны и блики не моделируются"
+   },
+   "truth": {
+    "n_items": 722,
+    "items_area_m2": 594.6,
+    "cover_pct_scene": 1.641,
+    "max_cover_pct_s2_pixel": 26.9,
+    "s2_pixels_cover_ge_20pct": 1,
+    "s2_pixels_cover_ge_1pct": 163,
+    "items_below_detail_px": 0
+   },
+   "count_detail": {
+    "n_components": 693,
+    "rel_err": -0.04
+   },
+   "img_detail": "/api/prime/img/p4_sparse_detail.png",
+   "img_s2": "/api/prime/img/p4_sparse_s2.png"
+  },
+  {
+   "id": "p5_weak",
+   "title": "Слабое пятно (не видно в 10 м)",
+   "layout": "cluster",
+   "size_src": "adis",
+   "size_src_ru": "ADIS (буи/волокно/жёсткий пластик)",
+   "size_m": 200,
+   "detail_m": 0.25,
+   "s2_m": 10,
+   "background": {
+    "source": "Sentinel-2 L2A (реальная вода, без находок)",
+    "region": "bali",
+    "region_ru": "Бали",
+    "date": "2026-07-05",
+    "lat": -8.7774,
+    "lon": 115.41455,
+    "note": "фон увеличен из пикселей 10 м; волны и блики не моделируются"
+   },
+   "truth": {
+    "n_items": 130,
+    "items_area_m2": 84.5,
+    "cover_pct_scene": 0.226,
+    "max_cover_pct_s2_pixel": 14.7,
+    "s2_pixels_cover_ge_20pct": 0,
+    "s2_pixels_cover_ge_1pct": 16,
+    "items_below_detail_px": 0
+   },
+   "count_detail": {
+    "n_components": 93,
+    "rel_err": -0.285
+   },
+   "img_detail": "/api/prime/img/p5_weak_detail.png",
+   "img_s2": "/api/prime/img/p5_weak_s2.png"
+  },
+  {
+   "id": "p6_clean",
+   "title": "Контроль: чистая вода",
+   "layout": "zero",
+   "size_src": "adis",
+   "size_src_ru": "ADIS (буи/волокно/жёсткий пластик)",
+   "size_m": 200,
+   "detail_m": 0.25,
+   "s2_m": 10,
+   "background": {
+    "source": "Sentinel-2 L2A (реальная вода, без находок)",
+    "region": "mumbai",
+    "region_ru": "Мумбаи",
+    "date": "2026-01-01",
+    "lat": 19.27617,
+    "lon": 72.68377,
+    "note": "фон увеличен из пикселей 10 м; волны и блики не моделируются"
+   },
+   "truth": {
+    "n_items": 0,
+    "items_area_m2": 0.0,
+    "cover_pct_scene": 0.0,
+    "max_cover_pct_s2_pixel": 0.0,
+    "s2_pixels_cover_ge_20pct": 0,
+    "s2_pixels_cover_ge_1pct": 0,
+    "items_below_detail_px": 0
+   },
+   "count_detail": {
+    "n_components": 0,
+    "rel_err": null
+   },
+   "img_detail": "/api/prime/img/p6_clean_detail.png",
+   "img_s2": "/api/prime/img/p6_clean_s2.png"
+  }
+ ],
+ "metrics": [
+  {
+   "label": "Счёт связных областей на кадре 0,25 м против заложенного числа (эти 6 сцен)",
+   "value": "медиана отн. ошибки 45%, MAE 282 предм. на сцену",
+   "file": "data/case/prime/index.json",
+   "note": "слипшиеся предметы считаются одним — в плотных сценах счёт занижен; это простой счёт, не модель"
+  },
+  {
+   "label": "П3: спектр S2 → число бутылок-эквивалентов, синтетический тест",
+   "value": "MAE 66.6 против 193.29 у «всегда 0»",
+   "file": "reports/p3/p3_synth.json",
+   "note": "folds.final; окна 15 × 15 пикселей S2"
+  },
+  {
+   "label": "П3: число предметов реальных размеров по спектру (синтетика)",
+   "value": "медиана отн. ошибки 60%",
+   "file": "reports/p3/p3_synth.json",
+   "note": "спектр несёт долю покрытия, а не размер предметов"
+  },
+  {
+   "label": "П3 на реальных мишенях (проверка вне синтетики)",
+   "value": "MAE 893.5 против 100.9 у плоской калибровки — модель НЕ принята",
+   "file": "reports/p3/p3_synth.json",
+   "note": "поэтому в основном продукте её нет"
+  }
+ ],
+ "count_detail_rows": [
+  {
+   "id": "p1_windrow",
+   "n_true": 455,
+   "n_components": 214
+  },
+  {
+   "id": "p2_cluster",
+   "n_true": 1208,
+   "n_components": 660
+  },
+  {
+   "id": "p3_target",
+   "n_true": 837,
+   "n_components": 1
+  },
+  {
+   "id": "p4_sparse",
+   "n_true": 722,
+   "n_components": 693
+  },
+  {
+   "id": "p5_weak",
+   "n_true": 130,
+   "n_components": 93
+  },
+  {
+   "id": "p6_clean",
+   "n_true": 0,
+   "n_components": 0
+  }
+ ]
+}
