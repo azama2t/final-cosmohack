@@ -51,9 +51,107 @@
    }
   }
  ],
- "level_A_pairs": 0,
- "s11_levels": {},
- "s11_files": [],
+ "csv_search_levels": {
+  "total": {
+   "A": 0,
+   "B": 0,
+   "C": 9,
+   "D": 165
+  },
+  "by_source": {
+   "S1": {
+    "A": 0,
+    "B": 0,
+    "C": 0,
+    "D": 10
+   },
+   "S2": {
+    "A": 0,
+    "B": 0,
+    "C": 1,
+    "D": 62
+   },
+   "S3": {
+    "A": 0,
+    "B": 0,
+    "C": 0,
+    "D": 68
+   },
+   "S4": {
+    "A": 0,
+    "B": 0,
+    "C": 8,
+    "D": 25
+   }
+  }
+ },
+ "level_A_pairs_csv": 0,
+ "adis_stages": [
+  {
+   "label": "Отрезки ADIS по 10 км (камера судна, счёт предметов)",
+   "total": 21444
+  },
+  {
+   "label": "Есть снимок Sentinel-2 L2A в ±1 сут",
+   "total": 2086
+  },
+  {
+   "label": "|dt| ≤ 3 ч и облачность сцены ≤ 30 %",
+   "total": 177
+  },
+  {
+   "label": "Уровень A (время, дрейф, площадь, пиксели полосы годны)",
+   "total": 66
+  },
+  {
+   "label": "Детектор оценивается (солнце, сигнал воды)",
+   "total": 28
+  },
+  {
+   "label": "…из них с предметами в поле",
+   "total": 3
+  },
+  {
+   "label": "Срабатываний детектора в полосе у них, пикс.",
+   "total": 0
+  }
+ ],
+ "adis_total_source": "data/extra/field/adis/Segments.csv",
+ "labeled_BD": [
+  {
+   "level": "B",
+   "label": "съёмок PLP + FloatingObjects (съёмка = тайл + дата)",
+   "total": 65,
+   "note": "PLP 38 (мишени) · FO 27 (естественные)"
+  },
+  {
+   "level": "B",
+   "label": "окон Cózar 2024 (нити плавучего материала)",
+   "total": 14374,
+   "note": "4 435 съёмок (тайл + дата; 4 472 продуктов L1C), 322 тайлов"
+  },
+  {
+   "level": "D",
+   "label": "рамок судов",
+   "total": 2094,
+   "note": "18 съёмок (тайл + дата)"
+  },
+  {
+   "level": "D",
+   "label": "сцен облаков и теней",
+   "total": 28,
+   "note": "проверенные негативы"
+  }
+ ],
+ "cozar_units": {
+  "windows": 14374,
+  "acq_tile_date": 4435,
+  "products_l1c_scene_id": 4472,
+  "acq_with_2plus_products": 37,
+  "tiles": 322,
+  "definition": "съёмка = уникальная пара тайл MGRS + дата (единица проверки утечек, как у PLP/FO/судов); продукт L1C = уникальный scene_id; 4 472 в отчёте L98 — это продукты, не тайл+дата",
+  "source": "reports/extra_data/registry_cozar2024.csv.gz"
+ },
  "quality_reject_reasons": {
   "glint": 10,
   "cloud(qa_suspect:red_sr<0.03)": 4,

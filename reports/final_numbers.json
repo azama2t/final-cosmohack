@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-26T03:35:14+03:00",
+ "generated": "2026-09-26T03:52:24+03:00",
  "note": "генерируется scripts/final_numbers.py; руками не править; null = ещё не посчитано",
  "l3_lgbm": {
   "available": true,
@@ -5228,7 +5228,7 @@
   },
   "run": {
    "command": "run_all.py all --offline",
-   "finished": "2026-09-26T00:18:27",
+   "finished": "2026-09-26T03:52:00",
    "versions": {
     "python": "3.12.7",
     "platform": "Windows-10-10.0.19045-SP0",
@@ -5240,19 +5240,20 @@
     "shapely": "2.1.2",
     "fastapi": "0.141.1",
     "yaml": "6.0.3",
-    "git_commit": "71c050037dd98912b2a2c075d7a75981c5676129"
+    "git_commit": "f976592efe860566223a9c1558274f268bc395bc"
    },
    "outputs_fingerprint_short": "fccf808a8817d7c4",
    "n_outputs": 24,
-   "total_s": 6.9,
+   "total_s": 7.7,
    "step_s": {
     "1_selection": 0.1,
-    "2_pairs": 1.6,
+    "2_pairs": 1.8,
     "3_quality_detector": 0.2,
     "3b_registry": 0.7,
-    "4_concentration": 2.4,
+    "4_concentration": 2.8,
     "5_detector_marida": 1.0,
-    "6_export_api_v3": 0.9
+    "6_export_api_v3": 1.0,
+    "5b_search_numbers": 0.2
    },
    "export": {
     "observations": 935,
@@ -6000,14 +6001,14 @@
   "tests": {
    "available": true,
    "source": "reports/case_run/case_tests.json",
-   "passed": 232,
+   "passed": 242,
    "skipped": 2,
    "failed": 0,
-   "seconds": 18.5,
-   "when": "26.09.2026 00:18",
-   "command": "python -m pytest -q tests/test_case_conc_model.py tests/test_case_concentration.py tests/test_case_consistency.py tests/test_case_docs_numbers.py tests/test_case_geometry.py tests/test_case_geometry_integration.py tests/test_case_pairfinder.py tests/test_case_run_all.py tests/test_api_v3.py"
+   "seconds": 19.6,
+   "when": "26.09.2026 03:52",
+   "command": "python -m pytest -q tests/test_case_conc_model.py tests/test_case_concentration.py tests/test_case_consistency.py tests/test_case_coverage.py tests/test_case_docs_numbers.py tests/test_case_geometry.py tests/test_case_geometry_integration.py tests/test_case_pairfinder.py tests/test_case_run_all.py tests/test_api_v3.py"
   },
   "n_test_funcs": 155,
-  "n_tests": 232
+  "n_tests": 242
  }
 }

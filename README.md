@@ -140,7 +140,7 @@ powershell -ExecutionPolicy Bypass -File run.ps1
 - Клонировать обычным `git clone`. Концы строк у файлов данных зафиксированы в `.gitattributes` (`-text` для `data/**`, `task/**`, `reports/case_splits/**`), поэтому sha256 входов не зависят от настройки `core.autocrlf`.
 - `run.ps1` при первом запуске создаёт `.venv` и ставит пакеты — **для этого нужен интернет** (на чистом клоне ≈ 3 мин, CPU-вариант `.venv` ≈ 1,53 ГБ). На машине без NVIDIA берётся `requirements-cpu.txt`, ключ `-Cpu` включает этот вариант принудительно. Сервис поднимается на http://127.0.0.1:8000, документация API — http://127.0.0.1:8000/docs. Если порт занят — `-Port 8080`; без открытия браузера — `-NoBrowser`. Подложка карты (Esri, OSM) грузится из интернета; без сети данные кейса и API работают, но подложки не будет.
 - **Проверено на настоящем чистом клоне** ([reports/selfcheck/clean_clone_1941.md](reports/selfcheck/clean_clone_1941.md)): от `git clone` до карты на экране ≈ 7,5 мин на CPU — клон 76 с, установка пакетов и маршрут `-Case all -Offline -Cpu` 3 мин 17 с (сам маршрут 6.9 с), загрузка карты 8,1 с. Числа совпали с основным репозиторием.
-- `-Case all -Offline` на этой машине выполняется за **6.9 с** по шагам (плюс около 1,5 с на запуск Python). Время каждого шага записано в `reports/case_run/run_summary.json`.
+- `-Case all -Offline` на этой машине выполняется за **7.7 с** по шагам (плюс около 1,5 с на запуск Python). Время каждого шага записано в `reports/case_run/run_summary.json`.
 - **Чистый клон работает без сети.** В репозитории лежат:
   - кэш STAC `data/pairs/cache` (ответы на все 1272 запроса);
   - реестр кандидатов `data/pairs/*.csv` и вырезки масок `data/pairs/quality/`;
@@ -418,11 +418,11 @@ MAPE не используется: в реестре есть нули. Осн�
 
 | Что | Команда | Выход | Время |
 |---|---|---|---|
-| весь маршрут | `scripts\case\run_all.py all --offline` | `reports/case_run/run_summary.json` | 6.9 с |
+| весь маршрут | `scripts\case\run_all.py all --offline` | `reports/case_run/run_summary.json` | 7.7 с |
 | отбор записей | `scripts\case\run_all.py prepare --offline` | `data/case/selection_*.csv`, `data/case/run/registry_*.csv` | 0.1 с |
 | реестр пар (поиск STAC) | `scripts\case\find_pairs.py --point-scl 6` | `data/pairs/{events,candidates,best_per_event}.csv`, `reports/case_pairs/summary.md` | ≈ 2 мин с сетью, секунды из кэша |
 | маски и детектор на парах | `scripts\case\pair_quality.py` (`--force` — заново) | `data/pairs/quality/<событие>/`, `data/pairs/pair_quality.csv`, `reports/case_pairs/quality.md` | ≈ 4–5 мин с сетью |
-| бейзлайны концентрации, 6 схем разбиения | `scripts\case\baseline_concentration.py` | `reports/case_conc/{metrics.json, predictions.csv, metrics_by_fold.csv, consistency.csv, baseline.md}` | 2.4 с |
+| бейзлайны концентрации, 6 схем разбиения | `scripts\case\baseline_concentration.py` | `reports/case_conc/{metrics.json, predictions.csv, metrics_by_fold.csv, consistency.csv, baseline.md}` | 2.8 с |
 | модели концентрации, dev CV | `scripts\case\conc_model_cv.py` | `reports/case_conc/{dev_cv.md, dev_cv.json, dev_predictions.csv}`, `weights/case_conc/*.json` | ≈ 6 с |
 | отложенный test концентрации | `scripts\case\final_test_conc.py` (**один раз**, уже посчитан; повтор скрипт отклоняет) | `reports/case_conc/final_test.json`, `final_test_predictions.csv` | секунды |
 | детектор: пересчёт из сохранённых предсказаний | `scripts\case\run_all.py eval` | `reports/case_run/detector_recomputed.json` (сверка TP/FP/FN с `metrics.json`) | 1 с |
@@ -430,7 +430,7 @@ MAPE не используется: в реестре есть нули. Осн�
 | детектор: полный прогон 7 моделей на val и test MARIDA | `scripts\case\detector_compare.py` (нужны MARIDA и кэш из предыдущей строки; RandomForest переобучается из train-кэша, если нет `data/case/detector_preds/rf_seed5.joblib`) | `reports/case_detector/*` | ≈ 130 с |
 | эксперимент на парах | `scripts\case\pairs_experiment.py --no-fetch` | `reports/case_pairs/experiment.{md,json}` | ≈ 3 мин с чтением FDI по сети |
 | согласованность API и экспорта | `scripts\case\consistency_check.py` | `reports/selfcheck/consistency_latest.md\|json` (в git; копии с датой не коммитятся) | 27 с |
-| тесты кейса | `-m pytest -q tests\test_case_*.py tests\test_api_v3.py` | 232 passed, 2 skipped, 0 failed (прогон 26.09.2026 00:18, `reports/case_run/case_tests.json`) | 18 с; вся папка `tests` — 10 мин 53 с на CPU |
+| тесты кейса | `-m pytest -q tests\test_case_*.py tests\test_api_v3.py` | 242 passed, 2 skipped, 0 failed (прогон 26.09.2026 03:52, `reports/case_run/case_tests.json`) | 20 с; вся папка `tests` — 10 мин 53 с на CPU |
 | **все документы** (README, отчёт, PREP, дека, речь, демо, вопросы) | `scripts\case\build_docs.py` — маршрут → тесты → `final_numbers.py` → `render_docs.py` → `make_deck_case.py` → сверка чисел (`tests/test_case_docs_numbers.py`) | `README.md`, `reports/report.md`, `docs/PREP.md`, `reports/case_deck.pptx`, `docs/{SPEECH,DEMO,QA}.md` | ≈ 1–2 мин |
 
 - Предсказания детектора на MARIDA (`data/case/detector_preds/*.npz`: вероятности основной модели и RandomForest, маски 7 моделей по патчам) лежат в git. Для пересчёта TP/FP/FN из них нужна разметка MARIDA (`data/MARIDA/patches/*_cl.tif`, как скачать — раздел 2). Без разметки `run_all eval` берёт числа из `reports/case_detector/metrics.json` и записывает его sha256. Полный прогон детекторов заново делает `detector_compare.py` по MARIDA.
