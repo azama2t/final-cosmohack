@@ -80,6 +80,11 @@ export function notCheckedLabel(p: any): string {
 
 /** «Что это: …» without the prefix — the class of the zone (§40 п.2: the first large line of the card) */
 export function whatLabel(p: any): string {
+  // jury_s44 п.4: «недостаточно данных» answers «is it pollution?» first, then the reason
+  if (status4(p) === 'insufficient_data') {
+    const f = flaggedLabel(p);
+    return `загрязнение не подтверждено — недостаточно признаков${f ? ` (${f})` : ''}`;
+  }
   const w = strip(str(p.classification?.what_label), 'Что это:');
   if (w) return w;
   const st = status4(p);
@@ -119,3 +124,8 @@ export const LEGEND_CLASSES: { k: string; t: string }[] = [
   { k: 'insuf', t: 'не определено (признаки ложного срабатывания / ветер)' },
   { k: 'none', t: 'объектов нет' },
 ];
+
+/** jury_s44 п.5: short decoding right next to the class label */
+export function classGloss(p: any): string | null {
+  return status4(p) === 'detected' ? 'MARIDA Marine Debris = любой плавающий материал; состав по снимку не различается' : null;
+}

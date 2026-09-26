@@ -12,6 +12,7 @@ import PairsDrawer from './PairsDrawer';
 import SceneZoneCard, { zoneTitle, type SceneZoneDetail, type SceneZoneProps } from './SceneZoneCard';
 import { SZ_COLORS, szKey, isFind, geomCenter } from './CaseMap';
 import MetricsPanel from './MetricsPanel';
+import DefenseExamples from './DefenseExamples';
 import { plural, dateRu, eventRu, label, missionShort, num, profileRu, scopeRu, sourceShort } from './fmt';
 import { estLine, estTxt, RES_CAPTION, RES_CAPTION_LIST, RES_CONTEXT, RES_NOTE, researchEst } from './estimate';
 import { shortName } from '../lib/data';
@@ -231,6 +232,9 @@ export default function CaseApp() {
     driftPaths().then(setDPaths);
   }, []);
   const selDriftPath = selSz && dPaths ? dPaths.get(driftKey(selSz.properties as any)) ?? null : null;
+  /** jury_s44 п.2–3: which snapshots of the list have a published drift forecast */
+  const nDriftScenes = useMemo(() => (dPaths ? (szScenes.data?.scenes ?? []).filter((x) => dPaths.has(driftKey(x as any))).length : 0), [dPaths, szScenes.data]);
+  const hasDrift = useCallback((x: { region?: string; datetime?: string | null } | null | undefined) => !!(x && dPaths?.has(driftKey(x))), [dPaths]);
   const stopDrift = useCallback(() => {
     closeDrift();
     setDrift(null);
@@ -669,7 +673,7 @@ export default function CaseApp() {
       ...(layer === 'zones' ? zP : layer === 'pairs' ? pP : layer === 'scene_zones' ? szP : { ...oP, geometry: 'line' }),
     });
   const exportRows: [string, string, number | undefined][] = [
-    ['scene_zones', 'Спутниковые зоны', szones.err ? undefined : szones.data?.count],
+    ['scene_zones', `Спутниковые зоны (все статусы; из них находок ${szones.data ? nFinds.n : '—'})`, szones.err ? undefined : szones.data?.count],
     ['observations', 'Полевые измерения', obs.data?.count],
     ['zones', 'Полосы обследования (поле ↔ снимок)', zones.data?.count],
     ['pairs', q.bbox && !q.source ? 'Пары снимок ↔ поле (все: рамка района к парам не применяется)' : 'Пары снимок ↔ поле', pairs.data?.count],
@@ -839,7 +843,7 @@ export default function CaseApp() {
 
         <div className="left-body" data-testid="zone-list">
           {!curScene ? (
-            <SceneList rows={sceneRows} loading={!szones.data && !szones.err} err={szones.err} onPick={openScene} filtered={!isDefault(q)} fieldArea={!!q.source} />
+            <SceneList rows={sceneRows} loading={!szones.data && !szones.err} err={szones.err} onPick={openScene} filtered={!isDefault(q)} fieldArea={!!q.source} drift={hasDrift} />
           ) : (
             <SceneZones
               s={szScene}
@@ -850,6 +854,7 @@ export default function CaseApp() {
               onClose={closeScene}
               layers={q.layers}
               onLayer={setLayer}
+              drift={hasDrift(szScene ?? (selSz?.properties as any))}
             />
           )}
         </div>
@@ -1160,6 +1165,13 @@ export default function CaseApp() {
                   />
                 ) : (
                   <div data-testid="metrics-wrap">
+                    <DefenseExamples
+                      onOpen={(e) => {
+                        setPanel(null);
+                        if (e.zone_id) openZone(e.zone_id);
+                        else openScene(e.scene_key);
+                      }}
+                    />
                     <MetricsPanel m={metrics.data} err={metrics.err} />
                   </div>
                 )}
@@ -1170,7 +1182,10 @@ export default function CaseApp() {
         {drift && (
           <div className="c-drift-wrap" data-testid="drift-wrap">
             <div className="c-drift-tag">
-              <b>Прогноз дрейфа</b> · эксперимент (OpenDrift: течения + ветер), не наблюдение · кольца — частицы, белые точки — старт
+              <b>Прогноз дрейфа</b> · эксперимент (OpenDrift: течения + ветер), не наблюдение · кольца — частицы, белые точки — старт ·{' '}
+              <span data-testid="drift-horizon">
+                горизонт {drift.hours?.length ? drift.hours[drift.hours.length - 1] : 72} ч, шаг расчёта {(drift.forcing as any)?.output_step_h ?? 1} ч
+              </span>
             </div>
             <DriftPlayer drift={drift} onRender={renderDrift} flow={[]} autoplay />
           </div>
@@ -1194,6 +1209,7 @@ export default function CaseApp() {
             onDrift={selDriftPath ? toggleDrift : null}
             driftOn={!!drift}
             driftCheck={checkLine(driftSum)}
+            driftScenes={nDriftScenes}
             onStudio={() => {
               setStudio(true);
               setQ((x) => ({ ...x, layers: { ...x.layers, scenes: true } }));
@@ -1324,7 +1340,7 @@ function cloudTxt(s: SzScene): string {
   return 'облачность —';
 }
 
-function SceneRowBtn({ r, onPick }: { r: SceneRow; onPick: (k: string) => void }) {
+function SceneRowBtn({ r, onPick, drift }: { r: SceneRow; onPick: (k: string) => void; drift?: boolean }) {
   const s = r.s;
   const nIns = r.zones.filter((f) => szKey(f.properties) === 'insufficient_data').length;
   return (
@@ -1335,7 +1351,14 @@ function SceneRowBtn({ r, onPick }: { r: SceneRow; onPick: (k: string) => void }
       data-scene={s.scene_key}
       title={`${s.region_name ?? ''} · Sentinel-2 ${dateRu(s.datetime)}${s.wind10m_ms !== null && s.wind10m_ms !== undefined ? ` · ветер ${num(s.wind10m_ms, 1)} м/с (ERA5)` : ''}`}
     >
-      <span className="ri-name">{sceneName(s)}</span>
+      <span className="ri-name">
+        {sceneName(s)}
+        {drift && (
+          <span className="c-drift-badge" data-testid="scene-drift-badge" title="Для этого снимка есть прогноз дрейфа 24–72 ч (эксперимент)">
+            дрейф
+          </span>
+        )}
+      </span>
       <span className={`ri-val ${r.finds ? 'c-ri-finds' : 'faint'}`}>
         {r.group === 'noeval'
           ? 'не оценивается'
@@ -1352,7 +1375,7 @@ function SceneRowBtn({ r, onPick }: { r: SceneRow; onPick: (k: string) => void }
   );
 }
 
-function SceneList({ rows, loading, err, onPick, filtered, fieldArea }: { rows: SceneRows; loading: boolean; err: string | null; onPick: (k: string) => void; filtered: boolean; fieldArea?: boolean }) {
+function SceneList({ rows, loading, err, onPick, filtered, fieldArea, drift }: { rows: SceneRows; loading: boolean; err: string | null; onPick: (k: string) => void; filtered: boolean; fieldArea?: boolean; drift?: (s: SzScene) => boolean }) {
   const [openNo, setOpenNo] = useState(false);
   const [openBad, setOpenBad] = useState(false);
   if (err)
@@ -1381,20 +1404,20 @@ function SceneList({ rows, loading, err, onPick, filtered, fieldArea }: { rows: 
         </div>
       )}
       {rows.finds.map((r) => (
-        <SceneRowBtn key={r.s.scene_key} r={r} onPick={onPick} />
+        <SceneRowBtn key={r.s.scene_key} r={r} onPick={onPick} drift={!!drift?.(r.s)} />
       ))}
       {rows.nofinds.length > 0 && (
         <button className="reg-fold" onClick={() => setOpenNo((v) => !v)} aria-expanded={openNo} data-testid="fold-nofind">
           <span>{openNo ? '▾' : '▸'}</span> Без находок ({rows.nofinds.length})
         </button>
       )}
-      {openNo && rows.nofinds.map((r) => <SceneRowBtn key={r.s.scene_key} r={r} onPick={onPick} />)}
+      {openNo && rows.nofinds.map((r) => <SceneRowBtn key={r.s.scene_key} r={r} onPick={onPick} drift={!!drift?.(r.s)} />)}
       {rows.noeval.length > 0 && (
         <button className="reg-fold" onClick={() => setOpenBad((v) => !v)} aria-expanded={openBad} data-testid="fold-noeval" title="Низкое солнце или слабый сигнал: детектор на таких снимках не оценивается, зон нет">
           <span>{openBad ? '▾' : '▸'}</span> Детектор не оценивается ({rows.noeval.length})
         </button>
       )}
-      {openBad && rows.noeval.map((r) => <SceneRowBtn key={r.s.scene_key} r={r} onPick={onPick} />)}
+      {openBad && rows.noeval.map((r) => <SceneRowBtn key={r.s.scene_key} r={r} onPick={onPick} drift={!!drift?.(r.s)} />)}
     </div>
   );
 }
@@ -1408,7 +1431,10 @@ function SceneZones({
   onClose,
   layers,
   onLayer,
+  drift,
 }: {
+  /** jury_s44 п.2: the snapshot has a published drift forecast */
+  drift?: boolean;
   s: SzScene | null;
   sceneKey: string;
   zones: { f: Feat<SceneZoneProps>; n: number }[];
@@ -1423,6 +1449,14 @@ function SceneZones({
   const finds = numbered.filter((z) => isFind(z.f.properties)).length;
   const est0 = numbered.map((z) => researchEst(z.f.properties)).find((e) => !!e) ?? null;
   const anyEst = !!est0;
+  // INBOX §46 п.1: by default only the finds (status «обнаружено»); the rest behind «показать все N зон»
+  const isDet = (p: any) => (p.status ?? p.detection_status) === 'detected';
+  const nDet = numbered.filter((z) => isDet(z.f.properties)).length;
+  const [showAll, setShowAll] = useState(false);
+  useEffect(() => setShowAll(false), [sceneKey]);
+  const selHidden = !!sel && numbered.some((z) => z.f.id === sel && !isDet(z.f.properties));
+  const all = showAll || nDet === 0 || selHidden;
+  const shown = all ? numbered : numbered.filter((z) => isDet(z.f.properties));
   return (
     <div data-testid="scene-zones">
       <div className="c-scene-head">
@@ -1440,6 +1474,11 @@ function SceneZones({
         <div className="c-scene-s">
           {plural(finds, 'находка', 'находки', 'находок')} · {plural(numbered.length, 'зона', 'зоны', 'зон')} детектора
         </div>
+        {drift && (
+          <div className="c-scene-s" data-testid="scene-drift">
+            <span className="c-drift-badge">дрейф</span> прогноз 24–72 ч (эксперимент) — кнопка в карточке зоны
+          </div>
+        )}
         {whole && (
           <div className="c-scene-s faint" data-testid="scene-whole">
             вся вырезка: {whole.properties.detection_label}
@@ -1455,7 +1494,20 @@ function SceneZones({
         </div>
       </div>
       {!numbered.length && <div className="empty">{whole ? 'Зон детектора на этом снимке нет' : 'Нет зон под выбранные фильтры'}</div>}
-      {numbered.map(({ f, n }) => {
+      {numbered.length > 0 && nDet < numbered.length && (
+        <div className="c-zshow" data-testid="sz-show">
+          <span className="faint" data-testid="sz-shown">
+            показано {plural(shown.length, 'зона', 'зоны', 'зон')} из {numbered.length}
+            {all ? '' : ` — только находки`}
+          </span>
+          {nDet > 0 && !selHidden && (
+            <button className="link" onClick={() => setShowAll((v) => !v)} data-testid="sz-show-all" aria-pressed={showAll}>
+              {showAll ? `только находки (${nDet})` : `показать все ${numbered.length} зон (в т.ч. недостаточно данных)`}
+            </button>
+          )}
+        </div>
+      )}
+      {shown.map(({ f, n }) => {
         const p = f.properties;
         const est = researchEst(p);
         return (
@@ -1477,6 +1529,7 @@ function SceneZones({
               </span>
               <span className="c-zi-cls" data-testid="sz-item-class">
                 {classShort(p)}
+                {drift && <span className="c-drift-badge" data-testid="sz-drift-badge">дрейф</span>}
               </span>
             </span>
           </button>

@@ -1917,3 +1917,81 @@ a.c-head-r.c-head-link {
 .c-legend:not(.min) {
   min-width: 300px;
 }
+/* jury_s44 п.2/п.5/п.10 */
+.c-drift-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 5px;
+  border: 1px dashed #b197fc;
+  border-radius: 4px;
+  color: #d0bfff;
+  font-size: 10.5px;
+  line-height: 15px;
+  font-weight: 500;
+  vertical-align: 1px;
+}
+.sz-what-gloss {
+  font-size: 12px;
+  font-weight: 400;
+  margin-top: 2px;
+}
+.c-def {
+  margin-bottom: 14px;
+}
+.c-def-h {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+.c-def-note {
+  white-space: normal !important;
+  margin-bottom: 8px;
+}
+.c-def-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 10px;
+}
+.c-def-card {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.12));
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+}
+.c-def-card:hover {
+  border-color: #ff8c42;
+}
+.c-def-imgs {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 4px;
+}
+.c-def-imgs img {
+  width: 100%;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 4px;
+  background: #0b1a2a;
+}
+.c-def-t {
+  color: var(--text-2);
+}
+.c-def-r {
+  line-height: 1.35;
+}
+/* INBOX §46 п.1: finds first, the rest behind a toggle */
+.c-zshow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  align-items: baseline;
+  padding: 6px 16px;
+  font-size: 12px;
+}

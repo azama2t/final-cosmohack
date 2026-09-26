@@ -85,6 +85,16 @@ def run(base: str, W: int, H: int, pw, api: dict) -> dict:
         "item0": tid("sz-item").first.inner_text().replace("\n", " | ") if tid("sz-item").count() else None,
         "caption": tid("est-caption").inner_text() if tid("est-caption").count() else None,
     }
+    # §46 п.1: finds only by default; «показать все N зон» shows every zone of the snapshot (= numbers on the map)
+    res["scene"]["shown_caption"] = tid("sz-shown").inner_text() if tid("sz-shown").count() else None
+    if tid("sz-show-all").count():
+        n_def = tid("sz-item").count()
+        tid("sz-show-all").click()
+        pg.wait_for_timeout(500)
+        n_all = tid("sz-item").count()
+        res["scene"]["show_all"] = {"default": n_def, "all": n_all, "all_eq_scene_zones": n_all == len(sz)}
+        tid("sz-show-all").click()
+        pg.wait_for_timeout(500)
     # §40 п.2: every zone row carries a short class + confirmation label
     cls = [tid("sz-item-class").nth(i).inner_text().strip() for i in range(tid("sz-item-class").count())]
     res["scene"]["row_classes"] = sorted(set(cls))

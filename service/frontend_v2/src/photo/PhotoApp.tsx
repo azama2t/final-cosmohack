@@ -397,8 +397,8 @@ export default function PhotoApp() {
                 </button>
               )}
             </span>
+            <span className="faint ph-hint" data-testid="photo-thr-why">По умолчанию {f2(res?.threshold_default ?? sm?.threshold ?? meta?.model?.threshold)} — выбран на отложенных кадрах val по ошибке числа предметов.</span>
             <input type="range" min={0.05} max={0.95} step={0.05} value={t} onChange={(e) => setThr(Number(e.target.value))} data-testid="photo-thr" />
-            <span className="faint ph-hint">По умолчанию {f2(res?.threshold_default ?? sm?.threshold ?? meta?.model?.threshold)} — выбран на отложенных кадрах val по ошибке числа предметов.</span>
           </label>
           <div className="ph-row">
             <span>Площадь кадра — м² или GSD (размер пикселя на земле, м)</span>

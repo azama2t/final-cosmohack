@@ -7,7 +7,7 @@ import { API_BASE, type Feat, type FC, type Meta } from './api3';
 import { dateRu, dateTimeRu, num, pct } from './fmt';
 import { geomCenter, szKey, SZ_COLORS } from './CaseMap';
 import { cap, RES_CAPTION, RES_NOTE, researchEst, scenarioLine } from './estimate';
-import { confirmation, excludedLabel, flaggedLabel, notCheckedLabel, quantityLine, statusLabel, whatLabel } from './zoneinfo';
+import { classGloss, confirmation, excludedLabel, flaggedLabel, notCheckedLabel, quantityLine, statusLabel, whatLabel } from './zoneinfo';
 
 /** §33: the source of every number next to it */
 function Src({ k }: { k: 'image' | 'field' | 'photo' | 'research' | 'none' | 'model' | 'era5' | 'mask' }) {
@@ -146,7 +146,10 @@ export default function SceneZoneCard({
   onDrift,
   driftOn,
   driftCheck,
+  driftScenes,
 }: {
+  /** jury_s44 п.3: how many snapshots of the layer have a forecast (shown when this one has none) */
+  driftScenes?: number;
   /** §44 п.3: drift forecast of the snapshot (null = no published run for this date) */
   onDrift?: (() => void) | null;
   driftOn?: boolean;
@@ -195,6 +198,11 @@ export default function SceneZoneCard({
             <i className="sz-cls-sw" style={{ background: SZ_COLOR[szKey(p)] ?? '#868e96' }} aria-hidden />
             <span className="faint">Что это:</span> <b>{whatLabel(p)}</b>
           </div>
+          {classGloss(p) && (
+            <div className="sz-what-gloss faint" data-testid="sz-class-gloss">
+              {classGloss(p)}
+            </div>
+          )}
           <div className="c-line sz-qstatus" data-testid="sz-plain-what">
             <span className="faint">Статус:</span> <b data-testid="sz-status">{statusLabel(p)}</b> <Src k="model" />
           </div>
@@ -245,6 +253,14 @@ export default function SceneZoneCard({
               <b>{p.classification?.composition ?? 'Состав не определён'}</b> <Src k="none" />
             </div>
         </div>
+        {!onDrift && !!driftScenes && (
+          <div className="sec sz-drift" data-testid="sz-drift-none">
+            <div className="c-line tiny faint">
+              Прогноз дрейфа 24–72 ч (эксперимент) есть для {driftScenes} {driftScenes % 10 === 1 && driftScenes % 100 !== 11 ? 'снимка' : 'снимков'} (метка «дрейф» в списке); для этого снимка
+              расчёта нет.
+            </div>
+          </div>
+        )}
         {onDrift && (
           <div className="sec sz-drift" data-testid="sz-drift">
             <button className={`btn sm sz-drift-btn ${driftOn ? 'on' : ''}`} onClick={onDrift} data-testid="sz-drift-btn" aria-pressed={!!driftOn}>
