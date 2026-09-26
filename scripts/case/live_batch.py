@@ -519,7 +519,7 @@ def build_index(run: dict | None = None) -> dict:
     cat = build_catalog(scenes)
     win = max([30] + [int(x.get("days") or 0) for x in runs if x.get("finished") and x.get("trigger") != "test"])
     oldest = max([e.get("age_days") or 0 for e in cat["scenes"]] + [0])  # окно расширено (идёт или завершено)
-    win = max(win, oldest)
+    win = max(win, oldest - 2)  # 2-day tolerance: a 180-day search returns a scene 181 days old (UTC boundary)
     win = next((k for k in sorted(WINDOW_LABELS) if win <= k), win)
     cut = (dt.date.today() - dt.timedelta(days=30)).isoformat()
     s30 = [s for s in scenes if str(s.get("date", "")) >= cut and not s.get("error")]

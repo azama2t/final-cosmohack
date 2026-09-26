@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-26T21:04:49Z",
+ "generated": "2026-09-26T21:11:49Z",
  "model": {
   "weights": "weights/lgbm",
   "file": "weights/lgbm/model.txt",
@@ -20,56 +20,50 @@
  "last_success": "2026-09-26T20:47:23Z",
  "last_success_trigger": "§58: 6 мес, продолжение 4 (после паузы по диску)",
  "search_window": {
-  "days": 365,
-  "label": "поиск за: год"
+  "days": 180,
+  "label": "поиск за: 6 мес"
  },
  "funnel": {
-  "window_days": 365,
-  "window_label": "поиск за: год",
-  "complete": true,
-  "status_note": null,
-  "found": 1081,
-  "downloaded": 1081,
+  "window_days": 180,
+  "window_label": "поиск за: 6 мес",
+  "complete": false,
+  "status_note": "архив обработан не полностью: 271 пригодных снимков не обработаны, 0 найденных не проверены по облачности (обработка на CPU ~1,5–2 мин на снимок); показан уже полученный результат, продолжение — live_batch.py --reuse-screen",
+  "found": 1077,
+  "downloaded": 1077,
   "found_note": "найдено = все снимки Sentinel-2 L2A в каталоге STAC (Earth Search) по центру района, одна сцена на дату",
   "passed_quality": 476,
-  "processed": 196,
+  "processed": 202,
   "with_finds": 10,
-  "zones": 475,
+  "zones": 477,
   "finds": 19,
   "not_in_pc": 4,
   "errors": 0,
-  "pending": 0,
+  "pending": 271,
   "not_checked": 0,
-  "rejected_quality": 604,
-  "excluded": 885,
-  "no_disk": 277,
+  "rejected_quality": 600,
+  "excluded": 604,
+  "not_processed": 271,
+  "no_disk": 271,
   "excluded_reasons": {
-   "облачность вырезки > 40 %": 341,
-   "остановлено: нет места на диске": 277,
-   "вырезка на краю тайла (мало валидных пикселей)": 263,
+   "облачность вырезки > 40 %": 339,
+   "вырезка на краю тайла (мало валидных пикселей)": 261,
    "пикселей ещё нет в Planetary Computer": 4
   },
   "zone_status": {
    "detected": 19,
-   "not_detected": 115,
-   "insufficient_data": 490
+   "not_detected": 118,
+   "insufficient_data": 494
   },
   "scenes_by_result": {
    "with_finds": 10,
-   "not_detected": 116,
-   "insufficient_data": 70
+   "not_detected": 119,
+   "insufficient_data": 73
   },
   "coverage": [
    {
     "region": "accra",
     "region_name": "Аккра (лагуна Корле, порт Тема)",
     "months": {
-     "2026-03": {
-      "found": 1,
-      "processed": 0,
-      "pending": 0,
-      "excluded": 1
-     },
      "2026-04": {
       "found": 8,
       "processed": 0,
@@ -132,9 +126,9 @@
      },
      "2026-07": {
       "found": 7,
-      "processed": 4,
+      "processed": 5,
       "pending": 0,
-      "excluded": 3
+      "excluded": 2
      },
      "2026-08": {
       "found": 7,
@@ -154,12 +148,6 @@
     "region": "cozar_demo",
     "region_name": "Альборанское море (акватория демо Cózar 2024)",
     "months": {
-     "2026-03": {
-      "found": 1,
-      "processed": 0,
-      "pending": 0,
-      "excluded": 1
-     },
      "2026-04": {
       "found": 9,
       "processed": 0,
@@ -180,9 +168,9 @@
      },
      "2026-07": {
       "found": 9,
-      "processed": 5,
+      "processed": 6,
       "pending": 0,
-      "excluded": 4
+      "excluded": 3
      },
      "2026-08": {
       "found": 9,
@@ -390,9 +378,9 @@
      },
      "2026-07": {
       "found": 8,
-      "processed": 4,
+      "processed": 5,
       "pending": 0,
-      "excluded": 4
+      "excluded": 3
      },
      "2026-08": {
       "found": 7,
@@ -744,9 +732,9 @@
      },
      "2026-07": {
       "found": 10,
-      "processed": 5,
+      "processed": 6,
       "pending": 0,
-      "excluded": 5
+      "excluded": 4
      },
      "2026-08": {
       "found": 9,
@@ -766,12 +754,6 @@
     "region": "org_german_bight",
     "region_name": "Германская бухта (акватория CSV организаторов, Gutow 2018)",
     "months": {
-     "2026-03": {
-      "found": 1,
-      "processed": 0,
-      "pending": 0,
-      "excluded": 1
-     },
      "2026-04": {
       "found": 15,
       "processed": 0,
@@ -814,12 +796,6 @@
     "region": "org_north_sea",
     "region_name": "Северное море, 55° с. ш. 6° в. д. (акватория CSV организаторов)",
     "months": {
-     "2026-03": {
-      "found": 1,
-      "processed": 0,
-      "pending": 0,
-      "excluded": 1
-     },
      "2026-04": {
       "found": 9,
       "processed": 0,
@@ -930,9 +906,9 @@
      },
      "2026-07": {
       "found": 14,
-      "processed": 6,
+      "processed": 7,
       "pending": 0,
-      "excluded": 8
+      "excluded": 7
      },
      "2026-08": {
       "found": 15,
@@ -972,9 +948,9 @@
      },
      "2026-07": {
       "found": 9,
-      "processed": 5,
+      "processed": 6,
       "pending": 0,
-      "excluded": 4
+      "excluded": 3
      },
      "2026-08": {
       "found": 9,
@@ -1012,6 +988,7 @@
   "not_checked": 0,
   "rejected_quality": 91,
   "excluded": 95,
+  "not_processed": 0,
   "no_disk": 0,
   "excluded_reasons": {
    "облачность вырезки > 40 %": 60,
@@ -2006,6 +1983,82 @@
    "whole_crop_status": "insufficient_data",
    "zone_status_all": {
     "insufficient_data": 1
+   }
+  },
+  {
+   "key": "fresh-bali-2026-07-15",
+   "kind": "fresh_s2",
+   "region": "bali",
+   "region_name": "Бали (пролив Бадунг)",
+   "date": "2026-07-15",
+   "datetime": "2026-07-15T02:15:31.025000Z",
+   "scene_id": "S2C_MSIL2A_20260715T021531_R003_T50LLR_20260715T063113",
+   "tile": "50LLR",
+   "bounds": [
+    115.235529,
+    -8.943519,
+    115.464512,
+    -8.716301
+   ],
+   "sun_zenith_deg": 44.0,
+   "water_b3_median": 0.0174,
+   "evaluable": true,
+   "low_sun": false,
+   "weak_signal": false,
+   "wind10m_ms": 0.92,
+   "wind_source": "ERA5 через Open-Meteo archive API, час съёмки",
+   "water_km2": 601.735,
+   "det_pixels": 68,
+   "det_area_m2": 6800,
+   "lwd_m2_km2": 11.3,
+   "wind_high": false,
+   "model": {
+    "weights": "weights/lgbm",
+    "file": "weights/lgbm/model.txt",
+    "sha256": "0eeebf43fcccd8c7c07f053b7ec723229d1a3c9b92d12eec1bdb269258c51470",
+    "sha256_short": "0eeebf43fccc",
+    "trained_at": "2026-09-25T01:36:30Z",
+    "threshold": 0.63,
+    "harmonize": "none",
+    "class": "MARIDA Marine Debris (любой плавающий мусор, не только пластик)"
+   },
+   "crop_note": "вырезка вокруг района/сцены, не весь тайл",
+   "selection": "live_batch 2026-09-26T21:03:39Z: crop cloud 0.021 <= 0.40, valid 1.0",
+   "in_observed_area": true,
+   "observed_water_km2": 601.735,
+   "training_scene": null,
+   "rgb_file": "rgb.jpg",
+   "quality_file": "quality.png",
+   "rgb_note": "B4,B3,B2, растяжка 0..p98 по пригодной воде, гамма 1/1.4; EPSG:4326 по bounds",
+   "n_zones": 2,
+   "small_cluster_px": 57,
+   "n_zones_total": 2,
+   "by_status": {
+    "detected": 0,
+    "not_detected": 0,
+    "insufficient_data": 2
+   },
+   "auto_label": "автоматически, не проверено человеком",
+   "human_checked": false,
+   "source": "Sentinel-2 L2A (STAC: Earth Search — поиск, Planetary Computer — пиксели)",
+   "in_case_numbers": false,
+   "processed_at": "2026-09-26T21:05:04Z",
+   "processing_s": 121.8,
+   "timing_s": {
+    "read": 68.4,
+    "detector": 39.8,
+    "zones": 13.6
+   },
+   "crop_cloud_frac": 0.021,
+   "crop_valid_frac": 1.0,
+   "tile_cloud_pct": 25.938874,
+   "stac_item": "S2C_MSIL2A_20260715T021531_R003_T50LLR_20260715T063113",
+   "det_pixels_raw": 68,
+   "det_objects": 44,
+   "n_finds": 0,
+   "whole_crop_status": null,
+   "zone_status_all": {
+    "insufficient_data": 2
    }
   },
   {
@@ -3374,6 +3427,82 @@
    "whole_crop_status": "not_detected",
    "zone_status_all": {
     "not_detected": 1
+   }
+  },
+  {
+   "key": "fresh-cozar_demo-2026-07-13",
+   "kind": "fresh_s2",
+   "region": "cozar_demo",
+   "region_name": "Альборанское море (акватория демо Cózar 2024)",
+   "date": "2026-07-13",
+   "datetime": "2026-07-13T10:46:19.024000Z",
+   "scene_id": "S2B_MSIL2A_20260713T104619_R051_T30SXE_20260713T144304",
+   "tile": "30SXE",
+   "bounds": [
+    -1.75692,
+    35.383396,
+    -1.477257,
+    35.612629
+   ],
+   "sun_zenith_deg": 23.1,
+   "water_b3_median": 0.0504,
+   "evaluable": true,
+   "low_sun": false,
+   "weak_signal": false,
+   "wind10m_ms": 5.41,
+   "wind_source": "ERA5 через Open-Meteo archive API, час съёмки",
+   "water_km2": 150.651,
+   "det_pixels": 0,
+   "det_area_m2": 0,
+   "lwd_m2_km2": null,
+   "wind_high": true,
+   "model": {
+    "weights": "weights/lgbm",
+    "file": "weights/lgbm/model.txt",
+    "sha256": "0eeebf43fcccd8c7c07f053b7ec723229d1a3c9b92d12eec1bdb269258c51470",
+    "sha256_short": "0eeebf43fccc",
+    "trained_at": "2026-09-25T01:36:30Z",
+    "threshold": 0.63,
+    "harmonize": "none",
+    "class": "MARIDA Marine Debris (любой плавающий мусор, не только пластик)"
+   },
+   "crop_note": "вырезка вокруг района/сцены, не весь тайл",
+   "selection": "live_batch 2026-09-26T21:05:10Z: crop cloud 0.0 <= 0.40, valid 1.0",
+   "in_observed_area": false,
+   "observed_water_km2": 0.0,
+   "training_scene": null,
+   "rgb_file": "rgb.jpg",
+   "quality_file": "quality.png",
+   "rgb_note": "B4,B3,B2, растяжка 0..p98 по пригодной воде, гамма 1/1.4; EPSG:4326 по bounds",
+   "n_zones": 0,
+   "small_cluster_px": 0,
+   "n_zones_total": 1,
+   "by_status": {
+    "detected": 0,
+    "not_detected": 0,
+    "insufficient_data": 1
+   },
+   "auto_label": "автоматически, не проверено человеком",
+   "human_checked": false,
+   "source": "Sentinel-2 L2A (STAC: Earth Search — поиск, Planetary Computer — пиксели)",
+   "in_case_numbers": false,
+   "processed_at": "2026-09-26T21:06:18Z",
+   "processing_s": 89.8,
+   "timing_s": {
+    "read": 41.4,
+    "detector": 41.8,
+    "zones": 6.6
+   },
+   "crop_cloud_frac": 0.0,
+   "crop_valid_frac": 1.0,
+   "tile_cloud_pct": 0.067113,
+   "stac_item": "S2B_MSIL2A_20260713T104619_R051_T30SXE_20260713T144304",
+   "det_pixels_raw": 0,
+   "det_objects": 0,
+   "n_finds": 0,
+   "whole_crop_status": "insufficient_data",
+   "zone_status_all": {
+    "insufficient_data": 1
    }
   },
   {
@@ -6416,6 +6545,82 @@
    "stac_item": "S2C_MSIL2A_20260626T152651_R025_T18QYF_20260626T214210",
    "det_pixels_raw": 2,
    "det_objects": 2,
+   "n_finds": 0,
+   "whole_crop_status": "not_detected",
+   "zone_status_all": {
+    "not_detected": 1
+   }
+  },
+  {
+   "key": "fresh-haiti-2026-07-11",
+   "kind": "fresh_s2",
+   "region": "haiti",
+   "region_name": "Залив Порт-о-Пренс (Гаити)",
+   "date": "2026-07-11",
+   "datetime": "2026-07-11T15:26:49.024000Z",
+   "scene_id": "S2B_MSIL2A_20260711T152649_R025_T18QYF_20260711T203304",
+   "tile": "18QYF",
+   "bounds": [
+    -72.670518,
+    18.605186,
+    -72.429578,
+    18.834759
+   ],
+   "sun_zenith_deg": 21.0,
+   "water_b3_median": 0.0307,
+   "evaluable": true,
+   "low_sun": false,
+   "weak_signal": false,
+   "wind10m_ms": 1.03,
+   "wind_source": "ERA5 через Open-Meteo archive API, час съёмки",
+   "water_km2": 387.26,
+   "det_pixels": 0,
+   "det_area_m2": 0,
+   "lwd_m2_km2": 0.0,
+   "wind_high": false,
+   "model": {
+    "weights": "weights/lgbm",
+    "file": "weights/lgbm/model.txt",
+    "sha256": "0eeebf43fcccd8c7c07f053b7ec723229d1a3c9b92d12eec1bdb269258c51470",
+    "sha256_short": "0eeebf43fccc",
+    "trained_at": "2026-09-25T01:36:30Z",
+    "threshold": 0.63,
+    "harmonize": "none",
+    "class": "MARIDA Marine Debris (любой плавающий мусор, не только пластик)"
+   },
+   "crop_note": "вырезка вокруг района/сцены, не весь тайл",
+   "selection": "live_batch 2026-09-26T21:06:18Z: crop cloud 0.247 <= 0.40, valid 1.0",
+   "in_observed_area": true,
+   "observed_water_km2": 387.26,
+   "training_scene": null,
+   "rgb_file": "rgb.jpg",
+   "quality_file": "quality.png",
+   "rgb_note": "B4,B3,B2, растяжка 0..p98 по пригодной воде, гамма 1/1.4; EPSG:4326 по bounds",
+   "n_zones": 0,
+   "small_cluster_px": 0,
+   "n_zones_total": 1,
+   "by_status": {
+    "detected": 0,
+    "not_detected": 1,
+    "insufficient_data": 0
+   },
+   "auto_label": "автоматически, не проверено человеком",
+   "human_checked": false,
+   "source": "Sentinel-2 L2A (STAC: Earth Search — поиск, Planetary Computer — пиксели)",
+   "in_case_numbers": false,
+   "processed_at": "2026-09-26T21:07:33Z",
+   "processing_s": 86.8,
+   "timing_s": {
+    "read": 39.4,
+    "detector": 38.3,
+    "zones": 9.1
+   },
+   "crop_cloud_frac": 0.247,
+   "crop_valid_frac": 1.0,
+   "tile_cloud_pct": 23.148142,
+   "stac_item": "S2B_MSIL2A_20260711T152649_R025_T18QYF_20260711T203304",
+   "det_pixels_raw": 0,
+   "det_objects": 0,
    "n_finds": 0,
    "whole_crop_status": "not_detected",
    "zone_status_all": {
@@ -10835,6 +11040,82 @@
    }
   },
   {
+   "key": "fresh-nile-2026-07-14",
+   "kind": "fresh_s2",
+   "region": "nile",
+   "region_name": "Дельта Нила (устье Розетты)",
+   "date": "2026-07-14",
+   "datetime": "2026-07-14T08:35:59.024000Z",
+   "scene_id": "S2B_MSIL2A_20260714T083559_R064_T36RTV_20260714T124050",
+   "tile": "36RTV",
+   "bounds": [
+    30.244659,
+    31.369508,
+    30.514729,
+    31.600418
+   ],
+   "sun_zenith_deg": 21.9,
+   "water_b3_median": 0.0695,
+   "evaluable": true,
+   "low_sun": false,
+   "weak_signal": false,
+   "wind10m_ms": 5.31,
+   "wind_source": "ERA5 через Open-Meteo archive API, час съёмки",
+   "water_km2": 8.937,
+   "det_pixels": 0,
+   "det_area_m2": 0,
+   "lwd_m2_km2": null,
+   "wind_high": true,
+   "model": {
+    "weights": "weights/lgbm",
+    "file": "weights/lgbm/model.txt",
+    "sha256": "0eeebf43fcccd8c7c07f053b7ec723229d1a3c9b92d12eec1bdb269258c51470",
+    "sha256_short": "0eeebf43fccc",
+    "trained_at": "2026-09-25T01:36:30Z",
+    "threshold": 0.63,
+    "harmonize": "none",
+    "class": "MARIDA Marine Debris (любой плавающий мусор, не только пластик)"
+   },
+   "crop_note": "вырезка вокруг района/сцены, не весь тайл",
+   "selection": "live_batch 2026-09-26T21:04:55Z: crop cloud 0.002 <= 0.40, valid 1.0",
+   "in_observed_area": false,
+   "observed_water_km2": 0.0,
+   "training_scene": null,
+   "rgb_file": "rgb.jpg",
+   "quality_file": "quality.png",
+   "rgb_note": "B4,B3,B2, растяжка 0..p98 по пригодной воде, гамма 1/1.4; EPSG:4326 по bounds",
+   "n_zones": 0,
+   "small_cluster_px": 0,
+   "n_zones_total": 1,
+   "by_status": {
+    "detected": 0,
+    "not_detected": 0,
+    "insufficient_data": 1
+   },
+   "auto_label": "автоматически, не проверено человеком",
+   "human_checked": false,
+   "source": "Sentinel-2 L2A (STAC: Earth Search — поиск, Planetary Computer — пиксели)",
+   "in_case_numbers": false,
+   "processed_at": "2026-09-26T21:06:06Z",
+   "processing_s": 97.9,
+   "timing_s": {
+    "read": 51.2,
+    "detector": 36.6,
+    "zones": 10.2
+   },
+   "crop_cloud_frac": 0.002,
+   "crop_valid_frac": 1.0,
+   "tile_cloud_pct": 3.243427,
+   "stac_item": "S2B_MSIL2A_20260714T083559_R064_T36RTV_20260714T124050",
+   "det_pixels_raw": 0,
+   "det_objects": 0,
+   "n_finds": 0,
+   "whole_crop_status": "insufficient_data",
+   "zone_status_all": {
+    "insufficient_data": 1
+   }
+  },
+  {
    "key": "fresh-nile-2026-07-19",
    "kind": "fresh_s2",
    "region": "nile",
@@ -13482,6 +13763,82 @@
    }
   },
   {
+   "key": "fresh-scotland-2026-07-10",
+   "kind": "fresh_s2",
+   "region": "scotland",
+   "region_name": "Шотландия (Ферт-оф-Форт)",
+   "date": "2026-07-10",
+   "datetime": "2026-07-10T11:33:21.025000Z",
+   "scene_id": "S2C_MSIL2A_20260710T113321_R080_T30VWH_20260710T150914",
+   "tile": "30VWH",
+   "bounds": [
+    -2.663014,
+    56.066432,
+    -2.255854,
+    56.29352
+   ],
+   "sun_zenith_deg": 34.7,
+   "water_b3_median": 0.0072,
+   "evaluable": true,
+   "low_sun": false,
+   "weak_signal": false,
+   "wind10m_ms": 3.58,
+   "wind_source": "ERA5 через Open-Meteo archive API, час съёмки",
+   "water_km2": 526.514,
+   "det_pixels": 0,
+   "det_area_m2": 0,
+   "lwd_m2_km2": 0.0,
+   "wind_high": false,
+   "model": {
+    "weights": "weights/lgbm",
+    "file": "weights/lgbm/model.txt",
+    "sha256": "0eeebf43fcccd8c7c07f053b7ec723229d1a3c9b92d12eec1bdb269258c51470",
+    "sha256_short": "0eeebf43fccc",
+    "trained_at": "2026-09-25T01:36:30Z",
+    "threshold": 0.63,
+    "harmonize": "none",
+    "class": "MARIDA Marine Debris (любой плавающий мусор, не только пластик)"
+   },
+   "crop_note": "вырезка вокруг района/сцены, не весь тайл",
+   "selection": "live_batch 2026-09-26T21:08:07Z: crop cloud 0.083 <= 0.40, valid 1.0",
+   "in_observed_area": true,
+   "observed_water_km2": 526.514,
+   "training_scene": null,
+   "rgb_file": "rgb.jpg",
+   "quality_file": "quality.png",
+   "rgb_note": "B4,B3,B2, растяжка 0..p98 по пригодной воде, гамма 1/1.4; EPSG:4326 по bounds",
+   "n_zones": 0,
+   "small_cluster_px": 0,
+   "n_zones_total": 1,
+   "by_status": {
+    "detected": 0,
+    "not_detected": 1,
+    "insufficient_data": 0
+   },
+   "auto_label": "автоматически, не проверено человеком",
+   "human_checked": false,
+   "source": "Sentinel-2 L2A (STAC: Earth Search — поиск, Planetary Computer — пиксели)",
+   "in_case_numbers": false,
+   "processed_at": "2026-09-26T21:09:15Z",
+   "processing_s": 102.1,
+   "timing_s": {
+    "read": 65.8,
+    "detector": 29.9,
+    "zones": 6.4
+   },
+   "crop_cloud_frac": 0.083,
+   "crop_valid_frac": 1.0,
+   "tile_cloud_pct": 25.329348,
+   "stac_item": "S2C_MSIL2A_20260710T113321_R080_T30VWH_20260710T150914",
+   "det_pixels_raw": 0,
+   "det_objects": 0,
+   "n_finds": 0,
+   "whole_crop_status": "not_detected",
+   "zone_status_all": {
+    "not_detected": 1
+   }
+  },
+  {
    "key": "fresh-scotland-2026-07-17",
    "kind": "fresh_s2",
    "region": "scotland",
@@ -14611,6 +14968,82 @@
    "crop_valid_frac": 1.0,
    "tile_cloud_pct": 0.510705,
    "stac_item": "S2A_MSIL2A_20260625T100051_R122_T33TTG_20260625T164457",
+   "det_pixels_raw": 0,
+   "det_objects": 0,
+   "n_finds": 0,
+   "whole_crop_status": "not_detected",
+   "zone_status_all": {
+    "not_detected": 1
+   }
+  },
+  {
+   "key": "fresh-tiber-2026-07-13",
+   "kind": "fresh_s2",
+   "region": "tiber",
+   "region_name": "Средиземное море: устье Тибра (Рим, Остия)",
+   "date": "2026-07-13",
+   "datetime": "2026-07-13T10:00:31.025000Z",
+   "scene_id": "S2C_MSIL2A_20260713T100031_R122_T33TTG_20260713T144221",
+   "tile": "33TTG",
+   "bounds": [
+    12.064181,
+    41.603774,
+    12.375052,
+    41.836157
+   ],
+   "sun_zenith_deg": 25.4,
+   "water_b3_median": 0.0343,
+   "evaluable": true,
+   "low_sun": false,
+   "weak_signal": false,
+   "wind10m_ms": 4.44,
+   "wind_source": "ERA5 через Open-Meteo archive API, час съёмки",
+   "water_km2": 467.931,
+   "det_pixels": 0,
+   "det_area_m2": 0,
+   "lwd_m2_km2": 0.0,
+   "wind_high": false,
+   "model": {
+    "weights": "weights/lgbm",
+    "file": "weights/lgbm/model.txt",
+    "sha256": "0eeebf43fcccd8c7c07f053b7ec723229d1a3c9b92d12eec1bdb269258c51470",
+    "sha256_short": "0eeebf43fccc",
+    "trained_at": "2026-09-25T01:36:30Z",
+    "threshold": 0.63,
+    "harmonize": "none",
+    "class": "MARIDA Marine Debris (любой плавающий мусор, не только пластик)"
+   },
+   "crop_note": "вырезка вокруг района/сцены, не весь тайл",
+   "selection": "live_batch 2026-09-26T21:05:16Z: crop cloud 0.0 <= 0.40, valid 1.0",
+   "in_observed_area": true,
+   "observed_water_km2": 467.931,
+   "training_scene": null,
+   "rgb_file": "rgb.jpg",
+   "quality_file": "quality.png",
+   "rgb_note": "B4,B3,B2, растяжка 0..p98 по пригодной воде, гамма 1/1.4; EPSG:4326 по bounds",
+   "n_zones": 0,
+   "small_cluster_px": 0,
+   "n_zones_total": 1,
+   "by_status": {
+    "detected": 0,
+    "not_detected": 1,
+    "insufficient_data": 0
+   },
+   "auto_label": "автоматически, не проверено человеком",
+   "human_checked": false,
+   "source": "Sentinel-2 L2A (STAC: Earth Search — поиск, Planetary Computer — пиксели)",
+   "in_case_numbers": false,
+   "processed_at": "2026-09-26T21:06:21Z",
+   "processing_s": 76.1,
+   "timing_s": {
+    "read": 33.2,
+    "detector": 36.8,
+    "zones": 6.0
+   },
+   "crop_cloud_frac": 0.0,
+   "crop_valid_frac": 1.0,
+   "tile_cloud_pct": 3.666043,
+   "stac_item": "S2C_MSIL2A_20260713T100031_R122_T33TTG_20260713T144221",
    "det_pixels_raw": 0,
    "det_objects": 0,
    "n_finds": 0,
