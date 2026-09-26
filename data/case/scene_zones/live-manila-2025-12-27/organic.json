@@ -1,0 +1,72 @@
+{
+ "rule": "NDVI ≥ 0,20 и FAI > 0 (медианы по пикселям детекции зоны)",
+ "sources": "Biermann et al. 2020 (Sci Rep 10:5364) — NDVI; Hu 2009 (RSE 113:2118) — FAI",
+ "label": "эксперимент",
+ "model_note": "органика отдельно не выделяется моделью (детектор бинарный: мусор / нет)",
+ "validation": "reports/organic/val_flag.json (MARIDA val)",
+ "zones": {
+  "SZ-live-manila-2025-12-27-001": {
+   "likely_organic": false,
+   "ndvi_median": -0.026,
+   "fai_median": 0.0031,
+   "organic_px_share": 0.0,
+   "n_px": 6
+  },
+  "SZ-live-manila-2025-12-27-002": {
+   "likely_organic": false,
+   "ndvi_median": -0.002,
+   "fai_median": 0.0034,
+   "organic_px_share": 0.0,
+   "n_px": 9
+  },
+  "SZ-live-manila-2025-12-27-003": {
+   "likely_organic": false,
+   "ndvi_median": -0.029,
+   "fai_median": 0.0024,
+   "organic_px_share": 0.0,
+   "n_px": 6
+  },
+  "SZ-live-manila-2025-12-27-004": {
+   "likely_organic": false,
+   "ndvi_median": -0.042,
+   "fai_median": 0.0022,
+   "organic_px_share": 0.0,
+   "n_px": 7
+  },
+  "SZ-live-manila-2025-12-27-005": {
+   "likely_organic": false,
+   "ndvi_median": 0.063,
+   "fai_median": 0.0098,
+   "organic_px_share": 0.0,
+   "n_px": 11
+  },
+  "SZ-live-manila-2025-12-27-006": {
+   "likely_organic": false,
+   "ndvi_median": 0.034,
+   "fai_median": 0.0053,
+   "organic_px_share": 0.0,
+   "n_px": 10
+  },
+  "SZ-live-manila-2025-12-27-007": {
+   "likely_organic": false,
+   "ndvi_median": 0.01,
+   "fai_median": 0.0052,
+   "organic_px_share": 0.0,
+   "n_px": 6
+  },
+  "SZ-live-manila-2025-12-27-008": {
+   "likely_organic": false,
+   "ndvi_median": 0.036,
+   "fai_median": 0.0047,
+   "organic_px_share": 0.0,
+   "n_px": 12
+  },
+  "SZ-live-manila-2025-12-27-009": {
+   "likely_organic": false,
+   "ndvi_median": -0.051,
+   "fai_median": 0.0002,
+   "organic_px_share": 0.0,
+   "n_px": 5
+  }
+ }
+}

@@ -350,10 +350,15 @@ def test_s39_status_confirmation_classification(client):
             assert c["excluded_backgrounds"] and not c["flagged_backgrounds"]
         else:
             assert p["confirmation"] is None
-        # excluded = checked and not flagged; flagged = the zone's flags; algae / sargassum are never checked
+        # excluded = checked and not flagged; flagged = the zone's flags; algae / sargassum: §51 п.9 (L143) — replaced by
+        # the spectral flag «вероятно органика» where it is computed, otherwise still «не проверяется»
         assert set(c["excluded_backgrounds"]) <= set(c["checked_backgrounds"])
         assert not set(c["excluded_backgrounds"]) & set(p["flags"]) and set(c["flagged_backgrounds"]) == set(p["flags"])
-        assert "algae_sargassum" in c["not_checked_backgrounds"] and "водоросли/саргассум" in c["not_checked_label"]
+        if p.get("likely_organic") is None:
+            assert "algae_sargassum" in c["not_checked_backgrounds"] and "водоросли/саргассум" in c["not_checked_label"]
+        else:
+            assert "algae_sargassum" not in c["not_checked_backgrounds"] and c["organic_label"].startswith("Органика: ")
+        assert "wood_organic" in c["not_checked_backgrounds"]
         if c["excluded_label"]:
             assert c["excluded_label"].startswith("Исключено: ")
         assert c["composition"] == "Состав не определён"

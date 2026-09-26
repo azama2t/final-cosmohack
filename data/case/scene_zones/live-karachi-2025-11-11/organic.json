@@ -1,0 +1,58 @@
+{
+ "rule": "NDVI ≥ 0,20 и FAI > 0 (медианы по пикселям детекции зоны)",
+ "sources": "Biermann et al. 2020 (Sci Rep 10:5364) — NDVI; Hu 2009 (RSE 113:2118) — FAI",
+ "label": "эксперимент",
+ "model_note": "органика отдельно не выделяется моделью (детектор бинарный: мусор / нет)",
+ "validation": "reports/organic/val_flag.json (MARIDA val)",
+ "zones": {
+  "SZ-live-karachi-2025-11-11-001": {
+   "likely_organic": false,
+   "ndvi_median": 0.026,
+   "fai_median": 0.0076,
+   "organic_px_share": 0.0,
+   "n_px": 6
+  },
+  "SZ-live-karachi-2025-11-11-002": {
+   "likely_organic": false,
+   "ndvi_median": -0.081,
+   "fai_median": -0.0016,
+   "organic_px_share": 0.0,
+   "n_px": 47
+  },
+  "SZ-live-karachi-2025-11-11-003": {
+   "likely_organic": false,
+   "ndvi_median": -0.007,
+   "fai_median": 0.0058,
+   "organic_px_share": 0.0,
+   "n_px": 6
+  },
+  "SZ-live-karachi-2025-11-11-004": {
+   "likely_organic": false,
+   "ndvi_median": 0.009,
+   "fai_median": 0.0081,
+   "organic_px_share": 0.0,
+   "n_px": 41
+  },
+  "SZ-live-karachi-2025-11-11-005": {
+   "likely_organic": false,
+   "ndvi_median": -0.051,
+   "fai_median": 0.0006,
+   "organic_px_share": 0.0,
+   "n_px": 7
+  },
+  "SZ-live-karachi-2025-11-11-006": {
+   "likely_organic": false,
+   "ndvi_median": -0.021,
+   "fai_median": 0.0025,
+   "organic_px_share": 0.0,
+   "n_px": 5
+  },
+  "SZ-live-karachi-2025-11-11-007": {
+   "likely_organic": false,
+   "ndvi_median": -0.014,
+   "fai_median": 0.0039,
+   "organic_px_share": 0.0,
+   "n_px": 6
+  }
+ }
+}

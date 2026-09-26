@@ -1,0 +1,79 @@
+{
+ "rule": "NDVI ≥ 0,20 и FAI > 0 (медианы по пикселям детекции зоны)",
+ "sources": "Biermann et al. 2020 (Sci Rep 10:5364) — NDVI; Hu 2009 (RSE 113:2118) — FAI",
+ "label": "эксперимент",
+ "model_note": "органика отдельно не выделяется моделью (детектор бинарный: мусор / нет)",
+ "validation": "reports/organic/val_flag.json (MARIDA val)",
+ "zones": {
+  "SZ-live-manila-2019-05-13-001": {
+   "likely_organic": false,
+   "ndvi_median": -0.066,
+   "fai_median": 0.0007,
+   "organic_px_share": 0.0,
+   "n_px": 5
+  },
+  "SZ-live-manila-2019-05-13-002": {
+   "likely_organic": false,
+   "ndvi_median": 0.026,
+   "fai_median": 0.0049,
+   "organic_px_share": 0.0,
+   "n_px": 5
+  },
+  "SZ-live-manila-2019-05-13-003": {
+   "likely_organic": false,
+   "ndvi_median": -0.051,
+   "fai_median": 0.0013,
+   "organic_px_share": 0.0,
+   "n_px": 6
+  },
+  "SZ-live-manila-2019-05-13-004": {
+   "likely_organic": false,
+   "ndvi_median": -0.034,
+   "fai_median": 0.0026,
+   "organic_px_share": 0.0,
+   "n_px": 11
+  },
+  "SZ-live-manila-2019-05-13-005": {
+   "likely_organic": false,
+   "ndvi_median": -0.046,
+   "fai_median": 0.0011,
+   "organic_px_share": 0.0,
+   "n_px": 5
+  },
+  "SZ-live-manila-2019-05-13-006": {
+   "likely_organic": false,
+   "ndvi_median": -0.021,
+   "fai_median": 0.0028,
+   "organic_px_share": 0.0,
+   "n_px": 5
+  },
+  "SZ-live-manila-2019-05-13-007": {
+   "likely_organic": false,
+   "ndvi_median": -0.05,
+   "fai_median": 0.0017,
+   "organic_px_share": 0.0,
+   "n_px": 37
+  },
+  "SZ-live-manila-2019-05-13-008": {
+   "likely_organic": true,
+   "ndvi_median": 0.249,
+   "fai_median": 0.0089,
+   "organic_px_share": 0.778,
+   "n_px": 9
+  },
+  "SZ-live-manila-2019-05-13-009": {
+   "likely_organic": false,
+   "ndvi_median": 0.082,
+   "fai_median": 0.0039,
+   "organic_px_share": 0.167,
+   "n_px": 6
+  },
+  "SZ-live-manila-2019-05-13-010": {
+   "likely_organic": false,
+   "ndvi_median": 0.161,
+   "fai_median": 0.0081,
+   "organic_px_share": 0.182,
+   "n_px": 11
+  }
+ }
+}

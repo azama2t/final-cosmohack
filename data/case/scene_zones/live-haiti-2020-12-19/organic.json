@@ -1,0 +1,37 @@
+{
+ "rule": "NDVI ≥ 0,20 и FAI > 0 (медианы по пикселям детекции зоны)",
+ "sources": "Biermann et al. 2020 (Sci Rep 10:5364) — NDVI; Hu 2009 (RSE 113:2118) — FAI",
+ "label": "эксперимент",
+ "model_note": "органика отдельно не выделяется моделью (детектор бинарный: мусор / нет)",
+ "validation": "reports/organic/val_flag.json (MARIDA val)",
+ "zones": {
+  "SZ-live-haiti-2020-12-19-001": {
+   "likely_organic": false,
+   "ndvi_median": 0.008,
+   "fai_median": 0.0026,
+   "organic_px_share": 0.024,
+   "n_px": 41
+  },
+  "SZ-live-haiti-2020-12-19-002": {
+   "likely_organic": false,
+   "ndvi_median": -0.058,
+   "fai_median": 0.0009,
+   "organic_px_share": 0.0,
+   "n_px": 17
+  },
+  "SZ-live-haiti-2020-12-19-003": {
+   "likely_organic": false,
+   "ndvi_median": -0.021,
+   "fai_median": 0.0023,
+   "organic_px_share": 0.0,
+   "n_px": 37
+  },
+  "SZ-live-haiti-2020-12-19-004": {
+   "likely_organic": false,
+   "ndvi_median": 0.05,
+   "fai_median": 0.0061,
+   "organic_px_share": 0.061,
+   "n_px": 49
+  }
+ }
+}

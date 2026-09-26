@@ -1,0 +1,170 @@
+{
+ "rule": "NDVI ≥ 0,20 и FAI > 0 (медианы по пикселям детекции зоны)",
+ "sources": "Biermann et al. 2020 (Sci Rep 10:5364) — NDVI; Hu 2009 (RSE 113:2118) — FAI",
+ "label": "эксперимент",
+ "model_note": "органика отдельно не выделяется моделью (детектор бинарный: мусор / нет)",
+ "validation": "reports/organic/val_flag.json (MARIDA val)",
+ "zones": {
+  "SZ-demo-cozar-2021-03-11-001": {
+   "likely_organic": false,
+   "ndvi_median": -0.121,
+   "fai_median": -0.001,
+   "organic_px_share": 0.0,
+   "n_px": 23
+  },
+  "SZ-demo-cozar-2021-03-11-002": {
+   "likely_organic": false,
+   "ndvi_median": -0.072,
+   "fai_median": 0.0006,
+   "organic_px_share": 0.0,
+   "n_px": 10
+  },
+  "SZ-demo-cozar-2021-03-11-003": {
+   "likely_organic": false,
+   "ndvi_median": -0.098,
+   "fai_median": -0.0002,
+   "organic_px_share": 0.0,
+   "n_px": 9
+  },
+  "SZ-demo-cozar-2021-03-11-004": {
+   "likely_organic": false,
+   "ndvi_median": -0.064,
+   "fai_median": 0.0015,
+   "organic_px_share": 0.0,
+   "n_px": 60
+  },
+  "SZ-demo-cozar-2021-03-11-005": {
+   "likely_organic": false,
+   "ndvi_median": -0.107,
+   "fai_median": -0.0007,
+   "organic_px_share": 0.0,
+   "n_px": 12
+  },
+  "SZ-demo-cozar-2021-03-11-006": {
+   "likely_organic": false,
+   "ndvi_median": -0.004,
+   "fai_median": 0.0029,
+   "organic_px_share": 0.0,
+   "n_px": 92
+  },
+  "SZ-demo-cozar-2021-03-11-007": {
+   "likely_organic": false,
+   "ndvi_median": -0.03,
+   "fai_median": 0.0036,
+   "organic_px_share": 0.0,
+   "n_px": 413
+  },
+  "SZ-demo-cozar-2021-03-11-008": {
+   "likely_organic": false,
+   "ndvi_median": -0.006,
+   "fai_median": 0.0023,
+   "organic_px_share": 0.0,
+   "n_px": 7
+  },
+  "SZ-demo-cozar-2021-03-11-009": {
+   "likely_organic": false,
+   "ndvi_median": -0.042,
+   "fai_median": 0.0026,
+   "organic_px_share": 0.0,
+   "n_px": 11
+  },
+  "SZ-demo-cozar-2021-03-11-010": {
+   "likely_organic": false,
+   "ndvi_median": -0.092,
+   "fai_median": 0.0,
+   "organic_px_share": 0.0,
+   "n_px": 55
+  },
+  "SZ-demo-cozar-2021-03-11-011": {
+   "likely_organic": false,
+   "ndvi_median": -0.081,
+   "fai_median": 0.0004,
+   "organic_px_share": 0.0,
+   "n_px": 8
+  },
+  "SZ-demo-cozar-2021-03-11-012": {
+   "likely_organic": false,
+   "ndvi_median": -0.014,
+   "fai_median": 0.0032,
+   "organic_px_share": 0.0,
+   "n_px": 243
+  },
+  "SZ-demo-cozar-2021-03-11-013": {
+   "likely_organic": false,
+   "ndvi_median": -0.058,
+   "fai_median": 0.0033,
+   "organic_px_share": 0.0,
+   "n_px": 30
+  },
+  "SZ-demo-cozar-2021-03-11-014": {
+   "likely_organic": false,
+   "ndvi_median": -0.068,
+   "fai_median": 0.0006,
+   "organic_px_share": 0.0,
+   "n_px": 24
+  },
+  "SZ-demo-cozar-2021-03-11-015": {
+   "likely_organic": false,
+   "ndvi_median": -0.093,
+   "fai_median": 0.0001,
+   "organic_px_share": 0.0,
+   "n_px": 11
+  },
+  "SZ-demo-cozar-2021-03-11-016": {
+   "likely_organic": false,
+   "ndvi_median": -0.05,
+   "fai_median": 0.0018,
+   "organic_px_share": 0.0,
+   "n_px": 691
+  },
+  "SZ-demo-cozar-2021-03-11-017": {
+   "likely_organic": false,
+   "ndvi_median": -0.089,
+   "fai_median": 0.0001,
+   "organic_px_share": 0.0,
+   "n_px": 28
+  },
+  "SZ-demo-cozar-2021-03-11-018": {
+   "likely_organic": false,
+   "ndvi_median": 0.001,
+   "fai_median": 0.0025,
+   "organic_px_share": 0.0,
+   "n_px": 12
+  },
+  "SZ-demo-cozar-2021-03-11-019": {
+   "likely_organic": false,
+   "ndvi_median": -0.017,
+   "fai_median": 0.0026,
+   "organic_px_share": 0.0,
+   "n_px": 18
+  },
+  "SZ-demo-cozar-2021-03-11-020": {
+   "likely_organic": false,
+   "ndvi_median": -0.074,
+   "fai_median": 0.0009,
+   "organic_px_share": 0.0,
+   "n_px": 12
+  },
+  "SZ-demo-cozar-2021-03-11-021": {
+   "likely_organic": false,
+   "ndvi_median": -0.05,
+   "fai_median": 0.0016,
+   "organic_px_share": 0.0,
+   "n_px": 61
+  },
+  "SZ-demo-cozar-2021-03-11-022": {
+   "likely_organic": false,
+   "ndvi_median": -0.072,
+   "fai_median": 0.0017,
+   "organic_px_share": 0.0,
+   "n_px": 39
+  },
+  "SZ-demo-cozar-2021-03-11-023": {
+   "likely_organic": false,
+   "ndvi_median": -0.077,
+   "fai_median": 0.0006,
+   "organic_px_share": 0.0,
+   "n_px": 34
+  }
+ }
+}

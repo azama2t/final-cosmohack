@@ -1,0 +1,121 @@
+{
+ "rule": "NDVI ≥ 0,20 и FAI > 0 (медианы по пикселям детекции зоны)",
+ "sources": "Biermann et al. 2020 (Sci Rep 10:5364) — NDVI; Hu 2009 (RSE 113:2118) — FAI",
+ "label": "эксперимент",
+ "model_note": "органика отдельно не выделяется моделью (детектор бинарный: мусор / нет)",
+ "validation": "reports/organic/val_flag.json (MARIDA val)",
+ "zones": {
+  "SZ-drift-guanabara-2025-09-09-001": {
+   "likely_organic": false,
+   "ndvi_median": -0.115,
+   "fai_median": -0.0015,
+   "organic_px_share": 0.0,
+   "n_px": 41
+  },
+  "SZ-drift-guanabara-2025-09-09-002": {
+   "likely_organic": false,
+   "ndvi_median": 0.016,
+   "fai_median": 0.0053,
+   "organic_px_share": 0.0,
+   "n_px": 52
+  },
+  "SZ-drift-guanabara-2025-09-09-003": {
+   "likely_organic": false,
+   "ndvi_median": -0.084,
+   "fai_median": -0.0012,
+   "organic_px_share": 0.0,
+   "n_px": 5
+  },
+  "SZ-drift-guanabara-2025-09-09-004": {
+   "likely_organic": false,
+   "ndvi_median": 0.049,
+   "fai_median": 0.0124,
+   "organic_px_share": 0.0,
+   "n_px": 46
+  },
+  "SZ-drift-guanabara-2025-09-09-005": {
+   "likely_organic": false,
+   "ndvi_median": 0.028,
+   "fai_median": 0.0089,
+   "organic_px_share": 0.0,
+   "n_px": 8
+  },
+  "SZ-drift-guanabara-2025-09-09-006": {
+   "likely_organic": false,
+   "ndvi_median": -0.08,
+   "fai_median": 0.0007,
+   "organic_px_share": 0.0,
+   "n_px": 19
+  },
+  "SZ-drift-guanabara-2025-09-09-007": {
+   "likely_organic": false,
+   "ndvi_median": 0.001,
+   "fai_median": 0.0053,
+   "organic_px_share": 0.0,
+   "n_px": 132
+  },
+  "SZ-drift-guanabara-2025-09-09-008": {
+   "likely_organic": false,
+   "ndvi_median": 0.01,
+   "fai_median": 0.0054,
+   "organic_px_share": 0.0,
+   "n_px": 5
+  },
+  "SZ-drift-guanabara-2025-09-09-009": {
+   "likely_organic": false,
+   "ndvi_median": -0.094,
+   "fai_median": -0.0002,
+   "organic_px_share": 0.0,
+   "n_px": 10
+  },
+  "SZ-drift-guanabara-2025-09-09-010": {
+   "likely_organic": false,
+   "ndvi_median": -0.08,
+   "fai_median": 0.0011,
+   "organic_px_share": 0.0,
+   "n_px": 13
+  },
+  "SZ-drift-guanabara-2025-09-09-011": {
+   "likely_organic": false,
+   "ndvi_median": 0.02,
+   "fai_median": 0.0058,
+   "organic_px_share": 0.0,
+   "n_px": 8
+  },
+  "SZ-drift-guanabara-2025-09-09-012": {
+   "likely_organic": false,
+   "ndvi_median": -0.009,
+   "fai_median": 0.0053,
+   "organic_px_share": 0.0,
+   "n_px": 30
+  },
+  "SZ-drift-guanabara-2025-09-09-013": {
+   "likely_organic": false,
+   "ndvi_median": 0.004,
+   "fai_median": 0.0074,
+   "organic_px_share": 0.0,
+   "n_px": 7
+  },
+  "SZ-drift-guanabara-2025-09-09-014": {
+   "likely_organic": false,
+   "ndvi_median": -0.046,
+   "fai_median": 0.0022,
+   "organic_px_share": 0.0,
+   "n_px": 5
+  },
+  "SZ-drift-guanabara-2025-09-09-015": {
+   "likely_organic": false,
+   "ndvi_median": -0.026,
+   "fai_median": 0.0021,
+   "organic_px_share": 0.0,
+   "n_px": 5
+  },
+  "SZ-drift-guanabara-2025-09-09-016": {
+   "likely_organic": false,
+   "ndvi_median": -0.064,
+   "fai_median": 0.0011,
+   "organic_px_share": 0.0,
+   "n_px": 5
+  }
+ }
+}

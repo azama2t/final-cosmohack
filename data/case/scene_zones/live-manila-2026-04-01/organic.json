@@ -1,0 +1,79 @@
+{
+ "rule": "NDVI ≥ 0,20 и FAI > 0 (медианы по пикселям детекции зоны)",
+ "sources": "Biermann et al. 2020 (Sci Rep 10:5364) — NDVI; Hu 2009 (RSE 113:2118) — FAI",
+ "label": "эксперимент",
+ "model_note": "органика отдельно не выделяется моделью (детектор бинарный: мусор / нет)",
+ "validation": "reports/organic/val_flag.json (MARIDA val)",
+ "zones": {
+  "SZ-live-manila-2026-04-01-001": {
+   "likely_organic": false,
+   "ndvi_median": -0.013,
+   "fai_median": 0.0048,
+   "organic_px_share": 0.0,
+   "n_px": 8
+  },
+  "SZ-live-manila-2026-04-01-002": {
+   "likely_organic": false,
+   "ndvi_median": 0.02,
+   "fai_median": 0.0077,
+   "organic_px_share": 0.0,
+   "n_px": 14
+  },
+  "SZ-live-manila-2026-04-01-003": {
+   "likely_organic": false,
+   "ndvi_median": 0.009,
+   "fai_median": 0.0054,
+   "organic_px_share": 0.0,
+   "n_px": 5
+  },
+  "SZ-live-manila-2026-04-01-004": {
+   "likely_organic": false,
+   "ndvi_median": 0.03,
+   "fai_median": 0.0066,
+   "organic_px_share": 0.0,
+   "n_px": 7
+  },
+  "SZ-live-manila-2026-04-01-005": {
+   "likely_organic": false,
+   "ndvi_median": 0.018,
+   "fai_median": 0.006,
+   "organic_px_share": 0.0,
+   "n_px": 8
+  },
+  "SZ-live-manila-2026-04-01-006": {
+   "likely_organic": false,
+   "ndvi_median": 0.025,
+   "fai_median": 0.0049,
+   "organic_px_share": 0.0,
+   "n_px": 6
+  },
+  "SZ-live-manila-2026-04-01-007": {
+   "likely_organic": false,
+   "ndvi_median": -0.074,
+   "fai_median": -0.0001,
+   "organic_px_share": 0.0,
+   "n_px": 15
+  },
+  "SZ-live-manila-2026-04-01-008": {
+   "likely_organic": false,
+   "ndvi_median": 0.028,
+   "fai_median": 0.0089,
+   "organic_px_share": 0.0,
+   "n_px": 5
+  },
+  "SZ-live-manila-2026-04-01-009": {
+   "likely_organic": false,
+   "ndvi_median": -0.014,
+   "fai_median": 0.0043,
+   "organic_px_share": 0.0,
+   "n_px": 6
+  },
+  "SZ-live-manila-2026-04-01-010": {
+   "likely_organic": false,
+   "ndvi_median": -0.022,
+   "fai_median": 0.0032,
+   "organic_px_share": 0.0,
+   "n_px": 5
+  }
+ }
+}

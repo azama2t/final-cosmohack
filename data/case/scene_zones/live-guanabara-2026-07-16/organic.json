@@ -1,0 +1,114 @@
+{
+ "rule": "NDVI ≥ 0,20 и FAI > 0 (медианы по пикселям детекции зоны)",
+ "sources": "Biermann et al. 2020 (Sci Rep 10:5364) — NDVI; Hu 2009 (RSE 113:2118) — FAI",
+ "label": "эксперимент",
+ "model_note": "органика отдельно не выделяется моделью (детектор бинарный: мусор / нет)",
+ "validation": "reports/organic/val_flag.json (MARIDA val)",
+ "zones": {
+  "SZ-live-guanabara-2026-07-16-001": {
+   "likely_organic": false,
+   "ndvi_median": 0.076,
+   "fai_median": 0.0073,
+   "organic_px_share": 0.0,
+   "n_px": 7
+  },
+  "SZ-live-guanabara-2026-07-16-002": {
+   "likely_organic": false,
+   "ndvi_median": 0.032,
+   "fai_median": 0.006,
+   "organic_px_share": 0.0,
+   "n_px": 17
+  },
+  "SZ-live-guanabara-2026-07-16-003": {
+   "likely_organic": false,
+   "ndvi_median": 0.025,
+   "fai_median": 0.0073,
+   "organic_px_share": 0.0,
+   "n_px": 5
+  },
+  "SZ-live-guanabara-2026-07-16-004": {
+   "likely_organic": false,
+   "ndvi_median": 0.068,
+   "fai_median": 0.0062,
+   "organic_px_share": 0.0,
+   "n_px": 8
+  },
+  "SZ-live-guanabara-2026-07-16-005": {
+   "likely_organic": false,
+   "ndvi_median": 0.012,
+   "fai_median": 0.0067,
+   "organic_px_share": 0.0,
+   "n_px": 11
+  },
+  "SZ-live-guanabara-2026-07-16-006": {
+   "likely_organic": false,
+   "ndvi_median": -0.093,
+   "fai_median": -0.0004,
+   "organic_px_share": 0.0,
+   "n_px": 7
+  },
+  "SZ-live-guanabara-2026-07-16-007": {
+   "likely_organic": false,
+   "ndvi_median": -0.006,
+   "fai_median": 0.0049,
+   "organic_px_share": 0.0,
+   "n_px": 9
+  },
+  "SZ-live-guanabara-2026-07-16-008": {
+   "likely_organic": false,
+   "ndvi_median": -0.007,
+   "fai_median": 0.0025,
+   "organic_px_share": 0.0,
+   "n_px": 5
+  },
+  "SZ-live-guanabara-2026-07-16-009": {
+   "likely_organic": false,
+   "ndvi_median": 0.02,
+   "fai_median": 0.0052,
+   "organic_px_share": 0.0,
+   "n_px": 7
+  },
+  "SZ-live-guanabara-2026-07-16-010": {
+   "likely_organic": false,
+   "ndvi_median": -0.049,
+   "fai_median": 0.0014,
+   "organic_px_share": 0.0,
+   "n_px": 5
+  },
+  "SZ-live-guanabara-2026-07-16-011": {
+   "likely_organic": false,
+   "ndvi_median": -0.122,
+   "fai_median": -0.005,
+   "organic_px_share": 0.0,
+   "n_px": 5
+  },
+  "SZ-live-guanabara-2026-07-16-012": {
+   "likely_organic": false,
+   "ndvi_median": -0.095,
+   "fai_median": -0.0001,
+   "organic_px_share": 0.0,
+   "n_px": 6
+  },
+  "SZ-live-guanabara-2026-07-16-013": {
+   "likely_organic": false,
+   "ndvi_median": -0.076,
+   "fai_median": -0.0003,
+   "organic_px_share": 0.0,
+   "n_px": 12
+  },
+  "SZ-live-guanabara-2026-07-16-014": {
+   "likely_organic": false,
+   "ndvi_median": 0.026,
+   "fai_median": 0.0084,
+   "organic_px_share": 0.0,
+   "n_px": 6
+  },
+  "SZ-live-guanabara-2026-07-16-015": {
+   "likely_organic": false,
+   "ndvi_median": -0.031,
+   "fai_median": 0.0025,
+   "organic_px_share": 0.0,
+   "n_px": 7
+  }
+ }
+}

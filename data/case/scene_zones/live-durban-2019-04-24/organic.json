@@ -1,0 +1,58 @@
+{
+ "rule": "NDVI ≥ 0,20 и FAI > 0 (медианы по пикселям детекции зоны)",
+ "sources": "Biermann et al. 2020 (Sci Rep 10:5364) — NDVI; Hu 2009 (RSE 113:2118) — FAI",
+ "label": "эксперимент",
+ "model_note": "органика отдельно не выделяется моделью (детектор бинарный: мусор / нет)",
+ "validation": "reports/organic/val_flag.json (MARIDA val)",
+ "zones": {
+  "SZ-live-durban-2019-04-24-001": {
+   "likely_organic": false,
+   "ndvi_median": 0.061,
+   "fai_median": 0.0096,
+   "organic_px_share": 0.0,
+   "n_px": 5
+  },
+  "SZ-live-durban-2019-04-24-002": {
+   "likely_organic": false,
+   "ndvi_median": 0.051,
+   "fai_median": 0.0087,
+   "organic_px_share": 0.0,
+   "n_px": 13
+  },
+  "SZ-live-durban-2019-04-24-003": {
+   "likely_organic": false,
+   "ndvi_median": 0.017,
+   "fai_median": 0.0057,
+   "organic_px_share": 0.0,
+   "n_px": 22
+  },
+  "SZ-live-durban-2019-04-24-004": {
+   "likely_organic": false,
+   "ndvi_median": 0.038,
+   "fai_median": 0.0069,
+   "organic_px_share": 0.0,
+   "n_px": 5
+  },
+  "SZ-live-durban-2019-04-24-005": {
+   "likely_organic": false,
+   "ndvi_median": 0.006,
+   "fai_median": 0.0053,
+   "organic_px_share": 0.0,
+   "n_px": 15
+  },
+  "SZ-live-durban-2019-04-24-006": {
+   "likely_organic": false,
+   "ndvi_median": 0.003,
+   "fai_median": 0.0049,
+   "organic_px_share": 0.0,
+   "n_px": 24
+  },
+  "SZ-live-durban-2019-04-24-007": {
+   "likely_organic": false,
+   "ndvi_median": 0.048,
+   "fai_median": 0.0076,
+   "organic_px_share": 0.0,
+   "n_px": 10
+  }
+ }
+}

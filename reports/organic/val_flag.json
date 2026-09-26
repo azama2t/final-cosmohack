@@ -1,0 +1,193 @@
+{
+ "split": "MARIDA val (официальный), test не читался",
+ "n_patches": 328,
+ "rule": "NDVI ≥ 0,20 и FAI > 0 (медианы по пикселям детекции зоны)",
+ "sources": "Biermann et al. 2020 (Sci Rep 10:5364) — NDVI; Hu 2009 (RSE 113:2118) — FAI",
+ "detector": {
+  "weights": "weights/lgbm",
+  "threshold": 0.63
+ },
+ "seconds": 25.0,
+ "classes": {
+  "Marine Debris": {
+   "pixels": 1075,
+   "flag_px": 2,
+   "flag_px_share": 0.002,
+   "ndvi_ge_0.20_share": 0.002,
+   "fai_gt_0_share": 0.849,
+   "sensitivity_flag_px_share": {
+    "NDVI≥0.10": 0.077,
+    "NDVI≥0.20": 0.002,
+    "NDVI≥0.30": 0.0
+   },
+   "objects": 418,
+   "flag_obj": 1,
+   "flag_obj_share": 0.002,
+   "flag_obj_ci95_wilson": [
+    0.0,
+    0.013
+   ],
+   "detector_md_px": 984,
+   "detector_md_px_flagged": 2,
+   "detector_md_flag_share": 0.002,
+   "scenes": {
+    "S2_11-6-18_16PCC": {
+     "px": 43,
+     "flag_share": 0.0
+    },
+    "S2_12-1-17_16PEC": {
+     "px": 3,
+     "flag_share": 0.0
+    },
+    "S2_14-3-20_18QYF": {
+     "px": 231,
+     "flag_share": 0.0
+    },
+    "S2_18-1-18_48PZC": {
+     "px": 9,
+     "flag_share": 0.0
+    },
+    "S2_18-9-20_16PCC": {
+     "px": 383,
+     "flag_share": 0.0
+    },
+    "S2_19-9-18_16PCC": {
+     "px": 49,
+     "flag_share": 0.041
+    },
+    "S2_21-2-18_16PCC": {
+     "px": 5,
+     "flag_share": 0.0
+    },
+    "S2_29-12-20_18QYF": {
+     "px": 245,
+     "flag_share": 0.0
+    },
+    "S2_29-8-17_51RVQ": {
+     "px": 17,
+     "flag_share": 0.0
+    },
+    "S2_7-3-20_18QYG": {
+     "px": 90,
+     "flag_share": 0.0
+    }
+   }
+  },
+  "Dense Sargassum": {
+   "pixels": 1167,
+   "flag_px": 1167,
+   "flag_px_share": 1.0,
+   "ndvi_ge_0.20_share": 1.0,
+   "fai_gt_0_share": 1.0,
+   "sensitivity_flag_px_share": {
+    "NDVI≥0.10": 1.0,
+    "NDVI≥0.20": 1.0,
+    "NDVI≥0.30": 0.997
+   },
+   "objects": 16,
+   "flag_obj": 16,
+   "flag_obj_share": 1.0,
+   "flag_obj_ci95_wilson": [
+    0.806,
+    1.0
+   ],
+   "detector_md_px": 0,
+   "detector_md_px_flagged": 0,
+   "detector_md_flag_share": null,
+   "scenes": {
+    "S2_12-1-17_16PEC": {
+     "px": 38,
+     "flag_share": 1.0
+    },
+    "S2_19-9-18_16PCC": {
+     "px": 1102,
+     "flag_share": 1.0
+    },
+    "S2_28-9-20_16PDC": {
+     "px": 27,
+     "flag_share": 1.0
+    }
+   }
+  },
+  "Sparse Sargassum": {
+   "pixels": 385,
+   "flag_px": 251,
+   "flag_px_share": 0.652,
+   "ndvi_ge_0.20_share": 0.652,
+   "fai_gt_0_share": 0.966,
+   "sensitivity_flag_px_share": {
+    "NDVI≥0.10": 0.829,
+    "NDVI≥0.20": 0.652,
+    "NDVI≥0.30": 0.351
+   },
+   "objects": 60,
+   "flag_obj": 42,
+   "flag_obj_share": 0.7,
+   "flag_obj_ci95_wilson": [
+    0.575,
+    0.801
+   ],
+   "detector_md_px": 6,
+   "detector_md_px_flagged": 1,
+   "detector_md_flag_share": 0.167,
+   "scenes": {
+    "S2_12-1-17_16PEC": {
+     "px": 146,
+     "flag_share": 0.801
+    },
+    "S2_19-9-18_16PCC": {
+     "px": 152,
+     "flag_share": 0.533
+    },
+    "S2_28-9-20_16PDC": {
+     "px": 87,
+     "flag_share": 0.609
+    }
+   }
+  },
+  "Natural Organic Material": {
+   "pixels": 92,
+   "flag_px": 3,
+   "flag_px_share": 0.033,
+   "ndvi_ge_0.20_share": 0.033,
+   "fai_gt_0_share": 0.913,
+   "sensitivity_flag_px_share": {
+    "NDVI≥0.10": 0.511,
+    "NDVI≥0.20": 0.033,
+    "NDVI≥0.30": 0.0
+   },
+   "objects": 46,
+   "flag_obj": 0,
+   "flag_obj_share": 0.0,
+   "flag_obj_ci95_wilson": [
+    0.0,
+    0.077
+   ],
+   "detector_md_px": 53,
+   "detector_md_px_flagged": 0,
+   "detector_md_flag_share": 0.0,
+   "scenes": {
+    "S2_11-6-18_16PCC": {
+     "px": 4,
+     "flag_share": 0.0
+    },
+    "S2_18-9-20_16PCC": {
+     "px": 37,
+     "flag_share": 0.0
+    },
+    "S2_19-9-18_16PCC": {
+     "px": 6,
+     "flag_share": 0.0
+    },
+    "S2_24-3-20_18QYF": {
+     "px": 38,
+     "flag_share": 0.079
+    },
+    "S2_7-3-20_18QYG": {
+     "px": 7,
+     "flag_share": 0.0
+    }
+   }
+  }
+ }
+}

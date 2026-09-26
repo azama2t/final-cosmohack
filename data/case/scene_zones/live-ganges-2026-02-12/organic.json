@@ -1,0 +1,16 @@
+{
+ "rule": "NDVI ≥ 0,20 и FAI > 0 (медианы по пикселям детекции зоны)",
+ "sources": "Biermann et al. 2020 (Sci Rep 10:5364) — NDVI; Hu 2009 (RSE 113:2118) — FAI",
+ "label": "эксперимент",
+ "model_note": "органика отдельно не выделяется моделью (детектор бинарный: мусор / нет)",
+ "validation": "reports/organic/val_flag.json (MARIDA val)",
+ "zones": {
+  "SZ-live-ganges-2026-02-12-001": {
+   "likely_organic": false,
+   "ndvi_median": 0.008,
+   "fai_median": 0.0149,
+   "organic_px_share": 0.0,
+   "n_px": 5
+  }
+ }
+}

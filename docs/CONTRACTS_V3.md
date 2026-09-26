@@ -876,3 +876,37 @@ GET /api/v3/photo/meta: + headline {count_mae_per_frame, count_mae_ci95, n_image
     image{crop_url, rgb_url, quality_url, crop_note}, model_result{…}, reference, verdict, basis, status, status_label (из 4),
     status_explanation, rule (правило выбора, записано в коде), repeat{api, command[, inputs]}; у miss + related_zones}.
     miss — data/case/scene_zones/defense_examples.json (scripts/case/defense_examples.py). scene_zones.examples — без изменений.
+  (§51 п.2 / п.4 — ДОБАВЛЕНИЕ) /scene_zones, /scene_zones/{id}, выгрузка — у каждой зоны:
+    field_estimate {unit "items/km2", value (шт./км² полевой записи организаторов C = N/A, только если она не дальше
+    region_km от центра зоны; иначе null), date, distance_km, profile, source, source_id, sample_id, in_region, region_km,
+    method_note, trust_note «независимая оценка по полю, не по снимку», reason (если в районе поля нет — явная причина с
+    расстоянием до ближайшей записи организаторов и ADIS), label, nearest {sample_id, source_id, source, date, distance_km,
+    value, profile} — справочно, другое место}; units {default "items_km2", items_km2 (= field_estimate.value),
+    area_m2_per_km2 (площадь маски / пригодная вода контура), coverage_pct (= area_m2_per_km2 / 10⁴), area_basis,
+    area_note «площадь, не предметы»}; quantity_by_image «не определено (принятых пар N)» (N — из реестра пар);
+    is_large — находка с area_km2 ≥ large_zone_km2 (configs/zone_estimate.yaml, 0.1 км²; area_km2 — контур кластер + 150 м).
+    Параметры: large_zone_km2 0.1, field_region_km 50, field_max_days 2. /scene_zones/scenes: + n_large, large_area_km2,
+    large_threshold_km2 (null у неоценённых снимков). CSV: + is_large, quantity_by_image, field_in_region,
+    field_value_items_km2, field_date, field_distance_km, field_profile, field_source, field_trust_note, field_reason,
+    area_m2_per_km2, coverage_pct, area_note.
+  (§51 п.5 — ДОБАВЛЕНИЕ) /scene_zones/scenes: + total_find_area_km2 (сумма площадей контуров находок), find_mask_area_km2
+    (пиксели маски находок), valid_water_km2 (пригодная вода вырезки по маске качества), coverage_pct = маска / вода × 100,
+    integral_note «площадь, не число предметов …» (null у неоценённых снимков). meta.scene_zone_regions[]: + integral
+    {n_snapshots, n_evaluable, n_finds, n_large, total_find_area_km2, find_mask_area_km2, valid_water_km2, coverage_pct,
+    last_date, last_total_find_area_km2, last_coverage_pct, note} — суммы по оцениваемым снимкам района.
+  (§51 п.3 — НОВЫЙ) GET /api/v3/regions/{region_id}/dynamics (id — meta.scene_zone_regions[].id; без параметров; неизвестный
+    → 404 NO_REGION) → {region, label, short, count, rows[], summary (= integral), params{field_region_km, field_max_days,
+    large_zone_km2}, units, note}. rows по дате снимка (по возрастанию): {scene_key, date, datetime, scene_kind, scene_id,
+    evaluable, not_evaluated_reason, cloud_pct, n_finds, n_large, large_area_km2, total_find_area_km2, find_mask_area_km2,
+    valid_water_km2, coverage_pct, field_items_km2 (полевая запись организаторов ≤ field_region_km и ±field_max_days сут,
+    иначе null), field {value, date, distance_km, source, sample_id, profile, trust_note} | null, field_reason}.
+  (§51 п.2 / п.4 — ИЗМЕНЕНИЕ, решение оркестратора) is_large — находка, у которой площадь маски детектора (пиксели, без
+    буфера) ≥ large_mask_km2 (0.1) ИЛИ большая ось её объектов детектора (наибольшее расстояние между вершинами выпуклой
+    оболочки, без буфера) ≥ large_axis_m (500); + large_reason (какое условие сработало), major_axis_m. Ключ конфига
+    large_zone_km2 → large_mask_km2 + large_axis_m. scenes: + large_axis_m. field_estimate: + basis (nearest_record |
+    basin_profile | null), lo, hi, basin_profile {basin, basin_name, source, source_kind, method, size_class, n, n_days,
+    years, pooled_items_km2, median_items_km2, lo95, hi95, interval_label, nearest_km}, profile_note «профиль акватории по
+    полевым данным — не измерение этого участка». Если в 50 км записи нет — value = ΣN/ΣA профиля акватории
+    (configs/zone_estimate.yaml: field_basins; организаторы того же моря, иначе ADIS в рамке акватории; ≥ 5 измерений;
+    95 % бутстреп по дням); если и профиля нет — value null и reason. dynamics — без изменений (только ±2 сут / 50 км).
+    CSV: + large_reason, major_axis_m, field_basis, field_lo, field_hi.

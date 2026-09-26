@@ -1,0 +1,30 @@
+{
+ "rule": "NDVI ≥ 0,20 и FAI > 0 (медианы по пикселям детекции зоны)",
+ "sources": "Biermann et al. 2020 (Sci Rep 10:5364) — NDVI; Hu 2009 (RSE 113:2118) — FAI",
+ "label": "эксперимент",
+ "model_note": "органика отдельно не выделяется моделью (детектор бинарный: мусор / нет)",
+ "validation": "reports/organic/val_flag.json (MARIDA val)",
+ "zones": {
+  "SZ-drift-guanabara-2026-07-21-001": {
+   "likely_organic": false,
+   "ndvi_median": 0.038,
+   "fai_median": 0.006,
+   "organic_px_share": 0.0,
+   "n_px": 5
+  },
+  "SZ-drift-guanabara-2026-07-21-002": {
+   "likely_organic": false,
+   "ndvi_median": -0.019,
+   "fai_median": 0.002,
+   "organic_px_share": 0.0,
+   "n_px": 5
+  },
+  "SZ-drift-guanabara-2026-07-21-003": {
+   "likely_organic": false,
+   "ndvi_median": -0.097,
+   "fai_median": -0.0018,
+   "organic_px_share": 0.0,
+   "n_px": 5
+  }
+ }
+}

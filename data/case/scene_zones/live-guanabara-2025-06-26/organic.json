@@ -1,0 +1,58 @@
+{
+ "rule": "NDVI ≥ 0,20 и FAI > 0 (медианы по пикселям детекции зоны)",
+ "sources": "Biermann et al. 2020 (Sci Rep 10:5364) — NDVI; Hu 2009 (RSE 113:2118) — FAI",
+ "label": "эксперимент",
+ "model_note": "органика отдельно не выделяется моделью (детектор бинарный: мусор / нет)",
+ "validation": "reports/organic/val_flag.json (MARIDA val)",
+ "zones": {
+  "SZ-live-guanabara-2025-06-26-001": {
+   "likely_organic": false,
+   "ndvi_median": 0.023,
+   "fai_median": 0.0043,
+   "organic_px_share": 0.0,
+   "n_px": 5
+  },
+  "SZ-live-guanabara-2025-06-26-002": {
+   "likely_organic": false,
+   "ndvi_median": -0.004,
+   "fai_median": 0.0042,
+   "organic_px_share": 0.0,
+   "n_px": 10
+  },
+  "SZ-live-guanabara-2025-06-26-003": {
+   "likely_organic": false,
+   "ndvi_median": 0.018,
+   "fai_median": 0.0062,
+   "organic_px_share": 0.0,
+   "n_px": 46
+  },
+  "SZ-live-guanabara-2025-06-26-004": {
+   "likely_organic": false,
+   "ndvi_median": -0.025,
+   "fai_median": 0.0037,
+   "organic_px_share": 0.0,
+   "n_px": 14
+  },
+  "SZ-live-guanabara-2025-06-26-005": {
+   "likely_organic": false,
+   "ndvi_median": -0.096,
+   "fai_median": -0.0005,
+   "organic_px_share": 0.0,
+   "n_px": 7
+  },
+  "SZ-live-guanabara-2025-06-26-006": {
+   "likely_organic": false,
+   "ndvi_median": -0.07,
+   "fai_median": 0.0007,
+   "organic_px_share": 0.0,
+   "n_px": 6
+  },
+  "SZ-live-guanabara-2025-06-26-007": {
+   "likely_organic": false,
+   "ndvi_median": 0.001,
+   "fai_median": 0.0058,
+   "organic_px_share": 0.0,
+   "n_px": 5
+  }
+ }
+}

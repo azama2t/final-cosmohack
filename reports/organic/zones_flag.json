@@ -1,0 +1,28 @@
+{
+ "scenes": 83,
+ "zones": 255,
+ "flagged": 2,
+ "mismatch": [
+  {
+   "key": "live-durban-2025-07-28",
+   "zones": 0,
+   "recomputed": 1
+  },
+  {
+   "key": "live-durban-2026-05-17",
+   "zones": 0,
+   "recomputed": 1
+  },
+  {
+   "key": "live-durban-2026-07-03",
+   "zones": 0,
+   "recomputed": 4
+  },
+  {
+   "key": "drift-durban-2025-07-31",
+   "zones": 0,
+   "recomputed": 5
+  }
+ ],
+ "skipped": []
+}

@@ -48,9 +48,15 @@ def run(base: str, W: int, H: int, pw, api: dict) -> dict:
     def tid(k):
         return pg.locator(f"[data-testid={k}]")
 
+    def more(k):  # §47 п.1: Earth / field / queries live in «Ещё ▾»
+        if not (tid(k).count() and tid(k).is_visible()):
+            tid("act-more").click()
+            pg.wait_for_timeout(300)
+        tid(k).click()
+
     def one_block():
         """«Фильтры», «Цифры», «Проверка качества»: never more than one open"""
-        return {"filters": tid("f-source").count(), "nums": tid("headline").count(), "qc": tid("qc-panel").count()}
+        return {"filters": tid("f-det-detected").count(), "nums": tid("headline").count(), "qc": tid("qc-panel").count()}
 
     pg.goto(base + "/", wait_until="domcontentloaded")
     pg.evaluate("() => { try { localStorage.removeItem('mp.case.filtersOpen') } catch (e) {} }")
@@ -103,7 +109,7 @@ def run(base: str, W: int, H: int, pw, api: dict) -> dict:
     shot("02_scene")
     # 3. zone → card
     tid("sz-item").first.click()
-    pg.wait_for_function("() => window.__app.szDetailReady && document.querySelector('[data-testid=sz-plain]')", timeout=60000)
+    pg.wait_for_function("() => window.__app.szDetailReady && document.querySelector('[data-testid=sz-verdict]')", timeout=60000)
     pg.wait_for_timeout(2500)
     zid = pg.evaluate("() => window.__app.sel && window.__app.sel.id")
     card = {k: tid(k).inner_text() for k in ("card-title", "sz-plain-what", "sz-plain-qty", "sz-plain-comp", "sz-plain-area") if tid(k).count()}
@@ -128,6 +134,21 @@ def run(base: str, W: int, H: int, pw, api: dict) -> dict:
     card["no_number_in_qty"] = "шт./км²" not in card.get("sz-plain-qty", "")
     card["no_forbidden_words"] = not any(w in pg.evaluate("() => document.body.innerText") for w in ("требует проверки", "нижняя граница", "порядка"))
     card["list_has_no_items_km2"] = "шт./км²" not in (tid("scene-zones").inner_text() if tid("scene-zones").count() else "")
+    # §47 п.4: conclusion frame + tabs; the PLP scenario lives in «Подробно»
+    card["verdict"] = tid("sz-verdict").inner_text() if tid("sz-verdict").count() else None
+    card["verdict_ok"] = bool(card["verdict"]) and "Пластик и количество шт./км² по этому снимку не подтверждены" in card["verdict"]
+    panes = {}
+    for k in ("quality", "drift", "export", "details"):
+        tid(f"card-tab-{k}").click()
+        pg.wait_for_timeout(400)
+        panes[k] = tid(f"card-pane-{k}").count() == 1
+    card["tabs"] = panes
+    card["excluded_in_quality"] = None
+    tid("card-tab-quality").click()
+    pg.wait_for_timeout(300)
+    card["excluded_in_quality"] = tid("sz-excluded").count() == 1
+    tid("card-tab-details").click()
+    pg.wait_for_timeout(300)
     if re_api and tid("sz-scenario").count():
         from math import floor, log10
         x = re_api["value"]
@@ -142,7 +163,11 @@ def run(base: str, W: int, H: int, pw, api: dict) -> dict:
         card["ui_equals_api"] = card["scenario"]["ui_equals_api"]
         shot("03b_scenario")
         tid("sz-scenario").locator("summary").click()
+    tid("card-tab-main").click()
+    pg.wait_for_timeout(400)
     card["drift_button"] = tid("sz-drift-btn").count()
+    card["step"] = tid("actions").get_attribute("data-step")
+    card["next_hint"] = tid("next-hint").inner_text() if tid("next-hint").count() else None
     res["card"] = card
     shot("03_card")
     # 4. studio → back to the card → back to the map
@@ -158,7 +183,7 @@ def run(base: str, W: int, H: int, pw, api: dict) -> dict:
     # 5. all snapshots → Earth; a find by a map click
     tid("scene-back").click()
     pg.wait_for_timeout(1500)
-    tid("act-earth").click()
+    more("act-earth")
     pg.wait_for_timeout(3000)
     box = tid("main").bounding_box()
     opened = False
@@ -170,14 +195,23 @@ def run(base: str, W: int, H: int, pw, api: dict) -> dict:
         tgt = single[0] if single else pts[0]
         pg.mouse.click(box["x"] + tgt["x"], box["y"] + tgt["y"])
         pg.wait_for_timeout(2600)
-        if tid("scene-zone-card").count():
+        if tid("scene-zones").count():  # §47 п.3: a find on the Earth → its snapshot + zone list, no card
             opened = True
             break
-    res["map_click"] = {"card": opened, "sel": pg.evaluate("() => window.__app.sel"), "scene": pg.evaluate("() => window.__app.scene")}
+    res["map_click"] = {"scene_opened": opened, "card": tid("scene-zone-card").count() > 0, "sel": pg.evaluate("() => window.__app.sel"),
+                        "scene": pg.evaluate("() => window.__app.scene")}
+    res["map_click"]["ok"] = opened and not res["map_click"]["card"]
     shot("06_map_click")
-    if tid("sz-back").count():
-        tid("sz-back").click()
-        pg.wait_for_timeout(2500)
+    # a zone of the open snapshot → only the card; browser «back» → the snapshot again, then the list of snapshots
+    if tid("sz-item").count():
+        tid("sz-item").first.click()
+        pg.wait_for_timeout(1500)
+        res["map_click"]["zone_card"] = tid("scene-zone-card").count() == 1
+        pg.go_back()
+        pg.wait_for_timeout(1500)
+        res["map_click"]["back_card_closed"] = tid("scene-zone-card").count() == 0 and tid("scene-zones").count() == 1
+        pg.go_back()
+        pg.wait_for_timeout(2000)
     res["map_click"]["back_to_list"] = tid("scene-list").count() == 1
     # 6. one block at a time: Фильтры → Цифры → Проверка качества
     tid("filters-toggle").click()
@@ -196,7 +230,7 @@ def run(base: str, W: int, H: int, pw, api: dict) -> dict:
     pg.wait_for_timeout(400)
     res["blocks"] = {"filters": b1, "nums": b2, "qc": b3, "ok": b1 == {"filters": 1, "nums": 0, "qc": 0} and b2 == {"filters": 0, "nums": 1, "qc": 0} and b3 == {"filters": 0, "nums": 0, "qc": 1}}
     # 7. field layer: one button on/off, profile/scope inside
-    tid("act-field").click()
+    more("act-field")
     pg.wait_for_timeout(2500)
     res["field"] = {"panel": tid("field-panel").count(), "profile_inside": tid("field-panel").locator("[data-testid=f-profile]").count(), "on": pg.evaluate("() => window.__app.q.layers.obs")}
     # §40 п.2: a field measurement card starts with «Измерено: <совокупность> <размер> (<метод>)»
@@ -212,7 +246,7 @@ def run(base: str, W: int, H: int, pw, api: dict) -> dict:
                 tid("card-close").first.click()
                 pg.wait_for_timeout(500)
     shot("09_field")
-    tid("act-field").click()
+    more("act-field")
     pg.wait_for_timeout(1000)
     res["field"]["off_again"] = not pg.evaluate("() => window.__app.q.layers.obs") and tid("field-panel").count() == 0
     # 8. filters: акватория (район) + status «находка» → list = map = export
@@ -241,7 +275,7 @@ def run(base: str, W: int, H: int, pw, api: dict) -> dict:
     shot("10_export")
     tid("act-export").click()
     # 9. saved query → reset → run → the same zones
-    tid("act-queries").click()
+    more("act-queries")
     tid("q-name").fill(f"s34 {W}")
     tid("q-save").click()
     pg.wait_for_timeout(1500)
@@ -249,7 +283,7 @@ def run(base: str, W: int, H: int, pw, api: dict) -> dict:
     pg.wait_for_function(f"() => window.__app.szReady && window.__app.counts.szones !== {n_ui}", timeout=60000)
     pg.wait_for_timeout(1500)
     n_reset = pg.evaluate("() => window.__app.counts.szones")
-    tid("act-queries").click()
+    more("act-queries")
     pg.locator("[data-testid=q-item]", has_text=f"s34 {W}").first.locator("[data-testid=q-run]").click()
     try:  # the run replaces the filter: wait until the zone count left the «all zones» state
         pg.wait_for_function(f"() => window.__app.szReady && window.__app.counts.szones !== {n_reset}", timeout=30000)
@@ -261,13 +295,13 @@ def run(base: str, W: int, H: int, pw, api: dict) -> dict:
                     "area_after_run": pg.evaluate("() => window.__app.q.area"), "toast": tid("toast").inner_text() if tid("toast").count() else None}
     shot("11_query_run")
     # clean up the saved query (server side)
-    tid("act-queries").click()
+    more("act-queries")
     row = pg.locator("[data-testid=q-item]", has_text=f"s34 {W}").first
     if row.count():
         row.locator("[data-testid=q-del]").click()
         pg.wait_for_timeout(800)
     tid("f-reset").click() if tid("f-reset").count() else None
-    tid("act-earth").click()
+    more("act-earth")
     pg.wait_for_timeout(2500)
     shot("12_earth_end")
     res["console_errors"] = [e for e in errs if "arcgisonline" not in e and "carto" not in e][:10]

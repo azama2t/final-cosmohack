@@ -59,12 +59,14 @@ PARAMS: dict = {
     "zone": set(), "metrics": set(), "query_list": set(), "query_get": set(), "query_run": set(),
     "query_add": set(), "query_delete": set(),
     "export": None,  # checked inside (depends on layer / query_id)
-    "scene_zones": None, "defense_examples": set(), "scene_zone": set(), "sz_scenes": set(), "sz_scene_png": set(), "sz_crop": set(),  # 3.10
+    "scene_zones": None, "defense_examples": set(), "region_dynamics": set(), "scene_zone": set(), "sz_scenes": set(), "sz_scene_png": set(), "sz_crop": set(),  # 3.10
 }
 _SZ_P = {"bbox", "date_from", "date_to", "status", "detection_status", "concentration_status", "scene_kind",
          "scene_key", "limit", "offset",
          # jury 12:56 T5: the UI's «Акватория» (field source) / profile / scope reach the zone export too; + region, is_find
-         "source", "profile", "scope", "region", "is_find"}
+         "source", "profile", "scope", "region", "is_find",
+         "organic",  # §51 п.9 (L143): likely_organic true | false
+         "alert_level"}  # §51 п.7/п.10 (docs/ALERTS.md): слабый | средний | высокий
 PARAMS["scene_zones"] = _SZ_P
 ALIASES = {"sources": "source", "profiles": "profile", "scopes": "scope", "statuses": "status", "missions": "mission"}
 
@@ -190,12 +192,18 @@ def _sz_filters(q: dict) -> dict:
             "scopes": cs.parse_list(q.get("scope"), "scope", cs.SCOPE_IDS),
             "regions": cs.parse_list(q.get("region"), "region", [r["id"] for r in cs.sz_regions()]),
             "is_find": {None: None, "": None, "true": True, "1": True, "false": False, "0": False}.get(
-                q.get("is_find"), "bad")}
+                q.get("is_find"), "bad"),
+            "organic": {None: None, "": None, "true": True, "1": True, "false": False, "0": False}.get(
+                q.get("organic"), "bad"),
+            # §51 п.7/п.10 (docs/ALERTS.md)
+            "alert_levels": cs.parse_list(q.get("alert_level"), "alert_level", ["слабый", "средний", "высокий"])}
 
 
 def _sz_check(f: dict) -> dict:
     if f["is_find"] == "bad":
         raise ApiError(400, "BAD_PARAM", "is_find: true | false", {"param": "is_find", "allowed": ["true", "false"]})
+    if f.get("organic") == "bad":
+        raise ApiError(400, "BAD_PARAM", "organic: true | false", {"param": "organic", "allowed": ["true", "false"]})
     return f
 
 
@@ -526,6 +534,16 @@ def scene_zones(request: Request):
     fc = cs.scene_zones_fc(feats[offset:offset + limit], field_filter=_sz_field_filter(szf))
     fc["total"], fc["offset"], fc["limit"] = len(feats), offset, limit
     return _ok(fc)
+
+
+@router.get("/regions/{region_id}/dynamics", summary="Динамика района по датам снимков (§51 п.3)")
+@api
+def region_dynamics(region_id: str):
+    d = cs.region_dynamics(region_id)
+    if d is None:
+        raise ApiError(404, "NO_REGION", f"Нет района {region_id}",
+                       {"region": region_id, "allowed": [r["id"] for r in cs.sz_regions()]})
+    return _ok(d)
 
 
 @router.get("/defense_examples", summary="5 обязательных примеров для защиты (рабочий режим карты)")

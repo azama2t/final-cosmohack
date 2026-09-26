@@ -2318,6 +2318,306 @@ def _sz_status39(p: dict, idx: dict) -> None:
     p["quantity_line"] = SZ_QUANTITY["label"]
 
 
+# ------------------------------------------------------------------ §51 п.2 / п.4 / п.5 / п.3 (scene zones)
+S51_TRUST = "независимая оценка по полю, не по снимку"
+S51_AREA_NOTE = "площадь, не предметы"
+S51_BASIN_NOTE = "профиль акватории по полевым данным — не измерение этого участка"
+
+
+def _s51_cfg() -> dict:
+    cfg = zone_estimate_cfg() or {}
+    return {"large_km2": float(cfg.get("large_mask_km2", 0.1)), "large_axis_m": float(cfg.get("large_axis_m", 500)),
+            "region_km": float(cfg.get("field_region_km", 50)),
+            "max_days": int(cfg.get("field_max_days", 2))}
+
+
+def _s51_field_points() -> list[dict]:
+    """Organisers' field densities C = N/A (not single items) with coordinates; cached on the samples object."""
+    fields, rows = samples_raw()
+    key = ("s51pts", id(rows))
+    with _lock:
+        hit = _cache.get("s51pts")
+        if hit and hit[0] == key:
+            return hit[1]
+    pts = []
+    for r in rows:
+        if r.get("record_type") == "item_observation":
+            continue
+        c, lat, lon = fnum(r.get("concentration_items_km2")), fnum(r.get("latitude")), fnum(r.get("longitude"))
+        if c is None or lat is None or lon is None:
+            continue
+        pts.append({"sample_id": r.get("sample_id"), "source_id": r.get("source_id"), "lat": lat, "lon": lon,
+                    "date": (r.get("date_utc") or "")[:10] or None, "c": c,
+                    "profile": r.get("measurement_profile") or None, "size_class": r.get("size_class") or None,
+                    "method": r.get("sampling_method") or None})
+    with _lock:
+        _cache["s51pts"] = (key, pts)
+    return pts
+
+
+def _km(lon1, lat1, lon2, lat2) -> float:
+    import math as _m
+    kx = 111.32 * _m.cos(_m.radians((lat1 + lat2) / 2))
+    return _m.hypot((lon1 - lon2) * kx, (lat1 - lat2) * 110.57)
+
+
+def _geom_center(g) -> tuple:
+    b = _geom_bounds(g) if g else None
+    return ((b[0] + b[2]) / 2, (b[1] + b[3]) / 2) if b else (None, None)
+
+
+def _n_accepted_pairs() -> int:
+    pa = pairs_all()
+    key = ("s51acc", id(pa))
+    hit = _cache.get("s51acc")
+    if hit and hit[0] == key:
+        return hit[1]
+    n = sum(1 for q in pa if q.get("status") == "accepted")
+    _cache["s51acc"] = (key, n)
+    return n
+
+
+def field_near(lon, lat, date: Optional[str] = None, max_days: Optional[int] = None) -> dict:
+    """Nearest organisers' field density to a point (optionally within ±max_days of `date`)."""
+    import numpy as _np
+    sc = _s51_cfg()
+    pts = _s51_field_points()
+    if date and max_days is not None:
+        d0 = dt.date.fromisoformat(date[:10])
+        pts = [q for q in pts if q["date"] and abs((dt.date.fromisoformat(q["date"]) - d0).days) <= max_days]
+    if not pts:
+        return {"point": None, "distance_km": None, "region_km": sc["region_km"]}
+    if pts is _s51_field_points():  # no date filter: cached coordinate arrays
+        hit = _cache.get("s51arr")
+        if not hit or hit[0] is not pts:
+            hit = (pts, _np.array([q["lon"] for q in pts]), _np.array([q["lat"] for q in pts]))
+            _cache["s51arr"] = hit
+        lo, la = hit[1], hit[2]
+    else:
+        lo = _np.array([q["lon"] for q in pts])
+        la = _np.array([q["lat"] for q in pts])
+    km = _np.hypot((lo - lon) * 111.32 * _np.cos(_np.radians((la + lat) / 2)), (la - lat) * 110.57)
+    i = int(_np.argmin(km))
+    return {"point": pts[i], "distance_km": round(float(km[i]), 1), "region_km": sc["region_km"]}
+
+
+def _sz_axes(key: str) -> dict:
+    """§51 п.4: per zone of a scene — the major axis (m) of its detector objects (no buffer): the largest distance
+    between vertices of the objects' convex hull. Cached on the detections file."""
+    import numpy as _np
+    path = PATHS["scene_zones_dir"] / key / "detections.geojson"
+
+    def load(pth):
+        g = _read_json(pth) or {}
+        pts: dict[str, list] = {}
+        for f in g.get("features") or []:
+            zid = (f.get("properties") or {}).get("zone_id")
+            geom = f.get("geometry") or {}
+            if not zid or not geom:
+                continue
+
+            def walk(c):
+                if isinstance(c, (list, tuple)) and c and isinstance(c[0], (int, float)):
+                    pts.setdefault(zid, []).append(c[:2])
+                elif isinstance(c, (list, tuple)):
+                    for x in c:
+                        walk(x)
+            walk(geom.get("coordinates"))
+        out = {}
+        for zid, pp in pts.items():
+            a = _np.array(pp, float)
+            lat0 = a[:, 1].mean()
+            xy = _np.c_[(a[:, 0] - a[:, 0].mean()) * 111320 * _np.cos(_np.radians(lat0)), (a[:, 1] - lat0) * 110570]
+            if len(xy) > 3:
+                try:
+                    from scipy.spatial import ConvexHull
+                    xy = xy[ConvexHull(xy).vertices]
+                except Exception:
+                    pass
+            d = _np.sqrt(((xy[:, None, :] - xy[None, :, :]) ** 2).sum(-1)).max() if len(xy) > 1 else 0.0
+            out[zid] = round(float(d), 1)
+        return out
+    return _cached(f"szax:{key}", path, load) or {}
+
+
+def _basins() -> list[dict]:
+    return list((zone_estimate_cfg() or {}).get("field_basins") or [])
+
+
+def _in_basin(lon, lat, b: dict) -> bool:
+    bb = b["bbox"]
+    if not (bb[0] <= lon <= bb[2] and bb[1] <= lat <= bb[3]):
+        return False
+    return not any(e[0] <= lon <= e[2] and e[1] <= lat <= e[3] for e in b.get("exclude") or [])
+
+
+def _boot_ratio(n, a, groups, reps: int = 2000, seed: int = 0) -> tuple:
+    """95 % cluster bootstrap (clusters = days) of ΣN/ΣA."""
+    import numpy as _np
+    n, a, groups = _np.asarray(n, float), _np.asarray(a, float), _np.asarray(groups)
+    ug = _np.unique(groups)
+    if len(ug) < 2:
+        return None, None
+    idx = {g: _np.where(groups == g)[0] for g in ug}
+    sn = _np.array([n[idx[g]].sum() for g in ug])
+    sa = _np.array([a[idx[g]].sum() for g in ug])
+    rng = _np.random.default_rng(seed)
+    k = rng.integers(0, len(ug), (reps, len(ug)))
+    r = sn[k].sum(1) / sa[k].sum(1)
+    return float(_np.percentile(r, 2.5)), float(_np.percentile(r, 97.5))
+
+
+def basin_profile(basin_id: str) -> Optional[dict]:
+    """§51 п.2: the field profile of a sea / basin — organisers' densities (same sea_area) or else ADIS segments inside
+    the basin box (minus exclusions). ΣN/ΣA, median, 95 % bootstrap over days, n, years."""
+    import numpy as _np
+    b = next((x for x in _basins() if x.get("id") == basin_id), None)
+    if not b:
+        return None
+    key = ("basin", basin_id, id(zone_estimate_cfg()), id(samples_raw()[1]))
+    hit = _cache.get(f"basin:{basin_id}")
+    if hit and hit[0] == key:
+        return hit[1]
+    res = None
+    rows = [r for r in samples_raw()[1] if r.get("record_type") != "item_observation"
+            and (r.get("sea_area") or "") in (b.get("organizer_sea_areas") or [])
+            and fnum(r.get("concentration_items_km2")) is not None and fnum(r.get("sampled_area_km2"))]
+    if len(rows) >= int(b.get("min_n", 5)):
+        c = [fnum(r["concentration_items_km2"]) for r in rows]
+        a = [fnum(r["sampled_area_km2"]) for r in rows]
+        n = [ci * ai for ci, ai in zip(c, a)]
+        g = [(r.get("date_utc") or "")[:10] for r in rows]
+        src = sorted({r.get("source_id") for r in rows})
+        res = {"source": "; ".join(dict(SOURCES).get(x, x) for x in src), "source_kind": "organizers",
+               "method": "полевой счёт организаторов (визуально/трал), C = N/A",
+               "size_class": "; ".join(sorted({r.get("size_class") or "" for r in rows} - {""})),
+               "pts": [(fnum(r["longitude"]), fnum(r["latitude"])) for r in rows], "c": c, "n": n, "a": a, "g": g}
+    else:
+        path = REPO / "data" / "extra" / "field" / "adis_s2_match.csv"
+        if path.is_file():
+            import pandas as _pd
+            d = _cached("adis_match", path, lambda pth: _pd.read_csv(pth, low_memory=False))
+            m = [_in_basin(x, y, b) for x, y in zip(d.Longitude.values, d.Latitude.values)]
+            x = d[_np.array(m, bool)]
+            x = x[x.area_scanned_km2 > 0]
+            if len(x) >= int(b.get("min_n", 5)):
+                res = {"source": "ADIS (4TU.ResearchData, судовая камера)", "source_kind": "adis",
+                       "method": "судовая камера ADIS, предметы > 5 см, C = N/A отрезка", "size_class": "> 5 см",
+                       "pts": list(zip(x.Longitude.astype(float), x.Latitude.astype(float))),
+                       "c": list((x["n_objects>5cm"] / x.area_scanned_km2).astype(float)),
+                       "n": list(x["n_objects>5cm"].astype(float)), "a": list(x.area_scanned_km2.astype(float)),
+                       "g": list(x.date.astype(str).str[:10])}
+    out = None
+    if res:
+        lo, hi = _boot_ratio(res["n"], res["a"], res["g"])
+        years = sorted({g[:4] for g in res["g"] if g})
+        pooled = sum(res["n"]) / sum(res["a"])
+        out = {"basin": basin_id, "basin_name": b.get("name"), "source": res["source"], "source_kind": res["source_kind"],
+               "method": res["method"], "size_class": res["size_class"], "n": len(res["c"]),
+               "n_days": len(set(res["g"])), "years": f"{years[0]}–{years[-1]}" if len(years) > 1 else (years[0] if years else None),
+               "pooled_items_km2": round(pooled, 3), "median_items_km2": round(float(_np.median(res["c"])), 3),
+               "lo95": None if lo is None else round(lo, 3), "hi95": None if hi is None else round(hi, 3),
+               "interval_label": "95 % бутстреп по дням (ΣN/ΣA)", "_pts": _np.array(res["pts"], float)}
+    _cache[f"basin:{basin_id}"] = (key, out)
+    return out
+
+
+def _basin_for(region: Optional[str]) -> Optional[dict]:
+    return next((b for b in _basins() if region in (b.get("regions") or [])), None)
+
+
+def _sz_field_estimate(f: dict, p: dict, adis_items: list) -> dict:
+    """§51 п.2: the independent field estimate for the zone + units (items/km2 default; area metrics = area, not items)."""
+    sc = _s51_cfg()
+    lon, lat = _geom_center(f.get("geometry"))
+    near = field_near(lon, lat) if lon is not None else {"point": None, "distance_km": None}
+    q, d = near["point"], near["distance_km"]
+    src = dict(SOURCES)
+    fe = {"unit": "items/km2", "trust_note": S51_TRUST, "region_km": sc["region_km"],
+          "method_note": "C = N/A полевого счёта организаторов (штуки на обследованную площадь); снимок в оценке не участвует",
+          "value": None, "date": None, "distance_km": d, "profile": None, "source": None, "source_id": None,
+          "sample_id": None, "in_region": False, "reason": None, "basis": None, "lo": None, "hi": None,
+          "basin_profile": None, "profile_note": None,
+          "nearest": None}
+    if q:
+        fe["nearest"] = {"sample_id": q["sample_id"], "source_id": q["source_id"], "source": src.get(q["source_id"], q["source_id"]),
+                         "date": q["date"], "distance_km": d, "value": q["c"], "profile": q["profile"]}
+    if q and d is not None and d <= sc["region_km"]:
+        fe.update({"basis": "nearest_record", "value": q["c"], "date": q["date"], "profile": q["profile"], "source_id": q["source_id"],
+                   "source": src.get(q["source_id"], q["source_id"]), "sample_id": q["sample_id"], "in_region": True})
+        fe["label"] = (f"По полю: {fmt_num(q['c'])} шт./км² ({src.get(q['source_id'], q['source_id'])}, {q['date']}, "
+                       f"{d:g} км) — {S51_TRUST}")
+    elif lon is not None and (bp := basin_profile((_basin_for(p.get("region")) or {}).get("id", ""))) is not None:
+        import numpy as _np
+        pts = bp["_pts"]
+        dk = _np.hypot((pts[:, 0] - lon) * 111.32 * _np.cos(_np.radians(lat)), (pts[:, 1] - lat) * 110.57).min()
+        prof = {k: v for k, v in bp.items() if not k.startswith("_")}
+        prof["nearest_km"] = round(float(dk), 1)
+        itv = f" [{fmt_num(bp['lo95'])}–{fmt_num(bp['hi95'])}]" if bp["lo95"] is not None else ""
+        fe.update({"value": bp["pooled_items_km2"], "lo": bp["lo95"], "hi": bp["hi95"], "basis": "basin_profile",
+                   "profile": bp["size_class"], "source": bp["source"], "date": bp["years"], "distance_km": prof["nearest_km"],
+                   "basin_profile": prof, "profile_note": S51_BASIN_NOTE})
+        fe["label"] = (f"По полю: {fmt_num(bp['pooled_items_km2'])}{itv} шт./км² — {S51_BASIN_NOTE} "
+                       f"({bp['basin_name']}; {bp['source']}, {bp['size_class']}; n = {bp['n']}, {bp['years']}; "
+                       f"ближайшее измерение — {prof['nearest_km']:g} км)")
+    else:
+        ad = min((it.get("distance_km") for it in adis_items or [] if it.get("distance_km") is not None), default=None)
+        bn = (_basin_for(p.get("region")) or {}).get("name")
+        fe["reason"] = ("в районе полевых измерений нет: ближайшее полевое измерение организаторов — "
+                        + (f"{src.get(q['source_id'], q['source_id'])}, {d:g} км" if q else "нет")
+                        + (f"; ближайший отрезок ADIS — {ad:g} км" if ad is not None else "")
+                        + f" (район — до {sc['region_km']:g} км); "
+                        + (f"профиля акватории нет: в акватории «{bn}» полевых измерений меньше порога" if bn
+                           else "акватория района в конфиге не задана — профиля нет"))
+        fe["label"] = "По полю: нет измерений в районе — " + fe["reason"].split(": ", 1)[1]
+    area, m = p.get("area_km2"), p.get("measured") or {}
+    det_m2, water = p.get("detected_area_m2"), m.get("water_km2") or area
+    a_per = round(det_m2 / water, 1) if det_m2 is not None and water else None
+    units = {"default": "items_km2",
+             "items_km2": fe["value"], "items_km2_basis": ({"nearest_record": "поле: запись в районе (независимая оценка)",
+                                                            "basin_profile": S51_BASIN_NOTE}.get(fe["basis"])),
+             "area_m2_per_km2": a_per, "coverage_pct": None if a_per is None else round(a_per / 1e4, 4),
+             "area_basis": "площадь маски детектора / пригодная вода контура зоны", "area_note": S51_AREA_NOTE}
+    return fe, units
+
+
+def fmt_num(x) -> str:
+    if x is None:
+        return "—"
+    return f"{x:.0f}" if abs(x) >= 10 else f"{x:.2g}"
+
+
+def sz_large(p: dict) -> tuple:
+    """§51 п.4: a find with the detector mask area (pixels, no buffer) >= large_mask_km2 OR the major axis of its
+    detector objects >= large_axis_m (configs/zone_estimate.yaml). -> (is_large, large_reason, axis_m)."""
+    sc = _s51_cfg()
+    ax = _sz_axes(p["scene_key"]).get(p["zone_id"])
+    if not p.get("is_find"):
+        return False, None, ax
+    mk = (p.get("detected_area_m2") or 0) / 1e6
+    why = []
+    if mk >= sc["large_km2"]:
+        why.append(f"площадь маски {mk:.3f} км² ≥ {sc['large_km2']:g} км²")
+    if ax is not None and ax >= sc["large_axis_m"]:
+        why.append(f"большая ось {ax:.0f} м ≥ {sc['large_axis_m']:g} м")
+    return bool(why), ("; ".join(why) or None), ax
+
+
+def _alerts():
+    from src.macroplastic.case import alerts as A
+    return A
+
+
+def _sz_alerts(f: dict, p: dict) -> dict:
+    """§51 п.6/п.7/п.10 — rule in docs/ALERTS.md, code in src/macroplastic/case/alerts.py (shared with
+    scripts/case/alerts.py). New fields only — does not touch is_large/field_estimate (§51 п.2/п.4, L131)."""
+    lon, lat = _geom_center(f.get("geometry"))
+    return _alerts().zone_alert(
+        is_find=bool(p.get("is_find")), area_km2=p.get("area_km2"), large_km2=_s51_cfg()["large_km2"],
+        lon=lon, lat=lat, region=p.get("region"), date=(p.get("datetime") or "")[:10] or None,
+        confirmed=p.get("verification") == "level_B_cozar")
+
+
 def _sz_enrich(f: dict, idx: dict) -> dict:
     import copy
     f = copy.deepcopy(f)
@@ -2382,6 +2682,11 @@ def _sz_enrich(f: dict, idx: dict) -> dict:
         p["concentration_label"] = SZ_RE_LABEL
     # аудит В16 / §33а п.3: a zone carries no items/km2 of another place (ADIS segments 521–9 848 km away): only the
     # nearest organisers' field record (id + distance), the same as the card and the CSV
+    # §51 п.2 / п.4: independent field estimate + units; «крупное скопление»
+    p["field_estimate"], p["units"] = _sz_field_estimate(f, p, (p.get("field_nearby") or {}).get("items") or [])
+    p["quantity_by_image"] = f"не определено (принятых пар {_n_accepted_pairs()})"
+    p["is_large"], p["large_reason"], p["major_axis_m"] = sz_large(p)
+    p.update(_sz_alerts(f, p))  # §51 п.6/п.7/п.10 (docs/ALERTS.md): shore_km, stranded_pct_72h, importance_rank, alert_level
     nos = (p.get("field_nearby") or {}).get("nearest_organizer_sample")
     p["field_nearby"] = {"nearest_organizer_sample": nos,
                          "note": ("ближайшее полевое измерение (CSV организаторов) — только расстояние и ссылка; его шт./км² "
@@ -2399,10 +2704,63 @@ def _sz_enrich(f: dict, idx: dict) -> dict:
     p["crop_url"] = (f"/api/v3/scene_zones/scenes/{p['scene_key']}/crops/{p['zone_id']}.jpg"
                      if p.get("crop_file") else None)
     p["crop_note"] = "слева снимок, справа он же с пикселями детектора (красные; жёлтые — объекты с признаком судна/шва)"
+    _sz_organic(p)
     return f
 
 
+# §51 п.9 (L143, docs/ORGANIC.md): the detector is binary (debris / not) -> organics are not a model class; spectral flag
+# «вероятно органика» (NDVI ≥ 0.20 and FAI > 0, zone medians) — experiment, offline scripts/case/organic_flag.py zones ->
+# data/case/scene_zones/<key>/organic.json; checked on MARIDA val -> reports/organic/val_flag.json
+SZ_ORGANIC_MODEL_NOTE = "органика отдельно не выделяется моделью (детектор бинарный: мусор / нет)"
+
+
+def _fmt2(x) -> str:
+    return f"{x:.2f}".replace(".", ",")
+
+
+def _sz_organic_val() -> Optional[str]:
+    v = _cached("organic_val", REPO / "reports" / "organic" / "val_flag.json", _read_json) or {}
+    c = v.get("classes") or {}
+    try:
+        md, ds, ss, nom = (c[k] for k in ("Marine Debris", "Dense Sargassum", "Sparse Sargassum", "Natural Organic Material"))
+        return (f"проверка MARIDA val (объекты): мусор помечен {md['flag_obj']}/{md['objects']}, саргассум "
+                f"{ds['flag_obj'] + ss['flag_obj']}/{ds['objects'] + ss['objects']}, прочая органика {nom['flag_obj']}/{nom['objects']}")
+    except (KeyError, TypeError):
+        return None
+
+
+def _sz_organic(p: dict) -> None:
+    doc = _cached(f"sz_org:{p.get('scene_key')}", PATHS["scene_zones_dir"] / str(p.get("scene_key")) / "organic.json",
+                  _read_json) or {}
+    z = (doc.get("zones") or {}).get(p.get("zone_id")) or {}
+    lo = z.get("likely_organic")
+    val = _sz_organic_val()
+    if lo is None:
+        line = None if p.get("detection_status") == "not_detected" else "Органика: не оценивалась (флаг не посчитан)"
+    elif lo:
+        line = f"Органика: вероятно органика (водоросли) — NDVI {_fmt2(z['ndvi_median'])} ≥ 0,20, эксперимент"
+    else:
+        line = (f"Органика: признака водорослей нет (NDVI {_fmt2(z['ndvi_median'])} < 0,20), эксперимент; "
+                "древесину и прочую органику флаг не различает")
+    p["likely_organic"] = lo
+    p["organic"] = {"likely_organic": lo, "ndvi_median": z.get("ndvi_median"), "fai_median": z.get("fai_median"),
+                    "organic_px_share": z.get("organic_px_share"), "n_px": z.get("n_px"),
+                    "label": line, "experiment": True, "experiment_label": "эксперимент",
+                    "rule": doc.get("rule") or "NDVI ≥ 0,20 и FAI > 0 (медианы по пикселям детекции зоны)",
+                    "sources": doc.get("sources"), "model_note": SZ_ORGANIC_MODEL_NOTE, "validation": val,
+                    "doc": "docs/ORGANIC.md"}
+    cl = p.get("classification")
+    if lo is not None and isinstance(cl, dict):  # «Не проверяется: водоросли/саргассум» -> result of the flag
+        cl["not_checked_backgrounds"] = [b for b in (cl.get("not_checked_backgrounds") or []) if b != "algae_sargassum"]
+        cl["not_checked_label"] = ("Не проверяется: " + ", ".join(SZ_NOT_CHECKED[b] for b in cl["not_checked_backgrounds"])
+                                   + " (модель органику отдельно не выделяет)") if cl["not_checked_backgrounds"] else None
+        cl["organic_label"] = line
+
+
 def scene_zones_all() -> list[dict]:
+    memo = _REQ_MEMO.get()  # one build per request (meta / regions / scene stats call it several times)
+    if memo is not None and "sz_all" in memo:
+        return memo["sz_all"]
     idx = scene_zones_index()
     out = []
     for s in idx.get("scenes") or []:
@@ -2410,16 +2768,55 @@ def scene_zones_all() -> list[dict]:
             continue
         out.extend(_sz_enrich(f, idx) for f in _sz_scene_zones(s["key"]))
     out.sort(key=lambda f: f["id"])
+    if memo is not None:
+        memo["sz_all"] = out
+    return out
+
+
+def sz_scene_stats(feats: Optional[list] = None) -> dict:
+    """§51 п.4 / п.5: per scene — finds, large finds, the integral (total find area, mask area, valid water, coverage)."""
+    feats = scene_zones_all() if feats is None else feats
+    st: dict[str, dict] = {}
+    for f in feats:
+        p = f["properties"]
+        if not p.get("is_find"):
+            continue
+        d = st.setdefault(p["scene_key"], {"n_finds": 0, "n_large": 0, "large_area_km2": 0.0,
+                                           "total_find_area_km2": 0.0, "find_mask_m2": 0.0})
+        a = p.get("area_km2") or 0.0
+        d["n_finds"] += 1
+        d["total_find_area_km2"] += a
+        d["find_mask_m2"] += p.get("detected_area_m2") or 0.0
+        if p.get("is_large"):
+            d["n_large"] += 1
+            d["large_area_km2"] += a  # zone contour area of the large finds
+    out = {}
+    for s_ in scene_zones_index().get("scenes") or []:
+        d = st.get(s_["key"], {"n_finds": 0, "n_large": 0, "large_area_km2": 0.0, "total_find_area_km2": 0.0,
+                               "find_mask_m2": 0.0})
+        ev = bool(s_.get("evaluable"))
+        vw = fnum(s_.get("water_km2"))  # valid water of the snapshot crop (quality mask), not the observed-area part
+        mk = d["find_mask_m2"] / 1e6
+        out[s_["key"]] = {
+            "n_finds": d["n_finds"] if ev else None, "n_large": d["n_large"] if ev else None,
+            "large_area_km2": round(d["large_area_km2"], 4) if ev else None,
+            "large_threshold_km2": _s51_cfg()["large_km2"], "large_axis_m": _s51_cfg()["large_axis_m"],
+            "total_find_area_km2": round(d["total_find_area_km2"], 4) if ev else None,
+            "find_mask_area_km2": round(mk, 4) if ev else None,
+            "valid_water_km2": None if vw is None else round(vw, 3),
+            "coverage_pct": (round(mk / vw * 100, 4) if ev and vw else None),
+            "integral_note": ("площадь, не число предметов: сумма площадей контуров находок (кластер + 150 м) и доля "
+                              "пикселей маски детектора в пригодной воде снимка" if ev else
+                              "снимок не оценивается — интегральной оценки нет"),
+            "evaluable": ev}
     return out
 
 
 def sz_scenes() -> list[dict]:
     """Scene records of the layer, in the /scenes shape (preview + quality overlay on bounds)."""
     out = []
-    nf: dict[str, int] = {}
-    for f in scene_zones_all():
-        if f["properties"].get("is_find"):
-            nf[f["properties"]["scene_key"]] = nf.get(f["properties"]["scene_key"], 0) + 1
+    stats = sz_scene_stats()
+    nf = {k: v["n_finds"] or 0 for k, v in stats.items()}
     for s in scene_zones_index().get("scenes") or []:
         if s.get("error"):
             continue
@@ -2443,7 +2840,9 @@ def sz_scenes() -> list[dict]:
                     "by_status": s.get("by_status"), "model": s.get("model"),
                     # §34 п.3: «район · дата · N находок»
                     "region_short": sz_region_short(s.get("region"), s.get("region_name")),
-                    "n_finds": nf.get(s["key"], 0)})
+                    "n_finds": nf.get(s["key"], 0),
+                    # §51 п.4 / п.5
+                    **{k: v for k, v in (stats.get(s["key"]) or {}).items() if k not in ("n_finds", "evaluable")}})
     return out
 
 
@@ -2486,7 +2885,70 @@ def sz_regions() -> list[dict]:
         if r:
             r["n_zones"] += 1
             r["n_finds"] += 1 if p.get("is_find") else 0
+    stats = sz_scene_stats()
+    for r in by.values():  # §51 п.5: the region integral
+        d = region_dynamics(r["id"], stats)
+        r["integral"] = d["summary"] if d else None
     return sorted(by.values(), key=lambda r: (-r["n_finds"], r["short"]))
+
+
+def _region_integral(rows: list[dict]) -> dict:
+    """§51 п.5: the region integral over its evaluable snapshots (sum over dates, the same water is re-observed)."""
+    ev = [r for r in rows if r["evaluable"]]
+    mk = sum(r["find_mask_area_km2"] or 0 for r in ev)
+    vw = sum(r["valid_water_km2"] or 0 for r in ev)
+    last = ev[-1] if ev else None
+    return {"n_snapshots": len(rows), "n_evaluable": len(ev), "n_finds": sum(r["n_finds"] or 0 for r in ev),
+            "n_large": sum(r["n_large"] or 0 for r in ev),
+            "total_find_area_km2": round(sum(r["total_find_area_km2"] or 0 for r in ev), 4),
+            "find_mask_area_km2": round(mk, 4), "valid_water_km2": round(vw, 3),
+            "coverage_pct": round(mk / vw * 100, 4) if vw else None,
+            "last_date": last["date"] if last else None,
+            "last_total_find_area_km2": last["total_find_area_km2"] if last else None,
+            "last_coverage_pct": last["coverage_pct"] if last else None,
+            "note": ("площадь, не число предметов; суммы — по всем оцениваемым снимкам района (одна и та же вода "
+                     "наблюдается в разные даты, это не площадь района); доля покрытия = пиксели маски находок / "
+                     "пригодная вода этих снимков")}
+
+
+def region_dynamics(region_id: str, stats: Optional[dict] = None) -> Optional[dict]:
+    """§51 п.3: per snapshot date of a region — finds, find area, mask coverage, cloudiness, the field density of that
+    date (±field_max_days, within field_region_km) where it exists."""
+    scenes = [x for x in scene_zones_index().get("scenes") or [] if x.get("region") == region_id and not x.get("error")]
+    if not scenes:
+        return None
+    sc = _s51_cfg()
+    stats = sz_scene_stats() if stats is None else stats
+    src = dict(SOURCES)
+    rows = []
+    for x in sorted(scenes, key=lambda x: (x.get("datetime") or "", x["key"])):
+        st = stats.get(x["key"]) or {}
+        b = x.get("bounds")
+        lon, lat = ((b[0] + b[2]) / 2, (b[1] + b[3]) / 2) if b else (None, None)
+        fn = field_near(lon, lat, x.get("datetime") or x.get("date"), sc["max_days"]) if lon is not None else {}
+        q, d = fn.get("point"), fn.get("distance_km")
+        ok = bool(q and d is not None and d <= sc["region_km"])
+        rows.append({
+            "scene_key": x["key"], "date": x.get("date"), "datetime": x.get("datetime"), "scene_kind": x.get("kind"),
+            "scene_id": x.get("scene_id"), "evaluable": bool(x.get("evaluable")),
+            "not_evaluated_reason": x.get("not_evaluated_reason") or (
+                None if x.get("evaluable") else ("низкое солнце" if x.get("low_sun") else "слабый сигнал воды")),
+            "cloud_pct": _sz_src_scene(x).get("crop_cloud_pct"),
+            **{k: st.get(k) for k in ("n_finds", "n_large", "large_area_km2", "total_find_area_km2",
+                                       "find_mask_area_km2", "valid_water_km2", "coverage_pct")},
+            "field_items_km2": q["c"] if ok else None,
+            "field": ({"value": q["c"], "date": q["date"], "distance_km": d, "source": src.get(q["source_id"], q["source_id"]),
+                       "sample_id": q["sample_id"], "profile": q["profile"], "trust_note": S51_TRUST} if ok else None),
+            "field_reason": None if ok else (
+                f"полевых измерений в пределах {sc['region_km']:g} км и ±{sc['max_days']} сут от снимка нет")})
+    name = scenes[0].get("region_name") or region_id
+    return {"region": region_id, "label": name, "short": sz_region_short(region_id, scenes[0].get("region_name")),
+            "count": len(rows), "rows": rows, "summary": _region_integral(rows),
+            "params": {"field_region_km": sc["region_km"], "field_max_days": sc["max_days"],
+                       "large_zone_km2": sc["large_km2"]},
+            "units": {"area": "км²", "coverage": "%", "field": "шт./км²"},
+            "note": ("находки и площади — по снимку (площадь, не предметы); шт./км² — только полевые записи "
+                     "организаторов той же даты (±2 сут) в районе — независимая оценка по полю, не по снимку")}
 
 
 def sz_crop(key: str, zone_id: str) -> Optional[Path]:
@@ -2694,7 +3156,7 @@ def sz_file(key: str, name: str) -> Optional[Path]:
 
 def filter_scene_zones(bbox=None, date_from=None, date_to=None, detection_statuses=None, concentration_statuses=None,
                        scene_kinds=None, scene_key=None, statuses=None, sources=None, profiles=None, scopes=None,
-                       regions=None, is_find=None) -> list[dict]:
+                       regions=None, is_find=None, organic=None, alert_levels=None) -> list[dict]:
     """One filter for the list, the export and saved queries. sources/profiles/scopes are attributes of field records:
     satellite zones have none, so any of them -> no zones (the same as the v2 UI, jury 12:56 T5)."""
     if sources or profiles or scopes:
@@ -2707,6 +3169,10 @@ def filter_scene_zones(bbox=None, date_from=None, date_to=None, detection_status
         if regions and p["region"] not in regions:
             continue
         if is_find is not None and bool(p.get("is_find")) != is_find:
+            continue
+        if organic is not None and p.get("likely_organic") is not bool(organic):  # §51 п.9: True/False; None zones drop
+            continue
+        if alert_levels and p.get("alert_level") not in alert_levels:  # §51 п.7/п.10 (docs/ALERTS.md)
             continue
         if scene_kinds and p["scene_kind"] not in scene_kinds:
             continue
@@ -2779,6 +3245,14 @@ SZ_COLS = ["zone_id", "scene_key", "scene_kind", "scene_id", "region", "title", 
            "research_n_items_lo", "research_n_items_hi", "research_items_per_pixel_lo", "research_items_per_pixel_hi",
            "research_estimate_reason", "research_estimate_muted",
            "field_nearest_sample_id", "field_nearest_km",
+           # §51 п.2 / п.4 / п.9
+           "is_large", "large_reason", "major_axis_m", "field_basis", "field_lo", "field_hi", "quantity_by_image", "field_in_region", "field_value_items_km2", "field_date", "field_distance_km",
+           "field_profile", "field_source", "field_trust_note", "field_reason", "area_m2_per_km2", "coverage_pct",
+           "area_note",
+           "likely_organic", "organic_ndvi_median", "organic_fai_median", "organic_label",
+           # §51 п.6 / п.7 / п.10 (docs/ALERTS.md)
+           "shore_km", "shore_km_reason", "stranded_pct_72h", "drift_reason", "importance_rank", "alert_level",
+           "alert_material", "alert_material_note",
            "model_weights", "model_sha256",
            "threshold", "centroid_lon", "centroid_lat", "kind"]
 
@@ -2791,6 +3265,7 @@ def scene_zones_csv(feats: list[dict]) -> str:
         q, sg, md = m.get("quality") or {}, pr.get("signs") or {}, m.get("model") or {}
         # §33а п.3 / jury 08:51: no items/km2 of another place in the zone export; the same «nearest field» as the card
         nos = (p.get("field_nearby") or {}).get("nearest_organizer_sample") or {}
+        fe, un = p.get("field_estimate") or {}, p.get("units") or {}
         b = _geom_bounds(f["geometry"]) if f.get("geometry") else None
         cen = [round((b[0] + b[2]) / 2, 6), round((b[1] + b[3]) / 2, 6)] if b else [None, None]
         re = p.get("research_estimate") or {}
@@ -2816,6 +3291,14 @@ def scene_zones_csv(feats: list[dict]) -> str:
                      rn.get("lo"), rn.get("hi"), rpp.get("lo"), rpp.get("hi"),
                      p.get("research_estimate_reason"), re.get("muted") if re else None,
                      nos.get("sample_id"), nos.get("distance_km"),
+                     p.get("is_large"), p.get("large_reason"), p.get("major_axis_m"), fe.get("basis"), fe.get("lo"),
+                     fe.get("hi"), p.get("quantity_by_image"), fe.get("in_region"), fe.get("value"), fe.get("date"),
+                     fe.get("distance_km"), fe.get("profile"), fe.get("source"), fe.get("trust_note"), fe.get("reason"),
+                     un.get("area_m2_per_km2"), un.get("coverage_pct"), un.get("area_note"),
+                     p.get("likely_organic"), (p.get("organic") or {}).get("ndvi_median"),
+                     (p.get("organic") or {}).get("fai_median"), (p.get("organic") or {}).get("label"),
+                     p.get("shore_km"), p.get("shore_km_reason"), p.get("stranded_pct_72h"), p.get("drift_reason"),
+                     p.get("importance_rank"), p.get("alert_level"), p.get("alert_material"), p.get("alert_material_note"),
                      md.get("weights"), md.get("sha256"), md.get("threshold"), cen[0], cen[1], "detection_zone"])
     return _csv(SZ_COLS, rows)
 
