@@ -1,0 +1,91 @@
+[disk] start: 29.5 GB free
+[variants] removed-group sizes: {'E_MINUS_FDI': 9, 'E_MINUS_FAI': 1, 'E_MINUS_NDVI': 8, 'E_MINUS_NDWI': 7, 'E_MINUS_NDMI': 1, 'E_MINUS_SI': 1, 'E_MINUS_BSI': 1, 'E_MINUS_NRD': 1}
+[cache] loading MARIDA val (should be cached already)...
+[disk] after val cache: 29.6 GB free
+[cache] building MARIDA train features (one-time, no S2 redownload, local MARIDA patches)...
+[disk] start: 29.6 GB free
+[disk] start: 29.6 GB free
+[disk] start: 29.6 GB free
+[disk] start: 29.6 GB free
+[variants] removed-group sizes: {'E_MINUS_FDI': 9, 'E_MINUS_FAI': 1, 'E_MINUS_NDVI': 8, 'E_MINUS_NDWI': 7, 'E_MINUS_NDMI': 1, 'E_MINUS_SI': 1, 'E_MINUS_BSI': 1, 'E_MINUS_NRD': 1}
+[variants] removed-group sizes: {'E_MINUS_FDI': 9, 'E_MINUS_FAI': 1, 'E_MINUS_NDVI': 8, 'E_MINUS_NDWI': 7, 'E_MINUS_NDMI': 1, 'E_MINUS_SI': 1, 'E_MINUS_BSI': 1, 'E_MINUS_NRD': 1}
+[variants] removed-group sizes: {'E_MINUS_FDI': 9, 'E_MINUS_FAI': 1, 'E_MINUS_NDVI': 8, 'E_MINUS_NDWI': 7, 'E_MINUS_NDMI': 1, 'E_MINUS_SI': 1, 'E_MINUS_BSI': 1, 'E_MINUS_NRD': 1}
+[variants] removed-group sizes: {'E_MINUS_FDI': 9, 'E_MINUS_FAI': 1, 'E_MINUS_NDVI': 8, 'E_MINUS_NDWI': 7, 'E_MINUS_NDMI': 1, 'E_MINUS_SI': 1, 'E_MINUS_BSI': 1, 'E_MINUS_NRD': 1}
+[cache] train: 694 patches, 429412 labelled px, 50.9s
+[disk] after marida train cache: 29.7 GB free
+[cache] building MADOS train/val features (one-time, no S2 redownload, local MADOS patches)...
+[disk] start: 29.7 GB free
+[disk] start: 29.7 GB free
+[disk] start: 29.7 GB free
+[disk] start: 29.7 GB free
+[variants] removed-group sizes: {'E_MINUS_FDI': 9, 'E_MINUS_FAI': 1, 'E_MINUS_NDVI': 8, 'E_MINUS_NDWI': 7, 'E_MINUS_NDMI': 1, 'E_MINUS_SI': 1, 'E_MINUS_BSI': 1, 'E_MINUS_NRD': 1}
+[variants] removed-group sizes: {'E_MINUS_FDI': 9, 'E_MINUS_FAI': 1, 'E_MINUS_NDVI': 8, 'E_MINUS_NDWI': 7, 'E_MINUS_NDMI': 1, 'E_MINUS_SI': 1, 'E_MINUS_BSI': 1, 'E_MINUS_NRD': 1}
+[variants] removed-group sizes: {'E_MINUS_FDI': 9, 'E_MINUS_FAI': 1, 'E_MINUS_NDVI': 8, 'E_MINUS_NDWI': 7, 'E_MINUS_NDMI': 1, 'E_MINUS_SI': 1, 'E_MINUS_BSI': 1, 'E_MINUS_NRD': 1}
+[variants] removed-group sizes: {'E_MINUS_FDI': 9, 'E_MINUS_FAI': 1, 'E_MINUS_NDVI': 8, 'E_MINUS_NDWI': 7, 'E_MINUS_NDMI': 1, 'E_MINUS_SI': 1, 'E_MINUS_BSI': 1, 'E_MINUS_NRD': 1}
+[cache] MADOS train: 1433 patches, 761887 labelled px, 362.7s
+[disk] after mados train cache: 28.5 GB free
+[disk] start: 28.4 GB free
+[disk] start: 28.4 GB free
+[disk] start: 28.4 GB free
+[disk] start: 28.4 GB free
+[variants] removed-group sizes: {'E_MINUS_FDI': 9, 'E_MINUS_FAI': 1, 'E_MINUS_NDVI': 8, 'E_MINUS_NDWI': 7, 'E_MINUS_NDMI': 1, 'E_MINUS_SI': 1, 'E_MINUS_BSI': 1, 'E_MINUS_NRD': 1}
+[variants] removed-group sizes: {'E_MINUS_FDI': 9, 'E_MINUS_FAI': 1, 'E_MINUS_NDVI': 8, 'E_MINUS_NDWI': 7, 'E_MINUS_NDMI': 1, 'E_MINUS_SI': 1, 'E_MINUS_BSI': 1, 'E_MINUS_NRD': 1}
+[variants] removed-group sizes: {'E_MINUS_FDI': 9, 'E_MINUS_FAI': 1, 'E_MINUS_NDVI': 8, 'E_MINUS_NDWI': 7, 'E_MINUS_NDMI': 1, 'E_MINUS_SI': 1, 'E_MINUS_BSI': 1, 'E_MINUS_NRD': 1}
+[variants] removed-group sizes: {'E_MINUS_FDI': 9, 'E_MINUS_FAI': 1, 'E_MINUS_NDVI': 8, 'E_MINUS_NDWI': 7, 'E_MINUS_NDMI': 1, 'E_MINUS_SI': 1, 'E_MINUS_BSI': 1, 'E_MINUS_NRD': 1}
+[cache] MADOS val: 642 patches, 358121 labelled px, 212.6s
+[disk] after mados val cache: 28.2 GB free
+[A_RAW_ONLY s0] nfeat=11 F1=0.9007 thr=0.36 F1@0.63=0.8899 train=10.1s
+[A_RAW_ONLY s1] nfeat=11 F1=0.9020 thr=0.45 F1@0.63=0.8943 train=16.7s
+[A_RAW_ONLY s2] nfeat=11 F1=0.9021 thr=0.43 F1@0.63=0.8951 train=10.6s
+[B_RAW_PLUS_INDICES s0] nfeat=19 F1=0.9027 thr=0.41 F1@0.63=0.9019 train=4.9s
+[B_RAW_PLUS_INDICES s1] nfeat=19 F1=0.9021 thr=0.50 F1@0.63=0.8964 train=5.1s
+[B_RAW_PLUS_INDICES s2] nfeat=19 F1=0.8983 thr=0.42 F1@0.63=0.8937 train=18.4s
+[C_RAW_PLUS_WINDOWS s0] nfeat=40 F1=0.9165 thr=0.75 F1@0.63=0.9132 train=14.5s
+[C_RAW_PLUS_WINDOWS s1] nfeat=40 F1=0.9171 thr=0.36 F1@0.63=0.9155 train=14.6s
+[C_RAW_PLUS_WINDOWS s2] nfeat=40 F1=0.9190 thr=0.40 F1@0.63=0.9156 train=13.2s
+[D_FULL s0] nfeat=48 F1=0.9226 thr=0.63 F1@0.63=0.9226 train=23.4s
+[D_FULL s1] nfeat=48 F1=0.9224 thr=0.45 F1@0.63=0.9176 train=26.8s
+[D_FULL s2] nfeat=48 F1=0.9234 thr=0.39 F1@0.63=0.9208 train=17.9s
+[E_MINUS_FDI s0] nfeat=39 F1=0.9233 thr=0.49 F1@0.63=0.9229 train=7.7s
+[E_MINUS_FDI s1] nfeat=39 F1=0.9227 thr=0.55 F1@0.63=0.9209 train=15.0s
+[E_MINUS_FDI s2] nfeat=39 F1=0.9227 thr=0.59 F1@0.63=0.9220 train=7.1s
+[E_MINUS_FAI s0] nfeat=47 F1=0.9254 thr=0.60 F1@0.63=0.9234 train=7.5s
+[E_MINUS_FAI s1] nfeat=47 F1=0.9241 thr=0.40 F1@0.63=0.9219 train=7.4s
+[E_MINUS_FAI s2] nfeat=47 F1=0.9242 thr=0.42 F1@0.63=0.9211 train=7.7s
+[E_MINUS_NDVI s0] nfeat=40 F1=0.9156 thr=0.42 F1@0.63=0.9104 train=6.4s
+[E_MINUS_NDVI s1] nfeat=40 F1=0.9125 thr=0.33 F1@0.63=0.9088 train=6.3s
+[E_MINUS_NDVI s2] nfeat=40 F1=0.9135 thr=0.41 F1@0.63=0.9067 train=6.4s
+[E_MINUS_NDWI s0] nfeat=41 F1=0.9157 thr=0.73 F1@0.63=0.9144 train=6.6s
+[E_MINUS_NDWI s1] nfeat=41 F1=0.9167 thr=0.66 F1@0.63=0.9150 train=6.7s
+[E_MINUS_NDWI s2] nfeat=41 F1=0.9143 thr=0.32 F1@0.63=0.9109 train=6.6s
+[E_MINUS_NDMI s0] nfeat=47 F1=0.9208 thr=0.41 F1@0.63=0.9175 train=7.2s
+[E_MINUS_NDMI s1] nfeat=47 F1=0.9226 thr=0.54 F1@0.63=0.9194 train=7.3s
+[E_MINUS_NDMI s2] nfeat=47 F1=0.9226 thr=0.51 F1@0.63=0.9174 train=7.2s
+[E_MINUS_SI s0] nfeat=47 F1=0.9232 thr=0.46 F1@0.63=0.9206 train=7.3s
+[E_MINUS_SI s1] nfeat=47 F1=0.9245 thr=0.65 F1@0.63=0.9232 train=7.3s
+[E_MINUS_SI s2] nfeat=47 F1=0.9249 thr=0.50 F1@0.63=0.9201 train=7.5s
+[E_MINUS_BSI s0] nfeat=47 F1=0.9217 thr=0.45 F1@0.63=0.9179 train=7.2s
+[E_MINUS_BSI s1] nfeat=47 F1=0.9217 thr=0.62 F1@0.63=0.9212 train=7.1s
+[E_MINUS_BSI s2] nfeat=47 F1=0.9205 thr=0.34 F1@0.63=0.9169 train=8.6s
+[E_MINUS_NRD s0] nfeat=47 F1=0.9234 thr=0.30 F1@0.63=0.9221 train=7.1s
+[E_MINUS_NRD s1] nfeat=47 F1=0.9233 thr=0.51 F1@0.63=0.9212 train=7.2s
+[E_MINUS_NRD s2] nfeat=47 F1=0.9262 thr=0.39 F1@0.63=0.9220 train=7.4s
+
+=== summary (mean over seeds, best-threshold-on-val) ===
+variant                nfeat      F1       P       R     IoU  F1@0.63
+A_RAW_ONLY                11 0.9016±0.001 0.8902 0.9135 0.8208  0.8931
+B_RAW_PLUS_INDICES        19 0.9010±0.002 0.8986 0.9036 0.8199  0.8973
+C_RAW_PLUS_WINDOWS        40 0.9175±0.001 0.9177 0.9175 0.8476  0.9148
+D_FULL                    48 0.9228±0.000 0.9208 0.9250 0.8567  0.9203
+E_MINUS_FDI               39 0.9229±0.000 0.9215 0.9244 0.8568  0.9219
+E_MINUS_FAI               47 0.9246±0.001 0.9218 0.9274 0.8597  0.9221
+E_MINUS_NDVI              40 0.9139±0.001 0.9084 0.9194 0.8414  0.9086
+E_MINUS_NDWI              41 0.9156±0.001 0.9172 0.9141 0.8443  0.9134
+E_MINUS_NDMI              47 0.9220±0.001 0.9167 0.9274 0.8553  0.9181
+E_MINUS_SI                47 0.9242±0.001 0.9222 0.9262 0.8591  0.9213
+E_MINUS_BSI               47 0.9213±0.001 0.9153 0.9274 0.8541  0.9187
+E_MINUS_NRD               47 0.9243±0.001 0.9173 0.9315 0.8593  0.9218
+
+best by MARIDA val F1: E_MINUS_FAI (0.9246 vs FULL 0.9228, delta=+0.0018)
+REPORT.md -> C:\Users\User\Documents\GitHub\final-cosmohack\reports\cheap_experiments\feature_ablation\REPORT.md
+elapsed: 1088s

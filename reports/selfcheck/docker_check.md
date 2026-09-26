@@ -27,3 +27,8 @@
 3. Первая сборка ≈ 12 мин (скачивание ~2,5 ГБ пакетов), повторная с кэшем ≈ 2 мин, повторный `up` — секунды. macOS/arm64 не проверены: сборка `--platform linux/arm64` не запускалась (нет времени до 00:40); на Apple Silicon образ amd64 пойдёт через эмуляцию — «не проверено на Mac». Linux — те же команды, на этой машине не проверялось.
 
 После проверки: `docker compose down`, `docker builder prune -f`, out/docker_clone удалён; оставлен один образ macroplastic-web:latest.
+
+## Дополнение 27.09 00:44 (INBOX §72)
+- Windows 10 / Docker Desktop, linux/amd64 — **PASS** (выше).
+- Linux — сборка прошла у команды (со слов Фёдора, INBOX §72); запуск нами не проверялся.
+- macOS Apple Silicon — сборка падала на шаге pip (колёса torch для linux/arm64 без метки «+cpu»). Внесена правка Dockerfile (`ARG TARGETARCH`: для arm64 метка снимается), **не проверена**. Рекомендуемый путь на Mac — `DOCKER_DEFAULT_PLATFORM=linux/amd64 docker compose up --build` (эмуляция Rosetta); на Mac нами не запускался.

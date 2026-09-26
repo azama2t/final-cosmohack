@@ -20,7 +20,9 @@ WORKDIR /app
 
 # Exact versions from requirements-lock.txt, PyTorch switched from the CUDA 12.8 wheels to the CPU wheels.
 COPY requirements-lock.txt ./
-RUN sed -e 's#whl/cu128#whl/cpu#' -e 's#+cu128#+cpu#' requirements-lock.txt > /tmp/req-cpu.txt \
+# linux/arm64 (Apple Silicon): CPU wheels on download.pytorch.org have no "+cpu" local tag -> drop the tag (not verified on a Mac).
+ARG TARGETARCH
+RUN if [ "$TARGETARCH" = "arm64" ]; then TAG=''; else TAG='+cpu'; fi  && sed -e 's#whl/cu128#whl/cpu#' -e "s#+cu128#${TAG}#" requirements-lock.txt > /tmp/req-cpu.txt \
  && pip install -r /tmp/req-cpu.txt \
  && rm /tmp/req-cpu.txt
 

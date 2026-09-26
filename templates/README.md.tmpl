@@ -98,6 +98,20 @@ docker compose up --build -d      # сборка образа (CPU) и запу�
 
 Нужен Docker Desktop (Windows / macOS) или Docker Engine с Compose (Linux). Сайт — http://localhost:8070 (API — `/api/v3/meta`, документация — `/docs`). Образ linux/amd64: на Mac с процессором Apple он пойдёт через эмуляцию, **на Mac и на Linux Docker-путь не проверялся**.
 
+### macOS (Apple Silicon M1/M2/M3 и Intel)
+1. Установить и запустить Docker Desktop for Mac.
+2. В терминале:
+```bash
+git clone https://github.com/azama2t/final-cosmohack.git
+cd final-cosmohack
+DOCKER_DEFAULT_PLATFORM=linux/amd64 docker compose up --build
+```
+3. Открыть http://localhost:8070 (первая сборка ~15–25 мин: на Apple Silicon образ linux/amd64 работает через эмуляцию Rosetta). Остановить: `docker compose down`.
+Если в Docker Desktop выключена эмуляция: Settings → General → «Use Rosetta for x86_64/amd64 emulation on Apple Silicon» — включить.
+Порт занят: `PORT=18070 DOCKER_DEFAULT_PLATFORM=linux/amd64 docker compose up --build` → http://localhost:18070.
+(Сборка нативно под linux/arm64 — правка Dockerfile по ошибке с Mac внесена, **не проверена**; проверенный путь на Mac — через `DOCKER_DEFAULT_PLATFORM=linux/amd64`, на Mac нами тоже не запускался.)
+
+
 **б) Windows нативно — проверено** на чистом клоне ([{{case.clean_clone.file}}]({{case.clean_clone.file}}): от `git clone` до карты ≈ {{case.clean_clone.total_min}} мин на CPU). Нужны Python 3.12 (с py launcher), git и место под `.venv` (≈ {{case.clean_clone.venv_gb}} ГБ).
 
 ```powershell
