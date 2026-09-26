@@ -119,7 +119,13 @@ def load_transect(csvdir: Path, file: str, tid: str, date: str) -> dict:
              if "-DD_" not in f.name and "plastiche" not in f.name.lower()]
     if newfs:
         d = pd.concat([pd.read_csv(f, dtype=str).rename(columns=lambda c: c.strip()) for f in newfs], ignore_index=True)
-        d = d[d.COD_Effort == tid].copy()
+        if "|" in tid:  # files where COD_Effort is per point: transect = ID_Transect + date
+            idt, day = tid.split("|")
+            y, m, dd = day.split("-")
+            d = d[(d.ID_Transect == idt) & (pd.to_numeric(d.Year, errors="coerce") == int(y)) & (pd.to_numeric(d.Month, errors="coerce") == int(m))
+                  & (pd.to_numeric(d.Day, errors="coerce") == int(dd))].copy()
+        else:
+            d = d[d.COD_Effort == tid].copy()
         d["lat"], d["lon"] = d.Latitude.map(_num), d.Longitude.map(_num)
         pts = d[d.Cod_Points.isin(["BEG", "START", "LIT", "STOP", "END"])].sort_values("Time")
         line = list(dict.fromkeys(zip(pts.lon.round(6), pts.lat.round(6))))
@@ -364,6 +370,80 @@ def run(workers: int, compare1: int, csvdir: Path, only: str | None):
             pd.DataFrame(rows).sort_values(["n", "variant"]).to_csv(res_fp, index=False)
 
 
+# ------------------------------------------------------------------------------------------------ candidates
+
+def candidates(csvdir: Path, min_items: int, dst: Path, exclude: Path | None, workers: int = 6):
+    """All transects in the converted ISPRA files with >= min_items items -> same-day S2 (Earth Search) -> list csv in the
+    format of ispra_167.csv (rows with a same-day scene only). exclude: an existing list whose (file, transect, date) are skipped."""
+    recs = []
+    for f in sorted(csvdir.glob("*-Macro*Camp*.csv")):
+        if "-DD_" in f.name or "plastiche" in f.name.lower():
+            continue
+        stem = f.name.rsplit("-", 1)[0]
+        d = pd.read_csv(f, dtype=str).rename(columns=lambda c: c.strip())
+        if "COD_Effort" not in d or "Cod_Points" not in d:
+            continue
+        pts_per_eff = d.groupby("COD_Effort").apply(lambda g: g[["Latitude", "Longitude"]].drop_duplicates().shape[0])
+        point_level = bool(len(pts_per_eff)) and (pts_per_eff < 2).mean() > 0.5 and "ID_Transect" in d
+        if point_level:
+            d["_day"] = [f"{int(float(y)):04d}-{int(float(m)):02d}-{int(float(x)):02d}" if all(str(v) not in ("nan", "") for v in (y, m, x)) else ""
+                         for y, m, x in zip(d.Year, d.Month, d.Day)]
+            groups = [(f"{k[0]}|{k[1]}", g) for k, g in d[d._day != ""].groupby(["ID_Transect", "_day"])]
+        else:
+            groups = list(d.groupby("COD_Effort"))
+        for eff, g in groups:
+            try:
+                day = f"{int(float(g.Year.iloc[0])):04d}-{int(float(g.Month.iloc[0])):02d}-{int(float(g.Day.iloc[0])):02d}"
+                lat, lon = g.Latitude.map(_num).mean(), g.Longitude.map(_num).mean()
+            except Exception:  # noqa: BLE001
+                continue
+            recs.append(dict(file=stem, tid=eff, date=day, n_items=int((g.Cod_Points == "LIT").sum()), lat=lat, lon=lon))
+    for f in sorted(csvdir.glob("*-MacroplasticheFlot.csv")):
+        stem = f.name[: -len("-MacroplasticheFlot.csv")]
+        fl = pd.read_csv(f, dtype=str).rename(columns=lambda c: c.strip())
+        cp = csvdir / f"{stem}-MacroplasticheFlotCamp.csv"
+        cnt = pd.read_csv(cp, dtype=str).rename(columns=lambda c: c.strip()).NationalStationID.value_counts() if cp.exists() else pd.Series(dtype=int)
+        for r in fl.itertuples():
+            try:
+                day = f"{int(r.Year):04d}-{int(r.Month):02d}-{int(r.Day):02d}"
+                lat = (_num(r.LatitudeInizio) + _num(r.LatitudeFine)) / 2
+                lon = (_num(r.LongitudeInizio) + _num(r.LongitudeFine)) / 2
+            except Exception:  # noqa: BLE001
+                continue
+            recs.append(dict(file=stem, tid=str(r.NationalStationID), date=day, n_items=int(cnt.get(r.NationalStationID, 0)), lat=lat, lon=lon))
+    t = pd.DataFrame(recs).drop_duplicates(["file", "tid", "date"])
+    t = t[(t.n_items >= min_items) & t.lat.between(30, 47) & t.lon.between(-6, 37)]
+    if exclude is not None and exclude.exists():
+        ex = pd.read_csv(exclude)
+        keys = set(zip(ex["файл_ISPRA"], ex["трансекта"].astype(str), ex["дата_учёта"]))
+        t = t[[k not in keys for k in zip(t.file, t.tid.astype(str), t.date)]]
+    t = t[t.date >= "2017-01-01"]
+    print("transects:", len(t), flush=True)
+
+    def job(r):
+        try:
+            pairs = s2_items(r.date, r.lon, r.lat)
+        except Exception as e:  # noqa: BLE001
+            return dict(r._asdict(), err=str(e)[:80])
+        if not pairs:
+            return None
+        i0 = pairs[0][0]
+        return dict(file=r.file, tid=r.tid, date=r.date, n_items=r.n_items, s2=i0.id, tile_cloud=i0.properties.get("eo:cloud_cover"),
+                    s2_time=i0.properties["datetime"][:19], lat=r.lat, lon=r.lon)
+    with ThreadPoolExecutor(workers) as ex:
+        S = [x for x in ex.map(job, list(t.drop(columns=[], errors="ignore").itertuples(index=False))) if x]
+    S = pd.DataFrame(S)
+    S = S[S.s2.notna()] if len(S) else S
+    S = S.sort_values(["date", "tid", "file"]).reset_index(drop=True)
+    S.insert(0, "№", range(1, len(S) + 1))
+    S.insert(1, "чётность", ["нечёт" if i % 2 else "чёт" for i in S["№"]])
+    S = S.rename(columns={"file": "файл_ISPRA", "tid": "трансекта", "date": "дата_учёта", "n_items": "предметов", "s2": "S2_L2A_EarthSearch",
+                          "tile_cloud": "облачность_тайла", "s2_time": "S2_время_UTC", "lat": "lat_средн", "lon": "lon_средн"})
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    S.to_csv(dst, index=False, encoding="utf-8")
+    print(dst, len(S))
+
+
 # ------------------------------------------------------------------------------------------------ levels
 
 def levels():
@@ -427,13 +507,24 @@ def levels():
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("stage", choices=["fetch", "run", "levels"])
+    ap.add_argument("stage", choices=["fetch", "candidates", "run", "levels"])
+    ap.add_argument("--list", default=None, help="список трансект (по умолчанию docs/research/pairs/ispra_167.csv)")
+    ap.add_argument("--out", default=None, help="каталог результатов (по умолчанию data/search/ispra)")
+    ap.add_argument("--levels-csv", default=None, help="куда писать уровни (по умолчанию docs/research/pairs/ispra_levels.csv)")
+    ap.add_argument("--min-items", type=int, default=1)
+    ap.add_argument("--exclude", default=str(ROOT / "docs" / "research" / "pairs" / "ispra_167.csv"))
     ap.add_argument("--workers", type=int, default=3)
     ap.add_argument("--compare1", type=int, default=0)
     ap.add_argument("--csv-dir", default=str(RAW / "csv"))
     ap.add_argument("--only", default=None, help="чёт | нечёт (строки списка)")
     a = ap.parse_args()
-    if a.stage == "fetch":
+    global LIST, OUT, LEVELS
+    LIST = Path(a.list).resolve() if a.list else LIST
+    OUT = Path(a.out).resolve() if a.out else OUT
+    LEVELS = Path(a.levels_csv).resolve() if a.levels_csv else LEVELS
+    if a.stage == "candidates":
+        candidates(Path(a.csv_dir), a.min_items, LIST, Path(a.exclude) if a.exclude else None)
+    elif a.stage == "fetch":
         fetch()
     elif a.stage == "run":
         run(a.workers, a.compare1, Path(a.csv_dir), a.only)
