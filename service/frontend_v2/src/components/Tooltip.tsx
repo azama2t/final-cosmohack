@@ -23,9 +23,12 @@ export default function Tooltip({ hover, manifest }: { hover: HoverInfo; manifes
     sub = `${p.n_dates} даты с находками${p.nearest_source ? ` · ${p.nearest_source.kind_ru}${p.nearest_source.name ? ` «${p.nearest_source.name}»` : ''}` : ''} · требует проверки`;
   }
   const W = window.innerWidth;
-  const left = hover.x + 16 + 280 > W ? hover.x - 296 : hover.x + 16;
+  const H = window.innerHeight;
+  // §48: flip left/up near the window edges, keep an 8 px margin
+  const left = Math.max(8, hover.x + 16 + 280 > W - 8 ? hover.x - 296 : hover.x + 16);
+  const top = Math.max(8, hover.y + 12 + 90 > H - 8 ? hover.y - 90 : hover.y + 12);
   return (
-    <div className="tip" style={{ left, top: hover.y + 12 }} data-testid="tooltip">
+    <div className="tip" style={{ left, top }} data-testid="tooltip">
       <div className="tt">{title}</div>
       <div className="ts">{sub}</div>
     </div>

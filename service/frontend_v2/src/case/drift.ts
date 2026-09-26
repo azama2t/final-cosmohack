@@ -1,9 +1,14 @@
 // INBOX §44 п.3: the drift forecast back in «Кейс» — an experiment, shown apart from observations (own style, «прогноз»).
 // Data: the published OpenDrift run of the snapshot (service/data/<region>/<date>/drift.json, the same file as the old
 // live mode); the check result — /api/drift_check (reports/drift_check.md: 7/18 = «нулевой дрейф» 7/18).
+// §48 (egor fix pack, screenshot 03): the per-hour ring cloud (one dot per particle) read as "hundreds of new
+// finds" — the actual layers (trajectory / corridor / ≤12 sampled points) now live in DriftLayer.ts; this file
+// only keeps the animation clock (anim.hour) and the API-facing helpers CaseApp already imports.
 import { ctl, anim } from '../map/controller';
 import { loadDrift, loadManifest } from '../lib/data';
 import type { DriftFile } from '../types';
+import { renderDriftLayer, driftCaption } from './DriftLayer';
+export { driftCaption };
 
 let cur: DriftFile | null = null;
 
@@ -37,73 +42,14 @@ export function closeDrift() {
 }
 export const driftOpen = () => !!cur;
 
-/** particle position at hour h (linear between the hourly outputs) */
-function at(path: [number, number, number][], h: number): [number, number] | null {
-  if (!path.length) return null;
-  let i = 0;
-  while (i < path.length - 1 && path[i + 1][2] <= h) i++;
-  const a = path[i];
-  const b = path[Math.min(i + 1, path.length - 1)];
-  if (b[2] <= a[2] || h <= a[2]) return [a[0], a[1]];
-  const t = Math.min(1, (h - a[2]) / (b[2] - a[2]));
-  return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
-}
-
-function fc(h: number) {
-  const feats: any[] = [];
-  const starts: any[] = [];
-  if (cur) {
-    const add = (ps: { path: [number, number, number][] }[], m: number) => {
-      for (const p of ps) {
-        const c = at(p.path, h);
-        if (c) feats.push({ type: 'Feature', geometry: { type: 'Point', coordinates: c }, properties: { m } });
-        if (m === 0 && p.path.length) starts.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [p.path[0][0], p.path[0][1]] }, properties: {} });
-      }
-    };
-    add(cur.particles ?? [], 0);
-    if (anim.spread) for (const e of cur.ensemble ?? []) add(e.particles ?? [], 1);
-  }
-  return { now: { type: 'FeatureCollection', features: feats }, start: { type: 'FeatureCollection', features: starts } };
-}
-
-/** (re)draw the forecast layers on the case map; called by DriftPlayer on every tick */
+/** (re)draw the forecast layers on the case map; called by DriftPlayer on every tick.
+ *  §48: median trajectory + hourly uncertainty corridor + ≤12 sampled points (DriftLayer.ts) — not a per-particle
+ *  ring cloud. `anim.spread` (the old "неопределённость" toggle in DriftPlayer) now decides whether the ensemble
+ *  runs (other wind-drift-factor scenarios) widen the corridor; the main run's median line is always shown. */
 export function renderDrift() {
   const map: any = ctl.map;
-  if (!map || !map.style?._loaded) return;
-  const d = fc(anim.hour);
-  const src = (id: string, data: any) => {
-    const s = map.getSource(id);
-    if (s) s.setData(data);
-    else map.addSource(id, { type: 'geojson', data });
-  };
-  src('c-drift', d.now);
-  src('c-drift-start', d.start);
-  if (!map.getLayer('c-drift-start'))
-    map.addLayer({
-      id: 'c-drift-start',
-      type: 'circle',
-      source: 'c-drift-start',
-      paint: { 'circle-radius': 2, 'circle-color': '#ffffff', 'circle-opacity': 0.5 },
-    });
-  if (!map.getLayer('c-drift'))
-    map.addLayer({
-      id: 'c-drift',
-      type: 'circle',
-      source: 'c-drift',
-      paint: {
-        // «прогноз»: hollow violet rings — not the filled class colours of observations/finds
-        'circle-radius': ['case', ['==', ['get', 'm'], 1], 2.2, 3],
-        'circle-color': '#b197fc',
-        'circle-opacity': ['case', ['==', ['get', 'm'], 1], 0.25, 0.08],
-        'circle-stroke-color': '#b197fc',
-        'circle-stroke-width': 1.2,
-        'circle-stroke-opacity': ['case', ['==', ['get', 'm'], 1], 0.45, 0.95],
-      },
-    });
-  const v = cur ? 'visible' : 'none';
-  map.setLayoutProperty('c-drift', 'visibility', v);
-  map.setLayoutProperty('c-drift-start', 'visibility', v);
-  map.triggerRepaint?.();
+  const d = cur && !anim.spread ? { ...cur, ensemble: [] } : cur;
+  renderDriftLayer(map, d, anim.hour);
 }
 
 /** bounds of the whole run (all hours) — to fit the map */

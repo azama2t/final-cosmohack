@@ -13,6 +13,7 @@ import SceneZoneCard, { zoneTitle, type SceneZoneDetail, type SceneZoneProps } f
 import { SZ_COLORS, szKey, isFind, geomCenter } from './CaseMap';
 import MetricsPanel from './MetricsPanel';
 import DefenseExamples from './DefenseExamples';
+import Timeline, { type TlScene } from './Timeline';
 import { plural, dateRu, eventRu, label, missionShort, num, profileRu, scopeRu, sourceShort } from './fmt';
 import { estLine, estTxt, RES_CAPTION, RES_CAPTION_LIST, RES_CONTEXT, RES_NOTE, researchEst } from './estimate';
 import { shortName } from '../lib/data';
@@ -41,7 +42,8 @@ import {
 import './case.css';
 import DriftPlayer from '../components/DriftPlayer';
 import type { DriftFile } from '../types';
-import { checkLine, closeDrift, driftBounds, driftKey, driftPaths, openDrift, renderDrift } from './drift';
+import { checkLine, closeDrift, driftBounds, driftCaption, driftKey, driftPaths, openDrift, renderDrift } from './drift';
+import DemoTour from './DemoTour';
 
 type Load<T> = { data: T | null; err: string | null; loading: boolean };
 const L0 = { data: null, err: null, loading: false };
@@ -143,6 +145,11 @@ export default function CaseApp() {
   const exportMenu = useMenu();
   const queryMenu = useMenu();
   const layerMenu = useMenu();
+  const moreMenu = useMenu();
+  // «Запросы» live inside «Ещё ▾»: closing «Ещё» closes them too (no stale open state behind a closed menu)
+  useEffect(() => {
+    if (!moreMenu.open) queryMenu.setOpen(false);
+  }, [moreMenu.open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const showToast = useCallback((t: string) => {
     setToast(t);
@@ -276,6 +283,23 @@ export default function CaseApp() {
   }, [scenes.data, szScene, q.layers.obs]);
   /** §34 п.3: «район · дата · N находок · облачность» — only scenes with zones under the current filter (= map = export) */
   const sceneRows = useMemo(() => buildSceneRows(szScenes.data?.scenes ?? [], szList, q), [szScenes.data, szList, q]);
+  // §48 timeline: the same snapshots as the left list (район/период/статус of step 1) + field dates
+  const tlScenes = useMemo<TlScene[]>(
+    () =>
+      sceneRows.all
+        .map((r) => ({
+          key: r.s.scene_key,
+          t: Date.parse(r.s.datetime ?? ''),
+          finds: r.finds,
+          b: r.b,
+          label: `${sceneName(r.s)} · ${dateRu(r.s.datetime)}`,
+          drift: !!dPaths?.has(driftKey(r.s as any)),
+          noeval: r.group === 'noeval',
+        }))
+        .filter((x) => Number.isFinite(x.t)),
+    [sceneRows, dPaths],
+  );
+  const tlObs = useMemo(() => (obs.data?.features ?? []).map((f) => Date.parse(f.properties.date_utc ?? '')).filter((t) => Number.isFinite(t)), [obs.data]);
   /** numbered zones of the shown snapshot: the same numbers in the list, on the map and in the card */
   const sceneZones = useMemo(() => (curScene ? numberZones(szList.filter((f) => f.properties.scene_key === curScene)) : []), [szList, curScene]);
   const numbered = useMemo(
@@ -701,6 +725,29 @@ export default function CaseApp() {
   const dateMax = [meta.date_range?.max, meta.scene_date_range?.max].filter(Boolean).sort().reverse()[0] as string | undefined;
   const profilesForSource = new Set((allObs.data?.features ?? []).filter((f) => !q.source || f.properties.source_id === q.source).map((f) => f.properties.measurement_profile));
   const rightOpen = !!sel;
+  // §47 п.1: the current step of the expert path
+  const step = exportMenu.open ? 5 : panel === 'qc' ? 4 : selSz ? 3 : curScene ? 2 : 1;
+  const nextHint =
+    step === 1
+      ? 'выберите район и даты слева, затем снимок в списке (точки на Земле — находки детектора)'
+      : step === 2
+        ? 'выберите зону — номер на карте или строку в списке слева'
+        : step === 3
+          ? 'посмотрите качество и статус (вкладки карточки), затем «5 Выгрузка»'
+          : step === 4
+            ? 'закройте окно и выгрузите результат — «5 Выгрузка»'
+            : 'CSV или GeoJSON — то, что сейчас отфильтровано';
+  const goStep1 = () => {
+    setPanel('filters');
+    if (curScene) closeScene();
+    window.setTimeout(() => (document.querySelector('[data-testid=f-source]') as HTMLElement | null)?.focus(), 50);
+  };
+  const goStep2 = () => {
+    if (sel) closeCard();
+  };
+  const goStep3 = () => {
+    if (panel === 'qc') setPanel(null);
+  };
   const selObs = sel?.kind === 'obs' ? sel.id : null;
   const sameEvent = selObs && obsById.get(selObs) ? (allObs.data?.features ?? []).filter((f) => f.properties.event_id === obsById.get(selObs)!.properties.event_id) : [];
   const hasQuality = sceneList.some((s) => s.quality_url && s.bounds);
@@ -710,15 +757,17 @@ export default function CaseApp() {
 
   return (
     <div className={`app case ${rightOpen ? 'right-open' : ''}`} data-testid="case-app">
+      {/* §47 п.7 «Демо ▶» (L141) — own component, own fixed positioning, no layout slot needed */}
+      <DemoTour />
       {/* ------------------------------------------------ left: mode, filters, snapshots → zones */}
       <aside className="left" data-panel="left">
         <div className="modebar">
           <div className="seg" role="tablist" aria-label="Режим">
             <button className="on" aria-selected data-testid="mode-case">
-              Кейс
+              Снимки и зоны
             </button>
             <button onClick={() => (location.href = '?mode=photo')} data-testid="mode-photo" title="Счётчик предметов по фото (камера у воды; отдельный модуль, не спутник)">
-              Фото
+              Счёт по фото
             </button>
           </div>
         </div>
@@ -733,14 +782,6 @@ export default function CaseApp() {
             </Info>
           </div>
         </div>
-        <div className="c-lbar" data-testid="left-bar">
-          <button className={`c-lbtn ${panel === 'filters' ? 'on' : ''}`} onClick={() => togglePanel('filters')} aria-expanded={panel === 'filters'} data-testid="filters-toggle">
-            Фильтры{!isDefault(q) ? ' · заданы' : ''} {panel === 'filters' ? '▾' : '▸'}
-          </button>
-          <button className={`c-lbtn ${panel === 'nums' ? 'on' : ''}`} onClick={() => togglePanel('nums')} data-testid="headline-open" title="Концентрация по полевым данным, счётчик по фото, спутник">
-            Цифры
-          </button>
-        </div>
         {MOCK && (
           <div className="c-mock" data-testid="mock-banner">
             Демо-данные (?mock=1) — не настоящие
@@ -748,49 +789,65 @@ export default function CaseApp() {
         )}
 
         <div className="c-filters" data-testid="filters">
+          {/* §47 п.2: step 1 «Район и даты» — open in the left panel (the snapshot list below = the dates of the район) */}
+          {(!curScene || panel === 'filters') && (
+            <div className="c-step1" data-testid="step1">
+              <div className="c-step1-h">
+                <span className="c-stn">1</span> Район и даты
+              </div>
+              <label className="c-f">
+                  <span>Район</span>
+                  <select value={q.area && q.area !== 'bbox' ? q.area : q.area === 'bbox' ? 'bbox' : ''} onChange={(e) => setArea(e.target.value)} data-testid="f-source">
+                    <option value="">Все</option>
+                    {q.area === 'bbox' && <option value="bbox">Рамка сохранённого запроса</option>}
+                    <optgroup label="Районы снимков Sentinel-2">
+                      {areas.regions.map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {a.label} ({plural(a.n, 'снимок', 'снимка', 'снимков')})
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="Полевые данные организаторов">
+                      {areas.fields.map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {a.label}
+                          {a.n ? ` (${a.n})` : ''}
+                        </option>
+                      ))}
+                    </optgroup>
+                  </select>
+                </label>
+                <div className="c-f">
+                  <span>
+                    Даты снимка
+                    <Info label="Даты" testid="f-dates-info">
+                      Один диапазон для даты снимка и даты полевого измерения. Снимки: {meta.scene_date_range ? `${dateRu(meta.scene_date_range.min)}–${dateRu(meta.scene_date_range.max)}` : 'нет'};
+                      поле: {dateRu(meta.date_range?.min)}–{dateRu(meta.date_range?.max)}.
+                    </Info>
+                  </span>
+                  <div className="c-dates">
+                    <input type="date" value={q.from ?? ''} min={dateMin} max={dateMax} onChange={(e) => setFilter({ from: e.target.value || null })} data-testid="f-from" aria-label="Дата с" />
+                    <span className="faint">–</span>
+                    <input type="date" value={q.to ?? ''} min={dateMin} max={dateMax} onChange={(e) => setFilter({ to: e.target.value || null })} data-testid="f-to" aria-label="Дата по" />
+                  </div>
+                  {dErr && (
+                    <div className="c-ferr" role="alert" data-testid="date-error">
+                      {dErr}
+                    </div>
+                  )}
+                </div>
+            </div>
+          )}
+        <div className="c-lbar" data-testid="left-bar">
+            <button className={`c-lbtn ${panel === 'filters' ? 'on' : ''}`} onClick={() => togglePanel('filters')} aria-expanded={panel === 'filters'} data-testid="filters-toggle">
+              Статус зоны{q.det.length ? ' · задан' : ''} {panel === 'filters' ? '▾' : '▸'}
+            </button>
+            <button className={`c-lbtn ${panel === 'nums' ? 'on' : ''}`} onClick={() => togglePanel('nums')} data-testid="headline-open" title="Концентрация по полевым данным, счётчик по фото, спутник">
+              Цифры
+            </button>
+          </div>
           {panel === 'filters' && (
             <div className="c-filters-body">
-              <label className="c-f">
-                <span>Акватория</span>
-                <select value={q.area && q.area !== 'bbox' ? q.area : q.area === 'bbox' ? 'bbox' : ''} onChange={(e) => setArea(e.target.value)} data-testid="f-source">
-                  <option value="">Все</option>
-                  {q.area === 'bbox' && <option value="bbox">Рамка сохранённого запроса</option>}
-                  <optgroup label="Районы снимков Sentinel-2">
-                    {areas.regions.map((a) => (
-                      <option key={a.id} value={a.id}>
-                        {a.label} ({plural(a.n, 'снимок', 'снимка', 'снимков')})
-                      </option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="Полевые данные организаторов">
-                    {areas.fields.map((a) => (
-                      <option key={a.id} value={a.id}>
-                        {a.label}
-                        {a.n ? ` (${a.n})` : ''}
-                      </option>
-                    ))}
-                  </optgroup>
-                </select>
-              </label>
-              <div className="c-f">
-                <span>
-                  Даты снимка
-                  <Info label="Даты" testid="f-dates-info">
-                    Один диапазон для даты снимка и даты полевого измерения. Снимки: {meta.scene_date_range ? `${dateRu(meta.scene_date_range.min)}–${dateRu(meta.scene_date_range.max)}` : 'нет'};
-                    поле: {dateRu(meta.date_range?.min)}–{dateRu(meta.date_range?.max)}.
-                  </Info>
-                </span>
-                <div className="c-dates">
-                  <input type="date" value={q.from ?? ''} min={dateMin} max={dateMax} onChange={(e) => setFilter({ from: e.target.value || null })} data-testid="f-from" aria-label="Дата с" />
-                  <span className="faint">–</span>
-                  <input type="date" value={q.to ?? ''} min={dateMin} max={dateMax} onChange={(e) => setFilter({ to: e.target.value || null })} data-testid="f-to" aria-label="Дата по" />
-                </div>
-                {dErr && (
-                  <div className="c-ferr" role="alert" data-testid="date-error">
-                    {dErr}
-                  </div>
-                )}
-              </div>
               <div className="c-f">
                 <span>
                   Статус зоны
@@ -843,7 +900,11 @@ export default function CaseApp() {
 
         <div className="left-body" data-testid="zone-list">
           {!curScene ? (
-            <SceneList rows={sceneRows} loading={!szones.data && !szones.err} err={szones.err} onPick={openScene} filtered={!isDefault(q)} fieldArea={!!q.source} drift={hasDrift} />
+            <SceneList rows={sceneRows} loading={!szones.data && !szones.err} err={szones.err} onPick={openScene} filtered={!isDefault(q)} fieldArea={!!q.source}
+              drift={hasDrift}
+              area={q.area && q.area.startsWith('r:') ? areaLabel : null}
+              onField={() => setQ((x) => ({ ...x, layers: { ...x.layers, obs: true } }))}
+            />
           ) : (
             <SceneZones
               s={szScene}
@@ -897,34 +958,37 @@ export default function CaseApp() {
         {/* §33б: with a card open the find tooltip would repeat the card — not shown */}
         {hover && !(sel && hover.id.startsWith('SZ-')) && <HoverTip meta={meta} h={hover} obs={obs.data} zones={zones.data} szones={szList} />}
 
-        <div className="actions c-actions" data-testid="actions">
-          <button onClick={toEarth} data-testid="act-earth" title="Вернуться к обзору Земли со всеми находками">
-            ⊕ <span className="c-al">Обзор Земли</span>
-            <span className="c-as">Земля</span>
+        {/* §47 п.1: the step bar «1 Район и даты → 2 Снимок → 3 Зона → 4 Качество и статус → 5 Выгрузка»; the rest — «Ещё ▾» */}
+        <div className="actions c-actions c-steps" data-testid="actions" data-step={step}>
+          <button className={`c-step ${step === 1 ? 'cur' : ''}`} onClick={goStep1} data-testid="step-1" title="Выбрать район и период, затем снимок в списке слева">
+            <span className="c-stn">1</span> <span className="c-al">Район и даты</span>
+            <span className="c-as">Район</span>
           </button>
           <button
-            className={q.layers.obs ? 'on' : ''}
-            onClick={() => {
-              if (q.layers.obs) {
-                if (sel?.kind === 'obs') closeCard();
-                setDrawer(false);
-              }
-              setLayer('obs');
-            }}
-            aria-pressed={q.layers.obs}
-            data-testid="act-field"
-            title="Слой «Полевые измерения» организаторов (шт./км² по трансектам) — включить / выключить"
+            className={`c-step ${step === 2 ? 'cur' : ''}`}
+            onClick={goStep2}
+            disabled={!curScene}
+            data-testid="step-2"
+            title={curScene ? 'Снимок и список его зон' : 'Сначала выберите снимок в списке слева или точку на Земле'}
           >
-            <span className={`check ${q.layers.obs ? 'on' : ''}`} aria-hidden /> <span className="c-al">Полевые измерения</span>
-            <span className="c-as">Поле</span>
+            <span className="c-stn">2</span> Снимок
           </button>
-          <button className={panel === 'qc' ? 'on' : ''} onClick={() => togglePanel('qc')} data-testid="act-qc" title="Проверка качества: метрики детектора и концентрации (F1, интервалы, базовые линии)">
-            <span className="c-al">Проверка качества</span>
+          <button
+            className={`c-step ${step === 3 ? 'cur' : ''}`}
+            onClick={goStep3}
+            disabled={!selSz}
+            data-testid="step-3"
+            title={selSz ? 'Карточка выбранной зоны' : 'Сначала выберите зону — номер на карте или строку в списке'}
+          >
+            <span className="c-stn">3</span> Зона
+          </button>
+          <button className={`c-step ${panel === 'qc' ? 'on cur' : ''}`} onClick={() => togglePanel('qc')} data-testid="act-qc" title="Проверка качества: метрики детектора и концентрации (F1, интервалы, базовые линии)">
+            <span className="c-stn">4</span> <span className="c-al">Качество и статус</span>
             <span className="c-as">Качество</span>
           </button>
           <div className="c-menu-wrap" ref={exportMenu.box}>
-            <button className={exportMenu.open ? 'on' : ''} onClick={() => exportMenu.setOpen((v) => !v)} data-testid="act-export" aria-expanded={exportMenu.open}>
-              Выгрузка
+            <button className={`c-step ${exportMenu.open ? 'on cur' : ''}`} onClick={() => exportMenu.setOpen((v) => !v)} data-testid="act-export" aria-expanded={exportMenu.open}>
+              <span className="c-stn">5</span> Выгрузка
             </button>
             {exportMenu.open && (
               <div className="menu c-menu" data-testid="export-menu">
@@ -946,43 +1010,89 @@ export default function CaseApp() {
               </div>
             )}
           </div>
-          <div className="c-menu-wrap" ref={queryMenu.box}>
-            <button className={queryMenu.open ? 'on' : ''} onClick={() => queryMenu.setOpen((v) => !v)} data-testid="act-queries" aria-expanded={queryMenu.open}>
-              Запросы
+          <div className="c-menu-wrap c-more" ref={moreMenu.box}>
+            <button className={moreMenu.open ? 'on' : ''} onClick={() => moreMenu.setOpen((v) => !v)} data-testid="act-more" aria-expanded={moreMenu.open}>
+              Ещё ▾
             </button>
-            {queryMenu.open && (
-              <div className="menu c-menu" data-testid="query-menu">
-                <div className="menu-group">Сохранить текущий (акватория, даты, статус зоны)</div>
-                <div className="c-save">
-                  <input value={qName} placeholder={autoName(meta, q, areaLabel)} onChange={(e) => setQName(e.target.value)} data-testid="q-name" aria-label="Название запроса" maxLength={200} />
-                  <button className="btn sm" onClick={saveQuery} data-testid="q-save" disabled={!!dErr}>
-                    Сохранить
-                  </button>
-                </div>
+            {moreMenu.open && (
+              <div className="menu c-menu c-more-menu" data-testid="more-menu">
+          <button onClick={() => { moreMenu.setOpen(false); toEarth(); }} className="menu-row" data-testid="act-earth" title="Вернуться к обзору Земли со всеми находками">
+            ⊕ <span className="c-al">Обзор Земли</span>
+            <span className="c-as">Земля</span>
+          </button>
+          <button
+            className={`menu-row ${q.layers.obs ? 'on' : ''}`}
+            onClick={() => {
+              if (q.layers.obs) {
+                if (sel?.kind === 'obs') closeCard();
+                setDrawer(false);
+              }
+              setLayer('obs');
+            }}
+            aria-pressed={q.layers.obs}
+            data-testid="act-field"
+            title="Слой «Полевые измерения» организаторов (шт./км² по трансектам) — включить / выключить"
+          >
+            <span className={`check ${q.layers.obs ? 'on' : ''}`} aria-hidden /> <span className="c-al">Полевые измерения</span>
+            <span className="c-as">Поле</span>
+          </button>
+                <button
+                  className="menu-row"
+                  onClick={() => {
+                    moreMenu.setOpen(false);
+                    layerMenu.setOpen(true);
+                  }}
+                  data-testid="more-layers"
+                >
+                  Слои карты
+                </button>
+                <a className="menu-row" href="?mode=photo" data-testid="more-photo">
+                  Посчитать предметы по фото
+                </a>
                 <div className="menu-sep" />
-                <div className="menu-group">Сохранённые</div>
-                {!saved.length && <div className="note c-pad-s">пока нет</div>}
-                {saved.map((s) => (
-                  <div className="c-q-row" key={s.query_id} data-testid="q-item">
-                    <button className="c-q-run" onClick={() => runQuery(s)} data-testid="q-run" title="Запустить">
-                      <span className="c-q-n">{s.name}</span>
-                      <span className="faint tiny">
-                        {dateRu(s.created_at)}
-                        {s.local ? ' · в браузере' : ''}
-                      </span>
-                    </button>
-                    <button className="icon-btn" onClick={() => deleteQuery(s)} aria-label="Удалить" data-testid="q-del">
-                      ✕
+            <div className="c-menu-wrap c-q-inline" ref={queryMenu.box}>
+              <button className={queryMenu.open ? 'on' : ''} onClick={() => queryMenu.setOpen((v) => !v)} data-testid="act-queries" aria-expanded={queryMenu.open}>
+                Запросы
+              </button>
+              {queryMenu.open && (
+                <div className="menu c-menu" data-testid="query-menu">
+                  <div className="menu-group">Сохранить текущий (акватория, даты, статус зоны)</div>
+                  <div className="c-save">
+                    <input value={qName} placeholder={autoName(meta, q, areaLabel)} onChange={(e) => setQName(e.target.value)} data-testid="q-name" aria-label="Название запроса" maxLength={200} />
+                    <button className="btn sm" onClick={saveQuery} data-testid="q-save" disabled={!!dErr}>
+                      Сохранить
                     </button>
                   </div>
-                ))}
-                <div className="menu-sep" />
-                <button className="menu-row" onClick={copyLink} data-testid="q-link">
-                  Скопировать ссылку на этот вид
-                </button>
+                  <div className="menu-sep" />
+                  <div className="menu-group">Сохранённые</div>
+                  {!saved.length && <div className="note c-pad-s">пока нет</div>}
+                  {saved.map((s) => (
+                    <div className="c-q-row" key={s.query_id} data-testid="q-item">
+                      <button className="c-q-run" onClick={() => runQuery(s)} data-testid="q-run" title="Запустить">
+                        <span className="c-q-n">{s.name}</span>
+                        <span className="faint tiny">
+                          {dateRu(s.created_at)}
+                          {s.local ? ' · в браузере' : ''}
+                        </span>
+                      </button>
+                      <button className="icon-btn" onClick={() => deleteQuery(s)} aria-label="Удалить" data-testid="q-del">
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                  <div className="menu-sep" />
+                  <button className="menu-row" onClick={copyLink} data-testid="q-link">
+                    Скопировать ссылку на этот вид
+                  </button>
+                </div>
+              )}
+            </div>
               </div>
             )}
           </div>
+        </div>
+        <div className="c-next" data-testid="next-hint">
+          <b>Что дальше:</b> {nextHint}
         </div>
 
         {q.layers.obs && (
@@ -1179,10 +1289,20 @@ export default function CaseApp() {
             </div>
           </div>
         )}
+        <Timeline
+          scenes={tlScenes}
+          obs={tlObs}
+          cur={curScene}
+          onPick={(k) => {
+            if (k !== curScene) openScene(k);
+          }}
+          period={[q.from ? Date.parse(q.from) : null, q.to ? Date.parse(q.to) + 86400e3 - 1 : null]}
+        />
         {drift && (
           <div className="c-drift-wrap" data-testid="drift-wrap">
             <div className="c-drift-tag">
-              <b>Прогноз дрейфа</b> · эксперимент (OpenDrift: течения + ветер), не наблюдение · кольца — частицы, белые точки — старт ·{' '}
+              {/* §48: текст даёт driftCaption() (DriftLayer.ts) — L141, одна строка на карте и в панели */}
+              {driftCaption(drift.forcing)} Линия — медианная траектория, заливка — коридор неопределённости ·{' '}
               <span data-testid="drift-horizon">
                 горизонт {drift.hours?.length ? drift.hours[drift.hours.length - 1] : 72} ч, шаг расчёта {(drift.forcing as any)?.output_step_h ?? 1} ч
               </span>
@@ -1375,8 +1495,44 @@ function SceneRowBtn({ r, onPick, drift }: { r: SceneRow; onPick: (k: string) =>
   );
 }
 
-function SceneList({ rows, loading, err, onPick, filtered, fieldArea, drift }: { rows: SceneRows; loading: boolean; err: string | null; onPick: (k: string) => void; filtered: boolean; fieldArea?: boolean; drift?: (s: SzScene) => boolean }) {
-  const [openNo, setOpenNo] = useState(false);
+function SceneList({
+  rows,
+  loading,
+  err,
+  onPick,
+  filtered,
+  fieldArea,
+  drift,
+  area,
+  onField,
+}: {
+  rows: SceneRows;
+  loading: boolean;
+  err: string | null;
+  onPick: (k: string) => void;
+  filtered: boolean;
+  fieldArea?: boolean;
+  drift?: (s: SzScene) => boolean;
+  /** §47 п.2: the район of step 1 (for the empty-state text) */
+  area?: string | null;
+  onField?: () => void;
+}) {
+  const [openNo0, setOpenNo] = useState(false);
+  // §47 п.2: snapshots but no finds → the dates are listed open, with what was rejected
+  const openNo = openNo0 || (rows.finds.length === 0 && rows.nofinds.length > 0);
+  const rejected = useMemo(() => {
+    const c = new Map<string, number>();
+    let nd = 0;
+    for (const r of rows.nofinds)
+      for (const f of r.zones) {
+        const p: any = f.properties;
+        if ((p.status ?? p.detection_status) === 'not_detected') nd++;
+        for (const k of p.flags ?? []) c.set(k, (c.get(k) ?? 0) + 1);
+      }
+    const parts = [...c.entries()].sort((a, b) => b[1] - a[1]).map(([k, n]) => `${SZ_FLAG_RU[k] ?? k} — ${n}`);
+    if (nd) parts.push(`«не обнаружено» — ${nd}`);
+    return parts.join(', ');
+  }, [rows.nofinds]);
   const [openBad, setOpenBad] = useState(false);
   if (err)
     return (
@@ -1396,11 +1552,27 @@ function SceneList({ rows, loading, err, onPick, filtered, fieldArea, drift }: {
       </div>
       {!rows.all.length && (
         <div className="empty" data-testid="scene-list-empty">
-          {fieldArea
-            ? 'Выбрана акватория полевых данных: это судовые измерения, у них нет снимков с зонами детектора. Измерения — в слое «Полевые измерения»; снимки — выберите район снимков в «Фильтрах».'
-            : filtered
-              ? 'Нет снимков с зонами под выбранные фильтры'
-              : 'Слой спутниковых зон не построен'}
+          {fieldArea ? (
+            <>
+              Это акватория полевых данных — снимков нет, смотрите «Поле».{' '}
+              {onField && (
+                <button className="link" onClick={onField} data-testid="empty-to-field">
+                  Открыть полевые измерения
+                </button>
+              )}
+            </>
+          ) : area ? (
+            `В районе «${area}» за выбранный период нет снимков Sentinel-2 в нашем наборе`
+          ) : filtered ? (
+            'Нет снимков с зонами под выбранные фильтры'
+          ) : (
+            'Слой спутниковых зон не построен'
+          )}
+        </div>
+      )}
+      {rows.all.length > 0 && rows.finds.length === 0 && rows.nofinds.length > 0 && (
+        <div className="empty c-empty-nf" data-testid="scene-list-nofinds">
+          Снимки есть, находок 0{rejected ? ` (что отбраковано: ${rejected})` : ''}.
         </div>
       )}
       {rows.finds.map((r) => (
@@ -1497,12 +1669,13 @@ function SceneZones({
       {numbered.length > 0 && nDet < numbered.length && (
         <div className="c-zshow" data-testid="sz-show">
           <span className="faint" data-testid="sz-shown">
-            показано {plural(shown.length, 'зона', 'зоны', 'зон')} из {numbered.length}
-            {all ? '' : ` — только находки`}
+            {all
+              ? `${pluralW(numbered.length, 'показана', 'показаны', 'показаны')} все ${plural(numbered.length, 'зона', 'зоны', 'зон')}`
+              : `${pluralW(nDet, 'показана', 'показаны', 'показано')} ${plural(nDet, 'находка', 'находки', 'находок')} из ${plural(numbered.length, 'зоны', 'зон', 'зон')}`}
           </span>
           {nDet > 0 && !selHidden && (
             <button className="link" onClick={() => setShowAll((v) => !v)} data-testid="sz-show-all" aria-pressed={showAll}>
-              {showAll ? `только находки (${nDet})` : `показать все ${numbered.length} зон (в т.ч. недостаточно данных)`}
+              {showAll ? `только находки (${nDet})` : `показать все ${plural(numbered.length, 'зону', 'зоны', 'зон')} (в т.ч. недостаточно данных)`}
             </button>
           )}
         </div>
@@ -1529,7 +1702,6 @@ function SceneZones({
               </span>
               <span className="c-zi-cls" data-testid="sz-item-class">
                 {classShort(p)}
-                {drift && <span className="c-drift-badge" data-testid="sz-drift-badge">дрейф</span>}
               </span>
             </span>
           </button>
@@ -1802,8 +1974,8 @@ function CaseLegend({
           выбранной полосы. Цвет точки — концентрация, шт./км²: сравнима только внутри одного размерного профиля.
           {absent.length ? ` ${absent.map((c) => `${c.label}: ${c.note ?? 'в маске не выделяется'}`).join('. ')}.` : ''}
         </Info>
-        <button className="icon-btn c-lg-min" onClick={() => setOpen((v) => !v)} aria-label={open ? 'Свернуть легенду' : 'Развернуть легенду'} data-testid="legend-toggle">
-          {open ? '–' : '+'}
+        <button className="icon-btn c-lg-min" onClick={() => setOpen((v) => !v)} aria-label={open ? 'Свернуть легенду' : 'Развернуть легенду'} title={open ? 'Свернуть легенду' : 'Развернуть легенду'} data-testid="legend-toggle">
+          {open ? 'свернуть' : 'развернуть'}
         </button>
       </div>
       {!open && (

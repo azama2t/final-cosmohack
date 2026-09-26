@@ -1,7 +1,7 @@
 // jury_s44 п.10: the 5 defence examples of the task (GET /api/v3/defense_examples, CONTRACTS_V3 «приёмка 16:03 п.4»):
 // верно / пропуск / судно / пена / анализ невозможен — crop, quality mask, result, basis, status; a click opens the snapshot.
-import { useEffect, useState } from 'react';
-import { API_BASE, get } from './api3';
+import { API_BASE } from './api3';
+import { QcOffline, useCachedGet } from './QcFallback';
 import { dateRu } from './fmt';
 
 interface Ex {
@@ -15,6 +15,7 @@ interface Ex {
   verdict: string;
   basis: string;
   status_label: string;
+  status_note?: string | null;
 }
 
 const SHORT: Record<string, string> = {
@@ -26,21 +27,14 @@ const SHORT: Record<string, string> = {
 };
 
 export default function DefenseExamples({ onOpen }: { onOpen: (e: { zone_id: string | null; scene_key: string }) => void }) {
-  const [d, setD] = useState<{ examples: Ex[]; note?: string } | null>(null);
-  const [err, setErr] = useState<string | null>(null);
-  useEffect(() => {
-    const ac = new AbortController();
-    get<any>('/api/v3/defense_examples', {}, ac.signal)
-      .then(setD)
-      .catch((e) => {
-        if (!ac.signal.aborted) setErr(String(e?.message ?? e));
-      });
-    return () => ac.abort();
-  }, []);
-  if (err) return <div className="c-err c-pad" data-testid="defense-error">Примеры недоступны: {err}</div>;
-  if (!d) return <div className="note c-pad">Загрузка примеров…</div>;
+  // §48 (L142): last successful answer kept; unavailable → one compact line + the saved examples
+  const q = useCachedGet<{ examples: Ex[]; note?: string }>('/api/v3/defense_examples');
+  const d = q.data;
+  const off = q.err ? <QcOffline lastOk={q.lastOk} loading={q.loading} onRetry={q.retry} what="примеры" testid="defense-error" /> : null;
+  if (!d) return off ?? <div className="note c-pad">Загрузка примеров…</div>;
   return (
     <section className="c-def" data-testid="defense-examples">
+      {off}
       <div className="c-def-h">Примеры: верно / пропуск / судно / пена / анализ невозможен</div>
       {d.note && <div className="c-line faint c-def-note">{d.note}</div>}
       <div className="c-def-grid">
@@ -55,6 +49,9 @@ export default function DefenseExamples({ onOpen }: { onOpen: (e: { zone_id: str
                 {img && <img src={API_BASE + img} alt="Вырезка снимка" loading="lazy" />}
                 {e.image.quality_url && <img src={API_BASE + e.image.quality_url} alt="Маска качества" loading="lazy" className="q" />}
               </div>
+              {e.image.quality_url && (
+                <div className="c-def-cap faint">слева — снимок и пиксели детектора; справа — маска качества: тёмное — годная вода, белое — облака, жёлтое — блик, серое — суша</div>
+              )}
               <div className="c-def-t">
                 {e.title} · {dateRu(e.datetime)}
               </div>
@@ -66,6 +63,11 @@ export default function DefenseExamples({ onOpen }: { onOpen: (e: { zone_id: str
               </div>
               <div className="c-def-r">
                 <span className="faint">Статус:</span> {e.status_label}
+                {e.status_note && (
+                  <div className="faint c-def-sn" data-testid={`defense-note-${e.kind}`}>
+                    {e.status_note}
+                  </div>
+                )}
               </div>
             </button>
           );

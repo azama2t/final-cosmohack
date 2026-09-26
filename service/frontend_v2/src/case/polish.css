@@ -1,0 +1,187 @@
+/* L142 §48 — own layer on top of styles.css / case.css (Egor's review: overlays, quality, photo entry, cleanup).
+   Loaded after styles.css; case.css (lazy, CaseApp) may come later, so selectors here carry enough weight. */
+
+/* ---------------------------------------------------------------- 1. «i» popover in <body>, never clipped */
+.info-pop.info-pop-float {
+  position: fixed;
+  z-index: 1000;
+  right: auto;
+  bottom: auto;
+  margin: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.55);
+  animation: none;
+}
+
+/* ---------------------------------------------------------------- 2. «Проверка качества»: service offline = one compact line */
+.c-offline {
+  display: block;
+  margin: 8px 16px;
+  padding: 8px 12px;
+  border: 1px solid rgba(245, 166, 35, 0.35);
+  border-radius: 8px;
+  background: rgba(245, 166, 35, 0.07);
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.c-offline-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f5a623;
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: 1px;
+}
+.c-offline-btn {
+  border: 1px solid var(--line-2);
+  background: var(--panel-2);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 1px 10px;
+  margin-left: 2px;
+  font: inherit;
+  cursor: pointer;
+}
+.c-offline-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.c-offline-loc {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-3);
+  font-size: 12px;
+}
+/* both quality requests failed → one line (its «Повторить» retries both) */
+[data-testid='metrics-wrap']:has([data-testid='defense-error']) [data-testid='metrics-offline'] {
+  display: none;
+}
+
+/* ---------------------------------------------------------------- 3. «Счёт по фото»: one line of roles + entry (BRIEF §11 colours) */
+:root {
+  --c-sat: #f5a623; /* спутниковые зоны — янтарный */
+  --c-field: #4ea1ff; /* поле / наблюдения — синий */
+  --c-drift: #a78bfa; /* дрейф — фиолетовый */
+}
+.c-roles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 6px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+.c-role::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-right: 5px;
+  vertical-align: 1px;
+  background: var(--text-2);
+}
+.c-role.sat::before {
+  background: var(--c-sat);
+}
+.c-role.field::before {
+  background: var(--c-field);
+}
+.c-role-sep {
+  color: var(--text-3);
+}
+.c-photo-entry {
+  display: grid;
+  gap: 8px;
+}
+.c-photo-entry-a {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.c-photo-entry-a .btn {
+  text-decoration: none;
+}
+.c-photo-entry-n {
+  font-size: 12px;
+}
+.ph-title .ph-roles {
+  margin-top: 3px;
+  font-weight: 400;
+}
+
+/* ---------------------------------------------------------------- 5. visual cleanup (BRIEF §13): CSS only, own layer */
+/* lists: more air, no «Альборан · 30…» — the name wraps instead of being cut */
+.app.case .reg-item.c-scene-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  row-gap: 3px;
+}
+.app.case .reg-item.c-scene-row .ri-name {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+  line-height: 1.3;
+  font-size: 14px;
+}
+.app.case .reg-item.c-scene-row .ri-val {
+  white-space: normal;
+  max-width: 8.5em;
+  line-height: 1.3;
+}
+.app.case .reg-item.c-scene-row .ri-sub {
+  white-space: normal;
+  font-size: 12.5px;
+}
+.app.case .c-zi {
+  padding-top: 11px;
+  padding-bottom: 11px;
+}
+.app.case .c-zi-t,
+.app.case .c-zi-s {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+.app.case .c-zi-s {
+  font-size: 12.5px;
+}
+/* selected row / zone: clearly stronger than hover (amber = satellite zone, blue = field observation) */
+.app.case .reg-item.on,
+.app.case .c-zi.on {
+  background: var(--panel-3);
+  box-shadow: inset 3px 0 0 var(--c-sat);
+}
+.app.case .c-fieldp-list .c-zi.on,
+.app.case [data-testid='obs-item'].on {
+  box-shadow: inset 3px 0 0 var(--c-field);
+}
+.app.case .c-zi.on .c-zi-t,
+.app.case .reg-item.on .ri-name {
+  font-weight: 600;
+}
+.app.case .c-zi.on .c-znum-i {
+  box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--c-sat);
+}
+/* small but important labels a bit larger; secondary metadata stays muted */
+.app.case .c-zi-cls {
+  font-size: 13px;
+}
+.app.case .c-scene-s,
+.app.case .c-scene-tg {
+  font-size: 13px;
+}
+.app.case .c-scene-t {
+  font-size: 16px;
+}
+/* drift = experiment colour only (BRIEF §11) */
+.app.case .c-drift-badge {
+  color: var(--c-drift);
+  border-color: var(--c-drift);
+}

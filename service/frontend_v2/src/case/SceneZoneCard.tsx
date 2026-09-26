@@ -5,7 +5,8 @@
 import Info from '../components/Info';
 import { API_BASE, type Feat, type FC, type Meta } from './api3';
 import { dateRu, dateTimeRu, num, pct } from './fmt';
-import { geomCenter, szKey, SZ_COLORS } from './CaseMap';
+import { geomCenter, isFind, szKey, SZ_COLORS } from './CaseMap';
+import DriftTab from './DriftTab';
 import { cap, RES_CAPTION, RES_NOTE, researchEst, scenarioLine } from './estimate';
 import { classGloss, confirmation, excludedLabel, flaggedLabel, notCheckedLabel, quantityLine, statusLabel, whatLabel } from './zoneinfo';
 
@@ -253,24 +254,10 @@ export default function SceneZoneCard({
               <b>{p.classification?.composition ?? 'Состав не определён'}</b> <Src k="none" />
             </div>
         </div>
-        {!onDrift && !!driftScenes && (
-          <div className="sec sz-drift" data-testid="sz-drift-none">
-            <div className="c-line tiny faint">
-              Прогноз дрейфа 24–72 ч (эксперимент) есть для {driftScenes} {driftScenes % 10 === 1 && driftScenes % 100 !== 11 ? 'снимка' : 'снимков'} (метка «дрейф» в списке); для этого снимка
-              расчёта нет.
-            </div>
-          </div>
-        )}
-        {onDrift && (
-          <div className="sec sz-drift" data-testid="sz-drift">
-            <button className={`btn sm sz-drift-btn ${driftOn ? 'on' : ''}`} onClick={onDrift} data-testid="sz-drift-btn" aria-pressed={!!driftOn}>
-              {driftOn ? 'Скрыть прогноз дрейфа' : 'Прогноз дрейфа 24–72 ч (эксперимент)'}
-            </button>
-            <div className="c-line tiny faint" data-testid="sz-drift-check">
-              Статус: исследовательская оценка. {driftCheck}
-            </div>
-          </div>
-        )}
+        {/* §47 п.6 / §48: content of «Дрейф» — DriftTab.tsx (L141). Findings → here (в карточке); «недостаточно
+            данных · пена/судно» → только в «Подробно» ниже (см. sz-more). driftScenes (счётчик) больше не нужен —
+            DriftTab сам показывает неактивное состояние с причиной, когда прогноза для сцены нет. */}
+        {isFind(p) && <DriftTab zone={p as any} onShowOnMap={onDrift ?? null} mapOn={driftOn} />}
         {(onBack || onStudio) && (
           <div className="sec c-studio-bar" data-testid="sz-nav">
             {onBack && (
@@ -287,6 +274,7 @@ export default function SceneZoneCard({
         )}
         <details className="sec sz-more" data-testid="sz-more">
           <summary>Подробнее: маска качества, признаки, площадь, модель, координаты, ветер</summary>
+            {!isFind(p) && <DriftTab zone={p as any} onShowOnMap={onDrift ?? null} mapOn={driftOn} />}
             <details className="sz-explore" data-testid="sz-explore">
               <summary className="btn sm">Исследовать дальше</summary>
               <ol className="sz-next-l">

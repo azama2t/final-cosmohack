@@ -3,6 +3,7 @@ import type { DriftFile } from '../types';
 import type { FlowField } from '../map/flow';
 import Info from './Info';
 import { anim } from '../map/controller';
+import { driftCaption } from '../case/DriftLayer';
 
 const SPEEDS = [1, 2, 4];
 const HOURS_PER_SEC = 6; // 72 h in 12 s at 1×
@@ -118,8 +119,9 @@ export default function DriftPlayer({ drift, onRender, flow, autoplay }: { drift
           </button>
         )}
       </div>
-      <div className="dp-cap">
-        Демо-прогноз, не валидирован{cur ? ` · ${cur.slice(8, 10)}.${cur.slice(5, 7)} ${cur.slice(11, 16)} UTC` : ''}
+      <div className="dp-cap" data-testid="drift-caption">
+        {driftCaption(f)}
+        {cur ? ` · +${Math.floor(hour)} ч ≈ ${cur.slice(8, 10)}.${cur.slice(5, 7)} ${cur.slice(11, 16)} UTC` : ''}
         <Info label="Источники прогноза" testid="info-drift-src">
           {f.model ?? 'OpenDrift'} · течения {shortSrc(f.currents)} · ветер {shortSrc(f.wind)} · коэф. ветра {f.wind_drift_factor ?? '—'}
           {ens.length > 0 ? ` · облако неопределённости: коэф. ${wdfs.join('–')}` : ''}

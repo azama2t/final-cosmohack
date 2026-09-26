@@ -1,6 +1,7 @@
 // «Метрики»: numbers ONLY from GET /api/v3/metrics (no constants here). Rows without data in the API are not shown.
 import { modelRu, profileCfgRu } from './fmt';
 import Info from '../components/Info';
+import { QcOffline, useCachedGet } from './QcFallback';
 import { num, signed } from './fmt';
 
 const f3 = (v: any) => (typeof v === 'number' ? num(v, 3) : '—');
@@ -38,9 +39,19 @@ const DET_ROWS: [string, string[], string, string][] = [
   ['IoU, test', ['test_iou', 'iou_test'], 'test_ci95_iou', 'iou'],
 ];
 
-export default function MetricsPanel({ m, err }: { m: any | null; err: string | null }) {
-  if (err) return <div className="c-err c-pad">{err}</div>;
-  if (!m) return <div className="note c-pad">Загрузка…</div>;
+/** §48 (L142): an unavailable /metrics is one compact line + the last saved answer, not a red page */
+export default function MetricsPanel({ m: m0, err: err0 }: { m: any | null; err: string | null }) {
+  const q = useCachedGet<any>('/api/v3/metrics', { data: m0, err: err0 });
+  const m = q.data;
+  return (
+    <>
+      {q.err && <QcOffline lastOk={q.lastOk} loading={q.loading} onRetry={q.retry} what="метрики" testid="metrics-offline" />}
+      {m ? <MetricsBody m={m} /> : !q.err && <div className="note c-pad">Загрузка…</div>}
+    </>
+  );
+}
+
+function MetricsBody({ m }: { m: any }) {
   const d = m.detector ?? {};
   const models = detModels(d).sort((a, b) => (a === d.main ? -1 : b === d.main ? 1 : 0));
   const c = m.concentration ?? {};

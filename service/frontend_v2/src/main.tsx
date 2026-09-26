@@ -5,6 +5,7 @@ import '@fontsource/inter/500.css';
 import '@fontsource/inter/600.css';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './styles.css';
+import './case/polish.css'; // L142 §48: floating «i», quality banner, photo entry, visual cleanup
 import { reloadOnceAfterBuild } from './lib/reload';
 import MobileShell from './mobile/MobileShell'; // L140 §45: mobile layer (≤ 820 px), CSS + chrome only
 

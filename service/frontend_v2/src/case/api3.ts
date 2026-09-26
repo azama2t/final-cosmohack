@@ -29,9 +29,33 @@ export const apiUrl = (path: string, params: Params = {}) => {
   return `${API_BASE}${path}${s ? '?' + s : ''}`;
 };
 
+/** §48 (L142): a transient failure — no connection, or a gateway/tunnel page instead of JSON (502/503/504/520–530:
+ *  the service is being restarted behind the cloudflared tunnel) — is retried 3 times (1.5, 3, 6 s — covers a :8070 restart) before «Сервис недоступен». */
+const RETRY_MS = [1500, 3000, 6000];
+const transient = (e: unknown) => e instanceof ApiErr && e.code === 'UNAVAILABLE' && (e.status === 0 || e.status === 502 || e.status === 503 || e.status === 504 || (e.status >= 520 && e.status <= 530));
+const pause = (ms: number, signal?: AbortSignal) =>
+  new Promise<void>((res, rej) => {
+    const t = setTimeout(res, ms);
+    signal?.addEventListener('abort', () => {
+      clearTimeout(t);
+      rej(new DOMException('aborted', 'AbortError'));
+    });
+  });
+
 /** GET JSON. Throws ApiErr: UNAVAILABLE (no service / 5xx without body), or the API error code with its message. */
 export async function get<T>(path: string, params: Params = {}, signal?: AbortSignal): Promise<T> {
   if (MOCK) return mockGet<T>(path, params);
+  for (let i = 0; ; i++) {
+    try {
+      return await get1<T>(path, params, signal);
+    } catch (e) {
+      if (i >= RETRY_MS.length || !transient(e) || signal?.aborted) throw e;
+      await pause(RETRY_MS[i], signal);
+    }
+  }
+}
+
+async function get1<T>(path: string, params: Params, signal?: AbortSignal): Promise<T> {
   let r: Response;
   try {
     r = await fetch(apiUrl(path, params), { signal, cache: 'no-cache' });

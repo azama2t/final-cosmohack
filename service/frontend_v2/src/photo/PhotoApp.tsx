@@ -4,6 +4,7 @@
 // Порог двигается на клиенте: запрос идёт с threshold=0.05, число = рамки со score ≥ порога.
 // Поправка на пропуски p(размер) (аэро) считается на клиенте по коэффициентам из /photo/meta — только при пороге по умолчанию.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { PhotoRolesLine } from '../case/PhotoRoles'; // §48 L142: one line «спутник · фото · поле»
 import './photo.css';
 
 type Survey = 'water_camera' | 'aerial';
@@ -244,15 +245,16 @@ export default function PhotoApp() {
       <header className="ph-top">
         <div className="seg" role="tablist" aria-label="Режим">
           <button onClick={() => (location.href = '?')} data-testid="mode-case">
-            Кейс
+            Снимки и зоны
           </button>
           <button className="on" aria-selected data-testid="mode-photo">
-            Фото
+            Счёт по фото
           </button>
         </div>
         <div className="ph-title">
           Счётчик предметов по фото
-          <span className="ph-sub">отдельный модуль · не спутник: Sentinel-2 (10 м) отдельные предметы так не считает</span>
+          <span className="ph-sub">не спутник: Sentinel-2 (10 м) отдельные предметы так не считает</span>
+          <PhotoRolesLine className="ph-roles" />
         </div>
       </header>
 
