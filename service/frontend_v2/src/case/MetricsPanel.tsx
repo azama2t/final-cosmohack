@@ -15,8 +15,8 @@ function pick(o: any, ...keys: string[]) {
 /** short column names that match README / deck */
 function detName(n: string): string {
   if (/random\s*forest/i.test(n)) return 'RF (MARIDA)';
-  if (/ndvi/i.test(n)) return 'окно FDI×NDVI';
-  if (/fdi/i.test(n)) return 'один порог FDI';
+  if (/ndvi/i.test(n)) return 'FDI×NDVI';
+  if (/fdi/i.test(n)) return 'порог FDI';
   if (/lightgbm/i.test(n)) return 'LightGBM';
   return n.split(/[ (]/)[0];
 }
@@ -32,9 +32,9 @@ function detModels(d: any): any[] {
 }
 
 const DET_ROWS: [string, string[], string, string][] = [
+  ['F1, test', ['test_f1', 'f1_test'], 'test_ci95_f1', 'f1'],
   ['Precision, test', ['test_precision', 'precision_test'], 'test_ci95_precision', 'precision'],
   ['Recall, test', ['test_recall', 'recall_test'], 'test_ci95_recall', 'recall'],
-  ['F1, test', ['test_f1', 'f1_test'], 'test_ci95_f1', 'f1'],
   ['IoU, test', ['test_iou', 'iou_test'], 'test_ci95_iou', 'iou'],
 ];
 
@@ -66,6 +66,15 @@ export default function MetricsPanel({ m, err }: { m: any | null; err: string | 
     <div className="c-metrics" data-testid="metrics-panel">
       {ftp.length > 0 && (
         <div className="sec c-verdict" data-testid="metrics-verdict">
+          {models.length > 0 && (
+            <div className="c-line" data-testid="metrics-det-f1">
+              <b>Детектор, test MARIDA — F1:</b>{' '}
+              {models
+                .map((x) => `${detName(x.name)} ${typeof (x.test_f1 ?? x.f1) === 'number' ? (x.test_f1 ?? x.f1).toFixed(3).replace('.', ',') : '—'}`)
+                .join(' · ')}
+              {d.unet ? ` · U-Net ${f1x(d.unet.f1)}` : ''}
+            </div>
+          )}
           {ftp.map(([pid, pr]) => {
             const mm = pr.main ?? {};
             const b = pr.baseline_metrics ?? {};
@@ -111,7 +120,7 @@ export default function MetricsPanel({ m, err }: { m: any | null; err: string | 
                 {r.vals.map((v, i) => (
                   <td key={i} className="r" data-testid={i === 0 ? `m-det-${r.k}` : undefined}>
                     {i === 0 ? <b>{f3(v)}</b> : f3(v)}
-                    {i === 0 && r.ci ? <div className="faint tiny">{r.ci}</div> : null}
+                    {i === 0 && r.ci ? <div className="faint tiny c-ci">{r.ci.replace('–', '–​')}</div> : null}
                   </td>
                 ))}
               </tr>

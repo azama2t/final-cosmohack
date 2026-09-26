@@ -1460,3 +1460,27 @@ a.c-head-r.c-head-link {
 .c-metrics td:first-child {
   width: 30%;
 }
+/* jury 11:25: headers never break inside a word */
+.c-metrics th {
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+}
+.c-metrics th {
+  font-size: 10px;
+  letter-spacing: -0.2px;
+  padding-left: 1px;
+  padding-right: 1px;
+}
+.c-metrics th:first-child,
+.c-metrics td:first-child {
+  width: 22%;
+}
+.c-metrics td * {
+  white-space: normal;
+  font-size: 9.5px;
+}
+.c-metrics .c-ci {
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+}

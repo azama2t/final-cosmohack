@@ -216,10 +216,10 @@ export default function SceneZoneCard({
             <dd data-testid="sz-plain-cover">
               {m.water_km2 && m.suspicious_area_m2 !== null ? `${num((m.suspicious_area_m2 / (m.water_km2 * 1e6)) * 100, 2)} % воды зоны` : '—'} ({num(m.suspicious_area_m2, 0)} м², {num(m.n_pixels, 0)} пикс. по 10 м) <Src k="model" />
             </dd>
-            <dt>Уверенность</dt>
+            <dt>Оценка детектора</dt>
             <dd data-testid="sz-plain-conf">
               {pr.prob_mean !== null && pr.prob_mean !== undefined
-                ? `детектор уверен в среднем на ${Math.round(pr.prob_mean * 100)} % (у самого уверенного пикселя ${Math.round((pr.prob_max ?? 0) * 100)} %); `
+                ? `средняя ${num(pr.prob_mean, 2)}, макс. ${(pr.prob_max ?? 0).toFixed(2).replace('.', ',')} (порог ${num(m.model?.threshold ?? null, 2)}; не откалибрована как вероятность); `
                 : ''}
               {p.verification === 'level_B_cozar' ? 'совпадает с разметкой людей (каталог Cózar 2024)' : p.detection_status === 'detected' ? 'независимо не проверено' : '—'}
             </dd>
@@ -311,7 +311,7 @@ export default function SceneZoneCard({
             </Info>
           </div>
           <dl className="rows">
-            <dt>Вероятность детектора, ср. / макс.</dt>
+            <dt>Оценка детектора, ср. / макс. (не вероятность)</dt>
             <dd data-testid="sz-prob">
               {num(pr.prob_mean, 2)} / {num(pr.prob_max, 2)}
             </dd>
