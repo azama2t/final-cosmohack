@@ -3,7 +3,7 @@
 // Data: GET /api/v3/drones, /api/v3/drones/{set}/frames (service/routes_drones.py, data/case/drones/index.json).
 // Honesty: шт./м² and шт./км² only when the frame area is known; our counter's boxes only where its error was checked.
 import { useEffect, useMemo, useState } from 'react';
-import { get } from './api3';
+import { apiUrl, get } from './api3';
 import './drones.css';
 
 export type Group = 'plastic' | 'algae' | 'wood' | 'other';
@@ -82,6 +82,7 @@ export interface DroneSet {
   groups_labelled: Group[];
   algae_note: string;
   model?: DroneModelSet | null;
+  region_group?: string;
   cover: string | null;
 }
 interface SetsResp {
@@ -292,6 +293,18 @@ function FrameView({ set, frames, idx, onIdx, onBack }: { set: DroneSet; frames:
               {set.link.replace(/^https?:\/\//, '')}
             </a>
           </div>
+          <div className="dr-sec" data-testid="drones-export">
+            <div className="dr-h">Выгрузка предметов кадра</div>
+            <div className="dr-exp">
+              <a className="btn sm" href={apiUrl(`/api/v3/drones/${set.id}/frames/${f.id}/items`, { format: 'csv' })} download data-testid="drones-export-csv">
+                CSV
+              </a>
+              <a className="btn sm ghost" href={apiUrl(`/api/v3/drones/${set.id}/frames/${f.id}/items`, { format: 'json' })} target="_blank" rel="noreferrer" data-testid="drones-export-json">
+                JSON
+              </a>
+            </div>
+            <div className="faint">строки «разметка набора» и «наша модель» — отдельно; координаты — доли кадра</div>
+          </div>
         </div>
       </div>
     </div>
@@ -358,8 +371,14 @@ export default function DronesPanel({ initialSet, onClose }: { initialSet?: stri
     return () => window.removeEventListener('keydown', on);
   }, [onClose]);
   const set = useMemo(() => data?.sets.find((s) => s.id === cur) ?? null, [data, cur]);
-  const drones = data?.sets.filter((s) => s.sensor === 'drone') ?? [];
-  const others = data?.sets.filter((s) => s.sensor !== 'drone') ?? [];
+  const byRegion = useMemo(() => {
+    const m = new Map<string, DroneSet[]>();
+    for (const s of data?.sets ?? []) {
+      const k = s.region_group || 'Регион не указан в наборе';
+      m.set(k, [...(m.get(k) ?? []), s]);
+    }
+    return [...m.entries()].sort((a, b) => (a[0].startsWith('Регион не указан') ? 1 : 0) - (b[0].startsWith('Регион не указан') ? 1 : 0) || a[0].localeCompare(b[0], 'ru'));
+  }, [data]);
   const card = (s: DroneSet) => (
     <button key={s.id} className="dr-card" onClick={() => setCur(s.id)} data-testid="drones-setcard" data-set={s.id}>
       {s.cover && <img src={s.cover} alt="" loading="lazy" />}
@@ -400,14 +419,13 @@ export default function DronesPanel({ initialSet, onClose }: { initialSet?: stri
         {!data && !err && <div className="dr-load">Загрузка…</div>}
         {data && !set && (
           <div className="dr-sets" data-testid="drones-sets">
-            <div className="dr-grp">Дроны</div>
-            <div className="dr-cards">{drones.map(card)}</div>
-            {others.length > 0 && (
-              <>
-                <div className="dr-grp">Другие детальные кадры (не дрон) — на них обучался и проверен наш счётчик</div>
-                <div className="dr-cards">{others.map(card)}</div>
-              </>
-            )}
+            {byRegion.map(([reg, list]) => (
+              <div key={reg} data-testid="drones-region" data-region={reg}>
+                <div className="dr-grp">{reg}</div>
+                <div className="dr-cards">{list.map(card)}</div>
+              </div>
+            ))}
+            <div className="dr-note faint">Платформа подписана на каждом наборе: дрон, самолёт или судно — ни один кадр не со спутника.</div>
             {data.not_included.length > 0 && (
               <div className="dr-note faint" data-testid="drones-not-included">
                 Не показано: {data.not_included.map((n) => `${n.what} — ${n.why}`).join('; ')}.

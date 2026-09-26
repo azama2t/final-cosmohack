@@ -3076,3 +3076,29 @@ a.c-head-r.c-head-link {
   margin: 0 2px 0 6px;
   vertical-align: middle;
 }
+
+/* §60 Б: one shared timeline — legend of shapes / date types + period presets */
+.c-tl-lg {
+  display: inline-flex;
+  gap: 10px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+.c-tl-lg i {
+  margin-right: 3px;
+}
+.c-tl-k-n {
+  display: inline-block;
+  width: 2px;
+  height: 10px;
+  background: #cfe0ff;
+}
+.c-tl-pre {
+  display: inline-flex;
+  gap: 8px;
+  margin-left: 6px;
+}
+.c-tl-pre .link {
+  font-size: 11px;
+  padding: 0;
+}

@@ -1593,6 +1593,8 @@ export default function CaseApp() {
           onDynamics={dynRegion || curScene ? () => openDynamics({ region: dynRegion, scene: curScene }) : null}
           nasa={{ on: nasaOn && nasaLayerOn, date: nasaDate, latest: nasaInfo?.latest ?? nasaDate }}
           fresh={tlFresh}
+          show={{ s2: q.layers.zones, fresh: freshOn, field: q.layers.obs, drift: q.layers.zones }}
+          onRange={(from, to) => setFilter({ from, to })}
           freshCur={freshScene?.key ?? null}
           onFresh={(k) => {
             const s = freshAll.find((x) => x.key === k) ?? null;

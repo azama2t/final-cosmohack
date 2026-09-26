@@ -136,3 +136,19 @@ def test_image_and_errors(client, sets):
 def test_previews_budget():
     total = sum(p.stat().st_size for p in (IDX.parent / "img").rglob("*.jpg"))
     assert total <= 30 * 1024 * 1024
+
+
+def test_items_export_csv_json(client, sets):
+    """§60 Г: регион → кадр → предметы → выгрузка; разметка и модель — разные строки."""
+    assert all(s["region_group"] for s in sets["sets"])
+    j = client.get("/api/v3/drones/tun_marinelitter/frames").json()
+    f = j["frames"][0]
+    r = client.get(f"/api/v3/drones/tun_marinelitter/frames/{f['id']}/items").json()
+    lab = [x for x in r["items"] if x["who"] == "разметка набора"]
+    mod = [x for x in r["items"] if x["who"] == "наша модель"]
+    assert len(lab) == f["n_objects"] and len(mod) == f["model"]["n"]
+    assert all(x["group"] is None for x in mod)
+    c = client.get(f"/api/v3/drones/tun_marinelitter/frames/{f['id']}/items?format=csv")
+    assert c.status_code == 200 and c.headers["content-type"].startswith("text/csv")
+    assert len(c.text.strip().split("\n")) == 1 + len(r["items"])
+    assert client.get("/api/v3/drones/tun_marinelitter/frames/nope/items").status_code == 404

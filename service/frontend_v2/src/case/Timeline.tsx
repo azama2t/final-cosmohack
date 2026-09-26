@@ -58,14 +58,14 @@ function ticks(t0: number, t1: number, W: number): { t: number; l: string; major
 
 export type LaneId = 's2' | 'nasa' | 'drones' | 'field' | 'drift';
 const LANES: { id: LaneId; label: string; h: number; title: string }[] = [
-  { id: 's2', label: 'Sentinel-2', h: 24, title: 'снимки Sentinel-2 (цифра — находки / число снимков в группе)' },
-  { id: 'nasa', label: 'NASA', h: 12, title: 'NASA · ежедневно — обзор 250–375 м, не обнаружение пластика; нажмите на день — слой NASA на эту дату' },
+  { id: 's2', label: 'Sentinel-2', h: 22, title: 'снимки Sentinel-2 (цифра — находки / число снимков в группе)' },
+  { id: 'nasa', label: 'NASA', h: 7, title: 'NASA · ежедневно — обзор 250–375 м, не обнаружение пластика; нажмите на день — слой NASA на эту дату' },
   { id: 'drones', label: 'Дроны', h: 12, title: 'кадры с дронов (детальные, не спутник)' },
-  { id: 'field', label: 'Поле', h: 12, title: 'полевые измерения организаторов (судно)' },
-  { id: 'drift', label: 'Дрейф', h: 12, title: 'прогноз дрейфа 72 ч от снимка — эксперимент' },
+  { id: 'field', label: 'Поле', h: 9, title: 'полевые измерения организаторов (судно)' },
+  { id: 'drift', label: 'Дрейф', h: 7, title: 'прогноз дрейфа 72 ч от снимка — эксперимент' },
 ];
 const LANE_KEY = 'mp.case.tl.lanes';
-const LBL = 62; // px: lane labels column
+const LBL = 6; // px: left margin (one shared scale, no lane labels)
 const AXIS = 13;
 const VIIRS_FROM = Date.UTC(2012, 0, 19);
 const iso = (t: number) => new Date(t).toISOString().slice(0, 10);
@@ -98,9 +98,15 @@ export default function Timeline({
   fresh,
   freshCur,
   onFresh,
+  show,
+  onRange,
 }: {
   /** §55/§57: «Реальное время» — fresh Sentinel-2 processed by our model (shown in the Sentinel-2 lane, red ring) */
   fresh?: { key: string; t: number; label: string; finds: number }[];
+  /** §60 Б: which sources are on (the left toggles) */
+  show?: { s2: boolean; fresh: boolean; field: boolean; drift: boolean };
+  /** «период шкалы → фильтр дат Sentinel-2» */
+  onRange?: (from: string, to: string) => void;
   freshCur?: string | null;
   onFresh?: (key: string) => void;
   /** §51 п.3: open the «Динамика района» panel (L140) */
@@ -132,24 +138,14 @@ export default function Timeline({
       /* no storage */
     }
   }, [open]);
-  const [lanes, setLanes] = useState<Record<LaneId, boolean>>(() => {
-    const d = { s2: true, nasa: true, drones: true, field: true, drift: true };
-    try {
-      return { ...d, ...JSON.parse(localStorage.getItem(LANE_KEY) ?? '{}') };
-    } catch {
-      return d;
-    }
-  });
-  const toggleLane = (id: LaneId) =>
-    setLanes((x) => {
-      const n = { ...x, [id]: !x[id] };
-      try {
-        localStorage.setItem(LANE_KEY, JSON.stringify(n));
-      } catch {
-        /* no storage */
-      }
-      return n;
-    });
+  // §60 Б: ONE shared scale for the enabled sources (left toggles); colour + shape per source
+  const lanes: Record<LaneId, boolean> = {
+    s2: !!(show?.s2 || show?.fresh),
+    nasa: !!nasa?.on,
+    drones: false,
+    field: !!show?.field,
+    drift: !!show?.drift,
+  };
   // §57 п.2: no drone lane without real shooting dates (none are invented)
   const hasDrones = (drones ?? []).some((d) => Number.isFinite(d.t));
   const avail = LANES.filter((l) => l.id !== 'drones' || hasDrones);
@@ -319,19 +315,60 @@ export default function Timeline({
       </div>
       <div className="c-tl-main" ref={box}>
         <div className="c-tl-key">
-          <span className="faint">дорожки:</span>
-          {avail.map((l) => (
-            <button
-              key={l.id}
-              className={`c-tl-chip ${l.id} ${lanes[l.id] ? 'on' : ''}`}
-              onClick={() => toggleLane(l.id)}
-              aria-pressed={lanes[l.id]}
-              data-testid={`timeline-lane-${l.id}`}
-              title={`${l.title} — показать / скрыть дорожку`}
-            >
-              {l.label}
-            </button>
-          ))}
+          <span className="c-tl-lg" data-testid="timeline-legend">
+            {show?.s2 && (
+              <span>
+                <i className="c-mk s2" /> съёмка S2 (архив)
+              </span>
+            )}
+            {show?.fresh && (
+              <span>
+                <i className="c-mk rt" /> съёмка S2 свежие (авто)
+              </span>
+            )}
+            {show?.field && (
+              <span>
+                <i className="c-mk fd" /> полевое измерение
+              </span>
+            )}
+            {show?.drift && (
+              <span>
+                <i className="c-tl-k-d" /> прогноз дрейфа
+              </span>
+            )}
+            {nasa?.on && (
+              <span>
+                <i className="c-tl-k-n" /> день NASA
+              </span>
+            )}
+            {!show?.s2 && !show?.fresh && !show?.field && <span className="faint">все источники выключены</span>}
+          </span>
+          <span className="c-tl-pre">
+            {(
+              [
+                ['1 мес', 31],
+                ['6 мес', 183],
+                ['год', 366],
+              ] as [string, number][]
+            ).map(([l, d]) => (
+              <button
+                key={l}
+                className="link"
+                data-testid={`timeline-pre-${d}`}
+                onClick={() => {
+                  const e = Date.now();
+                  setWin([e - d * DAY, e + 2 * DAY]);
+                }}
+              >
+                {l}
+              </button>
+            ))}
+            {onRange && (
+              <button className="link" data-testid="timeline-to-filter" title="Сделать видимый период шкалы фильтром дат снимков Sentinel-2 (шаг 1)" onClick={() => onRange(iso(Math.max(t0, 0)), iso(t1))}>
+                → фильтр дат
+              </button>
+            )}
+          </span>
           {unit && <span className="faint">· группы по {unit === 'year' ? 'годам' : 'месяцам'}</span>}
           {curS && <span className="c-tl-cur">выбран: {curS.label}</span>}
           {onDynamics && (
@@ -358,15 +395,6 @@ export default function Timeline({
           onMouseUp={() => setTimeout(() => (drag.current = null), 0)}
           onMouseLeave={() => (drag.current = null)}
         >
-          {shown.map((l, i) => (
-            <g key={'lane' + l.id} data-testid={`timeline-row-${l.id}`}>
-              {i % 2 === 0 && <rect x={0} y={ly(l.id)[0]} width={W + LBL} height={l.h} className="c-tl-band" />}
-              <text x={4} y={mid(l.id) + 3.5} className={`c-tl-lbl ${l.id}`}>
-                {l.label}
-                <title>{l.title}</title>
-              </text>
-            </g>
-          ))}
           {ticks(t0, t1, W).map((k) => (
             <g key={k.t}>
               <line x1={x(k.t)} x2={x(k.t)} y1={0} y2={H} className={k.major ? 'c-tl-gl major' : 'c-tl-gl'} />
@@ -381,11 +409,6 @@ export default function Timeline({
                 <title>полевые измерения (судно): {n}</title>
               </rect>
             ))}
-          {lanes.field && !obsBins.length && (
-            <text x={LBL + 6} y={mid('field') + 3.5} className="c-tl-empty">
-              {obs.length ? 'нет измерений в этом окне' : 'слой «Полевые измерения» выключен или нет дат'}
-            </text>
-          )}
           {lanes.drones && hasDrones &&
             droneBins.map(([px, n]) => (
               <rect key={'dr' + px} x={px - 2} y={mid('drones') - 4} width={4} height={8} rx={1} className="c-tl-drone">
@@ -419,7 +442,7 @@ export default function Timeline({
               )}
             </g>
           )}
-          {lanes.s2 &&
+          {show?.fresh &&
             freshBins.map(([px, fs]) => {
               const cy = mid('s2');
               const on = fs.some((f) => f.key === freshCur);
@@ -460,7 +483,7 @@ export default function Timeline({
               </text>
             </g>
           )}
-          {lanes.s2 &&
+          {(show ? show.s2 : true) &&
             groups.map((g) => {
               const cy = mid('s2');
               if (g.items.length === 1) {

@@ -409,3 +409,8 @@
   background: rgba(95, 208, 255, 0.07);
   font-size: 13px;
 }
+
+.dr-exp {
+  display: flex;
+  gap: 8px;
+}
