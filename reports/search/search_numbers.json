@@ -1173,5 +1173,37 @@
   "n_hscroll": 0,
   "n_console_errors": 0,
   "n_steps": 10
+ },
+ "demo_tour": {
+  "available": true,
+  "source": "service/frontend_v2/src/case/DemoTour.tsx; data/case/scene_zones/<сцена>/zones.geojson",
+  "steps": [
+   "Сцена",
+   "Зона",
+   "Качество",
+   "Итоговый статус",
+   "Выгрузка"
+  ],
+  "n_steps": 5,
+  "scene_key": "demo-cozar-2021-03-11",
+  "zone_id": "SZ-demo-cozar-2021-03-11-001",
+  "zone_n": 1,
+  "tile": "30SXE",
+  "date": "11.03.2021",
+  "scene_id": "S2B_30SXE_20210311_0_L2A",
+  "status": "detected",
+  "confirmation": "cozar_b",
+  "n_cozar_filaments": 1,
+  "area_km2": 0.21,
+  "card_tabs": [
+   "Главное",
+   "Качество",
+   "Подробно",
+   "Дрейф",
+   "Выгрузка"
+  ],
+  "card_tabs_found": true,
+  "drift_sources": "HYCOM ESPC-D-V02 + NCEP GFS",
+  "card_text": "вкладки «Главное | Качество | Подробно | Дрейф | Выгрузка»"
  }
 }
