@@ -511,7 +511,8 @@
    "short": "The current matching of satellite detections and field observations is limited to fake targets",
    "doi": "10.1038/s41467-024-48674-7",
    "ref": "Cózar et al. 2024, Nat Commun, раздел «A new scenario for research and management» (PMC11178853)",
-   "checked_in_text": true
+   "checked_in_text": true,
+   "checked_source": "reports/quantity/cozar2024_quote_check.json (проверка по тексту статьи PMC11178853)"
   },
   "analogy": {
    "text": "пальмы на гектар по Sentinel-2 с опорой на подсчёт по снимкам высокого разрешения (arXiv 2105.11207): MAE ±7,3 пальмы/га",
@@ -768,6 +769,9 @@
   "by_insufficient": 180,
   "by_not_detected": 28,
   "by_not_informative": 0,
+  "n_finds": 78,
+  "n_rejected": 208,
+  "demo_zone_title": "30SXE · зона 16",
   "demo": {
    "tile": "30SXE",
    "date": "11.03.2021",
@@ -839,6 +843,18 @@
    "baseline_density_mae_km2": 27930.0,
    "true_mean_density_km2": 37400.0,
    "license": "Winans 2023 — CC BY (Zenodo 8381113)"
+  },
+  "debrisscan": {
+   "rule": "наша модель заменяет бейзлайн DebrisScan, только если MAE ≤ 0,9 × MAE бейзлайна, ДИ разности < 0 и точность не хуже (правило записано до сравнения)",
+   "n_test": 397,
+   "ours_mae": 1.85,
+   "base_mae": 2.29,
+   "diff_ci95": [
+    -0.64,
+    -0.22
+   ],
+   "accepted": true,
+   "license": "DebrisScan — Apache-2.0"
   }
  }
 }

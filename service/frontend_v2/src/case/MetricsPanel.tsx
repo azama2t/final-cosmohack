@@ -61,8 +61,24 @@ export default function MetricsPanel({ m, err }: { m: any | null; err: string | 
     if (vals.some((v) => v !== null)) rows.push({ k, vals, ci: '' });
   }
   const ce = m.control_example;
+  const ftp: [string, any][] = c.final_test?.profiles ? Object.entries(c.final_test.profiles) : [];
   return (
     <div className="c-metrics" data-testid="metrics-panel">
+      {ftp.length > 0 && (
+        <div className="sec c-verdict" data-testid="metrics-verdict">
+          {ftp.map(([pid, pr]) => {
+            const mm = pr.main ?? {};
+            const b = pr.baseline_metrics ?? {};
+            const worse = typeof mm.mae === 'number' && typeof b.mae === 'number' && mm.mae >= b.mae;
+            return (
+              <div className="c-line" key={pid}>
+                <b>Концентрация, отложенный test ({profileCfgRu(pid)}): {worse ? 'модель не лучше медианы' : pr.main_better_significant ? 'модель лучше медианы' : 'разница с медианой незначима'}</b> — ошибка прогноза на test (MAE):
+                модель {f1(mm.mae)}, медиана профиля {f1(b.mae)} шт./км². На карте для нового места — медиана профиля.
+              </div>
+            );
+          })}
+        </div>
+      )}
       <div className="sec">
         <div className="sec-h">
           <h3>Детектор · MARIDA</h3>

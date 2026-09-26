@@ -3,6 +3,10 @@
 Генерируется `scripts/render_docs.py` из `reports/final_numbers.json` (`case.sections.quantity`, `adis_pairs`, `field_test`); руками не править.
 Исходные расчёты — `reports/quantity/*.json` (`scripts/case/quantity_report.py`, `quantity_live.py`; код `src/macroplastic/case/coverage.py`, `concentration.py`), пары ADIS — `reports/search/adis_candidates.csv`.
 
+**Целевая совокупность = материал + размерный класс + единица** (что именно считает каждая ступень; `docs/LABELS.md`):
+
+{{derived.case_targets_table}}
+
 ## 0. Единая логика: три уровня связи «снимок ↔ полевое число»
 
 {{derived.case_quantity_levels_table}}
@@ -18,11 +22,13 @@
 | Ступень | Единица | Проверка | Метрика |
 |---|---|---|---|
 | 1. Предмет на кадре (фото, счётчик) | шт. на кадр | отложенный test FML ({{case.sections.photo_count.frame.n_images|int}} кадров, по сессиям) | MAE {{case.sections.photo_count.frame.mae|f2}} шт./кадр [{{case.sections.photo_count.frame.mae_ci95.0|f2}}–{{case.sections.photo_count.frame.mae_ci95.1|f2}}] |
-| 2. Плотность на кадре (известная площадь) | шт./м² → шт./км² | аэро Winans, кадр {{case.sections.photo_count.area.frame_area_m2|int}} м², {{case.sections.photo_count.area.n_test_frames|int}} кадров | MAE {{case.sections.photo_count.area.density_mae_km2|int}} против {{case.sections.photo_count.area.baseline_density_mae_km2|int}} шт./км² у медианы |
+| 2. Плотность на кадре (известная площадь) | шт./м² → шт./км² | аэро Winans, шт. на {{case.sections.photo_count.area.frame_area_m2|int}} м² кадра берега, {{case.sections.photo_count.area.n_test_frames|int}} кадров | MAE {{case.sections.photo_count.area.density_mae_km2|int}} против {{case.sections.photo_count.area.baseline_density_mae_km2|int}} шт./км² у медианы |
 | 3. Маршрут судна (поле, C = N/A) — главный результат | шт./км² | отложенный test, модель против медианы | S2 {{case.sections.quantity.field_S2.pooled_C|f1}} [{{case.sections.quantity.field_S2.boot_lo95|f1}}–{{case.sections.quantity.field_S2.boot_hi95|f1}}]; ADIS > 10 см {{case.sections.quantity.adis_forecast.C|f2}} |
-| 4. Спутниковая зона | м² маски, LWD м²/км² | {{case.sections.scene_zones.n_zones}} зон; калибровочных пар «снимок → шт./км²» {{case.sections.quantity.levels.calibration_pairs}} | концентрация по снимку не подтверждена |
+| 4. Спутниковая зона | м² маски, LWD м²/км² | {{case.sections.scene_zones.n_finds}} находок из {{case.sections.scene_zones.n_zones}} зон; калибровочных пар «снимок → шт./км²» {{case.sections.quantity.levels.calibration_pairs}} | концентрация по снимку не подтверждена |
 
 ## 1. Поле: концентрация, шт./км² (измерение) — главный количественный результат
+
+**Три числа Саргассова моря (профиль S2, пластик > 2 см) — не путать:** {{case.sections.quantity.field_S2.pooled_C|f1}} шт./км² — среднее профиля ΣN/ΣA по всем событиям (измерение, 95 % с разбросом между днями [{{case.sections.quantity.field_S2.boot_lo95|f1}}–{{case.sections.quantity.field_S2.boot_hi95|f1}}]); {{case.conc.S2.dev_median_c|f1}} шт./км² — медиана события, её карта показывает как оценку для нового места; {{case.sections.field_test.S2.median_mae|f1}} шт./км² — средняя ошибка этой медианы на отложенном test.
 
 {{derived.case_field_table}}
 
@@ -30,7 +36,7 @@
 
 {{derived.case_quantity_profiles_table}}
 
-- **Полевой прогноз для ADIS** (> 10 см, {{case.sections.quantity.adis_forecast.n_segments|int}} отрезков): ΣN/ΣA = {{case.sections.quantity.adis_forecast.C|f2}} [{{case.sections.quantity.adis_forecast.lo|f2}}–{{case.sections.quantity.adis_forecast.hi|f2}}] шт./км², нулевых отрезков {{case.sections.quantity.adis_forecast.zero_pct|f0}} % ({{case.sections.quantity.adis_forecast.note_zero}}). Прогноз по координатам и сезону с правилом, записанным до метрик, и разбиением {{case.sections.quantity.adis_forecast.split}}: {{case.sections.quantity.adis_forecast.verdict}}. На отложенных регионах ({{case.sections.quantity.adis_forecast.test_n|int}} отрезков) медиана — MAE {{case.sections.quantity.adis_forecast.test_mae_median|f2}}, RMSE {{case.sections.quantity.adis_forecast.test_rmse_median|f2}} шт./км², покрытие 90 %-интервала {{case.sections.quantity.adis_forecast.test_cov90_median|f0}} % (`reports/quantity/adis_forecast.md`). Для сравнения — {{case.sections.quantity.adis_forecast.authors_calibrated.label}}: {{case.sections.quantity.adis_forecast.authors_calibrated.C|f2}} шт./км² (типичный интервал отрезка {{case.sections.quantity.adis_forecast.authors_calibrated.lo_typ|f2}}–{{case.sections.quantity.adis_forecast.authors_calibrated.hi_typ|f1}}; {{case.sections.quantity.adis_forecast.authors_calibrated.source}}); наша — {{case.sections.quantity.adis_forecast.authors_calibrated.ours_raw_C|f2}}. Оговорка: {{case.sections.quantity.adis_forecast.authors_calibrated.caveat}}.
+- **Полевой прогноз для ADIS** (объекты детектора ADIS > 10 см, 7 % — животное/растение по классу модели; {{case.sections.quantity.adis_forecast.n_segments|int}} отрезков): ΣN/ΣA = {{case.sections.quantity.adis_forecast.C|f2}} [{{case.sections.quantity.adis_forecast.lo|f2}}–{{case.sections.quantity.adis_forecast.hi|f2}}] шт./км², нулевых отрезков {{case.sections.quantity.adis_forecast.zero_pct|f0}} % ({{case.sections.quantity.adis_forecast.note_zero}}). Прогноз по координатам и сезону с правилом, записанным до метрик, и разбиением {{case.sections.quantity.adis_forecast.split}}: {{case.sections.quantity.adis_forecast.verdict}}. На отложенных регионах ({{case.sections.quantity.adis_forecast.test_n|int}} отрезков) медиана — MAE {{case.sections.quantity.adis_forecast.test_mae_median|f2}}, RMSE {{case.sections.quantity.adis_forecast.test_rmse_median|f2}} шт./км², покрытие 90 %-интервала {{case.sections.quantity.adis_forecast.test_cov90_median|f0}} % (`reports/quantity/adis_forecast.md`). Для сравнения — {{case.sections.quantity.adis_forecast.authors_calibrated.label}}: {{case.sections.quantity.adis_forecast.authors_calibrated.C|f2}} шт./км² (типичный интервал отрезка {{case.sections.quantity.adis_forecast.authors_calibrated.lo_typ|f2}}–{{case.sections.quantity.adis_forecast.authors_calibrated.hi_typ|f1}}; {{case.sections.quantity.adis_forecast.authors_calibrated.source}}); наша — {{case.sections.quantity.adis_forecast.authors_calibrated.ours_raw_C|f2}}. Оговорка: {{case.sections.quantity.adis_forecast.authors_calibrated.caveat}}.
 - Профили не смешиваются; «весь мусор» (S3, S4) — не пластик.
 - Оценка по полевым данным на карте — **медиана профиля**: на отложенном test модель не лучше медианы (S2 {{case.sections.field_test.S2.main_model}} {{case.sections.field_test.S2.main_mae|f1}} против медианы {{case.sections.field_test.S2.median_mae|f1}}; S1 {{case.sections.field_test.S1.main_mae|f1}} против {{case.sections.field_test.S1.median_mae|f1}}). Подпись — «оценка по полевым данным, не по снимку».
 - Изменчивость S2 в ln C: между событиями sd {{case.sections.quantity.variance_S2.sd_total|f2}}, из неё пуассоновская часть sd {{case.sections.quantity.variance_S2.sd_poisson|f2}} ({{case.sections.quantity.variance_S2.poisson_share_pct|f0}} % дисперсии); между трансектами одних суток сверх Пуассона sd {{case.sections.quantity.variance_S2.sd_within_day|f2}} — мелкомасштабная пятнистость.

@@ -36,7 +36,8 @@ ADIS_CSV = REP / "search" / "adis_candidates.csv"
 IMG = ROOT / "docs" / "img"
 V2_LIVE = REP / "detector_v2" / "experiments.json"
 V2_SNAPSHOT = REP / "detector_v2" / "experiments_snapshot.json"
-V2_PAIRS_D = REP / "detector_v2" / "pairs_d_scenes.json"          # снимок: на скольких съёмках срабатывания на D пар
+V2_PAIRS_D = REP / "detector_v2" / "pairs_d_scenes.json"
+QUOTE_CHECK = REP / "quantity" / "cozar2024_quote_check.json"     # в git: найдена ли цитата Cózar 2024 в тексте статьи          # снимок: на скольких съёмках срабатывания на D пар
 AUDIT_COZAR = REP / "audit" / "cozar_check.json"                    # аудит L107: полнота нитей Cózar при разных порогах
 
 SOURCES = {"S1": "S1_GPGP2018", "S2": "S2_SARGASSO_MSM41", "S3": "S3_SE_NORTH_SEA", "S4": "S4_BLACK_SEA_DOORS3"}
@@ -466,11 +467,12 @@ def collect_quantity() -> dict:
                 "source": ex.get("source"),
                 "label": "калибровка авторов ADIS (по тралу), не наша; наша — без поправок",
                 "caveat": "коэффициент в файле ≈ 1,5 не совпадает с приведённым в тексте статьи; приложение статьи не сверено"}
-    paper = ROOT / "data" / "extra" / "cozar2024" / "paper.txt"
     q_txt = "The current matching of satellite detections and field observations is limited to fake targets (artificial LWs), and reports of dense LW sightings"
+    q_chk = _load_json(QUOTE_CHECK) or {}
     q_short = "The current matching of satellite detections and field observations is limited to fake targets"
     out["cozar2024_quote"] = {"text": q_txt, "short": q_short, "doi": "10.1038/s41467-024-48674-7", "ref": "Cózar et al. 2024, Nat Commun, раздел «A new scenario for research and management» (PMC11178853)",
-                              "checked_in_text": (q_txt in paper.read_text(encoding="utf-8")) if paper.is_file() else None}
+                              "checked_in_text": q_chk.get("found") if q_chk.get("quote") == q_txt else None,
+                              "checked_source": "reports/quantity/cozar2024_quote_check.json (проверка по тексту статьи PMC11178853)"}
     out["analogy"] = {"text": "пальмы на гектар по Sentinel-2 с опорой на подсчёт по снимкам высокого разрешения (arXiv 2105.11207): "
                               "MAE ±7,3 пальмы/га",
                       "why_possible": "там объект неподвижен, однороден и даёт устойчивый сигнал в пикселе, а опорный счёт совпадает со снимком",
@@ -715,6 +717,9 @@ def collect_scene_zones() -> dict:
         "by_level_b": by.get("level_B", 0), "by_unverified": by.get("unverified", 0),
         "by_insufficient": by.get("insufficient_data", 0), "by_not_detected": by.get("not_detected", 0),
         "by_not_informative": by.get("not_informative", 0),
+        "n_finds": by.get("level_B", 0) + by.get("unverified", 0),
+        "n_rejected": by.get("insufficient_data", 0) + by.get("not_detected", 0) + by.get("not_informative", 0),
+        "demo_zone_title": f"{ds.get('tile')} · зона {int(str(ex.get('zone_id', '0')).rsplit('-', 1)[-1])}" if ex.get("zone_id") else None,
         "demo": {"tile": ds.get("tile"), "date": _dmy(ds.get("date")), "scene_id": ds.get("scene_id"),
                  "n_zones": k.get("n_demo"), "n_zones_cozar": k.get("n_demo_b"), "det_pixels": ds.get("det_pixels"),
                  "water_km2": _r(ds.get("water_km2"), 1), "lwd_m2_km2": _r(ds.get("lwd_m2_km2"), 0),
@@ -759,6 +764,16 @@ def collect_photo_count() -> dict:
                        "density_mae_km2": _r(raw.get("density_mae_km2"), -1), "baseline_density_mae_km2": _r(base.get("density_mae_km2"), -1),
                        "true_mean_density_km2": _r(ar.get("true_mean_density_km2"), -2),
                        "license": "Winans 2023 — CC BY (Zenodo 8381113)"}
+    cd = _load_json(pcd / "compare_debrisscan.json") or {}
+    r = (cd.get("results") or {}).get("all_test") or {}
+    if r:
+        base = r.get("debrisscan_default_0.30") or {}
+        out["debrisscan"] = {"rule": "наша модель заменяет бейзлайн DebrisScan, только если MAE ≤ 0,9 × MAE бейзлайна, ДИ разности < 0 и "
+                                     "точность не хуже (правило записано до сравнения)",
+                             "n_test": cd.get("n_test"), "ours_mae": _r((r.get("ours") or {}).get("count_mae"), 2),
+                             "base_mae": _r(base.get("count_mae"), 2),
+                             "diff_ci95": [_r(x, 2) for x in (base.get("mae_diff_ci95") or [])] or None,
+                             "accepted": base.get("ours_accepted"), "license": "DebrisScan — Apache-2.0"}
     return out
 
 
@@ -836,6 +851,18 @@ def sync_pairs_d() -> str:
     return f"D пар: {res['flagged']} из {res['n_d']} объектов, съёмок {res['acq_flagged']} из {res['acq_total']}"
 
 
+def sync_quote() -> str:
+    """data/extra/cozar2024/paper.txt (не в git) → reports/quantity/cozar2024_quote_check.json (в git)."""
+    paper = ROOT / "data" / "extra" / "cozar2024" / "paper.txt"
+    q = "The current matching of satellite detections and field observations is limited to fake targets (artificial LWs), and reports of dense LW sightings"
+    if not paper.is_file():
+        return "нет текста статьи Cózar 2024 — проверка цитаты не менялась"
+    res = {"quote": q, "found": q in paper.read_text(encoding="utf-8"), "paper": "Cózar et al. 2024, Nat Commun, PMC11178853 (Europe PMC fullTextXML)",
+           "section": "A new scenario for research and management"}
+    QUOTE_CHECK.write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8", newline="\n")
+    return f"цитата Cózar 2024 в тексте статьи: {res['found']}"
+
+
 def sync_adis() -> str:
     """data/search/adis/candidates.csv (не в git) → reports/search/adis_candidates.csv (в git)."""
     if not ADIS_SRC.is_file():
@@ -895,6 +922,7 @@ def main(argv=None) -> int:
         print("[collect_search]", sync_adis())
         print("[collect_search]", sync_v2_snapshot())
         print("[collect_search]", sync_pairs_d())
+        print("[collect_search]", sync_quote())
         print("[collect_search] вырезки:", ", ".join(sync_images()) or "исходников нет (data/search не в git)")
     res = collect()
     OUT_JSON.write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")

@@ -2337,8 +2337,8 @@ SZ_COLS = ["zone_id", "scene_key", "scene_kind", "scene_id", "datetime", "detect
            "concentration_status", "flags", "zone_area_km2", "suspicious_area_m2", "n_pixels", "n_objects",
            "water_km2", "lwd_m2_km2", "valid_water_fraction", "cloud_fraction", "glint_fraction", "prob_max",
            "prob_mean", "foam_sign", "glint_sign", "ship_sign", "n_cozar_filaments", "verification",
-           "quantity_status", "quantity_label", "quantity_detail", "field_nearest_km",
-           "field_nearest_c_items_km2", "field_nearest_ci95", "field_nearest_date", "model_weights", "model_sha256",
+           "quantity_status", "quantity_label", "quantity_detail", "field_nearest_sample_id", "field_nearest_km",
+           "model_weights", "model_sha256",
            "threshold", "centroid_lon", "centroid_lat", "kind"]
 
 
@@ -2348,7 +2348,8 @@ def scene_zones_csv(feats: list[dict]) -> str:
         p = f["properties"]
         m, pr, qn = p.get("measured") or {}, p.get("probable") or {}, p.get("quantity") or {}
         q, sg, md = m.get("quality") or {}, pr.get("signs") or {}, m.get("model") or {}
-        fn = ((p.get("field_nearby") or {}).get("items") or [None])[0] or {}
+        # §33а п.3 / jury 08:51: no items/km2 of another place in the zone export; the same «nearest field» as the card
+        nos = (p.get("field_nearby") or {}).get("nearest_organizer_sample") or {}
         b = _geom_bounds(f["geometry"]) if f.get("geometry") else None
         cen = [round((b[0] + b[2]) / 2, 6), round((b[1] + b[3]) / 2, 6)] if b else [None, None]
         rows.append([p["zone_id"], p["scene_key"], p["scene_kind"], p["scene_id"], p["datetime"], p["detection_status"],
@@ -2358,8 +2359,7 @@ def scene_zones_csv(feats: list[dict]) -> str:
                      pr.get("prob_max"), pr.get("prob_mean"), (sg.get("foam") or {}).get("flag"),
                      (sg.get("glint") or {}).get("flag"), (sg.get("ship") or {}).get("flag"), p.get("n_cozar_filaments"),
                      p.get("verification"), qn.get("status"), qn.get("label"), qn.get("detail"),
-                     fn.get("distance_km"), fn.get("c_items_km2"),
-                     f"{fn.get('ci95_lo')}–{fn.get('ci95_hi')}" if fn else None, fn.get("date"),
+                     nos.get("sample_id"), nos.get("distance_km"),
                      md.get("weights"), md.get("sha256"), md.get("threshold"), cen[0], cen[1], "detection_zone"])
     return _csv(SZ_COLS, rows)
 

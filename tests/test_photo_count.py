@@ -175,21 +175,28 @@ def test_headline_text_format():
 
 
 def test_clean_clone_weights_fallback(tmp_path, monkeypatch):
-    """No weights_exp/: water model comes from weights/photo_count (fp16, in git); aerial -> 503 with a reason."""
+    """No weights_exp/: both product models come from weights/photo_count (fp16, in git)."""
     from macroplastic.photo_count import model as PM
     monkeypatch.setattr(PM, "WEIGHTS_DIR", tmp_path / "none")
-    shipped = PM.SHIPPED_DIR / "model_card.json"
-    if shipped.exists():
-        card = PM.load_card("water_camera")
-        assert card is not None and card["_dir"].endswith("photo_count") and card["weights_file"].endswith("_fp16.pth")
-    assert PM.load_card("aerial") is None
+    for sv in ("water_camera", "aerial"):
+        card = PM.load_card(sv)
+        assert card is not None and card["weights_file"].endswith("_fp16.pth")
+        assert (PM.SHIPPED_DIR / card["weights_file"]).exists()
+
+
+def test_no_weights_anywhere_503(tmp_path, monkeypatch):
+    """No weights at all -> 503 MODEL_UNAVAILABLE with a reason (not a crash); meta says unavailable."""
+    from macroplastic.photo_count import model as PM
+    monkeypatch.setattr(PM, "WEIGHTS_DIR", tmp_path / "none")
+    monkeypatch.setattr(PM, "SHIPPED_DIR", tmp_path / "none2")
     PM.Counter._inst.clear()
     from fastapi.testclient import TestClient
     from service.app import create_app
     c = TestClient(create_app())
-    r = c.post("/api/v3/photo/count?survey=aerial", content=_jpeg())
-    assert r.status_code == 503 and r.json()["error"]["code"] == "MODEL_UNAVAILABLE"
-    assert "docs/PHOTO_COUNT.md" in r.json()["error"]["message"]
+    for q in ("", "?survey=aerial"):
+        r = c.post("/api/v3/photo/count" + q, content=_jpeg())
+        assert r.status_code == 503 and r.json()["error"]["code"] == "MODEL_UNAVAILABLE"
+        assert "docs/PHOTO_COUNT.md" in r.json()["error"]["message"]
     m = c.get("/api/v3/photo/meta").json()
-    assert m["surveys"]["aerial"]["available"] is False
+    assert m["available"] is False and m["surveys"]["aerial"]["available"] is False
     PM.Counter._inst.clear()

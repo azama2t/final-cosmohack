@@ -195,6 +195,11 @@ export default function CaseApp() {
   const photoMeta = useLoad<any>(meta ? (s) => get('/api/v3/photo/meta', {}, s) : null, meta ? 'pm' : '');
   const metrics = useLoad<any>(meta && leftTab === 'metrics' ? (s) => get('/api/v3/metrics', {}, s) : null, meta && leftTab === 'metrics' ? 'm' : '');
 
+  /** §33 / jury 08:51: the first-screen count is finds (detector «detected»), the rest is secondary */
+  const nFinds = useMemo(() => {
+    const fs = szones.data?.features ?? [];
+    return { n: fs.filter((f) => f.properties.detection_status === 'detected').length, b: fs.filter((f) => (f.properties as any).verification === 'level_B_cozar').length };
+  }, [szones.data]);
   const szList = useMemo(() => (szOn ? szones.data?.features ?? [] : []), [szOn, szones.data]);
   const selSz = selSzId ? szList.find((f) => f.id === selSzId) ?? null : null;
   // scene overlays of the layer: the held-out demo scene always, others only while one of their zones is open
@@ -299,6 +304,10 @@ export default function CaseApp() {
   };
   const openZone = (id: string, fly = true) => {
     if (id.startsWith('SZ-')) rememberCam();
+    if (fly) {
+      urlSelFly.current = true; // the first акватория/world fly must not override this selection
+      if (!mapReady || !ctl.map) pendingFly.current = true; // fly when the map is ready
+    }
     setStudio(false);
     setSel({ kind: 'zone', id });
     setActivePair(null);
@@ -538,6 +547,9 @@ export default function CaseApp() {
             </Info>
           </div>
         </div>
+        <div className="c-tagline" data-testid="tagline">
+          Находки плавающего мусора на снимках Sentinel-2 и полевые измерения
+        </div>
         <Headline
           open={numsOpen}
           onToggle={() => setNumsOpen((v) => !v)}
@@ -689,9 +701,9 @@ export default function CaseApp() {
               {szOn && szones.err ? (
                 <span className="c-err-inline" title={szones.err}>спутн. зоны: данные недоступны</span>
               ) : (
-                <>
-                  <b>{num(szOn ? szones.data?.count ?? null : 0, 0)}</b> спутн. зон
-                </>
+                <span title={`всего спутниковых зон ${num(szOn ? szones.data?.count ?? null : 0, 0)}: вместе с «недостаточно данных» и «не обнаружено»`}>
+                  <b>{num(nFinds.n, 0)}</b> находок ({num(nFinds.b, 0)} совпали с Cózar)
+                </span>
               )}
             </span>
             <span>
@@ -1188,7 +1200,7 @@ function SzList({ szOn, fc, err, list, sel, onPick }: { szOn: boolean; fc: FC<Sc
   return (
     <div data-testid="sz-list">
       <div className="c-list-note">
-        Спутниковые зоны детектора · {err ? '—' : list.length}
+        Находки детектора · {err ? '—' : list.filter((f) => f.properties.detection_status === 'detected').length} <span className="faint">(всего зон {err ? '—' : list.length}; находки — сверху)</span>
         <Info label="Спутниковые зоны">
           Зоны, где текущий детектор (weights/lgbm, порог 0,63) нашёл подозрительные пиксели на реальных снимках: отложенная сцена Cózar 2024 и снимки районов.
           «Обнаружено детектором» — только после фильтров судов/кильватера, пены, блика, облаков, берега и мелководья; с нитью каталога Cózar 2024 (разметка
@@ -1258,7 +1270,7 @@ function CaseLegend({
   hasDet: boolean;
 }) {
   // 1366×768 and similar: compact by default (summary + one row of symbols), expands on click
-  const [open, setOpen] = useState(() => window.innerHeight >= 900);
+  const [open, setOpen] = useState(false); // jury 08:51: folded by default at every size
   const qc = meta.quality_classes.filter((c) => c.present !== false && c.id !== 'valid');
   const absent = meta.quality_classes.filter((c) => c.present === false);
   return (
@@ -1439,7 +1451,7 @@ function Headline({ open, onToggle, meta, photo, onField, onZone }: { open: bool
             </small>
           </span>
           <span className="c-head-d">
-            {r.size_class} · {r.material} · измерение
+            {r.stat === 'среднее' ? 'среднее по профилю' : 'медиана профиля'} · {r.size_class} · {r.material} · измерение
           </span>
         </button>
       ))}

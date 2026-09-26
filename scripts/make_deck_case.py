@@ -52,9 +52,10 @@ IMAGES = {
 # свежие скрины v2 (http://localhost:8070, 1920×1080) кладутся в presentation/img/; пока их нет — прежние скрины
 IMAGES_MAIN = {
     "photo": (("presentation/img/photo.png", "reports/photo_count/ui_photo_v2.png"), "20_photo.jpg", None),
-    "svc_earth": (("presentation/img/earth.png",), "21_svc_earth.jpg", None),
+    "svc_earth": (("presentation/img/earth.png",), "21_svc_earth.jpg", (336, 0, 1920, 1080)),
+    "sz_card": (("presentation/img/card.png", "reports/case_demo/1920_02_zone_card.png"), "26_sz_card.jpg", (336, 0, 1920, 1080)),
     "svc_card": (("presentation/img/card.png", "reports/case_demo/1920_02_zone_card.png"), "22_svc_card.jpg", None),
-    "svc_studio": (("presentation/img/studio.png",), "25_svc_studio.jpg", None),
+    "svc_studio": (("presentation/img/studio.png",), "25_svc_studio.jpg", (336, 0, 1920, 1080)),
     "svc_photo": (("presentation/img/photo.png", "reports/photo_count/ui_photo_v2.png"), "23_svc_photo.jpg", None),
     "svc_export": (("presentation/img/export.png", "reports/case_demo/1920_07_export_menu.png"), "24_svc_export.jpg", None),
 }
@@ -342,7 +343,7 @@ def load() -> dict:
     for key in ("pairs.n", "routes_gt50", "routes_same_day_s2", "plp.rho_fdi"):
         k["ic_" + key.replace(".", "_")] = N(ic + key)
     sz = c + "sections.scene_zones."
-    for key in ("n_zones", "n_scenes_eval", "n_scenes", "by_level_b", "by_unverified", "by_insufficient", "by_not_detected", "by_not_informative",
+    for key in ("n_zones", "n_scenes_eval", "n_scenes", "by_level_b", "by_unverified", "by_insufficient", "by_not_detected", "by_not_informative", "n_finds", "n_rejected", "demo_zone_title",
                 "demo.tile", "demo.date", "demo.n_zones", "demo.n_zones_cozar", "demo.det_pixels", "demo.mados_votes",
                 "example.zone_id", "example.n_cozar", "example.area_km2", "example.susp_m2", "example.n_px", "example.lwd_m2_km2",
                 "example.water_pct", "example.prob_mean", "example.prob_max", "example.sha256_short",
@@ -706,7 +707,7 @@ def main_slides(k: dict) -> list[dict]:
                f"находок детектора на {num(k['sz_n_scenes_eval'], 0)} сценах: {num(k['sz_by_level_b'], 0)} совпали с Cózar, "
                f"{num(k['sz_by_unverified'], 0)} требуют проверки; ещё {num(k['sz_by_insufficient'], 0)} — недостаточно данных или "
                f"ложные, {num(k['sz_by_not_detected'], 0)} — не обнаружено")],
-        image="demo_card",
+        image="sz_card",
         caption=f"Вывод: снимок даёт место, площадь и статус зоны; шт./км² — «{k['sz_zone_main_status']}»",
         source="data/case/scene_zones; reports/case_demo/heldout_check.json, demo_path.json (final_numbers → case.sections.scene_zones)",
         speech=(f"Теперь спутник на сцене, которую модель не видела. На отложенной сцене {k['sz_demo_tile']} "
@@ -723,7 +724,7 @@ def main_slides(k: dict) -> list[dict]:
                 ("svc_card", "2. Точка → сцена и карточка: что найдено, когда, площадь, уверенность"),
                 ("svc_studio", "3. «В студию» — работа с зоной; «Назад к карте» — к той же точке обзора")],
         caption="Вывод: путь эколога — Земля → точка → карточка → студия → назад к следующей находке",
-        source="http://localhost:8070 (v2); docs/DEMO.md",
+        source="presentation/img/*.png (presentation/make_shots.py, http://localhost:8070, 1920×1080, без фикстур); docs/DEMO.md",
         speech=("Сервис. При открытии — Земля с реальными находками обработанных сцен. Клик по точке — сцена и карточка зоны: "
                 "что найдено, когда, площадь, уверенность и откуда каждое число. Из карточки — в студию, кнопкой «Назад» — "
                 "к той же точке обзора и к следующей находке."),
@@ -731,14 +732,15 @@ def main_slides(k: dict) -> list[dict]:
     ))
     S.append(dict(
         kind="main", layout="grid", section="Сервис: фото и выгрузка",
-        title=f"Счётчик по фото и выгрузка: карта = CSV = GeoJSON ({num(k['sz_export_ui'], 0)} = "
+        title=f"Счётчик по фото и выгрузка: зоны отложенной сцены на карте = CSV = GeoJSON ({num(k['sz_export_ui'], 0)} = "
               f"{num(k['sz_export_csv'], 0)} = {num(k['sz_export_geojson'], 0)})",
         images=[("svc_photo", "«Фото»: рамки и число предметов, площадь кадра → шт./км²; состав не определён"),
-                ("svc_export", "Выгрузка GeoJSON/CSV и повтор сохранённого запроса")],
+                ("svc_export", "Выгрузка GeoJSON/CSV того, что на карте; запросы сохраняются и повторяются")],
         caption="Вывод: у каждого числа подписан источник — поле, фото, снимок или «нет данных»",
-        source="reports/case_demo/*.png; reports/photo_count/ui_photo_v2.png; docs/CONTRACTS_V3.md",
-        speech=("В карточке у каждого числа подписан источник: измерено в поле, посчитано по фото или по снимку. Режим «Фото» "
-                "считает предметы на загруженном кадре. Выгрузка GeoJSON и CSV совпадает с картой, запрос можно сохранить и повторить."),
+        source="presentation/img/*.png (presentation/make_shots.py, http://localhost:8070, 1920×1080); docs/CONTRACTS_V3.md",
+        speech=("Режим «Фото» открывается с готовым примером: рамки и число предметов, а при известной площади кадра — штуки на "
+                "квадратный километр. У каждого числа подписан источник. Выгрузка GeoJSON и CSV совпадает с картой, запрос можно "
+                "сохранить и повторить."),
         notes=f"Выгрузка сверяется тестом: UI {num(k['sz_export_ui'], 0)}, CSV {num(k['sz_export_csv'], 0)}, GeoJSON {num(k['sz_export_geojson'], 0)} строк.",
     ))
     S.append(dict(
@@ -1365,12 +1367,12 @@ def _sz_block(k: dict) -> str:
 Сцена Sentinel-2 **{k['sz_demo_tile']}, {k['sz_demo_date']}** не участвовала ни в обучении и подборе порога детектора (MARIDA — по тайлу и
 дате; MADOS — по содержимому, лучшее совпадение {num(k['sz_demo_mados_votes'], 0)} голоса, «нет совпадения»), ни в экспериментах детектора v2
 (`reports/case_demo/heldout_scene.md`). Слой — `scripts/case/scene_zones.py` (данные в git, `data/case/scene_zones/`).
-Проверить до выхода: слева «{num(k['sz_n_zones'], 0)} спутн. зон», вкладка «Зоны» — первая строка «Cózar, отложенная сцена {k['sz_demo_tile']}».
+Проверить до выхода: на обзоре Земли {num(k['sz_n_finds'], 0)} находок из {num(k['sz_n_zones'], 0)} обработанных зон; демо-находка — «{k['sz_demo_zone_title']}» (отложенная сцена Cózar).
 Прямая ссылка: `?sel=zone:{k['sz_example_zone_id']}`.
 
 | Время | Действие | Что говорим | Что видно |
 |---|---|---|---|
-| 0:00–0:15 | Вкладка **«Зоны»** → первая строка | «Сцена, которую модель не видела. Снимок, маска качества, контуры зон детектора — всё с этой сцены.» | снимок, маска качества, контуры зон |
+| 0:00–0:15 | Обзор Земли → находка **«{k['sz_demo_zone_title']}»** (или вкладка «Зоны») | «Сцена, которую модель не видела. Снимок, маска качества, контуры зон детектора — всё с этой сцены.» | снимок, маска качества, контуры зон |
 | 0:15–0:40 | Карточка, блок **«Измерено по снимку»** | «Площадь зоны {num(k['sz_example_area_km2'], 2)} км², подозрительные пиксели {num(k['sz_example_susp_m2'], 0)} м² ({num(k['sz_example_n_px'], 0)} пикс.), LWD {num(k['sz_example_lwd_m2_km2'], 0)} м² на км² пригодной воды — как у Cózar 2024. Вода в зоне {num(k['sz_example_water_pct'], 0)} %. Модель weights/lgbm, порог {num(k['thr'], 2)}, sha256 {k['sz_example_sha256_short']}.» | вырезка «снимок / пиксели детектора», «Измерено» |
 | 0:40–0:55 | Блок **«Вероятно»** | «Вероятность детектора {num(k['sz_example_prob_mean'], 2)} / {num(k['sz_example_prob_max'], 2)}. Признаков пены, блика, судна, берега нет. Контур пересекает {num(k['sz_example_n_cozar'], 0)} нити каталога Cózar — их отметили люди по снимку. Поэтому «обнаружено»; без такой разметки зона — «срабатывание, не проверено».» | статус, признаки, «Каталог Cózar 2024» |
 | 0:55–1:10 | Статус **«Концентрация»** | «Главный статус зоны — «{k['sz_zone_main_status']}». Перевод площади в штуки не показываем: калибровочных пар «снимок → шт./км²» у нас {num(k['ql_calibration_pairs'], 0)}; {num(k['ad_A'], 0)} пар ADIS — пары по месту и времени, не калибровочные.» | статус концентрации |
@@ -1378,11 +1380,11 @@ def _sz_block(k: dict) -> str:
 | 1:20–1:30 | **Сложный случай:** «Как выглядит удача и ошибка» → «ложное срабатывание: судно / кильватер» | «Яркая точка со следом — судно. Статус «недостаточно данных». Суда — известная слабость: {num(k['v2_reference_vessels_pct'], 0)} % судов как мусор.» | вырезка судна, статус |
 | 1:30–1:40 | Даты сцены → **«Выгрузка»** → «Спутниковые зоны» CSV; **«Запросы»** → сохранить → «сбросить» → запустить | «Выгрузка — те же поля и статусы; сохранённый запрос восстанавливает вид.» | зон на карте {num(k['sz_export_ui'], 0)} = строк CSV {num(k['sz_export_csv'], 0)} = объектов GeoJSON {num(k['sz_export_geojson'], 0)} |
 
-Всего в слое {num(k['sz_n_zones'], 0)} зон на {num(k['sz_n_scenes_eval'], 0)} оцениваемых сценах из {num(k['sz_n_scenes'], 0)} (на остальных низкое солнце или слабый
+Всего {num(k['sz_n_finds'], 0)} находок из {num(k['sz_n_zones'], 0)} обработанных зон на {num(k['sz_n_scenes_eval'], 0)} оцениваемых сценах из {num(k['sz_n_scenes'], 0)} (на остальных низкое солнце или слабый
 сигнал воды — детектор не оценивается): обнаружено с подтверждением уровня B — {num(k['sz_by_level_b'], 0)}, срабатываний без проверки —
 {num(k['sz_by_unverified'], 0)}, недостаточно данных (пена/блик/судно/берег/мелководье) — {num(k['sz_by_insufficient'], 0)}, не обнаружено — {num(k['sz_by_not_detected'], 0)}, ноль не информативен (ветер ≥ 5 м/с) — {num(k['sz_by_not_informative'], 0)}.
 На демо-сцене {num(k['sz_demo_n_zones'], 0)} зон ({num(k['sz_demo_det_pixels'], 0)} пикс. детектора), из них с нитью Cózar — {num(k['sz_demo_n_zones_cozar'], 0)}.
-Живой проход без моков (окна 1920×1080 и 1366×768): `scripts/case/demo_path_v2.py` → `reports/case_demo/demo_path.json`, кадры `reports/case_demo/*.png`.
+Живой проход без моков (окна 1920×1080 и 1366×768): путь «Земля → находка → карточка → студия → назад» — `scripts/case/s33_path.py` → `reports/case_demo/s33_path.json`, кадры `reports/case_demo/s33_*.png`; прежний путь по списку зон — `scripts/case/demo_path_v2.py`.
 
 ## Путь данных: снимок → маски качества → детекция → зона
 1. `scripts/case/demo_scene.py select` — отбор и проверка отложенности (тайл, дата; MARIDA, MADOS, эксперименты детектора v2, PLP/FO, суда, пары, районы).

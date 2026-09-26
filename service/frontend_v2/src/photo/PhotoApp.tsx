@@ -8,7 +8,7 @@ import './photo.css';
 
 type Survey = 'water_camera' | 'aerial';
 type Box = { x1: number; y1: number; x2: number; y2: number; score: number; label: string };
-type Composition = { status: string; text: string; reason?: string; by_class?: Record<string, number>; box_materials?: (string | null)[] | null };
+type Composition = { status: string; text: string; reason?: string; by_class?: Record<string, number>; box_materials?: (string | null)[] | null; classes?: { material: string; label: string }[] };
 type CountInterval = { by_pred_count: { pred_from: number; pred_to: number; q025: number; q975: number }[]; overall_val: number[]; coverage_on_test?: number };
 type CountResp = {
   count: number;
@@ -374,7 +374,8 @@ export default function PhotoApp() {
                 ? Object.entries(
                     res.boxes.reduce<Record<string, number>>((acc, b, i) => {
                       if (b.score < t) return acc;
-                      const m = res.composition!.box_materials![i] ?? 'состав не определён';
+                      const code = res.composition!.box_materials![i];
+                      const m = (code && res.composition!.classes?.find((c) => c.material === code)?.label) ?? 'состав не определён';
                       acc[m] = (acc[m] ?? 0) + 1;
                       return acc;
                     }, {}),

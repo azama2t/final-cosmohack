@@ -592,6 +592,9 @@ function ModelEstimate({ meta, p }: { meta: Meta; p: ObsProps }) {
           <div className="c-big c-est" data-testid="obs-field-estimate">
             {num(fe.value)} <small>{unitRu(fe.unit || 'items/km2')}</small>
           </div>
+          <div className="c-line faint" data-testid="obs-field-estimate-label">
+            медиана профиля (обучающая часть) — оценка для нового места; «среднее по профилю» в «Цифрах» — ΣN/ΣA всех событий; «ошибка прогноза на test» — в «Метриках»
+          </div>
           <div className="c-line" title={fe.interval ?? undefined}>
             {fe.lo !== null && fe.lo !== undefined && fe.hi !== null && fe.hi !== undefined ? `[${num(fe.lo)}; ${num(fe.hi)}]` : 'интервал не рассчитан'}
             {fe.interval ? ` · покрытие ${fe.interval}` : ''}

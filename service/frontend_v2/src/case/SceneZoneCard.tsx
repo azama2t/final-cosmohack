@@ -8,9 +8,11 @@ import { dateRu, dateTimeRu, num, pct } from './fmt';
 import { geomCenter } from './CaseMap';
 
 /** §33: the source of every number next to it */
-function Src({ k }: { k: 'image' | 'field' | 'photo' | 'research' | 'none' | 'model' }) {
+function Src({ k }: { k: 'image' | 'field' | 'photo' | 'research' | 'none' | 'model' | 'era5' | 'mask' }) {
   const t = {
-    image: 'измерено по снимку',
+    image: 'по снимку',
+    mask: 'маска качества (SCL)',
+    era5: 'ERA5 (реанализ)',
     model: 'оценка детектора',
     field: 'измерено в поле',
     photo: 'посчитано по детальному фото',
@@ -164,6 +166,24 @@ export default function SceneZoneCard({
           </div>
         )}
         {/* ------------------------------------------------ §33а п.2: the zone card, strictly */}
+        <div className="sec sz-qtop" data-testid="sz-qtop">
+          <div className="c-line sz-qty" data-testid="sz-plain-qty">
+              <b>Количество предметов по этому снимку не определено</b> <Src k="none" />
+            </div>
+            <div className="c-line sz-qty" data-testid="sz-plain-comp">
+              <b>Состав не определён</b> <Src k="none" />
+            </div>
+            <details className="sz-explore" data-testid="sz-explore">
+              <summary className="btn sm">Исследовать дальше</summary>
+              <ol className="sz-next-l">
+                <li>детальный снимок зоны — дрон или камера с судна (спутник даёт только площадь пятна)</li>
+                <li>
+                  счёт предметов на детальном снимке — <a href="?mode=photo">счётчик в «Фото»</a> (шт. на кадр, при известной площади кадра — шт./м²)
+                </li>
+                <li>сверка с полевым измерением на этом же месте и в это же время</li>
+              </ol>
+            </details>
+        </div>
         <ZoneThumb zone={zone} scene={detail?.scene ?? null} />
         <div className="sec sz-plain" data-testid="sz-plain">
           <dl className="c-dl sz-plain-dl">
@@ -177,16 +197,21 @@ export default function SceneZoneCard({
             </dd>
             <dt>Маска качества</dt>
             <dd data-testid="sz-plain-quality">
-              вода {pct(m.quality?.valid_water_fraction)} · облака {pct(m.quality?.cloud_fraction)} · блик {pct(m.quality?.glint_fraction)}
-              {detail?.scene?.wind10m_ms !== null && detail?.scene?.wind10m_ms !== undefined ? ` · ветер ${num(detail.scene.wind10m_ms, 1)} м/с` : ''} <Src k="image" />
+              вода {pct(m.quality?.valid_water_fraction)} · облака {pct(m.quality?.cloud_fraction)} · блик {pct(m.quality?.glint_fraction)} <Src k="mask" />
+              {detail?.scene?.wind10m_ms !== null && detail?.scene?.wind10m_ms !== undefined && (
+                <>
+                  {' '}
+                  · ветер {num(detail.scene.wind10m_ms, 1)} м/с <Src k="era5" />
+                </>
+              )}
             </dd>
             <dt>Площадь зоны</dt>
             <dd data-testid="sz-plain-area">
-              {num(m.zone_area_km2 !== null && m.zone_area_km2 !== undefined ? m.zone_area_km2 * 1e6 : null, 0)} м² <Src k="image" />
+              {num(m.zone_area_km2 !== null && m.zone_area_km2 !== undefined ? m.zone_area_km2 * 1e6 : null, 0)} м² <Src k="model" />
             </dd>
             <dt>Доля покрытия пикселями</dt>
             <dd data-testid="sz-plain-cover">
-              {m.water_km2 && m.suspicious_area_m2 !== null ? `${num((m.suspicious_area_m2 / (m.water_km2 * 1e6)) * 100, 2)} % воды зоны` : '—'} ({num(m.suspicious_area_m2, 0)} м², {num(m.n_pixels, 0)} пикс. по 10 м) <Src k="image" />
+              {m.water_km2 && m.suspicious_area_m2 !== null ? `${num((m.suspicious_area_m2 / (m.water_km2 * 1e6)) * 100, 2)} % воды зоны` : '—'} ({num(m.suspicious_area_m2, 0)} м², {num(m.n_pixels, 0)} пикс. по 10 м) <Src k="model" />
             </dd>
             <dt>Статус детекции</dt>
             <dd data-testid="sz-plain-what">
@@ -198,22 +223,6 @@ export default function SceneZoneCard({
               {p.verification === 'level_B_cozar' ? 'совпадает с разметкой людей (каталог Cózar 2024)' : p.detection_status === 'detected' ? 'независимо не проверено' : '—'}
             </dd>
           </dl>
-          <div className="c-line sz-qty" data-testid="sz-plain-qty">
-            <b>Количество предметов по этому снимку не определено</b> <Src k="none" />
-          </div>
-          <div className="c-line sz-qty" data-testid="sz-plain-comp">
-            <b>Состав не определён</b> <Src k="none" />
-          </div>
-          <details className="sz-explore" data-testid="sz-explore">
-            <summary className="btn sm">Исследовать дальше</summary>
-            <ol className="sz-next-l">
-              <li>детальный снимок зоны — дрон или камера с судна (спутник даёт только площадь пятна)</li>
-              <li>
-                счёт предметов на детальном снимке — <a href="?mode=photo">счётчик в «Фото»</a> (шт. на кадр, при известной площади кадра — шт./м²)
-              </li>
-              <li>сверка с полевым измерением на этом же месте и в это же время</li>
-            </ol>
-          </details>
           {fn?.nearest_organizer_sample && (
             <button className="c-head-link" onClick={() => onField?.(fn.nearest_organizer_sample!.sample_id)} data-testid="sz-field-link">
               Ближайшее полевое измерение — {num(fn.nearest_organizer_sample.distance_km, 0)} км, в слое «Полевые измерения» →

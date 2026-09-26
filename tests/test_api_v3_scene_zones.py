@@ -193,3 +193,15 @@ def test_meta_headline_numbers_from_final_numbers(client):
     assert h["satellite"]["n_zones"] == fc["total"]
     assert h["satellite"]["n_level_b"] == sum(1 for f in fc["features"] if f["properties"]["verification"] == "level_B_cozar")
     assert h["satellite"]["quantity_label"] == "концентрация по снимку не подтверждена"
+
+
+def test_export_no_far_field_numbers(client):
+    """jury 08:51 / §33а п.3: the zone export carries no items/km2 of another place; nearest field = the card's one."""
+    body = client.get("/api/v3/export", params={"layer": "scene_zones", "format": "csv", "scene_kind": "demo"}).content.decode("utf-8-sig")
+    rows = list(csv.DictReader(io.StringIO(body)))
+    assert not any(k.startswith("field_nearest_c") or k.endswith("ci95") or k == "field_nearest_date" for k in rows[0])
+    fc = client.get("/api/v3/scene_zones", params={"scene_kind": "demo"}).json()
+    by = {f["id"]: f["properties"] for f in fc["features"]}
+    for r in rows:
+        nos = by[r["zone_id"]]["field_nearby"]["nearest_organizer_sample"]
+        assert r["field_nearest_sample_id"] == nos["sample_id"] and float(r["field_nearest_km"]) == nos["distance_km"]

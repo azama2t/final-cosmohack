@@ -1385,3 +1385,15 @@
 .sz-plain-dl dd {
   margin: 0;
 }
+.c-tagline {
+  padding: 2px var(--s3) 0;
+  font-size: 12px;
+  color: var(--text-2);
+}
+.sz-qtop {
+  padding-top: 4px;
+}
+.c-verdict {
+  border-left: 3px solid #ff8c42;
+  padding-left: 10px;
+}

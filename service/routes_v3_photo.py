@@ -72,9 +72,14 @@ def _card(survey="water_camera"):
     return load_card(survey)
 
 
-def _composition(survey, boxes, card):
-    """Class composition (L123, INBOX §30 п.4): only if macroplastic.labels.composition_for exists and says so."""
+def _composition(survey, boxes, card, image=None):
+    """Class composition (L123, INBOX §30 п.4): aerial -> material model M1 per box (composition_aerial, weights in
+    weights_exp/labels; without them -> not_determined); water camera -> composition_for (one class -> not_determined).
+    boxes = ALL boxes >= request threshold (front sends 0.05 and groups shown boxes by box_materials[i])."""
     try:
+        if survey == "aerial" and image is not None:
+            from macroplastic.labels.material_winans import composition_aerial  # type: ignore
+            return composition_aerial(image, boxes)
         from macroplastic.labels import composition_for  # type: ignore
         return composition_for(survey, boxes, card)
     except Exception:  # noqa: BLE001 - module absent or not ready -> honest default
@@ -240,6 +245,7 @@ async def photo_count(request: Request):
             t0 = time.time()
             c = Counter.get(survey)
             boxes, scores, used = c.count(im, thr)
+            comp = _composition(survey, boxes, c.card, im)
             ms = (time.time() - t0) * 1000
     except FileNotFoundError:
         raise ApiError(503, "MODEL_UNAVAILABLE", f"Нет весов счётчика для «{survey}» (weights_exp/photo_count/); "
@@ -289,7 +295,7 @@ async def photo_count(request: Request):
         "value_source": "посчитано по детальному фото",
         "value_source_code": "photo_count",
         "count_interval": cint,
-        "composition": _composition(survey, boxes, c.card),
+        "composition": comp,
         "gsd_m": gsd,
         "gsd_warning": gsd_warn,
         "density": density,

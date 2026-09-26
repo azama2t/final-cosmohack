@@ -18,6 +18,10 @@
 
 **Отбор.** Из {{case.csv.rows}} строк реестра ({{case.csv.events}} событий) в профиль S2 входят {{case.selection.S2.accepted_rows}}. У каждого отказа записана причина: объектная строка — {{case.selection.S2.rej_item_observation}}, категория пластика — {{case.selection.S2.rej_plastic_category}}, другой профиль — {{case.selection.S2.rej_other_source}}, весь мусор — {{case.selection.S2.rej_all_litter}}, промысловый мусор — {{case.selection.S2.rej_fisheries}}, аэросъёмка > 50 см — {{case.selection.S2.rej_aerial}}.
 
+**Целевая совокупность = материал + размерный класс + единица** (что именно считает каждая ступень; `docs/LABELS.md`):
+
+{{derived.case_targets_table}}
+
 **Лестница единиц** — у каждой ступени своя проверка и метрика; перевода между ступенями без калибровки нет:
 
 ![Лестница единиц](../docs/img/units_ladder.png)
@@ -27,6 +31,8 @@
 **Измерение ≠ оценка.** Измерение — C = N/A по трансекте с интервалом. Оценка по полевым данным — медиана профиля с подписью «не по снимку». Доля покрытия со снимка (м² маски на км² пригодной воды) — не мусор и не шт./км².
 
 {{derived.case_field_table}}
+
+**Три числа Саргассова моря (профиль S2, пластик > 2 см) — не путать:** {{case.sections.quantity.field_S2.pooled_C|f1}} шт./км² — среднее профиля ΣN/ΣA по всем событиям (измерение, 95 % с разбросом между днями [{{case.sections.quantity.field_S2.boot_lo95|f1}}–{{case.sections.quantity.field_S2.boot_hi95|f1}}]); {{case.conc.S2.dev_median_c|f1}} шт./км² — медиана события, её карта показывает как оценку для нового места; {{case.sections.field_test.S2.median_mae|f1}} шт./км² — средняя ошибка этой медианы на отложенном test.
 
 - **Интервалы.** Для среднего профиля S2 даны два интервала:
   - только ошибка счёта (Пуассон) — [{{case.sections.quantity.field_S2.lo95|f1}}–{{case.sections.quantity.field_S2.hi95|f1}}];
@@ -45,7 +51,7 @@
 
 ## О3. Обоснованность зон загрязнения
 
-**Зоны на отложенной сцене.** Сцена Sentinel-2 {{case.sections.scene_zones.demo.tile}} ({{case.sections.scene_zones.demo.date}}) не участвовала ни в обучении, ни в подборе порога, ни в экспериментах. На ней {{case.sections.scene_zones.demo.n_zones}} зон, из них {{case.sections.scene_zones.demo.n_zones_cozar}} совпадают с нитями каталога Cózar 2024 (уровень B). Во всём слое {{case.sections.scene_zones.n_zones}} зон на {{case.sections.scene_zones.n_scenes_eval}} оцениваемых сценах:
+**Зоны на отложенной сцене.** Сцена Sentinel-2 {{case.sections.scene_zones.demo.tile}} ({{case.sections.scene_zones.demo.date}}) не участвовала ни в обучении, ни в подборе порога, ни в экспериментах. На ней {{case.sections.scene_zones.demo.n_zones}} зон, из них {{case.sections.scene_zones.demo.n_zones_cozar}} совпадают с нитями каталога Cózar 2024 (уровень B). Во всём слое {{case.sections.scene_zones.n_finds}} находок из {{case.sections.scene_zones.n_zones}} обработанных зон на {{case.sections.scene_zones.n_scenes_eval}} оцениваемых сценах:
 
 | Статус зоны | Число зон |
 |---|---:|
@@ -83,14 +89,28 @@
 
 ![Пара по месту и времени ADIS ↔ Sentinel-2: судно-съёмщик видно на снимке, детектор в полосе пикселей не дал](../docs/img/search_adis_pair.jpg)
 
+Независимая проверка (член команды, без наших результатов): {{case.sections.independent_check.pairs.n}} наглядных пар ADIS ↔ S2 по предметам > 50 см; снимок S2 в тот же день есть у {{case.sections.independent_check.routes_same_day_s2}} из {{case.sections.independent_check.routes_gt50}} маршрутов; предметы на снимках не различимы. Выборки разные: там > 50 см, у нас > 5 см.
+
+![Независимая проверка: пары ADIS ↔ Sentinel-2 по предметам > 50 см](../docs/img/independent_adis_pairs.jpg)
+
+Чёрное море, трансекта T30 и снимок того же дня: полоса чистая, детектор объектов не дал; время и площадь трансекты не опубликованы — уровень C, не A.
+
+![Чёрное море, T30: RGB · SWIR · маска детектора](../docs/img/search_s4_t30.jpg)
+
+Северное море, HE460 т.03: полоса чистая, но между съёмкой и трансектой вода ушла дальше допуска.
+
+![Северное море, HE460 т.03](../docs/img/search_s3_he460.jpg)
+
 ## О4. Польза вебкарты
+
+**Первый экран — обзор Земли с реальными находками.** При открытии карта показывает точки зон из уже обработанных спутниковых сцен (накопленный архив, у точки — дата снимка и статус обработки), без выбора региона и даты. Путь эколога: **Земля → точка → карточка зоны → «В студию» → «Назад»** к прежнему масштабу → следующая точка. У каждого числа в карточке — его происхождение: «измерено в поле», «посчитано по детальному фото», «исследовательская оценка» или «нет данных»; для спутниковой зоны в графе шт./км² — «не определено по этому снимку», полевые шт./км² другого места за плотность зоны не выдаются. Полевая концентрация, счётчик по фото и метрики — во вторичной панели, в один клик от карты.
 
 **Карта v2** (режим «Кейс» по умолчанию) показывает:
 
 - **Слои:**
   - полевые измерения — шт./км² с интервалом, профилем, источником и признаком «пластик / весь мусор»;
   - полосы обследования со снимками-кандидатами — {{case.run.export.zones}};
-  - спутниковые зоны — {{case.sections.scene_zones.n_zones}};
+  - спутниковые находки — {{case.sections.scene_zones.n_finds}} из {{case.sections.scene_zones.n_zones}} обработанных зон;
   - маска качества снимка.
 - **Статусы:** у каждой полосы и зоны два статуса — детекция и концентрация. Концентрация по снимку везде «не подтверждена» или «недоступна».
 - **Навигация:** выбор акватории, дат, профиля и статуса; «Куда идти» — окно ближайшего пролёта.
@@ -121,6 +141,8 @@
 
 {{derived.case_search_table}}
 
+{{derived.case_labeled_table}}
+
 **Новые размеченные данные.** B: {{case.sections.labeled_data.b_new_acq}} съёмок PLP/FloatingObjects и {{case.sections.labeled_data.cozar.windows|int}} окон Cózar. D: {{case.sections.labeled_data.vessels.boxes|int}} судов и {{case.sections.labeled_data.clouds.scenes}} сцен облаков. Проверка утечек:
 - с MARIDA по тайлу и дате — {{case.sections.labeled_data.leaks_total}} совпадений;
 - с MADOS по пикселям проверены PLP и FloatingObjects — {{case.sections.labeled_data.content_match}} из {{case.sections.labeled_data.content_checked}}.
@@ -149,11 +171,14 @@
 
 ## О6. Дополнительные функции
 
+![«Подобрать снимок»: прерванная трансекта и окно пролёта](../reports/case_deck_img/04_pairfinder_transect.jpg)
+
 - **«Подобрать снимок».** Правило дрейфа превращено в инструмент планирования: окно синхронизации |dt| ≤ {{case.pairfinder.window_h|f2}} ч.
   - Для {{case.pairfinder.cond_date_only}} событий Чёрного моря функция выдаёт окно UTC.
   - Прогноз пролётов совпал с реальной съёмкой в {{case.pairfinder.forecast_hit}} из {{case.pairfinder.forecast_n}} случаев.
 - **Счётчик предметов по фото** — отдельный модуль, не спутник. Отложенный test FML ({{case.sections.photo_count.frame.n_images|int}} кадров, сплит по сессиям):
   - MAE {{case.sections.photo_count.frame.mae|f2}} шт./кадр [{{case.sections.photo_count.frame.mae_ci95.0|f2}}–{{case.sections.photo_count.frame.mae_ci95.1|f2}}], AP50 {{case.sections.photo_count.frame.ap50|f3}};
+  - сравнение с готовым DebrisScan на кадрах Winans ({{case.sections.photo_count.debrisscan.n_test}} кадров): MAE {{case.sections.photo_count.debrisscan.ours_mae|f2}} против {{case.sections.photo_count.debrisscan.base_mae|f2}} шт./кадр, разность [{{case.sections.photo_count.debrisscan.diff_ci95.0|f2}}; {{case.sections.photo_count.debrisscan.diff_ci95.1|f2}}] — {{case.sections.photo_count.debrisscan.rule}};
   - на кадрах с известной площадью (Winans, {{case.sections.photo_count.area.frame_area_m2|int}} м²) — MAE плотности {{case.sections.photo_count.area.density_mae_km2|int}} против {{case.sections.photo_count.area.baseline_density_mae_km2|int}} шт./км² у медианы.
 - **Нефтяное пятно** — эксперимент, выключен по умолчанию. На MADOS test F1 {{case.sections.oil.test_f1|f3}} против OSI {{case.sections.oil.test_osi_f1|f3}}. Известный разлив Wakashio на L2A голова не нашла — честный отказ.
 
@@ -162,6 +187,8 @@
 Отбор записей и сцен реализован в коде (`src/macroplastic/case/selection.py`, `scripts/case/find_pairs.py`, `pair_quality.py`), параметры — в `configs/case_selection.yaml` и `configs/case_pairs.yaml`. Реестр пар `data/case/run/registry_pairs.csv` содержит строку на каждое из {{case.pairs.events}} событий: статус, этап отказа, все причины, сцену, dt, сдвиг и допуск, решение по маскам. Повторная подготовка даёт те же sha256.
 
 {{derived.case_pairs_table}}
+
+{{derived.case_drift_table}}
 
 Маски качества в полосе: блик — {{case.pairs.reject_glint}}, облака — {{case.pairs.reject_cloud}}, покрытие — {{case.pairs.reject_coverage}}. При типичном дрейфе синхронных пар {{case.pairs.events_accept_drift}}.
 
@@ -173,6 +200,8 @@
 
 {{derived.case_detector_table}}
 
+![Полоса HE460 т.03 на карте: связь с полем не подтверждена, пикселей в полосе нет](../reports/case_deck_img/02_zone_he460_t03.jpg)
+
 Разница с RandomForest — {{case.detector.paired_vs_rf.delta_f1|f3}} [{{case.detector.paired_vs_rf.ci95.0|f3}}; {{case.detector.paired_vs_rf.ci95.1|f3}}] по парному бутстрепу сцен. Сохранённые предсказания 7 моделей (`data/case/detector_preds/`) позволяют пересчитать TP/FP/FN шагом `run_all eval`.
 
 ## Т3. Алгоритм оценки концентрации
@@ -182,9 +211,22 @@
 - контрольный пример {{case.control.n}} / {{case.control.area_km2|f2}} км² = {{case.control.value|f1}} шт./км² [{{case.control.lower|f1}}–{{case.control.upper|f1}}];
 - C = N/A совпала с опубликованной у {{case.conc.consistency.match}} из {{case.conc.consistency.rows}} строк.
 
-Метрики на отложенном test — MAE и RMSE против медианы на том же сплите (таблица в О2). Эталоны и предсказания лежат в `reports/case_conc/final_test_predictions.csv`. Индекс и площадь маски концентрацию не заменяют. Перенос на снимки не заявлен (О2, «три уровня»).
+Метрики на отложенном test — MAE и RMSE против медианы на том же сплите (таблица в О2). Кросс-валидация внутри dev (S2):
+
+{{derived.case_conc_table_S2}}
+
+Схемы разбиения (утечка через соседей того же дня найдена до моделей):
+
+{{derived.case_schemes_table}}
+
+![Карточка полевого измерения: C = N/A с интервалом, профиль, источник](../reports/case_deck_img/03_observation_card.jpg)
+ Эталоны и предсказания лежат в `reports/case_conc/final_test_predictions.csv`. Индекс и площадь маски концентрацию не заменяют. Перенос на снимки не заявлен (О2, «три уровня»).
 
 ## Т4. Эксперименты и воспроизводимость
+
+Сводка разделов чисел (каждый — со своим источником и протоколом):
+
+{{derived.case_sections_table}}
 
 - Одна команда: `run.ps1 -Case all -Offline` — {{case.run.total_s|f1}} с без сети; {{case.run.n_outputs}} выходных таблиц с одинаковыми sha256 при повторе.
 - Чистый клон с GitHub до карты — {{case.clean_clone.total_min}} мин на CPU, числа совпали (`{{case.clean_clone.file}}`).
