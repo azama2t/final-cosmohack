@@ -95,11 +95,21 @@ def create_app(data_root: Optional[str | Path] = None) -> FastAPI:
         return {} if st.has_data() else {"X-Data-Hint": "no data; see /health hint"}
 
     # ------------------------------------------------------------ service
+    def _public_path(p) -> Optional[str]:
+        """Путь без каталога пользователя (сервис открыт наружу): относительно корня репо или имя папки."""
+        if not p:
+            return None
+        p = Path(p).resolve()
+        try:
+            return p.relative_to(core.SERVICE_DIR.parent.resolve()).as_posix()
+        except ValueError:
+            return p.name
+
     @app.get("/health", tags=["service"])
     def health():
         st = store()
         out = {"status": "ok", "version": VERSION, "data_kind": st.data_kind(),
-               "data_root": str(st.root) if st.root else None, "regions": len(st.regions()),
+               "data_root": _public_path(st.root), "regions": len(st.regions()),
                "frontend_built": (STATIC / "index.html").is_file()}
         if not st.has_data():
             out["hint"] = core.GEN_HINT

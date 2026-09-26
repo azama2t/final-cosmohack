@@ -50,7 +50,7 @@ def test_health(client, data_root):
     assert r.status_code == 200
     j = r.json()
     assert j["status"] == "ok" and j["data_kind"] == "fixture" and j["regions"] == 2
-    assert Path(j["data_root"]) == data_root.resolve()
+    assert j["data_root"] == data_root.resolve().name and ":" not in j["data_root"]
 
 
 def test_manifest_as_is(client, data_root):
