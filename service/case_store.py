@@ -2150,8 +2150,26 @@ def _ze():
     return ZE
 
 
+_ZE_LAST_VALID: dict = {}
+
+
+def _ze_cfg_load(path: Path) -> dict:
+    return _ze().validate_config(_yaml_load(path) or {})
+
+
 def zone_estimate_cfg() -> dict:
-    return _cached("zone_estimate_cfg", PATHS["zone_estimate_cfg"], _yaml_load) or {}
+    """The config of the research estimate; an unreadable / incomplete file (e.g. being written) -> the last valid
+    version with a warning (jury/L132 14:3x: 500 «calibration_points пуст» while the file was rewritten)."""
+    cfg = _cached("zone_estimate_cfg", PATHS["zone_estimate_cfg"], _ze_cfg_load)
+    if cfg:
+        _ZE_LAST_VALID["cfg"] = cfg
+        return cfg
+    prev = _ZE_LAST_VALID.get("cfg")
+    if prev:
+        print(f"[case_store] zone_estimate_cfg: {PATHS['zone_estimate_cfg']} не читается или неполон — "
+              "используется последняя валидная версия")
+        return prev
+    return {}
 
 
 _ZE_CAL: dict = {}

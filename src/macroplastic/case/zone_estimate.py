@@ -27,9 +27,42 @@ FLAG_RU = {"foam": "пена", "glint": "блик", "ship": "судно/киль
            "coast": "берег/прибой", "shallow": "мелководье/мутная вода", "cloud": "облака", "wind": "ветер > 5 м/с"}
 
 
+REQUIRED = ("status", "method", "note", "unit", "calibration_points")
+
+
+def validate_config(cfg: dict) -> dict:
+    """Raise ValueError if the config is incomplete (e.g. read while being written); return it otherwise."""
+    if not isinstance(cfg, dict):
+        raise ValueError("configs/zone_estimate.yaml: не словарь")
+    miss = [k for k in REQUIRED if not cfg.get(k)]
+    if miss:
+        raise ValueError(f"configs/zone_estimate.yaml: нет ключей {', '.join(miss)}")
+    calibration(cfg)
+    return cfg
+
+
 def load_config(path: Path = CONFIG) -> dict:
     import yaml
-    return yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+    return validate_config(yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {})
+
+
+def write_config_atomic(text: str, path: Path = CONFIG) -> None:
+    """Write the config atomically: validate, write a temp file next to it, then os.replace (readers never see a
+    half-written file)."""
+    import os
+    import tempfile
+    import yaml
+    validate_config(yaml.safe_load(text) or {})
+    path = Path(path)
+    fd, tmp = tempfile.mkstemp(prefix=path.name + ".", suffix=".tmp", dir=str(path.parent))
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="") as f:
+            f.write(text)
+        os.replace(tmp, path)
+    except BaseException:
+        if os.path.exists(tmp):
+            os.unlink(tmp)
+        raise
 
 
 def items_per_pixel(pt: dict, pixel_m2: float) -> float:

@@ -292,3 +292,26 @@ def test_natural_pair_on_in_api_and_no_old_wording(client):
         assert re["natural_pair_note"] == ZE.natural_pair_note(cfg) and re["context"].endswith(re["natural_pair_note"])
     rows = _csv_rows(client, is_find="true")
     assert rows and all(r["research_natural_pair_note"] == ZE.natural_pair_note(cfg) for r in rows)
+
+
+def test_config_half_written_keeps_last_valid(client, tmp_path, monkeypatch):
+    """L132 14:3x: a config read mid-write must not give 500 — the loader keeps the last valid version;
+    ZE.write_config_atomic writes via a temp file + os.replace and refuses an invalid config."""
+    good = ZE.CONFIG.read_text(encoding="utf-8")
+    p = tmp_path / "zone_estimate.yaml"
+    ZE.write_config_atomic(good, p)
+    assert p.read_text(encoding="utf-8") == good and not list(tmp_path.glob("*.tmp"))
+    monkeypatch.setitem(cs.PATHS, "zone_estimate_cfg", p)
+    zid = "SZ-demo-cozar-2021-03-11-016"
+    ok = client.get(f"/api/v3/scene_zones/{zid}")
+    assert ok.status_code == 200
+    ref = ok.json()["properties"]["research_estimate"]
+    # a truncated file (calibration_points cut off), as seen while rewriting
+    p.write_text(good[: good.index("calibration_points:")], encoding="utf-8")
+    r = client.get(f"/api/v3/scene_zones/{zid}")
+    assert r.status_code == 200 and r.json()["properties"]["research_estimate"] == ref
+    assert client.get("/api/v3/export", params={"layer": "scene_zones", "format": "csv"}).status_code == 200
+    with pytest.raises(ValueError):
+        ZE.write_config_atomic(good[: good.index("calibration_points:")], p)
+    ZE.write_config_atomic(good, p)
+    assert client.get(f"/api/v3/scene_zones/{zid}").json()["properties"]["research_estimate"] == ref
