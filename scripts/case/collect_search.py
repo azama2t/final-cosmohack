@@ -12,7 +12,7 @@ r"""Раздел «Расследование данных» (§11) для repor
 У каждого раздела — source и protocol. Нет файла → раздел с available: false (документы пишут «—»).
 
     .venv\Scripts\python.exe scripts\case\collect_search.py            # числа -> reports/search/search_numbers.json
-    .venv\Scripts\python.exe scripts\case\collect_search.py --sync     # + копия ADIS и уменьшенные вырезки в docs/img/
+    .venv\Scripts\python.exe scripts\case\collect_search.py --sync     # + копия ADIS, снимок detector_v2, вырезки в docs/img/
 
 Импортируется из scripts/final_numbers.py (collect()) и вызывается из scripts/case/run_all.py (шаг 5b_search_numbers).
 Уровни доказательности — docs/INDEX.md: A (снимок ↔ независимое полевое число), B (подтверждённая разметка),
@@ -34,6 +34,8 @@ OUT_JSON = REP / "search" / "search_numbers.json"
 ADIS_SRC = ROOT / "data" / "search" / "adis" / "candidates.csv"
 ADIS_CSV = REP / "search" / "adis_candidates.csv"
 IMG = ROOT / "docs" / "img"
+V2_LIVE = REP / "detector_v2" / "experiments.json"
+V2_SNAPSHOT = REP / "detector_v2" / "experiments_snapshot.json"
 
 SOURCES = {"S1": "S1_GPGP2018", "S2": "S2_SARGASSO_MSM41", "S3": "S3_SE_NORTH_SEA", "S4": "S4_BLACK_SEA_DOORS3"}
 SEARCH_NAMES = {"S1": "S1 Тихий океан, аэросъёмка 2016 (L88)", "S2": "S2 Саргассово море, MSM41 (L98)",
@@ -437,9 +439,12 @@ def collect_oil() -> dict:
 
 # ------------------------------------------------------------------------------------------------ detector v2 (slot)
 def collect_detector_v2() -> dict:
-    e = _load_json(REP / "detector_v2" / "experiments.json") or {}
+    # зафиксированный снимок (копирует `--sync`), а не живой файл L92: иначе числа меняются при каждой записи экспериментов
+    e = _load_json(V2_SNAPSHOT) or {}
     dec = _load_json(REP / "detector_v2" / "decision.json") or {}  # слот: решение оркестратора о новой модели
-    out = {"available": bool(e), "source": "reports/detector_v2/experiments.json (L92), configs/detector_v2_eval.yaml",
+    out = {"available": bool(e), "source": "reports/detector_v2/experiments_snapshot.json (снимок experiments.json L92), "
+                                           "reports/detector_v2/decision.json (решение оркестратора), configs/detector_v2_eval.yaml",
+           "snapshot_generated": e.get("generated"),
            "protocol": "проверка зафиксирована до экспериментов (sha256 в experiments.json): MARIDA val + 3-fold по снимкам для "
                        "новых B/D; 3 seed; правило принятия записано заранее (ΔF1 val ≥ max(0.01, 2σ) и не хуже на D/B); "
                        "test MARIDA не читался; порог каждой модели — по val"}
@@ -488,6 +493,22 @@ def collect() -> dict:
 
 
 # ------------------------------------------------------------------------------------------------ sync (not offline-only)
+def sync_v2_snapshot() -> str:
+    """reports/detector_v2/experiments.json (живой файл L92) → experiments_snapshot.json (зафиксированный источник документов)."""
+    if not V2_LIVE.is_file():
+        return "нет reports/detector_v2/experiments.json — снимок не менялся"
+    try:
+        live = json.loads(V2_LIVE.read_text(encoding="utf-8"))
+    except Exception as e:  # noqa: BLE001  (L92 может писать файл прямо сейчас)
+        return f"experiments.json не читается ({type(e).__name__}) — снимок не менялся"
+    if not isinstance(live, dict) or not live.get("experiments"):
+        return "experiments.json без экспериментов — снимок не менялся"
+    if V2_SNAPSHOT.is_file() and _load_json(V2_SNAPSHOT) == live:
+        return "снимок detector_v2 актуален"
+    V2_SNAPSHOT.write_text(json.dumps(live, ensure_ascii=False, indent=1), encoding="utf-8", newline="\n")
+    return f"снимок detector_v2 обновлён ({live.get('generated')}, экспериментов {len(live['experiments'])})"
+
+
 def sync_adis() -> str:
     """data/search/adis/candidates.csv (не в git) → reports/search/adis_candidates.csv (в git)."""
     if not ADIS_SRC.is_file():
@@ -543,6 +564,7 @@ def main(argv=None) -> int:
         pass
     if a.sync:
         print("[collect_search]", sync_adis())
+        print("[collect_search]", sync_v2_snapshot())
         print("[collect_search] вырезки:", ", ".join(sync_images()) or "исходников нет (data/search не в git)")
     res = collect()
     OUT_JSON.write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")

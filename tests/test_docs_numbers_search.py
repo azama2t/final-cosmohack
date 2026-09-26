@@ -122,7 +122,7 @@ def test_deck_file_contains_search_slides(sec):
     pptx = pytest.importorskip("pptx")
     prs = pptx.Presentation(str(ROOT / "reports" / "case_deck.pptx"))
     text = "\n".join(sh.text_frame.text for sl in prs.slides for sh in sl.shapes if sh.has_text_frame)
-    for v in ("Как мы искали данные", "Пары уровня A", "Новые размеченные данные B/D", "Нефтяное пятно — эксперимент",
+    for v in ("Как мы искали данные", "Пары уровня A", "Новые размеченные данные B/D", "Приложение · Нефтяное пятно — эксперимент",
               _key_strings(sec)["U-Net test F1"]):
         assert v in text, f"reports/case_deck.pptx: нет «{v}» — пересоберите make_deck_case.py"
 

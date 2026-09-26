@@ -444,14 +444,15 @@
  },
  "detector_v2": {
   "available": true,
-  "source": "reports/detector_v2/experiments.json (L92), configs/detector_v2_eval.yaml",
+  "source": "reports/detector_v2/experiments_snapshot.json (снимок experiments.json L92), reports/detector_v2/decision.json (решение оркестратора), configs/detector_v2_eval.yaml",
+  "snapshot_generated": "2026-09-26T04:06:24",
   "protocol": "проверка зафиксирована до экспериментов (sha256 в experiments.json): MARIDA val + 3-fold по снимкам для новых B/D; 3 seed; правило принятия записано заранее (ΔF1 val ≥ max(0.01, 2σ) и не хуже на D/B); test MARIDA не читался; порог каждой модели — по val",
-  "n_variants": 11,
+  "n_variants": 10,
   "n_seeds": 3,
   "n_accept": 0,
   "accepted": [],
   "need_df1": 0.01,
-  "df1_min": -0.031,
+  "df1_min": -0.057,
   "df1_max": 0.002,
   "eval_sha256_short": "9220e3f8bc26",
   "reference": {
