@@ -63,3 +63,5 @@ reports/extra_data/registry_cozar2024.csv
 /reports/audit/*.log
 .venv-baseline/
 !/data/labels_map.csv
+/reports/jury_human/
+/reports/qa/img/
