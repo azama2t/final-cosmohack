@@ -20,10 +20,12 @@ def client(tmp_path, monkeypatch):
 
 # ---------------------------------------------------------------- rule (docs/ALERTS.md), pure functions
 def test_size_shore_drift_factors_are_bucketed_1_2_3():
-    assert A.size_factor(0.2, large_km2=0.1) == 3
-    assert A.size_factor(0.05, large_km2=0.1) == 2
-    assert A.size_factor(0.001, large_km2=0.1) == 1
-    assert A.size_factor(None, large_km2=0.1) == 1  # honest default, not a guess
+    # size_factor now shares the §51 п.4 «крупное скопление» definition (is_large/major_axis_m), not a raw
+    # area threshold — service/case_store.py:sz_large already decides is_large (mask area OR major axis)
+    assert A.size_factor(is_large=True, major_axis_m=600) == 3
+    assert A.size_factor(is_large=False, major_axis_m=150) == 2
+    assert A.size_factor(is_large=False, major_axis_m=10) == 1
+    assert A.size_factor(is_large=False, major_axis_m=None) == 1  # honest default, not a guess
 
     assert A.shore_factor(2.0) == 3
     assert A.shore_factor(10.0) == 2
@@ -37,16 +39,18 @@ def test_size_shore_drift_factors_are_bucketed_1_2_3():
 
 
 def test_importance_rank_is_the_product_1_to_27():
-    assert A.importance_rank(0.2, 0.1, 2.0, 80.0) == 27  # 3*3*3
-    assert A.importance_rank(None, 0.1, None, None) == 1 * 1 * 2  # size 1, shore 1, drift neutral 2
+    assert A.importance_rank(True, 600, 2.0, 80.0) == 27  # 3*3*3
+    assert A.importance_rank(False, None, None, None) == 1 * 1 * 2  # size 1, shore 1, drift neutral 2
 
 
-def test_alert_level_capped_without_independent_confirmation():
+def test_alert_level_capped_without_independent_confirmation_or_with_likely_organic():
     # rank 27 (all factors max) would be «высокий», but without confirmation it is capped at «средний»
     assert A.alert_level_from_rank(27, confirmed=True) == "высокий"
     assert A.alert_level_from_rank(27, confirmed=False) == "средний"
     assert A.alert_level_from_rank(6, confirmed=False) == "средний"
     assert A.alert_level_from_rank(5, confirmed=False) == "слабый"
+    # §51 п.9: a «likely organic» flag must not read as a high-priority plastic alert, even if confirmed
+    assert A.alert_level_from_rank(27, confirmed=True, likely_organic=True) == "средний"
 
 
 def test_material_bump_nets_up_bottles_down():
@@ -63,7 +67,7 @@ def test_shore_km_for_a_known_point_and_honest_null_without_geometry():
 
 
 def test_non_find_gets_honest_nulls_not_a_guessed_rank():
-    out = A.zone_alert(is_find=False, area_km2=1.0, large_km2=0.1, lon=0.0, lat=0.0, region="x", date="2024-01-01",
+    out = A.zone_alert(is_find=False, is_large=True, major_axis_m=600, lon=0.0, lat=0.0, region="x", date="2024-01-01",
                        confirmed=False)
     assert out["importance_rank"] is None and out["alert_level"] is None
     assert out["shore_km_reason"] == "не находка" and out["drift_reason"] == "не находка"
@@ -86,6 +90,10 @@ def test_scene_zones_carry_alert_fields_and_never_fabricate_material():
     non_finds = [f["properties"] for f in feats if not f["properties"].get("is_find")]
     if non_finds:
         assert non_finds[0]["alert_level"] is None
+    # §51 п.9: an experimental «likely organic» flag never reads as a high-priority plastic alert
+    for p in finds:
+        if p.get("likely_organic"):
+            assert p["alert_level"] != "высокий"
 
 
 def test_scene_zones_api_exposes_alert_fields_and_filters_by_level(client):

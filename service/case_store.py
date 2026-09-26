@@ -2610,12 +2610,13 @@ def _alerts():
 
 def _sz_alerts(f: dict, p: dict) -> dict:
     """§51 п.6/п.7/п.10 — rule in docs/ALERTS.md, code in src/macroplastic/case/alerts.py (shared with
-    scripts/case/alerts.py). New fields only — does not touch is_large/field_estimate (§51 п.2/п.4, L131)."""
+    scripts/case/alerts.py). New fields only — reuses is_large/major_axis_m (§51 п.4) and likely_organic (§51 п.9),
+    set just above by sz_large()/_sz_organic(); does not touch those functions."""
     lon, lat = _geom_center(f.get("geometry"))
     return _alerts().zone_alert(
-        is_find=bool(p.get("is_find")), area_km2=p.get("area_km2"), large_km2=_s51_cfg()["large_km2"],
+        is_find=bool(p.get("is_find")), is_large=bool(p.get("is_large")), major_axis_m=p.get("major_axis_m"),
         lon=lon, lat=lat, region=p.get("region"), date=(p.get("datetime") or "")[:10] or None,
-        confirmed=p.get("verification") == "level_B_cozar")
+        confirmed=p.get("verification") == "level_B_cozar", likely_organic=bool(p.get("likely_organic")))
 
 
 def _sz_enrich(f: dict, idx: dict) -> dict:
@@ -2686,7 +2687,6 @@ def _sz_enrich(f: dict, idx: dict) -> dict:
     p["field_estimate"], p["units"] = _sz_field_estimate(f, p, (p.get("field_nearby") or {}).get("items") or [])
     p["quantity_by_image"] = f"не определено (принятых пар {_n_accepted_pairs()})"
     p["is_large"], p["large_reason"], p["major_axis_m"] = sz_large(p)
-    p.update(_sz_alerts(f, p))  # §51 п.6/п.7/п.10 (docs/ALERTS.md): shore_km, stranded_pct_72h, importance_rank, alert_level
     nos = (p.get("field_nearby") or {}).get("nearest_organizer_sample")
     p["field_nearby"] = {"nearest_organizer_sample": nos,
                          "note": ("ближайшее полевое измерение (CSV организаторов) — только расстояние и ссылка; его шт./км² "
@@ -2705,6 +2705,9 @@ def _sz_enrich(f: dict, idx: dict) -> dict:
                      if p.get("crop_file") else None)
     p["crop_note"] = "слева снимок, справа он же с пикселями детектора (красные; жёлтые — объекты с признаком судна/шва)"
     _sz_organic(p)
+    # §51 п.6/п.7/п.10 (docs/ALERTS.md): shore_km, stranded_pct_72h, importance_rank, alert_level — after is_large
+    # (§51 п.4) and likely_organic (§51 п.9, just above), since both feed the rule
+    p.update(_sz_alerts(f, p))
     return f
 
 

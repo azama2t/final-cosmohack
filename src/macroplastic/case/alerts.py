@@ -132,12 +132,14 @@ def _bucket3(value: float, hi_lo: tuple[float, float], higher_is_worse: bool) ->
     return 3 if value <= a else 2 if value <= b else 1
 
 
-def size_factor(area_km2: Optional[float], large_km2: float) -> int:
-    if area_km2 is None:
-        return 1
-    if area_km2 >= large_km2:
+def size_factor(is_large: bool, major_axis_m: Optional[float]) -> int:
+    """docs/ALERTS.md §3: size on the same «крупное скопление» rule as §51 п.4 (service/case_store.py:sz_large) —
+    mask area >= large_zone_km2 OR major axis >= large_axis_m -> 3. Otherwise a middling axis (>= 100 m, an order
+    below the «large» threshold) -> 2; smaller/unknown -> 1. Not the raw contour area (that includes the 150 m
+    buffer, §51 п.4 note) — «крупное» and the size factor now agree on one definition."""
+    if is_large:
         return 3
-    if area_km2 >= 0.01:
+    if major_axis_m is not None and major_axis_m >= 100:
         return 2
     return 1
 
@@ -154,17 +156,19 @@ def drift_factor(stranded_pct: Optional[float]) -> int:
     return _bucket3(stranded_pct, DRIFT_FACTOR_PCT, higher_is_worse=True)
 
 
-def importance_rank(area_km2: Optional[float], large_km2: float, distance_km: Optional[float],
+def importance_rank(is_large: bool, major_axis_m: Optional[float], distance_km: Optional[float],
                      stranded_pct: Optional[float]) -> int:
     """docs/ALERTS.md §3: size_factor x shore_factor x drift_factor, each in {1,2,3} -> rank in [1,27]."""
-    return size_factor(area_km2, large_km2) * shore_factor(distance_km) * drift_factor(stranded_pct)
+    return size_factor(is_large, major_axis_m) * shore_factor(distance_km) * drift_factor(stranded_pct)
 
 
-def alert_level_from_rank(rank: int, confirmed: bool) -> str:
-    """docs/ALERTS.md §4: level from rank, capped at «средний» when not independently confirmed."""
+def alert_level_from_rank(rank: int, confirmed: bool, likely_organic: bool = False) -> str:
+    """docs/ALERTS.md §4: level from rank, capped at «средний» when not independently confirmed, or when the zone
+    is flagged «вероятно органика» (§51 п.9 — experimental NDVI/FAI flag; an organics guess should not read as a
+    high-priority plastic alert)."""
     hi, mid = RANK_LEVEL
     level = "высокий" if rank >= hi else "средний" if rank >= mid else "слабый"
-    if not confirmed and level == "высокий":
+    if (not confirmed or likely_organic) and level == "высокий":
         level = "средний"
     return level
 
@@ -180,10 +184,12 @@ def material_bump(level: str, text: str) -> str:
     return LEVELS[i]
 
 
-def zone_alert(is_find: bool, area_km2: Optional[float], large_km2: float, lon: Optional[float], lat: Optional[float],
-               region: Optional[str], date: Optional[str], confirmed: bool) -> dict:
+def zone_alert(is_find: bool, is_large: bool, major_axis_m: Optional[float], lon: Optional[float],
+               lat: Optional[float], region: Optional[str], date: Optional[str], confirmed: bool,
+               likely_organic: bool = False) -> dict:
     """One call per satellite zone -> all §51 п.6/п.7/п.10 fields (docs/ALERTS.md). Non-finds get honest nulls —
-    the rule ranks risk of a real find, not every detector row."""
+    the rule ranks risk of a real find, not every detector row. `is_large`/`major_axis_m` — the same «крупное
+    скопление» fields as §51 п.4 (service/case_store.py:sz_large), not a separate area threshold."""
     if not is_find:
         return {
             "shore_km": None, "shore_km_reason": "не находка", "shore_km_note": "грубо, Natural Earth 1:110m",
@@ -194,8 +200,8 @@ def zone_alert(is_find: bool, area_km2: Optional[float], large_km2: float, lon: 
         }
     d_km, shore_reason = shore_km(lon, lat)
     stranded_pct, drift_reason = stranded_pct_for(region, date)
-    rank = importance_rank(area_km2, large_km2, d_km, stranded_pct)
-    level = alert_level_from_rank(rank, confirmed)
+    rank = importance_rank(is_large, major_axis_m, d_km, stranded_pct)
+    level = alert_level_from_rank(rank, confirmed, likely_organic)
     return {
         "shore_km": d_km, "shore_km_reason": shore_reason, "shore_km_note": "грубо, Natural Earth 1:110m",
         "stranded_pct_72h": stranded_pct, "drift_reason": drift_reason,
