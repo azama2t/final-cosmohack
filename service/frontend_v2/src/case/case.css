@@ -1484,3 +1484,9 @@ a.c-head-r.c-head-link {
   white-space: normal !important;
   overflow-wrap: anywhere;
 }
+.c-head-gt {
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-2);
+}

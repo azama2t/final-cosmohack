@@ -69,9 +69,13 @@ export default function LeftColumn(p: Props) {
             Кейс
           </button>
           <button className="on" aria-selected data-testid="mode-live">
-            Живые снимки
+            Обзор районов (прежний режим)
           </button>
         </div>
+      </div>
+      <div className="c-legacy-note" role="note" data-testid="legacy-note">
+        Прежний режим без фильтров судов, пены и ветра; числа находок не совпадают со слоем «Спутниковые зоны» во вкладке «Кейс» — для оценки
+        используйте «Кейс».
       </div>
       <div className="brand">
         <div className="brand-name">

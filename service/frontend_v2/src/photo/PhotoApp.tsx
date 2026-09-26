@@ -247,7 +247,7 @@ export default function PhotoApp() {
             Кейс
           </button>
           <button onClick={() => (location.href = '?mode=live')} data-testid="mode-live">
-            Живые снимки
+            Обзор районов (прежний режим)
           </button>
           <button className="on" aria-selected data-testid="mode-photo">
             Фото

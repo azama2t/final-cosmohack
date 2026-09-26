@@ -500,7 +500,7 @@ export default function CaseApp() {
               Повторить
             </button>
             <a className="btn ghost" href="?mode=live">
-              Живые снимки
+              Обзор районов (прежний режим)
             </a>
           </div>
         </div>
@@ -528,8 +528,8 @@ export default function CaseApp() {
             <button className="on" aria-selected data-testid="mode-case">
               Кейс
             </button>
-            <button onClick={() => (location.href = '?mode=live')} data-testid="mode-live">
-              Живые снимки
+            <button onClick={() => (location.href = '?mode=live')} data-testid="mode-live" title="Прежний режим обзора районов: без фильтров судов, пены и ветра">
+              Обзор районов (прежний режим)
             </button>
             <button onClick={() => (location.href = '?mode=photo')} data-testid="mode-photo" title="Счётчик предметов по фото (камера у воды; отдельный модуль, не спутник)">
               Фото
@@ -1450,7 +1450,13 @@ function Headline({ open, onToggle, meta, photo, onField, onZone }: { open: bool
           мусор, не только пластик; ADIS — все объекты крупнее 10 см. {h.field_note}. Источник: {h.source}.
         </Info>
       </div>
-      {h.field.map((r: any) => (
+      {[
+        ['Пластик', h.field.filter((r: any) => String(r.material).startsWith('пластик'))],
+        ['Весь мусор (справочно)', h.field.filter((r: any) => !String(r.material).startsWith('пластик'))],
+      ].map(([g, rs]: any) => (
+        <div key={g} className="c-head-g" data-testid={`headline-group-${g === 'Пластик' ? 'plastic' : 'all'}`}>
+          <div className="c-head-gt">{g}</div>
+          {rs.map((r: any) => (
         <button
           key={r.key}
           className={`c-head-r ${r.source ? '' : 'static'}`}
@@ -1473,6 +1479,8 @@ function Headline({ open, onToggle, meta, photo, onField, onZone }: { open: bool
             {r.stat === 'медиана' ? ' (нет N — только медиана)' : ''}
           </span>
         </button>
+          ))}
+        </div>
       ))}
       {tg?.count_mae !== undefined && (
         <a className="c-head-r c-head-link" href="?mode=photo" data-testid="headline-photo">
