@@ -72,8 +72,11 @@ DECISION_RU = {"accept": "принят масками качества", "reject
 # (> 130 ppm of usable water, up to 7575 «objects») outside the coastal Guanabara crops has sun zenith 59.7–61.2°
 # (ADIS 30.10.2021, 17.11.2020, 25.11.2023); below 58° the maximum is 160 ppm. Weak signal: median B3 of usable water
 # < 0.003 (ADIS 30.10.2021: 0.0001 — the water is black after L2A correction).
-SUN_ZENITH_MAX = 58.0
-WATER_B3_MIN = 0.003
+# Constants and the verdict live in src/macroplastic/case/illumination.py (shared with scripts/search/adis_pairs.py);
+# re-exported here as module attributes (tests monkeypatch st.WATER_B3_MIN).
+from macroplastic.case import illumination as _illum  # noqa: E402
+SUN_ZENITH_MAX = _illum.SUN_ZENITH_MAX
+WATER_B3_MIN = _illum.WATER_B3_MIN
 
 KINDS = [
     {"id": "rgb", "label": "Снимок", "overlay": False},
@@ -688,9 +691,9 @@ def _gate_illumination(s: "Scene") -> None:
     """Low sun / weak water signal -> the detector result is not evaluated and the «Детекция» view is withheld."""
     zen = solar_zenith(s.get("datetime"), s.get("bounds"))
     det = s.get("detector") or {}
-    low = zen is not None and zen >= SUN_ZENITH_MAX
+    low = _illum.detector_evaluable(zen, None, SUN_ZENITH_MAX, WATER_B3_MIN)[1]
     sig = water_signal(s) if det.get("run") and not low else None  # only where it can change the verdict
-    weak = sig is not None and sig < WATER_B3_MIN
+    _, low, weak = _illum.detector_evaluable(zen, sig, SUN_ZENITH_MAX, WATER_B3_MIN)
     s["illumination"] = {"sun_zenith_deg": zen, "water_b3_median": sig, "low_sun": low, "weak_signal": weak,
                          "rule": f"не оценивается при зените Солнца ≥ {SUN_ZENITH_MAX:.0f}° или медиане B3 воды < "
                                  f"{WATER_B3_MIN}"}
@@ -883,28 +886,8 @@ def public(s: Scene, brief: bool = False) -> dict:
 
 # ------------------------------------------------------------------ illumination / water signal
 def solar_zenith(iso: Optional[str], bounds) -> Optional[float]:
-    """Solar zenith angle (deg) at the scene centre and acquisition time (NOAA solar position, error < 0.5 deg).
-    Computed, not read from STAC: the scene directories keep no sun angles."""
-    if not iso or not bounds:
-        return None
-    import datetime as _dt
-    try:
-        t = _dt.datetime.fromisoformat(iso.replace("Z", "+00:00")).astimezone(_dt.timezone.utc)
-    except ValueError:
-        return None
-    lon, lat = (bounds[0] + bounds[2]) / 2, (bounds[1] + bounds[3]) / 2
-    doy = t.timetuple().tm_yday
-    hour = t.hour + t.minute / 60 + t.second / 3600
-    g = 2 * math.pi / 365 * (doy - 1 + (hour - 12) / 24)
-    eqt = 229.18 * (0.000075 + 0.001868 * math.cos(g) - 0.032077 * math.sin(g) - 0.014615 * math.cos(2 * g)
-                    - 0.040849 * math.sin(2 * g))
-    decl = (0.006918 - 0.399912 * math.cos(g) + 0.070257 * math.sin(g) - 0.006758 * math.cos(2 * g)
-            + 0.000907 * math.sin(2 * g) - 0.002697 * math.cos(3 * g) + 0.00148 * math.sin(3 * g))
-    tst = hour * 60 + eqt + 4 * lon
-    ha = math.radians(tst / 4 - 180)
-    la = math.radians(lat)
-    cz = math.sin(la) * math.sin(decl) + math.cos(la) * math.cos(decl) * math.cos(ha)
-    return round(math.degrees(math.acos(max(-1.0, min(1.0, cz)))), 1)
+    """Solar zenith (deg) at the scene centre and acquisition time — macroplastic.case.illumination.solar_zenith."""
+    return _illum.solar_zenith(iso, bounds)
 
 
 def water_signal(s: "Scene") -> Optional[float]:
@@ -923,22 +906,15 @@ def water_signal(s: "Scene") -> Optional[float]:
                 g = _read(rgb["path"], [rgb["idx"][1]], 512, 512, "nearest")
                 h, w = g.shape
             elif rgb["op"] == "png" and rgb["path"].name == "rgb.png" and s["crs"] != "EPSG:4326":
-                with Image.open(rgb["path"]) as im:
-                    im = im.convert("RGB")
-                    im.thumbnail((512, 512), Image.NEAREST)
-                    v = np.asarray(im)[:, :, 1].astype(np.float32)
-                g = 0.16 * (v / 255.0) ** 1.8
+                g = _illum.rgb_png_b3(rgb["path"], 512)
                 h, w = g.shape
             else:
                 return None
-            water = None
+            q = None
             if qm is not None:
                 with rasterio.open(qm) as ds:
                     q = ds.read(1)
-                water = _nearest(q, w, h) == (6 if qm.name == "scl.tif" else 1)
-            vals = g[water] if water is not None and water.sum() >= 50 else g[np.isfinite(g)]
-            vals = vals[np.isfinite(vals)]
-            return round(float(np.median(vals)), 4) if vals.size else None
+            return _illum.water_median(g, q, 6 if qm is not None and qm.name == "scl.tif" else 1)
         except Exception as e:  # noqa: BLE001
             print(f"[studio] water_signal {s['id']}: {e}")
             return None
