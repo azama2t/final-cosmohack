@@ -1,0 +1,56 @@
+# VCS, environments, caches
+.git
+.gitattributes
+**/__pycache__
+**/*.pyc
+.pytest_cache
+.venv*
+**/node_modules
+.env
+.env.*
+*.zip
+~$*
+# local artifacts outside git
+out
+data_cache
+logs
+weights_exp
+models
+tools
+test-results
+playwright-report
+.playwright-mcp
+.claude
+spec
+# service data outside git (the service falls back to service/demo + data/case from git)
+service/data
+service/demo_fixtures
+service/labels
+service/tiles
+service/static_v2/assets/*.map
+service/static_v3/assets/*.map
+# large local data: keep only what git tracks
+data/*
+!data/case
+!data/pairs
+!data/live
+!data/drift_check
+!data/labels_map.csv
+data/pairs/experiment
+data/pairs/cache
+data/case/oil
+data/case/detector_preds/*.joblib
+data/live/**
+!data/live/**/scene.json
+data/drift_check/**
+!data/drift_check/**/scene.json
+# not needed to run the service
+presentation
+reports/tasklog
+reports/screens
+reports/deck_preview
+reports/jury_human
+reports/qa/img
+reports/perf
+docs/prev-hack
+docs/archive

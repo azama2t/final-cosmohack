@@ -1,0 +1,15 @@
+# One service: docker compose up --build -d  ->  http://localhost:8070
+# Another host port: PORT=18070 docker compose up --build -d   (PowerShell: $env:PORT=18070; docker compose up --build -d)
+services:
+  web:
+    build: .
+    image: macroplastic-web:latest
+    ports:
+      - "${PORT:-8070}:8070"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8070/api/v3/meta', timeout=8).status == 200 else 1)"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
