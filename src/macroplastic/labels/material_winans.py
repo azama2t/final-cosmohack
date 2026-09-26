@@ -314,6 +314,7 @@ def score(a):
     REP.mkdir(parents=True, exist_ok=True)
     (REP / "material_winans.json").write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     me["accepted"] = final
+    me["labels_ru"] = {"organic": "дерево (обработанное)", "metal": "металл"}
     me["rule_extra"] = "MAE числа класса на чип < бейзлайна «доля train» (парный бутстреп, ДИ95 < 0)"
     if final:
         me["classes_reportable"] = final
@@ -327,6 +328,47 @@ def score(a):
         print(sp, {m: {k: out["splits"][sp]["per_material"][m][k] for k in ("n_true", "precision", "recall",
                                                                             "mae_model", "mae_baseline_share")}
                    for m in MATS})
+
+
+# ------------------------------------------------------------------ API helper (for service/routes_v3_photo.py, L109)
+_M1 = {}
+CARD = WDIR / "model_card_material_aerial.json"
+
+
+def load_card():
+    return json.loads(CARD.read_text(encoding="utf-8")) if CARD.exists() else None
+
+
+def box_materials(image, boxes, device=None):
+    """Canonical material per counted box of the aerial counter (PIL image, boxes xyxy px), same order; the M1 model is
+    loaded once. Returns None if M1 weights/card are absent."""
+    card = load_card()
+    wp = WDIR / "frcnn_winans_material_best.pth"
+    if card is None or not wp.exists():
+        return None
+    import torch
+    from macroplastic.photo_count.model import build_model
+    dev = device or ("cuda" if torch.cuda.is_available() else "cpu")
+    if dev not in _M1:
+        m = build_model(num_classes=len(CLASSES) + 1)
+        m.load_state_dict(torch.load(wp, map_location="cpu", weights_only=True))
+        _M1[dev] = m.to(dev).eval()
+    from torchvision.transforms.functional import to_tensor
+    with torch.inference_mode():
+        r = _M1[dev]([to_tensor(image.convert("RGB")).to(dev)])[0]
+    mat_of = {i + 1: card["material_of_class"][c] for i, c in enumerate(CLASSES)}
+    mats, _ = assign_materials(np.asarray(boxes, float).reshape(-1, 4), r["boxes"].float().cpu().numpy(),
+                               r["scores"].float().cpu().numpy(), r["labels"].cpu().numpy(), mat_of)
+    return mats
+
+
+def composition_aerial(image, boxes, device=None):
+    """composition_for("aerial", ...) with the M1 material card and per-box materials (status by_class only for
+    materials that passed the rule of 26.09 06:30; the rest -> «состав не определён»)."""
+    from .composition import composition_for
+    card = load_card()
+    mats = box_materials(image, boxes, device) if card else None
+    return composition_for("aerial", boxes, card, box_materials=mats)
 
 
 def main(argv=None):

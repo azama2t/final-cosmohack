@@ -1,0 +1,68 @@
+dataset,dataset_ref,sensor,source_label_id,source_label,n,n_unit,n_detail,role,material,material_confidence,origin,form,context,used_by,note
+Winans2023,Zenodo 10.5281/zenodo.8381113 (CC BY 4.0),aerial,2,unidentified object,5291,рамки,train 3740 / eval 1551,item,unknown,unsure,anthropogenic,,shore,counter_aerial,мусор неопознанного типа; материал не указан — половина всех рамок набора
+Winans2023,Zenodo 10.5281/zenodo.8381113 (CC BY 4.0),aerial,,buoy,2838,рамки,train 1971 / eval 867,item,plastic,unsure,anthropogenic,buoy,shore,counter_aerial,буи и поплавки снастей; пластик — вывод по форме (бывают стекло/металл/пенопласт)
+Winans2023,Zenodo 10.5281/zenodo.8381113 (CC BY 4.0),aerial,,net cloth,829,рамки,train 606 / eval 223,item,plastic,unsure,anthropogenic,net,shore,counter_aerial,сетное полотно/ткань; синтетика — вывод по форме
+Winans2023,Zenodo 10.5281/zenodo.8381113 (CC BY 4.0),aerial,7,processed wood,791,рамки,train 574 / eval 217,item,organic,sure,anthropogenic,wood,shore,counter_aerial,обработанная древесина: материал дерево — НЕ пластик; происхождение антропогенное
+Winans2023,Zenodo 10.5281/zenodo.8381113 (CC BY 4.0),aerial,,tire,425,рамки,train 281 / eval 144,item,other,unsure,anthropogenic,tire,shore,counter_aerial,шины: резина (other) — не пластик по нашей схеме
+Winans2023,Zenodo 10.5281/zenodo.8381113 (CC BY 4.0),aerial,,metal,269,рамки,train 167 / eval 102,item,metal,sure,anthropogenic,,shore,counter_aerial,металлические предметы
+Winans2023,Zenodo 10.5281/zenodo.8381113 (CC BY 4.0),aerial,,line fragment,215,рамки,train 134 / eval 81,item,plastic,unsure,anthropogenic,rope,shore,counter_aerial,обрывки линей/канатов; синтетика — вывод по форме
+Winans2023,Zenodo 10.5281/zenodo.8381113 (CC BY 4.0),aerial,,vessel,45,рамки,train 35 / eval 10,item,unknown,unsure,anthropogenic,vessel,shore,counter_aerial,лодки/обломки судов; материал (стеклопластик/дерево/металл) не указан
+FML,SEANOE 10.17882/106148 (CC BY 4.0),ship,0,garbage,16457,рамки,train 11333 / val 3476 / test 1648,item,unknown,unsure,anthropogenic,,floating_water,counter_water_camera,один класс «мусор» (камера надводного аппарата; море и внутренние водоёмы); материал не размечен
+TOCL_RMS,4TU 10.4121/fad0aa03-37b4-4a3c-8263-8ed60a03b393 (CC BY-NC 4.0),bridge,0,trash,10314,рамки,train 7272 / val 3042,item,unknown,unsure,anthropogenic,,river,registry,надкатегория «мусор» без уточнения материала
+TOCL_RMS,4TU 10.4121/fad0aa03-37b4-4a3c-8263-8ed60a03b393 (CC BY-NC 4.0),bridge,1,organics,14560,рамки,train 10647 / val 3913,item,organic,sure,natural,,river,registry,природное (растения/ветки) — не мусор; самый частый класс набора (37.5 %)
+TOCL_RMS,4TU 10.4121/fad0aa03-37b4-4a3c-8263-8ed60a03b393 (CC BY-NC 4.0),bridge,2,Unidentified Floating Object (UFO),4570,рамки,train 3398 / val 1172,item,unknown,unsure,unknown,,river,registry,неопознанное: ни материал ни происхождение не известны
+TOCL_RMS,4TU 10.4121/fad0aa03-37b4-4a3c-8263-8ed60a03b393 (CC BY-NC 4.0),bridge,3,PET bottle,776,рамки,train 564 / val 212,item,plastic,sure,anthropogenic,bottle,river,registry,
+TOCL_RMS,4TU 10.4121/fad0aa03-37b4-4a3c-8263-8ed60a03b393 (CC BY-NC 4.0),bridge,4,soft plastics,2389,рамки,train 1778 / val 611,item,plastic,sure,anthropogenic,,river,registry,мягкий пластик (плёнки/пакеты) — форма в метке не выделена
+TOCL_RMS,4TU 10.4121/fad0aa03-37b4-4a3c-8263-8ed60a03b393 (CC BY-NC 4.0),bridge,5,hard plastics,448,рамки,train 327 / val 121,item,plastic,sure,anthropogenic,,river,registry,
+TOCL_RMS,4TU 10.4121/fad0aa03-37b4-4a3c-8263-8ed60a03b393 (CC BY-NC 4.0),bridge,6,foam plastics,234,рамки,train 163 / val 71,item,plastic,sure,anthropogenic,foam_item,river,registry,пенопласт (материал) ≠ морская пена (фон)
+TOCL_RMS,4TU 10.4121/fad0aa03-37b4-4a3c-8263-8ed60a03b393 (CC BY-NC 4.0),bridge,7,clothing,38,рамки,train 25 / val 13,item,other,unsure,anthropogenic,clothing,river,registry,ткань (бывает синтетика) — материал не указан
+TOCL_RMS,4TU 10.4121/fad0aa03-37b4-4a3c-8263-8ed60a03b393 (CC BY-NC 4.0),bridge,8,other plastics,6,рамки,train 5 / val 1,item,plastic,sure,anthropogenic,,river,registry,
+TOCL_RMS,4TU 10.4121/fad0aa03-37b4-4a3c-8263-8ed60a03b393 (CC BY-NC 4.0),bridge,9,non-plastics,85,рамки,train 62 / val 23,item,other,unsure,anthropogenic,,river,registry,«не пластик» антропогенный (металл/стекло/прочее не разделены)
+TOCL_RMS,4TU 10.4121/fad0aa03-37b4-4a3c-8263-8ed60a03b393 (CC BY-NC 4.0),bridge,10,unknown,5392,рамки,train 3949 / val 1443,item,unknown,unsure,anthropogenic,,river,registry,мусор (надкатегория trash) неизвестного материала
+UCWD,Zenodo 10.5281/zenodo.20630252 (CC BY 4.0),UAV,,Plastic bottle,11514,рамки,train 8740 / valid 1340 / test 1434,item,plastic,sure,anthropogenic,bottle,shore,registry,
+UCWD,Zenodo 10.5281/zenodo.20630252 (CC BY 4.0),UAV,,Plastic fragment,3839,рамки,train 2934 / valid 441 / test 464,item,plastic,sure,anthropogenic,fragment,shore,registry,
+UCWD,Zenodo 10.5281/zenodo.20630252 (CC BY 4.0),UAV,,Plastic container,1559,рамки,train 1154 / valid 184 / test 221,item,plastic,sure,anthropogenic,container,shore,registry,
+UCWD,Zenodo 10.5281/zenodo.20630252 (CC BY 4.0),UAV,,Plastic bag,764,рамки,train 575 / valid 73 / test 116,item,plastic,sure,anthropogenic,bag,shore,registry,
+UCWD,Zenodo 10.5281/zenodo.20630252 (CC BY 4.0),UAV,,Packet,2099,рамки,train 1527 / valid 303 / test 269,item,plastic,unsure,anthropogenic,packet,shore,registry,упаковка (часто многослойная плёнка с фольгой) — пластик не указан в метке
+UCWD,Zenodo 10.5281/zenodo.20630252 (CC BY 4.0),UAV,,Metal,4034,рамки,train 3046 / valid 492 / test 496,item,metal,sure,anthropogenic,,shore,registry,
+UCWD,Zenodo 10.5281/zenodo.20630252 (CC BY 4.0),UAV,,Glass,2449,рамки,train 1803 / valid 327 / test 319,item,other,sure,anthropogenic,,shore,registry,стекло (other)
+Maharjan2022,github.com/Nisha484/Nisha (лицензии нет),UAV,0,0,2094,рамки,Laos 841 / Thailand 1253,item,unknown,unsure,anthropogenic,,river,counter_crosscheck,класс 0 без имени в файлах; в статье — «plastic»; материал в разметке не проверяется
+TUD-GV,Zenodo 10.5281/zenodo.13730228 (CC BY 4.0),bridge,0,litter,8181,рамки,все кадры,item,unknown,unsure,anthropogenic,,river,counter_crosscheck,один класс «мусор» (камера 2.7/4 м над каналом)
+ADIS,4TU 10.4121/ddede7f5-aca5-42ae-b851-e0bbb9a2c4c2 (CC BY 4.0),ship,3,hard plastic,17959,объекты,Objects.csv (все объекты),item,plastic,sure,anthropogenic,,floating_water,field_adis,класс детектора YOLOv5 авторов (не ручная метка)
+ADIS,4TU 10.4121/ddede7f5-aca5-42ae-b851-e0bbb9a2c4c2 (CC BY 4.0),ship,2,fibrous,2803,объекты,Objects.csv (все объекты),item,plastic,unsure,anthropogenic,,floating_water,field_adis,волокнистое (сети/канаты — вывод); класс детектора авторов
+ADIS,4TU 10.4121/ddede7f5-aca5-42ae-b851-e0bbb9a2c4c2 (CC BY 4.0),ship,1,buoy,291,объекты,Objects.csv (все объекты),item,plastic,unsure,anthropogenic,buoy,floating_water,field_adis,класс детектора авторов; пластик — вывод по форме
+ADIS,4TU 10.4121/ddede7f5-aca5-42ae-b851-e0bbb9a2c4c2 (CC BY 4.0),ship,0,animal,1406,объекты,Objects.csv (все объекты),item,organic,unsure,natural,animal,floating_water,field_adis,класс детектора «животное»; ВХОДИТ в n_objects сегментов (animal+plant = 7.2 % объектов в сегментах)
+ADIS,4TU 10.4121/ddede7f5-aca5-42ae-b851-e0bbb9a2c4c2 (CC BY 4.0),ship,4,plant,183,объекты,Objects.csv (все объекты),item,organic,unsure,natural,vegetation,floating_water,field_adis,класс детектора «растение»; ВХОДИТ в n_objects сегментов
+MARIDA,Zenodo 10.5281/zenodo.5151941 (CC BY 4.0),satellite,1,Marine Debris,3399,пиксели 10 м,все патчи,aggregation,unknown,unsure,unknown,,floating_water,detector_s2,«подозрительный плавающий материал» (визуальная интерпретация авторов); предметы и материал на 10 м не различимы
+MARIDA,Zenodo 10.5281/zenodo.5151941 (CC BY 4.0),satellite,2,Dense Sargassum,2797,пиксели 10 м,все патчи,negative,,,natural,,floating_water,detector_s2,водоросли — фон для детектора мусора
+MARIDA,Zenodo 10.5281/zenodo.5151941 (CC BY 4.0),satellite,3,Sparse Sargassum,2357,пиксели 10 м,все патчи,negative,,,natural,,floating_water,detector_s2,водоросли — фон
+MARIDA,Zenodo 10.5281/zenodo.5151941 (CC BY 4.0),satellite,4,Natural Organic Material,864,пиксели 10 м,все патчи,negative,,,natural,,floating_water,detector_s2,природная органика — фон
+MARIDA,Zenodo 10.5281/zenodo.5151941 (CC BY 4.0),satellite,5,Ship,5803,пиксели 10 м,все патчи,negative,,,anthropogenic,,ship,detector_s2,суда — ложный объект
+MARIDA,Zenodo 10.5281/zenodo.5151941 (CC BY 4.0),satellite,6,Clouds,117400,пиксели 10 м,все патчи,negative,,,natural,,cloud,detector_s2,
+MARIDA,Zenodo 10.5281/zenodo.5151941 (CC BY 4.0),satellite,13,Cloud Shadows,11728,пиксели 10 м,все патчи,negative,,,natural,,cloud,detector_s2,
+MARIDA,Zenodo 10.5281/zenodo.5151941 (CC BY 4.0),satellite,9,Foam,1225,пиксели 10 м,все патчи,negative,,,natural,,floating_water,detector_s2,морская пена — фон; НЕ пенопласт
+MARIDA,Zenodo 10.5281/zenodo.5151941 (CC BY 4.0),satellite,14,Wakes,8490,пиксели 10 м,все патчи,negative,,,anthropogenic,,wake,detector_s2,кильватерный след
+MARIDA,Zenodo 10.5281/zenodo.5151941 (CC BY 4.0),satellite,12,Waves,5827,пиксели 10 м,все патчи,negative,,,natural,,floating_water,detector_s2,гребни волн
+MARIDA,Zenodo 10.5281/zenodo.5151941 (CC BY 4.0),satellite,7,Marine Water,129159,пиксели 10 м,все патчи,background,,,natural,,floating_water,detector_s2,
+MARIDA,Zenodo 10.5281/zenodo.5151941 (CC BY 4.0),satellite,8,Sediment-Laden Water,372937,пиксели 10 м,все патчи,background,,,natural,,floating_water,detector_s2,
+MARIDA,Zenodo 10.5281/zenodo.5151941 (CC BY 4.0),satellite,10,Turbid Water,157612,пиксели 10 м,все патчи,background,,,natural,,floating_water,detector_s2,
+MARIDA,Zenodo 10.5281/zenodo.5151941 (CC BY 4.0),satellite,11,Shallow Water,17369,пиксели 10 м,все патчи,background,,,natural,,floating_water,detector_s2,
+MARIDA,Zenodo 10.5281/zenodo.5151941 (CC BY 4.0),satellite,15,Mixed Water,410,пиксели 10 м,все патчи,background,,,natural,,floating_water,detector_s2,
+MADOS,Zenodo 10.5281/zenodo.10664073 (CC BY 4.0),satellite,1,Marine Debris,4696,пиксели 10 м,все кропы,aggregation,unknown,unsure,unknown,,floating_water,detector_s2,как MARIDA Marine Debris; часть сцен MADOS = сцены MARIDA
+MADOS,Zenodo 10.5281/zenodo.10664073 (CC BY 4.0),satellite,2,Dense Sargassum,4308,пиксели 10 м,все кропы,negative,,,natural,,floating_water,detector_s2,
+MADOS,Zenodo 10.5281/zenodo.10664073 (CC BY 4.0),satellite,3,Sparse Floating Algae,4972,пиксели 10 м,все кропы,negative,,,natural,,floating_water,detector_s2,
+MADOS,Zenodo 10.5281/zenodo.10664073 (CC BY 4.0),satellite,4,Natural Organic Material,1454,пиксели 10 м,все кропы,negative,,,natural,,floating_water,detector_s2,
+MADOS,Zenodo 10.5281/zenodo.10664073 (CC BY 4.0),satellite,5,Ship,13222,пиксели 10 м,все кропы,negative,,,anthropogenic,,ship,detector_s2,
+MADOS,Zenodo 10.5281/zenodo.10664073 (CC BY 4.0),satellite,6,Oil Spill,234568,пиксели 10 м,все кропы,negative,,,anthropogenic,,floating_water,detector_s2,нефтяное пятно — не мусор (отдельный модуль docs/OIL.md)
+MADOS,Zenodo 10.5281/zenodo.10664073 (CC BY 4.0),satellite,9,Foam,1225,пиксели 10 м,все кропы,negative,,,natural,,floating_water,detector_s2,морская пена — фон; НЕ пенопласт (те же 1 225 пикселей что в MARIDA)
+MADOS,Zenodo 10.5281/zenodo.10664073 (CC BY 4.0),satellite,12,Waves & Wakes,20374,пиксели 10 м,все кропы,negative,,,unknown,,wake,detector_s2,волны и кильватер в одном классе
+MADOS,Zenodo 10.5281/zenodo.10664073 (CC BY 4.0),satellite,13,Oil Platform,15701,пиксели 10 м,все кропы,negative,,,anthropogenic,,ship,detector_s2,платформа — как судно (объект на воде)
+MADOS,Zenodo 10.5281/zenodo.10664073 (CC BY 4.0),satellite,14,Jellyfish,2541,пиксели 10 м,все кропы,negative,,,natural,,floating_water,detector_s2,
+MADOS,Zenodo 10.5281/zenodo.10664073 (CC BY 4.0),satellite,15,Sea snot,12272,пиксели 10 м,все кропы,negative,,,natural,,floating_water,detector_s2,слизь (мукус) — природное
+MADOS,Zenodo 10.5281/zenodo.10664073 (CC BY 4.0),satellite,7,Marine Water,496702,пиксели 10 м,все кропы,background,,,natural,,floating_water,detector_s2,
+MADOS,Zenodo 10.5281/zenodo.10664073 (CC BY 4.0),satellite,8,Sediment-Laden Water,376061,пиксели 10 м,все кропы,background,,,natural,,floating_water,detector_s2,
+MADOS,Zenodo 10.5281/zenodo.10664073 (CC BY 4.0),satellite,10,Turbid Water,170306,пиксели 10 м,все кропы,background,,,natural,,floating_water,detector_s2,
+MADOS,Zenodo 10.5281/zenodo.10664073 (CC BY 4.0),satellite,11,Shallow Water,122753,пиксели 10 м,все кропы,background,,,natural,,floating_water,detector_s2,
+D_negatives,Zenodo 15019034 (CC BY 4.0),satellite,,vessel (суда у Финляндии),2094,рамки,по reports/extra_data/negatives.md (не пересчитано L123),negative,,,anthropogenic,,ship,detector_s2,наш набор D
+D_negatives,Zenodo 4172871 Cloud Mask Catalogue (CC BY 4.0),satellite,,cloud / shadow,28,сцены,по reports/extra_data/negatives.md (не пересчитано L123),negative,,,natural,,cloud,detector_s2,наш набор D
+ours_scene_zones,service /api/v3/scene_zones (weights/lgbm),satellite,,обнаружено детектором,,зоны,см. reports/final_numbers.json case.sections.scene_zones,aggregation,unknown,unsure,unknown,,floating_water,detector_s2,выход нашего детектора: площадь маски м²/км²; статус «концентрация по снимку не подтверждена»; форма/материал не выводятся

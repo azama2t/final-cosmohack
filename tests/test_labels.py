@@ -105,9 +105,13 @@ def test_composition_single_class_models_not_determined():
         assert out["total"] == 3 and out["classes"] == [] and out["reason"]
 
 
-def test_composition_satellite_not_applicable():
-    out = C.composition_for("satellite")
-    assert out["status"] == "not_applicable" and "форма" in out["text"]
+def test_composition_satellite_never_classes():
+    """§33: спутниковая зона — «состав не определён», никаких классов, даже при карточке с material_eval."""
+    conf = [[100, 0, 0, 0, 0], [0, 90, 0, 0, 10], [0, 0, 40, 0, 5], [0, 0, 0, 50, 0], [5, 5, 5, 0, 200]]
+    for kw in ({"survey": "satellite"}, {"survey": "aerial", "sensor": "satellite"}):
+        out = C.composition_for(**kw, boxes=[1, 2], card={"material_eval": _me(conf)}, box_materials=["organic"] * 2)
+        assert out["status"] == "not_determined" and out["text"] == "состав не определён"
+        assert out["classes"] == [] and "форма" in out["reason"]
 
 
 def _me(conf, classes=("plastic", "organic", "metal", "other", "unknown"), **kw):
@@ -170,3 +174,25 @@ def test_labels_doc_mentions_table():
 def test_counts_match_local_files():
     from macroplastic.labels.recount import check
     assert check(datasets=["Winans2023", "TOCL_RMS", "UCWD", "ADIS", "Maharjan2022", "TUD-GV"]) == []
+
+
+def test_card_accepted_list_and_labels_override():
+    conf = [[100, 0, 0, 0, 0], [0, 90, 0, 0, 10], [0, 0, 40, 0, 5], [0, 0, 0, 50, 0], [5, 5, 5, 0, 200]]
+    card = {"material_eval": _me(conf, accepted=["organic"], labels_ru={"organic": "дерево (обработанное)"})}
+    out = C.composition_for("aerial", boxes=[1, 2, 3], card=card, box_materials=["organic", "metal", None])
+    assert [c["material"] for c in out["classes"]] == ["organic"]
+    assert out["by_class"] == {"дерево (обработанное)": 1, "состав не определён": 2}
+    assert "metal" in out["not_reported"]
+
+
+@pytest.mark.skipif(not (ROOT / "reports" / "labels" / "material_winans.json").exists(), reason="M1 не запускался")
+def test_m1_decision_consistent():
+    import json
+    d = json.loads((ROOT / "reports" / "labels" / "material_winans.json").read_text(encoding="utf-8"))
+    te = d["splits"]["test"]
+    for m in d["decision"]["accepted"]:
+        pm = te["per_material"][m]
+        assert m in ("organic", "metal")  # only explicitly labelled Winans materials
+        assert pm["n_true"] >= C.MIN_TEST_ITEMS and pm["precision"] >= C.MIN_PRECISION and pm["recall"] >= C.MIN_RECALL
+        assert pm["mae_diff_ci95"][1] < 0
+    assert "plastic" not in d["decision"]["accepted"]

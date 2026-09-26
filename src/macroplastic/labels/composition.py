@@ -90,15 +90,19 @@ def composition_for(survey: str, boxes=None, card: dict | None = None, box_mater
 
     boxes — counted boxes (any sequence; only its length is used for "total");
     box_materials — predicted canonical material per counted box (None/"unknown" if the box has none), same order;
-    used only if the card passes the rule. Returns status "by_class" | "not_determined" | "not_applicable".
+    used only if the card passes the rule. Returns status "by_class" | "not_determined" (satellite: always).
     """
     if boxes is not None and box_materials is not None and len(box_materials) != len(boxes):
         raise ValueError("box_materials и boxes разной длины")
     base = {"rule": RULE_TEXT, "unit": "штук на кадр"}
     if sensor == "satellite" or survey == "satellite":
-        return {**base, "status": "not_applicable", "text": SATELLITE_TEXT, "classes": [], "box_materials": None}
+        return {**base, "status": "not_determined", "text": "состав не определён", "reason": SATELLITE_TEXT,
+                "unit": None, "total": None, "classes": [], "box_materials": None}  # §33: no classes for zones
     me = (card or {}).get("material_eval")
     ok, why = accepted_classes(me)
+    if me and "accepted" in me:  # extra rule of the experiment (e.g. MAE vs baseline) already decided on test
+        why.update({c: "не прошёл дополнительное правило эксперимента" for c in ok if c not in me["accepted"]})
+        ok = [c for c in ok if c in me["accepted"]]
     n = len(boxes) if boxes is not None else (len(box_materials) if box_materials is not None else None)
     if not ok or box_materials is None:
         reason = WHY_SINGLE_CLASS.get(survey, "у модели нет матрицы ошибок по материалу на отложенных данных")
@@ -108,7 +112,8 @@ def composition_for(survey: str, boxes=None, card: dict | None = None, box_mater
                 "classes": [], "box_materials": None}
     mets = class_metrics(me["classes"], me["confusion"])
     per = [m if m in ok else None for m in box_materials]
-    classes = [{"material": c, "label": MATERIAL_RU[c], "count": sum(1 for m in per if m == c),
+    names = {**MATERIAL_RU, **(me.get("labels_ru") or {})}
+    classes = [{"material": c, "label": names[c], "count": sum(1 for m in per if m == c),
                 "precision": round(mets[c]["precision"], 3), "recall": round(mets[c]["recall"], 3),
                 "n_heldout": mets[c]["n_true"]} for c in ok]
     und = sum(1 for m in per if m is None)

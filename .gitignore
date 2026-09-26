@@ -61,3 +61,5 @@ reports/extra_data/registry_cozar2024.csv
 /docs/archive/PROGRESS_*
 /INBOX_REQUESTS.md
 /reports/audit/*.log
+.venv-baseline/
+!/data/labels_map.csv
