@@ -58,7 +58,12 @@ def run(base: str, size: tuple[int, int], tag: str, res: dict, pw):
     assert app["mock"] is False
     shot("01_map")
     # map → zone (list of satellite zones; the held-out Cózar scene is first)
-    page.click("[data-testid=tab-zones]")
+    # §34 п.3: the left list is «район · дата · находки» → the snapshot opens its numbered zones
+    if page.locator("[data-testid=tab-zones]").count():
+        page.click("[data-testid=tab-zones]")
+    if page.locator("[data-testid=scene-item]").count():
+        page.locator("[data-testid=scene-item]").first.click()
+        page.wait_for_timeout(1500)
     item = page.locator("[data-testid=sz-item]").first
     steps["first_zone_title"] = item.inner_text().split("\n")[0]
     item.click()

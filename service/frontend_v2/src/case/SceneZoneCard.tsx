@@ -6,6 +6,7 @@ import Info from '../components/Info';
 import { API_BASE, type Feat, type FC, type Meta } from './api3';
 import { dateRu, dateTimeRu, num, pct } from './fmt';
 import { geomCenter, szKey } from './CaseMap';
+import { estTxt, RES_CAPTION, RES_NOTE, researchEst } from './estimate';
 
 /** §33: the source of every number next to it */
 function Src({ k }: { k: 'image' | 'field' | 'photo' | 'research' | 'none' | 'model' | 'era5' | 'mask' }) {
@@ -117,8 +118,11 @@ export default function SceneZoneCard({
   onBack,
   onStudio,
   onField,
+  num: zoneNum,
 }: {
   meta: Meta;
+  /** §34 п.3: the zone's number in the snapshot list / on the map */
+  num?: number;
   zone: Feat<SceneZoneProps>;
   detail: SceneZoneDetail | null;
   onClose: () => void;
@@ -133,13 +137,15 @@ export default function SceneZoneCard({
   const qn = p.quantity;
   const fn = p.field_nearby;
   const signs = pr.signs;
+  const est = researchEst(p);
   return (
     <div className="right-inner" data-testid="scene-zone-card">
       <div className="rp-head">
         <div className="rp-titles">
           <div className="rp-kicker">
             <span className="c-kind szone" aria-hidden />
-            Спутниковая зона · {p.scene_kind_label ?? p.scene_kind}
+            {zoneNum ? `Зона ${zoneNum} · ` : 'Спутниковая зона · '}
+            {p.scene_kind_label ?? p.scene_kind}
           </div>
           <div className="rp-title" data-testid="card-title">
             {p.title}
@@ -170,16 +176,39 @@ export default function SceneZoneCard({
           <div className="c-line sz-qstatus" data-testid="sz-plain-what">
             <span className="faint">Статус детекции:</span> <span data-testid="sz-status">{p.detection_label}</span> <Src k="model" />
           </div>
-          <div className="c-line sz-qty" data-testid="sz-plain-qty">
+          {est ? (
+            <div className="c-line sz-qty sz-est" data-testid="sz-plain-qty">
+              <span data-testid="sz-est">
+                <b>Количество: {estTxt(est)}</b> <Src k="research" />
+              </span>
+              <span className="sz-est-note" data-testid="sz-est-note">
+                {RES_CAPTION}{' '}
+                <Info label="Как получено" align="right" testid="sz-est-info">
+                  {RES_NOTE}
+                  {est.nItemsLabel ? ` ${est.nItemsLabel}` : ''}
+                  {est.basis ? ` (${est.basis}).` : ''}
+                  {est.notWhat ? ` Интервал: ${est.notWhat}.` : ''}
+                  {est.caveats.length ? ` Ограничения: ${est.caveats.join('; ')}.` : ''}
+                </Info>
+              </span>
+              {est.nItemsLabel && (
+                <span className="sz-est-note faint" data-testid="sz-est-n">
+                  {est.nItemsLabel}
+                </span>
+              )}
+            </div>
+          ) : (
+            <div className="c-line sz-qty" data-testid="sz-plain-qty">
               <b>Количество предметов по этому снимку не определено</b> <Src k="none" />
             </div>
+          )}
             <div className="c-line sz-qty" data-testid="sz-plain-comp">
               <b>Состав не определён</b> <Src k="none" />
             </div>
             <details className="sz-explore" data-testid="sz-explore">
               <summary className="btn sm">Исследовать дальше</summary>
               <ol className="sz-next-l">
-                <li>детальный снимок зоны — дрон или камера с судна (спутник даёт только площадь пятна)</li>
+                <li>детальный снимок зоны — дрон или камера с судна (спутник даёт площадь пятна{est ? ' и исследовательскую оценку штук' : ''})</li>
                 <li>
                   счёт предметов на детальном снимке — <a href="?mode=photo">счётчик в «Фото»</a> (шт. на кадр, при известной площади кадра — шт./м²)
                 </li>

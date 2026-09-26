@@ -12,7 +12,11 @@ export interface CaseLayers {
 }
 
 export interface CaseQuery {
-  /** акватория = source_id of the organisers' CSV (null = all) */
+  /** §34 п.3: акватория of the view — 'r:<район снимков>' | '<source_id поля>' | 'bbox' (from a saved query) | null = все */
+  area: string | null;
+  /** the акватория frame [W,S,E,N]: ONE box for the scene-zone list, the map and the export (bbox= of the API) */
+  bbox: Bbox | null;
+  /** field source (set with a field акватория = its id; filters the field layer only) */
   source: string | null;
   /** one date range for the measurement date AND the scene date (same as the backend runs saved queries) */
   from: string | null;
@@ -27,8 +31,12 @@ export interface CaseQuery {
   layers: CaseLayers;
 }
 
-export const DEFAULT_LAYERS: CaseLayers = { obs: true, zones: true, scenes: true, quality: true };
-export const DEFAULT_QUERY: CaseQuery = { source: null, from: null, to: null, profile: null, scope: null, det: [], conc: [], layers: DEFAULT_LAYERS };
+/** §34 п.3: field measurements are a layer switched on by one button (off on the Earth overview); scene zones and the
+ *  image of the chosen snapshot are on; the quality mask is on demand (studio / «Слои») */
+export const DEFAULT_LAYERS: CaseLayers = { obs: false, zones: true, scenes: true, quality: false };
+export const DEFAULT_QUERY: CaseQuery = { area: null, bbox: null, source: null, from: null, to: null, profile: null, scope: null, det: [], conc: [], layers: DEFAULT_LAYERS };
+export const layersDefault = (l: CaseLayers) => (Object.keys(DEFAULT_LAYERS) as (keyof CaseLayers)[]).every((k) => l[k] === DEFAULT_LAYERS[k]);
+const bboxStr = (b: Bbox | null) => (b ? b.map((v) => +v.toFixed(4)).join(',') : null);
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 export function validDate(s: string | null): boolean {
@@ -48,7 +56,16 @@ export function dateError(q: CaseQuery): string | null {
 
 // ---- API params (identical for the layer request and its export) ----
 export function obsParams(q: CaseQuery): Params {
-  return { source: q.source, profile: q.profile, scope: q.scope, date_from: q.from, date_to: q.to };
+  // a field акватория filters by its source; a scene район — by its frame
+  return { source: q.source, bbox: q.source ? null : bboxStr(q.bbox), profile: q.profile, scope: q.scope, date_from: q.from, date_to: q.to };
+}
+/** §34 п.3: satellite scene zones — акватория (frame), dates, zone status; the same params for the list, the map and the export */
+export function szParams(q: CaseQuery): Params {
+  // a field акватория (source of the organisers) → source= : the API gives no scene zones for it (they have no field
+  // source) — the list, the map and the export agree; a район of snapshots → its frame (bbox=)
+  return q.source
+    ? { source: q.source, date_from: q.from, date_to: q.to, detection_status: q.det, concentration_status: q.conc }
+    : { bbox: bboxStr(q.bbox), date_from: q.from, date_to: q.to, detection_status: q.det, concentration_status: q.conc };
 }
 /** zones: source / scope via their linked field samples (API ≥ 6e601c2) */
 export function zoneParams(q: CaseQuery): Params {
@@ -83,12 +100,16 @@ function b64urlDecode(s: string): string {
 }
 
 const strOrNull = (v: any) => (typeof v === 'string' && v ? v : null);
+const boxOrNull = (v: any): Bbox | null => (Array.isArray(v) && v.length === 4 && v.every((x) => typeof x === 'number' && Number.isFinite(x)) ? (v as Bbox) : null);
 const strList = (v: any) => (Array.isArray(v) ? v.filter((x) => typeof x === 'string') : []);
 
 export function normalize(o: any): CaseQuery {
   const l = o?.layers ?? {};
+  const source = strOrNull(o?.source);
   return {
-    source: strOrNull(o?.source),
+    area: strOrNull(o?.area) ?? source,
+    bbox: boxOrNull(o?.bbox),
+    source,
     from: strOrNull(o?.from),
     to: strOrNull(o?.to),
     profile: strOrNull(o?.profile),
@@ -96,10 +117,10 @@ export function normalize(o: any): CaseQuery {
     det: strList(o?.det),
     conc: strList(o?.conc),
     layers: {
-      obs: l.obs !== false,
-      zones: l.zones !== false,
-      scenes: l.scenes !== false,
-      quality: l.quality !== false,
+      obs: typeof l.obs === 'boolean' ? l.obs : DEFAULT_LAYERS.obs,
+      zones: typeof l.zones === 'boolean' ? l.zones : DEFAULT_LAYERS.zones,
+      scenes: typeof l.scenes === 'boolean' ? l.scenes : DEFAULT_LAYERS.scenes,
+      quality: typeof l.quality === 'boolean' ? l.quality : DEFAULT_LAYERS.quality,
     },
   };
 }
@@ -123,6 +144,8 @@ export interface CaseUrl {
   cam: { lon: number; lat: number; zoom: number } | null;
   pairs: boolean;
   tab: string | null;
+  /** §34 п.3: the snapshot opened in the left list (scene_key of /scene_zones/scenes) */
+  scene?: string | null;
 }
 
 export function readCaseUrl(): CaseUrl {
@@ -135,6 +158,7 @@ export function readCaseUrl(): CaseUrl {
     cam: c.length >= 3 && c.slice(0, 3).every(Number.isFinite) ? { lon: c[0], lat: c[1], zoom: c[2] } : null,
     pairs: p.get('pairs') === '1',
     tab: p.get('tab'),
+    scene: p.get('scene'),
   };
 }
 
@@ -147,6 +171,7 @@ export function writeCaseUrl(u: CaseUrl) {
   if (u.pair) p.set('pair', u.pair);
   if (u.pairs) p.set('pairs', '1');
   if (u.tab) p.set('tab', u.tab);
+  if (u.scene) p.set('scene', u.scene);
   if (u.cam) p.set('c', [u.cam.lon.toFixed(4), u.cam.lat.toFixed(4), u.cam.zoom.toFixed(2)].join(','));
   const s = p.toString().replace(/%2C/g, ',');
   history.replaceState(null, '', `${location.pathname}${s ? '?' + s : ''}`);
@@ -164,14 +189,17 @@ export function toApiQuery(q: CaseQuery): ApiQuery {
     ...(q.layers.obs ? ['observations'] : []),
     ...(q.layers.zones ? ['zones'] : []),
   ];
+  // §34 п.3: a saved query keeps what defines the zone list — акватория (район → its frame; field source → source), dates, zone status — so that
+  // «запустить» gives the same zones as the list, the map and the export (a field source/profile/scope would make the
+  // backend drop all scene zones: they have no field source); field-layer filters stay in the link of the view
   return {
-    bbox: null,
+    bbox: q.bbox && !q.source ? q.bbox.map((v) => +v.toFixed(4)) : null,
     date_from: q.from,
     date_to: q.to,
     statuses: [...q.det, ...q.conc.map((c) => CONC_TO_STATUS[c]).filter(Boolean)],
     sources: q.source ? [q.source] : [],
-    profiles: q.profile ? [q.profile] : [],
-    scopes: q.scope ? [q.scope] : [],
+    profiles: [],
+    scopes: [],
     layers,
     scene_id: null,
   };
@@ -181,8 +209,12 @@ export function fromApiQuery(a: Partial<ApiQuery>): CaseQuery {
   const st = a.statuses ?? [];
   const ly = a.layers ?? [];
   const has = (k: string) => !ly.length || ly.includes(k);
+  const bb = boxOrNull(a.bbox);
+  const src = a.sources?.[0] ?? null;
   return {
-    source: a.sources?.[0] ?? null,
+    area: bb ? 'bbox' : src,
+    bbox: bb,
+    source: bb ? null : src,
     from: a.date_from ?? null,
     to: a.date_to ?? null,
     profile: a.profiles?.[0] ?? null,
@@ -225,5 +257,5 @@ export function deleteLocalQuery(id: string) {
 }
 
 export function isDefault(q: CaseQuery): boolean {
-  return !q.source && !q.from && !q.to && !q.profile && !q.scope && !q.det.length && !q.conc.length;
+  return !q.area && !q.bbox && !q.source && !q.from && !q.to && !q.profile && !q.scope && !q.det.length && !q.conc.length;
 }

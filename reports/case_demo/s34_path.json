@@ -1,0 +1,215 @@
+{
+ "base": "http://127.0.0.1:8092",
+ "n_finds_api": 77,
+ "n_finds_with_estimate_api": 77,
+ "n_nonfinds_with_estimate_api": 0,
+ "n_zones_api": 286,
+ "1366": {
+  "mock": false,
+  "earth": {
+   "find_points": 3,
+   "tabs_removed": {
+    "mode-live": 0,
+    "tab-go": 0,
+    "tab-metrics": 0,
+    "tab-zones": 0
+   },
+   "modes": 2,
+   "field_layer_off": true,
+   "scene_rows": 23,
+   "first_rows": [
+    "Альборан · Cózar | 23 находки · 14 Cózar | 11.03.2021 · облачность 0 %",
+    "Гондурас · Омоа | 8 находок | 30.01.2025 · облачность 0,3 %",
+    "Гондурас · Омоа | 5 находок | 28.12.2025 · облачность 3 %"
+   ],
+   "counts": "75 снимков 77 находок (14 совпали с Cózar)",
+   "one_block": {
+    "filters": 0,
+    "nums": 0,
+    "qc": 0
+   },
+   "rows_finds_sum": 77,
+   "api_finds": 77
+  },
+  "scene": {
+   "title": "Альборан · Cózar",
+   "zones_listed": 23,
+   "numbers_on_map": 23,
+   "with_estimate": 23,
+   "item0": "1 | 213 600 м² · находка · Cózar (B) | ≈ 60 400 [50 600–72 100] шт./км²",
+   "caption": " шт./км² — исследовательская оценка · калибровка на искусственных мишенях PLP (2 пикселя, 2 даты), для природных скоплений не проверена\ni"
+  },
+  "card": {
+   "card-title": "30SXE · зона 1",
+   "sz-plain-what": "Статус детекции: обнаружено детектором · совпадает с разметкой Cózar (B) оценка детектора",
+   "sz-plain-qty": "Количество: ≈ 60 400 [50 600–72 100] шт./км² исследовательская оценка\nисследовательская оценка · калибровка на искусственных мишенях PLP (2 пикселя, 2 даты), для природных скоплений не проверена; на площадь контура зоны; нижняя граница (пиксели ниже порога не учтены) \ni\nN ≈ 12 900 [10 810–15 410] шт. в зоне",
+   "sz-plain-comp": "Состав не определён нет данных",
+   "sz-plain-area": "213 600 м² оценка детектора",
+   "zone_id": "SZ-demo-cozar-2021-03-11-001",
+   "api_estimate": {
+    "value": 60400,
+    "lo": 50600,
+    "hi": 72100
+   },
+   "ui_equals_api": true
+  },
+  "back": {
+   "card_closed": true,
+   "scene_still_open": true
+  },
+  "map_click": {
+   "card": true,
+   "sel": {
+    "kind": "zone",
+    "id": "SZ-live-santo_domingo-2025-12-30-001"
+   },
+   "scene": "live-santo_domingo-2025-12-30",
+   "back_to_list": true
+  },
+  "blocks": {
+   "filters": {
+    "filters": 1,
+    "nums": 0,
+    "qc": 0
+   },
+   "nums": {
+    "filters": 0,
+    "nums": 1,
+    "qc": 0
+   },
+   "qc": {
+    "filters": 0,
+    "nums": 0,
+    "qc": 1
+   },
+   "ok": true
+  },
+  "field": {
+   "panel": 1,
+   "profile_inside": 1,
+   "on": true,
+   "off_again": true
+  },
+  "filter_export": {
+   "area": "r:honduras",
+   "n_ui": 32,
+   "n_csv": 32,
+   "same_ids": true,
+   "rows_after_filter": 9,
+   "counts": "9 снимков 32 находки (0 совпали с Cózar) · Гондурасский залив сбросить"
+  },
+  "query": {
+   "n_after_reset": 286,
+   "n_after_run": 32,
+   "same_as_saved": true,
+   "area_after_run": "r:honduras",
+   "toast": "«s34 1366»: 0 наблюдений, 0 полос, 32 спутниковые зоны"
+  },
+  "console_errors": [],
+  "http_errors": []
+ },
+ "1920": {
+  "mock": false,
+  "earth": {
+   "find_points": 3,
+   "tabs_removed": {
+    "mode-live": 0,
+    "tab-go": 0,
+    "tab-metrics": 0,
+    "tab-zones": 0
+   },
+   "modes": 2,
+   "field_layer_off": true,
+   "scene_rows": 23,
+   "first_rows": [
+    "Альборан · Cózar | 23 находки · 14 Cózar | 11.03.2021 · облачность 0 %",
+    "Гондурас · Омоа | 8 находок | 30.01.2025 · облачность 0,3 %",
+    "Гондурас · Омоа | 5 находок | 28.12.2025 · облачность 3 %"
+   ],
+   "counts": "75 снимков 77 находок (14 совпали с Cózar)",
+   "one_block": {
+    "filters": 0,
+    "nums": 0,
+    "qc": 0
+   },
+   "rows_finds_sum": 77,
+   "api_finds": 77
+  },
+  "scene": {
+   "title": "Альборан · Cózar",
+   "zones_listed": 23,
+   "numbers_on_map": 23,
+   "with_estimate": 23,
+   "item0": "1 | 213 600 м² · находка · Cózar (B) | ≈ 60 400 [50 600–72 100] шт./км²",
+   "caption": " шт./км² — исследовательская оценка · калибровка на искусственных мишенях PLP (2 пикселя, 2 даты), для природных скоплений не проверена\ni"
+  },
+  "card": {
+   "card-title": "30SXE · зона 1",
+   "sz-plain-what": "Статус детекции: обнаружено детектором · совпадает с разметкой Cózar (B) оценка детектора",
+   "sz-plain-qty": "Количество: ≈ 60 400 [50 600–72 100] шт./км² исследовательская оценка\nисследовательская оценка · калибровка на искусственных мишенях PLP (2 пикселя, 2 даты), для природных скоплений не проверена; на площадь контура зоны; нижняя граница (пиксели ниже порога не учтены) \ni\nN ≈ 12 900 [10 810–15 410] шт. в зоне",
+   "sz-plain-comp": "Состав не определён нет данных",
+   "sz-plain-area": "213 600 м² оценка детектора",
+   "zone_id": "SZ-demo-cozar-2021-03-11-001",
+   "api_estimate": {
+    "value": 60400,
+    "lo": 50600,
+    "hi": 72100
+   },
+   "ui_equals_api": true
+  },
+  "back": {
+   "card_closed": true,
+   "scene_still_open": true
+  },
+  "map_click": {
+   "card": true,
+   "sel": {
+    "kind": "zone",
+    "id": "SZ-live-santo_domingo-2025-12-30-001"
+   },
+   "scene": "live-santo_domingo-2025-12-30",
+   "back_to_list": true
+  },
+  "blocks": {
+   "filters": {
+    "filters": 1,
+    "nums": 0,
+    "qc": 0
+   },
+   "nums": {
+    "filters": 0,
+    "nums": 1,
+    "qc": 0
+   },
+   "qc": {
+    "filters": 0,
+    "nums": 0,
+    "qc": 1
+   },
+   "ok": true
+  },
+  "field": {
+   "panel": 1,
+   "profile_inside": 1,
+   "on": true,
+   "off_again": true
+  },
+  "filter_export": {
+   "area": "r:honduras",
+   "n_ui": 32,
+   "n_csv": 32,
+   "same_ids": true,
+   "rows_after_filter": 9,
+   "counts": "9 снимков 32 находки (0 совпали с Cózar) · Гондурасский залив сбросить"
+  },
+  "query": {
+   "n_after_reset": 286,
+   "n_after_run": 32,
+   "same_as_saved": true,
+   "area_after_run": "r:honduras",
+   "toast": "«s34 1920»: 0 наблюдений, 0 полос, 32 спутниковые зоны"
+  },
+  "console_errors": [],
+  "http_errors": []
+ }
+}

@@ -58,6 +58,8 @@ export interface CaseMapProps {
   detections: FC<any> | null;
   /** satellite scene zones (/api/v3/scene_zones, 3.10) */
   szones?: FC<any> | null;
+  /** §34 п.3: numbers of the zones of the snapshot opened in the left list (same numbers as the list) */
+  numbered?: { id: string; n: number; at: [number, number]; ds: string }[];
 }
 
 /** colours of the satellite scene zones by detection status (detector verdict, no field confirmation) */
@@ -274,7 +276,7 @@ export default function CaseMap(p: CaseMapProps) {
     add({
       id: 'c-obs-lines',
       type: 'line',
-      minzoom: FIELD_MINZOOM,
+      minzoom: 0,
       source: 'c-obs-lines',
       filter: ['!=', ['get', 'st'], 'reconstructed_approx'],
       paint: { 'line-color': '#e7e8ea', 'line-width': 1.4, 'line-opacity': 0.75 },
@@ -283,7 +285,7 @@ export default function CaseMap(p: CaseMapProps) {
     add({
       id: 'c-obs-lines-approx',
       type: 'line',
-      minzoom: FIELD_MINZOOM,
+      minzoom: 0,
       source: 'c-obs-lines',
       filter: ['==', ['get', 'st'], 'reconstructed_approx'],
       paint: { 'line-color': '#e7e8ea', 'line-width': 1.4, 'line-opacity': 0.75, 'line-dasharray': [1, 1.5] },
@@ -314,7 +316,7 @@ export default function CaseMap(p: CaseMapProps) {
     add({
       id: 'c-obs-items',
       type: 'symbol',
-      minzoom: FIELD_MINZOOM,
+      minzoom: 0,
       source: 'c-obs',
       filter: ['==', ['get', 'k'], 'i'],
       layout: { 'icon-image': 'mp-diamond', 'icon-size': 0.55, 'icon-allow-overlap': true, 'icon-ignore-placement': true },
@@ -323,7 +325,7 @@ export default function CaseMap(p: CaseMapProps) {
     add({
       id: 'c-obs-zero',
       type: 'circle',
-      minzoom: FIELD_MINZOOM,
+      minzoom: 0,
       source: 'c-obs',
       filter: ['==', ['get', 'k'], 'z'],
       paint: { 'circle-radius': 4, 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': '#e7e8ea', 'circle-stroke-width': 1.5 },
@@ -331,7 +333,7 @@ export default function CaseMap(p: CaseMapProps) {
     add({
       id: 'c-obs-dens',
       type: 'circle',
-      minzoom: FIELD_MINZOOM,
+      minzoom: 0,
       source: 'c-obs',
       filter: ['==', ['get', 'k'], 'd'],
       paint: {
@@ -415,7 +417,9 @@ export default function CaseMap(p: CaseMapProps) {
     // visibility + selection
     const vis = (id: string, on: boolean) => map.getLayer(id) && map.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none');
     for (const id of ['c-obs-lines', 'c-obs-lines-approx', 'c-obs-items', 'c-obs-zero', 'c-obs-dens', 'c-obs-sel']) vis(id, cur.layers.obs);
-    for (const id of ['c-zones-fill', 'c-zones-line', 'c-zones-sel', 'c-zone-pts', 'c-sz-fill', 'c-sz-line', 'c-sz-sel', 'c-sz-pts']) vis(id, cur.layers.zones);
+    // §34 п.3: survey strips of the field pairs belong to the «Полевые измерения» layer; scene zones — to «Спутниковые зоны»
+    for (const id of ['c-zones-fill', 'c-zones-line', 'c-zones-sel', 'c-zone-pts']) vis(id, cur.layers.obs);
+    for (const id of ['c-sz-fill', 'c-sz-line', 'c-sz-sel', 'c-sz-pts', 'c-sz-clu']) vis(id, cur.layers.zones);
     vis('c-scene-fp', cur.layers.scenes);
     const sel = cur.selected;
     map.setFilter('c-zones-sel', ['==', ['get', 'id'], sel?.kind === 'zone' ? sel.id : '']);
@@ -670,6 +674,37 @@ export default function CaseMap(p: CaseMapProps) {
     };
   }, [p.scenes, p.layers.quality, p.layers.scenes]);
 
+  // ---- §34 п.3: numbered zones of the opened snapshot (HTML markers: no glyphs needed; click = open the zone) ----
+  const numMarkers = useRef<maplibregl.Marker[]>([]);
+  useEffect(() => {
+    const map = ctl.map;
+    if (!map) return;
+    numMarkers.current.forEach((m) => m.remove());
+    numMarkers.current = [];
+    for (const z of p.numbered ?? []) {
+      const d = document.createElement('button');
+      d.className = `c-znum ${z.ds}${p.selected?.id === z.id ? ' on' : ''}`;
+      d.textContent = String(z.n);
+      d.title = `зона ${z.n}`;
+      d.setAttribute('data-testid', 'zone-num');
+      d.setAttribute('data-zone', z.id);
+      d.addEventListener('click', (e) => {
+        e.stopPropagation();
+        props.current.onPick({ kind: 'zone', id: z.id });
+      });
+      numMarkers.current.push(new maplibregl.Marker({ element: d, anchor: 'bottom', offset: [0, -6] }).setLngLat(z.at).addTo(map));
+    }
+    const vis = () => {
+      const on = map.getZoom() >= 7.5;
+      numMarkers.current.forEach((m) => (m.getElement().style.visibility = on ? 'visible' : 'hidden'));
+    };
+    vis();
+    map.on('zoom', vis);
+    return () => {
+      map.off('zoom', vis);
+    };
+  }, [p.numbered, p.selected]);
+
   // ---- label next to the selected feature: «измерение» / «оценка модели» ----
   useEffect(() => {
     const map = ctl.map!;
@@ -688,10 +723,11 @@ export default function CaseMap(p: CaseMapProps) {
     if (!at) return;
     const d = document.createElement('div');
     d.className = `c-sel-tag ${s.kind}`;
-    d.textContent = s.kind === 'obs' ? 'измерение' : s.id.startsWith('SZ-') ? 'зона детектора' : 'полоса обследования';
+    const zn = s.kind === 'zone' ? p.numbered?.find((x) => x.id === s.id)?.n : undefined;
+    d.textContent = s.kind === 'obs' ? 'измерение' : s.id.startsWith('SZ-') ? (zn ? `зона ${zn}` : 'зона детектора') : 'полоса обследования';
     d.setAttribute('data-testid', 'sel-tag');
     selMarker.current = new maplibregl.Marker({ element: d, anchor: 'left', offset: [14, 0] }).setLngLat(at).addTo(map);
-  }, [p.selected, p.obs, p.zones, p.szones]);
+  }, [p.selected, p.obs, p.zones, p.szones, p.numbered]);
 
   return (
     <>
