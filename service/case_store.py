@@ -1667,7 +1667,8 @@ def meta() -> dict:
                      "version": detector_model_info()},
         "quantity_levels": quantity_levels(),
         "headline": headline(),
-        "scene_zone_statuses": [{"id": k, "label": v} for k, v in SZ_DET_LABEL.items()],
+        "scene_zone_statuses": [{"id": k, "label": v, "note": SZ_STATUS4_NOTE[k]} for k, v in SZ_STATUS4.items()],
+        "scene_zone_confirmations": [{"id": k, "label": v} for k, v in SZ_CONFIRM.items()],
         "scene_zone_regions": sz_regions(),  # §34 п.3: filter `region` of /scene_zones and the export
         "layers": [
             {"id": "observations", "kind": "measurement", "label": "Полевые измерения (настоящие шт./км²)"},
@@ -2124,8 +2125,8 @@ SZ_FLAG_RU = {"foam": "пена", "glint": "блик", "ship": "судно/ки�
               "coast": "берег/прибой", "shallow": "мелководье/мутная вода", "cloud": "облака", "wind": "ветер > 5 м/с"}
 # INBOX §23 п.2: «обнаружено детектором» only after all false-alarm filters (ship/wake, foam, glint, cloud, coast, shallow)
 SZ_VERIFY_LABEL = {
-    "level_B_cozar": "обнаружено детектором · совпадает с разметкой Cózar (B)",
-    "unverified": "обнаружено детектором · вероятный плавающий материал, требует проверки",
+    "level_B_cozar": "обнаружено детектором · совпадает с разметкой Cózar 2024 (B)",
+    "unverified": "обнаружено детектором · независимой разметки нет",
     "false_alarm_signs": "недостаточно данных: признаки ложного срабатывания",
     "wind": "недостаточно данных (ветер > 5 м/с: мусор перемешивается, полосы не видны — правило Cózar 2024)",
 }
@@ -2133,7 +2134,22 @@ SZ_WIND_NOTE = ("ветер > 5 м/с (ERA5, час съёмки): Cózar et al.
                 "from a0 the sea surface area associated with wind speeds higher than 5 m·s−1») — мусор перемешивается, "
                 "полосы не видны; сцена не входит в знаменатель «обследовано», LWD не считается")
 SZ_FALSE_LABEL = "ложное срабатывание (признаки судна / кильватера / шва) — недостаточно данных"
-SZ_QUANTITY = {"status": "not_confirmed", "label": "концентрация по снимку не подтверждена",
+# §39 (15:26): zone status — strictly one of the four statuses of the task statement; confirmation is a separate field
+SZ_STATUS4 = {"detected": "обнаружено", "not_detected": "не обнаружено", "insufficient_data": "недостаточно данных",
+              "research_estimate": "исследовательская оценка"}
+SZ_STATUS4_NOTE = {
+    "detected": "детектор отметил плавающий материал после фильтров судов, пены, блика, облаков, берега, мелководья, ветра",
+    "not_detected": "детектор оценивается, объектов нет",
+    "insufficient_data": "признаки ложного срабатывания, ветер > 5 м/с или снимок не оценивается",
+    "research_estimate": "статус концентрации: перенос «снимок → шт.» не подтверждён — только сценарий с допущениями"}
+SZ_CONFIRM = {"cozar_b": "совпадает с разметкой Cózar 2024 (B)", "none": "независимой разметки нет",
+              "training_scene": "снимок из обучения детектора — не независимая проверка; находкой не считается"}
+SZ_CLASS_LABEL = "плавающий материал (класс MARIDA Marine Debris; пластик не подтверждён)"
+SZ_BG_ORDER = ["ship", "seam", "foam", "glint", "cloud", "coast", "shallow", "wind"]
+SZ_NOT_CHECKED = {"algae_sargassum": "водоросли/саргассум", "wood_organic": "древесина и прочая органика"}
+SZ_QUANTITY = {"status": "not_confirmed",
+               "label": "Количество предметов по этому снимку не определено (перенос не подтверждён: нет природных пар; "
+                        "см. ISPRA 604)",
                "detail": ("измеренной концентрации по снимку нет: калибровочных пар по природным скоплениям 0 (см. "
                           "docs/QUANTITY.md); для находок — только исследовательская оценка по мишеням PLP "
                           "(research_estimate), не измерение")}
@@ -2217,6 +2233,59 @@ def _sz_scene_zones(key: str) -> list[dict]:
     return (_cached(f"sz:{key}", PATHS["scene_zones_dir"] / key / "zones.geojson", _read_json) or {}).get("features") or []
 
 
+def _sz_scene_wind(p: dict, idx: dict):
+    sg = ((p.get("probable") or {}).get("signs") or {}).get("foam") or {}
+    if sg.get("wind10m_ms") is not None:
+        return sg["wind10m_ms"]
+    return next((s.get("wind10m_ms") for s in idx.get("scenes") or [] if s.get("key") == p.get("scene_key")), None)
+
+
+def _sz_status39(p: dict, idx: dict) -> None:
+    """§39: status (4 values), status_label, status_reason; confirmation; class / excluded / not checked backgrounds."""
+    st = p["detection_status"]
+    p["status"] = st if st in SZ_STATUS4 else "insufficient_data"
+    p["status_label"] = SZ_STATUS4[p["status"]]
+    p["status_reason"] = (p["detection_label"] if p["detection_label"] != p["status_label"] else None)
+    if p.get("training_scene") and st == "detected":
+        p["status_reason"] = SZ_CONFIRM["training_scene"]
+    elif st == "detected":
+        p["status_reason"] = None
+    p["detection_label"] = p["status_label"]
+    if st == "detected":
+        c = ("training_scene" if p.get("training_scene") else "cozar_b" if p.get("verification") == "level_B_cozar"
+             else "none")
+        p["confirmation"], p["confirmation_label"] = c, SZ_CONFIRM[c]
+    else:
+        p["confirmation"], p["confirmation_label"] = None, None
+    flags = list(p.get("flags") or [])
+    has_signs = bool((p.get("probable") or {}).get("signs"))
+    w = _sz_scene_wind(p, idx)
+    checked = [b for b in SZ_BG_ORDER if (b != "wind" and has_signs) or (b == "wind" and (w is not None or "wind" in flags))]
+    excluded = [b for b in checked if b not in flags]
+    flagged = [b for b in SZ_BG_ORDER if b in flags]
+    is_obj = st != "not_detected"
+    det = st == "detected"
+    und = "не определено (признаки ложного срабатывания или ветер — см. «Признаки»)"
+    p["classification"] = {
+        "class": "floating_material" if det else "undetermined" if is_obj else None,
+        "class_label": SZ_CLASS_LABEL if det else und if is_obj else None,
+        "what_label": (f"Что это: {SZ_CLASS_LABEL}" if det else f"Что это: {und}" if is_obj
+                       else "Что это: объектов детектора нет"),
+        "checked_backgrounds": checked,
+        "excluded_backgrounds": excluded if is_obj else [],
+        "excluded_label": ("Исключено: " + ", ".join(SZ_FLAG_RU[b] for b in excluded)) if (is_obj and excluded) else None,
+        "flagged_backgrounds": flagged,
+        "flagged_label": ("Признаки: " + ", ".join(SZ_FLAG_RU[b] for b in flagged)) if flagged else None,
+        "not_checked_backgrounds": list(SZ_NOT_CHECKED),
+        "not_checked_label": "Не проверяется: " + ", ".join(SZ_NOT_CHECKED.values()) + " (флага нет)",
+        "composition": "Состав не определён",
+        "wind10m_ms": w,
+    }
+    p["class"] = p["classification"]["class"]
+    p["excluded_backgrounds"] = p["classification"]["excluded_backgrounds"]
+    p["quantity_line"] = SZ_QUANTITY["label"]
+
+
 def _sz_enrich(f: dict, idx: dict) -> dict:
     import copy
     f = copy.deepcopy(f)
@@ -2285,6 +2354,8 @@ def _sz_enrich(f: dict, idx: dict) -> dict:
     p["field_nearby"] = {"nearest_organizer_sample": nos,
                          "note": ("ближайшее полевое измерение (CSV организаторов) — только расстояние и ссылка; его шт./км² "
                                   "относятся к другому месту и времени и не являются плотностью зоны")}
+    # §39 п.1–2: strict status, separate confirmation, classification
+    _sz_status39(p, idx)
     pr = p.get("probable") or {}
     pr["status"] = p["detection_label"]
     pr["cozar_note"] = (f"контур пересекает {p.get('n_cozar_filaments')} нит(и) каталога Cózar et al. 2024 "
@@ -2501,13 +2572,15 @@ def scene_zone_detections(zone_id: str) -> dict:
 
 
 SZ_COLS = ["zone_id", "scene_key", "scene_kind", "scene_id", "region", "title", "datetime", "detection_status",
-           "detection_label", "is_find", "training_scene",
+           "detection_label", "status", "status_label", "status_reason", "confirmation", "confirmation_label",
+           "class", "excluded_backgrounds", "flagged_backgrounds", "not_checked_backgrounds", "composition",
+           "quantity_line", "is_find", "training_scene",
            "concentration_status", "flags", "zone_area_km2", "suspicious_area_m2", "n_pixels", "n_objects",
            "water_km2", "lwd_m2_km2", "valid_water_fraction", "cloud_fraction", "glint_fraction", "prob_max",
            "prob_mean", "foam_sign", "glint_sign", "ship_sign", "n_cozar_filaments", "verification",
            "quantity_status", "quantity_label", "quantity_detail",
            # §34 п.2: research estimate (finds only; otherwise empty + reason); area is zone_area_km2 above
-           "research_estimate_lower_bound", "research_estimate_value", "research_calibration_spread_lo",
+           "research_scenario_status", "research_scenario_value", "research_scenario_line", "research_estimate_value", "research_calibration_spread_lo",
            "research_calibration_spread_hi", "research_estimate_unit",
            "research_estimate_status", "research_estimate_method", "research_estimate_note",
            "research_method_essence", "research_estimate_context", "research_scenario", "research_natural_pair_note",
@@ -2533,14 +2606,19 @@ def scene_zones_csv(feats: list[dict]) -> str:
         rn, rpp = re.get("n_items") or {}, re.get("items_per_pixel") or {}
         rows.append([p["zone_id"], p["scene_key"], p["scene_kind"], p["scene_id"], p.get("region"), p.get("title"),
                      p["datetime"], p["detection_status"],
-                     p.get("detection_label"), bool(p.get("is_find")), p.get("training_scene"),
+                     p.get("detection_label"), p.get("status"), p.get("status_label"), p.get("status_reason"),
+                     p.get("confirmation"), p.get("confirmation_label"), (p.get("classification") or {}).get("class_label"),
+                     p.get("excluded_backgrounds") or [], (p.get("classification") or {}).get("flagged_backgrounds") or [],
+                     (p.get("classification") or {}).get("not_checked_backgrounds") or [],
+                     (p.get("classification") or {}).get("composition"), p.get("quantity_line"),
+                     bool(p.get("is_find")), p.get("training_scene"),
                      p["concentration_status"], p.get("flags") or [], m.get("zone_area_km2"),
                      m.get("suspicious_area_m2"), m.get("n_pixels"), m.get("n_objects"), m.get("water_km2"),
                      m.get("lwd_m2_km2"), q.get("valid_water_fraction"), q.get("cloud_fraction"), q.get("glint_fraction"),
                      pr.get("prob_max"), pr.get("prob_mean"), (sg.get("foam") or {}).get("flag"),
                      (sg.get("glint") or {}).get("flag"), (sg.get("ship") or {}).get("flag"), p.get("n_cozar_filaments"),
                      p.get("verification"), qn.get("status"), qn.get("label"), qn.get("detail"),
-                     re.get("lower_bound"), re.get("value"), re.get("lo"), re.get("hi"), re.get("unit"), re.get("status"),
+                     re.get("scenario_status"), re.get("scenario_value"), re.get("scenario_line"), re.get("value"), re.get("lo"), re.get("hi"), re.get("unit"), re.get("status"),
                      re.get("method"), re.get("note"), re.get("method_essence"), re.get("context"), re.get("scenario"),
                      re.get("natural_pair_note"), re.get("formula_short"), re.get("calibration_name"),
                      re.get("firing_caveat"),

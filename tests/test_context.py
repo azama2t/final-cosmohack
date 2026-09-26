@@ -136,7 +136,7 @@ def test_repeats_neutral(client):
     js = r.json()
     # the repeated find at (30.0, 10.0) on 2 reliable dates -> 1 cell; the other place is seen once on a reliable
     # date + once as an artifact (wake) + once on a hazy date -> not repeated
-    assert js["n_cells"] == 1 and js["caption"] == "повторяемость, требует проверки"
+    assert js["n_cells"] == 1 and js["caption"] == "повторяемость (исследовательский слой)"
     c = js["cells"][0]
     assert c["n_dates"] == 2 and c["dates"] == ["2025-01-01", "2025-02-01"]
     assert c["area_m2"] == 1000.0

@@ -727,7 +727,7 @@ GET /api/v3/zones: model + weights_sha256, trained_at = дата файла weig
   штуки не показываем: нет калибровочных пар (см. docs/QUANTITY.md)»; + quantity {status "not_confirmed", label «концентрация по
   снимку не подтверждена», detail}; + concentration_label; concentration_status = "unavailable" у всех зон (research_estimate не
   выдаётся). FeatureCollection: + quantity; index.json: scenario = null, + quantity.
-- detection_label: «обнаружено детектором · совпадает с разметкой Cózar (B)» (verification level_B_cozar) | «обнаружено детектором ·
+- [ОТМЕНЕНО §39 — см. ниже «(§39, 15:26 …)»: detection_label = status_label из 4 статусов] detection_label: «обнаружено детектором · совпадает с разметкой Cózar (B)» (verification level_B_cozar) | «обнаружено детектором ·
   вероятный плавающий материал, требует проверки» (unverified) — обе только после фильтров судов/кильватера/шва, пены, блика,
   облаков (+ flag "cloud": облака/тени ≥ 20 % зоны), берега, мелководья; признаки судна/шва → «ложное срабатывание (признаки
   судна / кильватера / шва) — недостаточно данных»; прочие признаки → «недостаточно данных: признаки ложного срабатывания».
@@ -812,6 +812,7 @@ GET /api/v3/photo/meta: + headline {count_mae_per_frame, count_mae_ci95, n_image
     caveats[] (полнота детектора, размер предметов, класс «любой плавающий материал»); not_what — «диапазон N сработавших пикселей
     мишеней …, не доверительный интервал». /scene_zones/scenes: cloud_pct = crop_cloud_frac × 100 (вырезка района, scene.json
     снимка; было null), + tile_cloud_pct (cloud_cover тайла), cloud_basis.
+  [ОТМЕНЕНО §39 — «нижняя граница» и muted «требует проверки» не выдаются; см. «(§39, 15:26 …)»]
   (оценка: формулировки — жюри 13:47, аудит В19, оркестратор) research_estimate: главное число — нижняя граница
     lower_bound = display_value = n × lo / площадь (2 значащие цифры), lower_bound_label / label / label_short «≥ ~X шт./км²
     (нижняя граница; неопределённость калибровки не оценена: 2 пикселя на 2 датах PLP) …» — без «[lo–hi]»; lo/hi остаются,
@@ -843,3 +844,24 @@ GET /api/v3/photo/meta: + headline {count_mae_per_frame, count_mae_ci95, n_image
     (docs/research/pairs/CRITIC.md): «на природной паре ISPRA 604 (16.09.2019; протокол SNPA Modulo 2bis: …) ни один из 16
     предметов не ближе 50 м к пикселю детектора, ближайший — 85 м; их суммарная площадь ~10⁻⁵ площади полосы — сигнал нити дают
     не посчитанные предметы»; он же в конце context у всех оценок и в CSV research_natural_pair_note. Числа оценки не менялись.
+  (§39, 15:26 — ИЗМЕНЕНИЕ значений текстов, ключи добавлены) /scene_zones, /scene_zones/{id}, выгрузка:
+    status ∈ detected | not_detected | insufficient_data | research_estimate (4 статуса постановки; у зон сейчас первые три,
+    research_estimate — статус концентрации находок), + status_label ∈ «обнаружено | не обнаружено | недостаточно данных |
+    исследовательская оценка»; detection_label = status_label (строго); прежние пояснения — status_reason; «требует проверки»
+    удалено отовсюду. + confirmation ∈ cozar_b | none | training_scene (только у detected), confirmation_label «совпадает с
+    разметкой Cózar 2024 (B)» | «независимой разметки нет» | «снимок из обучения детектора — …». + classification {class
+    floating_material | undetermined | null, class_label «плавающий материал (класс MARIDA Marine Debris; пластик не
+    подтверждён)», what_label «Что это: …», checked_backgrounds, excluded_backgrounds (проверено и не сработало: ship, seam, foam,
+    glint, cloud, coast, shallow, wind), excluded_label «Исключено: …», flagged_backgrounds, flagged_label, not_checked_backgrounds
+    [algae_sargassum, wood_organic], not_checked_label «Не проверяется: водоросли/саргассум, древесина и прочая органика (флага
+    нет)», composition «Состав не определён», wind10m_ms}; + class, excluded_backgrounds (копии); + quantity_line «Количество
+    предметов по этому снимку не определено (перенос не подтверждён: нет природных пар; см. ISPRA 604)» (= quantity.label).
+    research_estimate: + quantity_line, scenario_title «Исследовательский сценарий (мишени PLP)», scenario_line «≈ X шт./км²,
+    если бы это были предметы размера бутылки 1.5 л при покрытии 28–40 % (искусственные мишени PLP); на природе не проверено;
+    на оценщике хуже ответа «0»» (= label), scenario_status, scenario_status_id "research_scenario", collapsed true,
+    scenario_value (= X, число не менялось); label_short «≈ X шт./км² · Исследовательский сценарий (мишени PLP)»; n_items_label
+    «N ≈ … шт. в зоне (сценарий)»; слов «нижняя граница» нет. meta.scene_zone_statuses — 4 статуса {id, label, note};
+    + scene_zone_confirmations. CSV scene_zones: + status, status_label, status_reason, confirmation, confirmation_label, class,
+    excluded_backgrounds, flagged_backgrounds, not_checked_backgrounds, composition, quantity_line; research_estimate_lower_bound
+    → research_scenario_value, + research_scenario_status, research_scenario_line. Сводка: + quantity_line, scenario_title,
+    scenario_status, n_confirmed_cozar_b, n_no_independent_labels, scenario_value_median/min/max.

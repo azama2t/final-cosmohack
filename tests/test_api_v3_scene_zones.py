@@ -41,20 +41,20 @@ def test_scene_zones_blocks_and_statuses(client):
             assert p["concentration_label"].startswith("исследовательская оценка")
         else:
             assert p["concentration_status"] == "unavailable" and p["research_estimate_reason"]
-            assert p["concentration_label"] == "концентрация по снимку не подтверждена"
+            assert p["concentration_label"].startswith("Количество предметов по этому снимку не определено")
         # «обнаружено детектором» only after all false-alarm filters; ships never «detected»
         if p["flags"]:
-            assert p["detection_status"] == "insufficient_data" and "обнаружено" not in p["detection_label"]
+            assert p["detection_status"] == "insufficient_data" and p["detection_label"] == "недостаточно данных"
         if "ship" in p["flags"]:
-            assert p["detection_label"].startswith("ложное срабатывание")
+            assert p["status_reason"].startswith("ложное срабатывание")
         if p["detection_status"] == "detected":
-            assert not p["flags"] and p["detection_label"].startswith("обнаружено детектором")
+            assert not p["flags"] and p["detection_label"] == "обнаружено"
             if p["n_cozar_filaments"]:
-                assert p["verification"] == "level_B_cozar" and "совпадает с разметкой Cózar (B)" in p["detection_label"]
+                assert p["verification"] == "level_B_cozar" and p["confirmation_label"] == "совпадает с разметкой Cózar 2024 (B)"
             elif p.get("training_scene"):  # жюри-7: detector-training acquisition — not a find
                 assert p["verification"] == "training_scene" and not p["is_find"]
             else:
-                assert p["verification"] == "unverified" and "требует проверки" in p["detection_label"]
+                assert p["verification"] == "unverified" and p["confirmation_label"] == "независимой разметки нет"
         fn = p["field_nearby"]
         # аудит В16: no items/km2 of another place in a zone — only the nearest field record (id + km)
         assert set(fn) == {"nearest_organizer_sample", "note"} and "items" not in fn
@@ -139,7 +139,8 @@ def test_demo_scene_cozar_zones_detected_level_b(client):
     b = [f["properties"] for f in fc["features"] if f["properties"]["n_cozar_filaments"]]
     assert len(b) >= 10
     for p in b:
-        assert p["detection_label"] == "обнаружено детектором · совпадает с разметкой Cózar (B)"
+        assert p["detection_label"] == "обнаружено" and p["confirmation"] == "cozar_b"
+        assert p["confirmation_label"] == "совпадает с разметкой Cózar 2024 (B)"
 
 
 def test_wind_rule_cozar2024(client):
@@ -159,8 +160,8 @@ def test_wind_rule_cozar2024(client):
             assert sc[p["scene_key"]]["in_observed_area"] is False and sc[p["scene_key"]]["lwd_m2_km2"] is None
             assert p["detection_status"] != "not_detected"
             if p["zone_id"].endswith("-000"):
-                assert p["detection_status"] == "insufficient_data" and "ветер > 5 м/с" in p["detection_label"]
-                assert "Cózar 2024" in p["detection_label"]
+                assert p["detection_status"] == "insufficient_data" and "ветер > 5 м/с" in p["status_reason"]
+                assert "Cózar 2024" in p["status_reason"] and p["detection_label"] == "недостаточно данных"
         else:
             assert "wind" not in p["flags"] and not p["measured"].get("lwd_note")
 
@@ -199,7 +200,7 @@ def test_meta_headline_numbers_from_final_numbers(client):
     fc = client.get("/api/v3/scene_zones").json()
     assert h["satellite"]["n_zones"] == fc["total"]
     assert h["satellite"]["n_level_b"] == sum(1 for f in fc["features"] if f["properties"]["verification"] == "level_B_cozar")
-    assert h["satellite"]["quantity_label"] == "концентрация по снимку не подтверждена"
+    assert h["satellite"]["quantity_label"].startswith("Количество предметов по этому снимку не определено")
 
 
 def test_export_no_far_field_numbers(client):
@@ -226,7 +227,7 @@ def test_jury7_finds_and_model_date(client):
     for f in fc["features"]:
         p = f["properties"]
         if p["detection_status"] == "detected" and p.get("training_scene"):
-            assert not p["is_find"] and "находкой не считается" in p["detection_label"]
+            assert not p["is_find"] and "находкой не считается" in p["confirmation_label"]
     assert m["headline"]["satellite"]["n_finds"] == len(finds)
     adis = next(r for r in m["headline"]["field"] if r["key"] == "ADIS")
     assert "не только пластик" in adis["material"]

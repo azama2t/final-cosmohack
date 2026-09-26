@@ -190,8 +190,10 @@ def estimate(p: dict, cfg: dict, cal: Optional[dict] = None, field_range: Option
     short_method = "калибровка на искусственных мишенях PLP (бутылки 1.5 л)"
     lb, n_lb = sig(n_lo / a, 2), sig(n_lo, 2)
     npx_d = f"{plural(cal['n_points'], 'пиксель', 'пикселя', 'пикселей')} на {plural(cal['n_dates'], 'дате', 'датах', 'датах')}"
-    bound_note = f"нижняя граница; неопределённость калибровки не оценена: {npx_d} PLP"
-    # verification: level_B_cozar = crosses a Cózar filament (independent human labels) -> normal; «требует проверки» -> muted
+    bound_note = f"неопределённость калибровки не оценена: {npx_d} PLP"
+    # confirmation: level_B_cozar = crosses a Cózar filament (independent human labels) -> normal; no independent labels -> muted
+    scen_line = " ".join(str(cfg.get("scenario_line") or "").split()).format(
+        x=fmt(lb), cov_lo=cal["coverage_pct_lo"], cov_hi=cal["coverage_pct_hi"]) or None
     muted = p.get("verification") != "level_B_cozar"
     fr = (f"с полевыми шт./км² (среднее по маршруту: {fmt_ru(field_range[0])}–{fmt_ru(field_range[1])}) не сравнивать "
           "напрямую: другой масштаб (внутри нити против среднего по маршруту)") if field_range else (
@@ -205,9 +207,14 @@ def estimate(p: dict, cfg: dict, cal: Optional[dict] = None, field_range: Option
         "scenario": scen, "kind": "scenario",
         "natural_pair_note": nat,
         "stat": stat,
-        # jury 13:47 / audit В19: the headline number is a lower bound; lo/hi — spread of the calibration points, not a CI
-        "lower_bound": lb, "lower_bound_label": f"≥ ~{fmt(lb)} {unit} ({bound_note})",
-        "display_value": lb, "label_short": f"≥ ~{fmt(lb)} {unit} · нижняя граница · {cfg.get('status')}",
+        # §39 п.3: the card says «Количество … не определено»; the PLP scenario is a separate, collapsed block.
+        # The number (n × lo / area, 2 significant digits) is unchanged; the key `lower_bound` is kept for compatibility.
+        "quantity_line": cfg.get("quantity_line"),
+        "scenario_title": cfg.get("scenario_title"), "scenario_line": scen_line,
+        "scenario_status": cfg.get("scenario_status"), "scenario_status_id": "research_scenario", "collapsed": True,
+        "scenario_value": lb,
+        "lower_bound": lb, "lower_bound_label": f"≈ {fmt(lb)} {unit} ({bound_note})",
+        "display_value": lb, "label_short": f"≈ {fmt(lb)} {unit} · {cfg.get('scenario_title') or 'сценарий'}",
         "n_items_display": n_lb,
         "calibration_spread": {"lo": lo, "hi": hi, "items_per_pixel_lo": cal["lo"], "items_per_pixel_hi": cal["hi"],
                                "label": f"сценарий {cal['lo']}–{cal['hi']} предметов-бутылок на пиксель: разброс "
@@ -226,12 +233,11 @@ def estimate(p: dict, cfg: dict, cal: Optional[dict] = None, field_range: Option
         "context": ("плотность внутри контура нити в пересчёте на бутылки PET 1,5 л — не среднее по маршруту; " + fr
                     + (f"; {nat}" if nat else "")),
         "muted": muted,
-        "muted_reason": (None if not muted else "зона требует проверки (не совпадает с разметкой Cózar) — оценку "
-                                                "показывать приглушённо"),
-        "label": (f"≥ ~{fmt(lb)} {unit} ({bound_note}) · {cfg.get('status')} · "
-                  + (f"{scen}; {str(cfg.get('note')).split('; ')[-1]}" if scen else f"{short_method}, {cfg.get('note')}")),
+        "muted_reason": (None if not muted else "независимой разметки нет (не совпадает с разметкой Cózar 2024) — "
+                                                "сценарий показывать приглушённо"),
+        "label": scen_line or (f"≈ {fmt(lb)} {unit} ({bound_note}) · {short_method}, {cfg.get('note')}"),
         "n_items": {"value": sig(n_val, nd), "lo": n_lo, "hi": n_hi, "lower_bound": n_lb},
-        "n_items_label": f"N ≥ ~{fmt(n_lb)} шт. в зоне (нижняя граница)",
+        "n_items_label": f"N ≈ {fmt(n_lb)} шт. в зоне (сценарий)",
         "n_pixels": n,
         # audit 13:10: C depends on the zone contour — detector pixels are a small share of it
         "basis": "на площадь контура зоны (объекты детектора ближе 300 м объединены, контур + 150 м)",
@@ -242,7 +248,7 @@ def estimate(p: dict, cfg: dict, cal: Optional[dict] = None, field_range: Option
             "класс детектора — любой плавающий материал, не только пластик → возможна переоценка"],
         "items_per_pixel": {"lo": cal["lo"], "hi": cal["hi"], "value": cal["value"]},
         "area_ref": "properties.area_km2 (= measured.zone_area_km2, площадь контура зоны)",
-        "formula": (f"C = n_пикселей × [{cal['lo']}; {cal['hi']}] / площадь_зоны (км²); нижняя граница = "
+        "formula": (f"C = n_пикселей × [{cal['lo']}; {cal['hi']}] / площадь_зоны (км²); показываемое число = "
                     f"n × {cal['lo']} / площадь (2 значащие цифры); value — {stat} (n × {cal['value']} / площадь), "
                     f"lo/hi — разброс калибровки ({nd} значащие цифры)"),
         "calibration": {"n_dates": cal["n_dates"], "dates": cal["dates"], "level": "A* (искусственные мишени)",
@@ -266,6 +272,8 @@ def summary(props: Iterable[dict], cfg: dict) -> dict:
     nd = int(cfg.get("sig_digits", 3))
     out = {"status": cfg.get("status"), "method": cfg.get("method"), "note": cfg.get("note"), "unit": cfg.get("unit"),
            "scenario": scenario_text(cfg, cal), "kind": "scenario", "natural_pair_note": natural_pair_note(cfg),
+           "quantity_line": cfg.get("quantity_line"), "scenario_title": cfg.get("scenario_title"),
+           "scenario_status": cfg.get("scenario_status"),
            "calibration_id": cfg.get("calibration_id", "flat_plp"), "calibration_name": cfg.get("calibration_name"),
            "firing_caveat": firing_caveat(cfg), "firing": dict(cfg.get("firing") or {}) or None,
            "formula_short": f"пиксели маски × {cal['lo']}–{cal['hi']} / площадь контура = пересчёт доли покрытия",
@@ -284,6 +292,10 @@ def summary(props: Iterable[dict], cfg: dict) -> dict:
     lbm = lbs[len(lbs) // 2] if len(lbs) % 2 else sig((lbs[len(lbs) // 2 - 1] + lbs[len(lbs) // 2]) / 2, 2)
     out.update({"lower_bound_median": lbm, "lower_bound_min": lbs[0], "lower_bound_max": lbs[-1],
                 "n_muted": sum(1 for _, e in ok if e["muted"]), "n_not_muted": sum(1 for _, e in ok if not e["muted"]),
+                # §39: confirmation instead of «требует проверки»; the scenario number (unchanged) under its own name
+                "n_confirmed_cozar_b": sum(1 for _, e in ok if not e["muted"]),
+                "n_no_independent_labels": sum(1 for _, e in ok if e["muted"]),
+                "scenario_value_median": lbm, "scenario_value_min": lbs[0], "scenario_value_max": lbs[-1],
                 "interval_kind": "calibration_spread"})
     out.update({"c_median": med, "c_min": vals[0], "c_max": vals[-1],
                 "c_lo_min": min(e["lo"] for _, e in ok), "c_hi_max": max(e["hi"] for _, e in ok),

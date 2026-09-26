@@ -85,19 +85,27 @@ def test_formula_equals_api_equals_export_on_5_zones(client):
         assert re["unit"] == "шт./км²" and re["status"] == "исследовательская оценка" and re["status_id"] == "research_estimate"
         assert "area_km2" not in re  # area not mixed into the estimate
         # audit 13:10: N of the zone next to C, contour basis, detector share of the contour, «2 сработавших пикселя»
-        assert re["n_items_label"].startswith("N ≥ ~") and "контура зоны" in re["basis"]
+        assert re["n_items_label"].startswith("N ≈ ") and "контура зоны" in re["basis"]
         assert re["det_px_share_of_zone_pct"] == round(n * 100 / 1e6 / a * 100, 2)
         assert "сработавших пикселей" in re["not_what"] and "не доверительный" in re["not_what"]
+        txt = " ".join(str(re[k]) for k in ("status", "scenario", "note", "label"))
         for w in WORDS:
-            assert w in re["label"]
+            assert w in txt, w
         assert "измерено" not in re["label"]
-        # jury 13:47 / audit В19: the shown number is a lower bound «≥ ~X» (X = n × 470 / area, 2 significant digits);
-        # lo/hi — the spread of the 2 calibration points, not a confidence interval; no «[lo–hi]» in the label
+        # §39 п.3: the scenario number X = n × 470 / area (2 significant digits, unchanged since 13:5x) in a collapsed
+        # block; «Количество … не определено» first; no «нижняя граница» anywhere; lo/hi — spread of 2 calibration points
         lb = _sig2(n * 470 / a)
-        assert re["lower_bound"] == re["display_value"] == lb and re["n_items_display"] == _sig2(n * 470)
-        assert re["label"].startswith(f"≥ ~{ZE.fmt(lb)} шт./км² (нижняя граница; неопределённость калибровки не оценена: "
-                                      "2 пикселя на 2 датах PLP)")
-        assert "[" not in re["label"] and re["label_short"].startswith(f"≥ ~{ZE.fmt(lb)}")
+        assert re["scenario_value"] == re["lower_bound"] == re["display_value"] == lb
+        assert re["n_items_display"] == _sig2(n * 470)
+        assert re["label"] == re["scenario_line"] == (
+            f"≈ {ZE.fmt(lb)} шт./км², если бы это были предметы размера бутылки 1.5 л при покрытии 28–40 % (искусственные "
+            "мишени PLP); на природе не проверено; на оценщике хуже ответа «0»")
+        assert re["quantity_line"] == ("Количество предметов по этому снимку не определено (перенос не подтверждён: нет "
+                                       "природных пар; см. ISPRA 604)")
+        assert re["scenario_title"] == "Исследовательский сценарий (мишени PLP)" and re["collapsed"] is True
+        assert re["scenario_status_id"] == "research_scenario" and "не результат" in re["scenario_status"]
+        assert "нижняя граница" not in json.dumps(re, ensure_ascii=False) and "требует проверки" not in json.dumps(re, ensure_ascii=False)
+        assert "[" not in re["label"] and re["label_short"].startswith(f"≈ {ZE.fmt(lb)}")
         assert re["interval_kind"] == "calibration_spread" and re["ci"] is None
         cs_ = re["calibration_spread"]
         assert (cs_["lo"], cs_["hi"]) == (re["lo"], re["hi"]) and "не доверительный интервал" in cs_["label"]
@@ -113,7 +121,7 @@ def test_formula_equals_api_equals_export_on_5_zones(client):
         assert re["method_essence"].endswith(re["firing_caveat"]) and re["items_per_pixel"]["lo"] == 470
         assert re["muted"] == (p["verification"] != "level_B_cozar")
         # §36 п.2: 470–670 per pixel — a research scenario on artificial PLP targets, not a CI, not checked on nature
-        assert re["kind"] == "scenario" and re["scenario"] in re["label"] and "сценарий" in re["method"]
+        assert re["kind"] == "scenario" and "сценарий" in re["method"]
         assert "не доверительный интервал" in re["calibration_spread"]["label"] and "сценарий 470–670" in re["calibration_spread"]["label"]
         nat = ZE.natural_pair_note(ZE.load_config())
         assert re["natural_pair_note"] == nat and ((nat in re["context"]) if nat else "ISPRA" not in re["context"])
@@ -121,7 +129,8 @@ def test_formula_equals_api_equals_export_on_5_zones(client):
         r = rows[zid]
         assert (float(r["research_estimate_value"]), float(r["research_calibration_spread_lo"]),
                 float(r["research_calibration_spread_hi"])) == want
-        assert float(r["research_estimate_lower_bound"]) == lb
+        assert float(r["research_scenario_value"]) == lb and r["research_scenario_line"] == re["scenario_line"]
+        assert r["research_scenario_status"] == re["scenario_status"]
         assert r["research_estimate_muted"] == ("true" if re["muted"] else "false")
         assert r["research_estimate_context"] == re["context"] and r["research_method_essence"] == re["method_essence"]
         assert r["research_scenario"] == re["scenario"] and r["research_estimate_method"] == re["method"]
@@ -315,3 +324,46 @@ def test_config_half_written_keeps_last_valid(client, tmp_path, monkeypatch):
         ZE.write_config_atomic(good[: good.index("calibration_points:")], p)
     ZE.write_config_atomic(good, p)
     assert client.get(f"/api/v3/scene_zones/{zid}").json()["properties"]["research_estimate"] == ref
+
+
+def test_s39_status_confirmation_classification(client):
+    """§39 п.1–2: status strictly one of 4; «требует проверки» nowhere; confirmation separate; classification by the checks
+    that were actually run; export fields status / confirmation / class / excluded_backgrounds."""
+    fc = client.get("/api/v3/scene_zones").json()
+    four = {"обнаружено", "не обнаружено", "недостаточно данных", "исследовательская оценка"}
+    body = json.dumps(fc, ensure_ascii=False)
+    rows = {r["zone_id"]: r for r in _csv_rows(client)}
+    csv_body = client.get("/api/v3/export", params={"layer": "scene_zones", "format": "csv"}).content.decode("utf-8-sig")
+    assert "требует проверки" not in body and "требует проверки" not in csv_body and "нижняя граница" not in csv_body
+    n_b = n_none = 0
+    for f in fc["features"]:
+        p = f["properties"]
+        assert p["status_label"] in four and p["detection_label"] == p["status_label"]
+        assert p["status"] in ("detected", "not_detected", "insufficient_data", "research_estimate")
+        c = p["classification"]
+        if p["detection_status"] == "detected":
+            assert p["confirmation"] in ("cozar_b", "none", "training_scene")
+            n_b += p["confirmation"] == "cozar_b"
+            n_none += p["confirmation"] == "none"
+            assert (p["confirmation"] == "cozar_b") == (p["verification"] == "level_B_cozar")
+            assert c["what_label"] == "Что это: плавающий материал (класс MARIDA Marine Debris; пластик не подтверждён)"
+            assert c["excluded_backgrounds"] and not c["flagged_backgrounds"]
+        else:
+            assert p["confirmation"] is None
+        # excluded = checked and not flagged; flagged = the zone's flags; algae / sargassum are never checked
+        assert set(c["excluded_backgrounds"]) <= set(c["checked_backgrounds"])
+        assert not set(c["excluded_backgrounds"]) & set(p["flags"]) and set(c["flagged_backgrounds"]) == set(p["flags"])
+        assert "algae_sargassum" in c["not_checked_backgrounds"] and "водоросли/саргассум" in c["not_checked_label"]
+        if c["excluded_label"]:
+            assert c["excluded_label"].startswith("Исключено: ")
+        assert c["composition"] == "Состав не определён"
+        r = rows[p["zone_id"]]
+        assert r["status"] == p["status"] and r["status_label"] == p["status_label"]
+        assert r["confirmation"] == (p["confirmation"] or "") and r["class"] == (c["class_label"] or "")
+        assert r["excluded_backgrounds"] == ";".join(c["excluded_backgrounds"])
+        assert r["quantity_line"].startswith("Количество предметов по этому снимку не определено")
+    assert (n_b, n_none) == (fc["research_estimate"]["n_confirmed_cozar_b"], fc["research_estimate"]["n_no_independent_labels"])
+    assert n_b >= 10
+    meta = client.get("/api/v3/meta").json()
+    assert [s_["label"] for s_ in meta["scene_zone_statuses"]] == ["обнаружено", "не обнаружено", "недостаточно данных",
+                                                                  "исследовательская оценка"]
