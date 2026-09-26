@@ -42,6 +42,11 @@ def _sig3(x: float):
     return int(v) if abs(v) >= 100 else v
 
 
+def _sig2(x: float):
+    v = float(f"{x:.2g}")
+    return int(v) if abs(v) >= 10 else v
+
+
 def test_calibration_from_config_all_points():
     """lo/hi = min/max items per pixel over all calibration points (bottles fraction × 100 m² × 16.64/m²), rounded to 10."""
     cfg = ZE.load_config()
@@ -79,15 +84,34 @@ def test_formula_equals_api_equals_export_on_5_zones(client):
         assert re["unit"] == "шт./км²" and re["status"] == "исследовательская оценка" and re["status_id"] == "research_estimate"
         assert "area_km2" not in re  # area not mixed into the estimate
         # audit 13:10: N of the zone next to C, contour basis, detector share of the contour, «2 сработавших пикселя»
-        assert re["n_items_label"].startswith("N ≈") and "контура зоны" in re["basis"]
+        assert re["n_items_label"].startswith("N ≥ ~") and "контура зоны" in re["basis"]
         assert re["det_px_share_of_zone_pct"] == round(n * 100 / 1e6 / a * 100, 2)
         assert "сработавших пикселей" in re["not_what"] and "не доверительный" in re["not_what"]
         for w in WORDS:
             assert w in re["label"]
         assert "измерено" not in re["label"]
+        # jury 13:47 / audit В19: the shown number is a lower bound «≥ ~X» (X = n × 470 / area, 2 significant digits);
+        # lo/hi — the spread of the 2 calibration points, not a confidence interval; no «[lo–hi]» in the label
+        lb = _sig2(n * 470 / a)
+        assert re["lower_bound"] == re["display_value"] == lb and re["n_items_display"] == _sig2(n * 470)
+        assert re["label"].startswith(f"≥ ~{ZE.fmt(lb)} шт./км² (нижняя граница; неопределённость калибровки не оценена: "
+                                      "2 пикселя на 2 датах PLP)")
+        assert "[" not in re["label"] and re["label_short"].startswith(f"≥ ~{ZE.fmt(lb)}")
+        assert re["interval_kind"] == "calibration_spread" and re["ci"] is None
+        cs_ = re["calibration_spread"]
+        assert (cs_["lo"], cs_["hi"]) == (re["lo"], re["hi"]) and "не доверительный интервал" in cs_["label"]
+        assert "доля покрытия пикселей детектора × калибровка PLP" in re["method_essence"]
+        assert "2 пикселя на 2 датах" in re["method_essence"]
+        assert re["context"].startswith("плотность внутри контура нити в пересчёте на бутылки PET 1,5 л — не среднее по маршруту")
+        assert "(среднее по маршруту: 1,5–54)" in re["context"] and "3–4 порядка" in re["context"]
+        assert re["muted"] == (p["verification"] != "level_B_cozar")
         # export CSV / GeoJSON: the same numbers
         r = rows[zid]
-        assert (float(r["research_estimate_value"]), float(r["research_estimate_lo"]), float(r["research_estimate_hi"])) == want
+        assert (float(r["research_estimate_value"]), float(r["research_calibration_spread_lo"]),
+                float(r["research_calibration_spread_hi"])) == want
+        assert float(r["research_estimate_lower_bound"]) == lb
+        assert r["research_estimate_muted"] == ("true" if re["muted"] else "false")
+        assert r["research_estimate_context"] == re["context"] and r["research_method_essence"] == re["method_essence"]
         assert float(r["zone_area_km2"]) == a and r["research_estimate_unit"] == "шт./км²"
         assert r["research_estimate_status"] == "исследовательская оценка" and r["is_find"] == "true"
         assert (int(r["research_n_items_lo"]), int(r["research_n_items_hi"])) == (n * 470, n * 670)
@@ -202,3 +226,18 @@ def test_summary_same_code_as_final_numbers(client):
         assert s_dir[k] == s_api[k] == h[k], k
     vals = sorted(f["properties"]["research_estimate"]["value"] for f in fc["features"] if f["properties"]["research_estimate"])
     assert s_api["n_zones_with_estimate"] == len(vals) and (s_api["c_min"], s_api["c_max"]) == (vals[0], vals[-1])
+    for k in ("lower_bound_median", "lower_bound_min", "lower_bound_max", "n_muted", "n_not_muted"):
+        assert s_dir[k] == s_api[k] == h[k], k
+
+
+def test_muted_only_for_unverified_finds(client):
+    """Orchestrator 13:5x (4): «требует проверки» — muted = true; the 14 zones crossing a Cózar filament — normal."""
+    fc = client.get("/api/v3/scene_zones").json()
+    est = [f["properties"] for f in fc["features"] if f["properties"]["research_estimate"]]
+    b = [p for p in est if p["verification"] == "level_B_cozar"]
+    assert len(b) >= 10 and all(p["research_estimate"]["muted"] is False for p in b)
+    u = [p for p in est if p["verification"] != "level_B_cozar"]
+    assert u and all(p["research_estimate"]["muted"] is True and p["research_estimate"]["muted_reason"] for p in u)
+    s = fc["research_estimate"]
+    assert (s["n_not_muted"], s["n_muted"]) == (len(b), len(u))
+    assert s["lower_bound_min"] <= s["lower_bound_median"] <= s["lower_bound_max"]

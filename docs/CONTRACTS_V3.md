@@ -812,3 +812,15 @@ GET /api/v3/photo/meta: + headline {count_mae_per_frame, count_mae_ci95, n_image
     caveats[] (полнота детектора, размер предметов, класс «любой плавающий материал»); not_what — «диапазон N сработавших пикселей
     мишеней …, не доверительный интервал». /scene_zones/scenes: cloud_pct = crop_cloud_frac × 100 (вырезка района, scene.json
     снимка; было null), + tile_cloud_pct (cloud_cover тайла), cloud_basis.
+  (оценка: формулировки — жюри 13:47, аудит В19, оркестратор) research_estimate: главное число — нижняя граница
+    lower_bound = display_value = n × lo / площадь (2 значащие цифры), lower_bound_label / label / label_short «≥ ~X шт./км²
+    (нижняя граница; неопределённость калибровки не оценена: 2 пикселя на 2 датах PLP) …» — без «[lo–hi]»; lo/hi остаются,
+    но это calibration_spread {lo, hi, items_per_pixel_lo, items_per_pixel_hi, label «разброс 2 точек калибровки …, не
+    доверительный интервал»}, interval_kind "calibration_spread", ci = null; + method_essence «по сути доля покрытия пикселей
+    детектора × калибровка PLP; независимая проверка — 2 пикселя на 2 датах»; + context «плотность внутри контура нити в пересчёте
+    на бутылки PET 1,5 л — не среднее по маршруту; с полевыми шт./км² (среднее по маршруту: 1,5–54) не сравнивать напрямую: разница
+    в 3–4 порядка ожидаема» (1,5 и 54 — ADIS и S2 из final_numbers); + muted (true у «требует проверки», false у level_B_cozar),
+    muted_reason; n_items + lower_bound, n_items_display, n_items_label «N ≥ ~… шт. в зоне (нижняя граница)».
+    Сводка: + lower_bound_median/min/max, n_muted, n_not_muted, interval_kind. CSV scene_zones (ИЗМЕНЕНИЕ колонок):
+    research_estimate_lo/_hi → research_calibration_spread_lo/_hi; + research_estimate_lower_bound (перед _value),
+    research_method_essence, research_estimate_context, research_estimate_muted.

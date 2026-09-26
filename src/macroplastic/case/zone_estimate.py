@@ -80,6 +80,17 @@ def fmt(x) -> str:
     return f"{x}".replace(".", ",")
 
 
+def plural(n: int, one: str, few: str, many: str) -> str:
+    n10, n100 = n % 10, n % 100
+    w = one if n10 == 1 and n100 != 11 else few if 2 <= n10 <= 4 and not 12 <= n100 <= 14 else many
+    return f"{n} {w}"
+
+
+def fmt_ru(x: Optional[float]) -> str:
+    """1.54 -> «1,5», 53.9 -> «54» (two significant digits, decimal comma)."""
+    return "—" if x is None else fmt(sig(float(x), 2))
+
+
 def not_eligible_reason(p: dict) -> Optional[str]:
     """None if the zone is a find that gets an estimate; otherwise the reason (Russian), shown next to null."""
     st = p.get("detection_status")
@@ -105,8 +116,10 @@ def not_eligible_reason(p: dict) -> Optional[str]:
     return None
 
 
-def estimate(p: dict, cfg: dict, cal: Optional[dict] = None) -> Optional[dict]:
-    """research_estimate of one zone (properties of zones.geojson or of the API) or None."""
+def estimate(p: dict, cfg: dict, cal: Optional[dict] = None, field_range: Optional[tuple] = None) -> Optional[dict]:
+    """research_estimate of one zone (properties of zones.geojson or of the API) or None.
+    Shown as a lower bound «≥ ~X» (X = n × lo / area, 2 significant digits): lo/hi are the spread of the calibration
+    points, not a confidence interval (jury 13:47, audit В19). field_range = (min, max) field items/km2 for the context."""
     if not_eligible_reason(p):
         return None
     cal = cal or calibration(cfg)
@@ -118,15 +131,37 @@ def estimate(p: dict, cfg: dict, cal: Optional[dict] = None) -> Optional[dict]:
     unit = cfg.get("unit", "шт./км²")
     stat = "геометрическое среднее границ" if cal["point"] == "geometric_mean" else "середина интервала"
     short_method = "калибровка на искусственных мишенях PLP (бутылки 1.5 л)"
+    lb, n_lb = sig(n_lo / a, 2), sig(n_lo, 2)
+    npx_d = f"{plural(cal['n_points'], 'пиксель', 'пикселя', 'пикселей')} на {plural(cal['n_dates'], 'дате', 'датах', 'датах')}"
+    bound_note = f"нижняя граница; неопределённость калибровки не оценена: {npx_d} PLP"
+    # verification: level_B_cozar = crosses a Cózar filament (independent human labels) -> normal; «требует проверки» -> muted
+    muted = p.get("verification") != "level_B_cozar"
+    fr = (f"с полевыми шт./км² (среднее по маршруту: {fmt_ru(field_range[0])}–{fmt_ru(field_range[1])}) не сравнивать "
+          "напрямую: разница в 3–4 порядка ожидаема") if field_range else (
+          "с полевыми шт./км² (среднее по маршруту) не сравнивать напрямую: разница в 3–4 порядка ожидаема")
     return {
         "value": v, "lo": lo, "hi": hi, "unit": unit, "unit_id": "items/km2",
         "stat": stat,
+        # jury 13:47 / audit В19: the headline number is a lower bound; lo/hi — spread of the calibration points, not a CI
+        "lower_bound": lb, "lower_bound_label": f"≥ ~{fmt(lb)} {unit} ({bound_note})",
+        "display_value": lb, "label_short": f"≥ ~{fmt(lb)} {unit} · нижняя граница · {cfg.get('status')}",
+        "n_items_display": n_lb,
+        "calibration_spread": {"lo": lo, "hi": hi, "items_per_pixel_lo": cal["lo"], "items_per_pixel_hi": cal["hi"],
+                               "label": f"разброс {plural(cal['n_points'], 'точки', 'точек', 'точек')} калибровки "
+                                        f"({fmt(lo)}–{fmt(hi)} {unit}), не доверительный интервал"},
+        "interval_kind": "calibration_spread", "ci": None,
         "status": cfg.get("status", "исследовательская оценка"), "status_id": cfg.get("status_id", "research_estimate"),
         "method": cfg.get("method"), "note": cfg.get("note"),
-        "label": (f"≈ {fmt(v)} [{fmt(lo)}–{fmt(hi)}] {unit} · {cfg.get('status')} · {short_method}, "
+        "method_essence": (f"по сути доля покрытия пикселей детектора × калибровка PLP; независимая проверка — "
+                           f"{npx_d}"),
+        "context": ("плотность внутри контура нити в пересчёте на бутылки PET 1,5 л — не среднее по маршруту; " + fr),
+        "muted": muted,
+        "muted_reason": (None if not muted else "зона требует проверки (не совпадает с разметкой Cózar) — оценку "
+                                                "показывать приглушённо"),
+        "label": (f"≥ ~{fmt(lb)} {unit} ({bound_note}) · {cfg.get('status')} · {short_method}, "
                   f"{cfg.get('note')}"),
-        "n_items": {"value": sig(n_val, nd), "lo": n_lo, "hi": n_hi},
-        "n_items_label": f"N ≈ {fmt(sig(n_val, nd))} [{fmt(n_lo)}–{fmt(n_hi)}] шт. в зоне",
+        "n_items": {"value": sig(n_val, nd), "lo": n_lo, "hi": n_hi, "lower_bound": n_lb},
+        "n_items_label": f"N ≥ ~{fmt(n_lb)} шт. в зоне (нижняя граница)",
         "n_pixels": n,
         # audit 13:10: C depends on the zone contour — detector pixels are a small share of it
         "basis": "на площадь контура зоны (объекты детектора ближе 300 м объединены, контур + 150 м)",
@@ -137,12 +172,13 @@ def estimate(p: dict, cfg: dict, cal: Optional[dict] = None) -> Optional[dict]:
             "класс детектора — любой плавающий материал, не только пластик → возможна переоценка"],
         "items_per_pixel": {"lo": cal["lo"], "hi": cal["hi"], "value": cal["value"]},
         "area_ref": "properties.area_km2 (= measured.zone_area_km2, площадь контура зоны)",
-        "formula": (f"C = n_пикселей × [{cal['lo']}; {cal['hi']}] / площадь_зоны (км²); значение — {stat} "
-                    f"(n × {cal['value']} / площадь); {nd} значащие цифры"),
+        "formula": (f"C = n_пикселей × [{cal['lo']}; {cal['hi']}] / площадь_зоны (км²); нижняя граница = "
+                    f"n × {cal['lo']} / площадь (2 значащие цифры); value — {stat} (n × {cal['value']} / площадь), "
+                    f"lo/hi — разброс калибровки ({nd} значащие цифры)"),
         "calibration": {"n_dates": cal["n_dates"], "dates": cal["dates"], "level": "A* (искусственные мишени)",
                         "source": cal["source"], "config": cal["config"]},
-        "not_what": (f"интервал — диапазон {cal['n_points']} сработавших пикселей мишеней "
-                     f"{', '.join(cal['campaigns']) or 'PLP'} (дат A*: {cal['n_dates']}), не доверительный интервал и "
+        "not_what": (f"lo–hi — диапазон {cal['n_points']} сработавших пикселей мишеней "
+                     f"{', '.join(cal['campaigns']) or 'PLP'} (дат A*: {cal['n_dates']}), не доверительный интервал; "
                      "не измерение"),
     }
 
@@ -169,6 +205,11 @@ def summary(props: Iterable[dict], cfg: dict) -> dict:
     npx = sum(e["n_pixels"] for _, e in ok)
     area = sum(float(p["measured"]["zone_area_km2"]) for p, _ in ok)
     med = vals[len(vals) // 2] if len(vals) % 2 else sig((vals[len(vals) // 2 - 1] + vals[len(vals) // 2]) / 2, nd)
+    lbs = sorted(e["lower_bound"] for _, e in ok)
+    lbm = lbs[len(lbs) // 2] if len(lbs) % 2 else sig((lbs[len(lbs) // 2 - 1] + lbs[len(lbs) // 2]) / 2, 2)
+    out.update({"lower_bound_median": lbm, "lower_bound_min": lbs[0], "lower_bound_max": lbs[-1],
+                "n_muted": sum(1 for _, e in ok if e["muted"]), "n_not_muted": sum(1 for _, e in ok if not e["muted"]),
+                "interval_kind": "calibration_spread"})
     out.update({"c_median": med, "c_min": vals[0], "c_max": vals[-1],
                 "c_lo_min": min(e["lo"] for _, e in ok), "c_hi_max": max(e["hi"] for _, e in ok),
                 "n_pixels_total": npx, "area_km2_total": round(area, 3),
@@ -181,7 +222,7 @@ def summary(props: Iterable[dict], cfg: dict) -> dict:
         p, e = sorted(b, key=lambda t: (-(t[0].get("n_cozar_filaments") or 0), -t[0]["measured"]["n_pixels"]))[0]
         out["example"] = {"zone_id": p.get("zone_id"), "n_cozar_filaments": p.get("n_cozar_filaments"),
                           "n_pixels": e["n_pixels"], "area_km2": p["measured"]["zone_area_km2"],
-                          "value": e["value"], "lo": e["lo"], "hi": e["hi"]}
+                          "value": e["value"], "lo": e["lo"], "hi": e["hi"], "lower_bound": e["lower_bound"]}
     return out
 
 

@@ -1,0 +1,80 @@
+# Фиксированные наборы оценщика «двигателя открытий» (INBOX §35 А, задание L133). Записано ДО первого прогона любого метода.
+# Сборка: scripts/discovery/build_sets.py compose → fetch → freeze (окна S2 — data/discovery/<version>/, вне git).
+# Оценщик: scripts/discovery/harness.py; как писать метод — docs/research/discovery/HARNESS.md.
+# ВЕРСИИ: новый состав (например, L127 добавил даты A*) = НОВАЯ версия (v2, …): новый блок sets, новый каталог
+#   data/discovery/v2, новый frozen. Баллы разных версий в лидерборде НЕ смешиваются (колонка set_version).
+version: v1
+created: "2026-09-26 13:40 (L133)"
+window:
+  size_px: 128            # 1.28 × 1.28 км, 10 м
+  bands: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B11, B12]   # B9 отброшен везде (в MARIDA его нет)
+  units: "отражение 0..1 (S2 L2A: STAC scale/offset, как live-контур; MARIDA — как распространяется), NaN = нет данных"
+  extra: "SCL (uint8, 0 = неизвестно; в MARIDA нет) — ключ 'SCL' в window_bands; roi (bool) — в meta['roi']"
+  roi: "зона, в которой метод считает предметы: A1 — центральные 64×64 (0.41 км²); A2 — всё окно (1.64 км²);
+        A3 — центральные 32×32 (0.10 км²) вокруг объекта фона; A4 — пиксели нити Cózar в окне"
+
+sets:
+  A1:
+    name: "A* — мишени с известным числом предметов (главный показатель)"
+    source: "docs/research/pairs/p1_pixels.csv + p1_targets.csv (L127, версия 26.09 13:14)"
+    include:
+      - "PLP2018 07.06.2018: N = 3 600 бутылок PET 1.5 л + 138 пакетов LDPE = 3 738 (сети не считаются)"
+      - "PLP2019 18.04, 03.05, 18.05, 28.05, 07.06.2019: N = Σ по пикселям мишеней (доля бутылок по дрону × 100 м² × 16.64 шт./м²); пакеты НЕ считаются (число не опубликовано) — N по пакетным мишеням занижен"
+      - "Maathuis 2026 (Недеррейн, берег): 10, 12, 14, 15, 17, 20.03.2025 — N = 360 бутылок PET; контроли 05.03 и 24.03.2025 — N = 0"
+      - "Themistocleous 2020 (Лимасол) 15.12.2018: N = 1 500 бутылок (место по кластеру 6 пикс. L127, детектор «не оценивается»)"
+    exclude:
+      - "PLP2021 (сетка HDPE 616 м² + деревянная мишень): число пластиковых предметов не определено (одна сетка), только покрытие"
+      - "Maathuis 07.03.2025: только полотно полиэстера (покрытие, не штуки)"
+      - "PLP2022–23: мишени меньше пикселя, штук нет"
+    group: "дата (leave-one-date-out: метод с fit() обучается на остальных датах A1, предсказывает оставшуюся)"
+    metric: "e = |log10((N̂ + 1) / (N + 1))| на дату; E1 = среднее по датам; cov1 = доля дат с lo ≤ N ≤ hi"
+  A2:
+    name: "Поле без видимого мусора: судовой/ADIS счёт ↔ S2"
+    source: "reports/search/adis_candidates.csv (level A, decision accept: 66 пар) + data/pairs/pair_quality.csv (accept и S2: 11 из 12; LC09 T33 исключён — не S2)"
+    observed: "ADIS — dhat_5cm_km2 (шт./км² > 5 см); CSV — field_items_km2"
+    group: "пара"
+    metric: "ĉ = N̂ / площадь ROI (км²); e = |log10((ĉ + 1) / (c + 1))|; E2 = среднее; G2 = доля пар с ĉ ≥ 1000 при c < 100 («тысячи при единицах»)"
+  A3:
+    name: "Чистая вода и сложный фон (ложные N > 0)"
+    source:
+      - "MARIDA test split (детектор weights/lgbm учился на train, порог — на val): окна 128 из патчей 256, ROI 32×32 вокруг случайного размеченного пикселя класса 2–15, в ROI нет класса 1; ≤ 40 окон на класс, seed 133"
+      - "Суда Финляндии (data/extra/finland_vessels, чипы L90): 40 окон, ROI 32×32 на центре рамки судна"
+      - "Облака CMC (data/extra/cloudmask_catalogue, выравнивание L90): по сцене до 3 окон — облако / тень / чистая вода, ROI ≥ 90 % класса по ручной маске"
+    group: "сцена/патч"
+    metric: "FP3 = доля окон с N̂ ≥ 1 (≥ 1 предмет на 0.10 км² ≈ ≥ 10 шт./км²); порог ≤ 1 %; таблица по классам фона"
+  A4:
+    name: "Мягкая проверка правдоподобия: полосы Cózar 2024 (уровень B)"
+    source: "data/extra/cozar2024 (features_check.csv: status ok, сдвиг (0,0)); ≤ 3 крупнейшие нити на сцену"
+    band_km2: [1.0e+4, 1.0e+8]
+    band_source: >-
+      Cózar et al. 2021, Front. Mar. Sci. 8:571796 (out/cozar2021/paper.txt), раздел «Litter concentrations in the
+      windrows»: «we used 1 macro-item per 100 m2 and 10 micro-items per m2 as minimum concentrations for well-developed
+      macro- and micro-litter windrows» → нижняя граница 10⁴ шт./км². Верхняя граница 10⁸ шт./км² (100 шт./м²) — НЕ из
+      текста: верх оси рис. 2A (по Ruiz et al. 2020, n = 163; прочитано L111, reports/tasklog/111_v2_zone_demo.md).
+      Не метка, а проверка правдоподобия.
+    metric: "ĉ_in = N̂ / площадь нити в окне; P4 = доля нитей, где НЕ (N̂ > 0 и 10⁴ ≤ ĉ_in ≤ 10⁸)"
+
+score:
+  formula: "SCORE = E1 + 0.5·E2 + 1.0·G2 + 10·max(0, FP3 − 0.01) + 0.25·P4   (меньше — лучше)"
+  main: "E1 (A*, leave-one-date-out) — главный показатель"
+  n_hat_rule: "N̂ < 0 → 0; ошибка/NaN/inf метода → N̂ = 0 и счётчик n_errors"
+  bootstrap: "2000 повторов, seed 0, кластерный по group внутри каждого набора; 95 % ДИ (2.5–97.5 перцентили) для SCORE, E1, E2, FP3; парный ΔE1 против б1"
+  product_gate: "в продукт (§35 Б, правило §24) — только если верхняя граница 95 % ДИ парной разницы ΔE1 = E1(метод) − E1(б1) < 0, E2 ≤ E2(б1) и FP3 ≤ max(FP3(б1), 0.01)"
+baselines:
+  b1_flat_plp: "детектор weights/lgbm (без гармонизации), P ≥ 0.63 в ROI → N = n × 561 [470; 670] (configs/zone_estimate.yaml, геом. среднее). Внимание: 470/670 получены на A1-датах 18.04 и 18.05.2019 — на A1 б1 оптимистичен (утечка)"
+  b2_zero: "N = 0 всегда"
+  b3_fdi_area: "FDI (Biermann 2020, как scripts/count_bridge) − медиана FDI воды окна > 0.03 → N = n × 561 [470; 670]; порог выбран до прогона (порядок FDI-контраста сработавших мишеней PLP, L115 — утечка того же рода, что у б1)"
+forbidden:
+  - "подбирать параметры/порог/выбор метода под A1 вне leave-one-date-out (fit() получает только обучающие даты)"
+  - "читать labels.csv, p1_*.csv, adis_candidates.csv, pair_quality.csv, registry_cozar*.csv и любые поля-ответы (N, плотность, класс фона, sample_id как ключ) как признаки"
+  - "учиться на окнах наборов A2–A4 (в т. ч. MARIDA test) — они только для оценки"
+  - "угадывать набор по meta (has_scl, дата, координаты, размер ROI) и ветвиться по нему; meta методу — только
+     roi, roi_area_km2, pixel_m, epsg, bounds, lon/lat центра, date, datetime, has_scl (без id, набора, класса фона)"
+frozen:   # записано build_sets.py freeze до первого прогона методов; harness проверяет перед каждым прогоном
+  at: '2026-09-26 13:59'
+  manifest: data/discovery/v1/manifest.csv
+  manifest_sha256: e5235ddf10d891a5adb5e05f2a9eff0ec6ce71f431a7ab40ed07a0c34695023b
+  labels: data/discovery/v1/labels.csv
+  labels_sha256: f2ea1bfa2b46eca37136cafc1dc7ea72342eb1c3cfb1a563250d460ddfc75ab4
+  n_ok: {"A1": 15, "A2": 77, "A3": 427, "A4": 35}
+  missing: []

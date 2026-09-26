@@ -2165,6 +2165,14 @@ def zone_estimate_cal(cfg: dict) -> dict:
     return _ZE_CAL["cal"]
 
 
+def zone_field_range() -> Optional[tuple]:
+    """Field items/km2 (mean over the route) for the context line of the estimate: ADIS (> 10 cm) … Sargasso S2
+    (plastic), from final_numbers.json (jury 13:47: «1,5–54»)."""
+    q = _fn_quantity()
+    a, s2 = (q.get("adis_forecast") or {}).get("C"), (q.get("field_S2") or {}).get("pooled_C")
+    return (min(a, s2), max(a, s2)) if a is not None and s2 is not None else None
+
+
 def zone_estimate_summary(feats: Optional[list] = None) -> Optional[dict]:
     cfg = zone_estimate_cfg()
     if not cfg:
@@ -2246,7 +2254,7 @@ def _sz_enrich(f: dict, idx: dict) -> dict:
     # §34 п.2: research estimate items/km2 for finds only (area stays in area_km2, not inside the estimate)
     cfg = zone_estimate_cfg()
     ZE = _ze()
-    est = ZE.estimate(p, cfg, zone_estimate_cal(cfg)) if cfg else None
+    est = ZE.estimate(p, cfg, zone_estimate_cal(cfg), zone_field_range()) if cfg else None
     p["research_estimate"] = est
     p["research_estimate_reason"] = None if est else (
         ZE.not_eligible_reason(p) or "калибровка не загружена (configs/zone_estimate.yaml)")
@@ -2481,10 +2489,12 @@ SZ_COLS = ["zone_id", "scene_key", "scene_kind", "scene_id", "region", "title", 
            "prob_mean", "foam_sign", "glint_sign", "ship_sign", "n_cozar_filaments", "verification",
            "quantity_status", "quantity_label", "quantity_detail",
            # §34 п.2: research estimate (finds only; otherwise empty + reason); area is zone_area_km2 above
-           "research_estimate_value", "research_estimate_lo", "research_estimate_hi", "research_estimate_unit",
+           "research_estimate_lower_bound", "research_estimate_value", "research_calibration_spread_lo",
+           "research_calibration_spread_hi", "research_estimate_unit",
            "research_estimate_status", "research_estimate_method", "research_estimate_note",
+           "research_method_essence", "research_estimate_context",
            "research_n_items_lo", "research_n_items_hi", "research_items_per_pixel_lo", "research_items_per_pixel_hi",
-           "research_estimate_reason",
+           "research_estimate_reason", "research_estimate_muted",
            "field_nearest_sample_id", "field_nearest_km",
            "model_weights", "model_sha256",
            "threshold", "centroid_lon", "centroid_lat", "kind"]
@@ -2511,9 +2521,10 @@ def scene_zones_csv(feats: list[dict]) -> str:
                      pr.get("prob_max"), pr.get("prob_mean"), (sg.get("foam") or {}).get("flag"),
                      (sg.get("glint") or {}).get("flag"), (sg.get("ship") or {}).get("flag"), p.get("n_cozar_filaments"),
                      p.get("verification"), qn.get("status"), qn.get("label"), qn.get("detail"),
-                     re.get("value"), re.get("lo"), re.get("hi"), re.get("unit"), re.get("status"), re.get("method"),
-                     re.get("note"), rn.get("lo"), rn.get("hi"), rpp.get("lo"), rpp.get("hi"),
-                     p.get("research_estimate_reason"),
+                     re.get("lower_bound"), re.get("value"), re.get("lo"), re.get("hi"), re.get("unit"), re.get("status"),
+                     re.get("method"), re.get("note"), re.get("method_essence"), re.get("context"),
+                     rn.get("lo"), rn.get("hi"), rpp.get("lo"), rpp.get("hi"),
+                     p.get("research_estimate_reason"), re.get("muted") if re else None,
                      nos.get("sample_id"), nos.get("distance_km"),
                      md.get("weights"), md.get("sha256"), md.get("threshold"), cen[0], cen[1], "detection_zone"])
     return _csv(SZ_COLS, rows)
