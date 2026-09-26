@@ -167,6 +167,9 @@ export default function SceneZoneCard({
         )}
         {/* ------------------------------------------------ §33а п.2: the zone card, strictly */}
         <div className="sec sz-qtop" data-testid="sz-qtop">
+          <div className="c-line sz-qstatus" data-testid="sz-plain-what">
+            <span className="faint">Статус детекции:</span> <span data-testid="sz-status">{p.detection_label}</span> <Src k="model" />
+          </div>
           <div className="c-line sz-qty" data-testid="sz-plain-qty">
               <b>Количество предметов по этому снимку не определено</b> <Src k="none" />
             </div>
@@ -212,10 +215,6 @@ export default function SceneZoneCard({
             <dt>Доля покрытия пикселями</dt>
             <dd data-testid="sz-plain-cover">
               {m.water_km2 && m.suspicious_area_m2 !== null ? `${num((m.suspicious_area_m2 / (m.water_km2 * 1e6)) * 100, 2)} % воды зоны` : '—'} ({num(m.suspicious_area_m2, 0)} м², {num(m.n_pixels, 0)} пикс. по 10 м) <Src k="model" />
-            </dd>
-            <dt>Статус детекции</dt>
-            <dd data-testid="sz-plain-what">
-              <span data-testid="sz-status">{p.detection_label}</span> <Src k="model" />
             </dd>
             <dt>Уверенность</dt>
             <dd data-testid="sz-plain-conf">

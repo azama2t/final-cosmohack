@@ -1403,3 +1403,8 @@
   overflow: visible;
   text-overflow: clip;
 }
+.c-tip-wide {
+  width: max-content;
+  max-width: 340px;
+  min-width: 220px;
+}

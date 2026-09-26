@@ -810,7 +810,8 @@ export default function CaseApp() {
             });
           }}
         />
-        {hover && <HoverTip meta={meta} h={hover} obs={obs.data} zones={zones.data} szones={szList} />}
+        {/* §33б: with a card open the find tooltip would repeat the card — not shown */}
+        {hover && !(sel && hover.id.startsWith('SZ-')) && <HoverTip meta={meta} h={hover} obs={obs.data} zones={zones.data} szones={szList} />}
 
         <div className="actions c-actions" data-testid="actions">
           <button onClick={toEarth} data-testid="act-earth" title="Вернуться к обзору Земли со всеми находками">
@@ -1167,7 +1168,11 @@ function HoverTip({ meta, h, obs, zones, szones }: { meta: Meta; h: HoverInfo; o
     s = `${p.pair_status === 'accepted' ? 'связь с полем подтверждена' : 'связь с полем не подтверждена'} · ${label(meta.concentration_statuses, p.concentration_status).toLowerCase()}`;
   }
   return (
-    <div className="tip" style={{ left: Math.min(h.x + 14, 9999), top: h.y + 14 }} data-testid="hover-tip">
+    <div
+      className="tip c-tip-wide"
+      style={h.x > ((document.querySelector('[data-testid=main]') as HTMLElement | null)?.clientWidth ?? 1200) - 360 ? { right: ((document.querySelector('[data-testid=main]') as HTMLElement | null)?.clientWidth ?? 1200) - h.x + 14, top: h.y + 14 } : { left: h.x + 14, top: h.y + 14 }}
+      data-testid="hover-tip"
+    >
       <div className="tt">{t}</div>
       <div className="ts">{s}</div>
     </div>
