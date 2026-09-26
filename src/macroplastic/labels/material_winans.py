@@ -32,6 +32,8 @@ CACHE = ROOT / "out" / "labels"
 REP = ROOT / "reports" / "labels"
 COUNTER_W = ROOT / "weights_exp" / "photo_count" / "frcnn_winans_best.pth"
 COUNTER_CARD = ROOT / "weights_exp" / "photo_count" / "model_card_aerial.json"
+SHIPPED = ROOT / "weights" / "labels"  # product copy in git: fp16 state_dict (< 95 MB) + card with sha256
+FP16_NAME = "frcnn_winans_material_fp16.pth"
 CLASSES = ["buoy", "line fragment", "metal", "net cloth", "processed wood", "tire", "unidentified object", "vessel"]
 MATS = ["plastic", "organic", "metal", "other", "unknown"]
 IOU = 0.5
@@ -172,11 +174,16 @@ def train(a):
     infer(dev)
 
 
-def infer(dev):
+def _load_sd(path):
     import torch
+    sd = torch.load(path, map_location="cpu", weights_only=True)
+    return {k: (v.float() if torch.is_tensor(v) and v.is_floating_point() else v) for k, v in sd.items()}  # fp16 -> fp32
+
+
+def infer(dev, weights=None, tag="m1"):
     from macroplastic.photo_count.model import build_model, load_model
     m1 = build_model(num_classes=len(CLASSES) + 1)
-    m1.load_state_dict(torch.load(WDIR / "frcnn_winans_material_best.pth", map_location="cpu", weights_only=True))
+    m1.load_state_dict(_load_sd(weights or WDIR / "frcnn_winans_material_best.pth"))
     m1.to(dev).eval()
     cnt = load_model(COUNTER_W, dev)
     CACHE.mkdir(parents=True, exist_ok=True)
@@ -184,7 +191,7 @@ def infer(dev):
         its = items(sp)
         pm = predict(m1, its, dev)
         pc = predict(cnt, its, dev)
-        np.savez_compressed(CACHE / f"preds_m1_{sp}.npz", files=np.array([Path(p).name for p, _, _ in its]),
+        np.savez_compressed(CACHE / f"preds_{tag}_{sp}.npz", files=np.array([Path(p).name for p, _, _ in its]),
                             m_boxes=np.array([x[0] for x in pm], dtype=object),
                             m_scores=np.array([x[1] for x in pm], dtype=object),
                             m_labels=np.array([x[2] for x in pm], dtype=object),
@@ -233,8 +240,8 @@ def match_counted(c_boxes, c_scores, gt_boxes):
     return pairs
 
 
-def score_split(sp, thr, share, mat_of):
-    z = np.load(CACHE / f"preds_m1_{sp}.npz", allow_pickle=True)
+def score_split(sp, thr, share, mat_of, tag="m1"):
+    z = np.load(CACHE / f"preds_{tag}_{sp}.npz", allow_pickle=True)
     its = items(sp)
     assert [Path(p).name for p, _, _ in its] == list(z["files"])
     conf = np.zeros((len(MATS), len(MATS)), int)
@@ -267,6 +274,7 @@ def paired_boot(a_err, b_err, b=1000, seed=0):
 
 
 def score(a):
+    tag = getattr(a, "tag", "m1") or "m1"
     from .composition import MIN_PRECISION, MIN_RECALL, MIN_TEST_ITEMS, accepted_classes, class_metrics
     card = json.loads(COUNTER_CARD.read_text(encoding="utf-8"))
     thr = float(card["threshold"])
@@ -283,7 +291,7 @@ def score(a):
     hist = json.loads((WDIR / "frcnn_winans_material_history.json").read_text(encoding="utf-8"))
     out["training"] = hist["best"]
     for sp in ("val", "test"):
-        conf, src_conf, pc, tc, bc = score_split(sp, thr, share, mat_of)
+        conf, src_conf, pc, tc, bc = score_split(sp, thr, share, mat_of, tag)
         met = class_metrics(MATS, conf.tolist())
         per = {}
         for m in MATS:
@@ -312,6 +320,10 @@ def score(a):
                        "thresholds": {"min_items": MIN_TEST_ITEMS, "min_precision": MIN_PRECISION,
                                       "min_recall": MIN_RECALL}}
     REP.mkdir(parents=True, exist_ok=True)
+    if tag != "m1":  # e.g. fp16 check: report only, the card is not touched
+        (REP / f"material_winans_{tag}.json").write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
+        print(json.dumps(out["decision"], ensure_ascii=False))
+        return out
     (REP / "material_winans.json").write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     me["accepted"] = final
     me["labels_ru"] = {"organic": "дерево (обработанное)", "metal": "металл"}
@@ -332,18 +344,42 @@ def score(a):
 
 # ------------------------------------------------------------------ API helper (for service/routes_v3_photo.py, L109)
 _M1 = {}
-CARD = WDIR / "model_card_material_aerial.json"
+CARD_NAME = "model_card_material_aerial.json"
 
 
 def load_card():
-    return json.loads(CARD.read_text(encoding="utf-8")) if CARD.exists() else None
+    """weights_exp/labels (experiments, outside git) first, then weights/labels (fp16 copy shipped in git)."""
+    for d in (WDIR, SHIPPED):
+        if (d / CARD_NAME).exists():
+            card = json.loads((d / CARD_NAME).read_text(encoding="utf-8"))
+            card["_dir"] = str(d)
+            return card
+    return None
+
+
+def export_fp16():
+    """fp16 copy of the M1 weights + card (sha256) into weights/labels/ for the clean clone."""
+    import hashlib
+    import torch
+    sd = torch.load(WDIR / "frcnn_winans_material_best.pth", map_location="cpu", weights_only=True)
+    sd = {k: (v.half() if torch.is_tensor(v) and v.is_floating_point() else v) for k, v in sd.items()}
+    SHIPPED.mkdir(parents=True, exist_ok=True)
+    wp = SHIPPED / FP16_NAME
+    torch.save(sd, wp)
+    card = json.loads((WDIR / CARD_NAME).read_text(encoding="utf-8"))
+    card.update({"weights_file": FP16_NAME, "weights_dtype": "float16 (loaded as float32)",
+                 "weights_sha256": hashlib.sha256(wp.read_bytes()).hexdigest(), "weights_bytes": wp.stat().st_size,
+                 "fp32_source": "weights_exp/labels/frcnn_winans_material_best.pth",
+                 "fp16_check": "reports/labels/material_winans_m1fp16.json"})
+    (SHIPPED / CARD_NAME).write_text(json.dumps(card, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(wp, wp.stat().st_size, card["weights_sha256"])
 
 
 def box_materials(image, boxes, device=None):
     """Canonical material per counted box of the aerial counter (PIL image, boxes xyxy px), same order; the M1 model is
     loaded once. Returns None if M1 weights/card are absent."""
     card = load_card()
-    wp = WDIR / "frcnn_winans_material_best.pth"
+    wp = Path(card["_dir"]) / card.get("weights_file", "frcnn_winans_material_best.pth") if card else None
     if card is None or not wp.exists():
         return None
     import torch
@@ -351,7 +387,7 @@ def box_materials(image, boxes, device=None):
     dev = device or ("cuda" if torch.cuda.is_available() else "cpu")
     if dev not in _M1:
         m = build_model(num_classes=len(CLASSES) + 1)
-        m.load_state_dict(torch.load(wp, map_location="cpu", weights_only=True))
+        m.load_state_dict(_load_sd(wp))
         _M1[dev] = m.to(dev).eval()
     from torchvision.transforms.functional import to_tensor
     with torch.inference_mode():
@@ -381,14 +417,20 @@ def main(argv=None):
     t.add_argument("--max-minutes", type=float, default=25)
     t.add_argument("--workers", type=int, default=2)
     t.add_argument("--seed", type=int, default=0)
-    sub.add_parser("infer")
-    sub.add_parser("score")
+    i = sub.add_parser("infer")
+    i.add_argument("--weights", default=None)
+    i.add_argument("--tag", default="m1")
+    sc = sub.add_parser("score")
+    sc.add_argument("--tag", default="m1")
+    sub.add_parser("export_fp16")
     a = ap.parse_args(argv)
     if a.cmd == "train":
         train(a)
     elif a.cmd == "infer":
         import torch
-        infer("cuda" if torch.cuda.is_available() else "cpu")
+        infer("cuda" if torch.cuda.is_available() else "cpu", a.weights, a.tag)
+    elif a.cmd == "export_fp16":
+        export_fp16()
     else:
         score(a)
 

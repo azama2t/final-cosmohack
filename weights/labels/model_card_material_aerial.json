@@ -1,0 +1,91 @@
+{
+ "version": "winans-material-m1-l123-2026-09-26",
+ "weights_file": "frcnn_winans_material_fp16.pth",
+ "classes_source": [
+  "buoy",
+  "line fragment",
+  "metal",
+  "net cloth",
+  "processed wood",
+  "tire",
+  "unidentified object",
+  "vessel"
+ ],
+ "material_of_class": {
+  "buoy": "plastic",
+  "line fragment": "plastic",
+  "metal": "metal",
+  "net cloth": "plastic",
+  "processed wood": "organic",
+  "tire": "other",
+  "unidentified object": "unknown",
+  "vessel": "unknown"
+ },
+ "counter_card": "weights_exp/photo_count/model_card_aerial.json",
+ "material_eval": {
+  "classes": [
+   "plastic",
+   "organic",
+   "metal",
+   "other",
+   "unknown"
+  ],
+  "confusion": [
+   [
+    561,
+    1,
+    3,
+    2,
+    75
+   ],
+   [
+    3,
+    50,
+    2,
+    1,
+    12
+   ],
+   [
+    5,
+    7,
+    10,
+    4,
+    7
+   ],
+   [
+    3,
+    0,
+    1,
+    67,
+    2
+   ],
+   [
+    82,
+    9,
+    4,
+    4,
+    687
+   ]
+  ],
+  "source_dataset": "Winans2023",
+  "heldout": "отложенные участки берега Winans 2023 (397 чипов, пространственное разбиение L109)",
+  "heldout_independent": true,
+  "other_source": false,
+  "accepted": [
+   "organic"
+  ],
+  "labels_ru": {
+   "organic": "дерево (обработанное)",
+   "metal": "металл"
+  },
+  "rule_extra": "MAE числа класса на чип < бейзлайна «доля train» (парный бутстреп, ДИ95 < 0)",
+  "classes_reportable": [
+   "organic"
+  ]
+ },
+ "weights_dtype": "float16 (loaded as float32)",
+ "weights_sha256": "67f352a93c0cb39d018d1f0ed86b38ddd3ba1f95ca0e913817443d41ae61b60d",
+ "weights_bytes": 82998093,
+ "fp32_source": "weights_exp/labels/frcnn_winans_material_best.pth",
+ "fp16_check": "reports/labels/material_winans_m1fp16.json"
+}

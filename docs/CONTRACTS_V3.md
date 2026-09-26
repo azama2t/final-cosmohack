@@ -772,3 +772,6 @@ POST /api/v3/photo/count 200: + value_source "посчитано по детал
     состав не определён", reason}; фронт при status=by_class группирует показанные рамки по composition.box_materials[i].
 GET /api/v3/photo/meta: + headline {count_mae_per_frame, count_mae_ci95, n_images, test, baseline_median_mae, text} — одно число для
   блока «Главное» (L111); + composition_rule; surveys.*.count_interval.
+3.10d CSV scene_zones (26.09, L111, жюри 08:51 / §33а п.3 — ИЗМЕНЕНИЕ колонок): field_nearest_c_items_km2, field_nearest_ci95,
+  field_nearest_date удалены (шт./км² чужого места); + field_nearest_sample_id; field_nearest_km — расстояние до ближайшего
+  измерения CSV организаторов (как в карточке: field_nearby.nearest_organizer_sample). GET /api/v3/meta: + headline (§31 п.2).

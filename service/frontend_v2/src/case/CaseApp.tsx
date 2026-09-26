@@ -1200,7 +1200,7 @@ function SzList({ szOn, fc, err, list, sel, onPick }: { szOn: boolean; fc: FC<Sc
   return (
     <div data-testid="sz-list">
       <div className="c-list-note">
-        Находки детектора · {err ? '—' : list.filter((f) => f.properties.detection_status === 'detected').length} <span className="faint">(всего зон {err ? '—' : list.length}; находки — сверху)</span>
+        Находки · {err ? '—' : list.filter((f) => f.properties.detection_status === 'detected').length} из {err ? '—' : list.length} зон
         <Info label="Спутниковые зоны">
           Зоны, где текущий детектор (weights/lgbm, порог 0,63) нашёл подозрительные пиксели на реальных снимках: отложенная сцена Cózar 2024 и снимки районов.
           «Обнаружено детектором» — только после фильтров судов/кильватера, пены, блика, облаков, берега и мелководья; с нитью каталога Cózar 2024 (разметка

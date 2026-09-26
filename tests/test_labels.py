@@ -196,3 +196,20 @@ def test_m1_decision_consistent():
         assert pm["n_true"] >= C.MIN_TEST_ITEMS and pm["precision"] >= C.MIN_PRECISION and pm["recall"] >= C.MIN_RECALL
         assert pm["mae_diff_ci95"][1] < 0
     assert "plastic" not in d["decision"]["accepted"]
+
+
+@pytest.mark.skipif(not (ROOT / "weights" / "labels" / "model_card_material_aerial.json").exists(),
+                    reason="fp16-копия модели состава не выложена")
+def test_shipped_fp16_material_card(monkeypatch, tmp_path):
+    """Чистый клон: weights_exp/ нет -> карточка и веса состава берутся из weights/labels (fp16, sha256 сходится)."""
+    import hashlib
+    from macroplastic.labels import material_winans as MW
+    monkeypatch.setattr(MW, "WDIR", tmp_path / "absent")
+    card = MW.load_card()
+    assert card and Path(card["_dir"]) == MW.SHIPPED and card["weights_file"] == MW.FP16_NAME
+    wp = MW.SHIPPED / card["weights_file"]
+    assert wp.stat().st_size < 95e6
+    assert hashlib.sha256(wp.read_bytes()).hexdigest() == card["weights_sha256"]
+    assert card["material_eval"]["accepted"] == ["organic"]
+    out = C.composition_for("aerial", boxes=[1, 2], card=card, box_materials=["organic", "plastic"])
+    assert out["by_class"] == {"дерево (обработанное)": 1, "состав не определён": 1}
