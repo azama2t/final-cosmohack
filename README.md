@@ -57,6 +57,8 @@
 | S1 пластик 5–50 см, трал | 19 (5) | knn5_log | 370.0 | 522.5 | 0.605 | 89 % | -1.1 [-60.7; 49.2] |
 | | | **медиана профиля (на карте)** | **371.1** | 502.4 | 0.599 | 100 % | разницы с медианой нет |
 
+- **Полевой прогноз для ADIS** (> 10 см, 20 836 отрезков): ΣN/ΣA = 1.54 [1.52–1.56] шт./км², нулевых отрезков 72 % (медиана отрезка 0 ≠ «чисто»: 0 означает, что камера на этом отрезке предметов не насчитала). Прогноз по координатам и сезону с правилом, записанным до метрик, и разбиением регионы 10° × 10° (отложено 20 групп), вторичная схема — по судам: ни один кандидат (B1, M1, M2) не прошёл правило на val в обеих схемах → медиана профиля остаётся. На отложенных регионах (4 335 отрезков) медиана — MAE 1.27, RMSE 3.69 шт./км², покрытие 90 %-интервала 96 % (`reports/quantity/adis_forecast.md`). Для сравнения — калибровка авторов ADIS (по тралу), не наша; наша — без поправок: 4.64 шт./км² (типичный интервал отрезка 1.15–18.7; de Vries et al. 2026, Environ. Res. Commun., doi 10.1088/2515-7620/ae8152); наша — 1.54. Оговорка: коэффициент в файле ≈ 1,5 не совпадает с приведённым в тексте статьи; приложение статьи не сверено.
+
 По правилу, записанному до открытия test, на карте и в API оценка по полевым данным — **медиана профиля** с подписью «оценка по полевым данным, не по снимку». Подробно — §5 и [docs/QUANTITY.md](docs/QUANTITY.md).
 
 ## Как мы искали данные
@@ -115,7 +117,7 @@
 | Видимый сигнал на снимке | **0** из 3 | видимый сигнал на снимке: в паре с предметами в поле и оцениваемым детектором есть срабатывания в полосе |
 | Калибровочная пара «снимок → шт./км²» | **0** (нужно 4–12) | калибровочная пара «снимок → шт./км²»: пара по месту и времени с ненулевым сигналом снимка |
 
-- **Поле (измерение).** C = N/A с интервалом Пуассона; S2: ΣN/ΣA = 697 / 12.94 км² = 53.9 [49.9–58.0] шт./км². Оценка по полевым данным на карте — медиана профиля: на отложенном test модель не лучше медианы (30.0 против 25.2).
+- **Поле (измерение).** C = N/A с интервалом Пуассона; S2: ΣN/ΣA = 697 / 12.94 км² = 53.9 шт./км²: интервал 95 % с разбросом между днями рейса [39.7–70.4] (кластерный бутстреп; только ошибка счёта, Пуассон — [49.9–58.0], занижен: разброс сверх Пуассона). Для одного нового места 95 % — 10–157 шт./км² (покрытие отложенного test 92.9 %; правило выбора записано до расчёта, `docs/PIPELINE.md` C10, `reports/quantity/field_intervals.md`). Оценка по полевым данным на карте — медиана профиля: на отложенном test модель не лучше медианы (30.0 против 25.2).
 - **Снимок (измерение по маске).** Только площадь маски и **доля покрытия подозрительного материала** (LWD, м² на км² пригодной воды, как у Cózar et al. 2024): на 64 живых сценах медиана 3.2 м²/км². Это не мусор и не шт./км².
 - **Штуки по снимку не показываем**: перевод площади маски в штуки не показываем — нет калибровочных пар «снимок → шт./км²». Главный статус спутниковой зоны — «концентрация по снимку не подтверждена».
 - **Калибровка по ячейкам** (как «пальмы на гектар по Sentinel-2», arXiv 2105.11207) проверена отдельно: калибровки по ячейкам нет: в одном периоде общих дат поле × спутник 0; климатологии разных лет ранжируют районы слабо (ρ ≈ география — удалённость от берега), правило принятия не пройдено (общих дат 0, климатологии: ρ = 0.18 на 123 ячейках; `reports/quantity/cell_calibration.md`).
@@ -336,7 +338,7 @@ powershell -ExecutionPolicy Bypass -File run.ps1
 - **C = N / A**, где N — число предметов выбранной совокупности, A — обследованная площадь, км².
 - Площадь полосы A = длина × ширина с переводом единиц (м², га, км², км × м).
 - Агрегация по нескольким записям — ΣN / ΣA, а не среднее плотностей.
-- Интервал поля — точный интервал Пуассона (Гарвуд) для N, делённый на A.
+- Интервал поля — точный интервал Пуассона (Гарвуд) для N, делённый на A: только ошибка счёта. Для среднего профиля рядом — кластерный бутстреп по дням рейса (разброс между событиями, `scripts/case/field_interval_check.py`).
 
 **Контрольные примеры** (тесты `tests/test_case_concentration.py`):
 - 12 / 0,20 = **60.0 шт./км²**, 95 % ДИ 31.0–104.8;
@@ -463,7 +465,7 @@ MAPE не используется: в реестре есть нули. Осн�
 | детектор: полный прогон 7 моделей на val и test MARIDA | `scripts\case\detector_compare.py` (нужны MARIDA и кэш из предыдущей строки; RandomForest переобучается из train-кэша, если нет `data/case/detector_preds/rf_seed5.joblib`) | `reports/case_detector/*` | ≈ 130 с |
 | эксперимент на парах | `scripts\case\pairs_experiment.py --no-fetch` | `reports/case_pairs/experiment.{md,json}` | ≈ 3 мин с чтением FDI по сети |
 | согласованность API и экспорта | `scripts\case\consistency_check.py` | `reports/selfcheck/consistency_latest.md\|json` (в git; копии с датой не коммитятся) | 27 с |
-| тесты кейса | `-m pytest -q tests\test_case_*.py tests\test_api_v3.py` | 252 passed, 2 skipped, 0 failed (прогон 26.09.2026 05:48, `reports/case_run/case_tests.json`) | 28 с; вся папка `tests` — 10 мин 53 с на CPU |
+| тесты кейса | `-m pytest -q tests\test_case_*.py tests\test_api_v3.py` | 255 passed, 2 skipped, 0 failed (прогон 26.09.2026 06:03, `reports/case_run/case_tests.json`) | 26 с; вся папка `tests` — 10 мин 53 с на CPU |
 | **все документы** (README, отчёт, PREP, дека, речь, демо, вопросы) | `scripts\case\build_docs.py` — маршрут → тесты → `final_numbers.py` → `render_docs.py` → `make_deck_case.py` → сверка чисел (`tests/test_case_docs_numbers.py`) | `README.md`, `reports/report.md`, `docs/PREP.md`, `reports/case_deck.pptx`, `docs/{SPEECH,DEMO,QA}.md` | ≈ 1–2 мин |
 
 - Предсказания детектора на MARIDA (`data/case/detector_preds/*.npz`: вероятности основной модели и RandomForest, маски 7 моделей по патчам) лежат в git. Для пересчёта TP/FP/FN из них нужна разметка MARIDA (`data/MARIDA/patches/*_cl.tif`, как скачать — раздел 2). Без разметки `run_all eval` берёт числа из `reports/case_detector/metrics.json` и записывает его sha256. Полный прогон детекторов заново делает `detector_compare.py` по MARIDA.
@@ -483,8 +485,10 @@ MAPE не используется: в реестре есть нули. Осн�
 | детектор v2 (дообучение на B + D) | `scripts\case\detector_retrain.py train --exp <вариант>`, затем `report` (проверка зафиксирована в `configs/detector_v2_eval.yaml`) | MARIDA + MADOS + признаки новых B/D → `reports/detector_v2/experiments.{json,md}` | нет; MARIDA/MADOS и признаки локально; ≈ минуты на вариант (CPU) | `reports/detector_v2/experiments_snapshot.json`, `decision.json` |
 | U-Net MARIDA (бейзлайн) | `scripts\case\unet_baseline.py val` (test — `test --once`, уже посчитан) | веса авторов `weights_exp/unet_marida/` + MARIDA → `reports/detector_v2/unet_baseline.json`, `unet_test.json` | веса — один раз из сети; ≈ 20 с CPU | `reports/detector_v2/unet_baseline.json`, `unet_test.json` |
 | количество: поле / доля покрытия / потребность в парах | `scripts\case\quantity_report.py` (сцены — `quantity_live.py`) | CSV организаторов, `data/pairs/quality/`, живые сцены → `reports/quantity/*.json` | нет, если есть `data/live` | `reports/quantity/*.json`, `docs/QUANTITY.md` |
+| полевой прогноз ADIS (> 10 см; медиана остаётся) | `scripts\case\adis_forecast.py val`, затем `final` (правило — `configs/adis_forecast.yaml`, sha256 сверяется) | отрезки ADIS → `reports/quantity/adis_forecast.{json,md}` | нужны Segments.csv ADIS (не в git); ≈ 20 с CPU | `reports/quantity/adis_forecast.json` |
 | калибровка по ячейкам (отрицательный результат) | `scripts\case\cell_calibration.py run` (проверка — `configs/cell_calibration.yaml`, sha256 сверяется) | каталог Cózar, ADIS, CSV организаторов, STAC-облачность → `reports/quantity/cell_calibration.{json,md}` | да (STAC, чтение NetCDF по HTTP); ≈ минуты | `reports/quantity/cell_calibration.json` |
 | мост «дрон / PlanetScope → Sentinel-2» | `scripts\count_bridge\plp_bridge_s2.py`, `nasa_ps_bridge_s2.py`, итог — `plp_bridge_summary.py` | мишени PLP, рамки PlanetScope + L2A того же дня → `out/l115/*.csv` | да (L2A, STAC) | отчёт `reports/count_datasets/` |
+| интервал профиля «между событиями» (§28 А) | `scripts\case\field_interval_check.py` | CSV организаторов, `reports/case_conc/final_test_predictions.csv` (состав test) | нет; ≈ 5 с | `reports/quantity/field_intervals.{json,md}` |
 | повтор расчёта экспертом | `scripts\case\expert_check.py --sample-id <id>` / `--zone-id <id>` / `--n 12 --area 0.20 --pred 75` | CSV, реестр пар, маски и вероятности → сверка с API и выгрузкой | нет; секунды | — (пересчёт из файлов в git) |
 | демо на отложенной сцене и слой зон | `scripts\case\demo_scene.py select`, `fetch --acq <тайл_дата>`, `detect`; `scripts\case\scene_zones.py` | L2A сцены → `data/case/scene_zones/`, `reports/case_demo/` | `fetch` — да; `scene_zones.py` — нет | `data/case/scene_zones/`, `reports/case_demo/heldout_check.json` |
 | счётчик предметов по фото (штуки на кадр) | `scripts\photo_count\eval.py infer ...` (GPU), затем `eval.py score --tag <tag>` | фото FML (сплит по сессиям) → `reports/photo_count/eval_<tag>.json` | веса и фото — локально; вывод на GPU | `reports/photo_count/` |

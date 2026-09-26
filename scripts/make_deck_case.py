@@ -359,6 +359,7 @@ def load() -> dict:
     k["q_an_text"] = N(qn + "analogy.text"); k["q_an_not"] = N(qn + "analogy.why_not_here")
     k["q_cc_rho"] = N(qn + "cell_calibration.v3_rho"); k["q_cc_cells"] = N(qn + "cell_calibration.v3_cells")
     k["q_cc_dates"] = N(qn + "cell_calibration.same_period_common_dates")
+    k["q_quote"] = N(qn + "cozar2024_quote.text"); k["q_quote_ref"] = N(qn + "cozar2024_quote.ref")
     oi = c + "sections.oil."
     for key in ("val_f1", "val_osi_f1", "test_f1", "test_osi_f1", "test_f1_ci95", "test_precision", "test_recall"):
         k["oil_" + key] = N(oi + key)
@@ -1264,6 +1265,12 @@ def qa_items(k: dict) -> list[tuple[str, str, str]]:
          f"суда. Перевод в штуки зависит от допущений о размере предметов и дал бы разброс в {num(k['q_sc_ratio'], 0)} раз, поэтому мы его "
          f"не показываем: {k['q_sc_reason']}. Массу не оцениваем.",
          "reports/quantity/scenario.json; docs/QUANTITY.md §4"),
+        ("Почему вы не откалибровали спутник по полю?",
+         f"Потому что природных калибровочных пар «снимок → шт./км²» нет ни у нас ({num(k['ql_calibration_pairs'], 0)}), ни у авторов "
+         f"крупнейшего каталога мусорных полос по Sentinel-2. Они пишут дословно: «{k['q_quote']}» ({k['q_quote_ref']}). У нас "
+         f"{num(k['ad_A'], 0)} пар ADIS — пары по месту и времени с нулевым сигналом снимка; для калибровки нужно "
+         f"{num(k['ql_calibration_needed_min'], 0)}–{num(k['ql_calibration_needed_max'], 0)} пар с сигналом.",
+         "data/extra/cozar2024/paper.txt (проверено по тексту); docs/QUANTITY.md §0, §3"),
         ("Почему не откалибровать по ячейкам, как считают пальмы на гектар по Sentinel-2?",
          f"Аналогия уместна: {k['q_an_text']}. Но для мусора {k['q_an_not']}. Мы проверили: общих дат поле × спутник в одном периоде "
          f"{num(k['q_cc_dates'], 0)}; климатологии разных лет дают ρ = {num(k['q_cc_rho'], 2)} на {num(k['q_cc_cells'], 0)} ячейках, и это "

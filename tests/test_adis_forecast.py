@@ -91,3 +91,16 @@ def test_report_consistent_with_config_and_rule():
                 assert val[c]["passes_rule"] == (bd["mae"]["hi"] < 0 and bd["log1p_mae"]["delta"] <= 0)
     for scheme, sc in o["schemes"].items():
         assert sc["groups_test"] >= 5  # бутстреп по группам не вырожден
+
+
+@pytest.mark.skipif(not REPORT_JSON.exists(), reason="отчёт ещё не построен")
+def test_external_calibrated_is_reference_only():
+    o = json.loads(REPORT_JSON.read_text(encoding="utf-8"))
+    e = o["external_adis_calibrated"]
+    ch = e["checks"]["readme_label_10cm"]
+    assert ch["cal10_zero_where_n10_zero"] and ch["cal10_positive_where_n50_zero"] > 0  # класс > 10 см
+    g = e["profiles"]["gt10cm"]
+    assert g["authors_observed_over_raw_median"] == pytest.approx(2.0, rel=1e-3)
+    assert g["calibrated_lo_typ"] <= g["calibrated_C"] <= g["calibrated_hi_typ"]
+    assert not any("dhat" in f or "calibrated" in f for f in AF.FEATURES)  # не признак
+    assert o["decision_primary"] == "M0_median"  # внешнее число не меняет решение

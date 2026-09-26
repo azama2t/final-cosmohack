@@ -732,3 +732,6 @@ GET /api/v3/zones: model + weights_sha256, trained_at = дата файла weig
   облаков (+ flag "cloud": облака/тени ≥ 20 % зоны), берега, мелководья; признаки судна/шва → «ложное срабатывание (признаки
   судна / кильватера / шва) — недостаточно данных»; прочие признаки → «недостаточно данных: признаки ложного срабатывания».
 - CSV scene_zones: колонки scenario_* удалены; + verification, quantity_status, quantity_label, quantity_detail.
+3.10b ПРАВИЛО ВЕТРА (26.09, L111, гипотеза Г3-1): + detection_status "not_informative" («ноль не информативен (ветер ≥ 5 м/с)») —
+  у зоны «вся вырезка» (-000) сцены с ветром ERA5 ≥ 5 м/с вместо not_detected (Cózar 2024 исключают воду с ветром > 5 м/с); фильтр
+  detection_status=not_informative; + properties.wind_high, wind_note; measured.lwd_note у всех зон таких сцен; index.json scenes[].wind_high.

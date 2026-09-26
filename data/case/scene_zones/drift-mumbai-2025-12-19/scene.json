@@ -24,6 +24,7 @@
  "det_pixels": 12,
  "det_area_m2": 1200,
  "lwd_m2_km2": 3.94,
+ "wind_high": false,
  "model": {
   "weights": "weights/lgbm",
   "file": "weights/lgbm/model.txt",
@@ -46,6 +47,7 @@
  "by_status": {
   "detected": 0,
   "not_detected": 1,
+  "not_informative": 0,
   "insufficient_data": 0
  }
 }

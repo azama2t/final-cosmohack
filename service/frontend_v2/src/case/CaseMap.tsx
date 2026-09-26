@@ -61,7 +61,7 @@ export interface CaseMapProps {
 }
 
 /** colours of the satellite scene zones by detection status (detector verdict, no field confirmation) */
-export const SZ_COLORS: Record<string, string> = { detected: '#ff8c42', unverified: '#d9b870', not_detected: '#2b8a3e', insufficient_data: '#9aa0a8' };
+export const SZ_COLORS: Record<string, string> = { detected: '#ff8c42', unverified: '#d9b870', not_detected: '#2b8a3e', not_informative: '#5c7c8a', insufficient_data: '#9aa0a8' };
 /** map colour key: a detector hit without level-B evidence is «unverified», not «detected» */
 export const szKey = (p: any) => (p.detection_status === 'detected' && p.verification !== 'level_B_cozar' ? 'unverified' : p.detection_status);
 
@@ -318,7 +318,7 @@ export default function CaseMap(p: CaseMapProps) {
       paint: { 'circle-radius': 11, 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 2 },
     });
     // satellite scene zones: solid outline (a zone of the detector on a real scene), colour = detector verdict
-    const szCol: any = ['match', ['get', 'ds'], 'detected', SZ_COLORS.detected, 'unverified', SZ_COLORS.unverified, 'not_detected', SZ_COLORS.not_detected, SZ_COLORS.insufficient_data];
+    const szCol: any = ['match', ['get', 'ds'], 'detected', SZ_COLORS.detected, 'unverified', SZ_COLORS.unverified, 'not_detected', SZ_COLORS.not_detected, 'not_informative', SZ_COLORS.not_informative, SZ_COLORS.insufficient_data];
     add({ id: 'c-sz-fill', type: 'fill', source: 'c-sz', paint: { 'fill-color': szCol, 'fill-opacity': ['case', ['==', ['get', 'full'], 1], 0.04, 0.22] } });
     add({ id: 'c-sz-line', type: 'line', source: 'c-sz', paint: { 'line-color': szCol, 'line-width': 1.8 } });
     add({ id: 'c-sz-sel', type: 'line', source: 'c-sz', filter: ['==', ['get', 'id'], ''], paint: { 'line-color': '#ffffff', 'line-width': 3 } });

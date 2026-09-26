@@ -1,4 +1,4 @@
-"""L111: живой проход демо-пути v2 без моков (Playwright): карта → зона → карточка (измерено / вероятно / сценарий) →
+"""L111: живой проход демо-пути v2 без моков (Playwright): карта → зона → карточка (измерено / вероятно / «концентрация по снимку не подтверждена») →
 поле рядом → выгрузка → повтор сохранённого запроса. Кадры 1920×1080 и 1366×768 -> reports/case_demo/.
 
   .venv\\Scripts\\python.exe -m service --port 8094
@@ -67,20 +67,23 @@ def run(base: str, size: tuple[int, int], tag: str, res: dict, pw):
     card = page.locator("[data-testid=scene-zone-card]")
     steps["card"] = {k: page.locator(f"[data-testid={k}]").inner_text() for k in
                      ("sz-status", "sz-area", "sz-px-area", "sz-lwd", "sz-quality", "sz-model", "sz-prob")}
-    steps["card"]["scenario"] = page.locator("[data-testid=sz-scenario]").inner_text()
-    page.locator("[data-testid=sz-scenario]").scroll_into_view_if_needed()
-    shot("03_scenario")
+    page.click("[data-testid=sz-quantity-more] summary")
+    steps["card"]["quantity"] = page.locator("[data-testid=sz-quantity]").inner_text()
+    page.locator("[data-testid=sz-quantity]").scroll_into_view_if_needed()
+    shot("03_quantity")
+    steps["no_scenario_numbers"] = not any(x in page.locator("[data-testid=scene-zone-card]").inner_text()
+                                           for x in ("10 000", "100 млн", "500 000", "Условный диапазон", "Сценарий"))
     page.locator("[data-testid=sz-field]").scroll_into_view_if_needed()
     steps["field"] = page.locator("[data-testid=sz-field]").inner_text()
     shot("04_field")
-    # difficult case: false alarm (ship) — status «недостаточно данных», scenario hidden
+    # difficult case: false alarm (ship) — status «ложное срабатывание … недостаточно данных»
     page.locator("[data-testid=sz-examples]").scroll_into_view_if_needed()
     shot("05_examples")
     page.click("[data-testid=sz-example-false_alarm]")
-    wait(page, "() => window.__app.szDetailReady && document.querySelector('[data-testid=sz-scenario-hidden]')")
+    wait(page, "() => window.__app.szDetailReady && document.querySelector('[data-testid=sz-status]') && document.querySelector('[data-testid=sz-status]').innerText.startsWith('ложное')")
     page.wait_for_timeout(2500)
     steps["false_alarm"] = {"status": page.locator("[data-testid=sz-status]").inner_text(),
-                            "scenario": page.locator("[data-testid=sz-scenario-hidden]").inner_text()}
+                            "quantity": page.locator("[data-testid=sz-quantity-status]").inner_text()}
     shot("06_false_alarm")
     # back to the demo zone and restrict the date to the demo scene (for the saved query)
     page.fill("[data-testid=f-from]", "2021-03-11")

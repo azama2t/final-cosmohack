@@ -1,0 +1,106 @@
+{
+ "profile": "S2_visual_total_plastic",
+ "rule": "Правило §28 А (docs/PIPELINE.md C10, записано до расчёта): метод интервала — кластерный бутстреп по событиям (кластер = день рейса, 2 000 повторов) и/или NB-GLM (offset ln A); выбор — по покрытию 95 %-интервала на отложенном test (14 событий S2), без подбора на test. Точечные оценки не меняются, только ширина.",
+ "B": 2000,
+ "seed": 20260926,
+ "n_events": 63,
+ "n_days": 26,
+ "dev": {
+  "n": 49,
+  "days": 21
+ },
+ "test": {
+  "n": 14,
+  "days": 5
+ },
+ "mean_all": {
+  "sumN": 697.0,
+  "sumA_km2": 12.9383,
+  "C": 53.9,
+  "garwood95": [
+   49.9,
+   58.0
+  ],
+  "bootstrap_days95": [
+   39.7,
+   70.4
+  ],
+  "nb2": {
+   "C": 53.4,
+   "ci95": [
+    44.2,
+    64.5
+   ],
+   "alpha": 0.489
+  },
+  "width_ratio_boot_vs_garwood": 3.8
+ },
+ "mean_dev_to_test": {
+  "dev_C": 56.3,
+  "test_C": 46.0,
+  "test_garwood95": [
+   38.7,
+   54.3
+  ],
+  "garwood95": [
+   51.7,
+   61.2
+  ],
+  "garwood_covers_test_mean": false,
+  "bootstrap_days95": [
+   39.0,
+   75.7
+  ],
+  "bootstrap_covers_test_mean": true,
+  "nb2_ci95": [
+   44.5,
+   69.0
+  ],
+  "nb2_covers_test_mean": true,
+  "note": "один исход (одно среднее test по 5 дням рейса) — это не оценка покрытия"
+ },
+ "single_event": {
+  "garwood95_of_dev_mean": {
+   "interval": [
+    51.7,
+    61.2
+   ],
+   "coverage": 0.0
+  },
+  "nb2_predictive95": {
+   "interval_median_area": [
+    4.3,
+    163.6
+   ],
+   "coverage": 1.0
+  },
+  "dev_event_quantiles_2_5_97_5": {
+   "interval": [
+    10.2,
+    157.0
+   ],
+   "coverage": 0.929
+  },
+  "map_median_interval90": {
+   "interval": [
+    9.0,
+    175.2
+   ],
+   "coverage": 0.929,
+   "note": "уже на карте (медиана dev, 90 %-интервал по остаткам CV)"
+  },
+  "nominal": 0.95,
+  "n_test": 14,
+  "binomial_95_band_for_n14": [
+   0.786,
+   1.0
+  ]
+ },
+ "decision": {
+  "garwood_undercovers": true,
+  "between_events_closer_to_nominal": true,
+  "chosen_mean": "bootstrap_days95",
+  "chosen_single_event": "dev_event_quantiles_2_5_97_5",
+  "text": "Гарвуд — интервал среднего, только ошибка счёта: среднее test (46.0) он не накрывает, отдельные события test — 0% при номинале 95 %. Бутстреп по дням рейса накрывает среднее test (как и NB2). Для одного события оба метода «между событиями» в пределах случайного разброса при n = 14 (NB2 100%, квантили событий dev 93%); ближе к номиналу — квантили событий. Решение: среднее профиля показывать с бутстреп-интервалом по дням рейса (39.7–70.4), Гарвуд — с подписью «только ошибка счёта»; диапазон для одного места — квантили событий (10.2–157.0, покрытие test 93%). Точечные оценки не меняются."
+ }
+}

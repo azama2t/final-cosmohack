@@ -63,7 +63,9 @@ def test_density_needs_area():
 class _Stub:
     threshold = 0.9
     device = "cpu"
-    card = {"version": "stub-1"}
+    card = {"version": "stub-1", "gsd_train_m": 0.02,
+            "correction": {"factor": [2.0, 1.0, 1.0, 1.0],
+                           "factor_ci95": [[1.5, 2.5], [0.9, 1.1], [0.9, 1.1], [0.9, 1.1]]}}
 
     def count(self, image, threshold=None):
         thr = self.threshold if threshold is None else threshold
@@ -77,7 +79,7 @@ class _Stub:
 def client(monkeypatch):
     from fastapi.testclient import TestClient
     from macroplastic.photo_count import model as PM
-    monkeypatch.setattr(PM.Counter, "get", classmethod(lambda cls: _Stub()))
+    monkeypatch.setattr(PM.Counter, "get", classmethod(lambda cls, survey="water_camera": _Stub()))
     from service.app import create_app
     return TestClient(create_app())
 
@@ -123,3 +125,27 @@ def test_api_meta(client):
     j = r.json()
     assert j["unit"] == "штук на кадр" and j["upload"]["path"] == "/api/v3/photo/count"
     assert j["density_note"] == "на площади кадра, не спутник"
+
+
+def test_api_aerial_gsd_correction(client):
+    # 320x180 px at GSD 0.02 m = 23.04 m^2; stub boxes 40 px = 80 cm -> bin "60-120 cm" (factor 1.0)
+    r = client.post("/api/v3/photo/count?survey=aerial&gsd_m=0.02&threshold=0.5", content=_jpeg())
+    j = r.json()
+    assert r.status_code == 200 and j["survey_type"] == "aerial" and j["count"] == 2
+    assert j["density"]["frame_area_m2"] == pytest.approx(23.04) and j["density"]["area_from"] == "gsd_m"
+    assert "corrected_count" not in j["density"]  # threshold differs from the default -> no correction
+    r = client.post("/api/v3/photo/count?survey=aerial&gsd_m=0.02", content=_jpeg())
+    d = r.json()["density"]
+    assert d["corrected_count"] == pytest.approx(1.0)
+    assert d["items_per_km2_interval"][0] <= d["items_per_km2_corrected"] <= d["items_per_km2_interval"][1]
+    assert any("Берег" in s for s in r.json()["limitations"])
+    r = client.post("/api/v3/photo/count?survey=aerial&gsd_m=0.2", content=_jpeg())
+    assert "вне проверенного" in r.json()["gsd_warning"]
+    assert client.post("/api/v3/photo/count?survey=satellite", content=_jpeg()).status_code == 400
+
+
+def test_corrected_count_bins():
+    from macroplastic.photo_count.model import corrected_count
+    b = np.array([[0, 0, 10, 10], [0, 0, 40, 10]])  # 20 cm and 80 cm at GSD 0.02
+    assert corrected_count(b, 0.02, [2.0, 1.5, 1.0, 1.0]) == pytest.approx(3.0)
+    assert corrected_count(np.zeros((0, 4)), 0.02, [2.0, 1, 1, 1]) == 0.0

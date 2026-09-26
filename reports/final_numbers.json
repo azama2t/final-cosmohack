@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-26T05:48:11+03:00",
+ "generated": "2026-09-26T06:03:18+03:00",
  "note": "генерируется scripts/final_numbers.py; руками не править; null = ещё не посчитано",
  "l3_lgbm": {
   "available": true,
@@ -5781,7 +5781,26 @@
      "pooled_A_km2": 12.94,
      "pooled_C": 53.9,
      "lo95": 49.9,
-     "hi95": 58.0
+     "hi95": 58.0,
+     "lo95_label": "только ошибка счёта (Пуассон, Гарвуд)",
+     "boot_lo95": 39.7,
+     "boot_hi95": 70.4,
+     "boot_label": "с разбросом между днями рейса (кластерный бутстреп, 2 000 повторов)",
+     "boot_width_ratio": 3.8,
+     "nb2_lo95": 44.2,
+     "nb2_hi95": 64.5,
+     "nb2_alpha": 0.489,
+     "test_mean": 46.0,
+     "dev_mean": 56.3,
+     "garwood_covers_test_mean": false,
+     "boot_covers_test_mean": true,
+     "event_lo95": 10.2,
+     "event_hi95": 157.0,
+     "event_cov_test": 0.929,
+     "event_n_test": 14,
+     "garwood_event_cov_test": 0.0,
+     "nb2_event_cov_test": 1.0,
+     "intervals_source": "reports/quantity/field_intervals.{json,md}"
     },
     "coverage_live": {
      "n_scenes": 64,
@@ -5862,6 +5881,42 @@
      ],
      "v3_rule_passed": false,
      "verdict": "калибровки по ячейкам нет: в одном периоде общих дат поле × спутник 0; климатологии разных лет ранжируют районы слабо (ρ ≈ география — удалённость от берега), правило принятия не пройдено"
+    },
+    "adis_forecast": {
+     "source": "reports/quantity/adis_forecast.{json,md}, configs/adis_forecast.yaml (правило записано до метрик)",
+     "profile": "ADIS, плавающий пластик > 10 см, камера судна",
+     "n_segments": 20836,
+     "sum_N": 22420,
+     "sum_A_km2": 14518.0,
+     "C": 1.54,
+     "lo": 1.52,
+     "hi": 1.56,
+     "zero_pct": 72.0,
+     "seg_median": 0.0,
+     "split": "регионы 10° × 10° (отложено 20 групп), вторичная схема — по судам",
+     "test_n": 4335,
+     "test_mae_median": 1.27,
+     "test_rmse_median": 3.69,
+     "test_cov90_median": 96.0,
+     "test_mae_b1": 1.28,
+     "final": "M0_median",
+     "verdict": "ни один кандидат (B1, M1, M2) не прошёл правило на val в обеих схемах → медиана профиля остаётся",
+     "note_zero": "медиана отрезка 0 ≠ «чисто»: 0 означает, что камера на этом отрезке предметов не насчитала",
+     "authors_calibrated": {
+      "C": 4.64,
+      "lo_typ": 1.15,
+      "hi_typ": 18.7,
+      "ours_raw_C": 1.54,
+      "factor_file": 1.5,
+      "source": "de Vries et al. 2026, Environ. Res. Commun., doi 10.1088/2515-7620/ae8152",
+      "label": "калибровка авторов ADIS (по тралу), не наша; наша — без поправок",
+      "caveat": "коэффициент в файле ≈ 1,5 не совпадает с приведённым в тексте статьи; приложение статьи не сверено"
+     }
+    },
+    "cozar2024_quote": {
+     "text": "The current matching of satellite detections and field observations is limited to fake targets (artificial LWs), and reports of dense LW sightings",
+     "ref": "Cózar et al. 2024, Nat Commun, раздел «A new scenario for research and management» (PMC11178853)",
+     "checked_in_text": true
     },
     "analogy": {
      "text": "пальмы на гектар по Sentinel-2 с опорой на подсчёт по снимкам высокого разрешения (arXiv 2105.11207): MAE ±7,3 пальмы/га",
@@ -6116,7 +6171,7 @@
     "by_level_b": 14,
     "by_unverified": 77,
     "by_insufficient": 164,
-    "by_not_detected": 31,
+    "by_not_detected": 28,
     "demo": {
      "tile": "30SXE",
      "date": "11.03.2021",
@@ -6277,14 +6332,14 @@
   "tests": {
    "available": true,
    "source": "reports/case_run/case_tests.json",
-   "passed": 252,
+   "passed": 255,
    "skipped": 2,
    "failed": 0,
-   "seconds": 27.9,
-   "when": "26.09.2026 05:48",
-   "command": "python -m pytest -q tests/test_case_conc_model.py tests/test_case_concentration.py tests/test_case_consistency.py tests/test_case_coverage.py tests/test_case_docs_numbers.py tests/test_case_expert_check.py tests/test_case_geometry.py tests/test_case_geometry_integration.py tests/test_case_pairfinder.py tests/test_case_run_all.py tests/test_api_v3.py"
+   "seconds": 25.8,
+   "when": "26.09.2026 06:03",
+   "command": "python -m pytest -q tests/test_case_conc_model.py tests/test_case_concentration.py tests/test_case_consistency.py tests/test_case_coverage.py tests/test_case_docs_numbers.py tests/test_case_expert_check.py tests/test_case_field_intervals.py tests/test_case_geometry.py tests/test_case_geometry_integration.py tests/test_case_pairfinder.py tests/test_case_run_all.py tests/test_api_v3.py"
   },
-  "n_test_funcs": 163,
-  "n_tests": 252
+  "n_test_funcs": 166,
+  "n_tests": 255
  }
 }

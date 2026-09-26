@@ -143,6 +143,8 @@ def test_internal_consistency(fn, sec):
     assert s["events_total"] == fn["case"]["pairs"]["events"], "воронка docs/img/funnel.json ≠ реестр пар"
     assert s["csv_A"] == 0 or s["csv_A"] == sum(s["by_source"][k]["A"] for k in ("S1", "S2", "S3", "S4"))
     assert ld["leaks_total"] == 0, "найдены утечки новых данных с MARIDA/MADOS/нашими сценами — разберитесь до сдачи"
+    qq = sec["quantity"].get("cozar2024_quote") or {}
+    assert qq.get("checked_in_text") in (True, None), "цитата Cózar 2024 не найдена в тексте статьи"
     assert sec["oil"]["experimental"] is True and sec["oil"]["enabled_by_default"] is False
     b = sec["baselines"]["test"]
     assert b["lgbm"]["f1"] == fn["case"]["sections"]["marida_test"]["lgbm_f1"], "LightGBM test в baselines ≠ marida_test"
@@ -158,7 +160,8 @@ def test_wording_no_mass_no_coverage_as_litter():
     assert "пар по месту и времени" in part
 
 
-FORBIDDEN = (r"предел обнаружения доказан", r"(это|—) предел обнаружения", r"\d+ пар A\b", r"калибровочн\w* пар\w* \(ADIS",
+FORBIDDEN = (r"10\s?000\s?[–-]\s?100", r"100\s?000\s?000", r"100 млн", r"10⁴", r"10⁸", r"160\s?[–-]\s?500",
+             r"предел обнаружения доказан", r"(это|—) предел обнаружения", r"\d+ пар A\b", r"калибровочн\w* пар\w* \(ADIS",
              r"доверительн\w* интервал\w* сценари")
 
 
@@ -167,7 +170,8 @@ def test_wording_section15(deck_texts):
     slides, texts = deck_texts
     docs = {"README.md": (ROOT / "README.md").read_text(encoding="utf-8"),
             "reports/report.md": (ROOT / "reports/report.md").read_text(encoding="utf-8"),
-            "docs/QUANTITY.md": (ROOT / "docs/QUANTITY.md").read_text(encoding="utf-8"), "slides": slides, **texts}
+            "docs/QUANTITY.md": (ROOT / "docs/QUANTITY.md").read_text(encoding="utf-8"), "slides": slides, **texts,
+            "docs/DEMO.md(file)": (ROOT / "docs/DEMO.md").read_text(encoding="utf-8")}
     bad = [(name, pat) for name, txt in docs.items() for pat in FORBIDDEN if re.search(pat, txt)]
     assert not bad, f"формулировки §15 нарушены: {bad}"
     trace = re.compile(r"\bL\d{2,3}\b|оркестрат|INBOX|SPEC-GAPS|tasklog")

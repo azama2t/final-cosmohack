@@ -2,260 +2,189 @@
  "n_zones": 286,
  "zones": {
   "SZ-drift-guanabara-2025-06-28-007": {
-   "status": "detected",
-   "concentration_status": "research_estimate",
-   "flags": [],
-   "detection_label": "обнаружено детектором (без полевого подтверждения)",
-   "scenario_shown": true,
-   "training": {}
+   "status": "insufficient_data",
+   "concentration_status": "unavailable",
+   "flags": [
+    "ship",
+    "coast"
+   ],
+   "detection_label": "ложное срабатывание (признаки судна / кильватера / шва) — недостаточно данных",
+   "scenario_shown": null,
+   "training": {
+    "training_scene": null,
+    "training_scene_note": null
+   }
   },
   "SZ-drift-guanabara-2025-09-09-014": {
-   "status": "detected",
-   "concentration_status": "research_estimate",
-   "flags": [],
-   "detection_label": "обнаружено детектором (без полевого подтверждения)",
-   "scenario_shown": true,
-   "training": {}
+   "status": "insufficient_data",
+   "concentration_status": "unavailable",
+   "flags": [
+    "ship"
+   ],
+   "detection_label": "ложное срабатывание (признаки судна / кильватера / шва) — недостаточно данных",
+   "scenario_shown": null,
+   "training": {
+    "training_scene": null,
+    "training_scene_note": null
+   }
   },
   "SZ-drift-guanabara-2025-09-09-015": {
-   "status": "detected",
-   "concentration_status": "research_estimate",
-   "flags": [],
-   "detection_label": "обнаружено детектором (без полевого подтверждения)",
-   "scenario_shown": true,
-   "training": {}
+   "status": "insufficient_data",
+   "concentration_status": "unavailable",
+   "flags": [
+    "ship"
+   ],
+   "detection_label": "ложное срабатывание (признаки судна / кильватера / шва) — недостаточно данных",
+   "scenario_shown": null,
+   "training": {
+    "training_scene": null,
+    "training_scene_note": null
+   }
   },
   "SZ-live-guanabara-2025-06-26-007": {
-   "status": "detected",
-   "concentration_status": "research_estimate",
-   "flags": [],
-   "detection_label": "обнаружено детектором (без полевого подтверждения)",
-   "scenario_shown": true,
-   "training": {}
+   "status": "insufficient_data",
+   "concentration_status": "unavailable",
+   "flags": [
+    "ship"
+   ],
+   "detection_label": "ложное срабатывание (признаки судна / кильватера / шва) — недостаточно данных",
+   "scenario_shown": null,
+   "training": {
+    "training_scene": null,
+    "training_scene_note": null
+   }
   },
   "SZ-live-guanabara-2025-09-04-020": {
-   "status": "detected",
-   "concentration_status": "research_estimate",
-   "flags": [],
-   "detection_label": "обнаружено детектором (без полевого подтверждения)",
-   "scenario_shown": true,
-   "training": {}
+   "status": "insufficient_data",
+   "concentration_status": "unavailable",
+   "flags": [
+    "ship"
+   ],
+   "detection_label": "ложное срабатывание (признаки судна / кильватера / шва) — недостаточно данных",
+   "scenario_shown": null,
+   "training": {
+    "training_scene": null,
+    "training_scene_note": null
+   }
   },
   "SZ-live-guanabara-2026-07-16-011": {
-   "status": "detected",
-   "concentration_status": "research_estimate",
-   "flags": [],
-   "detection_label": "обнаружено детектором (без полевого подтверждения)",
-   "scenario_shown": true,
-   "training": {}
+   "status": "insufficient_data",
+   "concentration_status": "unavailable",
+   "flags": [
+    "ship"
+   ],
+   "detection_label": "ложное срабатывание (признаки судна / кильватера / шва) — недостаточно данных",
+   "scenario_shown": null,
+   "training": {
+    "training_scene": null,
+    "training_scene_note": null
+   }
   },
   "SZ-live-manila-2019-05-13-010": {
-   "status": "detected",
-   "concentration_status": "research_estimate",
-   "flags": [],
-   "detection_label": "обнаружено детектором (без полевого подтверждения)",
-   "scenario_shown": true,
-   "training": {}
+   "status": "insufficient_data",
+   "concentration_status": "unavailable",
+   "flags": [
+    "ship"
+   ],
+   "detection_label": "ложное срабатывание (признаки судна / кильватера / шва) — недостаточно данных",
+   "scenario_shown": null,
+   "training": {
+    "training_scene": null,
+    "training_scene_note": null
+   }
   },
   "SZ-live-durban-2025-09-26-002": {
-   "status": "detected",
-   "concentration_status": "research_estimate",
-   "flags": [],
-   "detection_label": "обнаружено детектором (без полевого подтверждения)",
-   "scenario_shown": true,
-   "training": {}
+   "status": "insufficient_data",
+   "concentration_status": "unavailable",
+   "flags": [
+    "ship",
+    "coast",
+    "shallow"
+   ],
+   "detection_label": "ложное срабатывание (признаки судна / кильватера / шва) — недостаточно данных",
+   "scenario_shown": null,
+   "training": {
+    "training_scene": null,
+    "training_scene_note": null
+   }
   },
   "SZ-live-durban-2025-09-26-004": {
-   "status": "detected",
-   "concentration_status": "research_estimate",
-   "flags": [],
-   "detection_label": "обнаружено детектором (без полевого подтверждения)",
-   "scenario_shown": true,
-   "training": {}
+   "status": "insufficient_data",
+   "concentration_status": "unavailable",
+   "flags": [
+    "ship",
+    "shallow"
+   ],
+   "detection_label": "ложное срабатывание (признаки судна / кильватера / шва) — недостаточно данных",
+   "scenario_shown": null,
+   "training": {
+    "training_scene": null,
+    "training_scene_note": null
+   }
   },
   "SZ-live-guanabara-2025-09-04-013": {
-   "status": "detected",
-   "concentration_status": "research_estimate",
-   "flags": [],
-   "detection_label": "обнаружено детектором (без полевого подтверждения)",
-   "scenario_shown": true,
-   "training": {}
+   "status": "insufficient_data",
+   "concentration_status": "unavailable",
+   "flags": [
+    "ship",
+    "coast"
+   ],
+   "detection_label": "ложное срабатывание (признаки судна / кильватера / шва) — недостаточно данных",
+   "scenario_shown": null,
+   "training": {
+    "training_scene": null,
+    "training_scene_note": null
+   }
   },
   "SZ-drift-guanabara-2025-09-09-001": {
-   "status": "detected",
-   "concentration_status": "research_estimate",
-   "flags": [],
-   "detection_label": "обнаружено детектором (без полевого подтверждения)",
-   "scenario_shown": true,
-   "training": {}
+   "status": "insufficient_data",
+   "concentration_status": "unavailable",
+   "flags": [
+    "ship"
+   ],
+   "detection_label": "ложное срабатывание (признаки судна / кильватера / шва) — недостаточно данных",
+   "scenario_shown": null,
+   "training": {
+    "training_scene": null,
+    "training_scene_note": null
+   }
   },
   "SZ-live-mumbai-2025-01-31-004": {
-   "status": "detected",
-   "concentration_status": "research_estimate",
-   "flags": [],
-   "detection_label": "обнаружено детектором (без полевого подтверждения)",
-   "scenario_shown": true,
-   "training": {}
+   "status": "insufficient_data",
+   "concentration_status": "unavailable",
+   "flags": [
+    "ship"
+   ],
+   "detection_label": "ложное срабатывание (признаки судна / кильватера / шва) — недостаточно данных",
+   "scenario_shown": null,
+   "training": {
+    "training_scene": null,
+    "training_scene_note": null
+   }
   },
   "SZ-live-haiti-2021-01-03-001": {
    "status": "detected",
-   "concentration_status": "research_estimate",
+   "concentration_status": "unavailable",
    "flags": [],
-   "detection_label": "обнаружено детектором (без полевого подтверждения)",
-   "scenario_shown": true,
-   "training": {}
+   "detection_label": "обнаружено детектором · вероятный плавающий материал, требует проверки",
+   "scenario_shown": null,
+   "training": {
+    "training_scene": "MARIDA (train:5)",
+    "training_scene_note": "снимок из обучающей выборки детектора (MARIDA (train:5)) — не независимая проверка"
+   }
   }
  },
- "fail": [
-  "SZ-drift-guanabara-2025-06-28-007",
-  "SZ-drift-guanabara-2025-09-09-014",
-  "SZ-drift-guanabara-2025-09-09-015",
-  "SZ-live-guanabara-2025-06-26-007",
-  "SZ-live-guanabara-2025-09-04-020",
-  "SZ-live-guanabara-2026-07-16-011",
-  "SZ-live-manila-2019-05-13-010",
-  "SZ-live-durban-2025-09-26-002",
-  "SZ-live-durban-2025-09-26-004",
-  "SZ-live-guanabara-2025-09-04-013",
-  "SZ-demo-cozar-2021-03-11-002 (scenario without Cózar-B)",
-  "SZ-demo-cozar-2021-03-11-005 (scenario without Cózar-B)",
-  "SZ-demo-cozar-2021-03-11-008 (scenario without Cózar-B)",
-  "SZ-demo-cozar-2021-03-11-009 (scenario without Cózar-B)",
-  "SZ-demo-cozar-2021-03-11-011 (scenario without Cózar-B)",
-  "SZ-demo-cozar-2021-03-11-014 (scenario without Cózar-B)",
-  "SZ-demo-cozar-2021-03-11-018 (scenario without Cózar-B)",
-  "SZ-demo-cozar-2021-03-11-019 (scenario without Cózar-B)",
-  "SZ-demo-cozar-2021-03-11-020 (scenario without Cózar-B)",
-  "SZ-drift-guanabara-2025-06-28-001 (scenario without Cózar-B)",
-  "SZ-drift-guanabara-2025-06-28-005 (scenario without Cózar-B)",
-  "SZ-drift-guanabara-2025-06-28-006 (scenario without Cózar-B)",
-  "SZ-drift-guanabara-2025-06-28-007 (scenario without Cózar-B)",
-  "SZ-drift-guanabara-2025-06-28-008 (scenario without Cózar-B)",
-  "SZ-drift-guanabara-2025-06-28-009 (scenario without Cózar-B)",
-  "SZ-drift-guanabara-2025-09-09-001 (scenario without Cózar-B)",
-  "SZ-drift-guanabara-2025-09-09-002 (scenario without Cózar-B)",
-  "SZ-drift-guanabara-2025-09-09-005 (scenario without Cózar-B)",
-  "SZ-drift-guanabara-2025-09-09-007 (scenario without Cózar-B)",
-  "SZ-drift-guanabara-2025-09-09-008 (scenario without Cózar-B)",
-  "SZ-drift-guanabara-2025-09-09-009 (scenario without Cózar-B)",
-  "SZ-drift-guanabara-2025-09-09-011 (scenario without Cózar-B)",
-  "SZ-drift-guanabara-2025-09-09-014 (scenario without Cózar-B)",
-  "SZ-drift-guanabara-2025-09-09-015 (scenario without Cózar-B)",
-  "SZ-drift-guanabara-2025-09-09-016 (scenario without Cózar-B)",
-  "SZ-drift-guanabara-2026-07-21-003 (scenario without Cózar-B)",
-  "SZ-drift-honduras-2026-02-19-002 (scenario without Cózar-B)",
-  "SZ-drift-honduras-2026-02-19-003 (scenario without Cózar-B)",
-  "SZ-drift-honduras-2026-02-19-004 (scenario without Cózar-B)",
-  "SZ-drift-karachi-2026-02-16-001 (scenario without Cózar-B)",
-  "SZ-live-bali-2018-02-27-001 (scenario without Cózar-B)",
-  "SZ-live-bali-2018-02-27-002 (scenario without Cózar-B)",
-  "SZ-live-bali-2018-02-27-004 (scenario without Cózar-B)",
-  "SZ-live-bali-2026-05-31-002 (scenario without Cózar-B)",
-  "SZ-live-durban-2025-09-26-002 (scenario without Cózar-B)",
-  "SZ-live-durban-2025-09-26-004 (scenario without Cózar-B)",
-  "SZ-live-guanabara-2025-06-26-001 (scenario without Cózar-B)",
-  "SZ-live-guanabara-2025-06-26-002 (scenario without Cózar-B)",
-  "SZ-live-guanabara-2025-06-26-003 (scenario without Cózar-B)",
-  "SZ-live-guanabara-2025-06-26-004 (scenario without Cózar-B)",
-  "SZ-live-guanabara-2025-06-26-005 (scenario without Cózar-B)",
-  "SZ-live-guanabara-2025-06-26-007 (scenario without Cózar-B)",
-  "SZ-live-guanabara-2025-09-04-001 (scenario without Cózar-B)",
-  "SZ-live-guanabara-2025-09-04-002 (scenario without Cózar-B)",
-  "SZ-live-guanabara-2025-09-04-003 (scenario without Cózar-B)",
-  "SZ-live-guanabara-2025-09-04-008 (scenario without Cózar-B)",
-  "SZ-live-guanabara-2025-09-04-013 (scenario without Cózar-B)",
-  "SZ-live-guanabara-2025-09-04-014 (scenario without Cózar-B)",
-  "SZ-live-guanabara-2025-09-04-015 (scenario without Cózar-B)",
-  "SZ-live-guanabara-2025-09-04-017 (scenario without Cózar-B)",
-  "SZ-live-guanabara-2025-09-04-019 (scenario without Cózar-B)",
-  "SZ-live-guanabara-2025-09-04-020 (scenario without Cózar-B)",
-  "SZ-live-guanabara-2026-07-16-001 (scenario without Cózar-B)",
-  "SZ-live-guanabara-2026-07-16-003 (scenario without Cózar-B)",
-  "SZ-live-guanabara-2026-07-16-004 (scenario without Cózar-B)",
-  "SZ-live-guanabara-2026-07-16-005 (scenario without Cózar-B)",
-  "SZ-live-guanabara-2026-07-16-006 (scenario without Cózar-B)",
-  "SZ-live-guanabara-2026-07-16-008 (scenario without Cózar-B)",
-  "SZ-live-guanabara-2026-07-16-010 (scenario without Cózar-B)",
-  "SZ-live-guanabara-2026-07-16-011 (scenario without Cózar-B)",
-  "SZ-live-haiti-2021-01-03-001 (scenario without Cózar-B)",
-  "SZ-live-honduras-2019-01-12-001 (scenario without Cózar-B)",
-  "SZ-live-honduras-2019-01-12-002 (scenario without Cózar-B)",
-  "SZ-live-honduras-2020-08-29-001 (scenario without Cózar-B)",
-  "SZ-live-honduras-2020-08-29-002 (scenario without Cózar-B)",
-  "SZ-live-honduras-2020-08-29-004 (scenario without Cózar-B)",
-  "SZ-live-honduras-2020-08-29-005 (scenario without Cózar-B)",
-  "SZ-live-honduras-2020-08-29-006 (scenario without Cózar-B)",
-  "SZ-live-honduras-2020-08-29-007 (scenario without Cózar-B)",
-  "SZ-live-honduras-2020-08-29-008 (scenario without Cózar-B)",
-  "SZ-live-honduras-2020-08-29-009 (scenario without Cózar-B)",
-  "SZ-live-honduras-2020-08-29-010 (scenario without Cózar-B)",
-  "SZ-live-honduras-2025-01-30-001 (scenario without Cózar-B)",
-  "SZ-live-honduras-2025-01-30-002 (scenario without Cózar-B)",
-  "SZ-live-honduras-2025-01-30-003 (scenario without Cózar-B)",
-  "SZ-live-honduras-2025-01-30-004 (scenario without Cózar-B)",
-  "SZ-live-honduras-2025-01-30-005 (scenario without Cózar-B)",
-  "SZ-live-honduras-2025-01-30-006 (scenario without Cózar-B)",
-  "SZ-live-honduras-2025-01-30-007 (scenario without Cózar-B)",
-  "SZ-live-honduras-2025-01-30-008 (scenario without Cózar-B)",
-  "SZ-live-honduras-2025-02-19-001 (scenario without Cózar-B)",
-  "SZ-live-honduras-2025-12-28-003 (scenario without Cózar-B)",
-  "SZ-live-honduras-2025-12-28-005 (scenario without Cózar-B)",
-  "SZ-live-honduras-2025-12-28-006 (scenario without Cózar-B)",
-  "SZ-live-honduras-2025-12-28-007 (scenario without Cózar-B)",
-  "SZ-live-honduras-2025-12-28-008 (scenario without Cózar-B)",
-  "SZ-live-honduras-2025-12-28-009 (scenario without Cózar-B)",
-  "SZ-live-honduras-2026-02-14-001 (scenario without Cózar-B)",
-  "SZ-live-honduras-2026-02-14-003 (scenario without Cózar-B)",
-  "SZ-live-honduras-2026-02-14-004 (scenario without Cózar-B)",
-  "SZ-live-honduras-2026-04-10-001 (scenario without Cózar-B)",
-  "SZ-live-honduras-2026-04-10-002 (scenario without Cózar-B)",
-  "SZ-live-honduras-2026-04-10-003 (scenario without Cózar-B)",
-  "SZ-live-honduras-2026-04-10-004 (scenario without Cózar-B)",
-  "SZ-live-honduras-2026-04-10-005 (scenario without Cózar-B)",
-  "SZ-live-honduras-2026-04-10-006 (scenario without Cózar-B)",
-  "SZ-live-honduras-2026-05-30-001 (scenario without Cózar-B)",
-  "SZ-live-honduras-2026-05-30-003 (scenario without Cózar-B)",
-  "SZ-live-jakarta-2026-04-03-001 (scenario without Cózar-B)",
-  "SZ-live-jakarta-2026-04-03-002 (scenario without Cózar-B)",
-  "SZ-live-jakarta-2026-04-03-003 (scenario without Cózar-B)",
-  "SZ-live-jakarta-2026-04-03-004 (scenario without Cózar-B)",
-  "SZ-live-jakarta-2026-04-03-005 (scenario without Cózar-B)",
-  "SZ-live-karachi-2026-01-15-006 (scenario without Cózar-B)",
-  "SZ-live-karachi-2026-02-14-005 (scenario without Cózar-B)",
-  "SZ-live-karachi-2026-02-14-006 (scenario without Cózar-B)",
-  "SZ-live-karachi-2026-02-14-007 (scenario without Cózar-B)",
-  "SZ-live-manila-2019-05-13-001 (scenario without Cózar-B)",
-  "SZ-live-manila-2019-05-13-003 (scenario without Cózar-B)",
-  "SZ-live-manila-2019-05-13-004 (scenario without Cózar-B)",
-  "SZ-live-manila-2019-05-13-005 (scenario without Cózar-B)",
-  "SZ-live-manila-2019-05-13-007 (scenario without Cózar-B)",
-  "SZ-live-manila-2019-05-13-008 (scenario without Cózar-B)",
-  "SZ-live-manila-2019-05-13-009 (scenario without Cózar-B)",
-  "SZ-live-manila-2019-05-13-010 (scenario without Cózar-B)",
-  "SZ-live-manila-2025-01-06-001 (scenario without Cózar-B)",
-  "SZ-live-manila-2025-06-15-004 (scenario without Cózar-B)",
-  "SZ-live-manila-2025-11-07-001 (scenario without Cózar-B)",
-  "SZ-live-manila-2025-11-07-002 (scenario without Cózar-B)",
-  "SZ-live-manila-2025-11-07-003 (scenario without Cózar-B)",
-  "SZ-live-manila-2025-11-07-004 (scenario without Cózar-B)",
-  "SZ-live-manila-2025-12-27-005 (scenario without Cózar-B)",
-  "SZ-live-manila-2025-12-27-006 (scenario without Cózar-B)",
-  "SZ-live-manila-2025-12-27-009 (scenario without Cózar-B)",
-  "SZ-live-manila-2026-04-01-005 (scenario without Cózar-B)",
-  "SZ-live-manila-2026-04-01-010 (scenario without Cózar-B)",
-  "SZ-live-mumbai-2025-01-31-004 (scenario without Cózar-B)",
-  "SZ-live-nile-2026-01-05-001 (scenario without Cózar-B)",
-  "SZ-live-santo_domingo-2025-10-18-001 (scenario without Cózar-B)",
-  "SZ-live-santo_domingo-2025-12-30-001 (scenario without Cózar-B)"
- ],
+ "fail": [],
  "by_kind_status_scenario_cozar": {
-  "demo|detected|True|False": 9,
-  "demo|detected|True|True": 14,
-  "drift|detected|True|False": 21,
-  "drift|insufficient_data|False|False": 19,
-  "drift|not_detected|False|False": 9,
-  "live|detected|True|False": 100,
-  "live|insufficient_data|False|False": 92,
-  "live|not_detected|False|False": 22
+  "demo|detected|False|False": 9,
+  "demo|detected|False|True": 14,
+  "drift|detected|False|False": 7,
+  "drift|insufficient_data|False|False": 33,
+  "drift|not_detected|False|False": 8,
+  "drift|not_informative|False|False": 1,
+  "live|detected|False|False": 61,
+  "live|insufficient_data|False|False": 131,
+  "live|not_detected|False|False": 20,
+  "live|not_informative|False|False": 2
  }
 }

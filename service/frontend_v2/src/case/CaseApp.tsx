@@ -230,12 +230,15 @@ export default function CaseApp() {
   const lastSource = useRef<string | null | undefined>(url.cam ? q.source : undefined);
   /** a selection from the URL flies to itself once the data are there (not to the акватория) */
   const pendingFly = useRef(!!url.sel && !url.cam);
+  /** the URL selection keeps the camera: the first акватория/world fly must not override it even if the selection
+   *  flew before all observations loaded (bug: ?sel=zone:SZ-… opened on the globe) */
+  const urlSelFly = useRef(!!url.sel && !url.cam);
   useEffect(() => {
     if (!allObs.data || !mapReady) return;
     if (lastSource.current === q.source) return;
     const first = lastSource.current === undefined;
     lastSource.current = q.source;
-    if (first && pendingFly.current) return;
+    if (first && urlSelFly.current) return;
     if (q.source && srcBox.get(q.source)) flyToBox(srcBox.get(q.source)!, { duration: 1800, maxZoom: 9 });
     else if (!q.source && ctl.map) ctl.map.flyTo({ center: WORLD_CENTER, zoom: worldZoom(ctl.map.getContainer().clientHeight), duration: 1800, essential: true });
   }, [q.source, srcBox, allObs.data, mapReady]);
@@ -1047,7 +1050,7 @@ const DET_FILTER_RU: Record<string, string> = {
 };
 
 const SZ_FLAG_RU: Record<string, string> = { foam: 'пена', glint: 'блик', ship: 'судно', seam: 'шов', coast: 'берег', shallow: 'мелководье', cloud: 'облака' };
-const SZ_ORDER = ['detected', 'unverified', 'insufficient_data', 'not_detected'];
+const SZ_ORDER = ['detected', 'unverified', 'insufficient_data', 'not_detected', 'not_informative'];
 
 /** satellite scene zones of the current filter: the held-out Cózar scene first, then by status and pixel area */
 function SzList({ szOn, fc, err, list, sel, onPick }: { szOn: boolean; fc: FC<SceneZoneProps> | null; err: string | null; list: Feat<SceneZoneProps>[]; sel: string | null; onPick: (id: string) => void }) {
@@ -1070,7 +1073,8 @@ function SzList({ szOn, fc, err, list, sel, onPick }: { szOn: boolean; fc: FC<Sc
           Зоны, где текущий детектор (weights/lgbm, порог 0,63) нашёл подозрительные пиксели на реальных снимках: отложенная сцена Cózar 2024 и снимки районов.
           «Обнаружено детектором» — только после фильтров судов/кильватера, пены, блика, облаков, берега и мелководья; с нитью каталога Cózar 2024 (разметка
           людьми) — «совпадает с разметкой Cózar (B)», без неё — «вероятный плавающий материал, требует проверки». Суда и прочие признаки → «недостаточно данных»
-          (не «верное срабатывание»). Концентрация по снимку не подтверждена: шт./км² не выдаём. Снимки с низким солнцем зон не дают.
+          (не «верное срабатывание»). Концентрация по снимку не подтверждена: шт./км² не выдаём. При ветре ≥ 5 м/с (Cózar 2024 исключают такую воду) «не обнаружено» —
+          «ноль не информативен», LWD с пометкой. Снимки с низким солнцем зон не дают.
         </Info>
       </div>
       {szOn && err && (
@@ -1226,6 +1230,10 @@ function CaseLegend({
                 <span className="c-chip">
                   <i className="sq" style={{ background: SZ_COLORS.not_detected }} />
                   не обнаружено
+                </span>
+                <span className="c-chip" data-testid="legend-sz-wind">
+                  <i className="sq" style={{ background: SZ_COLORS.not_informative }} />
+                  ноль не информативен (ветер ≥ 5 м/с)
                 </span>
               </div>
               <div className="c-lg-note">класс MARIDA Marine Debris = любой плавающий мусор, не только пластик; без полевого подтверждения</div>

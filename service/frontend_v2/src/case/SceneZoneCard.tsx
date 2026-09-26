@@ -22,6 +22,8 @@ export interface SceneZoneProps {
   verification?: string;
   training_scene?: string | null;
   training_scene_note?: string | null;
+  wind_high?: boolean;
+  wind_note?: string | null;
   concentration_status: string;
   status_note?: string;
   flags: string[];
@@ -67,6 +69,7 @@ export interface SceneZoneProps {
       ci95_hi: number | null;
     }[];
     nearest_organizer_sample?: { sample_id: string; source_id: string; distance_km: number };
+    authors_calibration?: { C: number; lo_typ: number; hi_typ: number; ours_raw_C: number; label: string; source: string; size_class: string } | null;
     note: string;
   } | null;
 }
@@ -86,7 +89,7 @@ export interface SceneZoneDetail extends Feat<SceneZoneProps> {
   scene: { preview_url: string | null; quality_url: string | null; wind10m_ms?: number | null; sun_zenith_deg?: number | null; lwd_m2_km2?: number | null; water_km2?: number | null } | null;
 }
 
-export const SZ_COLOR: Record<string, string> = { detected: '#ff8c42', unverified: '#d9b870', not_detected: '#2b8a3e', insufficient_data: '#868e96' };
+export const SZ_COLOR: Record<string, string> = { detected: '#ff8c42', unverified: '#d9b870', not_detected: '#2b8a3e', not_informative: '#5c7c8a', insufficient_data: '#868e96' };
 const SIGN_RU: Record<string, string> = { foam: 'пена', glint: 'блик', ship: 'судно / кильватер', seam: 'шов / граница яркости', coast: 'берег / прибой ближе 300 м', shallow: 'мелководье / мутная вода', cloud: 'облака ≥ 20 % зоны' };
 
 
@@ -132,6 +135,11 @@ export default function SceneZoneCard({
             {p.detection_label}
           </span>
           {p.detection_reason && <div className="c-line" data-testid="sz-reason">{p.detection_reason}</div>}
+          {p.wind_note && (
+            <div className="c-line sz-warn" data-testid="sz-wind">
+              {p.wind_note}
+            </div>
+          )}
           {p.training_scene_note && (
             <div className="c-line sz-warn" data-testid="sz-training">
               {p.training_scene_note}
@@ -168,6 +176,11 @@ export default function SceneZoneCard({
             <dt>LWD (м² на км² пригодной воды)</dt>
             <dd data-testid="sz-lwd">
               {num(m.lwd_m2_km2, 0)} <span className="faint">· вода {num(m.water_km2, 2)} км²</span>
+              {(m as any).lwd_note && (
+                <div className="c-line sz-warn tiny" data-testid="sz-lwd-note">
+                  {(m as any).lwd_note}
+                </div>
+              )}
             </dd>
             <dt>Маска качества в зоне</dt>
             <dd data-testid="sz-quality">
@@ -254,6 +267,15 @@ export default function SceneZoneCard({
                     </td>
                     <td className="r">
                       {num(x.c_items_km2)} <span className="faint">[{num(x.ci95_lo)}–{num(x.ci95_hi)}]</span>
+                      {(x as any).authors_cal_10cm_items_km2 !== null && (x as any).authors_cal_10cm_items_km2 !== undefined && (
+                        <div className="faint tiny" data-testid="sz-field-cal" title="калибровка авторов ADIS (по тралу, de Vries 2026), класс > 10 см; не наша">
+                          авторы (> 10 см): {num((x as any).authors_cal_10cm_items_km2)}{' '}
+                          {(x as any).authors_cal_10cm_lo95 !== null && (x as any).authors_cal_10cm_hi95 !== null
+                            ? `[${num((x as any).authors_cal_10cm_lo95)}–${num((x as any).authors_cal_10cm_hi95)}]`
+                            : '· интервал не дан'}{' '}
+                          · наше без поправок {num((x as any).raw_10cm_items_km2)}
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -267,6 +289,13 @@ export default function SceneZoneCard({
             {fn?.note}
             {fn?.nearest_organizer_sample ? ` Ближайшее измерение CSV организаторов — ${fn.nearest_organizer_sample.sample_id}, ${num(fn.nearest_organizer_sample.distance_km, 0)} км.` : ''}
           </div>
+          {fn?.authors_calibration && (
+            <div className="c-line" data-testid="sz-field-authors" title={fn.authors_calibration.source}>
+              Все отрезки ADIS ({fn.authors_calibration.size_class}): калибровка авторов ADIS (по тралу), не наша —{' '}
+              <b>{num(fn.authors_calibration.C)}</b> шт./км², типичный интервал отрезка {num(fn.authors_calibration.lo_typ)}–{num(fn.authors_calibration.hi_typ)}; наше без
+              поправки — <b>{num(fn.authors_calibration.ours_raw_C)}</b>
+            </div>
+          )}
         </div>
 
         {!!detail?.examples?.length && (

@@ -1171,5 +1171,62 @@
   }
  },
  "decision_primary": "M0_median",
- "runtime_s": 21.6
+ "runtime_s": 21.6,
+ "external_adis_calibrated": {
+  "source": "de Vries et al. 2026, Environ. Res. Commun., doi 10.1088/2515-7620/ae8152",
+  "dataset": "4TU 10.4121/ddede7f5-aca5-42ae-b851-e0bbb9a2c4c2 (CC BY 4.0)",
+  "checks": {
+   "readme_label_10cm": {
+    "cal10_zero_where_n10_zero": true,
+    "cal10_positive_where_n50_zero": 2013,
+    "corr_cal10_vs_n10_over_A": 0.9148809493550463,
+    "corr_cal10_vs_n50_over_A": 0.6437979743830077,
+    "verdict": "dhat_10cm_calibrated* — класс > 10 см; подпись «>50 cm» в Readme — ошибка копирования"
+   }
+  },
+  "profiles": {
+   "gt10cm": {
+    "n_segments": 20836,
+    "ours_raw_C": 1.5443097333986042,
+    "authors_observed_C": 3.0886194667972084,
+    "authors_observed_over_raw_median": 2.0,
+    "authors_observed_over_raw_minmax": [
+     1.9999999999999865,
+     2.000000000000013
+    ],
+    "calibrated_C": 4.64328534972866,
+    "calibrated_lo_corr": 1.328721519079018,
+    "calibrated_hi_corr": 64.22239741829083,
+    "calibrated_lo_typ": 1.1518796578327388,
+    "calibrated_hi_typ": 18.717318855660842,
+    "cal_over_observed_median": 1.4825868241910973,
+    "seg_lo_over_c_median": 0.24807427738638793,
+    "seg_hi_over_c_median": 4.031050742284152,
+    "n_negative_calibrated": 7,
+    "n_positive": 5915,
+    "n_positive_without_interval": 2580
+   },
+   "gt50cm": {
+    "n_segments": 20836,
+    "ours_raw_C": 0.5612415569907149,
+    "authors_observed_C": 1.1224831139814297,
+    "authors_observed_over_raw_median": 2.0,
+    "authors_observed_over_raw_minmax": [
+     1.9999999999999873,
+     2.0000000000000124
+    ],
+    "calibrated_C": 1.65589295680881,
+    "calibrated_lo_corr": 0.43030844269564505,
+    "calibrated_hi_corr": 42.20343025169226,
+    "calibrated_lo_typ": 0.4307190850039176,
+    "calibrated_hi_typ": 6.366055231530021,
+    "cal_over_observed_median": 1.3813895669768101,
+    "seg_lo_over_c_median": 0.2601128794182368,
+    "seg_hi_over_c_median": 3.8444847569123684,
+    "n_negative_calibrated": 3,
+    "n_positive": 3902,
+    "n_positive_without_interval": 1785
+   }
+  }
+ }
 }

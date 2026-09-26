@@ -627,7 +627,9 @@ def field_poisson_ci(r: dict) -> dict:
                               "N — не числитель этой величины")
         return out
     out.update({"n_items": n, "ci95_lo": round(res.lower, 4), "ci95_hi": round(res.upper, 4),
-                "ci95_method": "95 % ДИ Пуассона для N, делённый на A (эталон, не прогноз)"
+                "ci95_method": "95 % ДИ Пуассона для N, делённый на A (эталон, не прогноз): только ошибка счёта этой полосы; "
+                               "пятнистость между соседними полосами сверх Пуассона (sd ln C ≈ 0.46) не входит — "
+                               "reports/quantity/field_intervals.md"
                                + (f"; {res.note}" if res.note else "")})
     return out
 
@@ -746,9 +748,31 @@ def _profile_median_estimate(profile: str) -> Optional[dict]:
             "scenarios": profile_scenarios(profile)}
 
 
+def _fn_quantity() -> dict:
+    fn = _cached("final_numbers", PATHS["final_numbers"], _read_json) or {}
+    return (((fn.get("case") or {}).get("sections") or {}).get("quantity") or {})
+
+
+def profile_pooled(profile_config: str) -> Optional[dict]:
+    """§28 А (L108): the profile mean with two intervals from final_numbers — cluster bootstrap over cruise days (the
+    honest one; plus the range for one new place) and Poisson (only the counting error)."""
+    q = _fn_quantity().get("field_S2") or {}
+    if not q or not str(profile_config or "").startswith("S2") or q.get("pooled_C") is None:
+        return None
+    return {"mean": q.get("pooled_C"), "unit": "items/km2", "n": q.get("n"),
+            "boot_lo95": q.get("boot_lo95"), "boot_hi95": q.get("boot_hi95"), "boot_label": q.get("boot_label"),
+            "event_lo95": q.get("event_lo95"), "event_hi95": q.get("event_hi95"),
+            "event_label": "для одного нового места (разброс между событиями)",
+            "poisson_lo95": q.get("lo95"), "poisson_hi95": q.get("hi95"),
+            "poisson_label": "только ошибка счёта (Пуассон)", "source": "reports/final_numbers.json · quantity.field_S2"}
+
+
 def obs_field_estimate(sample_id: str) -> Optional[dict]:
     prof = profile_members().get(sample_id)
-    return profile_median_estimate(prof) if prof else None
+    fe = profile_median_estimate(prof) if prof else None
+    if fe is not None:
+        fe["profile_pooled"] = profile_pooled(fe.get("profile_config") or prof)
+    return fe
 
 
 def model_estimate_for(sample_id: str) -> Optional[dict]:
@@ -2083,6 +2107,7 @@ PATHS.setdefault("scene_zones_dir", REPO / "data" / "case" / "scene_zones")
 SZ_DET_LABEL = {
     "detected": "обнаружено детектором (без полевого подтверждения)",
     "not_detected": "не обнаружено (детектор оценивается, объектов нет)",
+    "not_informative": "ноль не информативен (ветер ≥ 5 м/с)",
     "insufficient_data": "недостаточно данных: признаки ложного срабатывания",
 }
 SZ_FLAG_RU = {"foam": "пена", "glint": "блик", "ship": "судно/кильватер", "seam": "шов/граница яркости",
@@ -2093,6 +2118,8 @@ SZ_VERIFY_LABEL = {
     "unverified": "обнаружено детектором · вероятный плавающий материал, требует проверки",
     "false_alarm_signs": "недостаточно данных: признаки ложного срабатывания",
 }
+SZ_WIND_NOTE = ("ветер ≥ 5 м/с (ERA5, час съёмки): Cózar et al. 2024 исключают такую воду из наблюдаемой площади — нити "
+                "при сильном ветре не формируются и не держатся; отсутствие детекций ничего не говорит, LWD не сравнимо")
 SZ_FALSE_LABEL = "ложное срабатывание (признаки судна / кильватера / шва) — недостаточно данных"
 SZ_QUANTITY = {"status": "not_confirmed", "label": "концентрация по снимку не подтверждена",
                "detail": "перевод площади в штуки не показываем: нет калибровочных пар (см. docs/QUANTITY.md)"}
@@ -2115,13 +2142,18 @@ def _sz_enrich(f: dict, idx: dict) -> dict:
     p = f["properties"]
     st = p["detection_status"]
     ver = p.get("verification") or ("false_alarm_signs" if p.get("flags") else None)
-    p["verification"] = ver if st != "not_detected" else "none"
-    p["detection_label"] = SZ_VERIFY_LABEL.get(ver) if st != "not_detected" and ver else SZ_DET_LABEL.get(st, st)
+    zero = st in ("not_detected", "not_informative")
+    p["verification"] = ver if not zero else "none"
+    p["detection_label"] = SZ_VERIFY_LABEL.get(ver) if not zero and ver else SZ_DET_LABEL.get(st, st)
+    # Г3-1: Cózar 2024 exclude sea with wind > 5 m/s (windrows do not form / hold)
+    p["wind_note"] = (SZ_WIND_NOTE if p.get("wind_high") else None)
     if ver == "false_alarm_signs" and {"ship", "seam"} & set(p.get("flags") or []):
         p["detection_label"] = SZ_FALSE_LABEL
     p["training_scene_note"] = (f"снимок из обучающей выборки детектора ({p['training_scene']}) — не независимая проверка"
                                 if p.get("training_scene") else None)
-    if p.get("flags"):
+    if st == "not_informative":
+        p["detection_reason"] = None
+    elif p.get("flags"):
         p["detection_reason"] = ("признаки: " + ", ".join(SZ_FLAG_RU.get(x, x) for x in p["flags"])
                                  + " — вероятно, ложное срабатывание")
     else:
@@ -2142,6 +2174,11 @@ def _sz_enrich(f: dict, idx: dict) -> dict:
     p["concentration_reason"] = SZ_QUANTITY["detail"]
     p["scenario"] = None
     p["scenario_reason"] = SZ_QUANTITY["detail"]
+    fnb = p.get("field_nearby") or {}
+    ac = (_fn_quantity().get("adis_forecast") or {}).get("authors_calibrated") or {}
+    fnb["authors_calibration"] = ({"C": ac.get("C"), "lo_typ": ac.get("lo_typ"), "hi_typ": ac.get("hi_typ"),
+                                   "ours_raw_C": ac.get("ours_raw_C"), "label": ac.get("label"), "source": ac.get("source"),
+                                   "size_class": "> 10 см"} if ac.get("C") is not None else None)
     pr = p.get("probable") or {}
     pr["status"] = p["detection_label"]
     pr["cozar_note"] = (f"контур пересекает {p.get('n_cozar_filaments')} нит(и) каталога Cózar et al. 2024 "

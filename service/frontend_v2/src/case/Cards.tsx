@@ -551,15 +551,17 @@ export function ObsCard({
   );
 }
 
+/** §28 А (L108): the record interval is the counting error only; patchiness (sd of ln C ≈ 0.46) is not in it */
+const POISSON_NOTE = '95 % интервал счёта (Пуассон); пятнистость (разброс ln C ≈ 0.46) не входит';
 /** 95 % interval of a field density: from the API (ci95_lo/hi), else exact Poisson from N (numerator) and the area */
 function obsInterval(p: ObsProps): string {
   const n = p.density_numerator_items ?? p.items_count ?? null;
   const nTxt = n !== null ? `, Пуассон по N=${num(n, 0)}` : ', Пуассон';
   if (p.ci95_lo !== null && p.ci95_lo !== undefined && p.ci95_hi !== null && p.ci95_hi !== undefined)
-    return `95 % интервал [${num(p.ci95_lo)}; ${num(p.ci95_hi)}] шт./км²${nTxt}`;
+    return `[${num(p.ci95_lo)}; ${num(p.ci95_hi)}] шт./км² — ${POISSON_NOTE}${nTxt}`;
   if (n !== null && p.sampled_area_km2) {
     const [lo, hi] = poissonCI(n, p.sampled_area_km2);
-    return `95 % интервал [${num(lo)}; ${num(hi)}] шт./км²${nTxt}`;
+    return `[${num(lo)}; ${num(hi)}] шт./км² — ${POISSON_NOTE}${nTxt}`;
   }
   return 'интервал: нет данных N';
 }
@@ -591,6 +593,16 @@ function ModelEstimate({ meta, p }: { meta: Meta; p: ObsProps }) {
             {fe.lo !== null && fe.lo !== undefined && fe.hi !== null && fe.hi !== undefined ? `[${num(fe.lo)}; ${num(fe.hi)}]` : 'интервал не рассчитан'}
             {fe.interval ? ` · покрытие ${fe.interval}` : ''}
           </div>
+          {(fe as any).profile_pooled && (
+            <div className="c-line" data-testid="obs-profile-pooled" title={(fe as any).profile_pooled.source}>
+              среднее профиля {num((fe as any).profile_pooled.mean)} [{num((fe as any).profile_pooled.boot_lo95)}–{num((fe as any).profile_pooled.boot_hi95)}] шт./км² —{' '}
+              {(fe as any).profile_pooled.boot_label}; {(fe as any).profile_pooled.event_label}: {num((fe as any).profile_pooled.event_lo95)}–
+              {num((fe as any).profile_pooled.event_hi95)}.{' '}
+              <span className="faint">
+                Пуассон [{num((fe as any).profile_pooled.poisson_lo95)}–{num((fe as any).profile_pooled.poisson_hi95)}] — {(fe as any).profile_pooled.poisson_label}.
+              </span>
+            </div>
+          )}
           {scenLine((fe as any).scenarios) && (
             <div className="c-line" data-testid="obs-field-scenarios">
               {scenLine((fe as any).scenarios)}

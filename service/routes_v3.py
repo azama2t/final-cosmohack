@@ -175,7 +175,8 @@ def _sz_filters(q: dict) -> dict:
     a, b = cs.parse_dates(q.get("date_from"), q.get("date_to"))
     return {"bbox": cs.parse_bbox(q.get("bbox")), "date_from": a, "date_to": b,
             "statuses": cs.parse_list(q.get("status"), "status", cs.STATUS_IDS),
-            "detection_statuses": cs.parse_list(q.get("detection_status"), "detection_status", cs.DETECTION_STATUS_IDS),
+            "detection_statuses": cs.parse_list(q.get("detection_status"), "detection_status",
+                                                cs.DETECTION_STATUS_IDS + ["not_informative"]),
             "concentration_statuses": cs.parse_list(q.get("concentration_status"), "concentration_status",
                                                     cs.CONCENTRATION_STATUS_IDS),
             "scene_kinds": cs.parse_list(q.get("scene_kind"), "scene_kind", ["demo", "live", "drift"]),

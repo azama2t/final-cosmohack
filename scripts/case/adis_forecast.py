@@ -319,6 +319,95 @@ def field_summary(seg: pd.DataFrame, prof: str) -> dict:
             "regions_bottom5": top.tail(5).reset_index().round(3).to_dict("records")}
 
 
+# ------------------------------------------------------------------ внешняя оценка: калибровка авторов ADIS (Г1-1, §28 Б)
+ADIS_PAPER = "de Vries et al. 2026, Environ. Res. Commun., doi 10.1088/2515-7620/ae8152"
+
+
+def external_calibrated(cfg: dict) -> dict:
+    """Калиброванная авторами ADIS плотность (dhat_*_calibrated, lo95/hi95) — ВНЕШНЯЯ справка.
+    Не признак, не цель модели, не замена нашей C = N/A. Те же отрезки (A ≥ 0.1 км², nphotos > 0)."""
+    d = pd.read_csv(ROOT / cfg["data"]["file"])
+    d = d[(d["area_scanned_km2"] >= 0.1) & (d["nphotos"] > 0)].reset_index(drop=True)
+    A = d["area_scanned_km2"].to_numpy(float)
+    n10, n50 = d["n_objects>10cm"].to_numpy(float), d["n_objects>50cm"].to_numpy(float)
+    c10 = d["dhat_10cm_calibrated"].to_numpy(float)
+    res = {"source": ADIS_PAPER, "dataset": "4TU 10.4121/ddede7f5-aca5-42ae-b851-e0bbb9a2c4c2 (CC BY 4.0)",
+           "checks": {"readme_label_10cm": {
+               "cal10_zero_where_n10_zero": bool(np.all(c10[n10 == 0] == 0)),
+               "cal10_positive_where_n50_zero": int(((c10 > 0) & (n50 == 0)).sum()),
+               "corr_cal10_vs_n10_over_A": float(np.corrcoef(c10, n10 / A)[0, 1]),
+               "corr_cal10_vs_n50_over_A": float(np.corrcoef(c10, n50 / A)[0, 1]),
+               "verdict": "dhat_10cm_calibrated* — класс > 10 см; подпись «>50 cm» в Readme — ошибка копирования"}},
+           "profiles": {}}
+    for p, sz in (("gt10cm", "10cm"), ("gt50cm", "50cm")):
+        n = d[f"n_objects>{sz}"].to_numpy(float)
+        obs = d[f"dhat_{sz}"].to_numpy(float)
+        c = d[f"dhat_{sz}_calibrated"].to_numpy(float)
+        lo, hi = d[f"dhat_{sz}_calibrated_lo95"].to_numpy(float), d[f"dhat_{sz}_calibrated_hi95"].to_numpy(float)
+        neg = c < 0
+        ok, pos = ~neg, (c > 0)
+        has_iv = pos & np.isfinite(lo) & np.isfinite(hi)
+        point = float((c[ok] * A[ok]).sum() / A[ok].sum())
+        r_lo = float((lo[has_iv] * A[has_iv]).sum() / (c[has_iv] * A[has_iv]).sum())
+        r_hi = float((hi[has_iv] * A[has_iv]).sum() / (c[has_iv] * A[has_iv]).sum())
+        ratio_obs = obs[n > 0] / (n[n > 0] / A[n > 0])
+        po = pos & (obs > 0)
+        res["profiles"][p] = {
+            "n_segments": int(len(d)), "ours_raw_C": float(n.sum() / A.sum()),
+            "authors_observed_C": float((obs * A).sum() / A.sum()),
+            "authors_observed_over_raw_median": float(np.median(ratio_obs)),
+            "authors_observed_over_raw_minmax": [float(ratio_obs.min()), float(ratio_obs.max())],
+            "calibrated_C": point, "calibrated_lo_corr": point * r_lo, "calibrated_hi_corr": point * r_hi,
+            "calibrated_lo_typ": point * float(np.median(lo[has_iv] / c[has_iv])),
+            "calibrated_hi_typ": point * float(np.median(hi[has_iv] / c[has_iv])),
+            "cal_over_observed_median": float(np.median(c[po] / obs[po])),
+            "seg_lo_over_c_median": float(np.median(lo[has_iv] / c[has_iv])),
+            "seg_hi_over_c_median": float(np.median(hi[has_iv] / c[has_iv])),
+            "n_negative_calibrated": int(neg.sum()), "n_positive": int(pos.sum()),
+            "n_positive_without_interval": int((pos & ~has_iv).sum())}
+    return res
+
+
+def external_md(o: dict) -> list[str]:
+    e = o.get("external_adis_calibrated")
+    if not e:
+        return []
+    ch = e["checks"]["readme_label_10cm"]
+    g10 = e["profiles"]["gt10cm"]
+    L = ["## 1б. Рядом — ВНЕШНЯЯ оценка: калибровка авторов ADIS (не наша, не признак, не прогноз)", "",
+         f"Источник: {e['source']}; данные {e['dataset']}, колонки `dhat_*`, `dhat_*_calibrated`, `*_lo95`, `*_hi95` (шт./км²). "
+         "По статье: наблюдаемая плотность = счёт / площадь обзора × 2 (поправка на спад обнаружения с расстоянием); "
+         "калиброванная — плюс мультипликативные поправки на освещение (солнечный аспект) и скорость и перевод к "
+         "«эквиваленту мега-трала» (в тексте 1 : 5.7 для 10–50 см, 1 : 4.8 для > 50 см); интервал логнормальный, "
+         "дисперсии поправок и счёта сложены (Тейлор 1-го порядка).", "",
+         "| профиль | наша C = ΣN/ΣA (без поправок) | авторы: наблюдаемая | **авторы: калиброванная, ΣC·A/ΣA** | "
+         "95 % диапазон (типичная ширина интервала авторов) | медиана калибр. / наблюд. | отрезков с C_cal < 0 (исключены) | C_cal > 0 без интервала |",
+         "|---|---:|---:|---:|---|---:|---:|---:|"]
+    for p, r in e["profiles"].items():
+        lab = "> 10 см" if p == "gt10cm" else "> 50 см"
+        L.append(f"| {lab} | {r['ours_raw_C']:.2f} | {r['authors_observed_C']:.2f} | **{r['calibrated_C']:.2f}** | "
+                 f"{r['calibrated_lo_typ']:.2f}–{r['calibrated_hi_typ']:.2f} | {r['cal_over_observed_median']:.2f} | "
+                 f"{r['n_negative_calibrated']} | {r['n_positive_without_interval']} из {r['n_positive']} |")
+    L += ["", "Оговорки (проверено по файлу 26.09):",
+          f"- Подпись Readme у `dhat_10cm_calibrated*` («>50 cm») — ошибка: колонка = 0 везде, где предметов > 10 см нет, и > 0 в "
+          f"{ch['cal10_positive_where_n50_zero']} отрезках без предметов > 50 см; корреляция с N>10/A {ch['corr_cal10_vs_n10_over_A']:.2f}, "
+          f"с N>50/A {ch['corr_cal10_vs_n50_over_A']:.2f}. Это класс > 10 см.",
+          f"- «Наблюдаемая» авторов на каждом отрезке ровно в {g10['authors_observed_over_raw_median']:.0f} раза больше нашей N/A "
+          "(их поправка ×2 на спад обнаружения).",
+          "- В файле калиброванная / наблюдаемая — медиана ≈ 1.4–1.5 (по судам 1.2–2.9), а не 5.7 / 4.8 из текста статьи; точная "
+          "формула — в приложении S1, его мы не сверяли. Число авторов берём как есть и не пересчитываем.",
+          "- Есть отрезки с отрицательной калиброванной плотностью и отрицательными границами (артефакт расчёта у авторов) — они "
+          "исключены; у части положительных отрезков интервала нет (NaN).",
+          f"- 95 % диапазон = средняя × медианные отношения lo/C и hi/C по отрезкам с интервалом (×{g10['seg_lo_over_c_median']:.2f} … "
+          f"×{g10['seg_hi_over_c_median']:.1f} для > 10 см): допущение, что ошибка поправки общая для всех отрезков и не усредняется. "
+          "Своего интервала для суммы по отрезкам авторы не дают. Если взвешивать границы площадью (Σlo·A / ΣC·A, Σhi·A / ΣC·A), верх "
+          f"уходит до {g10['calibrated_hi_corr']:.0f} шт./км² из-за единичных отрезков с hi/C в сотни раз — это видно в json "
+          "(`calibrated_*_corr`), для показа не берём.",
+          "- В прогнозе (раздел 2) и в правиле принятия эти колонки НЕ участвуют: в них зашит счёт (утечка). Наше число не "
+          "заменяется (§24); калиброванное — справка «по данным авторов ADIS».", ""]
+    return L
+
+
 # ------------------------------------------------------------------ run
 def run(stage: str) -> dict:
     t0 = time.time()
@@ -392,6 +481,7 @@ def run(stage: str) -> dict:
                 dec["why"] = (f"{sel} прошёл val и test (регионы)" if acc else
                               f"{sel} прошёл val, но не подтвердился на отложенных регионах → медиана")
         out["decision_primary"] = out["decision"][cfg["profile"]["primary"]]["final"]
+    out["external_adis_calibrated"] = external_calibrated(cfg)
     out["runtime_s"] = round(time.time() - t0, 1)
     return out
 
@@ -449,6 +539,7 @@ def render_md(o: dict, cfg: dict) -> str:
         L.append(f"| {r['region']} | {r['n_seg']} | {r['ships']} | {r['N']:.0f} | {r['A']:.1f} | {r['C']:.2f} [{r['C_lo']:.2f}–{r['C_hi']:.2f}] |")
     L += ["", "Отрезок ADIS — 10 км одной камеры (площадь обзора медиана ≈ 0.8 км²); интервал — только счётная (пуассоновская) "
           "ошибка, без поправки на пропуски мелких предметов. Отрезок на отрезке: C = N / A; отрезки двух бортов одного прохода зависимы.", ""]
+    L += external_md(o)
     for scheme, sc in o["schemes"].items():
         name = "регионы 10° × 10° (основное)" if scheme == "region" else "суда (вторичное)"
         L += [f"## 2{'a' if scheme == 'region' else 'b'}. Разбиение: {name}", "",
@@ -509,6 +600,9 @@ def main() -> None:
     cfg = load_cfg()
     if a.stage == "render":  # только перерисовать md из сохранённого json (test не трогается)
         o = json.loads((REP / "adis_forecast.json").read_text(encoding="utf-8"))
+        o["external_adis_calibrated"] = external_calibrated(cfg)  # описательное; test не трогается
+        (REP / "adis_forecast.json").write_text(json.dumps(o, ensure_ascii=False, indent=1, default=str),
+                                                encoding="utf-8")
         (REP / "adis_forecast.md").write_text(render_md(o, cfg), encoding="utf-8")
         return
     o = run(a.stage)

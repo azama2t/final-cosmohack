@@ -28,7 +28,7 @@ def test_scene_zones_blocks_and_statuses(client):
     for f in fc["features"]:
         p = f["properties"]
         assert p["kind"] == "detection_zone" and p["concentration"] is None
-        assert p["detection_status"] in ("detected", "not_detected", "insufficient_data")
+        assert p["detection_status"] in ("detected", "not_detected", "not_informative", "insufficient_data")
         m = p["measured"]
         assert m["zone_area_km2"] > 0 and m["suspicious_area_m2"] == m["n_pixels"] * 100
         # INBOX §23 п.2: no items/km2 scenario at all; quantity status «концентрация по снимку не подтверждена»
@@ -131,3 +131,24 @@ def test_demo_scene_cozar_zones_detected_level_b(client):
     assert len(b) >= 10
     for p in b:
         assert p["detection_label"] == "обнаружено детектором · совпадает с разметкой Cózar (B)"
+
+
+def test_wind_rule_zero_not_informative(client):
+    """Г3-1: wind >= 5 m/s — «не обнаружено» becomes «ноль не информативен», LWD gets a note."""
+    idx = cs.scene_zones_index()
+    wind = {s["key"]: s.get("wind10m_ms") for s in idx["scenes"]}
+    fc = client.get("/api/v3/scene_zones").json()
+    for f in fc["features"]:
+        p = f["properties"]
+        w = wind.get(p["scene_key"])
+        high = w is not None and w >= 5
+        assert bool(p.get("wind_high")) == high
+        if high:
+            assert p["detection_status"] != "not_detected" and p["measured"]["lwd_note"] and p["wind_note"]
+            if p["zone_id"].endswith("-000"):
+                assert p["detection_status"] == "not_informative"
+                assert p["detection_label"] == "ноль не информативен (ветер ≥ 5 м/с)"
+        else:
+            assert p["detection_status"] != "not_informative" and not p["measured"].get("lwd_note")
+    ni = client.get("/api/v3/scene_zones", params={"detection_status": "not_informative"}).json()
+    assert all(f["properties"]["detection_status"] == "not_informative" for f in ni["features"])

@@ -233,6 +233,8 @@
 
 {{derived.case_final_test_text}}
 
+- **Полевой прогноз для ADIS** (> 10 см, {{case.sections.quantity.adis_forecast.n_segments|int}} отрезков): ΣN/ΣA = {{case.sections.quantity.adis_forecast.C|f2}} [{{case.sections.quantity.adis_forecast.lo|f2}}–{{case.sections.quantity.adis_forecast.hi|f2}}] шт./км², нулевых отрезков {{case.sections.quantity.adis_forecast.zero_pct|f0}} % ({{case.sections.quantity.adis_forecast.note_zero}}). Прогноз по координатам и сезону с правилом, записанным до метрик, и разбиением {{case.sections.quantity.adis_forecast.split}}: {{case.sections.quantity.adis_forecast.verdict}}. На отложенных регионах ({{case.sections.quantity.adis_forecast.test_n|int}} отрезков) медиана — MAE {{case.sections.quantity.adis_forecast.test_mae_median|f2}}, RMSE {{case.sections.quantity.adis_forecast.test_rmse_median|f2}} шт./км², покрытие 90 %-интервала {{case.sections.quantity.adis_forecast.test_cov90_median|f0}} % (`reports/quantity/adis_forecast.md`). Для сравнения — {{case.sections.quantity.adis_forecast.authors_calibrated.label}}: {{case.sections.quantity.adis_forecast.authors_calibrated.C|f2}} шт./км² (типичный интервал отрезка {{case.sections.quantity.adis_forecast.authors_calibrated.lo_typ|f2}}–{{case.sections.quantity.adis_forecast.authors_calibrated.hi_typ|f1}}; {{case.sections.quantity.adis_forecast.authors_calibrated.source}}); наша — {{case.sections.quantity.adis_forecast.authors_calibrated.ours_raw_C|f2}}. Оговорка: {{case.sections.quantity.adis_forecast.authors_calibrated.caveat}}.
+
 ### 4.4 Модели на dev
 
 **Протокол записан до запуска CV** (`configs/case_conc_model.yaml: protocol`):

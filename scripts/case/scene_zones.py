@@ -53,6 +53,8 @@ MIN_ZONE_PX = 5
 GLINT_B11 = 0.01
 FOAM_WHITE = 0.8
 FOAM_WIND = 7.0
+WIND_ZERO = 5.0         # Г3-1 (Cózar et al. 2024 exclude sea with wind > 5 m/s: windrows do not form / hold) -> a zero
+                        # is not informative and the LWD denominator (usable water) is not comparable with Cózar
 ART_FRAC = 0.3
 MAX_PX = 1024
 SHIP_NEAR_M = 500.0     # K2 (audit): a bright target (ship blob or dry hull) with SWIR response this close -> boat traffic
@@ -69,6 +71,8 @@ QUANTITY = {
     "label": "концентрация по снимку не подтверждена",
     "detail": "перевод площади в штуки не показываем: нет калибровочных пар (см. docs/QUANTITY.md)",
 }
+LWD_WIND_NOTE = ("ветер ≥ 5 м/с: Cózar 2024 исключают такую воду из наблюдаемой площади (нити не формируются) — "
+                 "LWD не сравнимо с их значениями")
 CLOUD_ZONE = 0.2        # cloud / cloud shadow (quality codes 3, 4) >= 20 % of the zone -> cloud sign
 
 
@@ -143,6 +147,25 @@ _ADIS = None
 _ORG = None
 
 
+def adis_calibrated(r) -> dict:
+    """§28 Б (L119 rule): the ADIS authors' trawl calibration of this segment (> 10 cm; de Vries et al. 2026) next to our
+    raw C = N(> 10 cm) / A. C_cal < 0 or NaN -> not shown; lo/hi NaN -> «интервал не дан»."""
+    def f(k):
+        try:
+            v = float(r[k])
+        except (KeyError, TypeError, ValueError):
+            return None
+        return None if math.isnan(v) else v
+    a = f("area_scanned_km2")
+    n10 = f("n_objects>10cm")
+    cal, lo, hi = f("dhat_10cm_calibrated"), f("dhat_10cm_calibrated_lo95"), f("dhat_10cm_calibrated_hi95")
+    ok = cal is not None and cal >= 0
+    return {"raw_10cm_items_km2": round(n10 / a, 2) if (n10 is not None and a) else None,
+            "authors_cal_10cm_items_km2": round(cal, 2) if ok else None,
+            "authors_cal_10cm_lo95": round(lo, 2) if ok and lo is not None else None,
+            "authors_cal_10cm_hi95": round(hi, 2) if ok and hi is not None else None}
+
+
 def field_nearby(lon: float, lat: float, scene_date: str) -> dict:
     """Nearest independent field measurements: ADIS segments (> 5 cm, C = N/A) and the organisers' CSV."""
     global _ADIS, _ORG
@@ -164,7 +187,7 @@ def field_nearby(lon: float, lat: float, scene_date: str) -> dict:
                       "distance_km": round(float(km.iloc[i]), 1), "lon": round(float(r.Longitude), 5), "lat": round(float(r.Latitude), 5),
                       "n_items": n, "area_km2": round(a, 4), "size_class": "> 5 см",
                       "c_items_km2": round(n / a, 2) if a > 0 else None, "ci95_lo": lo, "ci95_hi": hi,
-                      "ci95_method": "точный интервал Пуассона для N, делённый на A"})
+                      "ci95_method": "точный интервал Пуассона для N, делённый на A", **adis_calibrated(r)})
     o = _ORG
     ko = np.hypot((o.longitude - lon) * kx, (o.latitude - lat) * 110.57)
     j = int(np.nanargmin(ko.values))
@@ -258,6 +281,7 @@ def build_scene(s: dict, cozar: pd.DataFrame, minfo: dict) -> dict:
             "water_km2": round(water_km2, 3), "det_pixels": int(det.sum()),
             "det_area_m2": int(det.sum()) * 100,
             "lwd_m2_km2": round(int(det.sum()) * 100 / water_km2, 2) if water_km2 > 0 else None,
+            "wind_high": bool(w10 is not None and w10 >= WIND_ZERO),
             "model": minfo, "crop_note": "вырезка вокруг района/сцены, не весь тайл",
             "selection": sj.get("selection")}
     info["training_scene"] = training_scene(sj)
@@ -421,8 +445,10 @@ def build_scene(s: dict, cozar: pd.DataFrame, minfo: dict) -> dict:
                 "concentration_status": "unavailable", "quantity": QUANTITY,
                 "verification": verification, "training_scene": info.get("training_scene"),
                 "flags": flags, "n_cozar_filaments": n_cz, "crop_file": crop,
+                "wind_high": info["wind_high"],
                 "measured": {"zone_area_km2": round(area_km2, 4), "suspicious_area_m2": area_m2, "n_pixels": npx,
                              "n_objects": int(len(ids)), "water_km2": round(wz_km2, 4), "lwd_m2_km2": lwd,
+                             "lwd_note": LWD_WIND_NOTE if info["wind_high"] else None,
                              "quality": {"valid_water_fraction": round(float(wz.sum() / max(m.sum(), 1)), 3),
                                          "cloud_fraction": round(cloud_share, 3),
                                          "glint_fraction": round(glint_share, 3)},
@@ -442,6 +468,8 @@ def build_scene(s: dict, cozar: pd.DataFrame, minfo: dict) -> dict:
         info["n_zones"] = k
         info["small_cluster_px"] = small_px
         if k == 0:  # evaluated, nothing (big enough) found: the observed water of the crop is «не обнаружено»
+            # Г3-1: with wind >= 5 m/s windrows do not form — a zero says nothing («ноль не информативен»)
+            zero_st = "not_informative" if info["wind_high"] else "not_detected"
             zid = f"SZ-{s['key']}-000"
             poly = box(*bw)
             gj = json.loads(json.dumps(mapping(poly)), parse_float=lambda x: round(float(x), 6))
@@ -449,12 +477,14 @@ def build_scene(s: dict, cozar: pd.DataFrame, minfo: dict) -> dict:
                 "kind": "detection_zone", "layer_kind": "scene_zone", "zone_id": zid, "scene_key": s["key"],
                 "scene_kind": s["kind"], "scene_id": sj["scene_id"], "region": s["region"],
                 "title": f"{info['region_name']} · вся вырезка", "mission": "Sentinel-2", "datetime": iso,
-                "detection_status": "not_detected", "status": "not_detected", "concentration_status": "unavailable",
+                "detection_status": zero_st, "status": zero_st, "concentration_status": "unavailable",
+                "wind_high": info["wind_high"],
                 "quantity": QUANTITY,
                 "flags": [], "n_cozar_filaments": 0,
                 "measured": {"zone_area_km2": round(abs(Geod(ellps="WGS84").geometry_area_perimeter(poly)[0]) / 1e6, 3),
                              "suspicious_area_m2": int(det.sum()) * 100, "n_pixels": int(det.sum()), "n_objects": int(n),
                              "water_km2": round(water_km2, 3), "lwd_m2_km2": info["lwd_m2_km2"],
+                             "lwd_note": LWD_WIND_NOTE if info["wind_high"] else None,
                              "quality": {"valid_water_fraction": round(float(water.mean()), 3),
                                          "cloud_fraction": round(float(np.isin(qa, (3, 4)).mean()), 3),
                                          "glint_fraction": round(float((qa == 6).mean()), 3)},
@@ -467,7 +497,7 @@ def build_scene(s: dict, cozar: pd.DataFrame, minfo: dict) -> dict:
             z["properties"]["field_nearby"] = fn
     info["n_zones_total"] = len(zones)
     info["by_status"] = {st: sum(1 for z in zones if z["properties"]["detection_status"] == st)
-                         for st in ("detected", "not_detected", "insufficient_data")}
+                         for st in ("detected", "not_detected", "not_informative", "insufficient_data")}
     (od / "zones.geojson").write_text(json.dumps({"type": "FeatureCollection", "features": zones}, ensure_ascii=False), encoding="utf-8")
     (od / "detections.geojson").write_text(json.dumps({"type": "FeatureCollection", "features": dets}, ensure_ascii=False), encoding="utf-8")
     (od / "scene.json").write_text(json.dumps(info, ensure_ascii=False, indent=1), encoding="utf-8")

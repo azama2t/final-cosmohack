@@ -379,7 +379,27 @@ def collect_quantity() -> dict:
                        "площади в штуки не показывается"}
     p = next((x for x in (fld.get("profiles") or []) if x.get("source_id") == "S2_SARGASSO_MSM41"), {})
     out["field_S2"] = {"n": _i(p.get("n_events")), "pooled_N": _i(p.get("pooled_N")), "pooled_A_km2": _r(p.get("pooled_A_km2"), 2),
-                       "pooled_C": _r(p.get("pooled_C"), 1), "lo95": _r(p.get("pooled_lo95"), 1), "hi95": _r(p.get("pooled_hi95"), 1)}
+                       "pooled_C": _r(p.get("pooled_C"), 1), "lo95": _r(p.get("pooled_lo95"), 1), "hi95": _r(p.get("pooled_hi95"), 1),
+                       "lo95_label": "только ошибка счёта (Пуассон, Гарвуд)"}
+    # §28 А (Г1-2): интервал «между событиями» — scripts/case/field_interval_check.py, правило docs/PIPELINE.md C10
+    fi = _load_json(q / "field_intervals.json") or {}
+    if fi:
+        ma, se, md = fi.get("mean_all") or {}, fi.get("single_event") or {}, fi.get("mean_dev_to_test") or {}
+        ev = se.get("dev_event_quantiles_2_5_97_5") or {}
+        out["field_S2"].update({
+            "boot_lo95": (ma.get("bootstrap_days95") or [None, None])[0], "boot_hi95": (ma.get("bootstrap_days95") or [None, None])[1],
+            "boot_label": "с разбросом между днями рейса (кластерный бутстреп, 2 000 повторов)",
+            "boot_width_ratio": ma.get("width_ratio_boot_vs_garwood"),
+            "nb2_lo95": ((ma.get("nb2") or {}).get("ci95") or [None, None])[0], "nb2_hi95": ((ma.get("nb2") or {}).get("ci95") or [None, None])[1],
+            "nb2_alpha": (ma.get("nb2") or {}).get("alpha"),
+            "test_mean": md.get("test_C"), "dev_mean": md.get("dev_C"),
+            "garwood_covers_test_mean": md.get("garwood_covers_test_mean"), "boot_covers_test_mean": md.get("bootstrap_covers_test_mean"),
+            "event_lo95": (ev.get("interval") or [None, None])[0], "event_hi95": (ev.get("interval") or [None, None])[1],
+            "event_cov_test": ev.get("coverage"), "event_n_test": se.get("n_test"),
+            "garwood_event_cov_test": (se.get("garwood95_of_dev_mean") or {}).get("coverage"),
+            "nb2_event_cov_test": (se.get("nb2_predictive95") or {}).get("coverage"),
+            "intervals_source": "reports/quantity/field_intervals.{json,md}",
+        })
     cur = cl.get("current") or {}
     out["coverage_live"] = {"n_scenes": cl.get("n_scenes"), "nonzero": cur.get("scenes_nonzero"),
                             "ppm_median": _r(cur.get("ppm_median"), 1), "ppm_max": _r(cur.get("ppm_max"), 0),
@@ -415,6 +435,36 @@ def collect_quantity() -> dict:
             "v3_rule_passed": (cc.get("verdict") or {}).get("V3_decision_rule_passed"),
             "verdict": "калибровки по ячейкам нет: в одном периоде общих дат поле × спутник 0; климатологии разных лет ранжируют районы "
                        "слабо (ρ ≈ география — удалённость от берега), правило принятия не пройдено"}
+    af2 = _load_json(q / "adis_forecast.json") or {}
+    if af2:
+        fl = (af2.get("field") or {}).get("gt10cm") or {}
+        te = ((((af2.get("schemes") or {}).get("region") or {}).get("profiles") or {}).get("gt10cm") or {}).get("test") or {}
+        m0, b1 = (te.get("M0_median") or {}).get("metrics") or {}, (te.get("B1_band_season_median") or {}).get("metrics") or {}
+        dec = (af2.get("decision") or {}).get("gt10cm") or {}
+        out["adis_forecast"] = {
+            "source": "reports/quantity/adis_forecast.{json,md}, configs/adis_forecast.yaml (правило записано до метрик)",
+            "profile": "ADIS, плавающий пластик > 10 см, камера судна",
+            "n_segments": fl.get("n_segments"), "sum_N": _i(fl.get("sum_N")), "sum_A_km2": _r(fl.get("sum_A_km2"), 0),
+            "C": _r(fl.get("C_pooled"), 2), "lo": _r(fl.get("C_pooled_lo"), 2), "hi": _r(fl.get("C_pooled_hi"), 2),
+            "zero_pct": _r(100 * (fl.get("share_zero") or 0), 0), "seg_median": _r(fl.get("C_seg_median"), 1),
+            "split": "регионы 10° × 10° (отложено 20 групп), вторичная схема — по судам",
+            "test_n": m0.get("n"), "test_mae_median": _r(m0.get("mae"), 2), "test_rmse_median": _r(m0.get("rmse"), 2),
+            "test_cov90_median": _r(100 * (m0.get("coverage90") or 0), 0), "test_mae_b1": _r(b1.get("mae"), 2),
+            "final": dec.get("final"), "verdict": dec.get("why"),
+            "note_zero": "медиана отрезка 0 ≠ «чисто»: 0 означает, что камера на этом отрезке предметов не насчитала"}
+        ex = af2.get("external_adis_calibrated") or {}
+        g10 = (ex.get("profiles") or {}).get("gt10cm") or {}
+        if g10:
+            out["adis_forecast"]["authors_calibrated"] = {
+                "C": _r(g10.get("calibrated_C"), 2), "lo_typ": _r(g10.get("calibrated_lo_typ"), 2), "hi_typ": _r(g10.get("calibrated_hi_typ"), 1),
+                "ours_raw_C": _r(g10.get("ours_raw_C"), 2), "factor_file": _r(g10.get("cal_over_observed_median"), 1),
+                "source": ex.get("source"),
+                "label": "калибровка авторов ADIS (по тралу), не наша; наша — без поправок",
+                "caveat": "коэффициент в файле ≈ 1,5 не совпадает с приведённым в тексте статьи; приложение статьи не сверено"}
+    paper = ROOT / "data" / "extra" / "cozar2024" / "paper.txt"
+    q_txt = "The current matching of satellite detections and field observations is limited to fake targets (artificial LWs), and reports of dense LW sightings"
+    out["cozar2024_quote"] = {"text": q_txt, "ref": "Cózar et al. 2024, Nat Commun, раздел «A new scenario for research and management» (PMC11178853)",
+                              "checked_in_text": (q_txt in paper.read_text(encoding="utf-8")) if paper.is_file() else None}
     out["analogy"] = {"text": "пальмы на гектар по Sentinel-2 с опорой на подсчёт по снимкам высокого разрешения (arXiv 2105.11207): "
                               "MAE ±7,3 пальмы/га",
                       "why_possible": "там объект неподвижен, однороден и даёт устойчивый сигнал в пикселе, а опорный счёт совпадает со снимком",

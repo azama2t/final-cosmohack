@@ -1,9 +1,12 @@
-// L109 (INBOX §15 «Агент 5», §16 п.2): «Счётчик предметов по фото» — отдельный модуль, НЕ спутниковая задача.
+// L109 (INBOX §15 «Агент 5», §16 п.2, §23 п.4, §24): «Счётчик предметов по фото» — отдельный модуль, НЕ спутниковая задача.
 // Загрузка фото → POST /api/v3/photo/count (docs/CONTRACTS_V3.md, 3.10) → рамки + число предметов на кадр.
+// Два типа съёмки: «камера у воды» (FML) и «аэро/дрон, надир» (Winans 2023, GSD → площадь кадра → шт./км² на кадре).
 // Порог двигается на клиенте: запрос идёт с threshold=0.05, число = рамки со score ≥ порога.
+// Поправка на пропуски p(размер) (аэро) считается на клиенте по коэффициентам из /photo/meta — только при пороге по умолчанию.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import './photo.css';
 
+type Survey = 'water_camera' | 'aerial';
 type Box = { x1: number; y1: number; x2: number; y2: number; score: number; label: string };
 type CountResp = {
   count: number;
@@ -11,6 +14,7 @@ type CountResp = {
   threshold: number;
   threshold_default: number;
   model_version: string;
+  survey_type?: Survey;
   image: { width: number; height: number };
   boxes: Box[];
   survey: string;
@@ -28,12 +32,41 @@ type Metric = {
   count_exact_ci95?: number[];
   note?: string;
 };
+type AerialMetric = {
+  n_frames: number;
+  n_items: number;
+  ap50: number;
+  count_mae: number;
+  count_mae_ci95: number[];
+  count_mae_corrected: number;
+  baseline_median_mae: number;
+  density_mae_km2: number;
+  true_km2: number;
+  raw_km2: number;
+  corrected_km2: number;
+  corrected_km2_ci95: number[];
+  note?: string;
+};
+type SurveyMeta = {
+  label: string;
+  available: boolean;
+  version?: string;
+  threshold?: number;
+  gsd_train_m?: number;
+  dataset?: string;
+  weights_license?: string;
+  metrics?: AerialMetric;
+  correction?: { bins: string[]; bins_cm: number[]; factor: number[]; factor_ci95: number[][] };
+  baseline?: { name: string; status: string };
+  limitations: string[];
+};
 type Meta = {
   available: boolean;
   survey: string;
   unit: string;
   density_note: string;
   limitations: string[];
+  surveys?: { water_camera: SurveyMeta; aerial: SurveyMeta };
   model: null | {
     version: string;
     threshold: number;
@@ -44,27 +77,48 @@ type Meta = {
   };
 };
 
-const SAMPLES = [
-  { src: 'photo_samples/fml_1.jpg', label: 'Пример 1' },
-  { src: 'photo_samples/fml_2.jpg', label: 'Пример 2' },
-  { src: 'photo_samples/fml_3.jpg', label: 'Пример 3' },
-];
+const SAMPLES: Record<Survey, { src: string; label: string }[]> = {
+  water_camera: [
+    { src: 'photo_samples/fml_1.jpg', label: 'Пример 1' },
+    { src: 'photo_samples/fml_2.jpg', label: 'Пример 2' },
+    { src: 'photo_samples/fml_3.jpg', label: 'Пример 3' },
+  ],
+  aerial: [
+    { src: 'photo_samples/winans_1.jpg', label: 'Аэро 1' },
+    { src: 'photo_samples/winans_2.jpg', label: 'Аэро 2' },
+  ],
+};
 const API = '/api/v3/photo';
 const f2 = (x: number | undefined | null, d = 2) => (x == null || !isFinite(x) ? '—' : x.toFixed(d).replace('.', ','));
 const pct = (x: number | undefined | null) => (x == null ? '—' : `${Math.round(x * 100)} %`);
 const ci = (c?: number[], d = 2, p = false) => (c && c.length === 2 ? ` [${p ? pct(c[0]) : f2(c[0], d)} – ${p ? pct(c[1]) : f2(c[1], d)}]` : '');
 const numRu = (x: number) => x.toLocaleString('ru-RU', { maximumFractionDigits: 0 });
+const BINS_CM = [0, 30, 60, 120, 1e9];
+
+function corrected(boxes: Box[], gsd: number, factor: number[]): number {
+  let s = 0;
+  for (const b of boxes) {
+    const side = Math.max(b.x2 - b.x1, b.y2 - b.y1) * gsd * 100;
+    let k = 0;
+    while (k < factor.length - 1 && side >= BINS_CM[k + 1]) k++;
+    s += factor[k];
+  }
+  return s;
+}
 
 export default function PhotoApp() {
   const [meta, setMeta] = useState<Meta | null>(null);
   const [metaErr, setMetaErr] = useState<string | null>(null);
+  const [survey, setSurvey] = useState<Survey>(() => (new URLSearchParams(location.search).get('survey') === 'aerial' ? 'aerial' : 'water_camera'));
   const [imgUrl, setImgUrl] = useState<string | null>(null);
+  const [blob, setBlob] = useState<Blob | null>(null);
   const [name, setName] = useState<string>('');
   const [res, setRes] = useState<CountResp | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [thr, setThr] = useState<number | null>(null);
   const [area, setArea] = useState<string>('');
+  const [gsd, setGsd] = useState<string>('0,02');
   const [drag, setDrag] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -75,25 +129,26 @@ export default function PhotoApp() {
       .catch((e) => setMetaErr(typeof e === 'string' ? e : 'API /api/v3/photo не отвечает'));
   }, []);
 
-  const send = useCallback(async (blob: Blob, label: string) => {
+  const send = useCallback(async (b: Blob, label: string, sv: Survey) => {
     setBusy(true);
     setErr(null);
     setRes(null);
     setName(label);
+    setBlob(b);
     setImgUrl((old) => {
       if (old) URL.revokeObjectURL(old);
-      return URL.createObjectURL(blob);
+      return URL.createObjectURL(b);
     });
     try {
-      const r = await fetch(`${API}/count?threshold=0.05`, {
+      const r = await fetch(`${API}/count?threshold=0.05&survey=${sv}`, {
         method: 'POST',
-        headers: { 'Content-Type': blob.type || 'application/octet-stream' },
-        body: blob,
+        headers: { 'Content-Type': b.type || 'application/octet-stream' },
+        body: b,
       });
       const j = await r.json().catch(() => null);
       if (!r.ok) throw new Error(j?.error?.message ?? `HTTP ${r.status}`);
       setRes(j as CountResp);
-      setThr((t) => (t == null ? (j as CountResp).threshold_default : t));
+      setThr((j as CountResp).threshold_default);
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
     } finally {
@@ -101,6 +156,12 @@ export default function PhotoApp() {
     }
   }, []);
 
+  const switchSurvey = (sv: Survey) => {
+    if (sv === survey) return;
+    setSurvey(sv);
+    setThr(null);
+    if (blob) void send(blob, name, sv);
+  };
   const onFiles = (fl: FileList | null) => {
     const f = fl?.[0];
     if (!f) return;
@@ -108,23 +169,37 @@ export default function PhotoApp() {
       setErr('Нужен файл изображения (JPEG/PNG/WebP)');
       return;
     }
-    void send(f, f.name);
+    void send(f, f.name, survey);
   };
   const loadSample = async (src: string, label: string) => {
     try {
       const b = await fetch(src).then((r) => (r.ok ? r.blob() : Promise.reject(new Error(`нет файла ${src}`))));
-      void send(b, label);
+      void send(b, label, survey);
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
     }
   };
 
-  const t = thr ?? res?.threshold_default ?? meta?.model?.threshold ?? 0.9;
+  const sm = meta?.surveys?.[survey];
+  const t = thr ?? res?.threshold_default ?? sm?.threshold ?? meta?.model?.threshold ?? 0.9;
   const shown = useMemo(() => (res ? res.boxes.filter((b) => b.score >= t) : []), [res, t]);
-  const areaM2 = Number(area.replace(',', '.'));
-  const dens = res && area && isFinite(areaM2) && areaM2 > 0 ? shown.length / (areaM2 / 1e6) : null;
+  const atDefault = !!res && Math.abs(t - res.threshold_default) < 1e-9;
+  const num = (s: string) => Number(s.replace(',', '.'));
+  const gsdM = num(gsd);
+  const gsdOk = survey === 'aerial' && gsd !== '' && isFinite(gsdM) && gsdM > 0;
+  const areaM2 = res && gsdOk ? res.image.width * res.image.height * gsdM * gsdM : num(area);
+  const areaOk = !!res && isFinite(areaM2) && areaM2 > 0 && (gsdOk || area !== '');
+  const dens = areaOk ? shown.length / (areaM2 / 1e6) : null;
+  const corr = survey === 'aerial' && areaOk && gsdOk && atDefault && sm?.correction ? sm.correction : null;
+  const cN = corr ? corrected(shown, gsdM, corr.factor) : null;
+  const cLo = corr ? corrected(shown, gsdM, corr.factor_ci95.map((x) => x[0])) : null;
+  const cHi = corr ? corrected(shown, gsdM, corr.factor_ci95.map((x) => x[1])) : null;
+  const g0 = sm?.gsd_train_m ?? 0.02;
+  const gsdWarn = survey === 'aerial' && gsdOk && (gsdM < g0 / 2 || gsdM > g0 * 2);
   const mo = meta?.model?.metrics?.test_official;
   const mg = meta?.model?.metrics?.test_grouped;
+  const ma = meta?.surveys?.aerial?.metrics;
+  const aerialOff = meta?.surveys && !meta.surveys.aerial.available;
 
   return (
     <div className="ph-app" data-testid="photo-app">
@@ -142,12 +217,23 @@ export default function PhotoApp() {
         </div>
         <div className="ph-title">
           Счётчик предметов по фото
-          <span className="ph-sub">отдельный модуль · не спутник · камера у воды</span>
+          <span className="ph-sub">отдельный модуль · не спутник: Sentinel-2 (10 м) отдельные предметы так не считает</span>
         </div>
       </header>
 
       <main className="ph-main">
         <section className="ph-view">
+          <div className="ph-actions">
+            <div className="seg" role="tablist" aria-label="Тип съёмки" data-testid="photo-survey">
+              <button className={survey === 'water_camera' ? 'on' : ''} onClick={() => switchSurvey('water_camera')} data-testid="survey-water">
+                Камера у воды
+              </button>
+              <button className={survey === 'aerial' ? 'on' : ''} onClick={() => switchSurvey('aerial')} disabled={!!aerialOff} data-testid="survey-aerial" title={aerialOff ? 'нет весов аэро-модели' : ''}>
+                Аэро / дрон (надир)
+              </button>
+            </div>
+            <span className="faint ph-hint">{sm?.label ?? meta?.survey}</span>
+          </div>
           <div
             className={`ph-drop ${drag ? 'drag' : ''} ${imgUrl ? 'has' : ''}`}
             onDragOver={(e) => {
@@ -182,7 +268,12 @@ export default function PhotoApp() {
             ) : (
               <div className="ph-empty">
                 <div className="ph-empty-t">Перетащите фото сюда или выберите файл</div>
-                <div className="ph-empty-s">Похожие снимки: вода с камеры у поверхности (катер, надводный аппарат, берег). JPEG/PNG/WebP до 25 МБ.</div>
+                <div className="ph-empty-s">
+                  {survey === 'water_camera'
+                    ? 'Похожие снимки: вода с камеры у поверхности (катер, надводный аппарат, берег).'
+                    : 'Снимок сверху (дрон/самолёт, надир), берег; укажите GSD — размер пикселя на земле.'}{' '}
+                  JPEG/PNG/WebP до 25 МБ.
+                </div>
               </div>
             )}
           </div>
@@ -191,12 +282,12 @@ export default function PhotoApp() {
               Загрузить фото
             </button>
             <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => onFiles(e.target.files)} data-testid="photo-file" />
-            {SAMPLES.map((s) => (
+            {SAMPLES[survey].map((s) => (
               <button key={s.src} className="btn ghost sm" onClick={() => loadSample(s.src, s.label)} disabled={busy} data-testid="photo-sample">
                 {s.label}
               </button>
             ))}
-            {name && <span className="ph-name faint">{name}</span>}
+            {name && !name.startsWith('Пример') && !name.startsWith('Аэро') && <span className="ph-name faint">{name}</span>}
           </div>
           {err && (
             <div className="ph-err" role="alert" data-testid="photo-error">
@@ -208,31 +299,55 @@ export default function PhotoApp() {
         <aside className="ph-side">
           <div className="ph-count" data-testid="photo-count">
             <div className="ph-n">{res ? shown.length : '—'}</div>
-            <div className="ph-unit">предметов на кадр</div>
+            <div className="ph-unit">предметов на кадр (найдено)</div>
           </div>
           <label className="ph-row">
             <span>
               Порог уверенности <b>{f2(t)}</b>
-              {res && Math.abs(t - res.threshold_default) > 1e-9 && (
+              {res && !atDefault && (
                 <button className="ph-link" onClick={() => setThr(res.threshold_default)}>
                   сбросить к {f2(res.threshold_default)}
                 </button>
               )}
             </span>
             <input type="range" min={0.05} max={0.95} step={0.05} value={t} onChange={(e) => setThr(Number(e.target.value))} data-testid="photo-thr" />
-            <span className="faint ph-hint">По умолчанию {f2(res?.threshold_default ?? meta?.model?.threshold)} — выбран на val FML по ошибке числа предметов.</span>
+            <span className="faint ph-hint">По умолчанию {f2(res?.threshold_default ?? sm?.threshold ?? meta?.model?.threshold)} — выбран на отложенных кадрах val по ошибке числа предметов.</span>
           </label>
-          <label className="ph-row">
-            <span>Площадь воды в кадре, м² (если известна)</span>
-            <input className="ph-in" inputMode="decimal" placeholder="не задана" value={area} onChange={(e) => setArea(e.target.value)} data-testid="photo-area" />
-            {dens != null ? (
-              <span className="ph-dens" data-testid="photo-density">
-                ≈ {numRu(dens)} шт./км² — на площади кадра, не спутник
-              </span>
-            ) : (
-              <span className="faint ph-hint">Без известной площади кадра — только штуки на кадр (у FML площади кадра нет).</span>
-            )}
-          </label>
+          {survey === 'aerial' ? (
+            <label className="ph-row">
+              <span>GSD — размер пикселя на земле, м</span>
+              <input className="ph-in" inputMode="decimal" placeholder="напр. 0,02" value={gsd} onChange={(e) => setGsd(e.target.value)} data-testid="photo-gsd" />
+              {res && gsdOk && (
+                <span className="faint ph-hint">
+                  Площадь кадра {res.image.width}×{res.image.height} px × GSD² = {f2(areaM2, 1)} м²
+                </span>
+              )}
+              {gsdWarn && <span className="ph-err">GSD вне проверенного диапазона ({f2(g0 / 2)}–{f2(g0 * 2)} м) — результат не проверен.</span>}
+            </label>
+          ) : (
+            <label className="ph-row">
+              <span>Площадь воды в кадре, м² (если известна)</span>
+              <input className="ph-in" inputMode="decimal" placeholder="не задана" value={area} onChange={(e) => setArea(e.target.value)} data-testid="photo-area" />
+            </label>
+          )}
+          {dens != null ? (
+            <div className="ph-dens" data-testid="photo-density">
+              <div>
+                Найдено: ≈ <b>{numRu(dens)}</b> шт./км² — на площади кадра, не спутник
+              </div>
+              {cN != null && cLo != null && cHi != null && (
+                <div data-testid="photo-density-corrected">
+                  С поправкой на пропуски: ≈ <b>{numRu(cN / (areaM2 / 1e6))}</b> шт./км² [{numRu(cLo / (areaM2 / 1e6))} – {numRu(cHi / (areaM2 / 1e6))}]
+                  <div className="faint ph-hint">p(размер) по отложенным кадрам val; интервал — неопределённость p, без счётной ошибки кадра.</div>
+                </div>
+              )}
+              {survey === 'aerial' && !atDefault && <div className="faint ph-hint">Поправка — только при пороге по умолчанию.</div>}
+            </div>
+          ) : (
+            <span className="faint ph-hint">
+              {survey === 'aerial' ? 'Задайте GSD — тогда будет шт./км² на площади кадра.' : 'Без известной площади кадра — только штуки на кадр (у FML площади кадра нет).'}
+            </span>
+          )}
           {res && (
             <div className="ph-kv faint" data-testid="photo-model">
               Модель {res.model_version} · {res.device === 'cuda' ? 'GPU' : 'CPU'} · {f2(res.elapsed_ms / 1000, 1)} с
@@ -242,7 +357,7 @@ export default function PhotoApp() {
           <div className="ph-block">
             <div className="ph-h">Качество (отложенный тест, IoU 0,5)</div>
             {metaErr && <div className="ph-err">{metaErr}</div>}
-            {mg && (
+            {survey === 'water_camera' && mg && (
               <div className="ph-m" data-testid="photo-metric-grouped">
                 <b>Эта модель, отложенные сессии съёмки</b> ({mg.n_images} фото): mAP@0,5 {f2(mg.ap50)}
                 {ci(mg.ap50_ci95)}; ошибка числа {f2(mg.count_mae)}
@@ -250,13 +365,30 @@ export default function PhotoApp() {
                 {ci(mg.count_exact_ci95, 2, true)}
               </div>
             )}
-            {mo && (
+            {survey === 'water_camera' && mo && (
               <div className="ph-m" data-testid="photo-metric-official">
                 <b>Для сравнения: веса авторов FML, их test</b> ({mo.n_images} фото): mAP@0,5 {f2(mo.ap50)}
                 {ci(mo.ap50_ci95)}; ошибка числа {f2(mo.count_mae)}
                 {ci(mo.count_mae_ci95)}; точное число {pct(mo.count_exact)}
                 {ci(mo.count_exact_ci95, 2, true)}
-                <div className="faint ph-hint">Соседние кадры видео с обучением (~90 % в пределах 2 с)  — оценка оптимистична; опора — строка выше.</div>
+                <div className="faint ph-hint">Соседние кадры видео с обучением (~90 % в пределах 2 с) — оценка оптимистична; опора — строка выше.</div>
+              </div>
+            )}
+            {survey === 'aerial' && ma && (
+              <div className="ph-m" data-testid="photo-metric-aerial">
+                <b>Отложенные участки берега</b> ({ma.n_frames} кадров по {f2(163.84, 1)} м², {ma.n_items} предметов): mAP@0,5 {f2(ma.ap50)}; ошибка числа{' '}
+                {f2(ma.count_mae)}
+                {ci(ma.count_mae_ci95)} шт./кадр (медиана без модели — {f2(ma.baseline_median_mae)}); ошибка плотности {numRu(ma.density_mae_km2)} шт./км² на кадр.
+                <div>
+                  По всей отложенной площади: истинно {numRu(ma.true_km2)} шт./км²; найдено {numRu(ma.raw_km2)}; с поправкой {numRu(ma.corrected_km2)}
+                  {ma.corrected_km2_ci95 ? ` [${numRu(ma.corrected_km2_ci95[0])} – ${numRu(ma.corrected_km2_ci95[1])}]` : ''}.
+                </div>
+                {ma.note && <div className="faint ph-hint">{ma.note}</div>}
+              </div>
+            )}
+            {survey === 'aerial' && meta?.surveys?.aerial?.baseline && (
+              <div className="faint ph-hint" data-testid="photo-baseline">
+                Бейзлайн {meta.surveys.aerial.baseline.name}: {meta.surveys.aerial.baseline.status}
               </div>
             )}
           </div>
@@ -264,12 +396,14 @@ export default function PhotoApp() {
           <div className="ph-block">
             <div className="ph-h">Ограничения</div>
             <ul className="ph-lim" data-testid="photo-limits">
-              {(res?.limitations ?? meta?.limitations ?? []).map((s, i) => (
+              {(res?.limitations ?? sm?.limitations ?? meta?.limitations ?? []).map((s, i) => (
                 <li key={i}>{s}</li>
               ))}
             </ul>
             <div className="faint ph-hint">
-              Данные: FML (Lazzerini и др., SEANOE doi:10.17882/106148, CC BY 4.0). Веса: {meta?.model?.version ?? '—'}.
+              {survey === 'water_camera'
+                ? `Данные: FML (Lazzerini и др., SEANOE doi:10.17882/106148, CC BY 4.0). Веса: ${meta?.model?.version ?? '—'}.`
+                : `Данные: Winans и др. 2023 (Zenodo 8381113, CC BY 4.0). Веса: ${sm?.version ?? '—'}.`}
             </div>
           </div>
         </aside>

@@ -1,6 +1,0 @@
-index 60269476 keys, 4184 refs, 1s
-{'votes': 4, 'second': 4, 'ref': 'Scene_0_1', 'ref_kind': 'MADOS', 'block': [2040, 10200], 'item': 'S2B_30SXE_20210311_0_L2A', 'valid_keys': 118728018, 'baseline': '02.14', 'verdict': 'no match'} 157s
-{'votes': 5, 'second': 4, 'ref': 'Scene_0_1', 'ref_kind': 'MADOS', 'block': [0, 1020], 'item': 'S2B_32SKG_20201222_0_L2A', 'valid_keys': 113077184, 'baseline': '02.14', 'verdict': 'no match'} 164s
-{'votes': 3, 'second': 2, 'ref': 'Scene_0_1', 'ref_kind': 'MADOS', 'block': [0, 2040], 'item': 'S2B_32TLM_20180420_0_L2A', 'valid_keys': 60641674, 'baseline': '02.07', 'verdict': 'no match'} 104s
-{'votes': 5, 'second': 5, 'ref': 'Scene_0_1', 'ref_kind': 'MADOS', 'block': [0, 0], 'item': 'S2B_31SFB_20210325_0_L2A', 'valid_keys': 29133254, 'baseline': '02.14', 'verdict': 'no match'} 67s
-{'votes': 4, 'second': 3, 'ref': 'Scene_0_2', 'ref_kind': 'MADOS', 'block': [0, 2040], 'item': 'S2A_31TDG_20180418_0_L2A', 'valid_keys': 120017370, 'baseline': '02.07', 'verdict': 'no match'} 216s

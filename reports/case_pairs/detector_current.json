@@ -1,5 +1,5 @@
 {
- "created": "2026-09-26T05:47:38",
+ "created": "2026-09-26T06:02:47",
  "source": "data/pairs/quality/*/meta.json (scripts/case/pair_quality.py)",
  "protocol": "текущий режим детектора на вырезках Sentinel-2 L2A пар: LightGBM weights/lgbm, порог P ≥ 0.63, harmonize = 'none'; объекты — 8-связные компоненты на пригодной воде без объектов у облаков; «в полосе» — пересечение с растровой полосой обследования",
  "harmonize": "none",
