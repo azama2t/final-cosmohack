@@ -9,7 +9,7 @@ import { API_BASE, apiUrl, ApiErr, get, MOCK, send, type FC, type Feat, type Met
 import CaseMap, { ACCENT, CONC_BREAKS, CONC_COLORS, STRIP_NO, STRIP_OK, flyToBox, geomBounds, WORLD_CENTER, worldZoom, type HoverInfo, type Pick } from './CaseMap';
 import { ObsCard, ZoneCard } from './Cards';
 import PairsDrawer from './PairsDrawer';
-import SceneZoneCard, { type SceneZoneDetail, type SceneZoneProps } from './SceneZoneCard';
+import SceneZoneCard, { zoneTitle, type SceneZoneDetail, type SceneZoneProps } from './SceneZoneCard';
 import { SZ_COLORS, szKey, isFind, geomCenter } from './CaseMap';
 import MetricsPanel from './MetricsPanel';
 import { plural, dateRu, eventRu, label, missionShort, num, profileRu, scopeRu, sourceShort } from './fmt';
@@ -1259,7 +1259,7 @@ export function numberZones(fs: Feat<SceneZoneProps>[]): { f: Feat<SceneZoneProp
   return fs.map((f) => ({ f, n: zoneNo(f.properties.zone_id) })).sort((a, b) => (a.n || 1e9) - (b.n || 1e9));
 }
 
-const sceneName = (s: SzScene) => (s.scene_kind === 'demo' ? 'Альборан · Cózar' : s.region_short ?? shortName(s.region_name ?? s.region ?? s.scene_key));
+const sceneName = (s: SzScene) => (s.scene_kind === 'demo' ? 'Альборан · 30SXE' : s.region_short ?? shortName(s.region_name ?? s.region ?? s.scene_key));
 /** cloudiness of the snapshot: of the crop (SCL) if the API gives it, else of the tile */
 function cloudTxt(s: SzScene): string {
   const c = s.crop_cloud_pct ?? s.cloud_pct;
@@ -1416,7 +1416,7 @@ function SceneZones({
             onClick={() => onPick(f.id)}
             data-testid="sz-item"
             data-zone={f.id}
-            title={`${p.title} · ${p.detection_label} · площадь зоны ${num(p.measured.zone_area_km2 !== null && p.measured.zone_area_km2 !== undefined ? p.measured.zone_area_km2 * 1e6 : null, 0)} м², пикселей детектора ${num(p.measured.suspicious_area_m2, 0)} м²${est ? ` · ${estLine(est)} — ${RES_CONTEXT}; ${RES_CAPTION}` : ''}`}
+            title={`${zoneTitle(p)} · ${p.detection_label} · площадь зоны ${num(p.measured.zone_area_km2 !== null && p.measured.zone_area_km2 !== undefined ? p.measured.zone_area_km2 * 1e6 : null, 0)} м², пикселей детектора ${num(p.measured.suspicious_area_m2, 0)} м²${est ? ` · ${estLine(est)} — ${RES_CONTEXT}; ${RES_CAPTION}` : ''}`}
           >
             <span className={`c-znum-i ${szKey(p)}`} aria-hidden>
               {n}
@@ -1606,7 +1606,7 @@ function HoverTip({ meta, h, obs, zones, szones }: { meta: Meta; h: HoverInfo; o
     const scenes = new Map<string, string>();
     for (const id of leaves) {
       const f = szones.find((x) => x.id === id);
-      if (f) scenes.set(f.properties.scene_key, `${f.properties.title.split(' · ')[0]} · ${dateRu(f.properties.datetime)}`);
+      if (f) scenes.set(f.properties.scene_key, `${zoneTitle(f.properties).replace(/ · (зона \d+|вся вырезка)$/, '')} · ${dateRu(f.properties.datetime)}`);
     }
     const n = Number(n0), nb = Number(nb0);
     const dd = (v: string) => (v && v !== '0' ? `${v.slice(6, 8)}.${v.slice(4, 6)}.${v.slice(0, 4)}` : '—');
@@ -1620,7 +1620,7 @@ function HoverTip({ meta, h, obs, zones, szones }: { meta: Meta; h: HoverInfo; o
     const p = f.properties;
     const est = researchEst(p);
     t = `${isFind(p) ? 'Находка детектора' : 'Спутниковая зона'} · ${p.detection_label}`;
-    s = `снимок Sentinel-2 ${dateRu(p.datetime)} · ${p.title} · площадь пикселей ${num(p.measured.suspicious_area_m2, 0)} м²${est ? ` · ${estLine(est)}` : ''}`;
+    s = `снимок Sentinel-2 ${dateRu(p.datetime)} · ${zoneTitle(p)} · площадь пикселей ${num(p.measured.suspicious_area_m2, 0)} м²${est ? ` · ${estLine(est)}` : ''}`;
   } else {
     const f = zones?.features.find((x) => x.id === h.id);
     if (!f) return null;
@@ -1930,7 +1930,7 @@ function ZoneStudio({
       <div className="rp-head">
         <div className="rp-titles">
           <div className="rp-kicker">Студия · работа с зоной{zoneNum ? ` ${zoneNum}` : ''}</div>
-          <div className="rp-title">{p.title}</div>
+          <div className="rp-title">{zoneTitle(p)}</div>
           <div className="rp-sub">Sentinel-2 · {dateRu(p.datetime)}</div>
         </div>
       </div>

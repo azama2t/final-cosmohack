@@ -106,6 +106,11 @@ export interface SceneZoneDetail extends Feat<SceneZoneProps> {
   scene: { preview_url: string | null; quality_url: string | null; bounds?: number[] | null; wind10m_ms?: number | null; sun_zenith_deg?: number | null; lwd_m2_km2?: number | null; water_km2?: number | null } | null;
 }
 
+/** jury 14:55: the zone name carries its район — «Альборан · 30SXE · зона 1» (the held-out scene's API title has only the tile) */
+export function zoneTitle(p: { title: string; scene_kind?: string }): string {
+  return p.scene_kind === 'demo' && !p.title.startsWith('Альборан') ? `Альборан · ${p.title}` : p.title;
+}
+
 export const SZ_COLOR: Record<string, string> = { detected: '#ff8c42', unverified: '#d9b870', not_detected: '#2b8a3e', insufficient_data: '#868e96' };
 const SIGN_RU: Record<string, string> = { foam: 'пена', glint: 'блик', ship: 'судно / кильватер', seam: 'шов / граница яркости', coast: 'берег / прибой ближе 300 м', shallow: 'мелководье / мутная вода', cloud: 'облака ≥ 20 % зоны', wind: 'ветер > 5 м/с (правило Cózar 2024)' };
 
@@ -148,7 +153,7 @@ export default function SceneZoneCard({
             {p.scene_kind_label ?? p.scene_kind}
           </div>
           <div className="rp-title" data-testid="card-title">
-            {p.title}
+            {zoneTitle(p)}
           </div>
           <div className="rp-sub">Sentinel-2 · {dateTimeRu(p.datetime)}</div>
         </div>
