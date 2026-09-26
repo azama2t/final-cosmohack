@@ -2623,7 +2623,8 @@ def _sz_alerts(f: dict, p: dict) -> dict:
     return _alerts().zone_alert(
         is_find=bool(p.get("is_find")), is_large=bool(p.get("is_large")), major_axis_m=p.get("major_axis_m"),
         lon=lon, lat=lat, region=p.get("region"), date=(p.get("datetime") or "")[:10] or None,
-        confirmed=p.get("verification") == "level_B_cozar", likely_organic=bool(p.get("likely_organic")))
+        confirmed=p.get("verification") == "level_B_cozar", likely_organic=bool(p.get("likely_organic")),
+        zone_id=p.get("zone_id"))
 
 
 def _sz_enrich(f: dict, idx: dict) -> dict:
