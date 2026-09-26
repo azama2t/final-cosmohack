@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-26T04:40:53+03:00",
+ "generated": "2026-09-26T05:13:50+03:00",
  "note": "генерируется scripts/final_numbers.py; руками не править; null = ещё не посчитано",
  "l3_lgbm": {
   "available": true,
@@ -1807,6 +1807,8 @@
    "funnel.json",
    "funnel.png",
    "funnel_fig.py",
+   "hard_background.jpg",
+   "independent_adis_pairs.jpg",
    "overview.jpg",
    "region.jpg",
    "search_adis_pair.jpg",
@@ -5242,7 +5244,7 @@
   },
   "run": {
    "command": "run_all.py all --offline",
-   "finished": "2026-09-26T03:52:00",
+   "finished": "2026-09-26T05:13:09",
    "versions": {
     "python": "3.12.7",
     "platform": "Windows-10-10.0.19045-SP0",
@@ -5254,19 +5256,19 @@
     "shapely": "2.1.2",
     "fastapi": "0.141.1",
     "yaml": "6.0.3",
-    "git_commit": "f976592efe860566223a9c1558274f268bc395bc"
+    "git_commit": "f0dd6b8c7d0ddfe9c48e49ccdc53d6d6cfe1cc22"
    },
-   "outputs_fingerprint_short": "fccf808a8817d7c4",
+   "outputs_fingerprint_short": "3db680b6661e86d3",
    "n_outputs": 24,
-   "total_s": 7.7,
+   "total_s": 11.5,
    "step_s": {
-    "1_selection": 0.1,
-    "2_pairs": 1.8,
-    "3_quality_detector": 0.2,
-    "3b_registry": 0.7,
-    "4_concentration": 2.8,
-    "5_detector_marida": 1.0,
-    "6_export_api_v3": 1.0,
+    "1_selection": 0.2,
+    "2_pairs": 3.1,
+    "3_quality_detector": 0.3,
+    "3b_registry": 1.6,
+    "4_concentration": 3.3,
+    "5_detector_marida": 1.3,
+    "6_export_api_v3": 1.4,
     "5b_search_numbers": 0.2
    },
    "export": {
@@ -5410,7 +5412,7 @@
    "search": {
     "available": true,
     "source": "reports/search/{s1,s2,s3,s4}_candidates.csv, reports/search/adis_candidates.csv, docs/img/funnel.json",
-    "protocol": "розыск снимков под события CSV организаторов (L86–L88, L98) и под отрезки ADIS (L100); уровень доказательности A–D у каждой строки; стоп-правило §11: нет A или убедительного C за пилот — поиск по дрейфу не расширяем; дрейф — область поиска, не доказательство",
+    "protocol": "розыск снимков под события CSV организаторов и под отрезки ADIS; уровень доказательности A–D у каждой строки; стоп-правило §11: нет A или убедительного C за пилот — поиск по дрейфу не расширяем; дрейф — область поиска, не доказательство",
     "events_total": 318,
     "funnel": [
      {
@@ -5443,7 +5445,7 @@
     "by_source": {
      "S1": {
       "available": true,
-      "name": "S1 Тихий океан, аэросъёмка 2016 (L88)",
+      "name": "S1 Тихий океан, аэросъёмка 2016",
       "file": "reports/search/s1_candidates.csv",
       "events_in_csv": 181,
       "rows": 10,
@@ -5459,7 +5461,7 @@
      },
      "S2": {
       "available": true,
-      "name": "S2 Саргассово море, MSM41 (L98)",
+      "name": "S2 Саргассово море, MSM41",
       "file": "reports/search/s2_candidates.csv",
       "events_in_csv": 63,
       "rows": 63,
@@ -5475,7 +5477,7 @@
      },
      "S3": {
       "available": true,
-      "name": "S3 Северное море, HE419/HE460 (L86)",
+      "name": "S3 Северное море, HE419/HE460",
       "file": "reports/search/s3_candidates.csv",
       "events_in_csv": 41,
       "rows": 68,
@@ -5500,7 +5502,7 @@
      },
      "S4": {
       "available": true,
-      "name": "S4 Чёрное море, DOORS 2024 (L87)",
+      "name": "S4 Чёрное море, DOORS 2024",
       "file": "reports/search/s4_candidates.csv",
       "events_in_csv": 33,
       "rows": 33,
@@ -5520,7 +5522,7 @@
      },
      "ADIS": {
       "available": true,
-      "name": "ADIS, The Ocean Cleanup — найден нами, не в CSV (L91, L100)",
+      "name": "ADIS, The Ocean Cleanup — найден нами, не в CSV",
       "file": "reports/search/adis_candidates.csv",
       "events_in_csv": 0,
       "rows": 177,
@@ -5548,7 +5550,7 @@
     "csv_C": 9
    },
    "labeled_data": {
-    "source": "reports/extra_data/registry.csv (L89), registry_negatives.csv (L90), registry_cozar2024.csv.gz (L98), content_overlap.csv, current_detector_zero_shot.csv, fp_current_detector.json",
+    "source": "reports/extra_data/registry.csv, registry_negatives.csv, registry_cozar2024.csv.gz, content_overlap.csv, current_detector_zero_shot.csv, fp_current_detector.json",
     "protocol": "B — подтверждённая разметка скопления (без числа предметов), D — проверенный отрицательный пример; пиксели — S2 L2A той же съёмки (тот же ридер, что у live-сцен); утечка = та же съёмка (тайл+дата) или те же пиксели (LBP) с MARIDA/MADOS/нашими сценами; текущий детектор weights/lgbm без дообучения, порог с MARIDA val",
     "plp": {
      "acq_B": 38,
@@ -5613,7 +5615,7 @@
    },
    "adis_pairs": {
     "available": true,
-    "source": "reports/search/adis_candidates.csv (копия data/search/adis/candidates.csv, L100), reports/search/adis.md",
+    "source": "reports/search/adis_candidates.csv (копия data/search/adis/candidates.csv), reports/search/adis.md",
     "protocol": "отрезки ADIS 10 км (камера судна, счёт >5/>10/>50 см, площадь обследования) × Sentinel-2 L2A; A = |dt| и дрейф в допуске, пиксели полосы годны по маскам качества, площадь и размерные классы из ADIS; детектор weights/lgbm без гармонизации, те же маски и код, что у пар CSV (pair_quality.process_s2); TP/FP по пикселям не утверждаются: пара A даёт только «на снимке N срабатываний при полевых M шт./км²»",
     "segments": 177,
     "scenes": 40,
@@ -5686,7 +5688,7 @@
    },
    "baselines": {
     "available": true,
-    "source": "reports/detector_v2/unet_test.json, unet_baseline.json (L99)",
+    "source": "reports/detector_v2/unet_test.json, unet_baseline.json",
     "protocol": "официальные веса U-Net MARIDA (Kikaki et al. 2022, эпоха 44), код и предобработка авторов, не переобучали; та же функция оценки, что у LightGBM (detector_compare.evaluate); порог U-Net — только по val; test MARIDA посчитан один раз; ДИ и парная разность — бутстреп по сценам",
     "test": {
      "lgbm": {
@@ -5771,7 +5773,7 @@
    },
    "quantity": {
     "available": true,
-    "source": "reports/quantity/{field,calibration,coverage_live,coverage_pairs,scenario,adis_field}.json (L93), docs/QUANTITY.md",
+    "source": "reports/quantity/{field,calibration,coverage_live,coverage_pairs,scenario,adis_field}.json, docs/QUANTITY.md",
     "protocol": "раздельно: полевая плотность C = N/A (шт./км², интервал Пуассона) и спутниковая доля покрытия подозрительного материала (м² маски на км² пригодной воды, как LWD у Cózar et al. 2024); доля покрытия ≠ мусор и ≠ шт./км²; связь между ними — только калибровка на парах A, которой нет; сценарий «площадь / размер предмета» — помеченный исследовательский диапазон, на карту не идёт",
     "field_S2": {
      "n": 63,
@@ -5937,7 +5939,7 @@
     "available": true,
     "experimental": true,
     "enabled_by_default": false,
-    "source": "reports/oil/{val_runs,test,control}.json (L101), configs/oil_eval.yaml, docs/OIL.md",
+    "source": "reports/oil/{val_runs,test,control}.json, configs/oil_eval.yaml, docs/OIL.md",
     "protocol": "MADOS класс Oil Spill, сплит по сценам заморожен до обучения (без съёмок MARIDA val/test); отдельная голова LightGBM, основной детектор не тронут; выбор только по val, test открыт один раз; бейзлайн — порог OSI = (B3+B4)/B2; положительный контроль на S2 L2A — разлив Wakashio 2020; единица — площадь, км², не объём и не масса",
     "model": "win_pw1_l15_s0",
     "val_f1": 0.888,
@@ -5973,7 +5975,7 @@
    },
    "detector_v2": {
     "available": true,
-    "source": "reports/detector_v2/experiments_snapshot.json (снимок experiments.json L92), reports/detector_v2/decision.json (решение оркестратора), configs/detector_v2_eval.yaml",
+    "source": "reports/detector_v2/experiments_snapshot.json (снимок experiments.json), reports/detector_v2/decision.json (решение команды), configs/detector_v2_eval.yaml",
     "snapshot_generated": "2026-09-26T04:22:15",
     "protocol": "проверка зафиксирована до экспериментов (sha256 в experiments.json): MARIDA val + 3-fold по снимкам для новых B/D; 3 seed; правило принятия записано заранее (ΔF1 val ≥ max(0.01, 2σ) и не хуже на D/B); test MARIDA не читался; порог каждой модели — по val",
     "n_variants": 13,
@@ -5994,7 +5996,13 @@
      "vessels_pct": 26.0,
      "pairs_d_fa": 5,
      "pairs_d_n": 97,
-     "df1": null
+     "df1": null,
+     "pairs_d_acq_flagged": 1,
+     "pairs_d_acq_total": 8,
+     "cozar146_hit": 94,
+     "cozar146_n": 146,
+     "cozar_ge3px_pct": 21.0,
+     "cozar_pixel_pct": 7.0
     },
     "vessels_d": {
      "cozar_hit": 64,
@@ -6045,6 +6053,39 @@
     "orchestrator_accepted": false,
     "current_model": "weights/lgbm",
     "decision_note": "правило принятия (записано до экспериментов) не прошёл ни один из 13 вариантов с новыми данными (×3 seed) и контрольный r0 → остаётся weights/lgbm"
+   },
+   "independent_check": {
+    "available": true,
+    "source": "docs/research/gleb_quantitative_link/results/{REPORT.md, adis_pairs/pair_summary.csv, adis_sentinel_matches.csv, adis_open_ocean_audit.json, plp2019/summary.json}",
+    "protocol": "независимая проверка: наглядные пары ADIS ↔ S2 по предметам > 50 см (у автора «A» — хорошая полевая метка, у нас A — пара снимок + подсчёт; выборки разные: его пары > 50 см, наши > 5 см) и попытка «спектр пикселя → доля покрытия» на PLP2019 с проверкой leave-one-date-out",
+    "pairs": {
+     "n": 6,
+     "items_gt50": 10,
+     "dt_abs_min_h": 0.2,
+     "dt_abs_max_h": 5.3,
+     "density_min": 2.5,
+     "density_max": 7.5
+    },
+    "routes_gt50": 36,
+    "routes_same_day_s2": 12,
+    "dense_routes": 3,
+    "dense_routes_items": [
+     34,
+     29,
+     19
+    ],
+    "dense_routes_scenes_same_day": 0,
+    "plp": {
+     "n_pixels": 63,
+     "n_dates": 5,
+     "rho_fdi": 0.09,
+     "rho_nir": 0.14,
+     "lodo_mae_min": 8.5,
+     "lodo_mae_max": 16.5,
+     "lodo_mean_mae_min": 7.6,
+     "lodo_mean_mae_max": 16.6,
+     "verdict": "перевод «спектр пикселя → доля покрытия пластиком» не подтверждён: связь слабая, знак меняется по датам, модель по FDI на отложенной дате не лучше предсказания средним"
+    }
    }
   },
   "clean_clone": {
@@ -6161,14 +6202,14 @@
   "tests": {
    "available": true,
    "source": "reports/case_run/case_tests.json",
-   "passed": 242,
+   "passed": 252,
    "skipped": 2,
    "failed": 0,
-   "seconds": 20.7,
-   "when": "26.09.2026 04:40",
-   "command": "python -m pytest -q tests/test_case_conc_model.py tests/test_case_concentration.py tests/test_case_consistency.py tests/test_case_coverage.py tests/test_case_docs_numbers.py tests/test_case_geometry.py tests/test_case_geometry_integration.py tests/test_case_pairfinder.py tests/test_case_run_all.py tests/test_api_v3.py"
+   "seconds": 31.3,
+   "when": "26.09.2026 05:13",
+   "command": "python -m pytest -q tests/test_case_conc_model.py tests/test_case_concentration.py tests/test_case_consistency.py tests/test_case_coverage.py tests/test_case_docs_numbers.py tests/test_case_expert_check.py tests/test_case_geometry.py tests/test_case_geometry_integration.py tests/test_case_pairfinder.py tests/test_case_run_all.py tests/test_api_v3.py"
   },
-  "n_test_funcs": 155,
-  "n_tests": 242
+  "n_test_funcs": 163,
+  "n_tests": 252
  }
 }

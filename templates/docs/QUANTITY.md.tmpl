@@ -1,7 +1,7 @@
 # QUANTITY — количество: поле, снимок и сценарий раздельно (§11 п.5, §15)
 
 Генерируется `scripts/render_docs.py` из `reports/final_numbers.json` (`case.sections.quantity`, `adis_pairs`, `field_test`); руками не править.
-Исходные расчёты — `reports/quantity/*.json` (L93: `scripts/case/quantity_report.py`, `quantity_live.py`; код `src/macroplastic/case/coverage.py`, `concentration.py`), пары ADIS — `reports/search/adis_candidates.csv` (L100).
+Исходные расчёты — `reports/quantity/*.json` (`scripts/case/quantity_report.py`, `quantity_live.py`; код `src/macroplastic/case/coverage.py`, `concentration.py`), пары ADIS — `reports/search/adis_candidates.csv`.
 
 ## 0. Единая логика: три уровня связи «снимок ↔ полевое число»
 
@@ -11,7 +11,9 @@
 - **Видимый сигнал на снимке.** На {{case.sections.adis_pairs.A_with_items}} синхронных отрезках ADIS с единичными предметами ({{case.sections.adis_pairs.A_with_items_density_min|f1}}–{{case.sections.adis_pairs.A_with_items_density_max|f1}} шт./км²) детектор предметы не увидел: оценивается на {{case.sections.adis_pairs.A_with_items_eval}} из {{case.sections.adis_pairs.A_with_items}} — на всех {{case.sections.adis_pairs.A_with_items_eval_det_px}} пикселей. Это согласуется с физикой (доля покрытия ≈ {{case.sections.adis_pairs.coverage_frac_text}}, крупнейший предмет {{case.sections.adis_pairs.largest_item_pct_px|f1}} % пикселя), но не задаёт общий предел для всех скоплений: плотные полосы мусора эти пары не проверяют.
 - **Калибровочная пара «снимок → шт./км²»** — пара по месту и времени с ненулевым сигналом снимка. Их {{case.sections.quantity.levels.calibration_pairs}}, поэтому перевода «снимок → шт./км²» нет.
 
-## 1. Поле: концентрация, шт./км² (измерение)
+## 1. Поле: концентрация, шт./км² (измерение) — главный количественный результат
+
+{{derived.case_field_table}}
 
 Формула `C = N / A`; для полосы `A = L[км] × W[м] / 1000`; по профилю `C = ΣN / ΣA`. Интервал Гарвуда 95 % (только счётная ошибка): `N_lo = χ²(0.025; 2N)/2`, `N_hi = χ²(0.975; 2N+2)/2`, обе границы делим на A.
 
@@ -45,3 +47,4 @@
 
 - {{case.sections.quantity.scenario.mask_m2|f0}} м² маски: по границам размерного класса S2 — {{case.sections.quantity.scenario.items_min|int}}–{{case.sections.quantity.scenario.items_max|int}} предметов; по размерам предметов ADIS (медиана {{case.sections.quantity.scenario.adis_items_median_m2|f2}} м²) — {{case.sections.quantity.scenario.adis_min|int}}–{{case.sections.quantity.scenario.adis_max|int}}; Lebreton 2018 — медиана предмета {{case.sections.quantity.scenario.lebreton_items_median_m2|f2}} м².
 - Разброс — на порядки, он держится только на допущениях. Массу и физическую концентрацию не оцениваем.
+- **Попытка «спектр → доля покрытия» с отказом.** На PLP2019 ({{case.sections.independent_check.plp.n_pixels}} пикселей с измеренной долей пластика, {{case.sections.independent_check.plp.n_dates}} дат) ранговая связь с FDI ρ = {{case.sections.independent_check.plp.rho_fdi|f2}}, с NIR ρ = {{case.sections.independent_check.plp.rho_nir|f2}}; модель по FDI на отложенной дате — MAE {{case.sections.independent_check.plp.lodo_mae_min|f1}}–{{case.sections.independent_check.plp.lodo_mae_max|f1}} п.п. против {{case.sections.independent_check.plp.lodo_mean_mae_min|f1}}–{{case.sections.independent_check.plp.lodo_mean_mae_max|f1}} у предсказания средним. Вывод: {{case.sections.independent_check.plp.verdict}}. Поэтому штуки у спутниковой зоны — только сценарий.

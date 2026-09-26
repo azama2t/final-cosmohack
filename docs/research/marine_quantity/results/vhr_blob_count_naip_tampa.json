@@ -1,0 +1,130 @@
+{
+ "image": "https://naipeuwest.blob.core.windows.net/naip/v002/fl/2023/fl_030cm_2023/27082/m_2708227_ne_17_030_20230106_20230511.tif",
+ "note": "NAIP 2023-01-06 aerial 0.3 m RGB(+NIR), Tampa Bay FL, public domain (USDA), via Planetary Computer",
+ "imagery_in_git": false,
+ "window_lonlat": [
+  -82.6736,
+  27.5674,
+  -82.6524,
+  27.5825
+ ],
+ "native_gsd_m": 0.3,
+ "area_km2": 3.5986356,
+ "table": [
+  {
+   "gsd_m": 0.3,
+   "k": 4,
+   "n_blobs": 243566,
+   "n_bright": 242557,
+   "n_coloured_or_dark": 1009,
+   "median_area_m2": 0.63,
+   "blobs_per_km2": 67682.87403148015
+  },
+  {
+   "gsd_m": 0.3,
+   "k": 6,
+   "n_blobs": 181180,
+   "n_bright": 181011,
+   "n_coloured_or_dark": 169,
+   "median_area_m2": 0.63,
+   "blobs_per_km2": 50346.85923742876
+  },
+  {
+   "gsd_m": 0.3,
+   "k": 8,
+   "n_blobs": 138284,
+   "n_bright": 138244,
+   "n_coloured_or_dark": 40,
+   "median_area_m2": 0.5399999999999999,
+   "blobs_per_km2": 38426.78597410641
+  },
+  {
+   "gsd_m": 0.9,
+   "k": 4,
+   "n_blobs": 38643,
+   "n_bright": 38604,
+   "n_coloured_or_dark": 39,
+   "median_area_m2": 4.859999999999999,
+   "blobs_per_km2": 10738.236458284357
+  },
+  {
+   "gsd_m": 0.9,
+   "k": 6,
+   "n_blobs": 21609,
+   "n_bright": 21609,
+   "n_coloured_or_dark": 0,
+   "median_area_m2": 4.05,
+   "blobs_per_km2": 6004.775810032002
+  },
+  {
+   "gsd_m": 0.9,
+   "k": 8,
+   "n_blobs": 12571,
+   "n_bright": 12571,
+   "n_coloured_or_dark": 0,
+   "median_area_m2": 4.05,
+   "blobs_per_km2": 3493.268393165454
+  },
+  {
+   "gsd_m": 3.0,
+   "k": 4,
+   "n_blobs": 1049,
+   "n_bright": 1045,
+   "n_coloured_or_dark": 4,
+   "median_area_m2": 36.0,
+   "blobs_per_km2": 291.49936714903833
+  },
+  {
+   "gsd_m": 3.0,
+   "k": 6,
+   "n_blobs": 138,
+   "n_bright": 138,
+   "n_coloured_or_dark": 0,
+   "median_area_m2": 36.0,
+   "blobs_per_km2": 38.34786717499265
+  },
+  {
+   "gsd_m": 3.0,
+   "k": 8,
+   "n_blobs": 14,
+   "n_bright": 14,
+   "n_coloured_or_dark": 0,
+   "median_area_m2": 36.0,
+   "blobs_per_km2": 3.890363336593458
+  },
+  {
+   "gsd_m": 9.9,
+   "k": 4,
+   "n_blobs": 4,
+   "n_bright": 4,
+   "n_coloured_or_dark": 0,
+   "median_area_m2": 392.04,
+   "blobs_per_km2": 1.111532381883845
+  },
+  {
+   "gsd_m": 9.9,
+   "k": 6,
+   "n_blobs": 1,
+   "n_bright": 1,
+   "n_coloured_or_dark": 0,
+   "median_area_m2": 392.04,
+   "blobs_per_km2": 0.27788309547096124
+  },
+  {
+   "gsd_m": 9.9,
+   "k": 8,
+   "n_blobs": 0,
+   "n_bright": 0,
+   "n_coloured_or_dark": 0,
+   "median_area_m2": null,
+   "blobs_per_km2": 0.0
+  }
+ ],
+ "thumbs": {
+  "coloured_or_dark_first": 48,
+  "bright_last": 16,
+  "grid": "data/extra/marine_quantity/maxar/naip_tampa_blob_thumbs_k6.png",
+  "tile_side_m": 12.0
+ },
+ "reference_densities": "see results/resolution_physics.json (ADIS)"
+}

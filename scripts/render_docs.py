@@ -553,7 +553,7 @@ def case_sections_table(fn: dict) -> str:
     if ld.get("available"):
         rows.append(f"| 9. Новые размеченные данные B/D | B: {fmt(ld.get('b_new_acq'), None)} съёмок PLP/FloatingObjects + "
                     f"{fmt((ld.get('cozar') or {}).get('windows'), 'int')} окон Cózar; D: {fmt((ld.get('vessels') or {}).get('boxes'), 'int')} судов, "
-                    f"{fmt((ld.get('clouds') or {}).get('scenes'), None)} сцен облаков; утечек {fmt(ld.get('leaks_total'), None)} | {ld.get('protocol')} | `{ld.get('source')}` |")
+                    f"{fmt((ld.get('clouds') or {}).get('scenes'), None)} сцен облаков; с MARIDA по тайлу и дате совпадений {fmt(ld.get('leaks_total'), None)}, с MADOS по пикселям проверены только PLP/FO | {ld.get('protocol')} | `{ld.get('source')}` |")
     if v2.get("available"):
         rows.append(f"| 10. Детектор v2 (дообучение на B + D) | вариантов {fmt(v2.get('n_variants'), None)} × {fmt(v2.get('n_seeds'), None)} seed, "
                     f"принято {fmt(v2.get('n_accept'), None)}; в сервисе {v2.get('current_model')} | {v2.get('protocol')} | `{v2.get('source')}` |")
@@ -616,7 +616,9 @@ def case_labeled_table(fn: dict) -> str:
             f"{fmt(zs.get('fo_line_recall_pct'), 'f1')} %; Refined D: {fmt(zs.get('refined_D_flagged_pct'), 'f1')} % |",
             f"| Cózar et al. 2024, нити плавучего материала | B | {fmt(cz.get('windows'), 'int')} окон, {fmt(cz.get('acq'), 'int')} съёмок, "
             f"{fmt(cz.get('km2'), 'f2')} км² | {cz.get('license') or DASH} | {fmt(ref.get('cozar_hit'), None)} из {fmt(ref.get('cozar_n'), None)} "
-            f"случайных нитей на L2A ({fmt(ref.get('cozar_pct'), 'f0')} %) |",
+            f"случайных нитей на L2A ({fmt(ref.get('cozar_pct'), 'f0')} %: хотя бы один пиксель нити; ≥ 3 пикс. — "
+            f"{fmt(ref.get('cozar_ge3px_pct'), 'f0')} %, по пикселям {fmt(ref.get('cozar_pixel_pct'), 'f0')} %); на другой выборке — "
+            f"{fmt(ref.get('cozar146_n'), None)} окнах 15 съёмок каталога — {fmt(ref.get('cozar146_hit'), None)} |",
             f"| Суда у Финляндии (Zenodo 15019034) | D | {fmt(ves.get('boxes'), 'int')} рамок, {fmt(ves.get('acq'), None)} съёмок, "
             f"{fmt(ves.get('hull_px'), 'int')} пикс. корпусов | {ves.get('license') or DASH} | ложные на {fmt(ves.get('boxes_flagged'), None)} рамках "
             f"({fmt(ves.get('boxes_flagged_pct'), 'f1')} %) |",
@@ -655,6 +657,24 @@ def case_quantity_profiles_table(fn: dict) -> str:
         ci = (f"{fmt(r.get('pooled_C'), 'f1')} [{fmt(r.get('lo95'), 'f1')}–{fmt(r.get('hi95'), 'f1')}]" if r.get("has_N") else DASH)
         rows.append(f"| {names[key]} | {fmt(r.get('n'), None)} | {pooled} | {ci} | {fmt(r.get('c_median'), 'f1')} "
                     f"[{fmt(r.get('c_p25'), 'f1')}–{fmt(r.get('c_p75'), 'f1')}] |")
+    return "\n".join(rows)
+
+
+def case_field_table(fn: dict) -> str:
+    """Т3: основной количественный результат — полевой алгоритм шт./км² на отложенном test (модель против медианы)."""
+    ft = _sec(fn, "field_test")
+    if not ft.get("computed"):
+        return DASH
+    rows = ["| Профиль (отложенный test) | n событий (дней рейса) | Модель | MAE, шт./км² | RMSE | MAE log1p | Покрытие 90 %-интервала | ΔMAE модель − медиана [95 % ДИ] |",
+            "|---|---:|---|---:|---:|---:|---:|---|"]
+    for key, name in (("S2", "S2 пластик > 2 см, визуально (основной)"), ("S1", "S1 пластик 5–50 см, трал")):
+        r = ft.get(key) or {}
+        ci = r.get("d_mae_ci95") or [None, None]
+        rows.append(f"| {name} | {fmt(r.get('n_test'), None)} ({fmt(r.get('test_cruise_days'), None)}) | {r.get('main_model')} | "
+                    f"{fmt(r.get('main_mae'), 'f1')} | {fmt(r.get('main_rmse'), 'f1')} | {fmt(r.get('main_log1p_mae'), 'f3')} | "
+                    f"{fmt(r.get('main_coverage90_pct'), 'f0')} % | {fmt(r.get('d_mae'), 'f1')} [{fmt(ci[0], 'f1')}; {fmt(ci[1], 'f1')}] |")
+        rows.append(f"| | | **медиана профиля (на карте)** | **{fmt(r.get('median_mae'), 'f1')}** | {fmt(r.get('median_rmse'), 'f1')} | "
+                    f"{fmt(r.get('median_log1p_mae'), 'f3')} | {fmt(r.get('median_coverage90_pct'), 'f0')} % | {r.get('verdict')} |")
     return "\n".join(rows)
 
 
@@ -826,7 +846,7 @@ def derived(fn: dict) -> dict:
             "case_final_test_text": case_final_test_text(fn), "case_sections_table": case_sections_table(fn),
             "case_search_table": case_search_table(fn), "case_labeled_table": case_labeled_table(fn),
             "case_baselines_u_table": case_baselines_u_table(fn),
-            "case_quantity_levels_table": case_quantity_levels_table(fn),
+            "case_quantity_levels_table": case_quantity_levels_table(fn), "case_field_table": case_field_table(fn),
             "case_quantity_profiles_table": case_quantity_profiles_table(fn)}
 
 

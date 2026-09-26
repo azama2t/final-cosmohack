@@ -36,6 +36,8 @@ ADIS_CSV = REP / "search" / "adis_candidates.csv"
 IMG = ROOT / "docs" / "img"
 V2_LIVE = REP / "detector_v2" / "experiments.json"
 V2_SNAPSHOT = REP / "detector_v2" / "experiments_snapshot.json"
+V2_PAIRS_D = REP / "detector_v2" / "pairs_d_scenes.json"          # снимок: на скольких съёмках срабатывания на D пар
+AUDIT_COZAR = REP / "audit" / "cozar_check.json"                    # аудит L107: полнота нитей Cózar при разных порогах
 
 SOURCES = {"S1": "S1_GPGP2018", "S2": "S2_SARGASSO_MSM41", "S3": "S3_SE_NORTH_SEA", "S4": "S4_BLACK_SEA_DOORS3"}
 SEARCH_NAMES = {"S1": "S1 Тихий океан, аэросъёмка 2016 (L88)", "S2": "S2 Саргассово море, MSM41 (L98)",
@@ -472,9 +474,9 @@ def collect_oil() -> dict:
 def collect_detector_v2() -> dict:
     # зафиксированный снимок (копирует `--sync`), а не живой файл L92: иначе числа меняются при каждой записи экспериментов
     e = _load_json(V2_SNAPSHOT) or {}
-    dec = _load_json(REP / "detector_v2" / "decision.json") or {}  # слот: решение оркестратора о новой модели
+    dec = _load_json(REP / "detector_v2" / "decision.json") or {}  # слот: решение команды о новой модели
     out = {"available": bool(e), "source": "reports/detector_v2/experiments_snapshot.json (снимок experiments.json L92), "
-                                           "reports/detector_v2/decision.json (решение оркестратора), configs/detector_v2_eval.yaml",
+                                           "reports/detector_v2/decision.json (решение команды), configs/detector_v2_eval.yaml",
            "snapshot_generated": e.get("generated"),
            "protocol": "проверка зафиксирована до экспериментов (sha256 в experiments.json): MARIDA val + 3-fold по снимкам для "
                        "новых B/D; 3 seed; правило принятия записано заранее (ΔF1 val ≥ max(0.01, 2σ) и не хуже на D/B); "
@@ -529,6 +531,16 @@ def collect_detector_v2() -> dict:
                             "water_pct_min": _r(min(wf), 0), "water_pct_max": _r(max(wf), 0),
                             "df1_min": _r(min(d1), 3), "df1_max": _r(max(d1), 3),
                             "foam_fa_max": max(f[0] for f in fm if f[0] is not None), "foam_n": max(f[1] for f in fm if f[1] is not None)}
+    pd_ = _load_json(V2_PAIRS_D) or {}
+    if pd_:
+        out["reference"].update({"pairs_d_acq_flagged": pd_.get("acq_flagged"), "pairs_d_acq_total": pd_.get("acq_total")})
+    c146 = src(ref, "features_cozar2024", "B_recall")
+    if c146:
+        out["reference"].update({"cozar146_hit": c146.get("flagged"), "cozar146_n": c146.get("n_objects")})
+    au = (_load_json(AUDIT_COZAR) or {}).get("recall_36") or {}
+    if au:
+        out["reference"].update({"cozar_ge3px_pct": _r(100 * (au.get("recall_ge_3px") or 0), 0),
+                                 "cozar_pixel_pct": _r(100 * (au.get("pixel_rate") or 0), 0)})
     fr = foam(ref)
     out["reference_foam_fa"], out["reference_foam_n"] = fr
     vd = next((y for y in ex if y.get("exp") == "vesD_w03"), {})
@@ -544,7 +556,55 @@ def collect_detector_v2() -> dict:
                     "decision_note": (f"правило принятия (записано до экспериментов) не прошёл ни один из {len(cands)} вариантов с новыми "
                                       f"данными (×{out['n_seeds']} seed)" + (" и контрольный r0" if ctrl else "") +
                                       " → остаётся weights/lgbm") if not acc else
-                    "есть кандидаты по правилу; решение оркестратора ещё не записано — в сервисе weights/lgbm"})
+                    "есть кандидаты по правилу; решение команды ещё не записано — в сервисе weights/lgbm"})
+    return out
+
+
+GLEB = ROOT / "docs" / "research" / "gleb_quantitative_link" / "results"
+
+
+def collect_independent() -> dict:
+    """Независимая проверка источников количества (член команды, без наших результатов): docs/research/gleb_quantitative_link."""
+    import pandas as pd
+    out = {"available": (GLEB / "REPORT.md").is_file(),
+           "source": "docs/research/gleb_quantitative_link/results/{REPORT.md, adis_pairs/pair_summary.csv, adis_sentinel_matches.csv, "
+                     "adis_open_ocean_audit.json, plp2019/summary.json}",
+           "protocol": "независимая проверка: наглядные пары ADIS ↔ S2 по предметам > 50 см (у автора «A» — хорошая полевая метка, у нас A — "
+                       "пара снимок + подсчёт; выборки разные: его пары > 50 см, наши > 5 см) и попытка «спектр пикселя → доля покрытия» на "
+                       "PLP2019 с проверкой leave-one-date-out"}
+    if not out["available"]:
+        return out
+    ps = _csv(GLEB / "adis_pairs" / "pair_summary.csv")
+    if ps is not None:
+        out["pairs"] = {"n": int(len(ps)), "items_gt50": int(ps.n_objects_gt50cm.sum()),
+                        "dt_abs_min_h": _r(ps.delta_hours.abs().min(), 1), "dt_abs_max_h": _r(ps.delta_hours.abs().max(), 1),
+                        "density_min": _r(ps.raw_density_items_km2.min(), 1), "density_max": _r(ps.raw_density_items_km2.max(), 1)}
+    m = _csv(GLEB / "adis_sentinel_matches.csv")
+    if m is not None:
+        m = m.assign(same_day=pd.to_datetime(m.field_datetime, utc=True).dt.date == pd.to_datetime(m.acquisition_datetime, utc=True).dt.date)
+        out["routes_gt50"] = int(m.SegmentID.nunique())
+        out["routes_same_day_s2"] = int(m[m.same_day].SegmentID.nunique())
+    au = _load_json(GLEB / "adis_open_ocean_audit.json") or []
+    if au:
+        segs = {}
+        for x in au:
+            segs.setdefault(x["segment_id"], [int(x.get("count_gt50cm") or 0), 0])
+            segs[x["segment_id"]][1] += int(x.get("scenes_same_day") or 0)
+        out["dense_routes"] = len(segs)
+        out["dense_routes_items"] = sorted((v[0] for v in segs.values()), reverse=True)
+        out["dense_routes_scenes_same_day"] = sum(v[1] for v in segs.values())
+    plp = _load_json(GLEB / "plp2019" / "summary.json") or {}
+    if plp:
+        lodo = plp.get("leave_one_date_out_fdi") or []
+        out["plp"] = {"n_pixels": plp.get("rows"), "n_dates": len(lodo),
+                      "rho_fdi": _r((plp.get("pooled_spearman_fdi") or {}).get("rho"), 2),
+                      "rho_nir": _r((plp.get("pooled_spearman_nir") or {}).get("rho"), 2),
+                      "lodo_mae_min": _r(min(x["mae_percent_points"] for x in lodo), 1) if lodo else None,
+                      "lodo_mae_max": _r(max(x["mae_percent_points"] for x in lodo), 1) if lodo else None,
+                      "lodo_mean_mae_min": _r(min(x["mean_baseline_mae_percent_points"] for x in lodo), 1) if lodo else None,
+                      "lodo_mean_mae_max": _r(max(x["mean_baseline_mae_percent_points"] for x in lodo), 1) if lodo else None,
+                      "verdict": "перевод «спектр пикселя → доля покрытия пластиком» не подтверждён: связь слабая, знак меняется по датам, "
+                                 "модель по FDI на отложенной дате не лучше предсказания средним"}
     return out
 
 
@@ -566,9 +626,25 @@ def collect() -> dict:
     """Все разделы расследования данных → для case.sections (final_numbers.py)."""
     ad, q = collect_adis(), collect_quantity()
     q["levels"] = quantity_levels(ad, q)
-    return {"search": collect_search(), "labeled_data": collect_labeled(), "adis_pairs": ad,
-            "baselines": collect_baselines(), "quantity": q, "oil": collect_oil(),
-            "detector_v2": collect_detector_v2()}
+    res = {"search": collect_search(), "labeled_data": collect_labeled(), "adis_pairs": ad,
+           "baselines": collect_baselines(), "quantity": q, "oil": collect_oil(),
+           "detector_v2": collect_detector_v2(), "independent_check": collect_independent()}
+    return _clean_ids(res)
+
+
+_TASK_PAREN = re.compile(r"\s*\((?:L\d{2,3}(?:\s*[–,-]\s*L?\d{2,3})*(?:,\s*)?)+\)")
+_TASK_WORD = re.compile(r"(?:,\s*)?\bL\d{2,3}\b:?\s?")
+
+
+def _clean_ids(x):
+    """Сдача без служебных меток задач (L86 … L117): только в строках-подписях, числа не трогаются."""
+    if isinstance(x, dict):
+        return {k: _clean_ids(v) for k, v in x.items()}
+    if isinstance(x, list):
+        return [_clean_ids(v) for v in x]
+    if isinstance(x, str) and re.search(r"\bL\d{2,3}\b", x):
+        return re.sub(r"\s{2,}", " ", _TASK_WORD.sub("", _TASK_PAREN.sub("", x))).replace("( ", "(").replace(" )", ")").strip()
+    return x
 
 
 # ------------------------------------------------------------------------------------------------ sync (not offline-only)
@@ -588,6 +664,23 @@ def sync_v2_snapshot() -> str:
     return f"снимок detector_v2 обновлён ({live.get('generated')}, экспериментов {len(live['experiments'])})"
 
 
+def sync_pairs_d() -> str:
+    """out/detector_v2 (не в git): срабатывания отката на D-объектах пар → по съёмкам → reports/detector_v2/pairs_d_scenes.json."""
+    import pandas as pd
+    run, objs = ROOT / "out" / "detector_v2" / "runs" / "reference.json", ROOT / "out" / "detector_v2" / "pairs_objects.csv"
+    if not (run.is_file() and objs.is_file()):
+        return "нет out/detector_v2 — снимок D пар не менялся"
+    flags = ((((_load_json(run) or {}).get("pairs") or {}).get("none") or {}).get("flags")) or {}
+    o = pd.read_csv(objs)
+    d = o[o.level == "D"]
+    hit = [int(i) for i, v in flags.items() if v and int(i) in set(d.index)]
+    res = {"source": "out/detector_v2/runs/reference.json (pairs.none.flags), out/detector_v2/pairs_objects.csv",
+           "n_d": int(len(d)), "flagged": len(hit), "acq_total": int(d.acq.nunique()),
+           "acq_flagged": int(d.loc[hit].acq.nunique()) if hit else 0, "acq_list": sorted(d.loc[hit].acq.unique().tolist()) if hit else []}
+    V2_PAIRS_D.write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8", newline="\n")
+    return f"D пар: {res['flagged']} из {res['n_d']} объектов, съёмок {res['acq_flagged']} из {res['acq_total']}"
+
+
 def sync_adis() -> str:
     """data/search/adis/candidates.csv (не в git) → reports/search/adis_candidates.csv (в git)."""
     if not ADIS_SRC.is_file():
@@ -603,6 +696,8 @@ CROPS = {  # лучшие вырезки розыска → уменьшенны
     "search_s4_t30.jpg": ["data/search/s4/crops/S4_DOORS3_T30/S2B_36TUN_20240617_0_L2A/rgb.png",
                           "data/search/s4/crops/S4_DOORS3_T30/S2B_36TUN_20240617_0_L2A/swir.png",
                           "data/search/s4/crops/S4_DOORS3_T30/S2B_36TUN_20240617_0_L2A/mask.png"],
+    "independent_adis_pairs.jpg": ["docs/research/gleb_quantitative_link/results/adis_pairs/335694/rgb_pair_verified.png",
+                                   "docs/research/gleb_quantitative_link/results/adis_pairs/335765/rgb_pair_verified.png"],
     "search_s3_he460.jpg": ["data/search/s3/pairs/S3_HE460_MarLitter_transect03__S2A_MSIL2A_20160411T105022_R051_T32ULF_20210211T031140/panel.png"],
 }
 
@@ -644,6 +739,7 @@ def main(argv=None) -> int:
     if a.sync:
         print("[collect_search]", sync_adis())
         print("[collect_search]", sync_v2_snapshot())
+        print("[collect_search]", sync_pairs_d())
         print("[collect_search] вырезки:", ", ".join(sync_images()) or "исходников нет (data/search не в git)")
     res = collect()
     OUT_JSON.write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")

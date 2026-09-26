@@ -70,7 +70,7 @@
  },
  "command": "run_all.py all --offline",
  "last_subcommand": "all",
- "finished": "2026-09-26T03:52:00",
+ "finished": "2026-09-26T05:13:09",
  "offline": true,
  "force": false,
  "workdir": null,
@@ -85,7 +85,7 @@
   "shapely": "2.1.2",
   "fastapi": "0.141.1",
   "yaml": "6.0.3",
-  "git_commit": "f976592efe860566223a9c1558274f268bc395bc"
+  "git_commit": "f0dd6b8c7d0ddfe9c48e49ccdc53d6d6cfe1cc22"
  },
  "inputs": {
   "task/macroplastic_marine_samples.csv": "30ce0a65e3880b833b5dfe3bc6f528ee5f5af14a0d22f25995f4ef8af585a764",
@@ -99,7 +99,7 @@
   "data/case/selection_S2_visual_total_plastic.csv": "681891ba9128a553bc96c449cc449ebc877bfd1863739b5657707e80fb3f387e",
   "data/case/selection_S2_visual_total_plastic_rejected.csv": "0a91527bc96f0a30a9b37c2150bc38f04c912db63f9d1a0cb965eb8b339dba2f",
   "data/case/run/registry_samples.csv": "ad18fda9af315dbfce398601f05f11c4e212b323a14c53ad0ee98366d1279690",
-  "data/case/run/registry_pairs.csv": "13c86ff514a2eb1153b9ae8ab6ff97d0a42daa365ad05d2e2a8cb5dd636196bb",
+  "data/case/run/registry_pairs.csv": "a9bc32635892b38b76fa5d8c86440b8247562348d5aef3af1d03e5a4c92db407",
   "data/pairs/events.csv": "adf102a44ed29df914c936c896781bb45ee1e1fe82150a70eaba56221da699c5",
   "data/pairs/candidates.csv": "1799265e31cbf3f58282b015feaf61244f4117f258d30c031548099d97806c01",
   "data/pairs/best_per_event.csv": "6661b3dd12464acf38a01c428a9dc5a0cf1ae88a7efd86bffef1b90b4ebbe305",
@@ -113,37 +113,37 @@
   "out/case_export/observations.csv": "5b7d4d4d38761b44d0ed90b68048a5be12caa6adb36770785e0a8a6c452a9c44",
   "out/case_export/pairs.geojson": "628db7fa26cbf43fe6f81e6f34713d41dfb17f8ed8ce52fb5deee504069d5812",
   "out/case_export/pairs.csv": "507024a241b80fff91104dd20a2de9659fe4a3f176b40b779966cdccdb8eb6f2",
-  "out/case_export/zones.geojson": "a711d0e9a319e4e05f46ab88dd69563b56b3c575179614ed0f20c75b6cf0de58",
-  "out/case_export/zones.csv": "850b495f9ae250f1ec4ef3f1ebb8f9b919580a3ae84f986cacc80861920dc05b",
+  "out/case_export/zones.geojson": "86cb7b0f9cf4c5edfe518f8d4299cedbb06a617847ba1718626d64e75714837a",
+  "out/case_export/zones.csv": "f8094dff133c90c3a2285ab2f649eb0ffff15a2b913d4f4308031f7f78243e2a",
   "out/case_export/example_pairs_black_sea_24h.csv": "d19ca108880f26760d2a86ef18f35ef23f2fbfd5570d87f560cf32b6e0a5eef5",
   "out/case_export/example_pairs_accepted.csv": "c98dfb6d693c97b031d7abb94751e54b4baf7972f9f493e0a2b997bffcae2dbe",
-  "out/case_export/example_zones_detected.geojson": "58fd0941b152a511fe654ad736dec6fc78e45ec37dc7e9b29cab9792fe7ca0c6"
+  "out/case_export/example_zones_detected.geojson": "992fb86de290340aa8431e0d876f02cec2649eeb5f60247172d87cf3b3ed7a6c"
  },
- "outputs_fingerprint": "fccf808a8817d7c46dd455cc790e30d80d084a74eb0907620cd82f1f6428de2a",
+ "outputs_fingerprint": "3db680b6661e86d3a479b8197bbcd08ec59f61ef1ea0088f44bc355e9e32855d",
  "steps": {
   "1_selection": {
    "step": "1_selection",
    "ok": true,
    "note": "S2_visual_total_plastic: 63 принято / 872 отказ, S1_trawl_total_plastic: 83 принято / 852 отказ",
-   "seconds": 0.1
+   "seconds": 0.2
   },
   "2_pairs": {
    "step": "2_pairs",
    "ok": true,
    "note": "строк 1774, запросов мимо кэша 0, ошибок 0",
-   "seconds": 1.8
+   "seconds": 3.1
   },
   "3_quality_detector": {
    "step": "3_quality_detector",
    "ok": true,
    "note": "только готовые meta.json; пар с результатом 29",
-   "seconds": 0.2
+   "seconds": 0.3
   },
   "3b_registry": {
    "step": "3b_registry",
    "ok": true,
    "note": "событий 318: {'reject': 318}, без учёта дрейфа {'accept': 12, 'reject': 306}",
-   "seconds": 0.7
+   "seconds": 1.6
   },
   "total_prepare": {
    "step": "total_prepare",
@@ -154,7 +154,7 @@
    "step": "4_concentration",
    "ok": true,
    "note": "S2_visual_total_plastic: median MAE 35.9 vs knn5 31.3; S1_trawl_total_plastic: median MAE 456.4 vs knn5 448.9",
-   "seconds": 2.8
+   "seconds": 3.3
   },
   "total_eval": {
    "step": "total_eval",
@@ -165,13 +165,13 @@
    "step": "5_detector_marida",
    "ok": true,
    "note": "test F1 lgbm 0.8713; пересчёт из npz: test — совпал, val — совпал",
-   "seconds": 1.0
+   "seconds": 1.3
   },
   "6_export_api_v3": {
    "step": "6_export_api_v3",
    "ok": true,
    "note": "observations.geojson: 935, observations.csv: 935, pairs.geojson: 4436, pairs.csv: 4436, zones.geojson: 29, zones.csv: 29",
-   "seconds": 1.0
+   "seconds": 1.4
   },
   "total_export": {
    "step": "total_export",
@@ -181,7 +181,7 @@
   "total_all": {
    "step": "total_all",
    "ok": true,
-   "seconds": 7.7
+   "seconds": 11.5
   },
   "5b_search_numbers": {
    "step": "5b_search_numbers",

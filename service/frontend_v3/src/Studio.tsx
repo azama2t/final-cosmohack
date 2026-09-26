@@ -272,11 +272,15 @@ export default function Studio(p: {
     return rows;
   }, [obs]);
   const [oilList, setOilList] = useState<Feat<OilProps>[] | null>(null);
+  const [oilNoData, setOilNoData] = useState<string | null>(null); // clean clone: no layer in the submission ≠ «no spills»
   useEffect(() => {
     if (!p.oilOn) return;
     const ac = new AbortController();
-    get<{ features: Feat<OilProps>[] }>('/api/v3/oil/spills', { bbox: site.bbox.map((x) => x.toFixed(4)).join(','), limit: 1000 }, ac.signal)
-      .then((j) => setOilList(j.features ?? []))
+    get<{ features: Feat<OilProps>[]; data_available?: boolean; empty_reason?: string | null }>('/api/v3/oil/spills', { bbox: site.bbox.map((x) => x.toFixed(4)).join(','), limit: 1000 }, ac.signal)
+      .then((j) => {
+        setOilNoData(j.data_available === false ? j.empty_reason || 'нет данных слоя в сдаче' : null);
+        setOilList(j.features ?? []);
+      })
       .catch(() => {});
     return () => ac.abort();
   }, [p.oilOn, site.bbox]);
@@ -538,7 +542,7 @@ export default function Studio(p: {
               <div className="muted">площадь, не объём/масса</div>
             </div>
           ) : (
-            <div className="muted small">Пятен не найдено</div>
+            <div className="muted small" data-testid="oil-empty">{oilNoData ? 'Нет данных слоя в сдаче (это не «пятен нет»)' : 'Пятен не найдено'}</div>
           )}
         </Block>
       )}

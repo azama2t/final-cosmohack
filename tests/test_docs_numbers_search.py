@@ -21,7 +21,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 FN = ROOT / "reports" / "final_numbers.json"
-KEYS = ("search", "labeled_data", "adis_pairs", "baselines", "quantity", "oil", "detector_v2")
+KEYS = ("search", "labeled_data", "adis_pairs", "baselines", "quantity", "oil", "detector_v2", "independent_check")
 
 pytestmark = pytest.mark.skipif(not FN.exists(), reason="нет reports/final_numbers.json")
 
@@ -170,5 +170,10 @@ def test_wording_section15(deck_texts):
             "docs/QUANTITY.md": (ROOT / "docs/QUANTITY.md").read_text(encoding="utf-8"), "slides": slides, **texts}
     bad = [(name, pat) for name, txt in docs.items() for pat in FORBIDDEN if re.search(pat, txt)]
     assert not bad, f"формулировки §15 нарушены: {bad}"
+    trace = re.compile(r"\bL\d{2,3}\b|оркестрат|INBOX|SPEC-GAPS|tasklog")
+    leaks = [(name, m.group(0)) for name, txt in docs.items() for m in [trace.search(txt)] if m]
+    assert not leaks, f"следы внутреннего процесса в сдаче: {leaks}"
+    ft = (ROOT / "README.md").read_text(encoding="utf-8")
+    assert "Главный количественный результат" in ft and "медиана профиля (на карте)" in ft
     q = docs["docs/QUANTITY.md"]
     assert "Пара по месту и времени" in q and "Калибровочная пара" in q and "Видимый сигнал" in q

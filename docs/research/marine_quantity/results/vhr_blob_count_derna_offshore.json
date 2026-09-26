@@ -1,0 +1,130 @@
+{
+ "image": "https://maxar-opendata.s3.amazonaws.com/events/Libya-Floods-Sept-2023/ard/34/120200213130/2023-09-13/10500100363D0900-visual.tif",
+ "note": "Maxar Open Data GeoEye-1 visual 0.305 m, Derna 2023-09-13, CC-BY-NC-4.0",
+ "imagery_in_git": false,
+ "window_lonlat": [
+  22.625,
+  32.789,
+  22.65,
+  32.797
+ ],
+ "native_gsd_m": 0.30517578125,
+ "area_km2": 2.1740724332630634,
+ "table": [
+  {
+   "gsd_m": 0.305,
+   "k": 4,
+   "n_blobs": 87242,
+   "n_bright": 87242,
+   "n_coloured_or_dark": 0,
+   "median_area_m2": 0.7450580596923828,
+   "blobs_per_km2": 40128.37781538795
+  },
+  {
+   "gsd_m": 0.305,
+   "k": 6,
+   "n_blobs": 17336,
+   "n_bright": 17336,
+   "n_coloured_or_dark": 0,
+   "median_area_m2": 0.5587935447692871,
+   "blobs_per_km2": 7973.975353700802
+  },
+  {
+   "gsd_m": 0.305,
+   "k": 8,
+   "n_blobs": 824,
+   "n_bright": 824,
+   "n_coloured_or_dark": 0,
+   "median_area_m2": 0.46566128730773926,
+   "blobs_per_km2": 379.01221108960897
+  },
+  {
+   "gsd_m": 0.916,
+   "k": 4,
+   "n_blobs": 7814,
+   "n_bright": 7814,
+   "n_coloured_or_dark": 0,
+   "median_area_m2": 5.029141902923584,
+   "blobs_per_km2": 3594.1764774929666
+  },
+  {
+   "gsd_m": 0.916,
+   "k": 6,
+   "n_blobs": 308,
+   "n_bright": 308,
+   "n_coloured_or_dark": 0,
+   "median_area_m2": 4.190951585769653,
+   "blobs_per_km2": 141.66961288300917
+  },
+  {
+   "gsd_m": 0.916,
+   "k": 8,
+   "n_blobs": 3,
+   "n_bright": 3,
+   "n_coloured_or_dark": 0,
+   "median_area_m2": 4.190951585769653,
+   "blobs_per_km2": 1.379898826782557
+  },
+  {
+   "gsd_m": 3.052,
+   "k": 4,
+   "n_blobs": 130,
+   "n_bright": 130,
+   "n_coloured_or_dark": 0,
+   "median_area_m2": 37.25290298461914,
+   "blobs_per_km2": 59.795615827244134
+  },
+  {
+   "gsd_m": 3.052,
+   "k": 6,
+   "n_blobs": 1,
+   "n_bright": 1,
+   "n_coloured_or_dark": 0,
+   "median_area_m2": 37.25290298461914,
+   "blobs_per_km2": 0.4599662755941856
+  },
+  {
+   "gsd_m": 3.052,
+   "k": 8,
+   "n_blobs": 0,
+   "n_bright": 0,
+   "n_coloured_or_dark": 0,
+   "median_area_m2": null,
+   "blobs_per_km2": 0.0
+  },
+  {
+   "gsd_m": 10.071,
+   "k": 4,
+   "n_blobs": 0,
+   "n_bright": 0,
+   "n_coloured_or_dark": 0,
+   "median_area_m2": null,
+   "blobs_per_km2": 0.0
+  },
+  {
+   "gsd_m": 10.071,
+   "k": 6,
+   "n_blobs": 0,
+   "n_bright": 0,
+   "n_coloured_or_dark": 0,
+   "median_area_m2": null,
+   "blobs_per_km2": 0.0
+  },
+  {
+   "gsd_m": 10.071,
+   "k": 8,
+   "n_blobs": 0,
+   "n_bright": null,
+   "n_coloured_or_dark": null,
+   "median_area_m2": null,
+   "blobs_per_km2": 0.0
+  }
+ ],
+ "thumbs": {
+  "coloured_or_dark_first": 0,
+  "bright_last": 16,
+  "grid": "data/extra/marine_quantity/maxar/derna_offshore_blob_thumbs_k6.png",
+  "tile_side_m": 12.2
+ },
+ "reference_densities": "see results/resolution_physics.json (ADIS)"
+}

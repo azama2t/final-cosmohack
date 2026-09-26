@@ -59,3 +59,4 @@ reports/extra_data/registry_cozar2024.csv
 /reports/perf/**/*.gz
 /reports/perf/**/*.png
 /docs/archive/PROGRESS_*
+/INBOX_REQUESTS.md

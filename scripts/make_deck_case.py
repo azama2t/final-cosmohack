@@ -43,6 +43,7 @@ IMAGES = {
     "funnel": ("../../../../docs/img/funnel.png", "05_funnel.jpg", None),
     "adis": ("../../../../docs/img/search_adis_pair.jpg", "06_adis_pair.jpg", None),
     "s4": ("../../../../docs/img/search_s4_t30.jpg", "07_s4_t30.jpg", None),
+    "independent": ("../../../../docs/img/independent_adis_pairs.jpg", "08_independent_adis.jpg", None),
 }
 
 # основная часть деки и речи (SPEC-GAPS.md: ТЗ не задаёт время → основная речь ≤ 5:00, ≤ 14 слайдов); остальное — «Приложение»
@@ -213,7 +214,7 @@ def load() -> dict:
         k[f"{pr}_min_dt"] = N(b + "final_test.min_dt_days"); k[f"{pr}_min_km"] = N(b + "final_test.min_dist_km")
         f = c + f"sections.field_test.{pr}."
         for key in ("n_test", "main_model", "main_mae", "median_mae", "d_mae", "d_mae_ci95", "main_coverage90_pct",
-                    "median_coverage90_pct", "verdict", "field_estimate_model", "test_cruise_days"):
+                    "median_coverage90_pct", "verdict", "field_estimate_model", "test_cruise_days", "main_rmse", "median_rmse"):
             k[f"{pr}_t_{key}"] = N(f + key)
     k["S2_k4"] = N(c + "conc.S2.sensitivity.k4.d_mae"); k["S2_k4_ci"] = N(c + "conc.S2.sensitivity.k4.ci95")
     k["S2_knn_dev"] = N(c + "conc.S2.knn5_log.mae")
@@ -318,6 +319,11 @@ def load() -> dict:
                 "df1_min", "df1_max", "foam_fa_max", "foam_n"):
         k["nb_" + key] = N(v2 + "natural_b." + key)
     k["v2_ref_foam"] = N(v2 + "reference_foam_fa"); k["v2_vd_foam"] = N(v2 + "vessels_d.foam_fa")
+    for key in ("cozar_ge3px_pct", "cozar_pixel_pct", "pairs_d_fa", "pairs_d_n", "pairs_d_acq_flagged", "pairs_d_acq_total"):
+        k["v2_ref_" + key] = N(v2 + "reference." + key)
+    ic = c + "sections.independent_check."
+    for key in ("pairs.n", "routes_gt50", "routes_same_day_s2", "plp.rho_fdi"):
+        k["ic_" + key.replace(".", "_")] = N(ic + key)
     ql = c + "sections.quantity.levels."
     for key in ("pairs_place_time", "pairs_place_time_eval", "visible_signal", "visible_signal_of", "calibration_pairs",
                 "calibration_needed_min", "calibration_needed_max"):
@@ -377,9 +383,10 @@ def search_slides(k: dict) -> list[dict]:
             f"Согласуется с физикой: доля покрытия ≈ {k['ad_coverage_frac_text']}, предмет — {num(k['ad_largest_item_pct_px'], 1)} % пикселя; но общий предел для всех скоплений это не задаёт — плотные полосы эти пары не проверяют",
             f"Ложные при полевом нуле ({num(k['ad_A_zero_eval'], 0)} пар): ветер < {num(k['ad_wind_split_ms'], 0)} м/с — {num(k['ad_calm_px'], 0)} пикселей на {num(k['ad_calm_strip_km2'], 1)} км²; сильнее — {num(k['ad_windy_px'], 0)} на {num(k['ad_windy_strip_km2'], 1)} км², {num(k['ad_windy_zone_obj_per_km2'], 2)} объекта/км² в зоне (барашки)",
             f"Три уровня: по месту и времени {num(k['ql_pairs_place_time'], 0)} · видимый сигнал {num(k['ql_visible_signal'], 0)} из {num(k['ql_visible_signal_of'], 0)} · калибровочных «снимок → шт./км²» {num(k['ql_calibration_pairs'], 0)} (нужно {num(k['ql_calibration_needed_min'], 0)}–{num(k['ql_calibration_needed_max'], 0)})",
+            f"Независимая проверка: {num(k['ic_pairs_n'], 0)} наглядных пар по предметам > 50 см (другая выборка, наши — > 5 см); S2 в тот же день — у {num(k['ic_routes_same_day_s2'], 0)} из {num(k['ic_routes_gt50'], 0)} маршрутов",
         ],
-        image="adis",
-        caption="Пара по месту и времени, Средиземное море: судно-съёмщик видно на снимке в конце полосы скана (пурпур) — время подтверждено; детектор в полосе пикселей не дал",
+        image="independent",
+        caption="Независимая проверка: пары ADIS ↔ S2 по предметам > 50 см — маршрут судна (жёлтый), поиск с учётом дрейфа (голубой); предметы на снимке не различимы",
         source="reports/search/adis_candidates.csv, reports/search/adis.md (final_numbers → case.sections.adis_pairs, quantity.levels)",
         speech=(f"Пар по месту и времени — {num(k['ad_A'], 0)}, время подтверждено даже по самому судну на снимке. Это не калибровочные пары. "
                 f"На {num(k['ad_A_with_items'], 0)} отрезках с единичными предметами детектор их не увидел: предмет меньше процента пикселя. "
@@ -388,12 +395,12 @@ def search_slides(k: dict) -> list[dict]:
     ))
     S.append(dict(
         section="Новые размеченные данные B/D",
-        title=f"Новые данные: B — {num(k['ld_b_new_acq'], 0)} съёмок и {num(k['ld_cz_win'], 0)} нитей Cózar, D — {num(k['ld_ves_boxes'], 0)} судов и облака; утечек {num(k['ld_leaks_total'], 0)}",
+        title=f"Новые данные: B — {num(k['ld_b_new_acq'], 0)} съёмок и {num(k['ld_cz_win'], 0)} нитей Cózar, D — {num(k['ld_ves_boxes'], 0)} судов и облака; с MARIDA совпадений {num(k['ld_leaks_total'], 0)}",
         bullets=[
             f"B: PLP {num(k['ld_plp'], 0)} съёмок (мишени), FloatingObjects {num(k['ld_fo'], 0)} съёмок ({num(k['ld_fo_reg'], 0)} регионов), Cózar 2024 — {num(k['ld_cz_win'], 0)} окон на {num(k['ld_cz_acq'], 0)} съёмках",
             f"D: суда у Финляндии — {num(k['ld_ves_boxes'], 0)} рамок, {num(k['ld_ves_acq'], 0)} съёмок; облака — {num(k['ld_cl_scenes'], 0)} сцен; отклонено источников {num(k['ld_neg_sources_rejected'], 0)} (у каждого причина)",
-            f"Утечки: та же съёмка или те же пиксели с MARIDA, MADOS и нашими сценами — {num(k['ld_leaks_total'], 0)}; по содержимому {num(k['ld_content_match'], 0)} из {num(k['ld_content_checked'], 0)}; исключён {num(k['ld_dup_excluded'], 0)} дубль",
-            f"Детектор без дообучения на L2A: нити Cózar {num(k['v2_reference_cozar_pct'], 0)} %, Refined {num(k['ld_zs_ref'], 1)} % пикселей; ложные на судах {num(k['ld_ves_pct'], 1)} %; облака — {num(k['ld_cl_flag'], 0)} пикс.",
+            f"Утечки: с MARIDA — {num(k['ld_leaks_total'], 0)} совпадений по тайлу и дате у всех наборов; с MADOS по пикселям — PLP и FO ({num(k['ld_content_match'], 0)} из {num(k['ld_content_checked'], 0)}); Cózar, суда, облака с MADOS не сверить — у MADOS нет геопривязки",
+            f"Детектор без дообучения на L2A: нити Cózar {num(k['v2_reference_cozar_pct'], 0)} % (хотя бы один пиксель нити; ≥ 3 пикс. — {num(k['v2_ref_cozar_ge3px_pct'], 0)} %, по пикселям {num(k['v2_ref_cozar_pixel_pct'], 0)} %), Refined {num(k['ld_zs_ref'], 1)} % пикселей; ложные на судах {num(k['ld_ves_pct'], 1)} %; облака — {num(k['ld_cl_flag'], 0)} пикс.",
         ],
         table=[["Набор (уровень)", "Детектор"],
                [f"Cózar, нити (B), из {num(k['v2_reference_cozar_n'], 0)}", f"{num(k['v2_reference_cozar_hit'], 0)}"],
@@ -401,20 +408,20 @@ def search_slides(k: dict) -> list[dict]:
                ["Суда (D), ложные рамки", num(k["ld_ves_flag"], 0)],
                ["Облака (D), ложные пикс.", num(k["ld_cl_flag"], 0)]],
         source="reports/extra_data/registry*.csv, fp_current_detector.json (final_numbers → case.sections.labeled_data)",
-        speech=(f"Для детектора мы собрали новые метки: подтверждённые скопления PLP, FloatingObjects и нити Cózar — это B, суда и облака — D. "
-                f"Утечек с MARIDA и MADOS нет, проверяли по дате и по самим пикселям. Текущий детектор на них почти не видит нити и путает суда."),
+        speech=(f"Для детектора мы собрали новые метки: скопления PLP, FloatingObjects и нити Cózar — B, суда и облака — D. "
+                f"С MARIDA совпадений нет; с MADOS по пикселям сверены PLP и FloatingObjects. Детектор на них почти не видит нити и путает суда."),
     ))
     S.append(dict(
         section="Разбор ошибок на сложном фоне",
         title=f"Сложный фон: нити Cózar в обучении — полнота до {num(k['nb_cozar_pct_max'], 0)} %, но пена {num(k['nb_foam_fa_max'], 0)}/{num(k['nb_foam_n'], 0)} и до {num(k['nb_vessels_pct_max'], 0)} % судов становятся «мусором»",
         bullets=[
-            f"Откат weights/lgbm (L2A, как в сервисе): нити Cózar {num(k['v2_reference_cozar_pct'], 0)} %, ложные на судах {num(k['v2_reference_vessels_pct'], 0)} %, на пене пар {num(k['v2_ref_foam'], 0)}/{num(k['nb_foam_n'], 0)}",
+            f"Откат weights/lgbm (L2A, как в сервисе): нити Cózar {num(k['v2_reference_cozar_pct'], 0)} % (хотя бы один пиксель нити; по пикселям {num(k['v2_ref_cozar_pixel_pct'], 0)} %), ложные на судах {num(k['v2_reference_vessels_pct'], 0)} %; D пар {num(k['v2_ref_pairs_d_fa'], 0)} из {num(k['v2_ref_pairs_d_n'], 0)} объектов, все на {num(k['v2_ref_pairs_d_acq_flagged'], 0)} съёмке из {num(k['v2_ref_pairs_d_acq_total'], 0)}",
             f"+ естественные B (Cózar, линии FloatingObjects): нити {num(k['nb_cozar_pct_min'], 0)}–{num(k['nb_cozar_pct_max'], 0)} %, но F1 MARIDA val {num(k['nb_df1_max'], 3)}…{num(k['nb_df1_min'], 3)}, ложные на {num(k['nb_water_pct_min'], 0)}–{num(k['nb_water_pct_max'], 0)} % чистой воды и {num(k['nb_vessels_pct_min'], 0)}–{num(k['nb_vessels_pct_max'], 0)} % судов",
             f"+ D судов: ложные на судах {num(k['v2_reference_vessels_pct'], 0)} % → {num(k['v2_vessels_d_vessels_pct'], 0)} %, на пене {num(k['v2_vd_foam'], 0)}/{num(k['nb_foam_n'], 0)}, но нити {num(k['v2_reference_cozar_pct'], 0)} % → {num(k['v2_vessels_d_cozar_pct'], 0)} %",
             f"Суда, пена и нити спектрально близки: выигрыш на одном ломает другое. Итог: {k['v2_note']}",
         ],
         table=[["Вариант", "Нити · суда · пена"],
-               ["Откат weights/lgbm", f"{num(k['v2_reference_cozar_pct'], 0)} % · {num(k['v2_reference_vessels_pct'], 0)} % · {num(k['v2_ref_foam'], 0)}/{num(k['nb_foam_n'], 0)}"],
+               ["Откат weights/lgbm (нить — ≥ 1 пикс.)", f"{num(k['v2_reference_cozar_pct'], 0)} % · {num(k['v2_reference_vessels_pct'], 0)} % · {num(k['v2_ref_foam'], 0)}/{num(k['nb_foam_n'], 0)}"],
                ["+ естественные B", f"{num(k['nb_cozar_pct_min'], 0)}–{num(k['nb_cozar_pct_max'], 0)} % · {num(k['nb_vessels_pct_min'], 0)}–{num(k['nb_vessels_pct_max'], 0)} % · {num(k['nb_foam_fa_max'], 0)}/{num(k['nb_foam_n'], 0)}"],
                ["+ D судов", f"{num(k['v2_vessels_d_cozar_pct'], 0)} % · {num(k['v2_vessels_d_vessels_pct'], 0)} % · {num(k['v2_vd_foam'], 0)}/{num(k['nb_foam_n'], 0)}"]],
         table_w0=0.46,
@@ -570,7 +577,7 @@ def slides(k: dict) -> list[dict]:
             f"LightGBM, порог {num(k['thr'], 2)} с val; test MARIDA посчитан один раз: ΔF1 к RF {num(k['d_delta'], 3)} {ci(k['d_delta_ci'], 3)}",
             f"MARIDA test: на саргассуме и мутной воде ложных {num(k['d_hard_bg_fp'], 0)} (FDI × NDVI помечает {num(k['d_fdi_sarg_pct'], 0)} % саргассума); ошибки — суда {num(k['d_fp_ship'], 0)} и органика {num(k['d_fp_org'], 0)}",
             f"Снимки пар (L2A): гармонизация каналов выключена по MARIDA val — F1 {num(k['hv_f1_none'], 3)} без сдвига против {num(k['hv_f1_per_scene'], 3)} со сдвигом, Δ {num(k['hv_delta_per_scene'], 3)} {ci(k['hv_delta_per_scene_ci95'], 3)}",
-            f"Сейчас: {num(k['dc_n_obj'], 0)} объектов на {num(k['dc_n_crops'], 0)} сценах, в полосах {num(k['dc_n_in_strip'], 0)}; вне полосы HE460 т.03 — {num(k['dc_n_ship'], 0)} судно (верное срабатывание на сложном фоне) и {num(k['dc_n_other_single'], 0)} одиночных пикселя",
+            f"Сейчас: {num(k['dc_n_obj'], 0)} объектов на {num(k['dc_n_crops'], 0)} сценах, в полосах {num(k['dc_n_in_strip'], 0)}; все на HE460 т.03 вне полосы: {num(k['dc_n_other_single'], 0)} пена/барашки, {num(k['dc_n_ship'], 0)} вероятно судно (тип по правилам) — все ложные, скоплений нет (суда — известная слабость: {num(k['v2_reference_vessels_pct'], 0)} % судов)",
             f"Прежний режим (с гармонизацией) — основание отказа: {num(k['dr_n_obj'], 0)} объектов, вероятное скопление по виду у {num(k['vr_h_out_precision_pct'], 1)} % {ci(k['vr_h_out_ci95_pct'], 1)}; размечал ИИ-агент, один аннотатор, κ {num(k['vr_kappa'], 2)} — его же слепой повтор",
         ],
         bars=dict(title=f"F1 Marine Debris, test MARIDA ({num(k['d_n_scenes'], 0)} сцен)", maxv=1.0, fmt=3, items=[
@@ -581,7 +588,7 @@ def slides(k: dict) -> list[dict]:
         speech=(f"Детектор — пиксельный LightGBM. На test MARIDA F1 {num(k['d_lgbm_f1'], 3)}, RandomForest — {num(k['d_rf_argmax_f1'], 3)}, "
                 f"индексы FDI — {num(k['d_fdi_ndvi_box_f1'], 3)}; саргассум и мутную воду он не путает. На снимках пар мы выключили "
                 f"гармонизацию каналов — решение по MARIDA val, не по тесту. Сейчас {num(k['dc_n_obj'], 0)} объектов на {num(k['dc_n_crops'], 0)} "
-                f"сценах и ни одного в полосах; вне полосы — судно, это верное срабатывание. Прежний режим давал {num(k['dr_n_obj'], 0)} "
+                f"сценах и ни одного в полосах; вне полосы — одиночные пиксели пены и, вероятно, судно — все ложные, скоплений нет. Прежний режим давал {num(k['dr_n_obj'], 0)} "
                 f"объектов, почти всё — фон моря."),
     ))
     S.append(dict(
@@ -593,10 +600,13 @@ def slides(k: dict) -> list[dict]:
             f"Dev CV S2: {k['S2_primary']} {num(k['S2_dev_main'], 1)} против медианы {num(k['S2_dev_med'], 1)}, ΔMAE {ci(k['S2_dev_ci'])} — слабый выигрыш (с Бонферрони {ci(k['S2_dev_bonf'])})",
             f"Отложенный test ({k['ft_when']}, один раз): S2 {num(k['S2_t_main_mae'], 1)} против {num(k['S2_t_median_mae'], 1)} ({k['S2_t_verdict']}); S1 {num(k['S1_t_main_mae'], 1)} против {num(k['S1_t_median_mae'], 1)} ({k['S1_t_verdict']})",
         ],
-        bars=dict(title=f"S2, отложенный test ({pl(k['S2_t_n_test'], *EV)}): MAE, шт./км²", fmt=1, items=[
-            (f"{k['S2_t_main_model']} (основная)", k["S2_t_main_mae"], False),
-            ("медиана dev (на карте)", k["S2_t_median_mae"], True)],
-            note=f"ΔMAE {sgn(k['S2_t_d_mae'])} {ci(k['S2_t_d_mae_ci95'], 1, True)} — ДИ содержит 0"),
+        table=[["Отложенный test: модель / медиана", "S2 · S1"],
+               ["n событий", f"{num(k['S2_t_n_test'], 0)} · {num(k['S1_t_n_test'], 0)}"],
+               ["MAE, шт./км²", f"{num(k['S2_t_main_mae'], 1)} / {num(k['S2_t_median_mae'], 1)} · {num(k['S1_t_main_mae'], 1)} / {num(k['S1_t_median_mae'], 1)}"],
+               ["RMSE, шт./км²", f"{num(k['S2_t_main_rmse'], 1)} / {num(k['S2_t_median_rmse'], 1)} · {num(k['S1_t_main_rmse'], 1)} / {num(k['S1_t_median_rmse'], 1)}"],
+               ["Покрытие 90 %-интервала", f"{num(k['S2_t_main_coverage90_pct'], 0)} / {num(k['S2_t_median_coverage90_pct'], 0)} % · {num(k['S1_t_main_coverage90_pct'], 0)} / {num(k['S1_t_median_coverage90_pct'], 0)} %"],
+               ["На карте", "медиана профиля"]],
+        table_w0=0.5,
         source="reports/case_conc/dev_cv.json, final_test.json; configs/case_selection.yaml: final_test",
         speech=(f"Концентрация: C равно N на A, интервал Пуассона, контрольный пример — {num(k['ctl_v'], 1)}. Модели сравниваем с "
                 f"медианой на участках маршрута. На dev ridge выигрывает слабо, а на отложенном test, посчитанном один раз, — "
@@ -878,7 +888,7 @@ def speech_md(S: list[dict], k: dict) -> str:
          "в заметках докладчика `reports/case_deck.pptx`. Демо на карте — отдельно, `docs/DEMO.md` (2 мин); вопросы — `docs/QA.md`.",
          "",
          f"Темп ≈ 130 слов в минуту, всего ≈ {pl(sum(len(s['speech'].split()) for s in S), 'слово', 'слова', 'слов')}. Если отстаём больше чем на 15 с — слайды «Собственный вклад» и «Ограничения и развитие» сокращаем до заголовка. "
-         f"Регламент в ТЗ не задан — допущение «основная речь ≤ 5:00» (SPEC-GAPS.md); после основной части — {pl(len(A), 'слайд', 'слайда', 'слайдов')} «Приложения» для вопросов, вслух не читаются.", "",
+         f"Регламент в ТЗ не задан — допущение «основная речь ≤ 5:00»; после основной части — {pl(len(A), 'слайд', 'слайда', 'слайдов')} «Приложения» для вопросов, вслух не читаются.", "",
          "| Слайд | Время | О чём |", "|---|---|---|"]
     for i, s in enumerate(S, 1):
         L.append(f"| {i} | {s['time'][0]}–{s['time'][1]} | {s['section']} |")
@@ -899,7 +909,7 @@ def speech_md(S: list[dict], k: dict) -> str:
           f"- Отложенный test S2: {num(k['S2_t_main_mae'], 1)} против медианы **{num(k['S2_t_median_mae'], 1)}**; S1: {num(k['S1_t_main_mae'], 1)} против {num(k['S1_t_median_mae'], 1)}.",
           f"- Эксперимент: {num(k['e_n_accept_s2'], 0)} пар, {num(k['e_n_groups'], 0)} групп; нужно ≈ {num(k['e_n_needed_rho05'], 0)} пар для ρ = 0.5.",
           f"- Розыск: у событий CSV пар A {num(k['sr_csv_A'], 0)}; ADIS — **{num(k['ad_A'], 0)}** пар по месту и времени; видимый сигнал {num(k['ql_visible_signal'], 0)}; калибровочных пар {num(k['ql_calibration_pairs'], 0)}.",
-          f"- Новые метки: B {num(k['ld_b_new_acq'], 0)} съёмок + {num(k['ld_cz_win'], 0)} нитей Cózar, D {num(k['ld_ves_boxes'], 0)} судов; утечек {num(k['ld_leaks_total'], 0)}; детектор: {k['v2_note']}.",
+          f"- Новые метки: B {num(k['ld_b_new_acq'], 0)} съёмок + {num(k['ld_cz_win'], 0)} нитей Cózar, D {num(k['ld_ves_boxes'], 0)} судов; с MARIDA по тайлу и дате совпадений {num(k['ld_leaks_total'], 0)}, с MADOS по пикселям — только PLP/FO; детектор: {k['v2_note']}.",
           f"- U-Net MARIDA на test — {num(k['bl_unet_argmax'], 3)}; калибровке «снимок → шт./км²» нужно {num(k['q_n_pairs_k_x2_min'], 0)}–{num(k['q_n_pairs_k_x2_max'], 0)} калибровочных пар, есть {num(k['q_pairs_A_with_S_pos'], 0)}.",
           "",
           "## Формулировки, которых избегаем", "",
@@ -915,6 +925,13 @@ def speech_md(S: list[dict], k: dict) -> str:
 
 
 # ----------------------------------------------------------------------------------------------- DEMO.md
+def _sz_block() -> str:
+    """L111: main demo path on the held-out Cózar scene (numbers from data/case/scene_zones, scripts/case/demo_sz_md.py)."""
+    sys.path.insert(0, str(ROOT / "scripts" / "case"))
+    from demo_sz_md import md as _md
+    return _md()
+
+
 def demo_md(k: dict) -> str:
     return f"""# Демо на карте кейса: сценарий на 2 минуты и план Б
 
@@ -925,14 +942,16 @@ def demo_md(k: dict) -> str:
 Окно 1920×1080, браузер на весь экран. Проверить: слева «{num(k['exp_obs'], 0)} наблюдений · {num(k['zones'], 0)} полос»,
 в легенде — «{num(k['zones'], 0)} обследованных участков со снимками-кандидатами; 0 подтверждённых пар; для пластика снимков нет».
 
-## Сценарий (2:00)
+{_sz_block()}
+
+## Запасной путь: поле и полосы пар (2:00)
 
 | Время | Действие | Что говорим | Что видно |
 |---|---|---|---|
 | 0:00–0:15 | «Акватория» → **Саргассово море, MSM41**; даты не трогаем | «Основной профиль — суммарный пластик > 2 см, визуальная полоса 10 м, {pl(k['t_n_events'], *EV)}.» | точки измерений на трансектах |
 | 0:15–0:35 | Клик по измерению с плотностью (вкладка «Измерения» → запись «весь пластик») | «Это **измерение**: C = N/A, рядом 95 % интервал Пуассона. Если ниже есть блок «Оценка модели по полевым данным» — это исследовательский прогноз кросс-валидации без своего участка маршрута, не измерение. Итоговая оценка по полю — **медиана профиля**: на отложенном test модель не лучше медианы ({num(k['S2_t_main_mae'], 1)} против {num(k['S2_t_median_mae'], 1)}).» | карточка: значение, интервал Пуассона, профиль, источник |
 | 0:35–0:55 | «Акватория» → **Юго-восток Северного моря** → полоса **HE460 · трансекта 03** | «Это полоса обследования на снимке-кандидате. Статус — **связь не подтверждена**, причина — дрейф больше допуска 3 км. Концентрация по снимку недоступна.» | карточка полосы, два статуса |
-| 0:55–1:10 | В той же карточке — строка «подозрительных пикселей в полосе нет» и три миниатюры: снимок, маска качества, маска детектора | «Детектор в полосе ничего не нашёл. Сейчас он работает без гармонизации каналов — так решили по MARIDA val, не по тесту: на всех {num(k['dc_n_crops'], 0)} снимках пар {num(k['dc_n_obj'], 0)} объектов, в полосах {num(k['dc_n_in_strip'], 0)}; вне этой полосы детектор отметил судно — верное срабатывание на сложном фоне. Класс детектора — любой плавающий мусор, не пластик.» | «подозрительных пикселей в полосе нет», вероятность детектора ср./макс. |
+| 0:55–1:10 | В той же карточке — строка «подозрительных пикселей в полосе нет» и три миниатюры: снимок, маска качества, маска детектора | «Детектор в полосе ничего не нашёл. Сейчас он работает без гармонизации каналов — так решили по MARIDA val, не по тесту: на всех {num(k['dc_n_crops'], 0)} снимках пар {num(k['dc_n_obj'], 0)} объектов, в полосах {num(k['dc_n_in_strip'], 0)}; вне этой полосы — {num(k['dc_n_obj'], 0)} одиночных пикселей: {num(k['dc_n_other_single'], 0)} пена/барашки, {num(k['dc_n_ship'], 0)} вероятно судно (тип по правилам) — все ложные, скоплений нет. Класс детектора — любой плавающий мусор, не пластик.» | «подозрительных пикселей в полосе нет», вероятность детектора ср./макс. |
 | 1:10–1:25 | «Реестр пар» → фильтр «Отклонённые» | «У каждого из {num(k['p_events'], 0)} событий — статус и все причины: сцены нет, облака, блик, дрейф. Принятых — {num(k['p_events_accept_drift'], 0)}.» | таблица: Δt, дрейф/допуск, причина |
 | 1:25–1:40 | Карточка измерения → **«Подобрать снимок»** | «Окно синхронизации ≈ {num(k['p_max_dt_h_typical'], 1)} ч при 0,2 м/с. Функция отвечает, какой снимок годится и когда выходить на трансекту.» | окно синхронизации, кандидаты, решение |
 | 1:40–1:50 | Вкладка **«Метрики»** | «F1 детектора {num(k['d_lgbm_f1'], 3)} на test MARIDA; отложенный test концентрации — модель против медианы.» | таблицы детектора и test |
@@ -1016,8 +1035,8 @@ def qa_items(k: dict) -> list[tuple[str, str, str]]:
          "reports/case_detector/compare.md «Ложные срабатывания по классам», examples/"),
         ("Что детектор показал на реальных сценах пар?",
          f"В текущем режиме (без гармонизации каналов) на {num(k['dc_n_crops'], 0)} вырезках Sentinel-2 L2A — {num(k['dc_n_obj'], 0)} объектов, "
-         f"в полосах обследования {num(k['dc_n_in_strip'], 0)}. Все на одной сцене, HE460 т.03, вне полосы: {num(k['dc_n_ship'], 0)} судно (верное "
-         f"срабатывание на сложном фоне) и {num(k['dc_n_other_single'], 0)} одиночных пикселя. В полосах принятых черноморских пар — 0, хотя "
+         f"в полосах обследования {num(k['dc_n_in_strip'], 0)}. Все на одной сцене, HE460 т.03, вне полосы: {num(k['dc_n_other_single'], 0)} пена/барашки и "
+         f"{num(k['dc_n_ship'], 0)} вероятно судно (тип по правилам) — все ложные, скоплений нет (суда — известная слабость: {num(k['v2_reference_vessels_pct'], 0)} % судов). В полосах принятых черноморских пар — 0, хотя "
          f"плотность всего мусора там {num(k['e_field_min'], 0)}–{num(k['e_field_max'], 0)} шт./км²: меньше одного предмета на пиксель 10 м. "
          f"Прежний режим с гармонизацией давал {num(k['dr_n_obj'], 0)} объектов, почти все — блик, облака и барашки; это основание "
          f"отказа от гармонизации (следующий вопрос).",
@@ -1174,7 +1193,8 @@ def qa_items(k: dict) -> list[tuple[str, str, str]]:
          "reports/search/adis.md; reports/search/adis_candidates.csv; docs/QUANTITY.md §0"),
         ("Значит, вы доказали предел обнаружения Sentinel-2?",
          f"Нет, и мы так не говорим. На {num(k['ad_A_with_items'], 0)} синхронных отрезках ADIS с единичными предметами детектор предметы не "
-         f"увидел; это согласуется с физикой (доля покрытия ≈ {k['ad_coverage_frac_text']}, предмет — {num(k['ad_largest_item_pct_px'], 1)} % "
+         f"увидел (детектор оценивается на {num(k['ad_A_with_items_eval'], 0)} из {num(k['ad_A_with_items'], 0)} отрезков — на всех "
+         f"{num(k['ad_A_with_items_eval_det_px'], 0)}); это согласуется с физикой (доля покрытия ≈ {k['ad_coverage_frac_text']}, предмет — {num(k['ad_largest_item_pct_px'], 1)} % "
          f"пикселя), но не задаёт общий предел для всех скоплений: плотные полосы мусора эти пары не проверяют. Отдельно мы измерили фон "
          f"ложных тревог при полевом нуле: при ветре < {num(k['ad_wind_split_ms'], 0)} м/с — {num(k['ad_calm_px'], 0)} пикселей, при сильном — "
          f"{num(k['ad_windy_px'], 0)} на {num(k['ad_windy_strip_km2'], 1)} км² полосы (барашки).",
@@ -1198,15 +1218,16 @@ def qa_items(k: dict) -> list[tuple[str, str, str]]:
         ("Откуда B и D и как проверены утечки?",
          f"B — открытые наборы с подтверждённой разметкой: PLP ({num(k['ld_plp'], 0)} съёмок), FloatingObjects ({num(k['ld_fo'], 0)}), нити "
          f"Cózar 2024 ({num(k['ld_cz_win'], 0)} окон). D — суда у Финляндии ({num(k['ld_ves_boxes'], 0)} рамок) и облака Cloud Mask Catalogue "
-         f"({num(k['ld_cl_scenes'], 0)} сцен). Пиксели — L2A той же съёмки тем же кодом, что у сервиса. Утечки проверены по тайлу и дате и по "
-         f"самим пикселям (LBP против MADOS и MARIDA): совпадений {num(k['ld_content_match'], 0)} из {num(k['ld_content_checked'], 0)}, "
-         f"исключён {num(k['ld_dup_excluded'], 0)} дубль, итог {num(k['ld_leaks_total'], 0)}. Лицензии — в реестрах.",
+         f"({num(k['ld_cl_scenes'], 0)} сцен). Пиксели — L2A той же съёмки тем же кодом, что у сервиса. С MARIDA — {num(k['ld_leaks_total'], 0)} совпадений по тайлу "
+         f"и дате для всех наборов. С MADOS по содержимому (пикселям, LBP) проверены PLP и FloatingObjects: {num(k['ld_content_match'], 0)} из "
+         f"{num(k['ld_content_checked'], 0)}; для Cózar, судов и облаков сверка с MADOS невозможна — у сцен MADOS нет геопривязки. Демо-сцена "
+         f"проверена по содержимому отдельно (reports/audit). Исключён {num(k['ld_dup_excluded'], 0)} дубль. Лицензии — в реестрах.",
          "reports/extra_data/registry.csv, registry_negatives.csv, registry_cozar2024.csv.gz, content_overlap.csv"),
         ("Почему дообучение на новых данных не приняли?",
          f"Правило записано до экспериментов: ΔF1 на MARIDA val ≥ {num(k['v2_need_df1'], 2)} и не хуже на B и D. Итог: {k['v2_note']} "
          f"(ΔF1 от {num(k['v2_df1_min'], 3)} до {num(k['v2_df1_max'], 3)}). "
          f"Суда и нити спектрально похожи: D судов снижает ложные с {num(k['v2_reference_vessels_pct'], 0)} % до {num(k['v2_vessels_d_vessels_pct'], 0)} %, "
-         f"но полнота на нитях падает с {num(k['v2_reference_cozar_pct'], 0)} % до {num(k['v2_vessels_d_cozar_pct'], 0)} %. В сервисе — {k['v2_current_model']}.",
+         f"но полнота на нитях (хотя бы один пиксель нити) падает с {num(k['v2_reference_cozar_pct'], 0)} % до {num(k['v2_vessels_d_cozar_pct'], 0)} %. В сервисе — {k['v2_current_model']}.",
          "reports/detector_v2/experiments.md; configs/detector_v2_eval.yaml"),
         ("Почему официальный U-Net MARIDA хуже вашего LightGBM?",
          f"Веса и предобработка авторов, та же функция оценки: на test U-Net {num(k['bl_unet_argmax'], 3)} {ci(k['bl_unet_ci'], 3)} против "
@@ -1214,6 +1235,12 @@ def qa_items(k: dict) -> list[tuple[str, str, str]]:
          f"({num(k['bl_ship_unet'], 0)} пикселей против {num(k['bl_ship_lgbm'], 0)}) и на снимках пар даёт {num(k['bl_pairs_unet'], 0)} "
          f"объектов «соль-перец». В статье MARIDA U-Net тоже слабее RandomForest.",
          "reports/detector_v2/unet_test.json, unet_baseline.md"),
+        ("Что эколог получит на новой акватории без полевых данных?",
+         "Маску детектора «вероятное скопление плавающего мусора» с маской качества (облака, блик, суша) и площадь маски в м² и как "
+         "долю покрытия подозрительного материала — это измерение по снимку, а не мусор и не шт./км². Инструмент «Подобрать снимок» "
+         "подскажет окно пролёта для полевого обследования. Оценки шт./км² там нет: полевая модель работает только в области "
+         "применимости профиля, а перевода «снимок → шт./км²» нет — калибровочных пар ноль. Карта так и пишет: «концентрация недоступна».",
+         "README.md «Главный количественный результат», «Как мы искали данные»; docs/QUANTITY.md; docs/EXTRA_FEATURES.md"),
         ("Почему слой «Нефтяное пятно» выключен?",
          f"На MADOS голова лучше индекса OSI (test {num(k['oil_test_f1'], 3)} против {num(k['oil_test_osi_f1'], 3)}), но на реальном L2A "
          f"известный разлив Wakashio не найден: {num(k['oil_w1_km2'], 2)} км² мелких пятен в первый день и {num(k['oil_w2_km2'], 2)} км² ряби "

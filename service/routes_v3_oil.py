@@ -34,7 +34,11 @@ from .case_store import ApiError
 REPO = Path(__file__).resolve().parents[1]
 ROOTS: dict[str, Path] = {  # tests monkeypatch this
     "oil": Path(os.environ.get("MACROPLASTIC_OIL_DIR") or (REPO / "data" / "case" / "oil")),
+    # metrics of the head, in git (a clean clone has no data/case/oil): val_runs.json, test.json, control.json
+    "reports": REPO / "reports" / "oil",
 }
+NO_DATA = ("в сдаче нет слоя пятен (data/case/oil не входит в git): это не «пятен нет»; "
+           "построить — scripts/oil/train_oil.py infer")
 CLASS_ID = "oil_spill"
 CLASS_LABEL = "Нефтяное пятно"
 UNIT_NOTE = "площадь, не объём/масса"
@@ -100,6 +104,28 @@ def _read_json(p: Path):
 
 def _index() -> dict | None:
     return _read_json(ROOTS["oil"] / "index.json")
+
+
+def _metrics_from_reports() -> dict:
+    """Metrics of the head from reports/oil (in git), same numbers as index.json: selected run = test.json['model'],
+    its val metrics from val_runs.json, test once from test.json, OSI baseline val/test. {} when the files are absent."""
+    rep = ROOTS["reports"]
+    test, runs = _read_json(rep / "test.json") or {}, _read_json(rep / "val_runs.json") or {}
+    if not test and not runs:
+        return {}
+    sel = test.get("model")
+    run = runs.get(sel) or {}
+    osi_v, osi_t = runs.get("baseline_osi") or {}, test.get("baseline_osi") or {}
+    lg = test.get("lgbm") or {}
+    pooled = lambda d: (d or {}).get("pooled")  # noqa: E731
+    return {"selected_run": sel, "threshold": lg.get("threshold", run.get("threshold")),
+            "metrics_val": pooled(run.get("val")), "metrics_val_ci95": (run.get("val") or {}).get("ci95"),
+            "metrics_test": pooled(lg.get("test")), "metrics_test_ci95": (lg.get("test") or {}).get("ci95"),
+            "baseline_osi": ({"sign": osi_v.get("sign", osi_t.get("sign")),
+                              "threshold": osi_v.get("threshold", osi_t.get("threshold")),
+                              "val": pooled(osi_v.get("val")), "test": pooled(osi_t.get("test"))}
+                             if (osi_v or osi_t) else None),
+            "control": _read_json(rep / "control.json"), "test_opened_at": test.get("opened_at")}
 
 
 def _scene_features(key: str) -> list[dict]:
@@ -168,7 +194,7 @@ def _collect(q: dict, default_limit: int = SPILLS_LIMIT_DEFAULT):
     offset = cs.parse_int(q.get("offset"), "offset", 0, 10 ** 7, 0)
     idx = _index()
     if not idx:
-        return f, [], 0, "нет данных слоя «нефть»: не запускался scripts/oil/train_oil.py infer (data/case/oil/index.json)"
+        return f, [], 0, NO_DATA
     feats = []
     for s in sorted(idx.get("scenes", []), key=lambda s: s["scene_key"]):
         if not _scene_ok(s, f):
@@ -194,22 +220,31 @@ def _collect(q: dict, default_limit: int = SPILLS_LIMIT_DEFAULT):
 @_api
 def oil_meta(request: Request):
     idx = _index() or {}
+    rep = _metrics_from_reports()
+    # metrics: index.json of the layer if present, otherwise the same numbers from reports/oil (in git, clean clone)
+    m = {k: (idx.get(k) if idx.get(k) is not None else rep.get(k))
+         for k in ("selected_run", "threshold", "metrics_val", "metrics_val_ci95", "metrics_test", "metrics_test_ci95",
+                   "baseline_osi")}
+    src = ("data/case/oil/index.json" if idx.get("metrics_test") is not None
+           else ("reports/oil/{val_runs,test}.json" if rep.get("metrics_test") is not None else None))
     return v3._ok({
         "class": CLASS_ID, "class_label": CLASS_LABEL, "experimental": bool(idx.get("experimental", True)),
         "unit": "km²", "unit_note": UNIT_NOTE, "counts_applicable": False, "color": COLOR,
-        "model": idx.get("model"), "selected_run": idx.get("selected_run"), "threshold": idx.get("threshold"),
+        "model": idx.get("model"), "selected_run": m["selected_run"], "threshold": m["threshold"],
         "min_px": idx.get("min_px"), "harmonize": idx.get("harmonize"),
+        "data_available": bool(idx), "metrics_source": src,
+        "control": rep.get("control"), "test_opened_at": rep.get("test_opened_at"),
         "gates": {"min_valid_water_frac": idx.get("min_valid_water_frac"), "max_cloud_frac": idx.get("max_cloud_frac"),
                   "max_scene_frac": idx.get("max_scene_frac"),
                   "note": "маска качества (вода без облаков/теней/блика/суши и буферов) применяется ДО поиска пятен; "
                           "сцена вне ворот — «нет оценки» (null), не 0"},
         "metrics": {"dataset": "MADOS (класс 6 Oil Spill), сплит по сценам — configs/oil_eval.yaml",
-                    "val": idx.get("metrics_val"), "val_ci95": idx.get("metrics_val_ci95"),
-                    "test": idx.get("metrics_test"), "test_ci95": idx.get("metrics_test_ci95"),
-                    "baseline_osi": idx.get("baseline_osi")},
+                    "val": m["metrics_val"], "val_ci95": m["metrics_val_ci95"],
+                    "test": m["metrics_test"], "test_ci95": m["metrics_test_ci95"],
+                    "baseline_osi": m["baseline_osi"]},
         "n_scenes": len(idx.get("scenes", [])), "generated_at": idx.get("generated_at"),
         "domain_note": idx.get("domain_note"), "limitations": LIMITATIONS, "doc": "docs/OIL.md",
-        "empty_reason": None if idx else "нет data/case/oil/index.json",
+        "empty_reason": None if idx else NO_DATA,
     })
 
 
@@ -224,15 +259,15 @@ def oil_scenes(request: Request):
     rows = [] if not idx else [_scene_row(s, idx) for s in sorted(idx.get("scenes", []), key=lambda s: s["scene_key"])
                                if _scene_ok(s, f)]
     return v3._ok({"items": rows[offset:offset + limit], "total": len(rows), "limit": limit, "offset": offset,
-                   "class": CLASS_ID, "unit_note": UNIT_NOTE,
-                   "empty_reason": None if rows else ("нет data/case/oil/index.json" if not idx else "по фильтрам нет сцен")})
+                   "class": CLASS_ID, "unit_note": UNIT_NOTE, "data_available": bool(idx),
+                   "empty_reason": None if rows else (NO_DATA if not idx else "по фильтрам нет сцен")})
 
 
 def _fc(feats, total, f, empty, idx):
     return {"type": "FeatureCollection", "features": feats, "total": total, "count": len(feats), "class": CLASS_ID,
             "class_label": CLASS_LABEL, "experimental": bool((idx or {}).get("experimental", True)),
             "total_area_km2": round(sum(ft["properties"].get("area_km2") or 0 for ft in feats), 6),
-            "unit_note": UNIT_NOTE, "color": COLOR, "empty_reason": empty}
+            "unit_note": UNIT_NOTE, "color": COLOR, "empty_reason": empty, "data_available": bool(idx)}
 
 
 @_oil.get("/oil/spills", summary="GeoJSON пятен нефти (экспериментальный слой)")

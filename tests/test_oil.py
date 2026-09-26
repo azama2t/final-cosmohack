@@ -216,6 +216,59 @@ def test_api_empty_without_data(tmp_path, monkeypatch):
     assert c.get("/api/v3/oil/meta").status_code == 200
 
 
+def test_api_clean_clone_metrics_from_reports(tmp_path, monkeypatch):
+    """Clean clone: data/case/oil is not in git, reports/oil/*.json is. Metrics come from reports; spills say
+    «нет данных в сдаче», not «пятен нет»."""
+    from fastapi.testclient import TestClient
+
+    from service import routes_v3_oil as ro
+    from service.app import create_app
+
+    rep = tmp_path / "reports_oil"
+    rep.mkdir()
+    pooled = lambda f1: {"precision": f1, "recall": f1, "f1": f1, "iou": f1 / 2, "tp": 1, "fp": 1, "fn": 1}  # noqa: E731
+    (rep / "val_runs.json").write_text(json.dumps({
+        "run_a": {"threshold": 0.06, "val": {"pooled": pooled(0.88), "ci95": {"f1": [0.7, 0.9]}}},
+        "baseline_osi": {"sign": 1, "threshold": 1.3, "val": {"pooled": pooled(0.44)}}}), encoding="utf-8")
+    (rep / "test.json").write_text(json.dumps({
+        "opened_at": "2026-09-26T01:38:10", "model": "run_a",
+        "lgbm": {"threshold": 0.06, "test": {"pooled": pooled(0.73), "ci95": {"f1": [0.6, 0.9]}}},
+        "baseline_osi": {"sign": 1, "threshold": 1.3, "test": {"pooled": pooled(0.32)}}}), encoding="utf-8")
+    (rep / "control.json").write_text(json.dumps([{"key": "control.x", "oil_km2": 0.1}]), encoding="utf-8")
+    monkeypatch.setitem(ro.ROOTS, "oil", tmp_path / "none")
+    monkeypatch.setitem(ro.ROOTS, "reports", rep)
+    ro._cache.clear()
+    c = TestClient(create_app())
+    j = c.get("/api/v3/oil/meta").json()
+    assert j["data_available"] is False and j["metrics_source"].startswith("reports/oil")
+    assert j["metrics"]["test"]["f1"] == 0.73 and j["metrics"]["val"]["f1"] == 0.88
+    assert j["metrics"]["baseline_osi"]["test"]["f1"] == 0.32 and j["selected_run"] == "run_a"
+    assert j["threshold"] == 0.06 and j["control"][0]["key"] == "control.x"
+    assert "не «пятен нет»" in j["empty_reason"]
+    s = c.get("/api/v3/oil/spills").json()
+    assert s["data_available"] is False and s["total"] == 0 and "не «пятен нет»" in s["empty_reason"]
+    sc = c.get("/api/v3/oil/scenes").json()
+    assert sc["data_available"] is False and "не «пятен нет»" in sc["empty_reason"]
+    # neither layer nor reports: metrics null, still 200
+    monkeypatch.setitem(ro.ROOTS, "reports", tmp_path / "no_reports")
+    ro._cache.clear()
+    j = c.get("/api/v3/oil/meta").json()
+    assert j["metrics"]["test"] is None and j["metrics_source"] is None
+
+
+def test_api_meta_real_reports_match_index():
+    """In the repo the metrics of reports/oil equal those of data/case/oil/index.json (when the layer exists)."""
+    from service import routes_v3_oil as ro
+    rep = ro._metrics_from_reports()
+    if not rep:
+        pytest.skip("нет reports/oil")
+    idx = ro._index()
+    if not idx:
+        pytest.skip("нет data/case/oil/index.json (чистый клон)")
+    for k in ("metrics_val", "metrics_test", "threshold", "selected_run"):
+        assert rep[k] == idx[k], k
+
+
 def test_other_v3_routes_still_work(client):
     assert client.get("/api/v3/definitely-not-here").status_code == 404  # v3 catch-all still last
 

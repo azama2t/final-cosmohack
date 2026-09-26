@@ -652,3 +652,73 @@ GET /api/v3/oil/export?format=geojson|csv&<фильтры spills>
     items_km2, field_source, label («Полевой счёт: 1 предмет > 5 см на 0,56 км² обзора; оценка 3,5 шт./км² (…)»).
   «Снимок»: variants ["water", "natural"]; water (по умолчанию) — растяжка 0..p98 по пикселям пригодной воды (все три
     канала одной шкалой, гамма 1/1,4; суша может пересвечиваться), natural — прежние 0..0,16, гамма 1/1,8.
+
+3.10 ФОТО (ДОБАВЛЕНИЯ, 26.09 05:15, L109, INBOX §15 «Агент 5») — новые эндпоинты, старые не менялись. ОТДЕЛЬНЫЙ МОДУЛЬ, не спутник
+Код: service/routes_v3_photo.py (маршруты встраиваются в router routes_v3 перед его GET catch-all, как 3.8/3.9);
+модель src/macroplastic/photo_count/; веса weights_exp/photo_count/ (model_card.json + .pth; вне git). Тесты: tests/test_photo_count.py.
+Описание, данные, лицензии, метрики — docs/PHOTO_COUNT.md. Общие правила как в 1, 3.6: charset=utf-8, ошибки {"error": {code, message,
+details}}, неизвестный параметр → 400 BAD_PARAM {unknown, allowed}; CORS *.
+Единица — ШТУКИ НА КАДР. Шт./км² — только если клиент передал известную площадь воды в кадре (frame_area_m2); подпись
+«на площади кадра, не спутник». Тип съёмки — камера у воды (надводный аппарат, вид от первого лица); дроны и спутник — не проверено.
+
+GET /api/v3/photo/meta  (параметров нет)
+  {module:"photo_count", task_note, survey, available:bool, unit:"штук на кадр", density_note:"на площади кадра, не спутник",
+   limitations[], upload:{method, path, body, max_bytes, params[]},
+   model:null | {version, architecture, threshold, threshold_rule, dataset, source, weights_license,
+                 metrics:{test_official?:{n_images, ap50, ap50_ci95, count_mae, count_mae_ci95, count_exact, count_exact_ci95},
+                          test_grouped?:{…те же поля…, note}}, caveat}}
+
+POST /api/v3/photo/count?threshold=&frame_area_m2=
+  Тело: байты изображения (Content-Type image/jpeg|png|webp|application/octet-stream) ИЛИ multipart/form-data с полем file
+  (python-multipart не нужен). ≤ 25 МБ, сторона ≤ 8000 px; EXIF-поворот учитывается.
+  threshold ∈ [0, 1] (по умолчанию — порог модели, выбранный на val FML); frame_area_m2 > 0 (м², необязательно).
+  200 {count:int, unit:"штук на кадр", threshold, threshold_default, model_version, image:{width, height},
+       boxes:[{x1, y1, x2, y2 (px исходного фото после EXIF-поворота), score, label:"мусор"}],
+       density: null | {items_per_km2, frame_area_m2, note:"на площади кадра, не спутник"}, density_reason: null | str,
+       survey, limitations[], device:"cuda"|"cpu", elapsed_ms}
+  Ошибки: 400 BAD_BODY (пусто / multipart без файла), 400 BAD_PARAM, 413 TOO_LARGE, 415 BAD_IMAGE,
+          503 MODEL_UNAVAILABLE (нет weights_exp/photo_count/model_card.json или весов).
+  Фронт v2: режим ?mode=photo (service/frontend_v2/src/photo/PhotoApp.tsx), кнопка «Фото» в переключателе режимов;
+  клиент шлёт threshold=0.05 и фильтрует рамки ползунком порога локально.
+
+3.10 СПУТНИКОВЫЕ ЗОНЫ (ДОБАВЛЕНИЯ, 26.09 05:30, L111, INBOX §15) — новый слой; /zones (полосы) не менялся, кроме kind
+Код: service/case_store.py (раздел «satellite scene zones»), service/routes_v3.py; данные строит scripts/case/scene_zones.py
+→ data/case/scene_zones/{index.json, <scene_key>/{zones.geojson, detections.geojson, scene.json, rgb.jpg, quality.png, crops/*.jpg}}.
+Тесты: tests/test_api_v3_scene_zones.py. Сцены: отложенная сцена Cózar 2024 (30SXE 11.03.2021, reports/case_demo/heldout_scene.md),
+районы data/live и data/drift_check; детектор в текущем режиме (weights/lgbm, без гармонизации, порог 0.63); сцены, где детектор
+«не оценивается» (src/macroplastic/case/illumination.py), зон не дают.
+ИЗМЕНЕНИЕ значения (не поля): у полос /zones properties.kind и FeatureCollection.kind = "candidate_strip" (было "model_estimate";
+концентрация у полос всегда null — это не оценка модели). CSV зон: колонка kind = candidate_strip.
+GET /api/v3/scene_zones?bbox=&date_from=&date_to=&status=&detection_status=&concentration_status=&scene_kind=demo,live,drift&scene_key=&limit=&offset=
+  FeatureCollection {kind:"detection_zone", layer_kind:"scene_zone", count, total, offset, limit, empty_reason, model{weights, sha256,
+  trained_at (дата файла model.txt), threshold, harmonize}, rules, status_note, blocks_note, examples[], features}.
+  Feature.properties: kind "detection_zone", zone_id "SZ-<scene_key>-NNN" (-000 = вся вырезка, «не обнаружено»), scene_key, scene_kind,
+    scene_kind_label, scene_id, title, datetime, detection_status (detected | not_detected | insufficient_data), status (= detection_status),
+    verification: level_B_cozar (контур пересекает нить каталога Cózar 2024 — независимая разметка людьми) | unverified | false_alarm_signs,
+    detection_label (по-русски: «обнаружено детектором; совпадает с нитью Cózar 2024 (уровень B)» | «срабатывание детектора, не проверено»
+    | «недостаточно данных: признаки ложного срабатывания» | «не обнаружено …»), detection_reason, flags [foam, glint, ship, seam, coast,
+    shallow], training_scene (MARIDA/MADOS той же съёмки) + training_scene_note, n_cozar_filaments, area_km2 (= measured.zone_area_km2),
+    detected_area_m2, concentration = null всегда, concentration_status: research_estimate ТОЛЬКО при verification = level_B_cozar,
+    иначе unavailable; concentration_reason; crop_url (снимок | он же с пикселями детектора), crop_note;
+    measured {zone_area_km2, suspicious_area_m2, n_pixels, n_objects, water_km2, lwd_m2_km2 (м² на км² пригодной воды, как LWD
+      Cózar 2024), quality {valid_water_fraction, cloud_fraction, glint_fraction}, model};
+    probable {prob_max, prob_mean, status, signs {foam, glint, ship, seam, coast, shallow: {flag, rule, значения}, note}, n_cozar_filaments,
+      cozar_note, context};
+    scenario {shown, label «Условный диапазон, ЕСЛИ это мусорная полоса», lo 1e4, typical_lo 1e6, typical_hi 1e7, hi 1e8 (шт./км²),
+      size_class, applies_to, assumption, not_what («не доверительный интервал, не измерение и не результат модели»), basis [{value, quote,
+      where}] (Cózar et al. 2021, Front. Mar. Sci. 8:571796), source} | {shown:false, label, reason};
+    field_nearby {items [{source ADIS, segment_id, ship, date, days_from_scene, distance_km, n_items, area_km2, size_class "> 5 см",
+      c_items_km2 = N/A, ci95_lo, ci95_hi (Пуассон)}], nearest_organizer_sample {sample_id, source_id, distance_km}, note «Измерение ≠ оценка…»}.
+GET /api/v3/scene_zones/{zone_id} → Feature + detections (FeatureCollection объектов детектора зоны: det_id, n_pixels, area_m2, prob_max,
+  prob_mean, threshold, artifact) + scene (запись сцены) + examples [{kind success|false_alarm, label, zone_id, crop_url, title, note}].
+GET /api/v3/scene_zones/scenes → {count, scenes [форма /scenes + scene_key, scene_kind, evaluable, not_evaluated_reason, sun_zenith_deg,
+  wind10m_ms, water_km2, lwd_m2_km2, by_status, model]}; /scene_zones/scenes/{key}/rgb.jpg | quality.png (EPSG:4326 по bounds);
+  /scene_zones/scenes/{key}/crops/{zone_id}.jpg.
+GET /api/v3/export?layer=scene_zones&format=geojson|csv&<фильтры scene_zones> | query_id=… — CSV колонки cs.SZ_COLS (zone_id … kind);
+  сценарий в CSV только при scenario_shown = true.
+GET /api/v3/queries/{id}/run: + scene_zones (FeatureCollection), summary.n_scene_zones (фильтры: bbox, даты, statuses; при фильтре по
+  source/profile/scope спутниковые зоны не выдаются — у них нет полевого источника).
+GET /api/v3/meta: + detector.version {weights, sha256, sha256_short, trained_at, threshold, harmonize}, + quantity_levels
+  {place_time_pairs «пары по месту и времени» n=66, visible_signal, calibration_pairs n=0}, + scene_zone_statuses, + layers[] scene_zones.
+GET /api/v3/zones: model + weights_sha256, trained_at = дата файла weights/lgbm/model.txt; объекты детектора полос (detections) +
+  type_label / visual_class / false_alarm по визуальной разметке (data/case/pairs_visual_labels.csv), если она есть для вырезки.

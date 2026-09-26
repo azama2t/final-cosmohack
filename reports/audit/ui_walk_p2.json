@@ -1,0 +1,101 @@
+{
+ "base": "http://127.0.0.1:8096/",
+ "tag": "p2",
+ "A_normal": {
+  "console": [
+   "warning: [.WebGL-0x2c4001f1600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+   "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+   "warning: [.WebGL-0x2c4001f1600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+   "warning: [.WebGL-0x2c4001f1600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+   "warning: [.WebGL-0x2c4001f1600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)",
+   "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+   "warning: performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "warning: performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "warning: performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "warning: performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "warning: performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback."
+  ],
+  "n_api_requests": 35,
+  "api_paths": [
+   "v3/meta",
+   "v3/observations",
+   "v3/queries",
+   "v3/scene_zones",
+   "v3/scene_zones/scenes",
+   "v3/scenes",
+   "v3/scenes/LC08_L2SP_196022_20140412_02_T1/quality.png",
+   "v3/scenes/LC09_L2SP_178030_20240604_02_T2/quality.png",
+   "v3/scenes/LC09_L2SP_180030_20240618_02_T1/quality.png",
+   "v3/scenes/S2A_35TQJ_20240602_0_L2A/quality.png",
+   "v3/scenes/S2A_35TQJ_20240602_0_L2A/rgb.png",
+   "v3/scenes/S2A_36TVN_20240602_0_L2A/quality.png",
+   "v3/scenes/S2A_36TVN_20240602_0_L2A/rgb.png",
+   "v3/scenes/S2A_36TYN_20240603_0_L2A/quality.png",
+   "v3/scenes/S2A_36TYN_20240603_0_L2A/rgb.png",
+   "v3/scenes/S2A_37TCG_20240603_0_L2A/quality.png",
+   "v3/scenes/S2A_37TCG_20240603_0_L2A/rgb.png",
+   "v3/scenes/S2A_37TCH_20240603_0_L2A/quality.png",
+   "v3/scenes/S2A_37TCH_20240603_0_L2A/rgb.png",
+   "v3/scenes/S2A_37TDG_20240603_0_L2A/quality.png",
+   "v3/scenes/S2A_37TDG_20240603_0_L2A/rgb.png",
+   "v3/scenes/S2A_37TGG_20240607_0_L2A/quality.png",
+   "v3/scenes/S2A_37TGG_20240607_0_L2A/rgb.png",
+   "v3/scenes/S2A_MSIL2A_20160408T104022_R008_T32UMF_20210211T022918/quality.png",
+   "v3/scenes/S2A_MSIL2A_20160408T104022_R008_T32UMF_20210211T022918/rgb.png",
+   "v3/scenes/S2A_MSIL2A_20160411T105022_R051_T32ULF_20210211T031140/quality.png",
+   "v3/scenes/S2A_MSIL2A_20160411T105022_R051_T32ULF_20210211T031140/rgb.png",
+   "v3/scenes/S2B_36TUN_20240617_0_L2A/quality.png",
+   "v3/scenes/S2B_36TUN_20240617_0_L2A/rgb.png",
+   "v3/scenes/S2B_37TFG_20240605_0_L2A/quality.png"
+  ],
+  "service_down_banner": 0,
+  "mock_banner": 0,
+  "text_head": "Кейс\nЖивые снимки\nФото\nПлавающий мусор: поле и снимки\ni\nАкватория\nВсе (935)\nБольшое тихоокеанское мусорное пятно, 2018 (350)\nСаргассово море, MSM41 (330)\nЮго-восток Северного моря (222)\nЧёрное море, DOORS (33)\nДаты\ni\n–\nПрофиль\nВсе профили\nТрал, 5–50 см\nТрал, >5 см (H)\nТрал, >5 см (N)\nТрал, >5 см (F)\nАвиасъёмка, >50 см\nВизуально с судна, >2 см · S2\nВизуально с судна, >2 см · S3\nВизуально с судна, >2.5 см · S4\nСовокупность\nЛюбая\nВесь пластик\nКатегория пластика\nРыболовный мусор\nВесь мусор (не только пластик)\nОтдельный объект (не плотность)\nСтатус полосы\ni\nсвязь не подтверждена\nпикселей не найдено\nобнаружено\nКонцентрация по снимку\nЕсть полевое измерение рядом\nИсследовательская оценка\nКонцентрация недоступна\n935 наблюдений\n29 полос\n— спутн. зон\n235 снимков\nЗоны\nИзмерения\nКуда идти\nМетрики\nСпутниковые зоны детектора · 0\ni\nПолосы обследования на снимках-кандидатах · 29\nHE419 · трансекта 29\nсвязь не подтверждена · L8 12.04.2014\n0,46 км²\nHE419 · трансекта 30\nсвязь не подтверждена · L8 12.04.2014\n0,3 км²\nHE419 · трансекта 32\nсвязь не подтверждена · L8 12.04.2014\n0,61 км²\nHE460 · трансекта 01\nсвязь не подтверждена · S2 08.04.2016\n0,3 км²\nHE460 · трансекта 03\nсвязь не подтверждена · S2 11.04.2016\n0,46 км²\nDOORS3 · трансекта T1\nсвязь не подтверждена · S2 02.06.2024\n0,78 км²\nDOORS3 · трансекта T2\nсвязь не подтверждена · S2 02.06.2024\n0,78 км²\nDOORS3 · трансекта T3\nсвязь не подтверждена · S2 02.06.2024\n0,78 км²\nDOORS3 · трансекта T4\nсвязь не подтверждена · S2 02.06.2024\n0,78 км²\nDOORS3 · тр"
+ },
+ "E_export_query": {
+  "error": "Error('Download.save_as: canceled')"
+ },
+ "B_all500": {
+  "console": [
+   "error: Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+  ],
+  "n_api_requests": 1,
+  "api_paths": [
+   "v3/meta"
+  ],
+  "service_down_banner": 1,
+  "mock_banner": 0,
+  "text_head": "Сервис недоступен\naudit: forced 500\nПовторить\nЖивые снимки"
+ },
+ "C_data500": {
+  "console": [
+   "warning: [.WebGL-0x11ec00409400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+   "error: Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+   "error: Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+   "error: Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+   "warning: [.WebGL-0x11ec00409400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+  ],
+  "n_api_requests": 4,
+  "api_paths": [
+   "v3/meta",
+   "v3/observations",
+   "v3/queries",
+   "v3/scene_zones/scenes"
+  ],
+  "service_down_banner": 0,
+  "mock_banner": 0,
+  "text_head": "Кейс\nЖивые снимки\nФото\nПлавающий мусор: поле и снимки\ni\nАкватория\nВсе (—)\nБольшое тихоокеанское мусорное пятно, 2018 (350)\nСаргассово море, MSM41 (330)\nЮго-восток Северного моря (222)\nЧёрное море, DOORS (33)\nДаты\ni\n–\nПрофиль\nВсе профили\nСовокупность\nЛюбая\nВесь пластик\nКатегория пластика\nРыболовный мусор\nВесь мусор (не только пластик)\nОтдельный объект (не плотность)\nСтатус полосы\ni\nсвязь не подтверждена\nпикселей не найдено\nобнаружено\nКонцентрация по снимку\nЕсть полевое измерение рядом\nИсследовательская оценка\nКонцентрация недоступна\n— наблюдений\n— полос\n— спутн. зон\n— снимков\nЗоны\nИзмерения\nКуда идти\nМетрики\nСпутниковые зоны детектора · 0\ni\nПолосы обследования на снимках-кандидатах · —\n1000 km\nРеестр пар\nВыгрузка\nЗапросы\nСлои\nЛегенда\ni\n–\n29 обследованных участков со снимками-кандидатами; 0 подтверждённых пар; для пластика снимков нет; подозрительные пиксели в полосах пар, прошедших маски качества: 0\nПолевые измерения, шт./км²\n<1\n10\n30\n100\n300\n1 000\nизмеренный ноль\nбез плотности\nСнимки-кандидаты: полосы обследования\nсвязь не подтверждена\nподтверждена\nПодозрительные пиксели детектора (у выбранной полосы)\nСпутниковые зоны детектора\nобнаружено детектором\nпена / блик / судно\nне обнаружено\nкласс MARIDA Marine Debris = любой плавающий мусор, не только пластик; без полевого подтверждения\nTiles © Esri — Esri, Maxar, Earthstar Geographics · Снимки: Copernicus Sentinel-2, USGS Landsat · Поле: данные организаторов (CSV)"
+ },
+ "D_abort": {
+  "console": [
+   "error: Failed to load resource: net::ERR_FAILED"
+  ],
+  "n_api_requests": 1,
+  "api_paths": [
+   "v3/meta"
+  ],
+  "service_down_banner": 1,
+  "mock_banner": 0,
+  "text_head": "Сервис недоступен\nAPI /api/v3 не отвечает. Данные не показываются.\nПовторить\nЖивые снимки"
+ }
+}

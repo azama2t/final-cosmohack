@@ -1,0 +1,8 @@
+cand,set,used_same_date,footprints_overlap_km2_approx,cand_cluster_inside_used_tile
+30SXE_20210311,L98_features_cozar2024,30SVE_20210311,0.0,False
+30SXE_20210311,L98_features_cozar2024,33TUF_20210311,0.0,False
+30SXE_20210311,L92_features_cozar2024_l2a,32TQL_20210311,0.0,False
+32SKG_20201222,L92_features_cozar2024_l2a,31SFA_20201222,0.0,False
+32TLM_20180420,L92_features_cozar2024_l2a,31TEJ_20180420,0.0,False
+31SFB_20210325,L98_features_cozar2024,31SDB_20210325,0.0,False
+31SFB_20210325,L98_features_cozar2024,31SEB_20210325,1078.1,False

@@ -1,0 +1,10 @@
+{
+ "source": "out/detector_v2/runs/reference.json (pairs.none.flags), out/detector_v2/pairs_objects.csv",
+ "n_d": 97,
+ "flagged": 5,
+ "acq_total": 8,
+ "acq_flagged": 1,
+ "acq_list": [
+  "32ULF_20160411"
+ ]
+}

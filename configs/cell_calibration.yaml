@@ -1,0 +1,99 @@
+# FROZEN before any field-vs-satellite value was compared (L110, INBOX §15 «Агент 6», часть (б)).
+# Do not edit; a new check = a new file. sha256 of this file: configs/cell_calibration.yaml.sha256
+# (the script refuses to run if the hash differs).
+# Before freezing only DATA AVAILABILITY was looked at (not values): ADIS segments in the Mediterranean
+# start 2021-09-27 (Dallaporta), the Cózar 2024 catalogue ends 2021-09-17; the organizers' CSV has no
+# Mediterranean rows; the Cózar NetCDF/xlsx contain filaments only (no observed-sea area a_o).
+version: 1
+frozen_at: '2026-09-26T04:45'
+frozen_by: L110 (worker), INBOX §15 agent 6 (b)
+held_out_test_policy: >
+  The deferred case test (configs/case_selection.yaml final_test, S1/S2 profiles) is NOT read.
+  Only sample_ids of data/case/splits/final_test_*.csv are used to EXCLUDE rows (no labels read).
+  In practice S1 (GPGP 2015) and S2 (Sargasso 2015-04) have no satellite value at all.
+
+grid:
+  cell_deg: 0.25            # as the Cózar 2024 LWD maps
+  cell_key: 'floor(lat/0.25), floor(lon/0.25)'
+  sensitivity_cell_deg: 0.5 # reported next to the primary, never chosen after the fact
+
+stop_rule:
+  min_independent_cells: 20   # INBOX §15: < 20 independent field x satellite cells -> report only, no model
+  independent_unit: 'distinct (cell, period) with both a field value and a satellite value'
+  also_reported: 'number of distinct ship-days (field clusters) among those cells'
+  extra_condition_detector: 'detector variant also needs >= 20 cells with satellite value > 0 (otherwise ranks/regression are undefined: all ties at 0)'
+
+field:
+  adis:
+    file: data/extra/field/adis/Segments.csv
+    primary_value: 'area-weighted calibrated density >10 cm: sum(dhat_10cm_calibrated * area_scanned_km2) / sum(area_scanned_km2), items/km2'
+    sensitivity_value: 'raw >5 cm: sum(n_objects>5cm) / sum(area_scanned_km2), items/km2 (as reports/extra_data/field.md)'
+    min_area_km2_per_cell: 0.5
+  organizers_csv:
+    file: task/macroplastic_marine_samples.csv
+    rule: 'C = N/A (src/macroplastic/case/concentration.py); profiles never mixed with ADIS in a model; final_test sample_ids excluded'
+  cefas_emodnet: 'only if time/coordinates available quickly (not in this run unless stated in the report)'
+
+satellite:
+  cozar_lwd:
+    catalogue: data/extra/registry_cozar2024.csv  # 14 374 filaments, area_m2 = n_pixels*100, datetime, centroid
+    period: '2015-06-01..2021-09-17'
+    a_lw: 'sum of filament area_m2 with centroid in the cell (and period)'
+    a_o_proxy: >
+      a_o is NOT published (NetCDF and Source Data hold filaments only). Proxy:
+      a_o = sea_area_km2(cell, GSHHS full L1 land) * sum over acquisition days of clear_frac,
+      clear_frac(day) = max over Sentinel-2 L1C items covering the cell centre that day of (1 - eo:cloud_cover/100)
+      (Earth Search v1 collection sentinel-2-l1c, same period). Cózar's wind > 5 m/s filter is NOT applied (no wind data) ->
+      a_o_proxy overestimates a_o in windy cells -> LWD_proxy underestimates there.
+    lwd_proxy: 'a_lw[m2] / a_o_proxy[km2]  (m2/km2 = ppm, as LWD)'
+    fallback_if_stac_fails: 'a_o_proxy = sea_area_km2 (constant effort); reported as such'
+    secondary_index: 'LW detection days / clear-day equivalents (frequency), sensitivity only'
+  detector:
+    source: 'L100 table data/search/adis/candidates.csv (ADIS segment x S2 scene <= 3 h), weights/lgbm, 0.63'
+    rows: 'detector_evaluable == True (illumination rule src/macroplastic/case/illumination.py) and strip_usable_km2 > 0'
+    value: 'S = det_px_strip_excl_ship*100 m2 / strip_usable_km2 (m2/km2); 0 = below detection floor, not clean'
+    also_counted: 'data/pairs/quality accepted strips (CSV events, all 0 detections per reports/quantity) and data/live scenes (no field data expected)'
+
+variants:
+  V1_same_period:
+    role: 'primary (closest to calibration): same cell and same season of the same year'
+    period_key: 'meteorological season: season = (month % 12) // 3 (0 DJF, 1 MAM, 2 JJA, 3 SON); season_year = year + 1 if month == 12 else year'
+    satellite: cozar_lwd
+    field: adis + organizers_csv (non-test)
+  V1b_same_year:
+    role: 'looser: same cell and same calendar year'
+    satellite: cozar_lwd
+    field: adis + organizers_csv (non-test)
+  V2_detector_same_month:
+    role: 'our detector coverage vs field, same cell and same month'
+    satellite: detector
+    field: adis
+  V3_climatology:
+    role: >
+      EXPLORATORY, NOT calibration and NOT same period: Cózar 2015-06..2021-09 climatology per cell vs ADIS
+      Mediterranean 2021-09..2023-12 per cell. Answers only "do the satellite hot-spot index and the field density rank
+      the same districts?" Must be labelled so everywhere.
+    satellite: cozar_lwd (all period)
+    field: 'adis Mediterranean (primary value); sensitivity = raw >5 cm'
+    mediterranean_mask: 'lat 30..46.5, lon -6.7..36.5, excluding Black Sea/Marmara (lat>40.9 & lon>26.3) and Biscay (lon<-1.5 & lat>42), and cells with GSHHS sea_area == 0'
+
+analysis_if_stop_rule_passed:
+  transforms: {y: 'ln(1 + C_field)', x: 'ln(LWD + eps), eps = 0.5 * min positive LWD over ALL Mediterranean cells of the grid (satellite only)'}
+  spearman: 'rho(x, y) over cells; 95% CI = bootstrap over cells, 2000 reps, numpy default_rng(0)'
+  partial_spearman: 'rho(x, y | ln dist_coast_km) (rank residuals), descriptive'
+  models:
+    M0_median: 'y_hat = median(y_train)'
+    M1_sat: 'OLS y ~ 1 + x'
+    M2_geo_ablation: 'OLS y ~ 1 + lat + lon + ln(dist_coast_km)   (does geography alone explain it?)'
+    M3_sat_geo: 'OLS y ~ 1 + x + lat + lon + ln(dist_coast_km)'
+  splits:
+    leave_region_out: 'region = 3 deg x 3 deg block (floor(lat/3), floor(lon/3)); leave one block out'
+    leave_year_out: 'field year of the cell (dominant by area)'
+    leave_ship_out: 'dominant ship of the cell (sensitivity: ships differ by region and camera setup)'
+  metric: 'MAE of y on held-out cells; paired bootstrap over cells (2000, rng 0) of dMAE'
+  decision_rule: >
+    "relation exists on independent cells" only if ALL: (i) Spearman 95% CI > 0; (ii) leave-region-out
+    dMAE(M1 - M0) 95% CI < 0; (iii) leave-region-out dMAE(M3 - M2) 95% CI < 0 (satellite adds beyond geography).
+    Then: "модель шт./км² по спутниковому индексу на уровне района" with a 90% prediction interval from
+    leave-region-out residual quantiles. Otherwise: honest negative result, no model is published.
+  wording: 'a cell/scenario is never presented as a measurement of one accumulation (§15 (в)); no synthetic data'

@@ -273,6 +273,41 @@ def step_quality(c: Ctx, rec: dict):
         + f"; пар с результатом {len(t)}"
 
 
+def _event_geometry_cols(eid: str, g: pd.DataFrame) -> dict:
+    """WKT (WGS84) of the observed strip centre line: PANGAEA track segments for S2/S3 (the same source as
+    find_pairs / pair_quality), else the CSV transect line, else the reported point; plus width / length."""
+    top = g[g.parent_sample_id.isna()] if "parent_sample_id" in g and g.parent_sample_id.isna().any() else g
+    r0 = top.iloc[0]
+    num = lambda v: None if pd.isna(v) else float(v)  # noqa: E731
+    out = {"geometry_source": None, "geometry_wkt": None,
+           "transect_width_m": num(r0.get("transect_width_m")), "transect_length_km": num(r0.get("transect_length_km"))}
+    t = None
+    if eid[:3] in ("S2:", "S3:"):
+        try:
+            from macroplastic.case.geometry import event_track
+            t = event_track(eid)
+        except Exception:  # noqa: BLE001  (no PANGAEA files -> CSV geometry)
+            t = None
+    fmt = lambda p: f"{p[0]:.6f} {p[1]:.6f}"  # noqa: E731
+    if t is not None:
+        geo = t["geometry"]
+        if geo["type"] == "Point":
+            out["geometry_wkt"] = f"POINT ({fmt(geo['coordinates'])})"
+        elif geo["type"] == "LineString":
+            out["geometry_wkt"] = "LINESTRING (" + ", ".join(fmt(p) for p in geo["coordinates"]) + ")"
+        else:
+            out["geometry_wkt"] = "MULTILINESTRING (" + ", ".join(
+                "(" + ", ".join(fmt(p) for p in seg) + ")" for seg in geo["coordinates"]) + ")"
+        out["geometry_source"] = f"pangaea_track ({t['geometry_status']})"
+    elif all(pd.notna(r0.get(k)) for k in ("lon_start", "lat_start", "lon_end", "lat_end")):
+        out["geometry_wkt"] = f"LINESTRING ({fmt((r0.lon_start, r0.lat_start))}, {fmt((r0.lon_end, r0.lat_end))})"
+        out["geometry_source"] = "samples_csv_line"
+    elif pd.notna(r0.get("longitude")) and pd.notna(r0.get("latitude")):
+        out["geometry_wkt"] = f"POINT ({fmt((r0.longitude, r0.latitude))})"
+        out["geometry_source"] = "samples_csv_point"
+    return out
+
+
 def build_pair_registry(c: Ctx) -> pd.DataFrame:
     """Одна строка на event_id исходного CSV: accept / reject + причина по этапам metadata → drift → quality."""
     d = pd.read_csv(c.samples, low_memory=False)
@@ -323,6 +358,14 @@ def build_pair_registry(c: Ctx) -> pd.DataFrame:
         r["reason"] = " | ".join(f"{s}: {t}" for s, t in fails) if fails else "ok: metadata+drift+quality"
         qf = [f for f in fails if f[0] != "drift"]
         r["status_without_drift"] = "reject" if qf else "accept"
+        # geometry of the observation (постановка «Реестр сопоставления»: геометрия, источник сцены, маски качества);
+        # new columns go last so that older readers by name are unaffected
+        r.update(_event_geometry_cols(eid, g))
+        if b is not None:
+            r["scene_source"] = f"{b.endpoint}/{b.collection}"
+        qdir = Path("data") / "pairs" / "quality" / eid.replace(":", "_").replace("/", "_")
+        if (ROOT / qdir / "quality.tif").is_file():
+            r["quality_mask"] = (qdir / "quality.tif").as_posix()
         rows.append(r)
     reg = pd.DataFrame(rows)
     reg.to_csv(c.run / "registry_pairs.csv", index=False, encoding="utf-8")
