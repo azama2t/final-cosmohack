@@ -1,0 +1,17 @@
+id_ispra_levels,трансекта,n_предметов,пикс_детектора_500м,гипотеза_пояса,Δt_ч,источник_течений,источник_ветра,мин_расстояние_после_дрейфа_м,предметов_ле50м_после_дрейфа,было_ближайший_м_без_дрейфа
+29,0222-MS01380_TR12,7,2,CEST(UTC+2/+1),3.5,"Open-Meteo Marine (ocean_current_velocity), сетка точек","Open-Meteo historical forecast 10 m wind, сетка точек",1784.7,0,1030.0
+29,0222-MS01380_TR12,7,2,UTC(файл=UTC),1.5,"Open-Meteo Marine (ocean_current_velocity), сетка точек","Open-Meteo historical forecast 10 m wind, сетка точек",2752.8,0,1030.0
+32-ER604,604 (ER604),16,36,CEST(UTC+2/+1),0.21,"Open-Meteo Marine (ocean_current_velocity), сетка точек","Open-Meteo historical forecast 10 m wind, сетка точек",275.0,0,85.0
+32-ER604,604 (ER604),16,36,UTC(файл=UTC),-1.79,"Open-Meteo Marine (ocean_current_velocity), сетка точек","Open-Meteo historical forecast 10 m wind, сетка точек",66.4,0,85.0
+36,PLM1,32,1,CEST(UTC+2/+1),1.18,"Open-Meteo Marine (ocean_current_velocity), сетка точек","Open-Meteo historical forecast 10 m wind, сетка точек",523.6,0,554.0
+36,PLM1,32,1,UTC(файл=UTC),-0.82,"Open-Meteo Marine (ocean_current_velocity), сетка точек","Open-Meteo historical forecast 10 m wind, сетка точек",460.4,0,554.0
+55,1_ABR_VA13,12,2,CEST(UTC+2/+1),-0.43,"Open-Meteo Marine (ocean_current_velocity), сетка точек","Open-Meteo historical forecast 10 m wind, сетка точек",620.9,0,964.0
+55,1_ABR_VA13,12,2,UTC(файл=UTC),-2.43,"Open-Meteo Marine (ocean_current_velocity), сетка точек","Open-Meteo historical forecast 10 m wind, сетка точек",219.8,0,964.0
+80,SMTS_S0518_LitA,18,13,CEST(UTC+2/+1),0.8,"Open-Meteo Marine (ocean_current_velocity), сетка точек","Open-Meteo historical forecast 10 m wind, сетка точек",154.5,0,293.0
+80,SMTS_S0518_LitA,18,13,UTC(файл=UTC),-1.2,"Open-Meteo Marine (ocean_current_velocity), сетка точек","Open-Meteo historical forecast 10 m wind, сетка точек",279.9,0,293.0
+94,NAPA_S012_Lita,19,3,CEST(UTC+2/+1),6.9,"Open-Meteo Marine (ocean_current_velocity), сетка точек","Open-Meteo historical forecast 10 m wind, сетка точек",1742.7,0,1354.0
+94,NAPA_S012_Lita,19,3,UTC(файл=UTC),4.9,"Open-Meteo Marine (ocean_current_velocity), сетка точек","Open-Meteo historical forecast 10 m wind, сетка точек",1801.7,0,1354.0
+114,8PC03_S009_LitB,47,6,CEST(UTC+2/+1),-3.44,"Open-Meteo Marine (ocean_current_velocity), сетка точек","Open-Meteo historical forecast 10 m wind, сетка точек",94.1,0,209.0
+114,8PC03_S009_LitB,47,6,UTC(файл=UTC),-5.44,"Open-Meteo Marine (ocean_current_velocity), сетка точек","Open-Meteo historical forecast 10 m wind, сетка точек",168.3,0,209.0
+117,9PN04_S009_LitA,65,4,CEST(UTC+2/+1),0.69,"Open-Meteo Marine (ocean_current_velocity), сетка точек","Open-Meteo historical forecast 10 m wind, сетка точек",435.2,0,392.0
+117,9PN04_S009_LitA,65,4,UTC(файл=UTC),-1.31,"Open-Meteo Marine (ocean_current_velocity), сетка точек","Open-Meteo historical forecast 10 m wind, сетка точек",645.5,0,392.0
