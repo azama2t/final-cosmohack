@@ -30,7 +30,7 @@ function localCalendar(region: Region, model: string, ts: TsRow[] | null): CalRo
     if (isFlagged(d)) reasons.push('дымка/блик — находки могут быть завышены');
     if (reasons.length) return { ...base, status: 'unreliable' as const, reason: reasons.join('; ') };
     return (row?.n_detections ?? 0) > 0
-      ? { ...base, status: 'detected' as const, reason: `${row!.n_detections} находок` }
+      ? { ...base, status: 'detected' as const, reason: `${row!.n_detections} кандидатов (без фильтров)` }
       : { ...base, status: 'clean' as const, reason: 'надёжное наблюдение, находок нет' };
   });
 }

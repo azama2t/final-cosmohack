@@ -868,7 +868,7 @@ export default function App() {
         {region && !checkMode && (
           <div className="actions" data-testid="actions" role="tablist" aria-label="Что показать по району">
             <button className={view === 'findings' && !zone && !place ? 'on' : ''} onClick={() => changeView('findings')} data-testid="act-findings">
-              Находки<span className="n">{detections ? detections.features.length : ''}</span>
+              Кандидаты<span className="n">{detections ? detections.features.length : ''}</span>
             </button>
             <button className={view === 'zones' || !!zone ? 'on' : ''} onClick={() => changeView('zones')} data-testid="act-zones" disabled={!scene || (!!zones && !nZones)}>
               Зоны<span className="n">{nZones || ''}</span>

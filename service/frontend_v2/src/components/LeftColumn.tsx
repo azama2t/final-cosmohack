@@ -167,7 +167,7 @@ function RegionRow({ r, on, bad, onClick }: { r: any; on: boolean; bad?: boolean
     <button className={`reg-item ${on ? 'on' : ''} ${bad ? 'bad' : ''}`} onClick={onClick} data-testid={`region-${r.id}`} title={tip}>
       <span className="ri-name">{shortName(r.name)}</span>
       <span className={`ri-val ${n ? '' : 'faint'}`}>
-        {n ? `${fmtNum(n)} ${plural(n, 'находка', 'находки', 'находок')}` : 'нет'}
+        {n ? `${fmtNum(n)} ${plural(n, 'кандидат', 'кандидата', 'кандидатов')} (без фильтров)` : 'нет'}
       </span>
       <span className="ri-sub">{d ? (isUnknownDate(d.date) ? 'дата неизвестна' : d.date.split('-').reverse().join('.')) : '—'}</span>
     </button>
