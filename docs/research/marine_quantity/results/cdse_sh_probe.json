@@ -1,0 +1,66 @@
+{
+ "demo_s2l2a_catalog": {
+  "status": 200,
+  "items": [
+   [
+    "S2B_MSIL2A_20210311T104749_N0500_R051_T30SXE_20230527T231548.SAFE",
+    "2021-03-11T11:01:15.638Z",
+    0.08
+   ]
+  ]
+ },
+ "demo_ccm_any_date": [],
+ "demo_ccm_pm3days": 0,
+ "odata_s2_demo_product": [
+  [
+   "2141e6de-09d6-4426-8aff-b712f6dbca2e",
+   "S2B_MSIL2A_20210311T104749_N0500_R051_T30SXE_20230527T231548.SAFE"
+  ]
+ ],
+ "download_probe_s2": {
+  "status": 501,
+  "bytes_read": 0
+ },
+ "ccm_example": {
+  "stac_id": "PH1A_PHR_MS___3_20230720T102355_20230720T102406_TOU_000278_6039_COG",
+  "platform": "pleiades-1a",
+  "odata": [
+   [
+    "428505f0-ea24-4195-a07e-768b698d6b2f",
+    "PH1A_PHR_MS___3_20230720T102355_20230720T102406_TOU_000278_b482.SAFE"
+   ],
+   [
+    "6a048e2b-ef82-45fc-bdbf-c01e03ab07b4",
+    "PH1A_PHR_MS___3_20230720T102355_20230720T102406_TOU_000278_ca56.SAFE"
+   ],
+   [
+    "af3fb951-d5a3-4d6a-acce-dfadfd2fa5a0",
+    "PH1A_PHR_MS___3_20230720T102355_20230720T102406_TOU_000278_b482_COG"
+   ],
+   [
+    "fbd38dfc-642a-4978-ad0f-fc2def936e6b",
+    "PH1A_PHR_MS___3_20230720T102355_20230720T102406_TOU_000278_ca56_COG"
+   ],
+   [
+    "2df1880c-16d9-4bc5-80bb-bc1cac61d23f",
+    "PH1A_PHR_MS___3_20230720T102355_20230720T102406_TOU_000278_136b_COG"
+   ]
+  ]
+ },
+ "download_probe_ccm": {
+  "status": 403,
+  "bytes_read": 0
+ },
+ "download_probe_no_range_stream_1KB": {
+  "s2_demo": {
+   "status": 200,
+   "first_bytes_read": 1024,
+   "content_length": "897471479"
+  },
+  "ccm_pleiades": {
+   "status": 403,
+   "first_bytes_read": 0,
+   "content_length": "97"
+  }
+ }
+}

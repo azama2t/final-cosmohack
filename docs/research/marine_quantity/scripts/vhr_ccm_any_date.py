@@ -1,4 +1,4 @@
-﻿"""L117 P3b: sparsity control for P3 - for a random sample of 150 ADIS positive (date, 0.5 deg) groups,
+"""L117 P3b: sparsity control for P3 - for a random sample of 150 ADIS positive (date, 0.5 deg) groups,
 how many CCM optical items exist over the group box at ANY date (whole archive)? Shows whether 0 same-day matches
 is due to timing or to the CCM archive simply not covering open-ocean ADIS routes.
 Output: results/vhr_ccm_any_date.json"""

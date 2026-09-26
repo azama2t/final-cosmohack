@@ -1,4 +1,4 @@
-﻿"""L117 P4: stage-2 of the two-stage scheme on a REAL free VHR image: naive per-object counter on open water,
+"""L117 P4: stage-2 of the two-stage scheme on a REAL free VHR image: naive per-object counter on open water,
 and what happens to the count when the same water is seen at 0.9 / 3 / 10 m (block-averaged).
 
 Image: Maxar Open Data (CC-BY-NC-4.0), GeoEye-1 visual (pansharpened RGB, 0.305 m), Derna, Libya, 2023-09-13 09:18 UTC

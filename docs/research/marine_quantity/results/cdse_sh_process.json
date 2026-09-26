@@ -1,0 +1,47 @@
+{
+ "status": 200,
+ "seconds": 2.6,
+ "bytes": 1282885,
+ "pu_spent": "2.543131586207892",
+ "bbox_utm30n": [
+  622920,
+  3926660,
+  627920,
+  3931660
+ ],
+ "earth_search_item": "S2B_30SXE_20210311_0_L2A",
+ "earth_search_processing_baseline": "02.14",
+ "n_valid": 250000,
+ "n_water": 249324,
+ "bands": {
+  "B02": {
+   "pearson_r": 0.6837163124444444,
+   "median_diff_sh_minus_es": -0.0006999988108873367,
+   "mad_abs_diff": 0.0009000003337860107,
+   "water_median_sh": 0.017000000923871994,
+   "water_median_es": 0.01769999973475933
+  },
+  "B03": {
+   "pearson_r": 0.901945840519975,
+   "median_diff_sh_minus_es": -0.000800000037997961,
+   "mad_abs_diff": 0.0008999994024634361,
+   "water_median_sh": 0.007000000216066837,
+   "water_median_es": 0.007699999958276749
+  },
+  "B04": {
+   "pearson_r": 0.9034020741679094,
+   "median_diff_sh_minus_es": -0.000699999975040555,
+   "mad_abs_diff": 0.000699999975040555,
+   "water_median_sh": 0.0005000000237487257,
+   "water_median_es": 0.0013000000035390258
+  },
+  "B08": {
+   "pearson_r": 0.9001582252140213,
+   "median_diff_sh_minus_es": -9.999999747378752e-05,
+   "mad_abs_diff": 9.999999747378752e-05,
+   "water_median_sh": 0.0,
+   "water_median_es": 9.999999747378752e-05
+  }
+ },
+ "note": "Sentinel Hub L2A uses the product it indexes (see demo_s2l2a_catalog: N0500 reprocessed 2023); Earth Search item is the original processing (_0) our detector was trained on; nothing saved to disk"
+}

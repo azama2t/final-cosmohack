@@ -375,8 +375,8 @@ def collect_quantity() -> dict:
                                                      "adis_field}.json (L93), docs/QUANTITY.md",
            "protocol": "раздельно: полевая плотность C = N/A (шт./км², интервал Пуассона) и спутниковая доля покрытия "
                        "подозрительного материала (м² маски на км² пригодной воды, как LWD у Cózar et al. 2024); доля покрытия ≠ "
-                       "мусор и ≠ шт./км²; связь между ними — только калибровка на парах A, которой нет; сценарий "
-                       "«площадь / размер предмета» — помеченный исследовательский диапазон, на карту не идёт"}
+                       "мусор и ≠ шт./км²; связь между ними — только калибровка на парах A, которой нет; перевод "
+                       "площади в штуки не показывается"}
     p = next((x for x in (fld.get("profiles") or []) if x.get("source_id") == "S2_SARGASSO_MSM41"), {})
     out["field_S2"] = {"n": _i(p.get("n_events")), "pooled_N": _i(p.get("pooled_N")), "pooled_A_km2": _r(p.get("pooled_A_km2"), 2),
                        "pooled_C": _r(p.get("pooled_C"), 1), "lo95": _r(p.get("pooled_lo95"), 1), "hi95": _r(p.get("pooled_hi95"), 1)}
@@ -398,8 +398,29 @@ def collect_quantity() -> dict:
                           "floor_factor": _r(fl.get("best_pi95_factor"), 1), "median_factor": _r(fl.get("median_baseline_pi95_factor"), 1),
                           "pairs_A_with_S_pos": 0}
     one = ((sc.get("one_minimal_object_200m2") or {}).get("size_class_bounds_S2")) or {}
-    out["scenario"] = {"label": sc.get("label"), "mask_m2": _r(one.get("area_m2"), 0), "items_min": _i(one.get("items_min")),
-                       "items_max": _i(one.get("items_max"))}
+    out["scenario"] = {"used": False, "spread_ratio": _i(one.get("ratio_max_min")),
+                       "spread_orders_text": f"{math.log10(one['ratio_max_min']):.1f}".replace(".", ",") if one.get("ratio_max_min") else None,
+                       "reason": "перевод площади маски в штуки не показываем — нет калибровочных пар «снимок → шт./км²»"}
+    cc = _load_json(q / "cell_calibration.json") or {}
+    if cc:
+        v, g = cc.get("variants") or {}, (((cc.get("variants") or {}).get("V3_climatology") or {}).get("grid_0.25") or {})
+        pr = g.get("primary") or {}
+        out["cell_calibration"] = {
+            "source": "reports/quantity/cell_calibration.{json,md}, configs/cell_calibration.yaml (проверка записана до сравнения)",
+            "stop_rule_min_cells": cc.get("stop_rule_min_cells"),
+            "same_period_common_dates": ((v.get("V1_same_period") or {}).get("cells_with_field_date_inside_cozar_dates")),
+            "v2_cells_with_signal": (v.get("V2_detector_same_month") or {}).get("cell_months_with_S_gt_0"),
+            "v3_cells": pr.get("n_cells"), "v3_rho": _r((pr.get("spearman") or {}).get("rho"), 2),
+            "v3_rho_ci95_shipday": [_r(x, 2) for x in (pr.get("spearman_ci95_shipday_cluster") or [])] or None,
+            "v3_rule_passed": (cc.get("verdict") or {}).get("V3_decision_rule_passed"),
+            "verdict": "калибровки по ячейкам нет: в одном периоде общих дат поле × спутник 0; климатологии разных лет ранжируют районы "
+                       "слабо (ρ ≈ география — удалённость от берега), правило принятия не пройдено"}
+    out["analogy"] = {"text": "пальмы на гектар по Sentinel-2 с опорой на подсчёт по снимкам высокого разрешения (arXiv 2105.11207): "
+                              "MAE ±7,3 пальмы/га",
+                      "why_possible": "там объект неподвижен, однороден и даёт устойчивый сигнал в пикселе, а опорный счёт совпадает со снимком",
+                      "why_not_here": "мусор дрейфует (часы между снимком и полем уже сдвигают поле), разнороден по размеру и материалу и "
+                                      "занимает доли процента пикселя; поэтому калибровка по ячейкам требует независимой проверки — у нас "
+                                      "она дала отрицательный результат"}
     fvd = sc.get("field_vs_detection") or {}
     f = fvd.get("factor_vs_field_median")
     out["detection_factor_vs_median"] = _r(f[0] if isinstance(f, list) else f, -3)
@@ -608,6 +629,57 @@ def collect_independent() -> dict:
     return out
 
 
+def _dmy(s):
+    s = str(s or "")[:10]
+    return f"{s[8:10]}.{s[5:7]}.{s[:4]}" if len(s) == 10 else None
+
+
+def collect_scene_zones() -> dict:
+    """Слой «Спутниковые зоны» и демо на отложенной сцене (data/case/scene_zones, reports/case_demo) — для DEMO.md, деки, README."""
+    idx = _load_json(ROOT / "data" / "case" / "scene_zones" / "index.json") or {}
+    out = {"available": bool(idx), "source": "data/case/scene_zones/{index.json, <сцена>/zones.geojson}, reports/case_demo/{demo_path.json, "
+                                              "heldout_check.json, mados_content_check.json}",
+           "protocol": "зоны = кластеры срабатываний weights/lgbm (без гармонизации, порог с MARIDA val) на оцениваемых сценах; «обнаружено» "
+                       "только при пересечении с нитью каталога Cózar 2024 (уровень B), признаки пены/блика/судна/берега/мелководья → "
+                       "«недостаточно данных»; демо-сцена не участвовала в обучении и подборе порога (MARIDA — тайл и дата, MADOS — по "
+                       "содержимому) и в экспериментах детектора v2"}
+    if not idx:
+        return out
+    sys.path.insert(0, str(ROOT / "scripts" / "case"))
+    import demo_sz_md  # noqa: WPS433  (числа слоя считает тот же код, что и сервис-документация)
+    k = demo_sz_md.numbers() or {}
+    ex, ds, fn, sc, by = k.get("ex") or {}, k.get("demo_scene") or {}, k.get("fn") or {}, k.get("sc") or {}, k.get("by") or {}
+    m, pr = ex.get("measured") or {}, ex.get("probable") or {}
+    path = (k.get("path") or {}).get("1920") or {}
+    mc = ((_load_json(REP / "case_demo" / "mados_content_check.json") or {}).get("results") or {})
+    mdemo = next((v for key, v in mc.items() if "cozar_demo" in key), {})
+    hc = _load_json(REP / "case_demo" / "heldout_check.json") or {}
+    out.update({
+        "n_zones": k.get("n_all"), "n_scenes_eval": k.get("n_scenes"), "n_scenes": k.get("n_scenes_total"),
+        "by_level_b": by.get("level_B", 0), "by_unverified": by.get("unverified", 0),
+        "by_insufficient": by.get("insufficient_data", 0), "by_not_detected": by.get("not_detected", 0),
+        "demo": {"tile": ds.get("tile"), "date": _dmy(ds.get("date")), "scene_id": ds.get("scene_id"),
+                 "n_zones": k.get("n_demo"), "n_zones_cozar": k.get("n_demo_b"), "det_pixels": ds.get("det_pixels"),
+                 "water_km2": _r(ds.get("water_km2"), 1), "lwd_m2_km2": _r(ds.get("lwd_m2_km2"), 0),
+                 "sun_zenith_deg": ds.get("sun_zenith_deg"), "wind10m_ms": ds.get("wind10m_ms"),
+                 "marida_same_tile": (hc.get("MARIDA") or {}).get("same_tile"), "marida_acq": (hc.get("MARIDA") or {}).get("n_acq"),
+                 "mados_votes": mdemo.get("votes"), "mados_verdict": mdemo.get("verdict")},
+        "example": {"zone_id": ex.get("zone_id"), "n_cozar": ex.get("n_cozar_filaments"),
+                    "area_km2": _r(m.get("zone_area_km2"), 2), "susp_m2": m.get("suspicious_area_m2"), "n_px": m.get("n_pixels"),
+                    "lwd_m2_km2": _r(m.get("lwd_m2_km2"), 0), "water_pct": _r(100 * ((m.get("quality") or {}).get("valid_water_fraction") or 0), 0),
+                    "prob_mean": _r(pr.get("prob_mean"), 2), "prob_max": _r(pr.get("prob_max"), 2),
+                    "sha256_short": (m.get("model") or {}).get("sha256_short")},
+        "field_nearby": {"distance_km": _r(fn.get("distance_km"), 0), "date": _dmy(fn.get("date")), "n": fn.get("n_items"),
+                         "area_km2": _r(fn.get("area_km2"), 2), "c": _r(fn.get("c_items_km2"), 1), "lo": _r(fn.get("ci95_lo"), 1),
+                         "hi": _r(fn.get("ci95_hi"), 1)},
+        "zone_main_status": "концентрация по снимку не подтверждена",
+        "no_count_reason": "перевод площади маски в штуки не показываем — нет калибровочных пар «снимок → шт./км²»",
+        "export": {"ui": (path.get("export") or {}).get("ui_count"), "csv": (path.get("export") or {}).get("csv"),
+                   "geojson": (path.get("export") or {}).get("geojson")},
+    })
+    return out
+
+
 def quantity_levels(ad: dict, q: dict) -> dict:
     """§15: единая логика количества — три уровня связи «снимок ↔ полевое число» (не путать между собой)."""
     return {
@@ -628,7 +700,7 @@ def collect() -> dict:
     q["levels"] = quantity_levels(ad, q)
     res = {"search": collect_search(), "labeled_data": collect_labeled(), "adis_pairs": ad,
            "baselines": collect_baselines(), "quantity": q, "oil": collect_oil(),
-           "detector_v2": collect_detector_v2(), "independent_check": collect_independent()}
+           "detector_v2": collect_detector_v2(), "independent_check": collect_independent(), "scene_zones": collect_scene_zones()}
     return _clean_ids(res)
 
 

@@ -21,7 +21,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 FN = ROOT / "reports" / "final_numbers.json"
-KEYS = ("search", "labeled_data", "adis_pairs", "baselines", "quantity", "oil", "detector_v2", "independent_check")
+KEYS = ("search", "labeled_data", "adis_pairs", "baselines", "quantity", "oil", "detector_v2", "independent_check", "scene_zones")
 
 pytestmark = pytest.mark.skipif(not FN.exists(), reason="нет reports/final_numbers.json")
 

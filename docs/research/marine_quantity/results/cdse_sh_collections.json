@@ -1,0 +1,128 @@
+{
+ "catalog_status": 200,
+ "n_collections": 10,
+ "collections": [
+  {
+   "id": "sentinel-2-l1c",
+   "title": "Sentinel 2 L1C",
+   "extent": {
+    "interval": [
+     [
+      "2015-11-01T00:00:00Z",
+      null
+     ]
+    ]
+   }
+  },
+  {
+   "id": "sentinel-3-olci-l2",
+   "title": "Sentinel 3 OLCI L2",
+   "extent": {
+    "interval": [
+     [
+      "2016-04-17T11:33:13Z",
+      null
+     ]
+    ]
+   }
+  },
+  {
+   "id": "landsat-ot-l1",
+   "title": "Landsat 8-9 OLI-TIRS L1",
+   "extent": {
+    "interval": [
+     [
+      "2013-03-08T00:00:00Z",
+      null
+     ]
+    ]
+   }
+  },
+  {
+   "id": "sentinel-3-olci",
+   "title": "Sentinel 3 OLCI",
+   "extent": {
+    "interval": [
+     [
+      "2016-04-17T11:33:13Z",
+      null
+     ]
+    ]
+   }
+  },
+  {
+   "id": "sentinel-3-slstr",
+   "title": "Sentinel 3 SLSTR",
+   "extent": {
+    "interval": [
+     [
+      "2016-04-17T11:33:13Z",
+      null
+     ]
+    ]
+   }
+  },
+  {
+   "id": "sentinel-3-slstr-l2",
+   "title": "Sentinel 3 SLSTR L2",
+   "extent": {
+    "interval": [
+     [
+      "2016-04-17T11:33:13Z",
+      null
+     ]
+    ]
+   }
+  },
+  {
+   "id": "sentinel-3-synergy-l2",
+   "title": "Sentinel 3 Synergy L2",
+   "extent": {
+    "interval": [
+     [
+      "2016-04-17T11:33:13Z",
+      null
+     ]
+    ]
+   }
+  },
+  {
+   "id": "sentinel-1-grd",
+   "title": "Sentinel 1 GRD",
+   "extent": {
+    "interval": [
+     [
+      "2014-10-03T00:00:00Z",
+      null
+     ]
+    ]
+   }
+  },
+  {
+   "id": "sentinel-2-l2a",
+   "title": "Sentinel 2 L2A",
+   "extent": {
+    "interval": [
+     [
+      "2016-11-01T00:00:00Z",
+      null
+     ]
+    ]
+   }
+  },
+  {
+   "id": "sentinel-5p-l2",
+   "title": "Sentinel 5 Precursor",
+   "extent": {
+    "interval": [
+     [
+      "2018-04-30T00:18:50Z",
+      null
+     ]
+    ]
+   }
+  }
+ ],
+ "byoc_status": 200,
+ "byoc": []
+}

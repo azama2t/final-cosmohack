@@ -722,3 +722,13 @@ GET /api/v3/meta: + detector.version {weights, sha256, sha256_short, trained_at,
   {place_time_pairs «пары по месту и времени» n=66, visible_signal, calibration_pairs n=0}, + scene_zone_statuses, + layers[] scene_zones.
 GET /api/v3/zones: model + weights_sha256, trained_at = дата файла weights/lgbm/model.txt; объекты детектора полос (detections) +
   type_label / visual_class / false_alarm по визуальной разметке (data/case/pairs_visual_labels.csv), если она есть для вырезки.
+3.10a ПРАВКА 3.10 (26.09, L111, INBOX §23 п.2 — ИЗМЕНЕНИЕ, не только добавление; frontend_alt слой зон не читает)
+- properties.scenario = null ВСЕГДА (числа 10⁴–10⁸ удалены из API, карточки и экспорта); + scenario_reason = «перевод площади в
+  штуки не показываем: нет калибровочных пар (см. docs/QUANTITY.md)»; + quantity {status "not_confirmed", label «концентрация по
+  снимку не подтверждена», detail}; + concentration_label; concentration_status = "unavailable" у всех зон (research_estimate не
+  выдаётся). FeatureCollection: + quantity; index.json: scenario = null, + quantity.
+- detection_label: «обнаружено детектором · совпадает с разметкой Cózar (B)» (verification level_B_cozar) | «обнаружено детектором ·
+  вероятный плавающий материал, требует проверки» (unverified) — обе только после фильтров судов/кильватера/шва, пены, блика,
+  облаков (+ flag "cloud": облака/тени ≥ 20 % зоны), берега, мелководья; признаки судна/шва → «ложное срабатывание (признаки
+  судна / кильватера / шва) — недостаточно данных»; прочие признаки → «недостаточно данных: признаки ложного срабатывания».
+- CSV scene_zones: колонки scenario_* удалены; + verification, quantity_status, quantity_label, quantity_detail.

@@ -44,6 +44,7 @@ IMAGES = {
     "adis": ("../../../../docs/img/search_adis_pair.jpg", "06_adis_pair.jpg", None),
     "s4": ("../../../../docs/img/search_s4_t30.jpg", "07_s4_t30.jpg", None),
     "independent": ("../../../../docs/img/independent_adis_pairs.jpg", "08_independent_adis.jpg", None),
+    "demo_card": ("../../../case_demo/1920_02_zone_card.png", "09_demo_zone_card.jpg", (336, 0, 1920, 1080)),
 }
 
 # основная часть деки и речи (SPEC-GAPS.md: ТЗ не задаёт время → основная речь ≤ 5:00, ≤ 14 слайдов); остальное — «Приложение»
@@ -324,6 +325,15 @@ def load() -> dict:
     ic = c + "sections.independent_check."
     for key in ("pairs.n", "routes_gt50", "routes_same_day_s2", "plp.rho_fdi"):
         k["ic_" + key.replace(".", "_")] = N(ic + key)
+    sz = c + "sections.scene_zones."
+    for key in ("n_zones", "n_scenes_eval", "n_scenes", "by_level_b", "by_unverified", "by_insufficient", "by_not_detected",
+                "demo.tile", "demo.date", "demo.n_zones", "demo.n_zones_cozar", "demo.det_pixels", "demo.mados_votes",
+                "example.zone_id", "example.n_cozar", "example.area_km2", "example.susp_m2", "example.n_px", "example.lwd_m2_km2",
+                "example.water_pct", "example.prob_mean", "example.prob_max", "example.sha256_short",
+                "field_nearby.distance_km", "field_nearby.date", "field_nearby.c", "field_nearby.lo", "field_nearby.hi",
+                "zone_main_status",
+                "export.ui", "export.csv", "export.geojson"):
+        k["sz_" + key.replace(".", "_")] = N(sz + key)
     ql = c + "sections.quantity.levels."
     for key in ("pairs_place_time", "pairs_place_time_eval", "visible_signal", "visible_signal_of", "calibration_pairs",
                 "calibration_needed_min", "calibration_needed_max"):
@@ -345,7 +355,10 @@ def load() -> dict:
     k["q_p_nz"] = N(qn + "pairs.p_nonzero_upper95"); k["q_mult"] = N(qn + "pairs.survey_multiplier")
     for key in ("n_pairs_k_x2_min", "n_pairs_k_x2_max", "n_pairs_r05", "n_pairs_r03", "floor_factor", "median_factor", "pairs_A_with_S_pos"):
         k["q_" + key] = N(qn + "calibration." + key)
-    k["q_sc_m2"] = N(qn + "scenario.mask_m2"); k["q_sc_min"] = N(qn + "scenario.items_min"); k["q_sc_max"] = N(qn + "scenario.items_max")
+    k["q_sc_ratio"] = N(qn + "scenario.spread_ratio"); k["q_sc_reason"] = N(qn + "scenario.reason")
+    k["q_an_text"] = N(qn + "analogy.text"); k["q_an_not"] = N(qn + "analogy.why_not_here")
+    k["q_cc_rho"] = N(qn + "cell_calibration.v3_rho"); k["q_cc_cells"] = N(qn + "cell_calibration.v3_cells")
+    k["q_cc_dates"] = N(qn + "cell_calibration.same_period_common_dates")
     oi = c + "sections.oil."
     for key in ("val_f1", "val_osi_f1", "test_f1", "test_osi_f1", "test_f1_ci95", "test_precision", "test_recall"):
         k["oil_" + key] = N(oi + key)
@@ -451,18 +464,19 @@ def search_slides(k: dict) -> list[dict]:
                 f"{num(k['bl_unet_argmax'], 3)}, наш LightGBM — {num(k['bl_lgbm'], 3)}."),
     ))
     S.append(dict(
-        section="Количество: поле, снимок, сценарий",
+        section="Количество: поле и снимок",
         title=f"Количество: пар по месту и времени {num(k['ql_pairs_place_time'], 0)}, видимый сигнал {num(k['ql_visible_signal'], 0)}, калибровочных пар {num(k['ql_calibration_pairs'], 0)} — шт./км² только по полю",
         bullets=[
             f"Поле (измерение): C = N/A, интервал Пуассона; S2 ΣN/ΣA = {num(k['q_pooled_N'], 0)} / {num(k['q_pooled_A_km2'], 2)} км² = {num(k['q_pooled_C'], 1)} [{rng(k['q_lo95'], k['q_hi95'])}] шт./км²; на карте — медиана профиля (отложенный test)",
             f"Снимок: площадь маски и доля покрытия подозрительного материала (LWD, м²/км²); медиана на {num(k['q_live_n'], 0)} живых сценах {num(k['q_live_med'], 1)}; это не мусор и не шт./км²",
             f"Калибровка ln C = ln k + b · ln S требует калибровочных пар (по месту и времени и с сигналом) — их {num(k['ql_calibration_pairs'], 0)}; нужно {num(k['q_n_pairs_k_x2_min'], 0)}–{num(k['q_n_pairs_k_x2_max'], 0)} для k в ×/÷2, для связи r = 0.5 — {num(k['q_n_pairs_r05'], 0)}",
-            f"Сценарий шт./км² — только «если это мусорная полоса», с допущениями: {num(k['q_sc_m2'], 0)} м² маски = {num(k['q_sc_min'], 0)}–{num(k['q_sc_max'], 0)} предметов; не доверительный интервал, не измерение, не результат модели",
+            f"Штуки по снимку не показываем: {k['q_sc_reason']}; перевод «площадь / размер предмета» дал бы разброс в {num(k['q_sc_ratio'], 0)} раз",
+            f"Аналогия: {k['q_an_text']}. Для мусора — {k['q_an_not']}: общих дат поле × спутник {num(k['q_cc_dates'], 0)}, климатологии ρ = {num(k['q_cc_rho'], 2)} на {num(k['q_cc_cells'], 0)} ячейках",
         ],
         big=(num(k["ql_calibration_pairs"], 0), f"калибровочных пар «снимок → шт./км²» (нужно {num(k['q_n_pairs_k_x2_min'], 0)}–{num(k['q_n_pairs_k_x2_max'], 0)})"),
         source="docs/QUANTITY.md; reports/quantity/*.json (final_numbers → case.sections.quantity)",
-        speech=("Количество: штуки на квадратный километр — только по полю. Со снимка — площадь маски и доля покрытия; сценарий в штуках "
-                "— только условный диапазон с допущениями."),
+        speech=("Количество: штуки на квадратный километр — только по полю. Со снимка — площадь маски и доля покрытия; перевода в "
+                "штуки нет, калибровочных пар ноль, калибровка по ячейкам дала отрицательный результат."),
     ))
     S.append(dict(
         section="Нефтяное пятно — эксперимент",
@@ -630,18 +644,18 @@ def slides(k: dict) -> list[dict]:
     ))
     S.append(dict(
         time=("3:05", "3:25"), section="Карта",
-        title=f"Карта говорит то же, что отчёт: {num(k['zones'], 0)} полос-кандидатов, 0 подтверждённых пар, концентрация по снимку недоступна",
+        title=f"Карта: отложенная сцена Cózar {k['sz_demo_tile']} — {num(k['sz_demo_n_zones'], 0)} зон, {num(k['sz_demo_n_zones_cozar'], 0)} совпали с нитями Cózar; концентрация по снимку не подтверждена",
         bullets=[
-            "Три слоя: полевые измерения (шт./км² с интервалом Пуассона) · снимки-кандидаты (полосы обследования) · подозрительные пиксели детектора",
-            "Два статуса полосы: детекция («связь не подтверждена» + причина) и концентрация («недоступна»)",
-            f"Реестр пар, выгрузка GeoJSON/CSV, сохранённые запросы; самопроверка API ↔ выгрузка: {num(k['sc_ok'], 0)} из {num(k['sc_checks'], 0)}, ошибочные входы {num(k['sc_inv_ok'], 0)}/{num(k['sc_inv_total'], 0)}, p95 ≤ {num(k['sc_p95'], 0)} мс",
+            f"Сцена {k['sz_demo_tile']}, {k['sz_demo_date']} не участвовала в обучении, подборе порога и экспериментах детектора; всего в слое {num(k['sz_n_zones'], 0)} зон на {num(k['sz_n_scenes_eval'], 0)} оцениваемых сценах",
+            f"Карточка зоны: измерено (площадь {num(k['sz_example_area_km2'], 2)} км², LWD, маска качества, версия модели) · вероятно (статус, признаки пены/блика/судна) · главный статус — «{k['sz_zone_main_status']}»",
+            f"«Обнаружено» только при совпадении с нитью Cózar ({num(k['sz_by_level_b'], 0)}); признаки пены, блика, судна, берега → «недостаточно данных» ({num(k['sz_by_insufficient'], 0)})",
+            f"Полосы кейса ({num(k['zones'], 0)}): связь с полем не подтверждена, концентрация по снимку недоступна; выгрузка = карта ({num(k['sz_export_ui'], 0)} = {num(k['sz_export_csv'], 0)} строк CSV)",
         ],
-        image="zone",
-        caption="Северное море, HE460 трансекта 03: связь с полем не подтверждена (дрейф > допуска), подозрительных пикселей в полосе нет",
-        source=f"service/routes_v3.py; {k['sc_file']}",
-        speech=("Карта повторяет отчёт: три слоя и два статуса полосы. Эта пара отклонена по дрейфу — «связь не "
-                "подтверждена»; пикселей детектора в полосе нет, концентрация по снимку недоступна. Выгрузка сверена с API "
-                "самопроверкой."),
+        image="demo_card",
+        caption="Отложенная сцена Cózar: контуры зон детектора и карточка «Измерено / Вероятно»",
+        source=f"data/case/scene_zones; reports/case_demo/demo_path.json (final_numbers → case.sections.scene_zones); {k['sc_file']}",
+        speech=("Карта на сцене, которую модель не видела. Каждая зона — измерено по снимку, вероятность с признаками ложных и, "
+                "статус «концентрация по снимку не подтверждена» — штук по снимку мы не показываем. Выгрузка равна карте."),
     ))
     st, rb = k["S2_sch_st"], k["S2_sch_route_buf1"]
     S.append(dict(
@@ -920,16 +934,51 @@ def speech_md(S: list[dict], k: dict) -> str:
           "- Доля покрытия со снимка — «доля покрытия подозрительного материала», не «мусор» и не «шт./км²»; массу не называем.",
           "- Пары ADIS — «пары по месту и времени», не «калибровочные»; не говорим о доказанном пределе обнаружения: 0 на единичных предметах "
           "согласуется с физикой, но не задаёт общий предел для всех скоплений.",
-          "- Сценарий шт./км² — «условный диапазон, если это мусорная полоса», не доверительный интервал, не измерение и не результат модели.", ""]
+          "- Штуки по снимку — не показываем: «концентрация по снимку не подтверждена», калибровочных пар нет.", ""]
     return "\n".join(L)
 
 
 # ----------------------------------------------------------------------------------------------- DEMO.md
-def _sz_block() -> str:
-    """L111: main demo path on the held-out Cózar scene (numbers from data/case/scene_zones, scripts/case/demo_sz_md.py)."""
-    sys.path.insert(0, str(ROOT / "scripts" / "case"))
-    from demo_sz_md import md as _md
-    return _md()
+def _sz_block(k: dict) -> str:
+    """Основной путь демо: отложенная сцена Cózar, слой «Спутниковые зоны». Числа — только case.sections.scene_zones."""
+    return f"""<!-- scene_zones:begin -->
+## Основной путь: отложенная сцена Cózar (спутниковые зоны, 1:40)
+
+Сцена Sentinel-2 **{k['sz_demo_tile']}, {k['sz_demo_date']}** не участвовала ни в обучении и подборе порога детектора (MARIDA — по тайлу и
+дате; MADOS — по содержимому, лучшее совпадение {num(k['sz_demo_mados_votes'], 0)} голоса, «нет совпадения»), ни в экспериментах детектора v2
+(`reports/case_demo/heldout_scene.md`). Слой — `scripts/case/scene_zones.py` (данные в git, `data/case/scene_zones/`).
+Проверить до выхода: слева «{num(k['sz_n_zones'], 0)} спутн. зон», вкладка «Зоны» — первая строка «Cózar, отложенная сцена {k['sz_demo_tile']}».
+Прямая ссылка: `?sel=zone:{k['sz_example_zone_id']}`.
+
+| Время | Действие | Что говорим | Что видно |
+|---|---|---|---|
+| 0:00–0:15 | Вкладка **«Зоны»** → первая строка | «Сцена, которую модель не видела. Снимок, маска качества, контуры зон детектора — всё с этой сцены.» | снимок, маска качества, контуры зон |
+| 0:15–0:40 | Карточка, блок **«Измерено по снимку»** | «Площадь зоны {num(k['sz_example_area_km2'], 2)} км², подозрительные пиксели {num(k['sz_example_susp_m2'], 0)} м² ({num(k['sz_example_n_px'], 0)} пикс.), LWD {num(k['sz_example_lwd_m2_km2'], 0)} м² на км² пригодной воды — как у Cózar 2024. Вода в зоне {num(k['sz_example_water_pct'], 0)} %. Модель weights/lgbm, порог {num(k['thr'], 2)}, sha256 {k['sz_example_sha256_short']}.» | вырезка «снимок / пиксели детектора», «Измерено» |
+| 0:40–0:55 | Блок **«Вероятно»** | «Вероятность детектора {num(k['sz_example_prob_mean'], 2)} / {num(k['sz_example_prob_max'], 2)}. Признаков пены, блика, судна, берега нет. Контур пересекает {num(k['sz_example_n_cozar'], 0)} нити каталога Cózar — их отметили люди по снимку. Поэтому «обнаружено»; без такой разметки зона — «срабатывание, не проверено».» | статус, признаки, «Каталог Cózar 2024» |
+| 0:55–1:10 | Статус **«Концентрация»** | «Главный статус зоны — «{k['sz_zone_main_status']}». Перевод площади в штуки не показываем: калибровочных пар «снимок → шт./км²» у нас {num(k['ql_calibration_pairs'], 0)}; {num(k['ad_A'], 0)} пар ADIS — пары по месту и времени, не калибровочные.» | статус концентрации |
+| 1:10–1:20 | Блок **«Поле рядом»** | «Ближайшее полевое измерение — ADIS за {num(k['sz_field_nearby_distance_km'], 0)} км, {k['sz_field_nearby_date']}: C = N/A = {num(k['sz_field_nearby_c'], 1)} [{num(k['sz_field_nearby_lo'], 1)}–{num(k['sz_field_nearby_hi'], 1)}] шт./км² (> 5 см). Измерение ≠ оценка: это другое время и место.» | таблица N / A / C |
+| 1:20–1:30 | **Сложный случай:** «Как выглядит удача и ошибка» → «ложное срабатывание: судно / кильватер» | «Яркая точка со следом — судно. Статус «недостаточно данных». Суда — известная слабость: {num(k['v2_reference_vessels_pct'], 0)} % судов как мусор.» | вырезка судна, статус |
+| 1:30–1:40 | Даты сцены → **«Выгрузка»** → «Спутниковые зоны» CSV; **«Запросы»** → сохранить → «сбросить» → запустить | «Выгрузка — те же поля и статусы; сохранённый запрос восстанавливает вид.» | зон на карте {num(k['sz_export_ui'], 0)} = строк CSV {num(k['sz_export_csv'], 0)} = объектов GeoJSON {num(k['sz_export_geojson'], 0)} |
+
+Всего в слое {num(k['sz_n_zones'], 0)} зон на {num(k['sz_n_scenes_eval'], 0)} оцениваемых сценах из {num(k['sz_n_scenes'], 0)} (на остальных низкое солнце или слабый
+сигнал воды — детектор не оценивается): обнаружено с подтверждением уровня B — {num(k['sz_by_level_b'], 0)}, срабатываний без проверки —
+{num(k['sz_by_unverified'], 0)}, недостаточно данных (пена/блик/судно/берег/мелководье) — {num(k['sz_by_insufficient'], 0)}, не обнаружено — {num(k['sz_by_not_detected'], 0)}.
+На демо-сцене {num(k['sz_demo_n_zones'], 0)} зон ({num(k['sz_demo_det_pixels'], 0)} пикс. детектора), из них с нитью Cózar — {num(k['sz_demo_n_zones_cozar'], 0)}.
+Живой проход без моков (окна 1920×1080 и 1366×768): `scripts/case/demo_path_v2.py` → `reports/case_demo/demo_path.json`, кадры `reports/case_demo/*.png`.
+
+## Путь данных: снимок → маски качества → детекция → зона
+1. `scripts/case/demo_scene.py select` — отбор и проверка отложенности (тайл, дата; MARIDA, MADOS, эксперименты детектора v2, PLP/FO, суда, пары, районы).
+2. `scripts/case/demo_scene.py fetch --acq <тайл_дата>` — L2A той же съёмки (Earth Search) → `data/live/cozar_demo/<дата>/` (формат районов сервиса).
+3. `scripts/case/demo_scene.py detect` — маска качества и детектор, как у пар (weights/lgbm, без гармонизации, порог с MARIDA val).
+4. `scripts/case/scene_zones.py [--only demo]` — зоны (кластеры объектов), признаки ложных, «измерено / вероятно», статус концентрации, вырезки.
+5. Сервис: `/api/v3/scene_zones`, `/api/v3/scene_zones/{{id}}`, `/api/v3/export?layer=scene_zones`; карта v2 — слой «Спутниковые зоны».
+
+## Эксперт повторяет расчёт без правки кода
+- Другая сцена Cózar: строка из `reports/case_demo/heldout_candidates.csv` → `demo_scene.py fetch --acq <тайл_дата>` → `detect` → `scene_zones.py --only demo` → перезапустить сервис.
+- Полоса пары кейса: `scripts/case/pair_quality.py --only S3:HE460_MarLitter_transect03 --force` → `/api/v3/zones/Z-S3_HE460_MarLitter_transect03`.
+- Своя точка и дата: «Подобрать снимок» в карточке измерения (`scripts/case/pairfinder.py`), затем тот же путь.
+- Любая зона открывается ссылкой `?sel=zone:<zone_id>`; числа — `curl http://127.0.0.1:8000/api/v3/scene_zones/<zone_id>`.
+<!-- scene_zones:end -->"""
 
 
 def demo_md(k: dict) -> str:
@@ -942,7 +991,7 @@ def demo_md(k: dict) -> str:
 Окно 1920×1080, браузер на весь экран. Проверить: слева «{num(k['exp_obs'], 0)} наблюдений · {num(k['zones'], 0)} полос»,
 в легенде — «{num(k['zones'], 0)} обследованных участков со снимками-кандидатами; 0 подтверждённых пар; для пластика снимков нет».
 
-{_sz_block()}
+{_sz_block(k)}
 
 ## Запасной путь: поле и полосы пар (2:00)
 
@@ -1212,9 +1261,14 @@ def qa_items(k: dict) -> list[tuple[str, str, str]]:
          "reports/quantity/calibration.json; docs/QUANTITY.md"),
         ("Что такое «доля покрытия» на снимке и почему это не концентрация?",
          f"Это м² маски детектора на км² пригодной воды — как у Cózar et al. 2024. Маска — «подозрительный материал», в ней пена, органика, "
-         f"суда. Перевод в штуки зависит от допущений о размере предметов: {num(k['q_sc_m2'], 0)} м² маски — от {num(k['q_sc_min'], 0)} до "
-         f"{num(k['q_sc_max'], 0)} предметов. Поэтому это только помеченный сценарий, на карту не идёт; массу не оцениваем.",
-         "reports/quantity/scenario.json; docs/QUANTITY.md"),
+         f"суда. Перевод в штуки зависит от допущений о размере предметов и дал бы разброс в {num(k['q_sc_ratio'], 0)} раз, поэтому мы его "
+         f"не показываем: {k['q_sc_reason']}. Массу не оцениваем.",
+         "reports/quantity/scenario.json; docs/QUANTITY.md §4"),
+        ("Почему не откалибровать по ячейкам, как считают пальмы на гектар по Sentinel-2?",
+         f"Аналогия уместна: {k['q_an_text']}. Но для мусора {k['q_an_not']}. Мы проверили: общих дат поле × спутник в одном периоде "
+         f"{num(k['q_cc_dates'], 0)}; климатологии разных лет дают ρ = {num(k['q_cc_rho'], 2)} на {num(k['q_cc_cells'], 0)} ячейках, и это "
+         f"почти целиком география (удалённость от берега). Правило принятия не пройдено, модели нет.",
+         "reports/quantity/cell_calibration.md; docs/QUANTITY.md §5"),
         ("Откуда B и D и как проверены утечки?",
          f"B — открытые наборы с подтверждённой разметкой: PLP ({num(k['ld_plp'], 0)} съёмок), FloatingObjects ({num(k['ld_fo'], 0)}), нити "
          f"Cózar 2024 ({num(k['ld_cz_win'], 0)} окон). D — суда у Финляндии ({num(k['ld_ves_boxes'], 0)} рамок) и облака Cloud Mask Catalogue "
