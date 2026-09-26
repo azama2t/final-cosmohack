@@ -823,19 +823,30 @@ def _fa(x):
     return f"{x['flagged']}/{x['n']} = {x['rate']:.2f} [{x['ci95'][0]:.2f}–{x['ci95'][1]:.2f}]"
 
 
+def _srcs(r, key):
+    short = {"features_cozar2024": "Cózar L98", "features_cozar2024_l2a": "Cózar L92", "features_vessels_fi": "суда",
+             "features_clouds_cmc": "облака", "features_folines_norm": "FO линии", "features_forefined_norm": "FO Refined",
+             "features_plpplastic_norm": "PLP", "features_plpwood_norm": "PLP дерево"}
+    return ", ".join(short.get(x, x) for x in ((r.get("train_sources") or {}).get(key) or {}).get("srcs", []))
+
+
 def write_md(out):
     L = ["# Детектор v2 — эксперименты (L92, §11 п.4)", "",
          f"Проверка зафиксирована ДО экспериментов: `configs/detector_v2_eval.yaml` (sha256 `{out['eval_yaml_sha256'][:16]}…`). "
          "Тест MARIDA не читался. Порог каждой модели выбран на MARIDA val (как у `weights/lgbm`), CI — бутстреп по сценам val.",
-         "Новые данные: D — визуальная разметка ИИ-агентом объектов на 22 снимках пар (`reports/case_pairs/visual_labels.csv`; "
-         "пена/облако/блик/судно/шов), не полевая истина. Оценка на них — 3-fold по снимкам (tile+дата), каждый объект "
-         "оценивает модель, не видевшая его снимок. C (accumulation) и unclear в обучение не входят.", "",
+         "Новые данные (все — S2 L2A, как в сервисе): D пар — визуальная разметка ИИ-агентом 97 объектов на 22 снимках пар "
+         "(пена/облако/блик/судно/шов; не полевая истина); B Cózar L92 — 234 случайные нити Cózar 2024 (1 на снимок, L2A той же съёмки); "
+         "B Cózar L98 — 146 окон с 15 снимков; B/D FloatingObjects (L89: линии и проверенные точки Refined; исключены tangshan, toledo, "
+         "tunisia, mandaluyong); D суда Финляндии и облака CMC (L90); PLP (L89) — искусственные малые мишени, отдельный тест. "
+         "Оценка на новых данных — 3-fold по снимкам (тайл+дата): каждый объект оценивает модель, не видевшая его снимка. "
+         "C (accumulation), unclear, U (непроверенный фон), W/C судов в обучение не входят.", "",
          "## Сводка", "",
          "Колонки D/B: доля объектов с хотя бы одним пикселем P ≥ порога модели (порог с MARIDA val), 95 % CI Уилсона, seed 0; "
          "«как в сервисе» = L2A без гармонизации; «гарм.» = water_median. Cózar — естественные нити плавучего материала (B, L2A той же съёмки); "
          "PLP — искусственные мишени (B, другая радиометрия).", "",
          "| эксперимент | данные | F1 MD val (seed) | 95 % CI (seed 0) | ΔF1 к откату | D пар, как в сервисе | D пар, гарм. | B Cózar, как в сервисе | B Cózar, гарм. | B FO линии | B FO Refined | D FO Refined | B PLP пластик (малые мишени) | D суда Финляндии, как в сервисе | D облака CMC, доля пикселей | вода пар, доля флагов | решение |",
          "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+    rows = {}
     for r in out["experiments"]:
         f1s = [v["f1"] for v in r["val_per_seed"]]
         f1 = f"{np.mean(f1s):.4f}" + (f" ± {np.std(f1s, ddof=1):.4f} (n={len(f1s)})" if len(f1s) > 1 else "")
@@ -844,8 +855,10 @@ def write_md(out):
         dF = f"{dd['dF1_vs_ref']:+.4f} (нужно ≥ {dd['need']:.4f})" if "dF1_vs_ref" in dd else "—"
         data = r["kind"] if not r.get("train_kw") else (
             "MARIDA+MADOS" + (f" + D пар ×{r['train_kw']['pairs_w']:g} ({'/'.join(r['train_kw']['pairs_modes'])})" if r['train_kw']['pairs_w'] else "")
-            + (f" + B ×{r['train_kw']['extra_b_w']:g}" if r['train_kw']['extra_b_w'] else "")
-            + (f" + D доп ×{r['train_kw']['extra_d_w']:g}" if r['train_kw']['extra_d_w'] else ""))
+            + (f" + B ×{r['train_kw']['extra_b_w']:g} ({_srcs(r, 'extra_B')})" if r['train_kw']['extra_b_w'] else "")
+            + (f" + D ×{r['train_kw']['extra_d_w']:g} ({_srcs(r, 'extra_D')})" if r['train_kw']['extra_d_w'] else "")
+            + (f"; вес ист. {r['train_kw'].get('src_weights')}" if r['train_kw'].get('src_weights') else "")
+            + (f"; ≤ {r['train_kw']['extra_cap']} px/ист." if r['train_kw'].get('extra_cap') else ""))
         wf = f"{np.mean(r['water_flag_none']):.5f}"
         ex0 = r["extra"][0] or {}
 
@@ -860,10 +873,11 @@ def write_md(out):
         def _b(m, src):
             x = ((ex0.get(m) or {}).get("by_src") or {}).get(f"{src}:B_recall")
             return _fa({"n": x["n_objects"], "flagged": x["flagged"], "rate": x["rate"], "ci95": x["ci95"]}) if x and x["n_objects"] else "—"
-        L.append(f"| {r['exp']} | {data} | {f1} | {ci[0]:.3f}–{ci[1]:.3f} | {dF} | {_fa(r['pairs_D_none'][0])} | "
+        rows[r["exp"]] = (f"| {r['exp']} | {data} | {f1} | {ci[0]:.3f}–{ci[1]:.3f} | {dF} | {_fa(r['pairs_D_none'][0])} | "
                  f"{_fa(r['pairs_D_wm'][0])} | {_b('none', 'features_cozar2024_l2a')} | {_b('water_median', 'features_cozar2024_l2a')} | "
                  f"{_b('none', 'features_folines_norm')} | {_b('none', 'features_forefined_norm')} | {_d('features_forefined_norm')} | "
                  f"{_b('none', 'features_plpplastic_norm')} | {_d('features_vessels_fi')} | {_px('features_clouds_cmc')} | {wf} | {dd['decision']} |")
+        
     ub, un = REP / "unet_baseline.json", REP / "unet_newdata.json"
     if ub.is_file() and un.is_file():
         vb = json.loads(ub.read_text(encoding="utf-8"))["val"]
@@ -871,10 +885,12 @@ def write_md(out):
         for k, lab in (("argmax", "argmax"), ("prob", f"P ≥ {nd['threshold_prob']}")):
             v = vb[f"unet_{k}"]
             pr, cz = nd["pairs"][k], nd["cozar_l2a"][k]
-            L.append(f"| unet_marida_{k} | официальный U-Net MARIDA (L99), {lab}; только данные со снимками | {v['f1_md']:.4f} | "
+            rows[f"unet_marida_{k}"] = (f"| unet_marida_{k} | официальный U-Net MARIDA (L99), {lab}; только данные со снимками | {v['f1_md']:.4f} | "
                      f"{v['ci95_f1'][0]:.3f}–{v['ci95_f1'][1]:.3f} | — | {_fa(pr['D_all'])} | — | "
                      f"{_fa({'n': cz['n'], 'flagged': cz['flagged'], 'rate': cz['rate'], 'ci95': cz['ci95']})} | — | — | — | — | — | — | — | "
                      f"{pr['water_flag_rate_all_valid_px']:.5f} (все px воды) | baseline (not a candidate) |")
+    first = ["reference", "r0", "rf_prob", "rf_argmax", "fdi_threshold", "unet_marida_argmax", "unet_marida_prob"]
+    L += [rows[k] for k in first if k in rows] + [rows[k] for k in sorted(rows) if k not in first]
     L += ["", "D по классам (вход как в сервисе / с гармонизацией), первый seed:", ""]
     for r in out["experiments"]:
         L.append(f"- {r['exp']}: {r['pairs_D_by_class_none']} / {r['pairs_D_by_class_wm']}")

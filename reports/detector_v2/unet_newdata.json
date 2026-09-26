@@ -1,0 +1,93 @@
+{
+ "threshold_prob": 0.34,
+ "input": "S2 L2A, no harmonisation (as the service)",
+ "pairs": {
+  "argmax": {
+   "D_all": {
+    "n": 97,
+    "flagged": 4,
+    "rate": 0.0412,
+    "ci95": [
+     0.0162,
+     0.1013
+    ]
+   },
+   "D_by_class": {
+    "foam": "2/50",
+    "cloud": "0/27",
+    "glint": "0/11",
+    "ship": "2/5",
+    "artifact": "0/4"
+   },
+   "water_flag_rate_all_valid_px": 3.1e-05,
+   "n_water_px": 12878835
+  },
+  "prob": {
+   "D_all": {
+    "n": 97,
+    "flagged": 2,
+    "rate": 0.0206,
+    "ci95": [
+     0.0057,
+     0.0721
+    ]
+   },
+   "D_by_class": {
+    "foam": "1/50",
+    "cloud": "0/27",
+    "glint": "0/11",
+    "ship": "1/5",
+    "artifact": "0/4"
+   },
+   "water_flag_rate_all_valid_px": 3.1e-05,
+   "n_water_px": 12878835
+  },
+  "water_flag_per_crop_argmax": {
+   "S3_HE460_MarLitter_transect01": 0.0,
+   "S3_HE460_MarLitter_transect03": 9.3e-05,
+   "S4_DOORS3_T1": 0.0,
+   "S4_DOORS3_T11": 0.0,
+   "S4_DOORS3_T12": 0.0,
+   "S4_DOORS3_T13": 0.0,
+   "S4_DOORS3_T14": 0.0,
+   "S4_DOORS3_T15": 0.0,
+   "S4_DOORS3_T16": 0.0,
+   "S4_DOORS3_T17": 0.0,
+   "S4_DOORS3_T18": 0.0,
+   "S4_DOORS3_T19": 0.0,
+   "S4_DOORS3_T2": 4e-06,
+   "S4_DOORS3_T20": 0.0,
+   "S4_DOORS3_T21": 0.0,
+   "S4_DOORS3_T25": 4e-06,
+   "S4_DOORS3_T3": 0.0,
+   "S4_DOORS3_T30": 0.0,
+   "S4_DOORS3_T31": 0.0,
+   "S4_DOORS3_T32": 0.0,
+   "S4_DOORS3_T4": 0.0,
+   "S4_DOORS3_T5": 0.0
+  }
+ },
+ "cozar_l2a": {
+  "argmax": {
+   "n": 234,
+   "flagged": 99,
+   "rate": 0.4231,
+   "ci95": [
+    0.3615,
+    0.4871
+   ],
+   "pixel_rate": 0.1099
+  },
+  "prob": {
+   "n": 234,
+   "flagged": 95,
+   "rate": 0.406,
+   "ci95": [
+    0.3451,
+    0.4699
+   ],
+   "pixel_rate": 0.1071
+  }
+ },
+ "seconds": 36.9
+}
