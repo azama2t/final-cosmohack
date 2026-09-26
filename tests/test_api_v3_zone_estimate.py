@@ -18,8 +18,9 @@ from macroplastic.case import zone_estimate as ZE
 HAS = (cs.PATHS["scene_zones_dir"] / "index.json").is_file()
 pytestmark = pytest.mark.skipif(not HAS, reason="scripts/case/scene_zones.py not run")
 
-WORDS = ("исследовательская оценка", "калибровка на искусственных мишенях PLP", "бутылки", "1.5 л",
-         "для природных скоплений не проверена", "мелкие предметы → больше штук")
+WORDS = ("исследовательская оценка", "исследовательский сценарий по искусственным мишеням PLP",
+         "допущения: предметы размера бутылки PET 1,5 л, покрытие пикселя 28–40 %", "470–670 предметов-бутылок на пиксель",
+         "не доверительный интервал и не проверено на природе", "мелкие предметы → больше штук")
 
 
 @pytest.fixture()
@@ -105,6 +106,11 @@ def test_formula_equals_api_equals_export_on_5_zones(client):
         assert re["context"].startswith("плотность внутри контура нити в пересчёте на бутылки PET 1,5 л — не среднее по маршруту")
         assert "(среднее по маршруту: 1,5–54)" in re["context"] and "3–4 порядка" in re["context"]
         assert re["muted"] == (p["verification"] != "level_B_cozar")
+        # §36 п.2: 470–670 per pixel — a research scenario on artificial PLP targets, not a CI, not checked on nature
+        assert re["kind"] == "scenario" and re["scenario"] in re["label"] and "сценарий" in re["method"]
+        assert "не доверительный интервал" in re["calibration_spread"]["label"] and "сценарий 470–670" in re["calibration_spread"]["label"]
+        nat = ZE.natural_pair_note(ZE.load_config())
+        assert re["natural_pair_note"] == nat and ((nat in re["context"]) if nat else "ISPRA" not in re["context"])
         # export CSV / GeoJSON: the same numbers
         r = rows[zid]
         assert (float(r["research_estimate_value"]), float(r["research_calibration_spread_lo"]),
@@ -112,6 +118,11 @@ def test_formula_equals_api_equals_export_on_5_zones(client):
         assert float(r["research_estimate_lower_bound"]) == lb
         assert r["research_estimate_muted"] == ("true" if re["muted"] else "false")
         assert r["research_estimate_context"] == re["context"] and r["research_method_essence"] == re["method_essence"]
+        assert r["research_scenario"] == re["scenario"] and r["research_estimate_method"] == re["method"]
+        # jury 14:06: «(i)» line and the calibration in force
+        assert re["formula_short"] == "пиксели маски × 470–670 / площадь контура = пересчёт доли покрытия"
+        assert re["calibration_id"] == "flat_plp" and "плоская калибровка" in re["calibration_name"]
+        assert r["research_formula_short"] == re["formula_short"] and r["research_calibration_name"] == re["calibration_name"]
         assert float(r["zone_area_km2"]) == a and r["research_estimate_unit"] == "шт./км²"
         assert r["research_estimate_status"] == "исследовательская оценка" and r["is_find"] == "true"
         assert (int(r["research_n_items_lo"]), int(r["research_n_items_hi"])) == (n * 470, n * 670)
@@ -241,3 +252,17 @@ def test_muted_only_for_unverified_finds(client):
     s = fc["research_estimate"]
     assert (s["n_not_muted"], s["n_muted"]) == (len(b), len(u))
     assert s["lower_bound_min"] <= s["lower_bound_median"] <= s["lower_bound_max"]
+
+
+def test_natural_pair_note_only_when_confirmed():
+    """§36 п.2: the ISPRA 604 sentence appears in the context only with natural_pair.confirmed = true."""
+    cfg = ZE.load_config()
+    p = {"detection_status": "detected", "flags": [], "verification": "level_B_cozar",
+         "measured": {"n_pixels": 10, "zone_area_km2": 0.5}}
+    off = ZE.estimate(p, {**cfg, "natural_pair": {**cfg["natural_pair"], "confirmed": False}}, field_range=(1.54, 53.9))
+    on = ZE.estimate(p, {**cfg, "natural_pair": {**cfg["natural_pair"], "confirmed": True}}, field_range=(1.54, 53.9))
+    assert off["natural_pair_note"] is None and "ISPRA" not in off["context"]
+    assert on["natural_pair_note"].startswith("на природной паре ISPRA 604 (16.09.2019) видимая нить содержала лишь 2–4")
+    assert on["context"].endswith("сигнал нити даёт в основном не посчитанный мусор")
+    s_on = ZE.summary([p], {**cfg, "natural_pair": {**cfg["natural_pair"], "confirmed": True}})
+    assert s_on["natural_pair_note"] == on["natural_pair_note"] and s_on["kind"] == "scenario" and s_on["scenario"]

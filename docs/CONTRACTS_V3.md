@@ -824,3 +824,14 @@ GET /api/v3/photo/meta: + headline {count_mae_per_frame, count_mae_ci95, n_image
     Сводка: + lower_bound_median/min/max, n_muted, n_not_muted, interval_kind. CSV scene_zones (ИЗМЕНЕНИЕ колонок):
     research_estimate_lo/_hi → research_calibration_spread_lo/_hi; + research_estimate_lower_bound (перед _value),
     research_method_essence, research_estimate_context, research_estimate_muted.
+  (§36 п.2, оценка: сценарий) research_estimate: + scenario «исследовательский сценарий по искусственным мишеням PLP (допущения:
+    предметы размера бутылки PET 1,5 л, покрытие пикселя 28–40 %): 470–670 предметов-бутылок на пиксель — не доверительный
+    интервал и не проверено на природе» (числа из calibration_points), kind "scenario", natural_pair_note (null, пока в конфиге
+    natural_pair.confirmed = false; после подтверждения — фраза ISPRA 604, она же дописывается в context); label: «≥ ~X … ·
+    исследовательская оценка · <scenario>; мелкие предметы → больше штук»; method «исследовательский сценарий: калибровка на
+    искусственных мишенях PLP (бутылки PET 1.5 л)»; calibration_spread.label «сценарий 470–670 предметов-бутылок на пиксель: разброс …,
+    не доверительный интервал». CSV scene_zones: + research_scenario, research_natural_pair_note (после research_estimate_context).
+    Сводка (final_numbers): + scenario, kind, natural_pair_note, coverage_pct_lo, coverage_pct_hi.
+  (жюри 14:06) research_estimate: + formula_short «пиксели маски × 470–670 / площадь контура = пересчёт доли покрытия» (для (i)),
+    + calibration_id ("flat_plp") и calibration_name (действующая калибровка, из configs/zone_estimate.yaml; при смене модели —
+    меняется там). CSV: + research_formula_short, research_calibration_name. Сводка: + calibration_id, calibration_name, formula_short.

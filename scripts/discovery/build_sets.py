@@ -33,8 +33,14 @@ import pandas as pd  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
-VERSION = "v1"
+VERSION = "v2"
 OUT = ROOT / "data" / "discovery" / VERSION
+CFG_FILES = {"v1": "discovery_sets.yaml", "v2": "discovery_sets_v2.yaml"}
+
+
+def set_version(v: str) -> None:
+    global VERSION, OUT
+    VERSION, OUT = v, ROOT / "data" / "discovery" / v
 WIN = 128
 BANDS11 = ["B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B8A", "B11", "B12"]
 BANDS12 = ["B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B8A", "B9", "B11", "B12"]
@@ -240,6 +246,8 @@ def compose_cozar(rows, labels, per_scene=3):
 
 
 def compose():
+    if VERSION != "v1":
+        return compose_v2()
     OUT.mkdir(parents=True, exist_ok=True)
     rows, labels = [], []
     compose_astar(rows, labels)
@@ -413,52 +421,152 @@ def sha256_file(p: Path) -> str:
     return h.hexdigest()
 
 
+
+def compose_v2():
+    """v2 (оценщик, правка 26.09 14:03): v1 samples (windows hard-linked, not re-fetched) + campaign folds for A1 +
+    PLP2021 coverage dates (A1, «по доле») + A5 natural synchronous pairs (only pairs confirmed by the pair critic;
+    v2: none — candidates are listed in configs/discovery_sets_v2.yaml)."""
+    v1 = ROOT / "data" / "discovery" / "v1"
+    OUT.mkdir(parents=True, exist_ok=True)
+    c = pd.read_csv(v1 / "candidates.csv", low_memory=False)
+    lab = pd.read_csv(v1 / "labels.csv")
+    lab["cover_m2"] = np.nan
+    p = pd.read_csv(ROOT / "docs" / "research" / "pairs" / "p1_pixels.csv")
+    rows, labels = [], []
+    for pid, g in p[p.campaign == "PLP2021"].groupby("pair_id"):
+        date = pid.split("-")[-1]
+        scene = str(g.scene_id.iloc[0])
+        hd = g[~g.material.astype(str).str.lower().str.contains("wood")]
+        rows.append(dict(set="A1", sample_id=pid, group=date, kind="astar_cover", source=_src_of(scene), item_id=scene,
+                         epsg=int(g.epsg.iloc[0]), cx=float(g.x.mean()), cy=float(g.y.mean()), date=date,
+                         roi="center64", campaign="PLP2021"))
+        labels.append(dict(sample_id=pid, set="A1", N_true=np.nan, obs_density_km2=np.nan,
+                           cover_m2=round(float(hd.frac_plastic.fillna(0).sum()) * 100.0, 1),
+                           basis="PLP2021: one HDPE mesh (~616 m2) — plastic cover m2 = sum of pixel fractions x 100 m2 "
+                                 "(wooden target not counted); number of items undefined"))
+    c = pd.concat([c, pd.DataFrame(rows)], ignore_index=True)
+    c["fold"] = np.where(c.set == "A1", c.campaign, c.group)
+    lab = pd.concat([lab, pd.DataFrame(labels)], ignore_index=True)
+    c.to_csv(OUT / "candidates.csv", index=False)
+    lab.to_csv(OUT / "labels.csv", index=False)
+    (OUT / "win").mkdir(exist_ok=True)
+    n = 0
+    for f in (v1 / "win").glob("*.npz"):
+        t = OUT / "win" / f.name
+        if not t.exists():
+            try:
+                os.link(f, t)
+            except OSError:
+                import shutil
+                shutil.copy2(f, t)
+            n += 1
+    print(c.groupby(["set", "kind"]).size().to_string(), "\nlinked", n)
+
+
+GLINT_B11 = 0.03   # tile glint: median B11 of tile water > 0.03 (3x the pair-mask rule 0.01: MARIDA water B11 ~0.010)
+TILE = 32
+MARIDA_TILE_TYPE = {1: "debris", 2: "organic", 3: "organic", 4: "organic", 5: "ship", 6: "cloud", 13: "cloud",
+                    9: "foam", 12: "waves_wakes", 14: "waves_wakes"}
+
+
+def tiles():
+    """Type of every 32x32 tile of the A2/A3 windows for the false-ZONE scan: MARIDA majority label (>= 5 % labelled),
+    Finnish ship (4 central tiles), CMC hand-mask class (4 central tiles), else glint by the spectral rule (> 50 % of
+    the tile is water with B11 > 0.01), else water. Answers-side file: never passed to a method."""
+    import rasterio
+    c = pd.read_csv(OUT / "candidates.csv", low_memory=False)
+    c = c[c.set.isin(["A2", "A3"])]
+    rows = []
+    central = {(1, 1), (1, 2), (2, 1), (2, 2)}
+    for r in c.to_dict("records"):
+        cl = None
+        if r["kind"] == "marida":
+            b, scl, _, _ = marida_window(r)
+            with rasterio.open(MARIDA / r["item_id"].replace(".tif", "_cl.tif")) as d:
+                y0, x0 = int(r["win_r0"]), int(r["win_c0"])
+                cl = d.read(1).astype(int)[y0:y0 + WIN, x0:x0 + WIN]
+        else:
+            z = np.load(win_path(r["sample_id"]))
+            b, scl = z["bands"], z["scl"]
+        b3, b8, b2, b11 = b[2], b[7], b[1], b[9]
+        with np.errstate(invalid="ignore", divide="ignore"):
+            water = (scl == 6) if scl.any() else (((b3 - b8) / (b3 + b8) > 0.1) & (b2 < 0.2))
+        for tr in range(WIN // TILE):
+            for tc in range(WIN // TILE):
+                sl = (slice(tr * TILE, (tr + 1) * TILE), slice(tc * TILE, (tc + 1) * TILE))
+                typ = ""
+                if cl is not None:
+                    t = cl[sl]
+                    for k_, name in ((1, "debris"), (5, "ship"), (9, "foam"), (2, "organic"), (3, "organic"),
+                                     (4, "organic"), (6, "cloud"), (13, "cloud"), (12, "waves_wakes"), (14, "waves_wakes")):
+                        if (t == k_).sum() >= (1 if k_ == 1 else 3):
+                            typ = name
+                            break
+                elif r["kind"] == "vessel" and (tr, tc) in central:
+                    typ = "ship"
+                elif r["kind"] == "cmc" and (tr, tc) in central:
+                    typ = {"cmc_cloud": "cloud", "cmc_cloud_shadow": "cloud", "cmc_clear_water": "water"}[r["background"]]
+                if not typ:
+                    w_ = water[sl]
+                    g_ = w_.mean() > 0.5 and float(np.nanmedian(b11[sl][w_])) > GLINT_B11
+                    typ = "glint" if g_ else "water"
+                rows.append(dict(sample_id=r["sample_id"], set=r["set"], tile_r=tr, tile_c=tc, type=typ))
+    t = pd.DataFrame(rows)
+    t.to_csv(OUT / "tile_types.csv", index=False)
+    print(t.groupby(["set", "type"]).size().to_string())
+
+
 def freeze():
     c = pd.read_csv(OUT / "candidates.csv", low_memory=False)
+    if "fold" not in c:
+        c["fold"] = c["group"]
     rows = []
     for r in c.itertuples(index=False):
+        base = dict(set=r.set, sample_id=r.sample_id, group=r.group, fold=r.fold, kind=r.kind, roi=r.roi)
         if r.kind == "marida":
-            p = MARIDA / r.item_id
-            rows.append(dict(set=r.set, sample_id=r.sample_id, group=r.group, kind=r.kind, file=f"MARIDA:{r.item_id}",
-                             win_r0=r.win_r0, win_c0=r.win_c0, roi=r.roi, sha256=sha256_file(p), status="ok"))
+            rows.append(dict(base, file=f"MARIDA:{r.item_id}", win_r0=r.win_r0, win_c0=r.win_c0,
+                             sha256=sha256_file(MARIDA / r.item_id), status="ok"))
             continue
         f = win_path(r.sample_id)
         if f.exists():
-            rows.append(dict(set=r.set, sample_id=r.sample_id, group=r.group, kind=r.kind,
-                             file=str(f.relative_to(ROOT)).replace("\\", "/"), roi=r.roi, sha256=sha256_file(f),
-                             status="ok"))
+            rows.append(dict(base, file=str(f.relative_to(ROOT)).replace("\\", "/"), sha256=sha256_file(f), status="ok"))
         else:
-            rows.append(dict(set=r.set, sample_id=r.sample_id, group=r.group, kind=r.kind, file="", roi=r.roi,
-                             sha256="", status="missing"))
+            rows.append(dict(base, file="", sha256="", status="missing"))
     m = pd.DataFrame(rows)
     m.to_csv(OUT / "manifest.csv", index=False)
     lab = OUT / "labels.csv"
     print(m.groupby(["set", "kind", "status"]).size().to_string())
     ms, ls_ = sha256_file(OUT / "manifest.csv"), sha256_file(lab)
+    ts = sha256_file(OUT / "tile_types.csv") if (OUT / "tile_types.csv").exists() else None
     print("manifest sha256", ms)
     print("labels sha256", ls_)
     cnt = m[m.status == "ok"].groupby("set").size().to_dict()
     miss = m[m.status != "ok"].sample_id.tolist()
-    cfgp = ROOT / "configs" / "discovery_sets.yaml"
+    cfgp = ROOT / "configs" / CFG_FILES[VERSION]
     txt = cfgp.read_text(encoding="utf-8").split("\nfrozen:")[0].rstrip("\n")
     txt += "\nfrozen:   # записано build_sets.py freeze до первого прогона методов; harness проверяет перед каждым прогоном\n"
     txt += f"  at: '{time.strftime('%Y-%m-%d %H:%M')}'\n"
     txt += f"  manifest: data/discovery/{VERSION}/manifest.csv\n  manifest_sha256: {ms}\n"
     txt += f"  labels: data/discovery/{VERSION}/labels.csv\n  labels_sha256: {ls_}\n"
+    if ts:
+        txt += f"  tile_types: data/discovery/{VERSION}/tile_types.csv\n  tile_types_sha256: {ts}\n"
     txt += f"  n_ok: {json.dumps(cnt)}\n  missing: {json.dumps(miss, ensure_ascii=False)}\n"
     cfgp.write_text(txt, encoding="utf-8")
-    (ROOT / "configs" / "discovery_sets.yaml.sha256").write_text(
-        f"{sha256_file(cfgp)} *configs/discovery_sets.yaml\n", encoding="utf-8")
+    (ROOT / "configs" / f"{CFG_FILES[VERSION]}.sha256").write_text(
+        f"{sha256_file(cfgp)} *configs/{CFG_FILES[VERSION]}\n", encoding="utf-8")
     print("yaml sha256", sha256_file(cfgp))
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("stage", choices=["compose", "fetch", "freeze"])
+    ap.add_argument("stage", choices=["compose", "fetch", "tiles", "freeze"])
+    ap.add_argument("--version", default="v2")
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--only", nargs="*")
     ap.add_argument("--ids-file")
     a = ap.parse_args()
-    {"compose": compose, "freeze": freeze}.get(a.stage, lambda: fetch(a.workers, a.only, a.ids_file))()
+    set_version(a.version)
+    {"compose": compose, "freeze": freeze, "tiles": tiles}.get(
+        a.stage, lambda: fetch(a.workers, a.only, a.ids_file))()
     sys.stdout.flush()
     os._exit(0)  # GDAL/HTTP threads sometimes keep the interpreter alive after all windows are written

@@ -53,6 +53,8 @@ def calibration(cfg: dict) -> dict:
             "raw_items_per_pixel": [round(x, 1) for x in raw], "n_points": len(pts),
             "dates": sorted({str(p.get("date")) for p in pts}), "n_dates": len({str(p.get("date")) for p in pts}),
             "campaigns": sorted({str(p.get("campaign")) for p in pts if p.get("campaign")}),
+            "coverage_pct_lo": round(100 * min(float(p.get("bottles_fraction") or 0) for p in pts)),
+            "coverage_pct_hi": round(100 * max(float(p.get("bottles_fraction") or 0) for p in pts)),
             "pixel_m2": pm2,
             "points": [{"date": str(p.get("date")), "level": p.get("level"), "campaign": p.get("campaign"),
                         "target": p.get("target"), "s2_product": p.get("s2_product"),
@@ -78,6 +80,18 @@ def fmt(x) -> str:
     if isinstance(x, int) or float(x).is_integer():
         return f"{int(x):,}".replace(",", " ")
     return f"{x}".replace(".", ",")
+
+
+def scenario_text(cfg: dict, cal: dict) -> Optional[str]:
+    """§36 п.2: «исследовательский сценарий по искусственным мишеням PLP (допущения: …)» with numbers from the points."""
+    t = " ".join(str(cfg.get("scenario") or "").split())
+    return t.format(lo=cal["lo"], hi=cal["hi"], cov_lo=cal["coverage_pct_lo"], cov_hi=cal["coverage_pct_hi"]) if t else None
+
+
+def natural_pair_note(cfg: dict) -> Optional[str]:
+    """The natural-pair sentence (ISPRA 604) — only after it is confirmed (natural_pair.confirmed in the config)."""
+    np_ = cfg.get("natural_pair") or {}
+    return " ".join(str(np_.get("text") or "").split()) or None if np_.get("confirmed") else None
 
 
 def plural(n: int, one: str, few: str, many: str) -> str:
@@ -139,27 +153,38 @@ def estimate(p: dict, cfg: dict, cal: Optional[dict] = None, field_range: Option
     fr = (f"с полевыми шт./км² (среднее по маршруту: {fmt_ru(field_range[0])}–{fmt_ru(field_range[1])}) не сравнивать "
           "напрямую: разница в 3–4 порядка ожидаема") if field_range else (
           "с полевыми шт./км² (среднее по маршруту) не сравнивать напрямую: разница в 3–4 порядка ожидаема")
+    scen = scenario_text(cfg, cal)
+    nat = natural_pair_note(cfg)
     return {
         "value": v, "lo": lo, "hi": hi, "unit": unit, "unit_id": "items/km2",
+        # §36 п.2: 470–670 items per pixel is a research SCENARIO on artificial targets, not a CI, not checked on nature
+        "scenario": scen, "kind": "scenario",
+        "natural_pair_note": nat,
         "stat": stat,
         # jury 13:47 / audit В19: the headline number is a lower bound; lo/hi — spread of the calibration points, not a CI
         "lower_bound": lb, "lower_bound_label": f"≥ ~{fmt(lb)} {unit} ({bound_note})",
         "display_value": lb, "label_short": f"≥ ~{fmt(lb)} {unit} · нижняя граница · {cfg.get('status')}",
         "n_items_display": n_lb,
         "calibration_spread": {"lo": lo, "hi": hi, "items_per_pixel_lo": cal["lo"], "items_per_pixel_hi": cal["hi"],
-                               "label": f"разброс {plural(cal['n_points'], 'точки', 'точек', 'точек')} калибровки "
+                               "label": f"сценарий {cal['lo']}–{cal['hi']} предметов-бутылок на пиксель: разброс "
+                                        f"{plural(cal['n_points'], 'точки', 'точек', 'точек')} калибровки на мишенях PLP "
                                         f"({fmt(lo)}–{fmt(hi)} {unit}), не доверительный интервал"},
         "interval_kind": "calibration_spread", "ci": None,
         "status": cfg.get("status", "исследовательская оценка"), "status_id": cfg.get("status_id", "research_estimate"),
         "method": cfg.get("method"), "note": cfg.get("note"),
+        # jury 14:06: «(i)» line straight from the API; the calibration in force (flat PLP unless another is accepted)
+        "formula_short": f"пиксели маски × {cal['lo']}–{cal['hi']} / площадь контура = пересчёт доли покрытия",
+        "calibration_id": cfg.get("calibration_id", "flat_plp"),
+        "calibration_name": cfg.get("calibration_name"),
         "method_essence": (f"по сути доля покрытия пикселей детектора × калибровка PLP; независимая проверка — "
                            f"{npx_d}"),
-        "context": ("плотность внутри контура нити в пересчёте на бутылки PET 1,5 л — не среднее по маршруту; " + fr),
+        "context": ("плотность внутри контура нити в пересчёте на бутылки PET 1,5 л — не среднее по маршруту; " + fr
+                    + (f"; {nat}" if nat else "")),
         "muted": muted,
         "muted_reason": (None if not muted else "зона требует проверки (не совпадает с разметкой Cózar) — оценку "
                                                 "показывать приглушённо"),
-        "label": (f"≥ ~{fmt(lb)} {unit} ({bound_note}) · {cfg.get('status')} · {short_method}, "
-                  f"{cfg.get('note')}"),
+        "label": (f"≥ ~{fmt(lb)} {unit} ({bound_note}) · {cfg.get('status')} · "
+                  + (f"{scen}; {str(cfg.get('note')).split('; ')[-1]}" if scen else f"{short_method}, {cfg.get('note')}")),
         "n_items": {"value": sig(n_val, nd), "lo": n_lo, "hi": n_hi, "lower_bound": n_lb},
         "n_items_label": f"N ≥ ~{fmt(n_lb)} шт. в зоне (нижняя граница)",
         "n_pixels": n,
@@ -195,6 +220,10 @@ def summary(props: Iterable[dict], cfg: dict) -> dict:
     ok = [(p, e) for p, e in ests if e]
     nd = int(cfg.get("sig_digits", 3))
     out = {"status": cfg.get("status"), "method": cfg.get("method"), "note": cfg.get("note"), "unit": cfg.get("unit"),
+           "scenario": scenario_text(cfg, cal), "kind": "scenario", "natural_pair_note": natural_pair_note(cfg),
+           "calibration_id": cfg.get("calibration_id", "flat_plp"), "calibration_name": cfg.get("calibration_name"),
+           "formula_short": f"пиксели маски × {cal['lo']}–{cal['hi']} / площадь контура = пересчёт доли покрытия",
+           "coverage_pct_lo": cal["coverage_pct_lo"], "coverage_pct_hi": cal["coverage_pct_hi"],
            "items_per_pixel_lo": cal["lo"], "items_per_pixel_hi": cal["hi"], "items_per_pixel_value": cal["value"],
            "point": cal["point"], "calibration_n_dates": cal["n_dates"], "calibration_dates": cal["dates"],
            "source": cal["source"], "config": cal["config"],
