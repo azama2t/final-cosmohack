@@ -1,0 +1,97 @@
+# FROZEN before any model metric was computed (L119, INBOX §23 п.5 «ADIS-прогноз», правило §24).
+# Do not edit; a new check = a new file. sha256 of this file: configs/adis_forecast.yaml.sha256
+# (scripts/case/adis_forecast.py refuses to run if the hash differs).
+# Before freezing only METADATA was looked at: ship names, segment counts per ship / per 20° cell, date and
+# coordinate ranges, area_scanned_km2 distribution, NaN columns. Global totals already published in
+# reports/extra_data/field.md / docs/QUANTITY.md (72 % zero segments, ΣN/ΣA = 1.55 /km² > 5 cm) were known.
+# No per-group or per-feature count/density value was looked at.
+# Amendment BEFORE any metric (05:52): the first draft (20° regions, no per-group cap) put one 20° cell with 29 % of
+# segments + 2 tiny cells into test (3 groups → group bootstrap degenerate). Changed, on group SIZES only, to 10° regions
+# and a per-group cap of 10 % for test candidates (both schemes). Resulting test: region 20 groups / 20.8 %, ship 7 / 22.3 %.
+version: 1
+frozen_at: '2026-09-26T05:48'
+frozen_by: L119 (worker), INBOX §23 p.5
+scope: >
+  FIELD-ONLY forecast of ADIS items/km² from what is known WITHOUT the count (geography + season).
+  No satellite feature (that is L110 cell_calibration). Not a satellite → items/km² conversion.
+
+data:
+  file: data/extra/field/adis/Segments.csv       # de Vries et al. 2026, 4TU 10.4121/ddede7f5-..., CC BY 4.0
+  unit: 'segment (≈10 km of ship track, one camera side)'
+  ship_name_fix: {'Maestk Tender': 'Maersk Tender'}   # typo in the source, same vessel
+  keep: 'area_scanned_km2 >= 0.1 and nphotos > 0'
+  area: area_scanned_km2
+
+profile:
+  primary: gt10cm        # decision is taken on this profile only
+  sensitivity: [gt50cm]  # reported with the same pipeline and rule, never used to choose
+  classes:
+    gt10cm: {count: 'n_objects>10cm', label: 'ADIS, плавающий пластик > 10 см, камера судна'}
+    gt50cm: {count: 'n_objects>50cm', label: 'ADIS, плавающий пластик > 50 см, камера судна'}
+  target: 'C = N / A (items/km²), raw count, no detection-probability correction; src/macroplastic/case/concentration.py'
+  field_interval: 'Garwood 95 % Poisson on N, divided by A (poisson_count_interval)'
+
+splits:
+  seed: 119
+  test_fraction_target: 0.20   # share of segments in held-out test groups
+  test_fraction_cap: 0.35      # a group that would push the test share above the cap is skipped
+  test_group_cap: 0.10         # a group with > 10 % of all segments is never a test group (stays train/val)
+  test_selection: >
+    groups ordered by sha256("119:" + group_name) ascending; add groups to test in that order while the
+    test share < target; skip a group if adding it makes the share > cap or if the group alone is > test_group_cap.
+    Deterministic, no look at values.
+  schemes:
+    region:   # PRIMARY: forecast for an unseen region
+      group: 'region10 = floor(lat/10)*10 "_" floor(lon/10)*10 (10°×10° cell of the segment centroid)'
+      primary: true
+    ship:     # SECONDARY: forecast for an unseen vessel/cruise series (other camera, other route)
+      group: 'Ship (after name fix)'
+      primary: false
+  val: 'GroupKFold(n_splits=5) over the train groups of each scheme (sklearn, no shuffle); out-of-fold predictions'
+  test_usage: 'test is scored ONCE at the end, for M0, B1 and the val-selected candidate(s) only; nothing is refit or retuned after'
+
+features:   # known without the count
+  used: [lat, lon_sin, lon_cos, doy_sin, doy_cos, log_dist_coast_km]
+  dist_coast: 'GSHHS i (L1 + L5 Antarctica) vertices, nearest haversine distance (BallTree), cached in out/adis_forecast/'
+  not_used:
+    wind_current: 'not available offline for the segments; no download (INBOX: ≤ 50 MB, disk rule) → not used'
+    satellite: 'forbidden here (L110)'
+    protocol_metadata: 'camera height, scan width, speed, solar geometry, side, ship — detection conditions, not a map-transferable forecast input'
+    year: 'not used (map forecast is for a place/season)'
+    counts_and_dhat: 'all n_objects*, dhat*, std*, var* columns are targets/leaks — never features'
+
+models:
+  M0_median:   'median of train segment C (global) — the reference, as the case field algorithm (median of the profile)'
+  B1_band_season_median: 'median of train C in the same 20° latitude band × meteorological season (DJF/MAM/JJA/SON); < 30 train segments in the stratum → M0'
+  M1_gbm_log1p: 'LightGBM regression, target log1p(C), L2; n_estimators 300, learning_rate 0.03, num_leaves 15, min_child_samples 100, subsample 0.8 (freq 1), colsample 1.0, reg_lambda 1.0, n_jobs 6, seed 119; point = expm1(pred) clipped at 0'
+  M2_gbm_poisson: 'LightGBM objective poisson on N with offset init_score = log(A); same hyperparameters; point = predicted rate λ (items/km²)'
+  tuning: none   # fixed hyperparameters, no search
+
+intervals:
+  nominal: 0.90
+  M0_B1: 'empirical 5th–95th percentile of train C (global for M0; stratum for B1 with the same fallback)'
+  M1_M2: 'point ⊗ log1p residual quantiles q05/q95 from an inner GroupKFold(3) on the training part of each fold (nested; no val/test residuals); lo = max(0, expm1(log1p(pt)+q05)), hi = expm1(log1p(pt)+q95); q05 ≤ 0 ≤ q95 enforced'
+  coverage: 'share of segments with lo ≤ C_obs ≤ hi'
+
+metrics:
+  primary: 'MAE of C, items/km², segment level'
+  second: 'MAE of log1p(C) (log1p_mae, as reports/case_conc)'
+  reported_not_in_rule: [RMSE, 'mean Poisson deviance of N vs pred·A', coverage90, 'median interval width', bias]
+  bootstrap: '2000 resamples of the scheme groups (regions / ships) of the evaluated set, percentile 95 % CI of Δ = metric(model) − metric(M0); rng seed 0'
+  bootstrap_supplementary: 'same with ship-days (Ship × UTC date) as the unit — reported, not in the rule'
+
+acceptance_rule:   # §24: nothing replaces the current solution (median of the profile) without this rule
+  val: >
+    A candidate (B1, M1, M2) passes on val in a scheme iff upper 95 % CI of ΔMAE(candidate − M0) < 0 AND
+    point Δlog1p_mae(candidate − M0) ≤ 0.
+  selection: 'candidate must pass on val in BOTH schemes (region and ship); among those, smallest val MAE in the primary (region) scheme'
+  test: >
+    The selected candidate is accepted for the map only if on the held-out test of the primary (region) scheme
+    upper 95 % CI of ΔMAE(candidate − M0) < 0 AND point Δlog1p_mae ≤ 0; the ship-scheme test is reported.
+  otherwise: 'median of the profile (M0) stays — honest negative result'
+  coverage_note: 'coverage is reported; a candidate with val coverage < 0.80 is flagged (not silently accepted) in the report'
+outputs:
+  script: scripts/case/adis_forecast.py
+  report: reports/quantity/adis_forecast.md
+  json: reports/quantity/adis_forecast.json
+  cache: out/adis_forecast/
