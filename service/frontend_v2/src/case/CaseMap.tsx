@@ -73,7 +73,8 @@ function szFeatures(fc: FC<any> | null | undefined) {
   const pts: any[] = [];
   for (const f of fc?.features ?? []) {
     if (!f.geometry) continue;
-    const props = { id: f.id, ds: szKey(f.properties), full: f.properties.zone_id.endsWith('-000') ? 1 : 0 };
+    const d = Number(String(f.properties.datetime ?? '').slice(0, 10).replace(/-/g, '')) || 0;
+    const props = { id: f.id, ds: szKey(f.properties), full: f.properties.zone_id.endsWith('-000') ? 1 : 0, d };
     polys.push({ type: 'Feature', geometry: f.geometry, properties: props });
     const c = geomCenter(f.geometry);
     // §33: overview points = real finds only (detection_status «detected»); «недостаточно данных», false alarms and
@@ -239,7 +240,20 @@ export default function CaseMap(p: CaseMapProps) {
     {
       const s0 = map.getSource('c-sz-pts') as maplibregl.GeoJSONSource | undefined;
       if (s0) s0.setData(sz.pts as any);
-      else map.addSource('c-sz-pts', { type: 'geojson', data: sz.pts, cluster: true, clusterRadius: 38, clusterMaxZoom: 7 } as any);
+      else
+        map.addSource('c-sz-pts', {
+          type: 'geojson',
+          data: sz.pts,
+          cluster: true,
+          clusterRadius: 38,
+          clusterMaxZoom: 7,
+          // аудит В17: a cluster is «Cózar» only if it holds a Cózar-confirmed find; image-date range for the tooltip
+          clusterProperties: {
+            nb: ['+', ['case', ['==', ['get', 'ds'], 'detected'], 1, 0]],
+            dmin: ['min', ['get', 'd']],
+            dmax: ['max', ['get', 'd']],
+          },
+        } as any);
     }
     const hl = cur.pairHl;
     src('c-pair', hl?.geom ? { type: 'FeatureCollection', features: [{ type: 'Feature', geometry: hl.geom, properties: {} }] } : EMPTY);
@@ -345,7 +359,7 @@ export default function CaseMap(p: CaseMapProps) {
       filter: ['has', 'point_count'],
       paint: {
         'circle-radius': ['step', ['get', 'point_count'], 9, 5, 12, 15, 15, 40, 19],
-        'circle-color': SZ_COLORS.detected,
+        'circle-color': ['case', ['>', ['get', 'nb'], 0], SZ_COLORS.detected, SZ_COLORS.unverified],
         'circle-opacity': 0.85,
         'circle-stroke-color': '#ffffff',
         'circle-stroke-width': 2,
@@ -493,7 +507,12 @@ export default function CaseMap(p: CaseMapProps) {
       ];
       const fs = map.queryRenderedFeatures(box, { layers });
       const cl = fs.find((f) => f.layer.id === 'c-sz-clu');
-      if (cl) return { kind: 'zone' as const, id: `CL-${cl.properties?.cluster_id}-${cl.properties?.point_count}`, lngLat: (cl.geometry as any).coordinates };
+      if (cl)
+        return {
+          kind: 'zone' as const,
+          id: `CL-${cl.properties?.cluster_id}-${cl.properties?.point_count}-${cl.properties?.nb ?? 0}-${cl.properties?.dmin ?? 0}-${cl.properties?.dmax ?? 0}`,
+          lngLat: (cl.geometry as any).coordinates,
+        };
       const o = fs.find((f) => f.layer.id.startsWith('c-obs'));
       // a small scene zone wins over the whole-crop «не обнаружено» zone and over strips
       const z = fs.find((f) => f.layer.id.startsWith('c-sz') && !f.properties?.full) ?? fs.find((f) => f.layer.id.startsWith('c-zone')) ?? fs.find((f) => f.layer.id.startsWith('c-sz'));
@@ -502,10 +521,12 @@ export default function CaseMap(p: CaseMapProps) {
       return { kind: (f === o ? 'obs' : 'zone') as 'obs' | 'zone', id: String(f.properties?.id) };
     };
     let raf = 0;
+    let quietUntil = 0; // after a click the tooltip stays off until the pointer moves again (jury 09:40)
     map.on('mousemove', (e) => {
       if (raf) return;
       raf = requestAnimationFrame(() => {
         raf = 0;
+        if (performance.now() < quietUntil) return;
         const h = hit(e.point);
         map.getCanvas().style.cursor = h ? 'pointer' : '';
         props.current.onHover(h ? { ...h, x: e.point.x, y: e.point.y } : null);
@@ -514,6 +535,10 @@ export default function CaseMap(p: CaseMapProps) {
     map.on('mouseout', () => props.current.onHover(null));
     map.on('click', (e) => {
       const h: any = hit(e.point);
+      props.current.onHover(null); // the tooltip goes out after a click
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+      quietUntil = performance.now() + 1200;
       if (h && h.id.startsWith('CL-')) {
         // a cluster of finds: zoom in until it splits
         const cid = Number(h.id.split('-')[1]);

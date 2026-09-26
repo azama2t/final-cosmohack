@@ -1,0 +1,56 @@
+[
+ {
+  "w": 1366,
+  "rep": 0,
+  "dom_s": 0.11,
+  "list_filled_s": 2.66,
+  "shot_s": 4.6,
+  "markers_at_list": 18,
+  "markers_plus1s": 18
+ },
+ {
+  "w": 1366,
+  "rep": 1,
+  "dom_s": 0.13,
+  "list_filled_s": 2.52,
+  "shot_s": 4.8,
+  "markers_at_list": 18,
+  "markers_plus1s": 18
+ },
+ {
+  "w": 1366,
+  "rep": 2,
+  "dom_s": 0.13,
+  "list_filled_s": 3.4,
+  "shot_s": 5.41,
+  "markers_at_list": 18,
+  "markers_plus1s": 18
+ },
+ {
+  "w": 1920,
+  "rep": 0,
+  "dom_s": 0.12,
+  "list_filled_s": 2.52,
+  "shot_s": 4.96,
+  "markers_at_list": 32,
+  "markers_plus1s": 39
+ },
+ {
+  "w": 1920,
+  "rep": 1,
+  "dom_s": 0.31,
+  "list_filled_s": 4.48,
+  "shot_s": 7.11,
+  "markers_at_list": 39,
+  "markers_plus1s": 39
+ },
+ {
+  "w": 1920,
+  "rep": 2,
+  "dom_s": 0.13,
+  "list_filled_s": 3.97,
+  "shot_s": 6.97,
+  "markers_at_list": 39,
+  "markers_plus1s": 39
+ }
+]

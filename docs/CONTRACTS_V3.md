@@ -775,3 +775,7 @@ GET /api/v3/photo/meta: + headline {count_mae_per_frame, count_mae_ci95, n_image
 3.10d CSV scene_zones (26.09, L111, жюри 08:51 / §33а п.3 — ИЗМЕНЕНИЕ колонок): field_nearest_c_items_km2, field_nearest_ci95,
   field_nearest_date удалены (шт./км² чужого места); + field_nearest_sample_id; field_nearest_km — расстояние до ближайшего
   измерения CSV организаторов (как в карточке: field_nearby.nearest_organizer_sample). GET /api/v3/meta: + headline (§31 п.2).
+3.10e field_nearby зоны (26.09, L111, аудит В16 — ИЗМЕНЕНИЕ): /api/v3/scene_zones и GeoJSON-выгрузка зон — field_nearby =
+  {nearest_organizer_sample {sample_id, source_id, distance_km}, note}; items[] (отрезки ADIS с c_items_km2, ci95, калибровкой
+  авторов) и authors_calibration удалены (шт./км² другого места не выдаются за плотность зоны). scene_kind_label demo —
+  «отложенная сцена Cózar 2024 (не участвовала в обучении)». meta.headline.satellite: + n_finds.

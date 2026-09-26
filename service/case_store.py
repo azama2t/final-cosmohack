@@ -2125,7 +2125,7 @@ SZ_WIND_NOTE = ("ветер > 5 м/с (ERA5, час съёмки): Cózar et al.
 SZ_FALSE_LABEL = "ложное срабатывание (признаки судна / кильватера / шва) — недостаточно данных"
 SZ_QUANTITY = {"status": "not_confirmed", "label": "концентрация по снимку не подтверждена",
                "detail": "перевод площади в штуки не показываем: нет калибровочных пар (см. docs/QUANTITY.md)"}
-SZ_KIND_RU = {"demo": "отложенная сцена Cózar 2024 (демо)", "live": "район сервиса", "drift": "район (проверка дрейфа)"}
+SZ_KIND_RU = {"demo": "отложенная сцена Cózar 2024 (не участвовала в обучении)", "live": "район сервиса", "drift": "район (проверка дрейфа)"}
 SZ_STATUS_NOTE = ("«Обнаружено» здесь — вывод детектора по снимку (класс MARIDA Marine Debris: любой плавающий "
                   "материал), не подтверждённый полем; это не «обнаружен пластик».")
 
@@ -2178,11 +2178,12 @@ def _sz_enrich(f: dict, idx: dict) -> dict:
     p["concentration_reason"] = SZ_QUANTITY["detail"]
     p["scenario"] = None
     p["scenario_reason"] = SZ_QUANTITY["detail"]
-    fnb = p.get("field_nearby") or {}
-    ac = (_fn_quantity().get("adis_forecast") or {}).get("authors_calibrated") or {}
-    fnb["authors_calibration"] = ({"C": ac.get("C"), "lo_typ": ac.get("lo_typ"), "hi_typ": ac.get("hi_typ"),
-                                   "ours_raw_C": ac.get("ours_raw_C"), "label": ac.get("label"), "source": ac.get("source"),
-                                   "size_class": "> 10 см"} if ac.get("C") is not None else None)
+    # аудит В16 / §33а п.3: a zone carries no items/km2 of another place (ADIS segments 521–9 848 km away): only the
+    # nearest organisers' field record (id + distance), the same as the card and the CSV
+    nos = (p.get("field_nearby") or {}).get("nearest_organizer_sample")
+    p["field_nearby"] = {"nearest_organizer_sample": nos,
+                         "note": ("ближайшее полевое измерение (CSV организаторов) — только расстояние и ссылка; его шт./км² "
+                                  "относятся к другому месту и времени и не являются плотностью зоны")}
     pr = p.get("probable") or {}
     pr["status"] = p["detection_label"]
     pr["cozar_note"] = (f"контур пересекает {p.get('n_cozar_filaments')} нит(и) каталога Cózar et al. 2024 "
@@ -2449,6 +2450,7 @@ def headline() -> dict:
         "field_label": "Концентрация по полевым данным (измерение, шт./км²)",
         "field_note": "числа сравнимы только внутри одного профиля (размерный класс, материал, метод счёта)",
         "satellite": {"n_zones": len(zs),
+                      "n_finds": sum(1 for f in zs if f["properties"]["detection_status"] == "detected"),
                       "n_level_b": sum(1 for f in zs if f["properties"].get("verification") == "level_B_cozar"),
                       "quantity_label": SZ_QUANTITY["label"], "why": SZ_QUANTITY["detail"],
                       "open_zone_id": good["zone_id"] if good else None},

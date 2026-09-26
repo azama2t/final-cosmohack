@@ -81,7 +81,7 @@ type Meta = {
   };
 };
 
-type Sample = { src: string; label: string; domain: string; survey: Survey; gsd?: number; truth: number; warn?: string; license: string };
+type Sample = { src: string; label: string; domain: string; survey: Survey; gsd?: number; truth: number; warn?: string; under?: string; license: string };
 const SAMPLES: Sample[] = [
   { src: 'photo_samples/fml_1.jpg', label: 'Море · FML', domain: 'камера у воды (надводный аппарат), Адриатика', survey: 'water_camera', truth: 6, license: 'FML, CC BY 4.0' },
   {
@@ -92,6 +92,7 @@ const SAMPLES: Sample[] = [
     gsd: 0.006,
     truth: 14,
     warn: 'Модель на этот домен не перенесена: на 97 отложенных кадрах TOCL найдено 0,045 шт./м² при истинных 0,164 — число ниже не измерение.',
+    under: 'на отложенных кадрах этого домена модель занижает ≈ в 3,6 раза (0,045 против 0,164 шт./м²) — шт./км² не показываем',
     license: 'The Ocean Cleanup RMS, CC BY-NC 4.0 — только исследовательское использование',
   },
   { src: 'photo_samples/winans_2.jpg', label: 'Берег · Winans', domain: 'аэрофото, надир, берег Гавайев, GSD 0,02 м (163,8 м²)', survey: 'aerial', gsd: 0.02, truth: 9, license: 'Winans 2023, CC BY 4.0' },
@@ -224,7 +225,7 @@ export default function PhotoApp() {
   const areaIn = num(area);
   const areaM2 = area !== '' && isFinite(areaIn) && areaIn > 0 ? areaIn : res && gsdOk ? res.image.width * res.image.height * gsdM * gsdM : NaN;
   const areaOk = !!res && isFinite(areaM2) && areaM2 > 0;
-  const dens = areaOk ? shown.length / (areaM2 / 1e6) : null;
+  const dens = areaOk && !sample?.warn ? shown.length / (areaM2 / 1e6) : null;
   const cInt = res && atDefault && !sample?.warn ? countInterval(sm?.count_interval, shown.length) : null;
   const corr = survey === 'aerial' && areaOk && gsdOk && atDefault && !sample?.warn && sm?.correction ? sm.correction : null;
   const cN = corr ? corrected(shown, gsdM, corr.factor) : null;
@@ -433,7 +434,11 @@ export default function PhotoApp() {
               {sample?.warn && <div className="ph-err">Не измерение: модель на этот домен не перенесена.</div>}
             </div>
           ) : (
-            <span className="faint ph-hint">Без площади кадра — только штуки на кадр (у FML площади кадра нет).</span>
+            <span className={sample?.under ? 'ph-err' : 'faint ph-hint'} data-testid="photo-no-density">
+              {sample?.under
+                ? `Только шт./кадр: ${sample.under}.`
+                : 'Без площади кадра — только штуки на кадр (у FML площади кадра нет).'}
+            </span>
           )}
           {res && (
             <div className="ph-kv faint" data-testid="photo-model">
@@ -459,6 +464,10 @@ export default function PhotoApp() {
                 {ci(mo.count_mae_ci95)}; точное число {pct(mo.count_exact)}
                 {ci(mo.count_exact_ci95, 2, true)}
                 <div className="faint ph-hint">Соседние кадры видео с обучением (~90 % в пределах 2 с) — оценка оптимистична; опора — строка выше.</div>
+                <div className="faint ph-hint" data-testid="photo-why-ours">
+                  Почему в продукте наша модель, а не веса авторов: их 0,54 измерено на официальном сплите, где test — соседние кадры тех же сессий (утечка); все
+                  наши отложенные сессии входили в их обучение, поэтому честно проверить их веса нельзя. Нашу модель мы проверили на сессиях, которых она не видела (0,59), и у её весов понятная лицензия.
+                </div>
               </div>
             )}
             {survey === 'aerial' && ma && (

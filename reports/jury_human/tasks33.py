@@ -69,7 +69,7 @@ with sync_playwright() as p:
     t0 = time.time(); pg.goto(URL)
     mk, _ = R.wait_markers(pg, "t1_wait", tries=60); t_mk = round(time.time() - t0, 2)
     try:
-        pg.wait_for_function("() => /Спутниковые зоны детектора\\s*·\\s*[1-9]/.test(document.body.innerText)", timeout=30000)
+        pg.wait_for_function("() => /30SXE · зона/.test(document.body.innerText)", timeout=30000)
     except Exception: pass
     t_list = round(time.time() - t0, 2)
     res["tasks"]["t1"] = {"markers_visible_s": t_mk, "n_marker_blobs": len(mk), "zone_list_filled_s": t_list,
@@ -113,7 +113,7 @@ with sync_playwright() as p:
     # ---------- T2b zone via left list (fresh)
     pg.goto(URL); pg.wait_for_timeout(500)
     try:
-        pg.wait_for_function("() => /Спутниковые зоны детектора\\s*·\\s*[1-9]/.test(document.body.innerText)", timeout=30000)
+        pg.wait_for_function("() => /30SXE · зона/.test(document.body.innerText)", timeout=30000)
         item = pg.locator("text=/30SXE · зона/").first
         box = item.bounding_box(); in_view = bool(box and box["y"] + box["height"] <= H)
         t0 = time.time(); item.click(timeout=5000)

@@ -47,9 +47,9 @@ def test_scene_zones_blocks_and_statuses(client):
             else:
                 assert p["verification"] == "unverified" and "требует проверки" in p["detection_label"]
         fn = p["field_nearby"]
-        assert "Измерение ≠ оценка" in fn["note"]
-        for it in fn["items"]:
-            assert it["ci95_lo"] <= (it["c_items_km2"] or 0) <= it["ci95_hi"]
+        # аудит В16: no items/km2 of another place in a zone — only the nearest field record (id + km)
+        assert set(fn) == {"nearest_organizer_sample", "note"} and "items" not in fn
+        assert fn["nearest_organizer_sample"] is None or set(fn["nearest_organizer_sample"]) >= {"sample_id", "distance_km"}
 
 
 def test_demo_scene_present_and_detail(client):
@@ -168,13 +168,11 @@ def test_field_cards_s28(client):
     assert pp["poisson_label"] == "только ошибка счёта (Пуассон)" and cs.profile_pooled("S1_trawl_total_plastic") is None
     meta = client.get("/api/v3/meta").json()
     assert meta["quantity_levels"]["patchiness"]["sd_ln_c"] == fnq["variance_S2"]["sd_within_day"]
-    ac = fnq["adis_forecast"]["authors_calibrated"]
-    p = client.get("/api/v3/scene_zones", params={"scene_kind": "demo"}).json()["features"][0]["properties"]
-    a = p["field_nearby"]["authors_calibration"]
-    assert (a["C"], a["lo_typ"], a["hi_typ"], a["ours_raw_C"]) == (ac["C"], ac["lo_typ"], ac["hi_typ"], ac["ours_raw_C"])
-    for it in p["field_nearby"]["items"]:
-        c = it.get("authors_cal_10cm_items_km2")
-        assert c is None or c >= 0
+    # аудит В16: the ADIS calibration is not attached to satellite zones any more
+    body = client.get("/api/v3/scene_zones").text + client.get(
+        "/api/v3/export", params={"layer": "scene_zones", "format": "geojson"}).content.decode("utf-8")
+    for bad in ("c_items_km2", "authors_cal", "ci95_lo", "authors_calibration"):
+        assert bad not in body
 
 
 def test_meta_headline_numbers_from_final_numbers(client):

@@ -10,7 +10,7 @@ with sync_playwright() as p:
         for rep in range(3):
             ctx = b.new_context(viewport={"width": W, "height": H}, locale="ru-RU"); pg = ctx.new_page()
             t0 = time.time(); pg.goto(URL, wait_until="domcontentloaded"); t_dom = time.time() - t0
-            pg.wait_for_function("() => /Спутниковые зоны детектора\\s*·\\s*[1-9]/.test(document.body.innerText)", timeout=60000, polling=100)
+            pg.wait_for_function("() => /30SXE · зона/.test(document.body.innerText)", timeout=60000, polling=100)
             t_list = time.time() - t0
             ph = os.path.join(IMG, f"{TAG}_{W}_load{rep}.png"); pg.screenshot(path=ph); t_shot = time.time() - t0
             mk = orange_markers(ph, pg)

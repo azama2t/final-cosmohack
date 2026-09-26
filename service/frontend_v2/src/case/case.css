@@ -1141,7 +1141,7 @@
 }
 .c-head-r {
   display: grid;
-  grid-template-columns: 62px auto 1fr;
+  grid-template-columns: 62px 52px auto 1fr;
   align-items: baseline;
   gap: 6px;
   width: 100%;
@@ -1407,4 +1407,12 @@
   width: max-content;
   max-width: 340px;
   min-width: 220px;
+}
+.c-head-s {
+  color: var(--text-2);
+  font-size: 10.5px;
+}
+.c-head-link.c-head-r,
+a.c-head-r.c-head-link {
+  display: block;
 }

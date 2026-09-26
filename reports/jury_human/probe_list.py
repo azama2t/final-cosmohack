@@ -8,7 +8,7 @@ with sync_playwright() as p:
     b = p.chromium.launch(headless=True)
     pg = b.new_context(viewport={"width": W, "height": H}, locale="ru-RU").new_page()
     pg.goto(URL)
-    pg.wait_for_function("() => /Спутниковые зоны детектора\\s*·\\s*[1-9]/.test(document.body.innerText)", timeout=60000)
+    pg.wait_for_function("() => /30SXE · зона/.test(document.body.innerText)", timeout=60000)
     pg.wait_for_timeout(int(os.environ.get("JH_DELAY", "1500")))
     pg.locator("text=/30SXE · зона 16/").first.click()
     for s in (1, 3, 6):

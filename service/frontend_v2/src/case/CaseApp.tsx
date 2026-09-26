@@ -791,6 +791,7 @@ export default function CaseApp() {
           pairHl={pairHl}
           initialCamera={url.cam}
           onPick={(pk) => {
+            setHover(null);
             if (!pk) return;
             if (pk.kind === 'zone') openZone(pk.id, pk.id.startsWith('SZ-'));
             else openObs(pk.id, false);
@@ -1151,9 +1152,11 @@ function HoverTip({ meta, h, obs, zones, szones }: { meta: Meta; h: HoverInfo; o
     t = `Измерение · ${v === null ? 'без плотности' : `${num(v)} шт./км²${lo !== null && lo !== undefined && hi !== null && hi !== undefined ? ` [${num(lo)}–${num(hi)}]` : ''}`}`;
     s = `${profileRu(meta, p.measurement_profile)} · ${dateRu(p.date_utc)} · ${scopeRu(meta, p.target_scope)}`;
   } else if (h.id.startsWith('CL-')) {
-    const n = Number(h.id.split('-')[2]);
-    t = `${plural(n, 'находка', 'находки', 'находок')} детектора рядом`;
-    s = 'нажмите — приблизить и раскрыть';
+    const [, , n0, nb0, d0, d1] = h.id.split('-');
+    const n = Number(n0), nb = Number(nb0);
+    const dd = (v: string) => (v && v !== '0' ? `${v.slice(6, 8)}.${v.slice(4, 6)}.${v.slice(0, 4)}` : '—');
+    t = `${plural(n, 'находка', 'находки', 'находок')} детектора рядом${nb ? `, из них ${nb} совпали с Cózar` : ' — требуют проверки'}`;
+    s = `снимки Sentinel-2 ${d0 === d1 ? dd(d0) : `${dd(d0)} – ${dd(d1)}`} · нажмите — приблизить и раскрыть`;
   } else if (h.id.startsWith('SZ-')) {
     const f = szones.find((x) => x.id === h.id);
     if (!f) return null;
@@ -1448,6 +1451,7 @@ function Headline({ open, onToggle, meta, photo, onField, onZone }: { open: bool
           title={`${r.source_label ?? ''} · ${r.stat}, ${r.interval_label}${r.n ? ` · n = ${num(r.n, 0)}` : ''}`}
         >
           <span className="c-head-k">{r.short ?? r.key}</span>
+          <span className="c-head-s">{r.stat}</span>
           <span className="c-head-v">
             <b>{num(r.value)}</b>
             <small>
@@ -1456,7 +1460,7 @@ function Headline({ open, onToggle, meta, photo, onField, onZone }: { open: bool
             </small>
           </span>
           <span className="c-head-d">
-            {r.stat === 'среднее' ? 'среднее по профилю' : 'медиана профиля'} · {r.size_class} · {r.material} · измерение
+            {r.size_class} · {r.material} · измерение{r.stat === 'медиана' ? ' (нет N — только медиана)' : ''}
           </span>
         </button>
       ))}
@@ -1470,7 +1474,7 @@ function Headline({ open, onToggle, meta, photo, onField, onZone }: { open: bool
       {sat && (
         <div className="c-head-r c-head-sat">
           <button className="c-head-link" onClick={() => sat.open_zone_id && onZone(sat.open_zone_id)} data-testid="headline-sat">
-            Спутник: {num(sat.n_zones, 0)} зон, из них {num(sat.n_level_b, 0)} совпадают с разметкой Cózar; {sat.quantity_label}
+            Спутник: {num(sat.n_finds ?? null, 0)} находок из {num(sat.n_zones, 0)} зон ({num(sat.n_level_b, 0)} совпали с Cózar); {sat.quantity_label}
           </button>
           <Info label="почему →" testid="headline-why" align="left">
             {sat.why}. {(meta as any).quantity_levels?.calibration_pairs?.note ?? ''}
