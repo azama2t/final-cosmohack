@@ -105,6 +105,25 @@ def test_scene_zones_carry_alert_fields_and_never_fabricate_material():
             assert p["alert_level"] != "высокий"
 
 
+def test_alert_levels_reproducible_without_data_cache(monkeypatch):
+    """Orchestrator 26.09 19:30: data_cache/natural_earth is gitignored — a clean clone must get the SAME
+    shore_km/alert_level as this dev box, from the git-tracked data/case/scene_zones/shore_km.json cache
+    (scripts/case/shore_km.py), not from a silent fallback to the coarser 1:110m contour."""
+    assert A.SHORE_KM_CACHE.is_file(), "run scripts/case/shore_km.py to (re)generate the git-tracked cache"
+    A._land_geoms_10m.cache_clear()
+    monkeypatch.setattr(A, "LAND_10M_SHP", A.ROOT / "does-not-exist.shp")  # simulate a clean clone
+    try:
+        feats = cs.scene_zones_all()
+        finds = [f["properties"] for f in feats if f["properties"].get("is_find")]
+        assert all(p["shore_km_note"] == "Natural Earth 1:10m" for p in finds), (
+            "shore_km must come from the git-tracked cache even when the .shp is missing")
+        import collections
+        counts = collections.Counter(p["alert_level"] for p in finds)
+        assert counts == collections.Counter({"средний": 53, "слабый": 24}), counts
+    finally:
+        A._land_geoms_10m.cache_clear()
+
+
 def test_scene_zones_api_exposes_alert_fields_and_filters_by_level(client):
     fc = client.get("/api/v3/scene_zones", params={"is_find": "true"}).json()
     assert fc["count"] > 0

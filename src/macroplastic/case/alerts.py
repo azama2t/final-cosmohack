@@ -21,6 +21,20 @@ from typing import Optional
 ROOT = Path(__file__).resolve().parents[3]
 LAND_10M_SHP = ROOT / "data_cache" / "natural_earth" / "ne_10m_land.shp"
 LAND_GEOJSON_110M = ROOT / "service" / "frontend_v2" / "public" / "land-110m.geojson"
+# reproducibility (orchestrator, 26.09 19:30): data_cache/ is gitignored (like data_cache/forcing) — a clean clone
+# has no ne_10m_land.shp and would silently fall back to the coarser 1:110m contour with different numbers. This
+# small, git-tracked cache (scripts/case/shore_km.py) is read FIRST; the .shp is only needed to regenerate it.
+SHORE_KM_CACHE = ROOT / "data" / "case" / "scene_zones" / "shore_km.json"
+
+
+@lru_cache(maxsize=1)
+def _shore_cache() -> dict:
+    if not SHORE_KM_CACHE.is_file():
+        return {}
+    try:
+        return (json.loads(SHORE_KM_CACHE.read_text(encoding="utf-8")).get("zones")) or {}
+    except Exception:
+        return {}
 
 
 def _data_root() -> Path:
@@ -159,6 +173,17 @@ def shore_km(lon: Optional[float], lat: Optional[float]) -> tuple[Optional[float
         return None, f"расчёт расстояния не удался: {e}"
 
 
+def shore_km_for_zone(zone_id: Optional[str], lon: Optional[float], lat: Optional[float]) -> tuple[Optional[float], Optional[str]]:
+    """Prefer the git-tracked precomputed cache (scripts/case/shore_km.py, 1:10m) — reproducible in a clean clone
+    without data_cache/; fall back to a live computation (shore_km()) only for zone_id's missing from the cache
+    (e.g. newly built zones before the cache is regenerated)."""
+    if zone_id:
+        hit = _shore_cache().get(zone_id)
+        if hit is not None:
+            return hit.get("shore_km"), hit.get("shore_km_reason")
+    return shore_km(lon, lat)
+
+
 def _bucket3(value: float, hi_lo: tuple[float, float], higher_is_worse: bool) -> int:
     a, b = hi_lo
     if higher_is_worse:
@@ -220,24 +245,25 @@ def material_bump(level: str, text: str) -> str:
 
 def zone_alert(is_find: bool, is_large: bool, major_axis_m: Optional[float], lon: Optional[float],
                lat: Optional[float], region: Optional[str], date: Optional[str], confirmed: bool,
-               likely_organic: bool = False) -> dict:
+               likely_organic: bool = False, zone_id: Optional[str] = None) -> dict:
     """One call per satellite zone -> all §51 п.6/п.7/п.10 fields (docs/ALERTS.md). Non-finds get honest nulls —
     the rule ranks risk of a real find, not every detector row. `is_large`/`major_axis_m` — the same «крупное
-    скопление» fields as §51 п.4 (service/case_store.py:sz_large), not a separate area threshold."""
+    скопление» fields as §51 п.4 (service/case_store.py:sz_large), not a separate area threshold. `zone_id` — looks
+    up the git-tracked shore_km cache first (scripts/case/shore_km.py) for reproducibility in a clean clone."""
     if not is_find:
         return {
-            "shore_km": None, "shore_km_reason": "не находка", "shore_km_note": "грубо, Natural Earth 1:110m",
+            "shore_km": None, "shore_km_reason": "не находка", "shore_km_note": "Natural Earth 1:10m",
             "stranded_pct_72h": None, "drift_reason": "не находка",
             "importance_rank": None, "importance_rank_max": 27,
             "alert_level": None,
             "alert_material": None, "alert_material_note": "материал по снимку не определяется",
         }
-    d_km, shore_reason = shore_km(lon, lat)
+    d_km, shore_reason = shore_km_for_zone(zone_id, lon, lat)
     stranded_pct, drift_reason = stranded_pct_for(region, date)
     rank = importance_rank(is_large, major_axis_m, d_km, stranded_pct)
     level = alert_level_from_rank(rank, confirmed, likely_organic)
     return {
-        "shore_km": d_km, "shore_km_reason": shore_reason, "shore_km_note": "грубо, Natural Earth 1:110m",
+        "shore_km": d_km, "shore_km_reason": shore_reason, "shore_km_note": "Natural Earth 1:10m",
         "stranded_pct_72h": stranded_pct, "drift_reason": drift_reason,
         "importance_rank": rank, "importance_rank_max": 27,
         "alert_level": level,

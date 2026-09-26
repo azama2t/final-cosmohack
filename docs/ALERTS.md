@@ -126,6 +126,14 @@ foil-варианты → мелкая упаковка). Список непо�
 - Тест — тот же набор зон/примеров, что уже покрыт существующими тестами case_store (`tests/test_api_v3*.py` или
   соседний): проверяет пороги (граничные значения 0,1 км² / 5 км / 20 км / 50 % / 10 %), капот подтверждения,
   честные `null` без прогноза/геометрии.
+- **Воспроизводимость в чистом клоне (правка 26.09 19:30):** `data_cache/natural_earth/ne_10m_land.shp` не в git
+  (как `data_cache/forcing`) — без него `shore_km` тихо откатился бы на грубый 1:110m и дал другие уровни алертов.
+  Поэтому `scripts/case/shore_km.py` считает `shore_km`/`shore_km_reason` по 1:10m один раз и пишет маленький файл
+  **в git**: `data/case/scene_zones/shore_km.json` (77 находок, ~7 КБ). `src/macroplastic/case/alerts.py`
+  (`shore_km_for_zone`) читает этот файл первым по `zone_id`; сам `.shp` нужен только чтобы пересчитать кэш
+  (`scripts/fetch_natural_earth_10m.py` → `scripts/case/shore_km.py`), не для боевой отдачи. Тест
+  `test_alert_levels_reproducible_without_data_cache` прячет `.shp` и проверяет, что уровни не меняются
+  (слабый 24 / средний 53 / высокий 0).
 
 ## 7. Что это не отменяет
 

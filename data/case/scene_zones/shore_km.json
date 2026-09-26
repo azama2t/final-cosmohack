@@ -1,0 +1,313 @@
+{
+ "source": "Natural Earth 1:10m",
+ "zones": {
+  "SZ-demo-cozar-2021-03-11-001": {
+   "shore_km": 26.9,
+   "shore_km_reason": null
+  },
+  "SZ-demo-cozar-2021-03-11-002": {
+   "shore_km": 25.4,
+   "shore_km_reason": null
+  },
+  "SZ-demo-cozar-2021-03-11-003": {
+   "shore_km": 26.4,
+   "shore_km_reason": null
+  },
+  "SZ-demo-cozar-2021-03-11-004": {
+   "shore_km": 27.9,
+   "shore_km_reason": null
+  },
+  "SZ-demo-cozar-2021-03-11-005": {
+   "shore_km": 24.8,
+   "shore_km_reason": null
+  },
+  "SZ-demo-cozar-2021-03-11-006": {
+   "shore_km": 23.7,
+   "shore_km_reason": null
+  },
+  "SZ-demo-cozar-2021-03-11-007": {
+   "shore_km": 23.5,
+   "shore_km_reason": null
+  },
+  "SZ-demo-cozar-2021-03-11-008": {
+   "shore_km": 24.0,
+   "shore_km_reason": null
+  },
+  "SZ-demo-cozar-2021-03-11-009": {
+   "shore_km": 26.5,
+   "shore_km_reason": null
+  },
+  "SZ-demo-cozar-2021-03-11-010": {
+   "shore_km": 26.5,
+   "shore_km_reason": null
+  },
+  "SZ-demo-cozar-2021-03-11-011": {
+   "shore_km": 23.9,
+   "shore_km_reason": null
+  },
+  "SZ-demo-cozar-2021-03-11-012": {
+   "shore_km": 22.3,
+   "shore_km_reason": null
+  },
+  "SZ-demo-cozar-2021-03-11-013": {
+   "shore_km": 25.4,
+   "shore_km_reason": null
+  },
+  "SZ-demo-cozar-2021-03-11-014": {
+   "shore_km": 23.4,
+   "shore_km_reason": null
+  },
+  "SZ-demo-cozar-2021-03-11-015": {
+   "shore_km": 24.9,
+   "shore_km_reason": null
+  },
+  "SZ-demo-cozar-2021-03-11-016": {
+   "shore_km": 22.0,
+   "shore_km_reason": null
+  },
+  "SZ-demo-cozar-2021-03-11-017": {
+   "shore_km": 24.3,
+   "shore_km_reason": null
+  },
+  "SZ-demo-cozar-2021-03-11-018": {
+   "shore_km": 21.8,
+   "shore_km_reason": null
+  },
+  "SZ-demo-cozar-2021-03-11-019": {
+   "shore_km": 22.3,
+   "shore_km_reason": null
+  },
+  "SZ-demo-cozar-2021-03-11-020": {
+   "shore_km": 23.1,
+   "shore_km_reason": null
+  },
+  "SZ-demo-cozar-2021-03-11-021": {
+   "shore_km": 23.0,
+   "shore_km_reason": null
+  },
+  "SZ-demo-cozar-2021-03-11-022": {
+   "shore_km": 21.7,
+   "shore_km_reason": null
+  },
+  "SZ-demo-cozar-2021-03-11-023": {
+   "shore_km": 20.8,
+   "shore_km_reason": null
+  },
+  "SZ-drift-guanabara-2025-06-28-008": {
+   "shore_km": 1.3,
+   "shore_km_reason": null
+  },
+  "SZ-drift-guanabara-2025-06-28-009": {
+   "shore_km": 1.8,
+   "shore_km_reason": null
+  },
+  "SZ-drift-honduras-2026-02-19-002": {
+   "shore_km": 6.0,
+   "shore_km_reason": null
+  },
+  "SZ-drift-honduras-2026-02-19-003": {
+   "shore_km": 6.3,
+   "shore_km_reason": null
+  },
+  "SZ-drift-honduras-2026-02-19-004": {
+   "shore_km": 7.0,
+   "shore_km_reason": null
+  },
+  "SZ-live-bali-2018-02-27-002": {
+   "shore_km": 7.2,
+   "shore_km_reason": null
+  },
+  "SZ-live-bali-2018-02-27-004": {
+   "shore_km": 12.3,
+   "shore_km_reason": null
+  },
+  "SZ-live-bali-2026-05-31-002": {
+   "shore_km": 0.1,
+   "shore_km_reason": null
+  },
+  "SZ-live-guanabara-2025-09-04-008": {
+   "shore_km": 4.3,
+   "shore_km_reason": null
+  },
+  "SZ-live-guanabara-2026-07-16-004": {
+   "shore_km": 3.1,
+   "shore_km_reason": null
+  },
+  "SZ-live-guanabara-2026-07-16-006": {
+   "shore_km": 4.9,
+   "shore_km_reason": null
+  },
+  "SZ-live-guanabara-2026-07-16-008": {
+   "shore_km": 2.5,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2019-01-12-001": {
+   "shore_km": 14.9,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2019-01-12-002": {
+   "shore_km": 4.5,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2020-08-29-004": {
+   "shore_km": 13.6,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2020-08-29-008": {
+   "shore_km": 12.1,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2020-08-29-009": {
+   "shore_km": 11.1,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2020-08-29-010": {
+   "shore_km": 8.2,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2025-01-30-001": {
+   "shore_km": 18.1,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2025-01-30-002": {
+   "shore_km": 16.9,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2025-01-30-003": {
+   "shore_km": 10.6,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2025-01-30-004": {
+   "shore_km": 9.1,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2025-01-30-005": {
+   "shore_km": 8.7,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2025-01-30-006": {
+   "shore_km": 8.4,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2025-01-30-007": {
+   "shore_km": 8.3,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2025-01-30-008": {
+   "shore_km": 8.3,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2025-02-19-001": {
+   "shore_km": 11.6,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2025-12-28-003": {
+   "shore_km": 5.8,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2025-12-28-005": {
+   "shore_km": 11.4,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2025-12-28-006": {
+   "shore_km": 10.8,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2025-12-28-008": {
+   "shore_km": 3.8,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2025-12-28-009": {
+   "shore_km": 2.9,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2026-02-14-001": {
+   "shore_km": 13.3,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2026-02-14-003": {
+   "shore_km": 7.2,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2026-02-14-004": {
+   "shore_km": 7.0,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2026-04-10-001": {
+   "shore_km": 11.3,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2026-04-10-002": {
+   "shore_km": 11.2,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2026-04-10-004": {
+   "shore_km": 9.4,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2026-04-10-005": {
+   "shore_km": 8.5,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2026-05-30-001": {
+   "shore_km": 10.1,
+   "shore_km_reason": null
+  },
+  "SZ-live-honduras-2026-05-30-003": {
+   "shore_km": 0.8,
+   "shore_km_reason": null
+  },
+  "SZ-live-jakarta-2026-04-03-001": {
+   "shore_km": 16.3,
+   "shore_km_reason": null
+  },
+  "SZ-live-jakarta-2026-04-03-003": {
+   "shore_km": 17.2,
+   "shore_km_reason": null
+  },
+  "SZ-live-karachi-2026-01-15-006": {
+   "shore_km": 11.2,
+   "shore_km_reason": null
+  },
+  "SZ-live-karachi-2026-02-14-007": {
+   "shore_km": 5.8,
+   "shore_km_reason": null
+  },
+  "SZ-live-manila-2019-05-13-001": {
+   "shore_km": 4.5,
+   "shore_km_reason": null
+  },
+  "SZ-live-manila-2019-05-13-004": {
+   "shore_km": 10.5,
+   "shore_km_reason": null
+  },
+  "SZ-live-manila-2019-05-13-005": {
+   "shore_km": 7.1,
+   "shore_km_reason": null
+  },
+  "SZ-live-manila-2019-05-13-008": {
+   "shore_km": 12.5,
+   "shore_km_reason": null
+  },
+  "SZ-live-manila-2019-05-13-009": {
+   "shore_km": 12.2,
+   "shore_km_reason": null
+  },
+  "SZ-live-manila-2025-11-07-002": {
+   "shore_km": 12.5,
+   "shore_km_reason": null
+  },
+  "SZ-live-manila-2025-12-27-009": {
+   "shore_km": 8.7,
+   "shore_km_reason": null
+  },
+  "SZ-live-manila-2026-04-01-010": {
+   "shore_km": 16.4,
+   "shore_km_reason": null
+  },
+  "SZ-live-santo_domingo-2025-12-30-001": {
+   "shore_km": 1.5,
+   "shore_km_reason": null
+  }
+ }
+}
