@@ -33,8 +33,15 @@ def test_scene_zones_blocks_and_statuses(client):
         assert m["zone_area_km2"] > 0 and m["suspicious_area_m2"] == m["n_pixels"] * 100
         # INBOX §23 п.2: no items/km2 scenario at all; quantity status «концентрация по снимку не подтверждена»
         assert p["scenario"] is None and "калибровочных пар" in p["scenario_reason"]
-        assert p["concentration_status"] == "unavailable"
-        assert p["quantity"]["status"] == "not_confirmed" and p["concentration_label"] == "концентрация по снимку не подтверждена"
+        # §34 п.2: finds carry a research estimate (concentration_status research_estimate), the rest — unavailable;
+        # the measured concentration stays «not confirmed» for every zone
+        assert p["quantity"]["status"] == "not_confirmed"
+        if p["research_estimate"]:
+            assert p["is_find"] and p["concentration_status"] == "research_estimate"
+            assert p["concentration_label"].startswith("исследовательская оценка")
+        else:
+            assert p["concentration_status"] == "unavailable" and p["research_estimate_reason"]
+            assert p["concentration_label"] == "концентрация по снимку не подтверждена"
         # «обнаружено детектором» only after all false-alarm filters; ships never «detected»
         if p["flags"]:
             assert p["detection_status"] == "insufficient_data" and "обнаружено" not in p["detection_label"]

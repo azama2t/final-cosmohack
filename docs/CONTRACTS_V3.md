@@ -780,3 +780,35 @@ GET /api/v3/photo/meta: + headline {count_mae_per_frame, count_mae_ci95, n_image
   авторов) и authors_calibration удалены (шт./км² другого места не выдаются за плотность зоны). scene_kind_label demo —
   «отложенная сцена Cózar 2024 (не участвовала в обучении)». meta.headline.satellite: + n_finds.
 3.10f (26.09, L111, жюри-7): scene_zones properties + is_find (detected и не снимок обучения детектора); verification "training_scene" у detected на съёмке MARIDA/MADOS; meta.headline.satellite.n_finds = число is_find; detector.version.trained_at — из weights/lgbm/model_card.json; /metrics detector + unet {name, split, f1, precision, recall, ci95_f1} (вне rows).
+3.10g (26.09, L131, решение 26.09 12:58 п.2 + жюри-человек 12:56 Т5 — ДОБАВЛЕНИЯ; одно ИЗМЕНЕНИЕ значения: concentration_status находок)
+  Исследовательская оценка шт./км² у спутниковых зон-находок. Формула — src/macroplastic/case/zone_estimate.py, параметры —
+  configs/zone_estimate.yaml (точки калибровки PLP с источником reports/count_datasets/115_bridge_s2.md; lo/hi = min/max
+  «предметов на пиксель» по всем датам A*, округление до 10; сейчас 470 / 670). N_зоны = n_пикселей × [lo; hi];
+  C = N_зоны / площадь_зоны (км², measured.zone_area_km2 = properties.area_km2); value = n × √(lo·hi) / площадь
+  (геометрическое среднее границ); value/lo/hi — 3 значащие цифры.
+  /api/v3/scene_zones и GeoJSON-выгрузка, properties:
+  + research_estimate = null | {value, lo, hi, unit «шт./км²», unit_id "items/km2", stat, status «исследовательская оценка»,
+    status_id "research_estimate", method «калибровка на искусственных мишенях PLP (бутылки PET 1.5 л)», note «для природных
+    скоплений не проверена; мелкие предметы → больше штук», label (готовая строка «≈ X [lo–hi] шт./км² · исследовательская
+    оценка · …»), n_items {value, lo, hi}, n_pixels, items_per_pixel {lo, hi, value}, area_ref, formula,
+    calibration {n_dates, dates, level, source, config}, not_what}. Площадь в объект не входит — только properties.area_km2.
+    Оценка — только у находок: detection_status detected, не снимок обучения детектора, без флагов, не ветер > 5 м/с.
+  + research_estimate_reason: null | строка (не обнаружено / недостаточно данных (признаки…) / ветер > 5 м/с / снимок обучения).
+  ИЗМЕНЕНИЕ значения: concentration_status = "research_estimate" у зон с оценкой (было "unavailable" у всех), concentration_label
+    «исследовательская оценка шт./км² (калибровка на мишенях PLP), не измерение»; у прочих — как было. quantity.status
+    "not_confirmed" (измеренной концентрации по снимку нет) — у всех зон, quantity.detail переписан.
+  FeatureCollection: + research_estimate (сводка по зонам ответа: n_finds, n_zones_with_estimate, c_median, c_min, c_max,
+    c_lo_min, c_hi_max, c_pooled/_lo/_hi = ΣN/ΣA, n_items_total_*, items_per_pixel_*, calibration_*, example).
+  Фильтры GET /scene_zones и /export?layer=scene_zones: + source, profile, scope (атрибуты полевых записей: у зон их нет →
+    0 зон, empty_reason; то же правило, что в UI и в /queries/{id}/run), + region (список ключей районов, 400 на неизвестный),
+    + is_find=true|false (400 на иное).
+  CSV scene_zones: + region, title, is_find, training_scene, research_estimate_value, research_estimate_lo, research_estimate_hi,
+    research_estimate_unit, research_estimate_status, research_estimate_method, research_estimate_note, research_n_items_lo,
+    research_n_items_hi, research_items_per_pixel_lo, research_items_per_pixel_hi, research_estimate_reason (порядок — cs.SZ_COLS).
+  GET /meta: + scene_zone_regions [{id, label, short, n_scenes, n_zones, n_finds}]; headline.satellite + research_estimate (сводка).
+  GET /scene_zones/scenes: scenes[] + region_short, n_finds.
+  Для final_numbers: macroplastic.case.zone_estimate.summary_from_dir() — те же числа, что FeatureCollection.research_estimate.
+  (13:30) research_estimate: + n_items_label «N ≈ … [lo–hi] шт. в зоне», basis (площадь контура зоны), det_px_share_of_zone_pct,
+    caveats[] (полнота детектора, размер предметов, класс «любой плавающий материал»); not_what — «диапазон N сработавших пикселей
+    мишеней …, не доверительный интервал». /scene_zones/scenes: cloud_pct = crop_cloud_frac × 100 (вырезка района, scene.json
+    снимка; было null), + tile_cloud_pct (cloud_cover тайла), cloud_basis.

@@ -61,7 +61,9 @@ PARAMS: dict = {
     "scene_zones": None, "scene_zone": set(), "sz_scenes": set(), "sz_scene_png": set(), "sz_crop": set(),  # 3.10
 }
 _SZ_P = {"bbox", "date_from", "date_to", "status", "detection_status", "concentration_status", "scene_kind",
-         "scene_key", "limit", "offset"}
+         "scene_key", "limit", "offset",
+         # jury 12:56 T5: the UI's «Акватория» (field source) / profile / scope reach the zone export too; + region, is_find
+         "source", "profile", "scope", "region", "is_find"}
 PARAMS["scene_zones"] = _SZ_P
 ALIASES = {"sources": "source", "profiles": "profile", "scopes": "scope", "statuses": "status", "missions": "mission"}
 
@@ -180,7 +182,24 @@ def _sz_filters(q: dict) -> dict:
             "concentration_statuses": cs.parse_list(q.get("concentration_status"), "concentration_status",
                                                     cs.CONCENTRATION_STATUS_IDS),
             "scene_kinds": cs.parse_list(q.get("scene_kind"), "scene_kind", ["demo", "live", "drift"]),
-            "scene_key": q.get("scene_key") or None}
+            "scene_key": q.get("scene_key") or None,
+            # field-record filters: satellite zones have none -> 0 zones (cs.filter_scene_zones), as the v2 UI
+            "sources": cs.parse_list(q.get("source"), "source", cs.SOURCE_IDS),
+            "profiles": cs.parse_list(q.get("profile"), "profile", cs.PROFILE_IDS),
+            "scopes": cs.parse_list(q.get("scope"), "scope", cs.SCOPE_IDS),
+            "regions": cs.parse_list(q.get("region"), "region", [r["id"] for r in cs.sz_regions()]),
+            "is_find": {None: None, "": None, "true": True, "1": True, "false": False, "0": False}.get(
+                q.get("is_find"), "bad")}
+
+
+def _sz_check(f: dict) -> dict:
+    if f["is_find"] == "bad":
+        raise ApiError(400, "BAD_PARAM", "is_find: true | false", {"param": "is_find", "allowed": ["true", "false"]})
+    return f
+
+
+def _sz_field_filter(f: dict) -> bool:
+    return bool(f.get("sources") or f.get("profiles") or f.get("scopes"))
 
 
 def _scene_filters(q: dict) -> dict:
@@ -408,11 +427,12 @@ def export(request: Request):
                    "features": [{"type": "Feature", "id": p["pair_id"], "geometry": p["geometry"],
                                  "properties": {k: v for k, v in p.items() if k != "geometry"}} for p in items]}
     elif layer == "scene_zones":
-        feats = ran["scene_zones"] if ran is not None else cs.filter_scene_zones(**_sz_filters(q))
+        szf = _sz_check(_sz_filters(q)) if ran is None else {}
+        feats = ran["scene_zones"] if ran is not None else cs.filter_scene_zones(**szf)
         if fmt == "csv":
             body = cs.scene_zones_csv(feats)
         else:
-            obj = cs.scene_zones_fc(feats)
+            obj = cs.scene_zones_fc(feats, field_filter=_sz_field_filter(szf) if ran is None else False)
     elif layer == "detections":  # detector objects of the zones selected by the same zone filters
         dfc = cs.detections_fc(ran["zones"] if ran is not None else cs.filter_zones(**_zone_filters(q)))
         if fmt == "csv":
@@ -491,9 +511,10 @@ def query_delete(query_id: str):
 @api
 def scene_zones(request: Request):
     q = _q(request)
-    feats = cs.filter_scene_zones(**_sz_filters(q))
+    szf = _sz_check(_sz_filters(q))
+    feats = cs.filter_scene_zones(**szf)
     limit, offset = _page(q)
-    fc = cs.scene_zones_fc(feats[offset:offset + limit])
+    fc = cs.scene_zones_fc(feats[offset:offset + limit], field_filter=_sz_field_filter(szf))
     fc["total"], fc["offset"], fc["limit"] = len(feats), offset, limit
     return _ok(fc)
 

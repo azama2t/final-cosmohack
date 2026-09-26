@@ -1668,6 +1668,7 @@ def meta() -> dict:
         "quantity_levels": quantity_levels(),
         "headline": headline(),
         "scene_zone_statuses": [{"id": k, "label": v} for k, v in SZ_DET_LABEL.items()],
+        "scene_zone_regions": sz_regions(),  # §34 п.3: filter `region` of /scene_zones and the export
         "layers": [
             {"id": "observations", "kind": "measurement", "label": "Полевые измерения (настоящие шт./км²)"},
             {"id": "zones", "kind": "candidate_strip", "label": "Проверенные снимки-кандидаты (полосы обследования)"},
@@ -1969,9 +1970,10 @@ def run_query_layers(qr: dict) -> dict:
         ids = {r.get("sample_id") for r in obs_rows}
         linked = {p["scene_id"] for p in pairs_all() if p["sample_id"] in ids and p["scene_id"]}
         sc = [x for x in sc if x["scene_id"] in linked]
-    szf = [] if (qr.get("sources") or qr.get("profiles") or qr.get("scopes")) else filter_scene_zones(
+    szf = filter_scene_zones(  # 3.10: satellite zones have no field source/profile/scope -> [] (inside the filter)
         bbox=qr.get("bbox"), date_from=qr.get("date_from"), date_to=qr.get("date_to"),
-        statuses=qr.get("statuses") or None)  # 3.10: satellite zones have no field source/profile/scope
+        statuses=qr.get("statuses") or None, sources=qr.get("sources") or None, profiles=qr.get("profiles") or None,
+        scopes=qr.get("scopes") or None)
     return {"obs_rows": obs_rows, "zones": zf, "scenes": sc, "scene_zones": szf}
 
 
@@ -2132,7 +2134,43 @@ SZ_WIND_NOTE = ("ветер > 5 м/с (ERA5, час съёмки): Cózar et al.
                 "полосы не видны; сцена не входит в знаменатель «обследовано», LWD не считается")
 SZ_FALSE_LABEL = "ложное срабатывание (признаки судна / кильватера / шва) — недостаточно данных"
 SZ_QUANTITY = {"status": "not_confirmed", "label": "концентрация по снимку не подтверждена",
-               "detail": "перевод площади в штуки не показываем: нет калибровочных пар (см. docs/QUANTITY.md)"}
+               "detail": ("измеренной концентрации по снимку нет: калибровочных пар по природным скоплениям 0 (см. "
+                          "docs/QUANTITY.md); для находок — только исследовательская оценка по мишеням PLP "
+                          "(research_estimate), не измерение")}
+# §34 п.2 (26.09 12:58): research estimate items/km2 of a find (calibration on PLP targets) — configs/zone_estimate.yaml,
+# formula in src/macroplastic/case/zone_estimate.py (the same code feeds final_numbers)
+PATHS.setdefault("zone_estimate_cfg", REPO / "configs" / "zone_estimate.yaml")
+SZ_RE_LABEL = "исследовательская оценка шт./км² (калибровка на мишенях PLP), не измерение"
+SZ_FIELD_FILTER_NOTE = ("у спутниковых зон нет полевой акватории, профиля и совокупности: при таком фильтре зон 0 "
+                        "(спутниковые районы — параметр region)")
+
+
+def _ze():
+    from src.macroplastic.case import zone_estimate as ZE
+    return ZE
+
+
+def zone_estimate_cfg() -> dict:
+    return _cached("zone_estimate_cfg", PATHS["zone_estimate_cfg"], _yaml_load) or {}
+
+
+_ZE_CAL: dict = {}
+
+
+def zone_estimate_cal(cfg: dict) -> dict:
+    """Calibration (lo / hi / value per pixel) of the loaded config object (reloaded with the file's mtime)."""
+    if _ZE_CAL.get("id") != id(cfg):
+        _ZE_CAL.clear()
+        _ZE_CAL.update({"id": id(cfg), "cal": _ze().calibration(cfg), "cfg": cfg})
+    return _ZE_CAL["cal"]
+
+
+def zone_estimate_summary(feats: Optional[list] = None) -> Optional[dict]:
+    cfg = zone_estimate_cfg()
+    if not cfg:
+        return None
+    zs = scene_zones_all() if feats is None else feats
+    return _ze().summary([f["properties"] for f in zs], cfg)
 SZ_KIND_RU = {"demo": "отложенная сцена Cózar 2024 (не участвовала в обучении)", "live": "район мониторинга",
               "drift": "район мониторинга (дополнительный снимок)"}
 # жюри 10:57: short list names («Гондурас · Омоа · зона 4»); the full region name stays in title_full
@@ -2205,6 +2243,16 @@ def _sz_enrich(f: dict, idx: dict) -> dict:
     p["concentration_reason"] = SZ_QUANTITY["detail"]
     p["scenario"] = None
     p["scenario_reason"] = SZ_QUANTITY["detail"]
+    # §34 п.2: research estimate items/km2 for finds only (area stays in area_km2, not inside the estimate)
+    cfg = zone_estimate_cfg()
+    ZE = _ze()
+    est = ZE.estimate(p, cfg, zone_estimate_cal(cfg)) if cfg else None
+    p["research_estimate"] = est
+    p["research_estimate_reason"] = None if est else (
+        ZE.not_eligible_reason(p) or "калибровка не загружена (configs/zone_estimate.yaml)")
+    if est:
+        p["concentration_status"] = "research_estimate"
+        p["concentration_label"] = SZ_RE_LABEL
     # аудит В16 / §33а п.3: a zone carries no items/km2 of another place (ADIS segments 521–9 848 km away): only the
     # nearest organisers' field record (id + distance), the same as the card and the CSV
     nos = (p.get("field_nearby") or {}).get("nearest_organizer_sample")
@@ -2239,6 +2287,10 @@ def scene_zones_all() -> list[dict]:
 def sz_scenes() -> list[dict]:
     """Scene records of the layer, in the /scenes shape (preview + quality overlay on bounds)."""
     out = []
+    nf: dict[str, int] = {}
+    for f in scene_zones_all():
+        if f["properties"].get("is_find"):
+            nf[f["properties"]["scene_key"]] = nf.get(f["properties"]["scene_key"], 0) + 1
     for s in scene_zones_index().get("scenes") or []:
         if s.get("error"):
             continue
@@ -2247,7 +2299,9 @@ def sz_scenes() -> list[dict]:
         out.append({"scene_id": s["key"], "scene_key": s["key"], "product_id": s.get("scene_id"),
                     "mission": "Sentinel-2", "source": "earth-search", "datetime": s.get("datetime"),
                     "footprint": bounds_polygon(b), "bounds": b,
-                    "footprint_note": s.get("crop_note"), "cloud_pct": None, "valid_water_fraction": None,
+                    "footprint_note": s.get("crop_note"), "cloud_pct": _sz_src_scene(s).get("crop_cloud_pct"),
+                    "cloud_basis": "облачность вырезки района (crop_cloud_frac × 100, scene.json снимка)",
+                    "tile_cloud_pct": _sz_src_scene(s).get("tile_cloud_pct"), "valid_water_fraction": None,
                     "preview_url": f"{base}/rgb.jpg", "quality_url": f"{base}/quality.png", "prob_url": None,
                     "mask_url": None, "tiles": None, "n_zones": s.get("n_zones_total", 0), "n_linked_samples": 0,
                     "status": "evaluated" if s.get("evaluable") else "not_evaluated",
@@ -2257,8 +2311,53 @@ def sz_scenes() -> list[dict]:
                     "evaluable": s.get("evaluable"), "not_evaluated_reason": s.get("not_evaluated_reason"),
                     "sun_zenith_deg": s.get("sun_zenith_deg"), "wind10m_ms": s.get("wind10m_ms"),
                     "water_km2": s.get("water_km2"), "lwd_m2_km2": s.get("lwd_m2_km2"),
-                    "by_status": s.get("by_status"), "model": s.get("model")})
+                    "by_status": s.get("by_status"), "model": s.get("model"),
+                    # §34 п.3: «район · дата · N находок»
+                    "region_short": sz_region_short(s.get("region"), s.get("region_name")),
+                    "n_finds": nf.get(s["key"], 0)})
     return out
+
+
+def _sz_src_scene(s: dict) -> dict:
+    """Cloudiness of the source scene: data/live/<region>/<date>/scene.json (demo: data/live/cozar_demo/<date>),
+    data/drift_check/<region>/<date>/scene.json — crop_cloud_frac (the crop) and cloud_cover (the whole tile), in %."""
+    root = REPO / "data" / ("drift_check" if s.get("kind") == "drift" else "live")
+    p = root / str(s.get("region")) / str(s.get("date")) / "scene.json"
+    if not p.is_file():
+        return {}
+
+    def load(path):
+        j = _read_json(path) or {}
+        cf, cc = fnum(j.get("crop_cloud_frac")), fnum(j.get("cloud_cover"))
+        return {"crop_cloud_pct": None if cf is None else round(cf * 100, 2),
+                "tile_cloud_pct": None if cc is None else round(cc, 2)}
+    return _cached(f"szsrc:{s.get('key')}", p, load) or {}
+
+
+def sz_region_short(region: Optional[str], region_name: Optional[str]) -> str:
+    if region == "cozar_demo":
+        return "30SXE"
+    key = str(region_name or region or "").split(" (")[0]
+    return SZ_SHORT.get(key, key)
+
+
+def sz_regions() -> list[dict]:
+    """Satellite regions of the layer (filter `region`): id, label, short, n_zones, n_finds (evaluable scenes)."""
+    by: dict[str, dict] = {}
+    for s in scene_zones_index().get("scenes") or []:
+        if s.get("error"):
+            continue
+        r = by.setdefault(s["region"], {"id": s["region"], "label": s.get("region_name") or s["region"],
+                                        "short": sz_region_short(s["region"], s.get("region_name")),
+                                        "n_scenes": 0, "n_zones": 0, "n_finds": 0})
+        r["n_scenes"] += 1
+    for f in scene_zones_all():
+        p = f["properties"]
+        r = by.get(p["region"])
+        if r:
+            r["n_zones"] += 1
+            r["n_finds"] += 1 if p.get("is_find") else 0
+    return sorted(by.values(), key=lambda r: (-r["n_finds"], r["short"]))
 
 
 def sz_crop(key: str, zone_id: str) -> Optional[Path]:
@@ -2306,11 +2405,20 @@ def sz_file(key: str, name: str) -> Optional[Path]:
 
 
 def filter_scene_zones(bbox=None, date_from=None, date_to=None, detection_statuses=None, concentration_statuses=None,
-                       scene_kinds=None, scene_key=None, statuses=None) -> list[dict]:
+                       scene_kinds=None, scene_key=None, statuses=None, sources=None, profiles=None, scopes=None,
+                       regions=None, is_find=None) -> list[dict]:
+    """One filter for the list, the export and saved queries. sources/profiles/scopes are attributes of field records:
+    satellite zones have none, so any of them -> no zones (the same as the v2 UI, jury 12:56 T5)."""
+    if sources or profiles or scopes:
+        return []
     out = []
     for f in scene_zones_all():
         p = f["properties"]
         if scene_key and p["scene_key"] != scene_key:
+            continue
+        if regions and p["region"] not in regions:
+            continue
+        if is_find is not None and bool(p.get("is_find")) != is_find:
             continue
         if scene_kinds and p["scene_kind"] not in scene_kinds:
             continue
@@ -2332,7 +2440,7 @@ def filter_scene_zones(bbox=None, date_from=None, date_to=None, detection_status
     return out
 
 
-def scene_zones_fc(feats: list[dict]) -> dict:
+def scene_zones_fc(feats: list[dict], field_filter: bool = False) -> dict:
     idx = scene_zones_index()
     mi = dict(idx.get("model") or {})
     if mi:
@@ -2341,13 +2449,15 @@ def scene_zones_fc(feats: list[dict]) -> dict:
           "label": "Спутниковые зоны детекции (текущий детектор)", "count": len(feats), "empty_reason": None,
           "model": mi or None, "rules": idx.get("rules"), "status_note": SZ_STATUS_NOTE,
           "quantity": dict(SZ_QUANTITY),
+          "research_estimate": zone_estimate_summary(feats) if idx else None,
           "blocks_note": ("measured — измерено по снимку; probable — вероятность и признаки; quantity — «концентрация по "
-                          "снимку не подтверждена» (scenario = null: перевод площади в штуки не показываем)"),
+                          "снимку не подтверждена» (измеренной нет); research_estimate — исследовательская оценка шт./км² "
+                          "только у находок (калибровка на мишенях PLP), иначе null + research_estimate_reason"),
           "examples": sz_examples() if idx else [],
           "features": feats}
     if not feats:
         fc["empty_reason"] = ("Слой не построен (scripts/case/scene_zones.py)" if not idx else
-                              "Нет спутниковых зон под выбранные фильтры")
+                              SZ_FIELD_FILTER_NOTE if field_filter else "Нет спутниковых зон под выбранные фильтры")
     return fc
 
 
@@ -2364,11 +2474,18 @@ def scene_zone_detections(zone_id: str) -> dict:
             "features": []}
 
 
-SZ_COLS = ["zone_id", "scene_key", "scene_kind", "scene_id", "datetime", "detection_status", "detection_label",
+SZ_COLS = ["zone_id", "scene_key", "scene_kind", "scene_id", "region", "title", "datetime", "detection_status",
+           "detection_label", "is_find", "training_scene",
            "concentration_status", "flags", "zone_area_km2", "suspicious_area_m2", "n_pixels", "n_objects",
            "water_km2", "lwd_m2_km2", "valid_water_fraction", "cloud_fraction", "glint_fraction", "prob_max",
            "prob_mean", "foam_sign", "glint_sign", "ship_sign", "n_cozar_filaments", "verification",
-           "quantity_status", "quantity_label", "quantity_detail", "field_nearest_sample_id", "field_nearest_km",
+           "quantity_status", "quantity_label", "quantity_detail",
+           # §34 п.2: research estimate (finds only; otherwise empty + reason); area is zone_area_km2 above
+           "research_estimate_value", "research_estimate_lo", "research_estimate_hi", "research_estimate_unit",
+           "research_estimate_status", "research_estimate_method", "research_estimate_note",
+           "research_n_items_lo", "research_n_items_hi", "research_items_per_pixel_lo", "research_items_per_pixel_hi",
+           "research_estimate_reason",
+           "field_nearest_sample_id", "field_nearest_km",
            "model_weights", "model_sha256",
            "threshold", "centroid_lon", "centroid_lat", "kind"]
 
@@ -2383,13 +2500,20 @@ def scene_zones_csv(feats: list[dict]) -> str:
         nos = (p.get("field_nearby") or {}).get("nearest_organizer_sample") or {}
         b = _geom_bounds(f["geometry"]) if f.get("geometry") else None
         cen = [round((b[0] + b[2]) / 2, 6), round((b[1] + b[3]) / 2, 6)] if b else [None, None]
-        rows.append([p["zone_id"], p["scene_key"], p["scene_kind"], p["scene_id"], p["datetime"], p["detection_status"],
-                     p.get("detection_label"), p["concentration_status"], p.get("flags") or [], m.get("zone_area_km2"),
+        re = p.get("research_estimate") or {}
+        rn, rpp = re.get("n_items") or {}, re.get("items_per_pixel") or {}
+        rows.append([p["zone_id"], p["scene_key"], p["scene_kind"], p["scene_id"], p.get("region"), p.get("title"),
+                     p["datetime"], p["detection_status"],
+                     p.get("detection_label"), bool(p.get("is_find")), p.get("training_scene"),
+                     p["concentration_status"], p.get("flags") or [], m.get("zone_area_km2"),
                      m.get("suspicious_area_m2"), m.get("n_pixels"), m.get("n_objects"), m.get("water_km2"),
                      m.get("lwd_m2_km2"), q.get("valid_water_fraction"), q.get("cloud_fraction"), q.get("glint_fraction"),
                      pr.get("prob_max"), pr.get("prob_mean"), (sg.get("foam") or {}).get("flag"),
                      (sg.get("glint") or {}).get("flag"), (sg.get("ship") or {}).get("flag"), p.get("n_cozar_filaments"),
                      p.get("verification"), qn.get("status"), qn.get("label"), qn.get("detail"),
+                     re.get("value"), re.get("lo"), re.get("hi"), re.get("unit"), re.get("status"), re.get("method"),
+                     re.get("note"), rn.get("lo"), rn.get("hi"), rpp.get("lo"), rpp.get("hi"),
+                     p.get("research_estimate_reason"),
                      nos.get("sample_id"), nos.get("distance_km"),
                      md.get("weights"), md.get("sha256"), md.get("threshold"), cen[0], cen[1], "detection_zone"])
     return _csv(SZ_COLS, rows)
@@ -2485,6 +2609,7 @@ def headline() -> dict:
                       "finds_note": "снимки обучения детектора (MARIDA/MADOS) находками не считаем",
                       "n_level_b": sum(1 for f in zs if f["properties"].get("verification") == "level_B_cozar"),
                       "quantity_label": SZ_QUANTITY["label"], "why": SZ_QUANTITY["detail"],
+                      "research_estimate": zone_estimate_summary(zs) if zs else None,
                       "open_zone_id": good["zone_id"] if good else None},
         "source": "reports/final_numbers.json · case.sections.quantity; слой data/case/scene_zones",
     }
