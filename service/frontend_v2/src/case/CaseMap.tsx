@@ -440,10 +440,18 @@ export default function CaseMap(p: CaseMapProps) {
 
     // §53 п.6: NASA GIBS overview — below the snapshot images and every vector layer, above the basemap
     {
+      // §71 п.1: ONE source with a stable id, created once; date/layer change = setTiles (never removed on move/zoom)
       const nk = cur.nasa ? cur.nasa.url : '';
-      if (map.getSource('c-nasa') && nasaKey.current !== nk) {
+      const nsrc = map.getSource('c-nasa') as any;
+      if (nsrc && !cur.nasa) {
         if (map.getLayer('c-nasa')) map.removeLayer('c-nasa');
         map.removeSource('c-nasa');
+      } else if (nsrc && cur.nasa && nasaKey.current !== nk) {
+        if (typeof nsrc.setTiles === 'function') nsrc.setTiles([nk]);
+        else {
+          if (map.getLayer('c-nasa')) map.removeLayer('c-nasa');
+          map.removeSource('c-nasa');
+        }
       }
       if (cur.nasa && !map.getSource('c-nasa')) {
         map.addSource('c-nasa', {
@@ -453,8 +461,13 @@ export default function CaseMap(p: CaseMapProps) {
           maxzoom: cur.nasa.maxzoom,
           attribution: 'NASA EOSDIS GIBS',
         });
+      }
+      if (cur.nasa && map.getSource('c-nasa') && !map.getLayer('c-nasa')) {
         const below = sceneKeys.current.find((k) => map.getLayer(k)) ?? 'c-scene-fp';
-        map.addLayer({ id: 'c-nasa', type: 'raster', source: 'c-nasa', paint: { 'raster-opacity': 0.9, 'raster-fade-duration': 0 } }, below);
+        map.addLayer(
+          { id: 'c-nasa', type: 'raster', source: 'c-nasa', minzoom: 3, paint: { 'raster-opacity': 0.9, 'raster-fade-duration': 0 } },
+          map.getLayer(below) ? below : undefined,
+        );
       }
       nasaKey.current = nk;
     }
