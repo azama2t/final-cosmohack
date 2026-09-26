@@ -54,6 +54,13 @@ def test_defense_examples_five_with_evidence(client):
             if u:
                 assert client.get(u).status_code == 200, u
         assert e["repeat"]["command"].startswith(".venv/Scripts/python.exe scripts/case/")
+        # texts shown to the jury: no service paths / keys (the path goes to `source`, not shown)
+        texts = [e[k] for k in ("label", "title", "reference", "verdict", "basis", "status_explanation", "rule")]
+        texts += [e["image"]["crop_note"], e.get("status_note") or ""]
+        for t in texts:
+            for bad in ("final_numbers", "reports/", ".md", ".py", "scripts/", "src/", "_px_", "n_pixels"):
+                assert bad not in t, (e["kind"], bad, t)
+        assert e["source"]
         if e["zone_id"]:  # zone examples agree with the zone API
             z = client.get(f"/api/v3/scene_zones/{e['zone_id']}").json()
             zp = z.get("properties", z)
@@ -61,6 +68,8 @@ def test_defense_examples_five_with_evidence(client):
     ex = {e["kind"]: e for e in d["examples"]}
     assert "level_B" not in ex["success"]["reference"] and "Cózar" in ex["success"]["reference"]
     assert ex["miss"]["model_result"]["n_pixels_in_bbox"] < 0.5 * int(ex["miss"]["reference"].split(", ")[-1].split()[0])
+    assert ex["miss"]["status_note"] == "статус зоны, задевшей нить: обнаружено; большая часть нити не отмечена"
+    assert "2,8 %" in ex["miss"]["basis"]
     assert set(ex["background_error"]["model_result"]["flags"]) <= {"foam", "glint"}
     assert "ship" in ex["false_alarm"]["model_result"]["flags"]
     assert ex["no_analysis"]["verdict"] == "анализ невозможен" and ex["no_analysis"]["model_result"]["n_zones"] is None

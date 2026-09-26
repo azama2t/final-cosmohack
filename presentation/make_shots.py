@@ -86,6 +86,15 @@ def main(argv=None) -> int:
             pg.click("[data-testid=act-qc]")
             pg.wait_for_timeout(3000)
             shot("metrics")
+            # 5 примеров защиты (верно / пропуск / ложное / ошибка на фоне / анализ невозможен) — слайд «Сложный фон»
+            de = pg.locator("[data-testid=defense-examples]")
+            if de.count():
+                de.first.scroll_into_view_if_needed()
+                pg.wait_for_timeout(3000)
+                de.first.screenshot(path=str(out / "defense.png"))
+                made.append("defense")
+            else:
+                notes.append("блока примеров защиты нет")
             if pg.locator("[data-testid=qc-close]").count():
                 pg.click("[data-testid=qc-close]")
             else:

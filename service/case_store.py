@@ -2546,7 +2546,8 @@ def _bbox_poly(b: list) -> dict:
     return {"type": "Polygon", "coordinates": [[[b[0], b[1]], [b[2], b[1]], [b[2], b[3]], [b[0], b[3]], [b[0], b[1]]]]}
 
 
-def _defense_zone(kind: str, f: dict, reference: str, verdict: str, basis: str, explanation: str, rule: str) -> dict:
+def _defense_zone(kind: str, f: dict, reference: str, verdict: str, basis: str, explanation: str, rule: str,
+                  source: Optional[str] = None) -> dict:
     p = f["properties"]
     base = f"/api/v3/scene_zones/scenes/{p['scene_key']}"
     meas = p.get("measured") or {}
@@ -2561,7 +2562,7 @@ def _defense_zone(kind: str, f: dict, reference: str, verdict: str, basis: str, 
                              "flags": p.get("flags") or []},
             "reference": reference, "verdict": verdict, "basis": basis,
             "status": p.get("status"), "status_label": p.get("status_label"), "status_explanation": explanation,
-            "rule": rule,
+            "rule": rule, "source": source or "data/case/scene_zones (scripts/case/scene_zones.py)",
             "repeat": {"api": f"/api/v3/scene_zones/{p['zone_id']}",
                        "command": f".venv/Scripts/python.exe scripts/case/scene_zones.py --only {p['scene_key'].split('-')[0]}  (все сцены этого вида)"}}
 
@@ -2608,12 +2609,15 @@ def defense_examples() -> dict:
                       f"{m['det_px_in_bbox']} (≤ {round(100 * m['det_share_upper'])} %) → пропущено не менее "
                       f"{m['missed_px_min']} пикс.; вода в рамке пригодна ({m['water_px_in_bbox']} из {m['bbox_px']} "
                       f"пикс.), ветер {sc.get('wind10m_ms')} м/с. По всему размеченному набору доля найденных "
-                      "пикселей B — 2.8 % (final_numbers: labeled_data.zero_shot.refined_B_recall_pct)"),
+                      "пикселей B — 2,8 %: пропуски для этого детектора — норма"),
+            "source": "reports/final_numbers.json: case.sections.labeled_data.zero_shot.refined_B_recall_pct; "
+                      "reports/extra_data/registry_cozar2024.csv.gz",
             "status": "detected", "status_label": "обнаружено",
             "related_zones": rel,
             "status_explanation": (f"отмеченные пиксели рядом с нитью входят в зоны «обнаружено» ({', '.join(rel) or 'нет'}); "
                                    "непокрытая часть нити на карте не отмечена — отсутствие зоны не означает «чистая вода»"),
-            "rule": dj.get("rule"),
+            "rule": "нить каталога Cózar (не меньше 100 пикселей) с наименьшей долей пикселей детектора",
+            "status_note": "статус зоны, задевшей нить: обнаружено; большая часть нити не отмечена",
             "repeat": {"api": "/api/v3/defense_examples",
                        "command": ".venv/Scripts/python.exe scripts/case/defense_examples.py",
                        "inputs": "reports/extra_data/registry_cozar2024.csv.gz, data/case/demo/cozar_demo_2021-03-11/*.tif"}})
@@ -2623,9 +2627,10 @@ def defense_examples() -> dict:
         sh = (((p.get("probable") or {}).get("signs") or {}).get("ship") or {}).get("share")
         out.append(_defense_zone(
             "false_alarm", f, "независимой разметки нет — качественный разбор по снимку", "ложное срабатывание",
-            f"пиксели детектора у яркой цели и её кильватера (доля {sh}); правило судна/кильватера (reports/artifacts.md)",
+            f"пиксели детектора у яркой цели и её кильватера (доля {sh}); сработало правило судна/кильватера",
             f"«{p.get('status_label')}» — признаки судна/кильватера; находкой не считается",
-            "зона с флагом ship на открытой воде с наибольшей долей признака; из равных выбрана самая читаемая вырезка"))
+            "зона с флагом ship на открытой воде с наибольшей долей признака; из равных выбрана самая читаемая вырезка",
+            "reports/artifacts.md; scripts/case/scene_zones.py"))
     bg = [f for f in zs if f["properties"].get("flags") and set(f["properties"]["flags"]) <= {"foam", "glint"}
           and f["properties"].get("crop_url")]
     bg.sort(key=lambda f: (-(f["properties"]["measured"].get("n_pixels") or 0), f["id"]))
@@ -2664,7 +2669,8 @@ def defense_examples() -> dict:
             "reference": "не нужен: вывод по правилу освещённости, до модели",
             "verdict": "анализ невозможен",
             "basis": (f"{why}; условия вне обучения детектора — его {s.get('det_pixels')} пикс. не учитываются "
-                      "(правило src/macroplastic/case/illumination.py, общее со студией)"),
+                      "(правило освещённости, общее со студией)"),
+            "source": "src/macroplastic/case/illumination.py",
             "status": "insufficient_data", "status_label": "недостаточно данных",
             "status_explanation": "сцена «не оценивается»: зон нет, пиксели детектора не показываются как находки",
             "rule": "сцена с evaluable = false и наибольшим числом пикселей детектора",

@@ -115,7 +115,7 @@ def main(argv=None) -> int:
                 pg.click("[data-testid=studio-back]"); step("назад к карточке"); pause(2500)
         back_to_scenes(); step("назад к списку снимков"); pause(2000)
 
-        # другой снимок и находка (требует проверки)
+        # другой снимок и находка
         items = pg.locator("[data-testid=scene-item]")
         oth = [i for i in range(items.count()) if SCENE_TEXT not in items.nth(i).inner_text()]
         if oth:
@@ -133,7 +133,10 @@ def main(argv=None) -> int:
                 pg.keyboard.press("Escape")
             pause(1000)
         if pg.locator("[data-testid=act-qc]").count():
-            pg.click("[data-testid=act-qc]"); step("Проверка качества"); pause(6000)
+            pg.click("[data-testid=act-qc]"); step("Проверка качества"); pause(4000)
+            de = pg.locator("[data-testid=defense-examples]")
+            if de.count():  # 5 примеров защиты: верно / пропуск / судно / пена / анализ невозможен
+                de.first.scroll_into_view_if_needed(); step("5 примеров защиты"); pause(8000)
             if pg.locator("[data-testid=qc-close]").count():
                 pg.click("[data-testid=qc-close]")
             else:
