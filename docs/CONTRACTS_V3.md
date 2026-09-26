@@ -912,3 +912,52 @@ GET /api/v3/photo/meta: + headline {count_mae_per_frame, count_mae_ci95, n_image
     CSV: + large_reason, major_axis_m, field_basis, field_lo, field_hi.
   (§51 п.2 — ИЗМЕНЕНИЕ) field_estimate.nearest — ближайшее измерение, на котором основано значение (при basin_profile —
     ближайшее измерение профиля акватории: source, date, distance_km, value); запись организаторов — nearest_organizer.
+
+## NASA · ежедневно (§54 п.1) — service/routes_nasa.py
+
+Обзорный слой снимков NASA GIBS по датам. Не обнаружение пластика: наш детектор на этих снимках не запускается,
+количества нет. Тайлы грузит браузер напрямую с gibs.earthdata.nasa.gov (CORS `*`); сервис их не проксирует.
+
+- `GET /api/v3/nasa/layers` → `{folder: "NASA · ежедневно", source: "NASA", default_layer, caption, not_what,
+  attribution, date_rule, layers: [...]}`. Элемент layers: `{id, title, source, satellite, sensor, resolution_m, crs:
+  "EPSG:3857", tile_matrix_set, max_native_zoom, tile_size: 256, format, cadence: daily|sparse, tile_url, attribution,
+  caption, not_what, default}`. `tile_url` — XYZ-шаблон с `{date}` (YYYY-MM-DD, UTC) и `{z}/{y}/{x}` (порядок WMTS:
+  строка, потом столбец; для GoogleMapsCompatible совпадает с обычным XYZ). Выше `max_native_zoom` GIBS тайлов не
+  отдаёт → в MapLibre `maxzoom` источника = max_native_zoom (дальше растягивается).
+  - daily: `VIIRS_SNPP_CorrectedReflectance_TrueColor` (375 м, по умолчанию), `MODIS_Terra_…` и `MODIS_Aqua_…`
+    (250 м); GoogleMapsCompatible_Level9, JPEG. caption: «ежедневный обзорный снимок NASA 250–375 м; пластик на таком
+    разрешении не обнаруживается — для обзора облачности/цветения/пятен».
+  - sparse: `HLS_S30_Nadir_BRDF_Adjusted_Reflectance` (Sentinel-2) и `HLS_L30_…` (Landsat), 30 м, Level12, PNG с
+    прозрачностью; есть в GIBS как тайлы (проверено 26.09), но только в дни пролёта — в остальные дни тайл пустой.
+    Свой caption (HLS 30 м, не каждый день, детектор не запускается).
+- `GET /api/v3/nasa/latest?layer=<id>` (по умолчанию VIIRS) → `{layer, date, latest_full, verified, unverified,
+  partial, note, today_utc, checked: [{date, ok}], tile_url (с подставленной date), caption, source, cached,
+  checked_at}`. Реальный запрос одного тайла 0/0/0 за сегодня, вчера, … (UTC; daily — до 3 сут., HLS — до 7), таймаут
+  5 с, кэш 30 мин. `partial = true`, если date = сегодня (UTC): день собирается по мере пролётов, часть Земли пустая;
+  `latest_full` — последний полный день. Сети нет / тайл не найден → date = вчера, `unverified: true`, note; сбой сети
+  не кэшируется. Неизвестный layer → 422 `{detail, allowed}`.
+- `GET /api/v3/nasa/regions` → `{folder, source, caption, default_layer, note, regions: [{id, label, short, bbox:
+  [w,s,e,n], center: [lon,lat], zoom (3–9), n_scenes_s2}]}` — те же id, что `sz_regions()` кейса; bbox — объединение
+  границ снимков района из data/case/scene_zones/index.json.
+
+Пример (26.09 21:1x МСК): `/latest` → `{"date": "2026-09-26", "latest_full": "2026-09-25", "partial": true,
+"verified": true, …}`; HLS S30 → `{"date": "2026-09-24", "checked": [26: false, 25: false, 24: true]}`; тайл
+VIIRS 2026-09-26 z6/29/53 (Филиппины) → 200 image/jpeg 17 012 байт. Тест: tests/test_nasa_api.py (сеть подменена).
+
+### «Свежий Sentinel-2» (§54 п.1, доп.) — отдельный набор, не в основных зонах
+
+Последние снимки S2 L2A для 1–2 районов, наш детектор в том же режиме, что основной слой (weights/lgbm, без
+гармонизации, порог 0.63, те же правила зон). Подпись «автоматически, не проверено человеком». Сцены: STAC
+(scripts/fetch_live.py --out out/fresh_s2/live), зоны: scripts/case/fresh_s2.py → data/case/fresh_s2/{index.json,
+<key>/zones.geojson, rgb.jpg}. Ключи `fresh-<region>-<date>`; в /api/v3/scene_zones, выгрузку, final_numbers не входят.
+
+- `GET /api/v3/fresh_s2` → `{source: "Sentinel-2 L2A (STAC), наш детектор", label, human_checked: false, note,
+  generated, model {weights, threshold, class}, in_case_numbers: false, scenes: [{key, region, region_name, date,
+  datetime, scene_id, tile, bounds, evaluable, n_zones_total, by_status, wind10m_ms, rgb_url, zones_url}]}`.
+- `GET /api/v3/fresh_s2/{key}/zones` → GeoJSON; у зоны + `layer_kind: "fresh_s2"`, `status_label`, `status_note`,
+  `status_reason`, `auto_label`, `human_checked: false`, `source`, `in_case_numbers: false`. Неизвестный key → 404.
+- `GET /api/v3/fresh_s2/{key}/rgb.jpg` → RGB-вырезка (EPSG:4326 по bounds).
+
+Набор 26.09: Тибр 2026-09-16 (S2B, облачность вырезки 0, ветер 1,3 м/с) — «не обнаружено» (12 пикселей P ≥ 0,63,
+кластеров ≥ 5 пикс. нет); дельта Нила 2026-09-17 (S2C) — «недостаточно данных» (ветер 5,9 м/с > 5, правило Cózar 2024).
+Тибр 2026-09-26 (снят сегодня) есть в Earth Search, но нет в Planetary Computer → пропущен (у ES тёмная вода обрезана на DN = 1).
