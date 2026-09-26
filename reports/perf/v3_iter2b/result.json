@@ -1,0 +1,2183 @@
+{
+ "url": "http://127.0.0.1:8072/",
+ "label": "v3_iter2b",
+ "gl": "gpu",
+ "cpu_throttle": 1,
+ "headless": true,
+ "started": "2026-09-26 01:43:10",
+ "sizes": {
+  "1920x1080": {
+   "first_show": {
+    "gl_context_ms": 190,
+    "first_gl_draw_ms": 249,
+    "first_tile_response_ms": 599,
+    "first_tile_draw_ms": 609,
+    "tiles_idle_ms": 1158,
+    "n_tile_requests": 36,
+    "map_handle": "__map",
+    "map_ready_at_ms": null,
+    "dom_content_loaded_ms": 130,
+    "load_event_ms": 130,
+    "fcp_ms": 232,
+    "lcp_ms": null,
+    "first_show_s": 0.61,
+    "first_show_basis": "first GL draw after first tile"
+   },
+   "map_style": {
+    "projection": [
+     "interpolate",
+     [
+      "linear"
+     ],
+     [
+      "zoom"
+     ],
+     5,
+     "vertical-perspective",
+     7,
+     "mercator"
+    ],
+    "n_sources": 10,
+    "sources_by_type": {
+     "raster": 1,
+     "geojson": 9
+    },
+    "n_layers": 21,
+    "n_canvas": 1,
+    "dpr": 1,
+    "n_dom": 55
+   },
+   "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "map_box": {
+    "x": 0,
+    "y": 0,
+    "w": 1920,
+    "h": 1080,
+    "cx": 960,
+    "cy": 540
+   },
+   "idle": {
+    "fps": 144,
+    "frames": 434,
+    "dur_ms": 3014,
+    "long50": 0,
+    "long50_share": 0,
+    "long33": 0,
+    "over17_share": 0,
+    "p95_ms": 7.2,
+    "max_ms": 7.3,
+    "long50_ms_total": 0,
+    "events_max_ms": null,
+    "events": [],
+    "wall_s": 3.01
+   },
+   "pan": [
+    {
+     "fps": 143.6,
+     "frames": 1168,
+     "dur_ms": 8132,
+     "long50": 0,
+     "long50_share": 0,
+     "long33": 0,
+     "over17_share": 0.001,
+     "p95_ms": 7.2,
+     "max_ms": 27.8,
+     "long50_ms_total": 0,
+     "events_max_ms": 16,
+     "events": [
+      {
+       "name": "pointerup",
+       "t": 13563,
+       "dur": 16,
+       "proc": 0
+      },
+      {
+       "name": "mouseup",
+       "t": 13563,
+       "dur": 16,
+       "proc": 1
+      },
+      {
+       "name": "click",
+       "t": 13563,
+       "dur": 16,
+       "proc": 0
+      }
+     ],
+     "wall_s": 8.14
+    },
+    {
+     "fps": 143.2,
+     "frames": 1132,
+     "dur_ms": 7902,
+     "long50": 0,
+     "long50_share": 0,
+     "long33": 0,
+     "over17_share": 0.002,
+     "p95_ms": 7.2,
+     "max_ms": 27.9,
+     "long50_ms_total": 0,
+     "events_max_ms": 24,
+     "events": [
+      {
+       "name": "pointerdown",
+       "t": 13977,
+       "dur": 16,
+       "proc": 0
+      },
+      {
+       "name": "mousedown",
+       "t": 13977,
+       "dur": 16,
+       "proc": 0
+      },
+      {
+       "name": "pointerup",
+       "t": 21471,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "mouseup",
+       "t": 21471,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "click",
+       "t": 21471,
+       "dur": 24,
+       "proc": 0
+      }
+     ],
+     "wall_s": 7.91
+    }
+   ],
+   "wheel_zoom": {
+    "fps": 142.4,
+    "frames": 451,
+    "dur_ms": 3167,
+    "long50": 0,
+    "long50_share": 0,
+    "long33": 0,
+    "over17_share": 0.002,
+    "p95_ms": 7,
+    "max_ms": 27.8,
+    "long50_ms_total": 0,
+    "events_max_ms": null,
+    "events": [],
+    "wall_s": 3.17
+   },
+   "flyto": {
+    "fps": 144,
+    "frames": 799,
+    "dur_ms": 5549,
+    "long50": 0,
+    "long50_share": 0,
+    "long33": 0,
+    "over17_share": 0,
+    "p95_ms": 7.1,
+    "max_ms": 7.3,
+    "long50_ms_total": 0,
+    "events_max_ms": null,
+    "events": [],
+    "wall_s": 5.55,
+    "from": {
+     "lon": -48.82685745201724,
+     "lat": 32.79989122350733,
+     "zoom": 2.4800326352176234,
+     "minZoom": -2,
+     "maxZoom": 22
+    },
+    "to": {
+     "lon": -23.827,
+     "lat": 27.8,
+     "zoom": 5.480032635217624
+    },
+    "fly_wall_s": 5.54
+   },
+   "left_toggle": {
+    "fps": 143.7,
+    "frames": 416,
+    "dur_ms": 2896,
+    "long50": 0,
+    "long50_share": 0,
+    "long33": 0,
+    "over17_share": 0,
+    "p95_ms": 7.1,
+    "max_ms": 14.1,
+    "long50_ms_total": 0,
+    "events_max_ms": 16,
+    "events": [
+     {
+      "name": "pointerout",
+      "t": 31563,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 31563,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 31563,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 31563,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerover",
+      "t": 31563,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 31563,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 31563,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 31563,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 31563,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseout",
+      "t": 31563,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseleave",
+      "t": 31563,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseover",
+      "t": 31563,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerdown",
+      "t": 31563,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mousedown",
+      "t": 31563,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerup",
+      "t": 31563,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseup",
+      "t": 31563,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "click",
+      "t": 31563,
+      "dur": 16,
+      "proc": 1
+     }
+    ],
+    "wall_s": 2.94,
+    "how": "left column toggle [data-testid=left-toggle] ×2"
+   },
+   "views": {
+    "fps": 143.7,
+    "frames": 558,
+    "dur_ms": 3882,
+    "long50": 0,
+    "long50_share": 0,
+    "long33": 0,
+    "over17_share": 0,
+    "p95_ms": 7.2,
+    "max_ms": 14,
+    "long50_ms_total": 0,
+    "events_max_ms": 32,
+    "events": [
+     {
+      "name": "pointerout",
+      "t": 36616,
+      "dur": 32,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 36616,
+      "dur": 32,
+      "proc": 0
+     },
+     {
+      "name": "pointerover",
+      "t": 36616,
+      "dur": 32,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 36616,
+      "dur": 32,
+      "proc": 0
+     },
+     {
+      "name": "mouseout",
+      "t": 36616,
+      "dur": 32,
+      "proc": 0
+     },
+     {
+      "name": "mouseover",
+      "t": 36616,
+      "dur": 32,
+      "proc": 0
+     },
+     {
+      "name": "pointerdown",
+      "t": 36616,
+      "dur": 32,
+      "proc": 0
+     },
+     {
+      "name": "mousedown",
+      "t": 36616,
+      "dur": 32,
+      "proc": 0
+     },
+     {
+      "name": "pointerup",
+      "t": 36616,
+      "dur": 32,
+      "proc": 0
+     },
+     {
+      "name": "mouseup",
+      "t": 36616,
+      "dur": 32,
+      "proc": 0
+     },
+     {
+      "name": "click",
+      "t": 36616,
+      "dur": 32,
+      "proc": 2
+     }
+    ],
+    "wall_s": 3.89,
+    "tabs": [
+     {
+      "tab": "nav-sites|Участки",
+      "max_frame_ms": 7,
+      "click_wall_ms": 721
+     },
+     {
+      "tab": "nav-studio|Студия",
+      "max_frame_ms": 7,
+      "click_wall_ms": 809
+     },
+     {
+      "tab": "nav-layers|Слои",
+      "max_frame_ms": 14,
+      "click_wall_ms": 823
+     },
+     {
+      "tab": "nav-export|Экспорт",
+      "max_frame_ms": 7,
+      "click_wall_ms": 733
+     },
+     {
+      "tab": "nav-sites|Участки",
+      "max_frame_ms": 7,
+      "click_wall_ms": 755
+     }
+    ]
+   },
+   "studio": {
+    "fps": 143.9,
+    "frames": 1079,
+    "dur_ms": 7500,
+    "long50": 0,
+    "long50_share": 0,
+    "long33": 0,
+    "over17_share": 0,
+    "p95_ms": 7.2,
+    "max_ms": 13.7,
+    "long50_ms_total": 0,
+    "events_max_ms": 24,
+    "events": [
+     {
+      "name": "pointerout",
+      "t": 63875,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 63875,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 63875,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerover",
+      "t": 63875,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 63875,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 63875,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 63875,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseout",
+      "t": 63875,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseover",
+      "t": 63875,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerdown",
+      "t": 63875,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mousedown",
+      "t": 63875,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerup",
+      "t": 63875,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseup",
+      "t": 63875,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "click",
+      "t": 63875,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerout",
+      "t": 64806,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 64806,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerover",
+      "t": 64806,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 64806,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseout",
+      "t": 64806,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseover",
+      "t": 64806,
+      "dur": 16,
+      "proc": 0
+     }
+    ],
+    "wall_s": 7.54,
+    "tried": [
+     {
+      "layer": "obs-d",
+      "studio": true,
+      "tabs": 0
+     },
+     {
+      "layer": "obs-d",
+      "studio": true,
+      "tabs": 0
+     },
+     {
+      "layer": "obs-i",
+      "studio": true,
+      "tabs": 0
+     },
+     {
+      "layer": "obs-i",
+      "studio": true,
+      "tabs": 0
+     },
+     {
+      "layer": "zone-line",
+      "studio": true,
+      "tabs": 4
+     }
+    ],
+    "layer": "zone-line",
+    "with_scene": true,
+    "moved_to_zone": {
+     "src": "scenes",
+     "c": [
+      7.431894,
+      54.151914
+     ]
+    },
+    "open_studio_ms": 62,
+    "scene_max_frame_ms": 7,
+    "tabs": [
+     {
+      "tab": "Снимок",
+      "max_frame_ms": 7
+     },
+     {
+      "tab": "Спектральный",
+      "max_frame_ms": 7
+     },
+     {
+      "tab": "Детекция",
+      "max_frame_ms": 7
+     },
+     {
+      "tab": "Качество",
+      "max_frame_ms": 7
+     },
+     {
+      "tab": "Снимок",
+      "max_frame_ms": 7
+     }
+    ]
+   },
+   "console_errors_this_size": [],
+   "first_show_loads": [
+    {
+     "first_show_s": 0.61,
+     "gl_context_ms": 132,
+     "first_tile_draw_ms": 611,
+     "tiles_idle_ms": 4131,
+     "fcp_ms": 172
+    },
+    {
+     "first_show_s": 0.48,
+     "gl_context_ms": 144,
+     "first_tile_draw_ms": 479,
+     "tiles_idle_ms": 1142,
+     "fcp_ms": 148
+    }
+   ],
+   "first_show_median_s": 0.61,
+   "first_show_all_s": [
+    0.48,
+    0.61,
+    0.61
+   ]
+  },
+  "1366x768": {
+   "first_show": {
+    "gl_context_ms": 108,
+    "first_gl_draw_ms": 148,
+    "first_tile_response_ms": 1596,
+    "first_tile_draw_ms": 1605,
+    "tiles_idle_ms": 3949,
+    "n_tile_requests": 34,
+    "map_handle": "__map",
+    "map_ready_at_ms": null,
+    "dom_content_loaded_ms": 90,
+    "load_event_ms": 90,
+    "fcp_ms": 140,
+    "lcp_ms": null,
+    "first_show_s": 1.6,
+    "first_show_basis": "first GL draw after first tile"
+   },
+   "map_style": {
+    "projection": [
+     "interpolate",
+     [
+      "linear"
+     ],
+     [
+      "zoom"
+     ],
+     5,
+     "vertical-perspective",
+     7,
+     "mercator"
+    ],
+    "n_sources": 10,
+    "sources_by_type": {
+     "raster": 1,
+     "geojson": 9
+    },
+    "n_layers": 21,
+    "n_canvas": 1,
+    "dpr": 1,
+    "n_dom": 55
+   },
+   "map_box": {
+    "x": 0,
+    "y": 0,
+    "w": 1366,
+    "h": 768,
+    "cx": 683,
+    "cy": 384
+   },
+   "idle": {
+    "fps": 144,
+    "frames": 434,
+    "dur_ms": 3014,
+    "long50": 0,
+    "long50_share": 0,
+    "long33": 0,
+    "over17_share": 0,
+    "p95_ms": 7.2,
+    "max_ms": 7.5,
+    "long50_ms_total": 0,
+    "events_max_ms": null,
+    "events": [],
+    "wall_s": 3.01
+   },
+   "pan": [
+    {
+     "fps": 143.4,
+     "frames": 1246,
+     "dur_ms": 8687,
+     "long50": 0,
+     "long50_share": 0,
+     "long33": 0,
+     "over17_share": 0.002,
+     "p95_ms": 7.2,
+     "max_ms": 27.6,
+     "long50_ms_total": 0,
+     "events_max_ms": 24,
+     "events": [
+      {
+       "name": "pointerout",
+       "t": 11510,
+       "dur": 16,
+       "proc": 0
+      },
+      {
+       "name": "pointerleave",
+       "t": 11510,
+       "dur": 16,
+       "proc": 0
+      },
+      {
+       "name": "pointerleave",
+       "t": 11510,
+       "dur": 16,
+       "proc": 0
+      },
+      {
+       "name": "pointerleave",
+       "t": 11510,
+       "dur": 16,
+       "proc": 0
+      },
+      {
+       "name": "pointerover",
+       "t": 11510,
+       "dur": 16,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 11510,
+       "dur": 16,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 11510,
+       "dur": 16,
+       "proc": 0
+      },
+      {
+       "name": "mouseout",
+       "t": 11510,
+       "dur": 16,
+       "proc": 0
+      },
+      {
+       "name": "mouseleave",
+       "t": 11510,
+       "dur": 16,
+       "proc": 0
+      },
+      {
+       "name": "mouseover",
+       "t": 11510,
+       "dur": 16,
+       "proc": 0
+      },
+      {
+       "name": "pointerout",
+       "t": 14058,
+       "dur": 16,
+       "proc": 0
+      },
+      {
+       "name": "pointerleave",
+       "t": 14058,
+       "dur": 16,
+       "proc": 0
+      },
+      {
+       "name": "pointerleave",
+       "t": 14058,
+       "dur": 16,
+       "proc": 0
+      },
+      {
+       "name": "pointerover",
+       "t": 14058,
+       "dur": 16,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 14058,
+       "dur": 16,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 14058,
+       "dur": 16,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 14058,
+       "dur": 16,
+       "proc": 0
+      },
+      {
+       "name": "mouseout",
+       "t": 14058,
+       "dur": 16,
+       "proc": 0
+      },
+      {
+       "name": "mouseover",
+       "t": 14058,
+       "dur": 16,
+       "proc": 0
+      },
+      {
+       "name": "pointerup",
+       "t": 16973,
+       "dur": 24,
+       "proc": 0
+      }
+     ],
+     "wall_s": 8.7
+    },
+    {
+     "fps": 144,
+     "frames": 855,
+     "dur_ms": 5937,
+     "long50": 0,
+     "long50_share": 0,
+     "long33": 0,
+     "over17_share": 0,
+     "p95_ms": 7.2,
+     "max_ms": 7.3,
+     "long50_ms_total": 0,
+     "events_max_ms": 24,
+     "events": [
+      {
+       "name": "pointerdown",
+       "t": 17397,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "mousedown",
+       "t": 17397,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "pointerout",
+       "t": 19373,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "pointerleave",
+       "t": 19373,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "pointerleave",
+       "t": 19373,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "pointerleave",
+       "t": 19373,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "pointerover",
+       "t": 19373,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 19373,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 19373,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "mouseout",
+       "t": 19373,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "mouseleave",
+       "t": 19373,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "mouseover",
+       "t": 19373,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "pointerout",
+       "t": 20932,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "pointerleave",
+       "t": 20932,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "pointerleave",
+       "t": 20932,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "pointerover",
+       "t": 20932,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 20932,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 20932,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 20932,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "mouseout",
+       "t": 20932,
+       "dur": 24,
+       "proc": 0
+      }
+     ],
+     "wall_s": 5.94
+    }
+   ],
+   "wheel_zoom": {
+    "fps": 144,
+    "frames": 443,
+    "dur_ms": 3077,
+    "long50": 0,
+    "long50_share": 0,
+    "long33": 0,
+    "over17_share": 0,
+    "p95_ms": 7.2,
+    "max_ms": 7.3,
+    "long50_ms_total": 0,
+    "events_max_ms": null,
+    "events": [],
+    "wall_s": 3.09
+   },
+   "flyto": {
+    "fps": 143.5,
+    "frames": 798,
+    "dur_ms": 5563,
+    "long50": 0,
+    "long50_share": 0,
+    "long33": 0,
+    "over17_share": 0.001,
+    "p95_ms": 7.2,
+    "max_ms": 20.8,
+    "long50_ms_total": 0,
+    "events_max_ms": null,
+    "events": [],
+    "wall_s": 5.56,
+    "from": {
+     "lon": -58.847252245486175,
+     "lat": 32.73039912996547,
+     "zoom": 1.9893056993908333,
+     "minZoom": -2,
+     "maxZoom": 22
+    },
+    "to": {
+     "lon": -33.847,
+     "lat": 27.73,
+     "zoom": 5
+    },
+    "fly_wall_s": 5.56
+   },
+   "left_toggle": {
+    "fps": 144,
+    "frames": 424,
+    "dur_ms": 2944,
+    "long50": 0,
+    "long50_share": 0,
+    "long33": 0,
+    "over17_share": 0,
+    "p95_ms": 7.2,
+    "max_ms": 7.3,
+    "long50_ms_total": 0,
+    "events_max_ms": 16,
+    "events": [
+     {
+      "name": "pointerout",
+      "t": 32959,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 32959,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 32959,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 32959,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerover",
+      "t": 32959,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 32959,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 32959,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 32959,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 32959,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseout",
+      "t": 32959,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseleave",
+      "t": 32959,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseover",
+      "t": 32959,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerdown",
+      "t": 32959,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mousedown",
+      "t": 32959,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerup",
+      "t": 32960,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseup",
+      "t": 32960,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "click",
+      "t": 32960,
+      "dur": 16,
+      "proc": 1
+     }
+    ],
+    "wall_s": 2.95,
+    "how": "left column toggle [data-testid=left-toggle] ×2"
+   },
+   "views": {
+    "fps": 144,
+    "frames": 529,
+    "dur_ms": 3674,
+    "long50": 0,
+    "long50_share": 0,
+    "long33": 0,
+    "over17_share": 0,
+    "p95_ms": 7.2,
+    "max_ms": 7.3,
+    "long50_ms_total": 0,
+    "events_max_ms": null,
+    "events": [],
+    "wall_s": 3.68,
+    "tabs": [
+     {
+      "tab": "nav-sites|Участки",
+      "max_frame_ms": 7,
+      "click_wall_ms": 733
+     },
+     {
+      "tab": "nav-studio|Студия",
+      "max_frame_ms": 7,
+      "click_wall_ms": 735
+     },
+     {
+      "tab": "nav-layers|Слои",
+      "max_frame_ms": 7,
+      "click_wall_ms": 736
+     },
+     {
+      "tab": "nav-export|Экспорт",
+      "max_frame_ms": 7,
+      "click_wall_ms": 739
+     },
+     {
+      "tab": "nav-sites|Участки",
+      "max_frame_ms": 7,
+      "click_wall_ms": 725
+     }
+    ]
+   },
+   "studio": {
+    "fps": 143.2,
+    "frames": 1402,
+    "dur_ms": 9792,
+    "long50": 0,
+    "long50_share": 0,
+    "long33": 0,
+    "over17_share": 0.002,
+    "p95_ms": 7.2,
+    "max_ms": 27.9,
+    "long50_ms_total": 0,
+    "events_max_ms": 24,
+    "events": [
+     {
+      "name": "pointerout",
+      "t": 60173,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 60173,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 60173,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 60173,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 60173,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerover",
+      "t": 60173,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 60173,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 60173,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 60173,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseout",
+      "t": 60173,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseover",
+      "t": 60173,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerdown",
+      "t": 60173,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mousedown",
+      "t": 60173,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerup",
+      "t": 60173,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseup",
+      "t": 60173,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "click",
+      "t": 60173,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerout",
+      "t": 61775,
+      "dur": 24,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 61775,
+      "dur": 24,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 61775,
+      "dur": 24,
+      "proc": 0
+     },
+     {
+      "name": "pointerover",
+      "t": 61775,
+      "dur": 24,
+      "proc": 0
+     }
+    ],
+    "wall_s": 9.79,
+    "tried": [
+     {
+      "layer": "obs-d",
+      "studio": true,
+      "tabs": 0
+     },
+     {
+      "layer": "obs-d",
+      "studio": true,
+      "tabs": 0
+     },
+     {
+      "layer": "obs-i",
+      "studio": true,
+      "tabs": 0
+     },
+     {
+      "layer": "obs-i",
+      "studio": true,
+      "tabs": 0
+     },
+     {
+      "layer": "zone-line",
+      "studio": true,
+      "tabs": 6
+     }
+    ],
+    "layer": "zone-line",
+    "with_scene": true,
+    "moved_to_zone": {
+     "src": "scenes",
+     "c": [
+      7.431894,
+      54.151914
+     ]
+    },
+    "open_studio_ms": 45,
+    "scene_max_frame_ms": 7,
+    "tabs": [
+     {
+      "tab": "L8 10:26",
+      "max_frame_ms": 21
+     },
+     {
+      "tab": "S2 10:40",
+      "max_frame_ms": 7
+     },
+     {
+      "tab": "Снимок",
+      "max_frame_ms": 7
+     },
+     {
+      "tab": "Спектральный",
+      "max_frame_ms": 7
+     },
+     {
+      "tab": "Детекция",
+      "max_frame_ms": 28
+     },
+     {
+      "tab": "Качество",
+      "max_frame_ms": 7
+     },
+     {
+      "tab": "L8 10:26",
+      "max_frame_ms": 7
+     }
+    ]
+   },
+   "console_errors_this_size": [],
+   "first_show_loads": [
+    {
+     "first_show_s": 0.63,
+     "gl_context_ms": 124,
+     "first_tile_draw_ms": 633,
+     "tiles_idle_ms": 1391,
+     "fcp_ms": 160
+    },
+    {
+     "first_show_s": 0.43,
+     "gl_context_ms": 122,
+     "first_tile_draw_ms": 428,
+     "tiles_idle_ms": 989,
+     "fcp_ms": 156
+    }
+   ],
+   "first_show_median_s": 0.63,
+   "first_show_all_s": [
+    0.43,
+    0.63,
+    1.6
+   ]
+  }
+ },
+ "notes": [],
+ "browser_version": "153.0.8010.12",
+ "profile": {
+  "scenario": {
+   "pan_s": 5.96,
+   "flyto_s": 5.55
+  },
+  "cpu": {
+   "total_ms": 11846,
+   "idle_program_ms": 8490,
+   "top_self": [
+    {
+     "fn": "Jr",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 5,
+     "col": 421678,
+     "ms": 159.5,
+     "share_busy": 0.048
+    },
+    {
+     "fn": "_update",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 803,
+     "col": 162376,
+     "ms": 140.2,
+     "share_busy": 0.042
+    },
+    {
+     "fn": "(garbage collector)",
+     "file": "",
+     "line": 0,
+     "col": 0,
+     "ms": 123.8,
+     "share_busy": 0.037
+    },
+    {
+     "fn": "fromInvProjectionMatrix",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 799,
+     "col": 13672,
+     "ms": 115.2,
+     "share_busy": 0.034
+    },
+    {
+     "fn": "O_.R.S",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 5,
+     "col": 302668,
+     "ms": 103.8,
+     "share_busy": 0.031
+    },
+    {
+     "fn": "_calcMatrices",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 799,
+     "col": 9576,
+     "ms": 95.3,
+     "share_busy": 0.028
+    },
+    {
+     "fn": "calculatePosMatrix",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 799,
+     "col": 22672,
+     "ms": 81.9,
+     "share_busy": 0.024
+    },
+    {
+     "fn": "draw",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 801,
+     "col": 2157,
+     "ms": 79.1,
+     "share_busy": 0.024
+    },
+    {
+     "fn": "set",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 5,
+     "col": 61800,
+     "ms": 77.2,
+     "share_busy": 0.023
+    },
+    {
+     "fn": "uniformMatrix4fv",
+     "file": "",
+     "line": 0,
+     "col": 0,
+     "ms": 63.9,
+     "share_busy": 0.019
+    },
+    {
+     "fn": "_renderTileMasks",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 803,
+     "col": 5833,
+     "ms": 62.9,
+     "share_busy": 0.019
+    },
+    {
+     "fn": "$e",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 4,
+     "col": 5165,
+     "ms": 62.4,
+     "share_busy": 0.019
+    },
+    {
+     "fn": "vn",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 803,
+     "col": 141357,
+     "ms": 60.8,
+     "share_busy": 0.018
+    },
+    {
+     "fn": "_calcMatrices",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 799,
+     "col": 24110,
+     "ms": 60.8,
+     "share_busy": 0.018
+    },
+    {
+     "fn": "getRenderableIds",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 5,
+     "col": 425867,
+     "ms": 59.8,
+     "share_busy": 0.018
+    },
+    {
+     "fn": "drawElements",
+     "file": "",
+     "line": 0,
+     "col": 0,
+     "ms": 55.4,
+     "share_busy": 0.017
+    },
+    {
+     "fn": "po",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 5,
+     "col": 423928,
+     "ms": 54.8,
+     "share_busy": 0.016
+    },
+    {
+     "fn": "be",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 5,
+     "col": 439670,
+     "ms": 54.5,
+     "share_busy": 0.016
+    },
+    {
+     "fn": "Ni",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 5,
+     "col": 210417,
+     "ms": 52.7,
+     "share_busy": 0.016
+    },
+    {
+     "fn": "_calcMatrices",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 799,
+     "col": 55747,
+     "ms": 44.2,
+     "share_busy": 0.013
+    },
+    {
+     "fn": "render",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 803,
+     "col": 8939,
+     "ms": 40.3,
+     "share_busy": 0.012
+    },
+    {
+     "fn": "getAllTiles",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 5,
+     "col": 425405,
+     "ms": 39.8,
+     "share_busy": 0.012
+    },
+    {
+     "fn": "O_.R.bg",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 5,
+     "col": 317323,
+     "ms": 38.9,
+     "share_busy": 0.012
+    },
+    {
+     "fn": "Qn",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 801,
+     "col": 50860,
+     "ms": 32.7,
+     "share_busy": 0.01
+    },
+    {
+     "fn": "oc",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 5,
+     "col": 451308,
+     "ms": 32.6,
+     "share_busy": 0.01
+    }
+   ],
+   "by_file": [
+    {
+     "file": "(idle)",
+     "ms": 6942.5
+    },
+    {
+     "file": "maplibre-CMX7JeUv.js",
+     "ms": 2810.5
+    },
+    {
+     "file": "(program)",
+     "ms": 1547.5
+    },
+    {
+     "file": "(garbage collector)",
+     "ms": 123.8
+    },
+    {
+     "file": "uniformMatrix4fv",
+     "ms": 63.9
+    },
+    {
+     "file": "drawElements",
+     "ms": 55.4
+    },
+    {
+     "file": "stencilFunc",
+     "ms": 25.8
+    },
+    {
+     "file": "getBufferSubData",
+     "ms": 24.6
+    },
+    {
+     "file": "bindTexture",
+     "ms": 24.3
+    },
+    {
+     "file": "fetch",
+     "ms": 20.1
+    },
+    {
+     "file": "bindVertexArray",
+     "ms": 19.6
+    },
+    {
+     "file": "remove",
+     "ms": 19.5
+    },
+    {
+     "file": "clear",
+     "ms": 14.5
+    },
+    {
+     "file": "requestAnimationFrame",
+     "ms": 13.8
+    },
+    {
+     "file": "now",
+     "ms": 12.4
+    }
+   ]
+  },
+  "trace": {
+   "renderer_main": [
+    {
+     "event": "RunTask",
+     "ms": 4649.0
+    },
+    {
+     "event": "ThreadControllerImpl::RunTask",
+     "ms": 4507.9
+    },
+    {
+     "event": "FunctionCall",
+     "ms": 3352.3
+    },
+    {
+     "event": "FireAnimationFrame",
+     "ms": 3338.2
+    },
+    {
+     "event": "Receive mojo message",
+     "ms": 256.3
+    },
+    {
+     "event": "RunMicrotasks",
+     "ms": 107.7
+    },
+    {
+     "event": "Commit",
+     "ms": 88.6
+    },
+    {
+     "event": "UpdateLayoutTree",
+     "ms": 85.1
+    },
+    {
+     "event": "BlinkScheduler_PerformMicrotaskCheckpoint",
+     "ms": 84.0
+    },
+    {
+     "event": "MinorGC",
+     "ms": 83.0
+    },
+    {
+     "event": "Layout",
+     "ms": 81.3
+    },
+    {
+     "event": "V8.GC_SCAVENGER",
+     "ms": 79.9
+    },
+    {
+     "event": "V8.GC_SCAVENGER_SCAVENGE",
+     "ms": 79.4
+    },
+    {
+     "event": "PrePaint",
+     "ms": 74.6
+    },
+    {
+     "event": "Layerize",
+     "ms": 74.0
+    },
+    {
+     "event": "V8.GC_SCAVENGER_SCAVENGE_PARALLEL_PHASE",
+     "ms": 64.6
+    },
+    {
+     "event": "Paint",
+     "ms": 61.2
+    },
+    {
+     "event": "EventDispatch",
+     "ms": 46.2
+    },
+    {
+     "event": "CommandBufferHelper::Flush",
+     "ms": 39.0
+    },
+    {
+     "event": "WidgetBase::WillBeginMainFrame",
+     "ms": 37.7
+    }
+   ],
+   "renderer_compositor": [
+    {
+     "event": "RunTask",
+     "ms": 487.3
+    },
+    {
+     "event": "ThreadControllerImpl::RunTask",
+     "ms": 463.1
+    },
+    {
+     "event": "IOHandler::OnIOCompleted",
+     "ms": 144.4
+    },
+    {
+     "event": "SimpleWatcher::OnHandleReady",
+     "ms": 111.1
+    },
+    {
+     "event": "GpuChannelHost::VerifyFlush",
+     "ms": 85.9
+    },
+    {
+     "event": "Receive mojo message",
+     "ms": 75.7
+    },
+    {
+     "event": "CommandBufferHelper::Flush",
+     "ms": 3.8
+    },
+    {
+     "event": "CommandBuffer::OrderingBarrier",
+     "ms": 3.2
+    },
+    {
+     "event": "cc::TaskGraphWorkQueue::ScheduleTasks",
+     "ms": 1.9
+    },
+    {
+     "event": "CommandBufferProxyImpl::Flush",
+     "ms": 1.5
+    },
+    {
+     "event": "GpuChannel::Flush",
+     "ms": 1.0
+    }
+   ],
+   "gpu:VizCompositorThread": [
+    {
+     "event": "RunTask",
+     "ms": 334.7
+    },
+    {
+     "event": "ThreadControllerImpl::RunTask",
+     "ms": 320.7
+    },
+    {
+     "event": "SimpleWatcher::OnHandleReady",
+     "ms": 68.1
+    },
+    {
+     "event": "Receive mojo message",
+     "ms": 42.7
+    },
+    {
+     "event": "Scheduler::ScheduleTask",
+     "ms": 7.1
+    },
+    {
+     "event": "SyncToken::Wait",
+     "ms": 0.1
+    }
+   ],
+   "gpu:CrGpuMain": [
+    {
+     "event": "RunTask",
+     "ms": 1379.2
+    },
+    {
+     "event": "ThreadControllerImpl::RunTask",
+     "ms": 1362.7
+    },
+    {
+     "event": "Scheduler::RunTask",
+     "ms": 1322.4
+    },
+    {
+     "event": "GpuChannel::ExecuteDeferredRequest",
+     "ms": 997.1
+    },
+    {
+     "event": "GPUTask",
+     "ms": 978.4
+    },
+    {
+     "event": "CommandBuffer::Flush",
+     "ms": 901.3
+    },
+    {
+     "event": "CommandBufferStub::OnAsyncFlush",
+     "ms": 897.2
+    },
+    {
+     "event": "CommandBufferService:PutChanged",
+     "ms": 877.2
+    },
+    {
+     "event": "WebGL",
+     "ms": 726.8
+    },
+    {
+     "event": "RendererRasterWorker",
+     "ms": 179.5
+    },
+    {
+     "event": "RasterDecoderImpl::DoEndRasterCHROMIUM",
+     "ms": 117.7
+    },
+    {
+     "event": "RasterDecoderImpl::DoEndRasterCHROMIUM::Flush",
+     "ms": 112.4
+    },
+    {
+     "event": "DXGISwapChainImageBacking::Present",
+     "ms": 92.4
+    },
+    {
+     "event": "RasterDecoderImpl::DoRasterCHROMIUM",
+     "ms": 42.5
+    },
+    {
+     "event": "RasterDecoderImpl::DoRasterCHROMIUM::Deserializing",
+     "ms": 40.7
+    },
+    {
+     "event": "DCompPresenter::Present",
+     "ms": 19.8
+    },
+    {
+     "event": "GLContextEGL::MakeCurrent",
+     "ms": 18.6
+    },
+    {
+     "event": "DCLayerTree::CommitAndClearPendingOverlays",
+     "ms": 10.3
+    },
+    {
+     "event": "RasterDecoderImpl::DoBeginRasterCHROMIUM",
+     "ms": 6.6
+    },
+    {
+     "event": "DCompPresenter::CheckPendingFrames",
+     "ms": 4.1
+    }
+   ]
+  }
+ },
+ "load_profile": {
+  "wall_s": 1.03,
+  "cpu": {
+   "total_ms": 990,
+   "idle_program_ms": 656,
+   "top_self": [
+    {
+     "fn": "(garbage collector)",
+     "file": "",
+     "line": 0,
+     "col": 0,
+     "ms": 20.9,
+     "share_busy": 0.062
+    },
+    {
+     "fn": "getShaderParameter",
+     "file": "",
+     "line": 0,
+     "col": 0,
+     "ms": 15.9,
+     "share_busy": 0.048
+    },
+    {
+     "fn": "_render",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 803,
+     "col": 120200,
+     "ms": 6.8,
+     "share_busy": 0.02
+    },
+    {
+     "fn": "getProgramParameter",
+     "file": "",
+     "line": 0,
+     "col": 0,
+     "ms": 6.5,
+     "share_busy": 0.019
+    },
+    {
+     "fn": "(anonymous)",
+     "file": "index-DbkKbWB9.js",
+     "line": 1,
+     "col": 1,
+     "ms": 6.4,
+     "share_busy": 0.019
+    },
+    {
+     "fn": "be",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 5,
+     "col": 439670,
+     "ms": 5.7,
+     "share_busy": 0.017
+    },
+    {
+     "fn": "_calcMatrices",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 799,
+     "col": 24110,
+     "ms": 5.0,
+     "share_busy": 0.015
+    },
+    {
+     "fn": "P.<computed>",
+     "file": "",
+     "line": 22,
+     "col": 34,
+     "ms": 4.8,
+     "share_busy": 0.014
+    },
+    {
+     "fn": "_getMesh",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 799,
+     "col": 40357,
+     "ms": 4.7,
+     "share_busy": 0.014
+    },
+    {
+     "fn": "draw",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 801,
+     "col": 2157,
+     "ms": 4.4,
+     "share_busy": 0.013
+    },
+    {
+     "fn": "(anonymous)",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 5,
+     "col": 332092,
+     "ms": 4.2,
+     "share_busy": 0.012
+    },
+    {
+     "fn": "getAllTiles",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 5,
+     "col": 425405,
+     "ms": 3.8,
+     "share_busy": 0.012
+    },
+    {
+     "fn": "_renderTileMasks",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 803,
+     "col": 5833,
+     "ms": 3.8,
+     "share_busy": 0.011
+    },
+    {
+     "fn": "O_.R.S",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 5,
+     "col": 302668,
+     "ms": 3.7,
+     "share_busy": 0.011
+    },
+    {
+     "fn": "receive",
+     "file": "maplibre-CMX7JeUv.js",
+     "line": 5,
+     "col": 300391,
+     "ms": 3.6,
+     "share_busy": 0.011
+    }
+   ],
+   "by_file": [
+    {
+     "file": "(idle)",
+     "ms": 578.9
+    },
+    {
+     "file": "maplibre-CMX7JeUv.js",
+     "ms": 222.7
+    },
+    {
+     "file": "(program)",
+     "ms": 77.1
+    },
+    {
+     "file": "index-DbkKbWB9.js",
+     "ms": 24.2
+    },
+    {
+     "file": "(garbage collector)",
+     "ms": 20.9
+    },
+    {
+     "file": "getShaderParameter",
+     "ms": 15.9
+    },
+    {
+     "file": "getProgramParameter",
+     "ms": 6.5
+    },
+    {
+     "file": "P.<computed>",
+     "ms": 4.8
+    },
+    {
+     "file": "texImage2D",
+     "ms": 3.2
+    },
+    {
+     "file": "drawElements",
+     "ms": 2.7
+    },
+    {
+     "file": "getContext",
+     "ms": 2.7
+    },
+    {
+     "file": "uniform4f",
+     "ms": 2.1
+    },
+    {
+     "file": "fetch",
+     "ms": 2.1
+    },
+    {
+     "file": "disable",
+     "ms": 1.7
+    },
+    {
+     "file": "getBufferSubData",
+     "ms": 1.7
+    }
+   ]
+  }
+ },
+ "bundle": {
+  "files": 3,
+  "js_css_bytes": 1339034,
+  "js_css_gzip_bytes": 361011,
+  "js_css_gzip_mb": 0.361,
+  "largest": [
+   {
+    "file": "maplibre-CMX7JeUv.js",
+    "bytes": 1053118,
+    "gzip": 282339
+   },
+   {
+    "file": "index-DbkKbWB9.js",
+    "bytes": 202268,
+    "gzip": 65719
+   },
+   {
+    "file": "index-BA2dAAPK.css",
+    "bytes": 83648,
+    "gzip": 12953
+   }
+  ],
+  "note": "every JS/CSS response of the first viewport session (initial + lazy chunks actually loaded), gzip -9 of the body"
+ },
+ "build": {
+  "entry_js": [
+   "index-DbkKbWB9.js"
+  ],
+  "index_html_sha1": "8a5e9f3cd2db"
+ },
+ "console": {
+  "errors": [],
+  "n_errors": 0,
+  "failed_local": [],
+  "external": [],
+  "n_external": 0,
+  "warnings": [
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "Deprecated API for given entry type.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback."
+  ]
+ },
+ "finished": "2026-09-26 01:46:13"
+}

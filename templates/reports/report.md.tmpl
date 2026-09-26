@@ -1,6 +1,6 @@
 # Детектирование и оценка концентрации макропластика: отчёт
 
-Все числа отчёта подставляются из `reports/final_numbers.json`. Этот файл собирает `scripts/final_numbers.py` из отчётов, конфигов и сводки прогона `reports/case_run/run_summary.json`. Руками числа не пишутся. Числа разбиты на шесть разделов, у каждого свой источник и протокол:
+Все числа отчёта подставляются из `reports/final_numbers.json`. Этот файл собирает `scripts/final_numbers.py` из отчётов, конфигов и сводки прогона `reports/case_run/run_summary.json`. Руками числа не пишутся. Числа разбиты на разделы, у каждого свой источник и протокол (7–13 — расследование данных, раздел 10):
 
 {{derived.case_sections_table}}
 
@@ -11,6 +11,7 @@
 - **Целевая величина** — суммарный плавающий пластик, предметы > 2 см, шт./км², визуальная полоса 10 м с судна (профиль `S2_visual_GT2 / total_plastic`, {{case.conc.S2.target.n_events|pl:событие/события/событий}}). Второй профиль, только для полевой проверки, — трал 5–50 см в Тихом океане ({{case.conc.S1.target.n_events|pl:событие/события/событий}}). Весь мусор (`all_litter`) пластиком не считаем.
 - **Концентрация**: C = N/A с точным интервалом Пуассона; контрольный пример 12 / 0,20 = {{case.control.value|f1}} шт./км². Основная модель на S2 — {{case.conc.S2.primary}}: MAE {{case.conc.S2.main.mae|f1}} против медианы {{case.conc.S2.median.mae|f1}} на кросс-валидации по участкам маршрута внутри dev; выигрыш слабый. На отложенном test, посчитанном один раз ({{case.sections.field_test.S2.n_test}} событий S2, {{case.sections.field_test.S1.n_test}} событий S1), основная модель S2 {{case.sections.field_test.S2.verdict}} ({{case.sections.field_test.S2.main_mae|f1}} против {{case.sections.field_test.S2.median_mae|f1}} шт./км²), у S1 {{case.sections.field_test.S1.verdict}} ({{case.sections.field_test.S1.main_mae|f1}} против {{case.sections.field_test.S1.median_mae|f1}}). По правилу, записанному до открытия test, оценка по полевым данным на карте — медиана профиля.
 - **Детектор** (класс Marine Debris MARIDA — любой плавающий мусор, пластик отдельно не выделяется): LightGBM, F1 Marine Debris на test MARIDA {{case.detector.test.lgbm.f1|f3}} [{{case.detector.test.lgbm.ci95_f1.0|f3}}–{{case.detector.test.lgbm.ci95_f1.1|f3}}] против RandomForest {{case.detector.test.rf_argmax.f1|f3}}; разница {{case.detector.paired_vs_rf.delta_f1|f3}} [{{case.detector.paired_vs_rf.ci95.0|f3}}; {{case.detector.paired_vs_rf.ci95.1|f3}}]. На саргассуме, мутной воде и воде со взвесью — {{case.detector.fp_hard_bg}} ложных срабатываний.
+- **Расследование данных** (раздел 10): у событий CSV пар уровня A — {{case.sections.search.csv_A}}; в найденных нами данных ADIS — {{case.sections.adis_pairs.A}} пар A, и во всех {{case.sections.adis_pairs.A_with_items}} с предметами детектор дал {{case.sections.adis_pairs.A_with_items_det_px}} пикселей — это предел обнаружения, а не калибровка. Новые B/D: {{case.sections.labeled_data.b_new_acq}} съёмок PLP/FloatingObjects, {{case.sections.labeled_data.cozar.windows|int}} окон Cózar, {{case.sections.labeled_data.vessels.boxes|int}} судов, утечек {{case.sections.labeled_data.leaks_total}}. Дообучение: принято {{case.sections.detector_v2.n_accept}} из {{case.sections.detector_v2.n_variants}} вариантов. U-Net MARIDA на test — F1 {{case.sections.baselines.test.unet_argmax.f1|f3}}.
 - **Спутниковые пары**: из {{case.pairs.events}} событий по метаданным проходят {{case.pairs.events_accept_meta}}, маски — {{case.pairs.quality_accept}}, синхронных при типичном дрейфе — {{case.pairs.events_accept_drift}}. Для профилей пластика сцен нет вообще. Связь признаков снимка с полевой плотностью на имеющихся парах не установлена. Поэтому перенос шт./км² на снимок не заявляем, и у всех зон на карте стоит «концентрация недоступна».
 
 ## 1. Задача и целевая величина
@@ -326,6 +327,84 @@
 3. Реанализ ветра и волн (ERA5) вместо констант в допуске дрейфа и как объяснение отрицательного знака FDI.
 4. Размеченные L2A-сцены и калибровка детектора (порог, возможная гармонизация) на них. Гармонизация по медиане воды выключена по MARIDA val; точность MARIDA test на реальные снимки L2A не переносится. Подбирать сдвиг по самим парам нельзя: пиксельной полевой разметки нет. Там же — попиксельная маска блика и мелких облаков.
 5. Для профилей пластика — наблюдения в прибрежных водах, которые снимает Sentinel-2. Только так проверяем перенос.
+
+## 10. Расследование данных: как искали данные и пришли к алгоритму
+
+Организаторы сказали прямо: данные для обучения добываем сами, и важнее всего — как мы их искали. Раздел собран из `case.sections.{search, adis_pairs, labeled_data, detector_v2, baselines, quantity, oil}` (`scripts/case/collect_search.py`, только файлы в git). Хронология попыток и неудач — [docs/PIPELINE.md](../docs/PIPELINE.md), журнал каждой попытки — [docs/SEARCH_LOG.md](../docs/SEARCH_LOG.md).
+
+### 10.1 Уровни доказательности
+
+| Уровень | Что значит | Для чего годится |
+|---|---|---|
+| A | снимок и независимое полевое число связаны по времени, месту, обследованной площади и категории мусора | единственное, на чём можно проверять «снимок → шт./км²» |
+| B | подтверждённая разметка скопления на снимке, без числа предметов | обучение и проверка детектора |
+| C | кандидат для ручной проверки | ни обучение, ни проверка; в метку автоматически не превращается |
+| D | отвергнутый кандидат или проверенный отрицательный пример (пена, блик, облако, судно, водоросли) | отрицательные примеры детектора; причина отказа записана |
+
+### 10.2 Розыск снимков под события CSV и ADIS
+
+![Воронка](../docs/img/funnel.png)
+
+{{derived.case_search_table}}
+
+- **События CSV организаторов.** Уровень A — {{case.sections.search.csv_A}}, C — {{case.sections.search.csv_C}}. Для пластика (S1 Тихий океан, S2 Саргассово море) в нужные сутки снимков нет: открытый океан Sentinel-2 почти не снимает. В Северном море полосы закрыты облаками или маршрут вне снимка; единственная чистая полоса (HE460 т.03) снята на следующий день, и вода за это время ушла дальше допуска. В Чёрном море снимки того же дня есть, но время и площадь трансект не опубликованы — это C, не A; детектор в полосах C дал {{case.sections.search.by_source.S4.c_det_in_strip}} пикселей.
+- **Стоп-правило** §11: без A или убедительного C за пилот массовый поиск по дрейфу не расширяли. Дрейф (HYCOM/SMOC + ERA5 через Open-Meteo) — только область поиска.
+- **ADIS (The Ocean Cleanup, CC BY 4.0)** — полевые данные с числами, которых нет в CSV: камера на борту считает предметы > 5 / 10 / 50 см на отрезках 10 км, с временем GPS и площадью обследования. Отбор: |dt| ≤ {{case.sections.adis_pairs.dt_max_h|f0}} ч, облачность сцены ≤ {{case.sections.adis_pairs.cloud_max_pct}} % — {{case.sections.adis_pairs.segments}} отрезков на {{case.sections.adis_pairs.scenes}} сценах S2 L2A. Итог: A **{{case.sections.adis_pairs.A}}** (≈ {{case.sections.adis_pairs.A_passes}} независимых проходов, {{case.sections.adis_pairs.A_ships}} судов), C {{case.sections.adis_pairs.C}}, D {{case.sections.adis_pairs.D}} (причины D: {{case.sections.adis_pairs.d_reasons}}).
+
+### 10.3 Пары ADIS: «0 на снимке при N шт./км²» — предел обнаружения
+
+- Обследовано в парах A {{case.sections.adis_pairs.A_survey_km2|f1}} км², пригодной полосы S2 {{case.sections.adis_pairs.A_strip_usable_km2|f1}} км²; предметов > 5 см — {{case.sections.adis_pairs.A_items_gt5}}, > 50 см — {{case.sections.adis_pairs.A_items_gt50}}.
+- Детектор оценивается на {{case.sections.adis_pairs.A_eval}} парах A из {{case.sections.adis_pairs.A}}: {{case.sections.adis_pairs.evaluable_rule}}. На остальных {{case.sections.adis_pairs.A_not_eval}} пара A остаётся связью «полевое число ↔ снимок», но в «0 при N» и в оценку ложных тревог не входит (в их зонах — массовый шум при низком солнце).
+- В {{case.sections.adis_pairs.A_with_items}} парах A с предметами ({{case.sections.adis_pairs.A_with_items_density_min|f1}}–{{case.sections.adis_pairs.A_with_items_density_max|f1}} шт./км²) детектор дал {{case.sections.adis_pairs.A_with_items_det_px}} пикселей в полосе и {{case.sections.adis_pairs.A_with_items_det_shifted}} объектов в полосе, сдвинутой на дрейф; из них с оцениваемым детектором {{case.sections.adis_pairs.A_with_items_eval}} ({{case.sections.adis_pairs.A_with_items_eval_density_min|f1}}–{{case.sections.adis_pairs.A_with_items_eval_density_max|f1}} шт./км²) — {{case.sections.adis_pairs.A_with_items_eval_det_px}} пикселей.
+- Физика (пары A с оцениваемым детектором): доля покрытия предметами ≈ {{case.sections.adis_pairs.coverage_frac_text}}, крупнейший предмет {{case.sections.adis_pairs.largest_item_m2|f2}} м² = {{case.sections.adis_pairs.largest_item_pct_px|f1}} % пикселя. Пиксель 10 м срабатывает лишь при покрытии порядка десятков процентов (Cózar et al. 2024), то есть на много порядков выше.
+- Время пар проверено независимо: судно-съёмщик найдено на снимке у {{case.sections.adis_pairs.A_ship_found}} пар A, медиана расхождения вдоль трека {{case.sections.adis_pairs.A_ship_along_median_m|f0}} м.
+- Ложные тревоги при полевом нуле ({{case.sections.adis_pairs.A_zero_eval}} пар A с оцениваемым детектором): ветер < {{case.sections.adis_pairs.wind_split_ms|f0}} м/с — {{case.sections.adis_pairs.fa_calm.px}} пикселей на {{case.sections.adis_pairs.fa_calm.strip_km2|f1}} км² полосы ({{case.sections.adis_pairs.fa_calm.pairs}} пар); ветер ≥ {{case.sections.adis_pairs.wind_split_ms|f0}} м/с — {{case.sections.adis_pairs.fa_windy.px}} пикселей на {{case.sections.adis_pairs.fa_windy.strip_km2|f1}} км² ({{case.sections.adis_pairs.fa_windy.zone_obj_per_km2|f2}} объекта/км² в зоне) — барашки, не мусор.
+- Вывод: {{case.sections.adis_pairs.verdict}}.
+
+### 10.4 Новые размеченные данные B/D и что на них показал детектор
+
+{{derived.case_labeled_table}}
+
+- Всего новых съёмок S2 с меткой B — {{case.sections.labeled_data.b_new_acq}} (PLP {{case.sections.labeled_data.plp.acq_B}}, FloatingObjects/Refined {{case.sections.labeled_data.floatingobjects.acq_B}}), плюс {{case.sections.labeled_data.cozar.windows|int}} окон Cózar на {{case.sections.labeled_data.cozar.acq|int}} съёмках ({{case.sections.labeled_data.cozar.date_min}} … {{case.sections.labeled_data.cozar.date_max}}). Мишени PLP — искусственные, их держим отдельно от естественных скоплений.
+- Отрицательные наборы: проверено {{case.sections.labeled_data.neg_sources_checked}} источников, отклонено {{case.sections.labeled_data.neg_sources_rejected}} (нет 11 каналов или геопривязки, недоступно, дубль) — причина у каждого в `reports/extra_data/registry_negatives.csv`.
+- Утечки: по содержимому (LBP против MADOS и MARIDA) совпадений {{case.sections.labeled_data.content_match}} из {{case.sections.labeled_data.content_checked}} при положительном контроле {{case.sections.labeled_data.content_control_votes|int}} голосов; по тайлу и дате — 0; исключён {{case.sections.labeled_data.dup_excluded}} дубль (та же съёмка, что MARIDA train). Итог утечек — {{case.sections.labeled_data.leaks_total}}.
+
+### 10.5 Детектор v2: дообучение на B + D
+
+- Проверка зафиксирована до экспериментов (`configs/detector_v2_eval.yaml`, sha256 `{{case.sections.detector_v2.eval_sha256_short}}…`): MARIDA val + 3-fold по снимкам для новых B/D; правило — ΔF1 val ≥ {{case.sections.detector_v2.need_df1|f2}} и не хуже на B и D. Test MARIDA не читался.
+- {{case.sections.detector_v2.n_variants}} вариантов × {{case.sections.detector_v2.n_seeds}} seed: ΔF1 val от {{case.sections.detector_v2.df1_min|f3}} до {{case.sections.detector_v2.df1_max|f3}}, принято {{case.sections.detector_v2.n_accept}}. {{case.sections.detector_v2.decision_note}}.
+- Откат в домене сервиса (L2A без гармонизации): нити Cózar {{case.sections.detector_v2.reference.cozar_hit}}/{{case.sections.detector_v2.reference.cozar_n}}, ложные на судах {{case.sections.detector_v2.reference.vessels_fa}}/{{case.sections.detector_v2.reference.vessels_n}}, на D пар {{case.sections.detector_v2.reference.pairs_d_fa}}/{{case.sections.detector_v2.reference.pairs_d_n}}.
+- Компромисс «суда ↔ нити»: + D судов — суда {{case.sections.detector_v2.vessels_d.vessels_pct|f0}} %, нити {{case.sections.detector_v2.vessels_d.cozar_pct|f0}} %; смесь B Cózar + все D — нити {{case.sections.detector_v2.mix.cozar_pct|f0}} %, суда {{case.sections.detector_v2.mix.vessels_pct|f0}} %, но F1 MARIDA val {{case.sections.detector_v2.mix.df1|f3}}: Marine Debris MARIDA и «плавучий материал» Cózar — разные понятия.
+
+### 10.6 Бейзлайны с U-Net MARIDA
+
+{{derived.case_baselines_u_table}}
+
+- U-Net — официальные веса авторов MARIDA, код и предобработка авторов, не переобучали; порог варианта «по val» подобран только на val. Test посчитан один раз.
+- LightGBM − U-Net на test: {{case.sections.baselines.test_lgbm_minus_unet|f3}} [{{case.sections.baselines.test_lgbm_minus_unet_ci95.0|f3}}; {{case.sections.baselines.test_lgbm_minus_unet_ci95.1|f3}}], лучше в {{case.sections.baselines.test_scenes_lgbm_better}} из {{case.sections.baselines.test_n_scenes}} сцен; на судах U-Net ошибается на {{case.sections.baselines.test_ship_fp_unet}} пикселях против {{case.sections.baselines.test_ship_fp_lgbm}}.
+- На {{case.sections.baselines.pairs_crops}} вырезках пар (L2A): U-Net {{case.sections.baselines.pairs_unet_obj}} объектов («соль-перец» по открытой воде), в полосах {{case.sections.baselines.pairs_unet_in_strip}}; LightGBM {{case.sections.baselines.pairs_lgbm_obj}}.
+
+### 10.7 Количество: поле и доля покрытия — раздельно
+
+- **Поле (измерение).** S2: ΣN/ΣA = {{case.sections.quantity.field_S2.pooled_N}} / {{case.sections.quantity.field_S2.pooled_A_km2|f2}} км² = {{case.sections.quantity.field_S2.pooled_C|f1}} [{{case.sections.quantity.field_S2.lo95|f1}}–{{case.sections.quantity.field_S2.hi95|f1}}] шт./км² ({{case.sections.quantity.field_S2.n}} событий, интервал Пуассона).
+- **Снимок (доля покрытия подозрительного материала)** — м² маски детектора на км² пригодной воды, как LWD у Cózar et al. 2024. Это не мусор и не шт./км². Живые сцены: > 0 у {{case.sections.quantity.coverage_live.nonzero}} из {{case.sections.quantity.coverage_live.n_scenes}}, медиана {{case.sections.quantity.coverage_live.ppm_median|f1}}, максимум {{case.sections.quantity.coverage_live.ppm_max|f0}} м²/км²; от выбора порога доля меняется в {{case.sections.quantity.coverage_live.thr_ratio_median|f0}} раз (медиана).
+- **Почему нет калибровки.** Модель {{case.sections.quantity.calibration.model}} требует пар A с ненулевой S; таких {{case.sections.quantity.calibration.pairs_A_with_S_pos}}. В {{case.sections.quantity.pairs.strips}} принятых полосах CSV сигнал {{case.sections.quantity.pairs.strips_nonzero}} → доля полос с сигналом ≤ {{case.sections.quantity.pairs.p_nonzero_upper95|f2}}, обследований нужно в ≥ {{case.sections.quantity.pairs.survey_multiplier|f1}} раза больше, чем пар.
+- **Сколько пар нужно.** Для множителя k в пределах ×/÷2 — {{case.sections.quantity.calibration.n_pairs_k_x2_min}}–{{case.sections.quantity.calibration.n_pairs_k_x2_max}} независимых пар с сигналом (по допущениям о шуме спутника), для связи r = 0,5 — {{case.sections.quantity.calibration.n_pairs_r05}}, r = 0,3 — {{case.sections.quantity.calibration.n_pairs_r03}}. Даже идеальный спутник не сузит интервал одной оценки уже ×/÷{{case.sections.quantity.calibration.floor_factor|f1}} (у медианы ×/÷{{case.sections.quantity.calibration.median_factor|f1}}): пятнистость и Пуассон.
+- **Сценарий «площадь / размер предмета = штуки»** — {{case.sections.quantity.scenario.label}}: {{case.sections.quantity.scenario.mask_m2|f0}} м² маски = от {{case.sections.quantity.scenario.items_min|int}} до {{case.sections.quantity.scenario.items_max|int}} предметов в зависимости от допущений. На карту не идёт. Массу и физическую концентрацию не оцениваем.
+
+### 10.8 Нефтяное пятно — эксперимент с честным отказом
+
+- MADOS, класс Oil Spill, сплит по сценам заморожен до обучения; отдельная голова LightGBM, основной детектор не тронут. Val F1 {{case.sections.oil.val_f1|f3}} [{{case.sections.oil.val_f1_ci95.0|f3}}–{{case.sections.oil.val_f1_ci95.1|f3}}] против OSI {{case.sections.oil.val_osi_f1|f3}}; test (один раз) {{case.sections.oil.test_f1|f3}} [{{case.sections.oil.test_f1_ci95.0|f3}}–{{case.sections.oil.test_f1_ci95.1|f3}}], P {{case.sections.oil.test_precision|f2}}, R {{case.sections.oil.test_recall|f2}}, против OSI {{case.sections.oil.test_osi_f1|f3}}.
+- Положительный контроль на S2 L2A — разлив Wakashio: {{case.sections.oil.wakashio.0.date}} — {{case.sections.oil.wakashio.0.oil_km2|f2}} км² мелких пятен (пятно в лагуне не найдено), {{case.sections.oil.wakashio.1.date}} — {{case.sections.oil.wakashio.1.oil_km2|f2}} км² ряби открытой воды.
+- Вывод: {{case.sections.oil.verdict}}. Единица — площадь, км², не объём и не масса ([docs/OIL.md](../docs/OIL.md)).
+
+### 10.9 Лучшие вырезки
+
+![Пара A ADIS ↔ Sentinel-2](../docs/img/search_adis_pair.jpg)
+
+![Чёрное море, T30, снимок того же дня](../docs/img/search_s4_t30.jpg)
+
+![Северное море, HE460 т.03](../docs/img/search_s3_he460.jpg)
 
 ---
 

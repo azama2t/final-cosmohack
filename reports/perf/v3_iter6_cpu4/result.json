@@ -1,0 +1,1760 @@
+{
+ "url": "http://127.0.0.1:8072/",
+ "label": "v3_iter6_cpu4",
+ "gl": "gpu",
+ "cpu_throttle": 4.0,
+ "headless": true,
+ "started": "2026-09-26 02:26:22",
+ "sizes": {
+  "1920x1080": {
+   "first_show": {
+    "gl_context_ms": 562,
+    "first_gl_draw_ms": 937,
+    "first_tile_response_ms": 1336,
+    "first_tile_draw_ms": 1437,
+    "tiles_idle_ms": 2769,
+    "n_tile_requests": 36,
+    "map_handle": "__map",
+    "map_ready_at_ms": null,
+    "dom_content_loaded_ms": 292,
+    "load_event_ms": 293,
+    "fcp_ms": 504,
+    "lcp_ms": null,
+    "first_show_s": 1.44,
+    "first_show_basis": "first GL draw after first tile"
+   },
+   "map_style": {
+    "projection": [
+     "interpolate",
+     [
+      "linear"
+     ],
+     [
+      "zoom"
+     ],
+     3,
+     "vertical-perspective",
+     4.5,
+     "mercator"
+    ],
+    "n_sources": 6,
+    "sources_by_type": {
+     "raster": 1,
+     "geojson": 5
+    },
+    "n_layers": 15,
+    "n_canvas": 1,
+    "dpr": 1,
+    "n_dom": 55
+   },
+   "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "map_box": {
+    "x": 0,
+    "y": 0,
+    "w": 1920,
+    "h": 1080,
+    "cx": 960,
+    "cy": 540
+   },
+   "idle": {
+    "fps": 136.1,
+    "frames": 415,
+    "dur_ms": 3049,
+    "long50": 1,
+    "long50_share": 0.002,
+    "long33": 1,
+    "over17_share": 0.017,
+    "p95_ms": 7.2,
+    "max_ms": 55.5,
+    "long50_ms_total": 56,
+    "events_max_ms": null,
+    "events": [],
+    "wall_s": 3.1
+   },
+   "pan": [
+    {
+     "fps": 97.5,
+     "frames": 1159,
+     "dur_ms": 11882,
+     "long50": 0,
+     "long50_share": 0,
+     "long33": 6,
+     "over17_share": 0.097,
+     "p95_ms": 20.8,
+     "max_ms": 41.7,
+     "long50_ms_total": 0,
+     "events_max_ms": 48,
+     "events": [
+      {
+       "name": "pointerover",
+       "t": 7672,
+       "dur": 40,
+       "proc": 2
+      },
+      {
+       "name": "pointerenter",
+       "t": 7672,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 7672,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 7672,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 7672,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 7672,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 7672,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 7672,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 7672,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "mouseover",
+       "t": 7672,
+       "dur": 40,
+       "proc": 2
+      },
+      {
+       "name": "pointerup",
+       "t": 19084,
+       "dur": 48,
+       "proc": 1
+      },
+      {
+       "name": "mouseup",
+       "t": 19084,
+       "dur": 48,
+       "proc": 4
+      },
+      {
+       "name": "click",
+       "t": 19084,
+       "dur": 48,
+       "proc": 0
+      }
+     ],
+     "wall_s": 11.86
+    },
+    {
+     "fps": 113.1,
+     "frames": 1793,
+     "dur_ms": 15847,
+     "long50": 1,
+     "long50_share": 0.001,
+     "long33": 21,
+     "over17_share": 0.049,
+     "p95_ms": 14.2,
+     "max_ms": 62.6,
+     "long50_ms_total": 63,
+     "events_max_ms": 32,
+     "events": [
+      {
+       "name": "pointerdown",
+       "t": 19557,
+       "dur": 32,
+       "proc": 0
+      },
+      {
+       "name": "mousedown",
+       "t": 19557,
+       "dur": 32,
+       "proc": 2
+      },
+      {
+       "name": "pointerup",
+       "t": 34972,
+       "dur": 16,
+       "proc": 0
+      },
+      {
+       "name": "mouseup",
+       "t": 34972,
+       "dur": 16,
+       "proc": 1
+      },
+      {
+       "name": "click",
+       "t": 34972,
+       "dur": 16,
+       "proc": 0
+      }
+     ],
+     "wall_s": 15.87
+    }
+   ],
+   "wheel_zoom": {
+    "fps": 67.4,
+    "frames": 300,
+    "dur_ms": 4451,
+    "long50": 10,
+    "long50_share": 0.033,
+    "long33": 24,
+    "over17_share": 0.213,
+    "p95_ms": 48.6,
+    "max_ms": 173.5,
+    "long50_ms_total": 909,
+    "events_max_ms": null,
+    "events": [],
+    "wall_s": 4.46
+   },
+   "flyto": {
+    "fps": 59.5,
+    "frames": 332,
+    "dur_ms": 5583,
+    "long50": 3,
+    "long50_share": 0.009,
+    "long33": 30,
+    "over17_share": 0.389,
+    "p95_ms": 34.7,
+    "max_ms": 97.2,
+    "long50_ms_total": 229,
+    "events_max_ms": null,
+    "events": [],
+    "wall_s": 5.59,
+    "from": {
+     "lon": -48.34407466097002,
+     "lat": 32.94338684538205,
+     "zoom": 2.477697693558494,
+     "minZoom": -2,
+     "maxZoom": 22
+    },
+    "to": {
+     "lon": -23.344,
+     "lat": 27.943,
+     "zoom": 5.477697693558493
+    },
+    "fly_wall_s": 5.58
+   },
+   "left_toggle": {
+    "fps": 140.2,
+    "frames": 440,
+    "dur_ms": 3139,
+    "long50": 0,
+    "long50_share": 0,
+    "long33": 1,
+    "over17_share": 0.002,
+    "p95_ms": 7.1,
+    "max_ms": 34.6,
+    "long50_ms_total": 0,
+    "events_max_ms": 48,
+    "events": [
+     {
+      "name": "pointerout",
+      "t": 46688,
+      "dur": 48,
+      "proc": 2
+     },
+     {
+      "name": "pointerleave",
+      "t": 46688,
+      "dur": 48,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 46688,
+      "dur": 48,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 46688,
+      "dur": 48,
+      "proc": 0
+     },
+     {
+      "name": "pointerover",
+      "t": 46688,
+      "dur": 48,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 46688,
+      "dur": 48,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 46688,
+      "dur": 48,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 46688,
+      "dur": 48,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 46688,
+      "dur": 48,
+      "proc": 0
+     },
+     {
+      "name": "mouseout",
+      "t": 46688,
+      "dur": 48,
+      "proc": 1
+     },
+     {
+      "name": "mouseleave",
+      "t": 46688,
+      "dur": 48,
+      "proc": 0
+     },
+     {
+      "name": "mouseover",
+      "t": 46688,
+      "dur": 48,
+      "proc": 0
+     },
+     {
+      "name": "pointerdown",
+      "t": 46688,
+      "dur": 48,
+      "proc": 1
+     },
+     {
+      "name": "mousedown",
+      "t": 46688,
+      "dur": 48,
+      "proc": 0
+     },
+     {
+      "name": "pointerup",
+      "t": 46688,
+      "dur": 48,
+      "proc": 0
+     },
+     {
+      "name": "mouseup",
+      "t": 46688,
+      "dur": 48,
+      "proc": 0
+     },
+     {
+      "name": "click",
+      "t": 46688,
+      "dur": 48,
+      "proc": 5
+     },
+     {
+      "name": "pointerdown",
+      "t": 47476,
+      "dur": 24,
+      "proc": 1
+     },
+     {
+      "name": "mousedown",
+      "t": 47476,
+      "dur": 24,
+      "proc": 0
+     },
+     {
+      "name": "pointerup",
+      "t": 47476,
+      "dur": 24,
+      "proc": 0
+     }
+    ],
+    "wall_s": 3.15,
+    "how": "left column toggle [data-testid=left-toggle] ×2"
+   },
+   "views": {
+    "fps": 141.9,
+    "frames": 539,
+    "dur_ms": 3799,
+    "long50": 0,
+    "long50_share": 0,
+    "long33": 1,
+    "over17_share": 0.002,
+    "p95_ms": 7.1,
+    "max_ms": 48.8,
+    "long50_ms_total": 0,
+    "events_max_ms": 80,
+    "events": [
+     {
+      "name": "pointerout",
+      "t": 50142,
+      "dur": 16,
+      "proc": 1
+     },
+     {
+      "name": "pointerleave",
+      "t": 50142,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 50142,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 50142,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerover",
+      "t": 50142,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 50142,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 50142,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseout",
+      "t": 50142,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseover",
+      "t": 50142,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerdown",
+      "t": 50142,
+      "dur": 16,
+      "proc": 1
+     },
+     {
+      "name": "mousedown",
+      "t": 50142,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerup",
+      "t": 50142,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseup",
+      "t": 50142,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "click",
+      "t": 50142,
+      "dur": 16,
+      "proc": 1
+     },
+     {
+      "name": "pointerout",
+      "t": 50899,
+      "dur": 16,
+      "proc": 1
+     },
+     {
+      "name": "pointerleave",
+      "t": 50899,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerover",
+      "t": 50899,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 50899,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseout",
+      "t": 50899,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseover",
+      "t": 50899,
+      "dur": 16,
+      "proc": 0
+     }
+    ],
+    "wall_s": 3.8,
+    "tabs": [
+     {
+      "tab": "nav-sites|Участки",
+      "max_frame_ms": 7,
+      "click_wall_ms": 753
+     },
+     {
+      "tab": "nav-studio|Студия",
+      "max_frame_ms": 7,
+      "click_wall_ms": 749
+     },
+     {
+      "tab": "nav-layers|Слои",
+      "max_frame_ms": 49,
+      "click_wall_ms": 798
+     },
+     {
+      "tab": "nav-export|Экспорт",
+      "max_frame_ms": 14,
+      "click_wall_ms": 751
+     },
+     {
+      "tab": "nav-sites|Участки",
+      "max_frame_ms": 7,
+      "click_wall_ms": 741
+     }
+    ]
+   },
+   "studio": {
+    "fps": 93,
+    "frames": 862,
+    "dur_ms": 9271,
+    "long50": 14,
+    "long50_share": 0.016,
+    "long33": 43,
+    "over17_share": 0.13,
+    "p95_ms": 28,
+    "max_ms": 90.2,
+    "long50_ms_total": 916,
+    "events_max_ms": 64,
+    "events": [
+     {
+      "name": "pointerout",
+      "t": 80148,
+      "dur": 64,
+      "proc": 1
+     },
+     {
+      "name": "pointerleave",
+      "t": 80148,
+      "dur": 64,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 80148,
+      "dur": 64,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 80148,
+      "dur": 64,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 80148,
+      "dur": 64,
+      "proc": 0
+     },
+     {
+      "name": "pointerover",
+      "t": 80148,
+      "dur": 64,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 80148,
+      "dur": 64,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 80148,
+      "dur": 64,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 80148,
+      "dur": 64,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 80148,
+      "dur": 64,
+      "proc": 0
+     },
+     {
+      "name": "mouseout",
+      "t": 80148,
+      "dur": 64,
+      "proc": 0
+     },
+     {
+      "name": "mouseover",
+      "t": 80148,
+      "dur": 64,
+      "proc": 0
+     },
+     {
+      "name": "pointerdown",
+      "t": 80148,
+      "dur": 64,
+      "proc": 1
+     },
+     {
+      "name": "mousedown",
+      "t": 80148,
+      "dur": 64,
+      "proc": 0
+     },
+     {
+      "name": "pointerup",
+      "t": 80148,
+      "dur": 64,
+      "proc": 0
+     },
+     {
+      "name": "mouseup",
+      "t": 80148,
+      "dur": 64,
+      "proc": 1
+     },
+     {
+      "name": "click",
+      "t": 80148,
+      "dur": 64,
+      "proc": 14
+     },
+     {
+      "name": "pointerover",
+      "t": 80148,
+      "dur": 64,
+      "proc": 0
+     },
+     {
+      "name": "mouseover",
+      "t": 80148,
+      "dur": 64,
+      "proc": 0
+     },
+     {
+      "name": "pointerout",
+      "t": 80177,
+      "dur": 32,
+      "proc": 1
+     }
+    ],
+    "wall_s": 9.31,
+    "tried": [
+     {
+      "layer": "obs-d",
+      "studio": true,
+      "tabs": 0
+     },
+     {
+      "layer": "obs-d",
+      "studio": true,
+      "tabs": 0
+     },
+     {
+      "layer": "obs-i",
+      "studio": true,
+      "tabs": 0
+     },
+     {
+      "layer": "obs-i",
+      "studio": true,
+      "tabs": 0
+     },
+     {
+      "layer": "zone-line",
+      "studio": true,
+      "tabs": 3
+     }
+    ],
+    "layer": "zone-line",
+    "with_scene": true,
+    "moved_to_zone": {
+     "src": "scenes",
+     "c": [
+      7.431894,
+      54.151914
+     ]
+    },
+    "open_studio_ms": 468,
+    "scene_max_frame_ms": 35,
+    "tabs": [
+     {
+      "tab": "Снимок",
+      "max_frame_ms": 49
+     },
+     {
+      "tab": "Спектральный",
+      "max_frame_ms": 21
+     },
+     {
+      "tab": "Детекция",
+      "max_frame_ms": 35
+     },
+     {
+      "tab": "Качество",
+      "max_frame_ms": 90
+     },
+     {
+      "tab": "Снимок",
+      "max_frame_ms": 48
+     }
+    ]
+   },
+   "console_errors_this_size": [
+    "Failed to load resource: net::ERR_CONNECTION_REFUSED [http://127.0.0.1:8072/api/v3/pairs?source=S2_SARGASSO_MSM41&date_from=2015-04-20&date_to=2015-04-26&limit=5000]",
+    "Failed to load resource: net::ERR_CONNECTION_REFUSED [http://127.0.0.1:8072/api/v3/studio/scenes?bbox=-58.0739,29.0041,-57.9793,29.2784&limit=2000]"
+   ],
+   "first_show_loads": [
+    {
+     "first_show_s": 1.41,
+     "gl_context_ms": 302,
+     "first_tile_draw_ms": 1406,
+     "tiles_idle_ms": 2539,
+     "fcp_ms": 308
+    },
+    {
+     "first_show_s": 1.06,
+     "gl_context_ms": 382,
+     "first_tile_draw_ms": 1064,
+     "tiles_idle_ms": 2269,
+     "fcp_ms": 524
+    }
+   ],
+   "first_show_median_s": 1.41,
+   "first_show_all_s": [
+    1.06,
+    1.41,
+    1.44
+   ]
+  },
+  "1366x768": {
+   "first_show": {
+    "gl_context_ms": 254,
+    "first_gl_draw_ms": 559,
+    "first_tile_response_ms": 1030,
+    "first_tile_draw_ms": 1078,
+    "tiles_idle_ms": 2098,
+    "n_tile_requests": 34,
+    "map_handle": "__map",
+    "map_ready_at_ms": null,
+    "dom_content_loaded_ms": 175,
+    "load_event_ms": 176,
+    "fcp_ms": 244,
+    "lcp_ms": null,
+    "first_show_s": 1.08,
+    "first_show_basis": "first GL draw after first tile"
+   },
+   "map_style": {
+    "projection": [
+     "interpolate",
+     [
+      "linear"
+     ],
+     [
+      "zoom"
+     ],
+     3,
+     "vertical-perspective",
+     4.5,
+     "mercator"
+    ],
+    "n_sources": 6,
+    "sources_by_type": {
+     "raster": 1,
+     "geojson": 5
+    },
+    "n_layers": 15,
+    "n_canvas": 1,
+    "dpr": 1,
+    "n_dom": 55
+   },
+   "map_box": {
+    "x": 0,
+    "y": 0,
+    "w": 1366,
+    "h": 768,
+    "cx": 683,
+    "cy": 384
+   },
+   "idle": {
+    "fps": 134.8,
+    "frames": 411,
+    "dur_ms": 3049,
+    "long50": 0,
+    "long50_share": 0,
+    "long33": 1,
+    "over17_share": 0.019,
+    "p95_ms": 7.2,
+    "max_ms": 34.9,
+    "long50_ms_total": 0,
+    "events_max_ms": null,
+    "events": [],
+    "wall_s": 3.1
+   },
+   "pan": [
+    {
+     "fps": 95.5,
+     "frames": 1133,
+     "dur_ms": 11861,
+     "long50": 0,
+     "long50_share": 0,
+     "long33": 6,
+     "over17_share": 0.092,
+     "p95_ms": 20.8,
+     "max_ms": 41.7,
+     "long50_ms_total": 0,
+     "events_max_ms": 48,
+     "events": [
+      {
+       "name": "pointerover",
+       "t": 6899,
+       "dur": 48,
+       "proc": 3
+      },
+      {
+       "name": "pointerenter",
+       "t": 6899,
+       "dur": 48,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 6899,
+       "dur": 48,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 6899,
+       "dur": 48,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 6899,
+       "dur": 48,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 6899,
+       "dur": 48,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 6899,
+       "dur": 48,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 6899,
+       "dur": 48,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 6899,
+       "dur": 48,
+       "proc": 0
+      },
+      {
+       "name": "mouseover",
+       "t": 6899,
+       "dur": 48,
+       "proc": 21
+      },
+      {
+       "name": "pointerdown",
+       "t": 6931,
+       "dur": 24,
+       "proc": 1
+      },
+      {
+       "name": "mousedown",
+       "t": 6931,
+       "dur": 24,
+       "proc": 2
+      },
+      {
+       "name": "pointerout",
+       "t": 11249,
+       "dur": 32,
+       "proc": 0
+      },
+      {
+       "name": "pointerleave",
+       "t": 11249,
+       "dur": 32,
+       "proc": 0
+      },
+      {
+       "name": "pointerleave",
+       "t": 11249,
+       "dur": 32,
+       "proc": 0
+      },
+      {
+       "name": "pointerleave",
+       "t": 11249,
+       "dur": 32,
+       "proc": 0
+      },
+      {
+       "name": "pointerover",
+       "t": 11249,
+       "dur": 32,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 11249,
+       "dur": 32,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 11249,
+       "dur": 32,
+       "proc": 0
+      },
+      {
+       "name": "mouseout",
+       "t": 11249,
+       "dur": 32,
+       "proc": 0
+      }
+     ],
+     "wall_s": 11.87
+    },
+    {
+     "fps": 101.8,
+     "frames": 1607,
+     "dur_ms": 15785,
+     "long50": 2,
+     "long50_share": 0.001,
+     "long33": 25,
+     "over17_share": 0.065,
+     "p95_ms": 20.8,
+     "max_ms": 76.5,
+     "long50_ms_total": 139,
+     "events_max_ms": 40,
+     "events": [
+      {
+       "name": "pointerdown",
+       "t": 18782,
+       "dur": 32,
+       "proc": 0
+      },
+      {
+       "name": "mousedown",
+       "t": 18782,
+       "dur": 32,
+       "proc": 1
+      },
+      {
+       "name": "pointerout",
+       "t": 22848,
+       "dur": 40,
+       "proc": 1
+      },
+      {
+       "name": "pointerleave",
+       "t": 22848,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerleave",
+       "t": 22848,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerleave",
+       "t": 22848,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerover",
+       "t": 22848,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 22848,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 22848,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "mouseout",
+       "t": 22848,
+       "dur": 40,
+       "proc": 1
+      },
+      {
+       "name": "mouseleave",
+       "t": 22848,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "mouseover",
+       "t": 22848,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerout",
+       "t": 27465,
+       "dur": 24,
+       "proc": 1
+      },
+      {
+       "name": "pointerleave",
+       "t": 27465,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "pointerleave",
+       "t": 27465,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "pointerover",
+       "t": 27465,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 27465,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 27465,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 27465,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "mouseout",
+       "t": 27465,
+       "dur": 24,
+       "proc": 0
+      }
+     ],
+     "wall_s": 15.84
+    }
+   ],
+   "wheel_zoom": {
+    "fps": 65.6,
+    "frames": 292,
+    "dur_ms": 4451,
+    "long50": 9,
+    "long50_share": 0.031,
+    "long33": 27,
+    "over17_share": 0.267,
+    "p95_ms": 41.7,
+    "max_ms": 152.7,
+    "long50_ms_total": 750,
+    "events_max_ms": null,
+    "events": [],
+    "wall_s": 4.46
+   },
+   "flyto": {
+    "fps": 58.7,
+    "frames": 330,
+    "dur_ms": 5625,
+    "long50": 8,
+    "long50_share": 0.024,
+    "long33": 30,
+    "over17_share": 0.385,
+    "p95_ms": 41.7,
+    "max_ms": 76.4,
+    "long50_ms_total": 507,
+    "events_max_ms": null,
+    "events": [],
+    "wall_s": 5.61,
+    "from": {
+     "lon": -58.27810732834746,
+     "lat": 32.88556027661995,
+     "zoom": 1.9867870867680588,
+     "minZoom": -2,
+     "maxZoom": 22
+    },
+    "to": {
+     "lon": -33.278,
+     "lat": 27.886,
+     "zoom": 5
+    },
+    "fly_wall_s": 5.57
+   },
+   "left_toggle": {
+    "fps": 139.4,
+    "frames": 451,
+    "dur_ms": 3236,
+    "long50": 0,
+    "long50_share": 0,
+    "long33": 1,
+    "over17_share": 0.004,
+    "p95_ms": 7.1,
+    "max_ms": 41.7,
+    "long50_ms_total": 0,
+    "events_max_ms": 72,
+    "events": [
+     {
+      "name": "pointerout",
+      "t": 45955,
+      "dur": 72,
+      "proc": 1
+     },
+     {
+      "name": "pointerleave",
+      "t": 45955,
+      "dur": 72,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 45955,
+      "dur": 72,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 45955,
+      "dur": 72,
+      "proc": 0
+     },
+     {
+      "name": "pointerover",
+      "t": 45955,
+      "dur": 72,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 45955,
+      "dur": 72,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 45955,
+      "dur": 72,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 45955,
+      "dur": 72,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 45955,
+      "dur": 72,
+      "proc": 0
+     },
+     {
+      "name": "mouseout",
+      "t": 45955,
+      "dur": 72,
+      "proc": 1
+     },
+     {
+      "name": "mouseleave",
+      "t": 45955,
+      "dur": 72,
+      "proc": 0
+     },
+     {
+      "name": "mouseover",
+      "t": 45955,
+      "dur": 72,
+      "proc": 0
+     },
+     {
+      "name": "pointerdown",
+      "t": 45955,
+      "dur": 72,
+      "proc": 2
+     },
+     {
+      "name": "mousedown",
+      "t": 45955,
+      "dur": 72,
+      "proc": 0
+     },
+     {
+      "name": "pointerup",
+      "t": 45955,
+      "dur": 72,
+      "proc": 1
+     },
+     {
+      "name": "mouseup",
+      "t": 45955,
+      "dur": 72,
+      "proc": 1
+     },
+     {
+      "name": "click",
+      "t": 45955,
+      "dur": 72,
+      "proc": 10
+     },
+     {
+      "name": "pointerdown",
+      "t": 46777,
+      "dur": 24,
+      "proc": 1
+     },
+     {
+      "name": "mousedown",
+      "t": 46777,
+      "dur": 24,
+      "proc": 0
+     },
+     {
+      "name": "pointerup",
+      "t": 46777,
+      "dur": 24,
+      "proc": 0
+     }
+    ],
+    "wall_s": 3.24,
+    "how": "left column toggle [data-testid=left-toggle] ×2"
+   },
+   "views": {
+    "fps": 141.7,
+    "frames": 552,
+    "dur_ms": 3896,
+    "long50": 0,
+    "long50_share": 0,
+    "long33": 1,
+    "over17_share": 0.004,
+    "p95_ms": 7.2,
+    "max_ms": 48.6,
+    "long50_ms_total": 0,
+    "events_max_ms": 64,
+    "events": [
+     {
+      "name": "pointerout",
+      "t": 49556,
+      "dur": 16,
+      "proc": 1
+     },
+     {
+      "name": "pointerleave",
+      "t": 49556,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 49556,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 49556,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerover",
+      "t": 49556,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 49556,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 49556,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseout",
+      "t": 49556,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseover",
+      "t": 49556,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerdown",
+      "t": 49556,
+      "dur": 16,
+      "proc": 1
+     },
+     {
+      "name": "mousedown",
+      "t": 49556,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerup",
+      "t": 49556,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseup",
+      "t": 49556,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "click",
+      "t": 49556,
+      "dur": 16,
+      "proc": 2
+     },
+     {
+      "name": "pointerout",
+      "t": 50319,
+      "dur": 16,
+      "proc": 1
+     },
+     {
+      "name": "pointerleave",
+      "t": 50319,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerover",
+      "t": 50319,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 50319,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseout",
+      "t": 50319,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseover",
+      "t": 50319,
+      "dur": 16,
+      "proc": 0
+     }
+    ],
+    "wall_s": 3.9,
+    "tabs": [
+     {
+      "tab": "nav-sites|Участки",
+      "max_frame_ms": 7,
+      "click_wall_ms": 770
+     },
+     {
+      "tab": "nav-studio|Студия",
+      "max_frame_ms": 7,
+      "click_wall_ms": 761
+     },
+     {
+      "tab": "nav-layers|Слои",
+      "max_frame_ms": 49,
+      "click_wall_ms": 802
+     },
+     {
+      "tab": "nav-export|Экспорт",
+      "max_frame_ms": 21,
+      "click_wall_ms": 783
+     },
+     {
+      "tab": "nav-sites|Участки",
+      "max_frame_ms": 7,
+      "click_wall_ms": 758
+     }
+    ]
+   },
+   "studio": {
+    "fps": 110.7,
+    "frames": 1299,
+    "dur_ms": 11729,
+    "long50": 6,
+    "long50_share": 0.005,
+    "long33": 25,
+    "over17_share": 0.079,
+    "p95_ms": 20.9,
+    "max_ms": 90.4,
+    "long50_ms_total": 396,
+    "events_max_ms": 72,
+    "events": [
+     {
+      "name": "pointerout",
+      "t": 82035,
+      "dur": 40,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 82035,
+      "dur": 40,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 82035,
+      "dur": 40,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 82035,
+      "dur": 40,
+      "proc": 0
+     },
+     {
+      "name": "pointerover",
+      "t": 82035,
+      "dur": 40,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 82035,
+      "dur": 40,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 82035,
+      "dur": 40,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 82035,
+      "dur": 40,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 82035,
+      "dur": 40,
+      "proc": 0
+     },
+     {
+      "name": "mouseout",
+      "t": 82035,
+      "dur": 40,
+      "proc": 0
+     },
+     {
+      "name": "mouseover",
+      "t": 82035,
+      "dur": 40,
+      "proc": 0
+     },
+     {
+      "name": "pointerdown",
+      "t": 82035,
+      "dur": 40,
+      "proc": 1
+     },
+     {
+      "name": "mousedown",
+      "t": 82035,
+      "dur": 40,
+      "proc": 0
+     },
+     {
+      "name": "pointerup",
+      "t": 82035,
+      "dur": 40,
+      "proc": 0
+     },
+     {
+      "name": "mouseup",
+      "t": 82035,
+      "dur": 40,
+      "proc": 0
+     },
+     {
+      "name": "click",
+      "t": 82035,
+      "dur": 40,
+      "proc": 10
+     },
+     {
+      "name": "pointerover",
+      "t": 82035,
+      "dur": 40,
+      "proc": 0
+     },
+     {
+      "name": "mouseover",
+      "t": 82035,
+      "dur": 40,
+      "proc": 0
+     },
+     {
+      "name": "pointerout",
+      "t": 82055,
+      "dur": 24,
+      "proc": 0
+     },
+     {
+      "name": "pointerover",
+      "t": 82055,
+      "dur": 24,
+      "proc": 0
+     }
+    ],
+    "wall_s": 11.72,
+    "tried": [
+     {
+      "layer": "obs-d",
+      "studio": true,
+      "tabs": 0
+     },
+     {
+      "layer": "obs-d",
+      "studio": true,
+      "tabs": 0
+     },
+     {
+      "layer": "obs-i",
+      "studio": true,
+      "tabs": 0
+     },
+     {
+      "layer": "obs-i",
+      "studio": true,
+      "tabs": 0
+     },
+     {
+      "layer": "zone-line",
+      "studio": true,
+      "tabs": 6
+     }
+    ],
+    "layer": "zone-line",
+    "with_scene": true,
+    "moved_to_zone": {
+     "src": "scenes",
+     "c": [
+      7.431894,
+      54.151914
+     ]
+    },
+    "open_studio_ms": 742,
+    "scene_max_frame_ms": 28,
+    "tabs": [
+     {
+      "tab": "L8 10:26",
+      "max_frame_ms": 35
+     },
+     {
+      "tab": "S2 10:40",
+      "max_frame_ms": 90
+     },
+     {
+      "tab": "Снимок",
+      "max_frame_ms": 42
+     },
+     {
+      "tab": "Спектральный",
+      "max_frame_ms": 21
+     },
+     {
+      "tab": "Детекция",
+      "max_frame_ms": 35
+     },
+     {
+      "tab": "Качество",
+      "max_frame_ms": 21
+     },
+     {
+      "tab": "L8 10:26",
+      "max_frame_ms": 42
+     }
+    ]
+   },
+   "console_errors_this_size": [],
+   "first_show_loads": [
+    {
+     "first_show_s": 1.31,
+     "gl_context_ms": 339,
+     "first_tile_draw_ms": 1315,
+     "tiles_idle_ms": 2277,
+     "fcp_ms": 328
+    },
+    {
+     "first_show_s": 1.22,
+     "gl_context_ms": 468,
+     "first_tile_draw_ms": 1220,
+     "tiles_idle_ms": 2165,
+     "fcp_ms": 396
+    }
+   ],
+   "first_show_median_s": 1.22,
+   "first_show_all_s": [
+    1.08,
+    1.22,
+    1.31
+   ]
+  }
+ },
+ "notes": [],
+ "browser_version": "153.0.8010.12",
+ "bundle": {
+  "files": 3,
+  "js_css_bytes": 1349699,
+  "js_css_gzip_bytes": 364224,
+  "js_css_gzip_mb": 0.364,
+  "largest": [
+   {
+    "file": "maplibre-CMX7JeUv.js",
+    "bytes": 1053118,
+    "gzip": 282339
+   },
+   {
+    "file": "index-D0Xnu6Ni.js",
+    "bytes": 212335,
+    "gzip": 68796
+   },
+   {
+    "file": "index-4kFagHpe.css",
+    "bytes": 84246,
+    "gzip": 13089
+   }
+  ],
+  "note": "every JS/CSS response of the first viewport session (initial + lazy chunks actually loaded), gzip -9 of the body"
+ },
+ "build": {
+  "entry_js": [
+   "index-D0Xnu6Ni.js"
+  ],
+  "index_html_sha1": "36b53aa4bcfa"
+ },
+ "console": {
+  "errors": [
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED [http://127.0.0.1:8072/api/v3/pairs?source=S2_SARGASSO_MSM41&date_from=2015-04-20&date_to=2015-04-26&limit=5000]",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED [http://127.0.0.1:8072/api/v3/studio/scenes?bbox=-58.0739,29.0041,-57.9793,29.2784&limit=2000]"
+  ],
+  "n_errors": 2,
+  "failed_local": [
+   "net::ERR_CONNECTION_REFUSED http://127.0.0.1:8072/api/v3/pairs?source=S2_SARGASSO_MSM41&date_from=2015-04-20&date_to=2015-04-26&limit=5000",
+   "net::ERR_CONNECTION_REFUSED http://127.0.0.1:8072/api/v3/studio/scenes?bbox=-58.0739,29.0041,-57.9793,29.2784&limit=2000"
+  ],
+  "external": [],
+  "n_external": 0,
+  "warnings": [
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "Deprecated API for given entry type.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback."
+  ]
+ },
+ "finished": "2026-09-26 02:29:42"
+}

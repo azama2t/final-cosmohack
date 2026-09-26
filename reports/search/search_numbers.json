@@ -1,0 +1,495 @@
+{
+ "search": {
+  "available": true,
+  "source": "reports/search/{s1,s2,s3,s4}_candidates.csv, reports/search/adis_candidates.csv, docs/img/funnel.json",
+  "protocol": "розыск снимков под события CSV организаторов (L86–L88, L98) и под отрезки ADIS (L100); уровень доказательности A–D у каждой строки; стоп-правило §11: нет A или убедительного C за пилот — поиск по дрейфу не расширяем; дрейф — область поиска, не доказательство",
+  "events_total": 318,
+  "funnel": [
+   {
+    "label": "События в CSV организаторов",
+    "total": 318
+   },
+   {
+    "label": "Есть снимок S2/Landsat в ±5 сут (точка внутри контура сцены)",
+    "total": 68
+   },
+   {
+    "label": "Отбор по метаданным (|dt| ≤ 1 сут, облачность ≤ 60 %)",
+    "total": 29
+   },
+   {
+    "label": "Прошли маски качества в полосе (облака, блик, покрытие)",
+    "total": 12
+   },
+   {
+    "label": "Синхронны при типичном дрейфе (0.2 м/с, допуск 3 км)",
+    "total": 0
+   }
+  ],
+  "funnel_quality_reject": {
+   "glint": 10,
+   "cloud(qa_suspect:red_sr<0.03)": 4,
+   "cloud": 2,
+   "insufficient_coverage": 1
+  },
+  "by_source": {
+   "S1": {
+    "available": true,
+    "name": "S1 Тихий океан, аэросъёмка 2016 (L88)",
+    "file": "reports/search/s1_candidates.csv",
+    "events_in_csv": 181,
+    "rows": 10,
+    "events_checked": 3,
+    "scenes": 10,
+    "A": 0,
+    "B": 0,
+    "C": 0,
+    "D": 10,
+    "d_reasons": {
+     "датчик не видит предметы": 10
+    }
+   },
+   "S2": {
+    "available": true,
+    "name": "S2 Саргассово море, MSM41 (L98)",
+    "file": "reports/search/s2_candidates.csv",
+    "events_in_csv": 63,
+    "rows": 63,
+    "events_checked": 63,
+    "scenes": 1,
+    "A": 0,
+    "B": 0,
+    "C": 1,
+    "D": 62,
+    "d_reasons": {
+     "снимка нет": 62
+    }
+   },
+   "S3": {
+    "available": true,
+    "name": "S3 Северное море, HE419/HE460 (L86)",
+    "file": "reports/search/s3_candidates.csv",
+    "events_in_csv": 41,
+    "rows": 68,
+    "events_checked": 20,
+    "scenes": 34,
+    "A": 0,
+    "B": 0,
+    "C": 0,
+    "D": 68,
+    "d_reasons": {
+     "маршрут вне снимка": 29,
+     "облака": 21,
+     "пена/барашки": 13,
+     "край снимка / покрытие": 4,
+     "дрейф больше допуска": 1
+    },
+    "d_by_kind": {
+     "footprint_miss": 29,
+     "strip": 26,
+     "zone_object": 13
+    }
+   },
+   "S4": {
+    "available": true,
+    "name": "S4 Чёрное море, DOORS 2024 (L87)",
+    "file": "reports/search/s4_candidates.csv",
+    "events_in_csv": 33,
+    "rows": 33,
+    "events_checked": 33,
+    "scenes": 6,
+    "A": 0,
+    "B": 0,
+    "C": 8,
+    "D": 25,
+    "d_reasons": {
+     "снимка нет": 21,
+     "блик": 2,
+     "облака": 2
+    },
+    "c_det_in_strip": 0,
+    "items_km2_max": 976.0
+   },
+   "ADIS": {
+    "available": true,
+    "name": "ADIS, The Ocean Cleanup — найден нами, не в CSV (L91, L100)",
+    "file": "reports/search/adis_candidates.csv",
+    "events_in_csv": 0,
+    "rows": 177,
+    "events_checked": 177,
+    "scenes": 40,
+    "A": 66,
+    "B": 0,
+    "C": 3,
+    "D": 108,
+    "d_reasons": {
+     "блик": 63,
+     "облака": 29,
+     "край снимка / покрытие": 9,
+     "дрейф больше допуска": 7
+    }
+   }
+  },
+  "totals": {
+   "A": 66,
+   "B": 0,
+   "C": 12,
+   "D": 273
+  },
+  "csv_A": 0,
+  "csv_C": 9
+ },
+ "labeled_data": {
+  "source": "reports/extra_data/registry.csv (L89), registry_negatives.csv (L90), registry_cozar2024.csv.gz (L98), content_overlap.csv, current_detector_zero_shot.csv, fp_current_detector.json",
+  "protocol": "B — подтверждённая разметка скопления (без числа предметов), D — проверенный отрицательный пример; пиксели — S2 L2A той же съёмки (тот же ридер, что у live-сцен); утечка = та же съёмка (тайл+дата) или те же пиксели (LBP) с MARIDA/MADOS/нашими сценами; текущий детектор weights/lgbm без дообучения, порог с MARIDA val",
+  "plp": {
+   "acq_B": 38,
+   "kind": "искусственные мишени (Лесбос)",
+   "license": "CC-BY-4.0 / не указана (зеркало MIT marinedebrisdetector)"
+  },
+  "floatingobjects": {
+   "acq_B": 27,
+   "regions": 25,
+   "kind": "естественные скопления (FloatingObjects + Refined)",
+   "license": "Apache-2.0 / MIT"
+  },
+  "b_new_acq": 65,
+  "acq_with_D": 10,
+  "dup_excluded": 1,
+  "registry_rows": 108,
+  "cozar": {
+   "windows": 14374,
+   "acq": 4435,
+   "tiles": 322,
+   "px": 944592,
+   "km2": 94.46,
+   "date_min": "2015-07-04",
+   "date_max": "2021-09-17",
+   "same_acq_marida_ours": 0,
+   "license": "CC BY 4.0",
+   "kind": "нити плавучего материала Средиземного моря (Cózar et al. 2024)"
+  },
+  "vessels": {
+   "acq": 18,
+   "boxes": 2094,
+   "license": "CC-BY-4.0",
+   "hull_px": 12631,
+   "boxes_flagged": 543,
+   "boxes_flagged_pct": 25.9
+  },
+  "clouds": {
+   "scenes": 28,
+   "px_cloud": 420000,
+   "px_shadow": 128000,
+   "px_water": 224000,
+   "license": "CC-BY-4.0",
+   "cloud_px_flagged": 4
+  },
+  "neg_sources_checked": 15,
+  "neg_sources_rejected": 13,
+  "neg_leaks": 0,
+  "threshold": 0.63,
+  "content_checked": 119,
+  "content_match": 0,
+  "content_control_votes": 7579,
+  "zero_shot": {
+   "refined_B_recall_pct": 2.8,
+   "refined_B_px": 1395,
+   "fo_line_recall_pct": 1.1,
+   "plp_plastic_recall_pct": 0.9,
+   "refined_D_px": 1181,
+   "refined_D_flagged_pct": 0.0
+  },
+  "leaks_total": 0,
+  "available": true
+ },
+ "adis_pairs": {
+  "available": true,
+  "source": "reports/search/adis_candidates.csv (копия data/search/adis/candidates.csv, L100), reports/search/adis.md",
+  "protocol": "отрезки ADIS 10 км (камера судна, счёт >5/>10/>50 см, площадь обследования) × Sentinel-2 L2A; A = |dt| и дрейф в допуске, пиксели полосы годны по маскам качества, площадь и размерные классы из ADIS; детектор weights/lgbm без гармонизации, те же маски и код, что у пар CSV (pair_quality.process_s2); TP/FP по пикселям не утверждаются: пара A даёт только «на снимке N срабатываний при полевых M шт./км²»",
+  "segments": 177,
+  "scenes": 40,
+  "A": 66,
+  "B": 0,
+  "C": 3,
+  "D": 108,
+  "d_reasons": {
+   "блик": 63,
+   "облака": 29,
+   "край снимка / покрытие": 9,
+   "дрейф больше допуска": 7
+  },
+  "A_passes": 52,
+  "A_dt_le1h": 28,
+  "A_ships": 6,
+  "A_survey_km2": 46.6,
+  "A_strip_usable_km2": 52.6,
+  "A_items_gt5": 6,
+  "A_items_gt50": 1,
+  "A_with_items": 6,
+  "A_with_items_det_px": 0,
+  "A_with_items_det_shifted": 0,
+  "A_with_items_density_min": 3.5,
+  "A_with_items_density_max": 4.4,
+  "A_ship_found": 26,
+  "A_ship_along_median_m": 136.0,
+  "A_zero": 60,
+  "wind_split_ms": 7.0,
+  "evaluable_rule": "детектор не оценивается при зените Солнца ≥ 58° или медиане B3 воды < 0.003 (правило студии)",
+  "A_eval": 28,
+  "A_not_eval": 38,
+  "A_with_items_eval": 3,
+  "A_with_items_eval_det_px": 0,
+  "A_with_items_eval_det_shifted": 0,
+  "A_with_items_eval_density_min": 4.0,
+  "A_with_items_eval_density_max": 4.4,
+  "A_eval_survey_km2": 17.3,
+  "A_eval_items_gt5": 3,
+  "A_zero_eval": 25,
+  "segments_not_eval": 90,
+  "scenes_not_eval": 15,
+  "fa_calm": {
+   "pairs": 13,
+   "strip_km2": 9.5,
+   "px": 0,
+   "px_per_km2": 0.0,
+   "zone_km2": 557.0,
+   "zone_obj": 0,
+   "zone_obj_per_km2": 0.0
+  },
+  "fa_windy": {
+   "pairs": 12,
+   "strip_km2": 8.8,
+   "px": 1,
+   "px_per_km2": 0.1,
+   "zone_km2": 771.0,
+   "zone_obj": 120,
+   "zone_obj_per_km2": 0.16
+  },
+  "dt_max_h": 3.0,
+  "cloud_max_pct": 30,
+  "items_area_m2": 1.13,
+  "coverage_frac": 6.6e-08,
+  "largest_item_m2": 0.67,
+  "largest_item_pct_px": 0.7,
+  "coverage_frac_text": "6.6·10⁻⁸",
+  "verdict": "пары A есть, но все вида «0 на снимке при ≈ 0–4 шт./км²» — это предел обнаружения Sentinel-2 для предметов 5 см – 5 м в открытом море, калибровку «снимок → шт./км²» на них построить нельзя"
+ },
+ "baselines": {
+  "available": true,
+  "source": "reports/detector_v2/unet_test.json, unet_baseline.json (L99)",
+  "protocol": "официальные веса U-Net MARIDA (Kikaki et al. 2022, эпоха 44), код и предобработка авторов, не переобучали; та же функция оценки, что у LightGBM (detector_compare.evaluate); порог U-Net — только по val; test MARIDA посчитан один раз; ДИ и парная разность — бутстреп по сценам",
+  "test": {
+   "lgbm": {
+    "f1": 0.871,
+    "ci95": [
+     0.823,
+     0.92
+    ],
+    "precision": 0.824,
+    "recall": 0.924
+   },
+   "rf_argmax": {
+    "f1": 0.771,
+    "ci95": [
+     0.709,
+     0.834
+    ],
+    "precision": 0.707,
+    "recall": 0.848
+   },
+   "unet_argmax": {
+    "f1": 0.501,
+    "ci95": [
+     0.362,
+     0.683
+    ],
+    "precision": 0.392,
+    "recall": 0.696
+   },
+   "unet_prob": {
+    "f1": 0.527,
+    "ci95": [
+     0.373,
+     0.709
+    ],
+    "precision": 0.412,
+    "recall": 0.732
+   }
+  },
+  "test_lgbm_minus_unet": 0.37,
+  "test_lgbm_minus_unet_ci95": [
+   0.215,
+   0.481
+  ],
+  "test_scenes_lgbm_better": 13,
+  "test_n_scenes": 15,
+  "test_ship_fp_unet": 99,
+  "test_ship_fp_lgbm": 27,
+  "val": {
+   "lgbm": {
+    "f1": 0.923,
+    "ci95": [
+     0.877,
+     0.97
+    ],
+    "precision": 0.93,
+    "recall": 0.915
+   },
+   "rf_argmax": {
+    "f1": 0.865,
+    "ci95": [
+     0.772,
+     0.949
+    ],
+    "precision": 0.89,
+    "recall": 0.841
+   },
+   "unet_argmax": {
+    "f1": 0.697,
+    "ci95": [
+     0.49,
+     0.858
+    ],
+    "precision": 0.686,
+    "recall": 0.708
+   }
+  },
+  "pairs_unet_obj": 253,
+  "pairs_unet_in_strip": 0,
+  "pairs_lgbm_obj": 5,
+  "pairs_crops": 22
+ },
+ "quantity": {
+  "available": true,
+  "source": "reports/quantity/{field,calibration,coverage_live,coverage_pairs,scenario,adis_field}.json (L93), docs/QUANTITY.md",
+  "protocol": "раздельно: полевая плотность C = N/A (шт./км², интервал Пуассона) и спутниковая доля покрытия подозрительного материала (м² маски на км² пригодной воды, как LWD у Cózar et al. 2024); доля покрытия ≠ мусор и ≠ шт./км²; связь между ними — только калибровка на парах A, которой нет; сценарий «площадь / размер предмета» — помеченный исследовательский диапазон, на карту не идёт",
+  "field_S2": {
+   "n": 63,
+   "pooled_N": 697,
+   "pooled_A_km2": 12.94,
+   "pooled_C": 53.9,
+   "lo95": 49.9,
+   "hi95": 58.0
+  },
+  "coverage_live": {
+   "n_scenes": 64,
+   "nonzero": 52,
+   "ppm_median": 3.2,
+   "ppm_max": 82.0,
+   "thr_ratio_median": 9.0
+  },
+  "pairs": {
+   "strips": 11,
+   "strips_nonzero": 0,
+   "p_nonzero_upper95": 0.28,
+   "survey_multiplier": 3.5
+  },
+  "calibration": {
+   "model": "ln C = ln k + b · ln S",
+   "n_pairs_k_x2_min": 4,
+   "n_pairs_k_x2_max": 12,
+   "n_pairs_r05": 30,
+   "n_pairs_r03": 85,
+   "floor_factor": 3.5,
+   "median_factor": 5.1,
+   "pairs_A_with_S_pos": 0
+  },
+  "scenario": {
+   "label": "исследовательский сценарий (допущения), не измерение",
+   "mask_m2": 200.0,
+   "items_min": 160,
+   "items_max": 500000
+  },
+  "detection_factor_vs_median": 147000.0,
+  "adis_rate_ge20m2_per_km2": 0.0016
+ },
+ "oil": {
+  "available": true,
+  "experimental": true,
+  "enabled_by_default": false,
+  "source": "reports/oil/{val_runs,test,control}.json (L101), configs/oil_eval.yaml, docs/OIL.md",
+  "protocol": "MADOS класс Oil Spill, сплит по сценам заморожен до обучения (без съёмок MARIDA val/test); отдельная голова LightGBM, основной детектор не тронут; выбор только по val, test открыт один раз; бейзлайн — порог OSI = (B3+B4)/B2; положительный контроль на S2 L2A — разлив Wakashio 2020; единица — площадь, км², не объём и не масса",
+  "model": "win_pw1_l15_s0",
+  "val_f1": 0.888,
+  "val_f1_ci95": [
+   0.754,
+   0.95
+  ],
+  "val_osi_f1": 0.444,
+  "test_f1": 0.733,
+  "test_f1_ci95": [
+   0.612,
+   0.947
+  ],
+  "test_precision": 0.58,
+  "test_recall": 0.99,
+  "test_iou": 0.58,
+  "test_osi_f1": 0.324,
+  "val_oil_scenes": 14,
+  "test_oil_scenes": 18,
+  "wakashio": [
+   {
+    "date": "2020-08-11",
+    "oil_km2": 0.17,
+    "n_spills": 12
+   },
+   {
+    "date": "2020-08-16",
+    "oil_km2": 62.41,
+    "n_spills": 86
+   }
+  ],
+  "verdict": "на разметке MADOS голова лучше порога OSI, но на реальных L2A ложные срабатывания (края облаков, дымка, рябь), а известный разлив Wakashio не найден — слой только «эксперимент», выключен по умолчанию"
+ },
+ "detector_v2": {
+  "available": true,
+  "source": "reports/detector_v2/experiments.json (L92), configs/detector_v2_eval.yaml",
+  "protocol": "проверка зафиксирована до экспериментов (sha256 в experiments.json): MARIDA val + 3-fold по снимкам для новых B/D; 3 seed; правило принятия записано заранее (ΔF1 val ≥ max(0.01, 2σ) и не хуже на D/B); test MARIDA не читался; порог каждой модели — по val",
+  "n_variants": 11,
+  "n_seeds": 3,
+  "n_accept": 0,
+  "accepted": [],
+  "need_df1": 0.01,
+  "df1_min": -0.031,
+  "df1_max": 0.002,
+  "eval_sha256_short": "9220e3f8bc26",
+  "reference": {
+   "cozar_hit": 85,
+   "cozar_n": 234,
+   "cozar_pct": 36.0,
+   "vessels_fa": 543,
+   "vessels_n": 2061,
+   "vessels_pct": 26.0,
+   "pairs_d_fa": 5,
+   "pairs_d_n": 97,
+   "df1": null
+  },
+  "vessels_d": {
+   "cozar_hit": 64,
+   "cozar_n": 234,
+   "cozar_pct": 27.0,
+   "vessels_fa": 74,
+   "vessels_n": 2061,
+   "vessels_pct": 4.0,
+   "pairs_d_fa": 0,
+   "pairs_d_n": 97,
+   "df1": 0.001
+  },
+  "mix": {
+   "cozar_hit": 218,
+   "cozar_n": 234,
+   "cozar_pct": 93.0,
+   "vessels_fa": 57,
+   "vessels_n": 2061,
+   "vessels_pct": 3.0,
+   "pairs_d_fa": 12,
+   "pairs_d_n": 97,
+   "df1": -0.017
+  },
+  "reference_val_f1": 0.923,
+  "orchestrator_accepted": false,
+  "current_model": "weights/lgbm",
+  "decision_note": "ни один вариант не прошёл заранее записанное правило — в сервисе остаётся откат weights/lgbm"
+ }
+}

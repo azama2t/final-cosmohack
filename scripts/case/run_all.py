@@ -443,6 +443,21 @@ def step_detector(c: Ctx, rec: dict):
                    + ", ".join(f"{s} — {_state(v)}" for s, v in res["splits"].items()))
 
 
+def step_search_numbers(c: Ctx, rec: dict):
+    """§11 «Расследование данных»: числа из reports/search, extra_data, detector_v2, quantity, oil (офлайн, файлы в git)
+    -> reports/search/search_numbers.json; в final_numbers.json тот же сбор попадает в case.sections."""
+    if c.sub:
+        rec["note"] = "пропущено (--workdir)"
+        return
+    m = load_script("collect_search")
+    res = m.collect()
+    (ROOT / "reports" / "search").mkdir(parents=True, exist_ok=True)
+    m.OUT_JSON.write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")
+    s, ad = res["search"], res["adis_pairs"]
+    rec["note"] = (f"поиск A/B/C/D {s.get('totals')}; ADIS A {ad.get('A')}, с предметами {ad.get('A_with_items')}, "
+                   f"пикселей детектора {ad.get('A_with_items_det_px')}")
+
+
 # ------------------------------------------------------------------------------------------ export
 def step_export(c: Ctx, rec: dict):
     import tempfile
@@ -532,7 +547,8 @@ def write_summary(c: Ctx, cmd: str):
 PLAN = {
     "prepare": [("1_selection", step_selection), ("2_pairs", step_pairs), ("3_quality_detector", step_quality),
                 ("3b_registry", step_registry)],
-    "eval": [("4_concentration", step_concentration), ("5_detector_marida", step_detector)],
+    "eval": [("4_concentration", step_concentration), ("5_detector_marida", step_detector),
+             ("5b_search_numbers", step_search_numbers)],
     "export": [("6_export_api_v3", step_export)],
 }
 

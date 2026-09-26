@@ -538,7 +538,111 @@ def case_sections_table(fn: dict) -> str:
                     f"визуально «вероятное скопление» ≈ {fmt(dr.get('visual_precision_pct'), 'f1')} % | "
                     f"{dr.get('protocol') or DASH}; визуальная разметка — ИИ-агент, один аннотатор, по вырезкам, не полевая | "
                     f"`{dr.get('source') or DASH}`, `reports/case_pairs/visual_review.json` |")
+    sr, ad, ld, bl = s.get("search") or {}, s.get("adis_pairs") or {}, s.get("labeled_data") or {}, s.get("baselines") or {}
+    qn, oil, v2 = s.get("quantity") or {}, s.get("oil") or {}, s.get("detector_v2") or {}
+    if sr.get("available"):
+        tt_ = sr.get("totals") or {}
+        rows.append(f"| 7. Розыск снимков (§11) | события CSV: A {fmt(sr.get('csv_A'), None)}, C {fmt(sr.get('csv_C'), None)}; все строки-кандидаты "
+                    f"вместе с ADIS: A {fmt(tt_.get('A'), None)} / C {fmt(tt_.get('C'), None)} / D {fmt(tt_.get('D'), None)} | {sr.get('protocol')} | "
+                    f"`{sr.get('source')}` |")
+    if ad.get("available"):
+        rows.append(f"| 8. Пары ADIS ↔ Sentinel-2 | A {fmt(ad.get('A'), None)} (≈ {fmt(ad.get('A_passes'), None)} проходов), с предметами "
+                    f"{fmt(ad.get('A_with_items'), None)} — пикселей детектора {fmt(ad.get('A_with_items_det_px'), None)} при "
+                    f"{fmt(ad.get('A_with_items_density_min'), 'f1')}–{fmt(ad.get('A_with_items_density_max'), 'f1')} шт./км² | {ad.get('protocol')} | `{ad.get('source')}` |")
+    if ld.get("available"):
+        rows.append(f"| 9. Новые размеченные данные B/D | B: {fmt(ld.get('b_new_acq'), None)} съёмок PLP/FloatingObjects + "
+                    f"{fmt((ld.get('cozar') or {}).get('windows'), 'int')} окон Cózar; D: {fmt((ld.get('vessels') or {}).get('boxes'), 'int')} судов, "
+                    f"{fmt((ld.get('clouds') or {}).get('scenes'), None)} сцен облаков; утечек {fmt(ld.get('leaks_total'), None)} | {ld.get('protocol')} | `{ld.get('source')}` |")
+    if v2.get("available"):
+        rows.append(f"| 10. Детектор v2 (дообучение на B + D) | вариантов {fmt(v2.get('n_variants'), None)} × {fmt(v2.get('n_seeds'), None)} seed, "
+                    f"принято {fmt(v2.get('n_accept'), None)}; в сервисе {v2.get('current_model')} | {v2.get('protocol')} | `{v2.get('source')}` |")
+    if bl.get("available"):
+        u = ((bl.get("test") or {}).get("unet_argmax")) or {}
+        ci_ = bl.get("test_lgbm_minus_unet_ci95") or [None, None]
+        rows.append(f"| 11. Бейзлайн U-Net MARIDA | test F1 {fmt(u.get('f1'), 'f3')}; LightGBM лучше на {fmt(bl.get('test_lgbm_minus_unet'), 'f3')} "
+                    f"[{fmt(ci_[0], 'f3')}; {fmt(ci_[1], 'f3')}] | {bl.get('protocol')} | `{bl.get('source')}` |")
+    if qn.get("available"):
+        c = qn.get("calibration") or {}
+        rows.append(f"| 12. Количество: поле и доля покрытия раздельно | калибровки нет (пар A с ненулевым сигналом {fmt(c.get('pairs_A_with_S_pos'), None)}); "
+                    f"для k в ×/÷2 нужно {fmt(c.get('n_pairs_k_x2_min'), None)}–{fmt(c.get('n_pairs_k_x2_max'), None)} пар с сигналом | {qn.get('protocol')} | `{qn.get('source')}` |")
+    if oil.get("available"):
+        rows.append(f"| 13. Нефтяное пятно (эксперимент, выключен) | MADOS test F1 {fmt(oil.get('test_f1'), 'f3')} против OSI {fmt(oil.get('test_osi_f1'), 'f3')}; "
+                    f"контроль Wakashio на L2A не пройден | {oil.get('protocol')} | `{oil.get('source')}` |")
     return "\n".join(rows)
+
+
+def _sec(fn: dict, key: str) -> dict:
+    return (((fn.get("case") or {}).get("sections") or {}).get(key)) or {}
+
+
+def _reasons_txt(d: dict, top: int = 3) -> str:
+    items = sorted((d or {}).items(), key=lambda kv: -kv[1])[:top]
+    return "; ".join(f"{k} {v}" for k, v in items) or DASH
+
+
+def case_search_table(fn: dict) -> str:
+    """§11: розыск снимков по источникам (reports/search/*_candidates.csv) — уровни A–D и причины D."""
+    s = _sec(fn, "search")
+    bs = s.get("by_source") or {}
+    if not bs:
+        return DASH
+    rows = ["| Источник | Событий в CSV организаторов | Строк-кандидатов (событий проверено) | Сцен | A | C | D | Главные причины D |",
+            "|---|---:|---:|---:|---:|---:|---:|---|"]
+    for key in ("S1", "S2", "S3", "S4", "ADIS"):
+        r = bs.get(key) or {}
+        if not r.get("available"):
+            rows.append(f"| {key} | — | нет файла | — | — | — | — | — |")
+            continue
+        rows.append(f"| {r.get('name')} | {fmt(r.get('events_in_csv'), None)} | {fmt(r.get('rows'), None)} ({fmt(r.get('events_checked'), None)}) | "
+                    f"{fmt(r.get('scenes'), None)} | **{fmt(r.get('A'), None)}** | {fmt(r.get('C'), None)} | {fmt(r.get('D'), None)} | "
+                    f"{_reasons_txt(r.get('d_reasons'))} |")
+    return "\n".join(rows)
+
+
+def case_labeled_table(fn: dict) -> str:
+    """§11 п.2: новые размеченные данные B/D (реестры reports/extra_data) и что на них показал текущий детектор."""
+    L = _sec(fn, "labeled_data")
+    v2 = _sec(fn, "detector_v2")
+    ref = v2.get("reference") or {}
+    if not L:
+        return DASH
+    plp, fo, cz, ves, cl, zs = (L.get(k) or {} for k in ("plp", "floatingobjects", "cozar", "vessels", "clouds", "zero_shot"))
+    rows = ["| Набор | Уровень | Объём | Лицензия | Текущий детектор без дообучения |", "|---|---|---|---|---|",
+            f"| PLP (Plastic Litter Project), искусственные мишени | B | {fmt(plp.get('acq_B'), None)} съёмок S2 | {plp.get('license') or DASH} | "
+            f"мишени из пластика (доля ≥ 0.5): найдено {fmt(zs.get('plp_plastic_recall_pct'), 'f1')} % пикселей |",
+            f"| FloatingObjects + Refined, естественные скопления | B (+ D) | {fmt(fo.get('acq_B'), None)} съёмок, {fmt(fo.get('regions'), None)} регионов | "
+            f"{fo.get('license') or DASH} | Refined B: {fmt(zs.get('refined_B_recall_pct'), 'f1')} % пикселей; линии FO: "
+            f"{fmt(zs.get('fo_line_recall_pct'), 'f1')} %; Refined D: {fmt(zs.get('refined_D_flagged_pct'), 'f1')} % |",
+            f"| Cózar et al. 2024, нити плавучего материала | B | {fmt(cz.get('windows'), 'int')} окон, {fmt(cz.get('acq'), 'int')} съёмок, "
+            f"{fmt(cz.get('km2'), 'f2')} км² | {cz.get('license') or DASH} | {fmt(ref.get('cozar_hit'), None)} из {fmt(ref.get('cozar_n'), None)} "
+            f"случайных нитей на L2A ({fmt(ref.get('cozar_pct'), 'f0')} %) |",
+            f"| Суда у Финляндии (Zenodo 15019034) | D | {fmt(ves.get('boxes'), 'int')} рамок, {fmt(ves.get('acq'), None)} съёмок, "
+            f"{fmt(ves.get('hull_px'), 'int')} пикс. корпусов | {ves.get('license') or DASH} | ложные на {fmt(ves.get('boxes_flagged'), None)} рамках "
+            f"({fmt(ves.get('boxes_flagged_pct'), 'f1')} %) |",
+            f"| Cloud Mask Catalogue (Zenodo 4172871) | D | {fmt(cl.get('scenes'), None)} сцен, {fmt(cl.get('px_cloud'), 'int')} пикс. облаков, "
+            f"{fmt(cl.get('px_shadow'), 'int')} теней | {cl.get('license') or DASH} | {fmt(cl.get('cloud_px_flagged'), None)} пикс. облаков из "
+            f"{fmt(cl.get('px_cloud'), 'int')} |"]
+    return "\n".join(rows)
+
+
+def case_baselines_u_table(fn: dict) -> str:
+    """Бейзлайны детектора на одном test MARIDA: LightGBM, RandomForest, U-Net MARIDA (официальные веса), FDI × NDVI."""
+    b = _sec(fn, "baselines")
+    t = b.get("test") or {}
+    fdi = ((((fn.get("case") or {}).get("detector") or {}).get("test") or {}).get("fdi_ndvi_box") or {})
+    if not t:
+        return DASH
+
+    def ci(c):
+        return f"[{fmt(c[0], 'f3')}–{fmt(c[1], 'f3')}]" if isinstance(c, list) and len(c) == 2 else DASH
+    rows = ["| Модель (test MARIDA) | F1 Marine Debris | 95 % ДИ | Точность | Полнота |", "|---|---:|---|---:|---:|"]
+    for name, key in (("LightGBM (наш, основной)", "lgbm"), ("RandomForest, протокол MARIDA", "rf_argmax"),
+                      ("U-Net MARIDA, официальные веса, argmax", "unet_argmax"), ("U-Net MARIDA, порог по val", "unet_prob")):
+        r = t.get(key) or {}
+        rows.append(f"| {name} | {fmt(r.get('f1'), 'f3')} | {ci(r.get('ci95'))} | {fmt(r.get('precision'), 'f3')} | {fmt(r.get('recall'), 'f3')} |")
+    rows.append(f"| окно FDI × NDVI | {fmt(fdi.get('f1'), 'f3')} | — | {fmt(fdi.get('precision'), 'f3')} | {fmt(fdi.get('recall'), 'f3')} |")
+    return "\n".join(rows)
+
 
 
 def derived(fn: dict) -> dict:
@@ -686,7 +790,9 @@ def derived(fn: dict) -> dict:
             "case_detector_table": case_detector_table(fn), "case_fp_table": case_fp_table(fn),
             "case_conc_table_S2": case_conc_table(fn, "S2"), "case_conc_table_S1": case_conc_table(fn, "S1"),
             "case_pairs_table": case_pairs_table(fn), "case_schemes_table": case_schemes_table(fn),"case_drift_table": case_drift_table(fn),
-            "case_final_test_text": case_final_test_text(fn), "case_sections_table": case_sections_table(fn)}
+            "case_final_test_text": case_final_test_text(fn), "case_sections_table": case_sections_table(fn),
+            "case_search_table": case_search_table(fn), "case_labeled_table": case_labeled_table(fn),
+            "case_baselines_u_table": case_baselines_u_table(fn)}
 
 
 def render(text: str, ctx: dict, missing: list) -> str:

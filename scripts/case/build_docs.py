@@ -9,7 +9,8 @@ r"""Сборка всех документов кейса одной коман�
   3. pytest тестов кейса (tests/test_case_*.py + tests/test_api_v3.py, включая сверку чисел документов)
      → reports/case_run/case_tests.json (passed / skipped / failed / секунды / время)
   4. final_numbers → render_docs → make_deck_case  ещё раз: в README и деку попадает фактическое число тестов этого прогона
-  5. pytest tests/test_case_docs_numbers.py     README, дека, речь, демо и вопросы = final_numbers.json
+  5. pytest tests/test_case_docs_numbers.py, tests/test_docs_numbers_search.py
+                                                README, отчёт, дека, речь, демо и вопросы = final_numbers.json (вкл. §11)
 
 Все числа README, отчёта, PREP, деки, речи, демо и вопросов берутся из reports/final_numbers.json. Руками после этой
 команды ничего не правится. CPU; сеть не нужна (маршрут офлайн, из кэша).
@@ -31,6 +32,7 @@ ROOT = Path(__file__).resolve().parents[2]
 PY = sys.executable
 TESTS_JSON = ROOT / "reports" / "case_run" / "case_tests.json"
 DOCS_TEST = "tests/test_case_docs_numbers.py"
+DOCS_TEST_SEARCH = "tests/test_docs_numbers_search.py"
 
 
 def case_test_files() -> list[str]:
@@ -86,12 +88,13 @@ def main(argv=None) -> int:
     if not a.no_run:
         run([PY, "scripts/case/run_all.py", "all", "--offline"])
     run([PY, "scripts/case/pairs_detector_summary.py"])  # текущий результат детектора на снимках пар
+    run([PY, "scripts/case/collect_search.py"])  # §11 расследование данных -> reports/search/search_numbers.json
     first = run([PY, "scripts/final_numbers.py"])  # noqa: F841
     run([PY, "scripts/render_docs.py"])
     run([PY, "scripts/make_deck_case.py"], check=False)  # при самом первом запуске ещё нет case_tests.json
     res = pytest_case()
     docs()
-    fin = run([PY, "-m", "pytest", "-q", "-p", "no:cacheprovider", DOCS_TEST], check=False)
+    fin = run([PY, "-m", "pytest", "-q", "-p", "no:cacheprovider", DOCS_TEST, DOCS_TEST_SEARCH], check=False)
     ok = fin.returncode == 0 and res["failed"] == 0
     print(f"[build_docs] {'готово' if ok else 'ЕСТЬ ОШИБКИ'} за {time.time() - t0:.0f} с")
     return 0 if ok else 1

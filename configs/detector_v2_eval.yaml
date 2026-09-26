@@ -1,0 +1,131 @@
+# FROZEN before detector_v2 experiments (L92). Do not edit; a new check = a new file.
+version: 1
+frozen_at: '2026-09-26T01:00:23'
+frozen_by: L92 (worker-ml), before any detector_v2 experiment
+test_policy: MARIDA test is NOT read (TL.load_split asserts train/val; opened once
+  for the final number, not for selection)
+primary:
+  name: MARIDA val (official split)
+  split_file: data/MARIDA/splits/val_X.txt
+  split_file_sha256: d5b4483ffdf28aa9aaa3dd49bcc8037ec59617e1985331e23ffb006d7b248ca7
+  feature_cache: out/l3_cache/val_win.npz
+  feature_cache_sha256: 811e179df852fd6210e8e88b675a1ed5267456cd71853186f02608f714ddeefc
+  n_patches: 328
+  n_scenes: 12
+  n_labelled_px: 213102
+  n_md_px: 1075
+  metric: F1 of Marine Debris vs all other labelled pixels (pooled), pixels with NaN
+    band -> not MD
+  threshold: chosen on val per model, grid [0.02, 0.98, 0.01] (project convention,
+    as weights/lgbm/meta.json); the same threshold is used on new data
+  ci: scene bootstrap 2000 reps, numpy default_rng(0) (as scripts/baselines.py)
+  seeds:
+  - 0
+  - 1
+  - 2
+new_data:
+  grouping_key: 'acquisition = <S2 tile>_<YYYYMMDD> (pairs: from data/pairs/quality/<scene>/meta.json;
+    extra: registry tile+date)'
+  fold_rule: fold = int(sha256('detector_v2:' + key)[:8], 16) % 3
+  protocol: '3-fold cross-fitting: objects of fold k are scored by a model trained
+    on MARIDA train + MADOS + new data of the other folds (never its own acquisition);
+    the final candidate is trained on all folds and is judged on MARIDA val only'
+  pairs_visual:
+    file: reports/case_pairs/visual_labels.csv
+    sha256: d93ce50b72deb31f3304773958571d8288353529c267da93aa9e23d326211594
+    labelled_by: AI agent, image chips, one annotator (L78b) - verified D, NOT field
+      truth
+    class_to_D:
+      foam_whitecap: foam
+      cloud: cloud
+      glint: glint
+      ship_wake: ship
+      seam_artifact: artifact
+    excluded:
+      unclear: not verified
+      accumulation: level C candidate - never a positive label
+    train_confidence:
+    - high
+    - medium
+    eval_confidence: all (high/medium/low reported separately)
+    pixels: all pixels of the object bbox (bbox of a 1-8 px component; extra pixels
+      are adjacent water, also not debris)
+    band_cache: out/l78_bands/<scene>.npz (S2 L2A crops, scripts/case/pairs_detector_review.py)
+    composition:
+      fold0:
+        acquisitions:
+        - 36TUN_20240617
+        - 37TCH_20240603
+        scenes:
+        - S4_DOORS3_T12
+        - S4_DOORS3_T13
+        - S4_DOORS3_T30
+        - S4_DOORS3_T31
+        objects_by_class:
+          glint: 8
+          cloud: 7
+          unclear: 1
+          seam_artifact: 1
+      fold1:
+        acquisitions:
+        - 32ULF_20160411
+        - 37TCG_20240603
+        - 37TDG_20240603
+        - 37TGG_20240607
+        scenes:
+        - S3_HE460_MarLitter_transect03
+        - S4_DOORS3_T14
+        - S4_DOORS3_T16
+        - S4_DOORS3_T20
+        - S4_DOORS3_T21
+        objects_by_class:
+          foam_whitecap: 50
+          cloud: 13
+          unclear: 12
+          seam_artifact: 3
+          glint: 3
+          ship_wake: 2
+          accumulation: 1
+      fold2:
+        acquisitions:
+        - 32UMF_20160408
+        - 35TQJ_20240602
+        - 37TGG_20240612
+        scenes:
+        - S3_HE460_MarLitter_transect01
+        - S4_DOORS3_T2
+        - S4_DOORS3_T25
+        objects_by_class:
+          cloud: 7
+          ship_wake: 3
+  extra: 'data/extra/features_*.npz + registry*.csv (L89/L90): same fold rule on tile_date;
+    the composition is computed deterministically by the rule and written to out/detector_v2/extra_folds.json'
+  metrics:
+    D_false_alarm: share of D objects with max P(MD) over the object's pixels >= the
+      model's val threshold; Wilson 95 % CI; inputs 'none' (as the service now) =
+      primary, 'water_median' = secondary
+    B_recall: share of B objects with max P >= threshold (and pixel recall); Wilson
+      95 % CI
+  descriptive_only: flag rate on 5000 random valid-water pixels per pair crop (22
+    S2 crops, unlabelled; not used for decisions)
+reference:
+  weights: weights/lgbm
+  model_sha256: 0eeebf43fcccd8c7c07f053b7ec723229d1a3c9b92d12eec1bdb269258c51470
+  threshold: 0.63
+  note: rollback; trained on MARIDA train + MADOS (config in its meta.json) - r0 re-trains
+    the same config with seeds 0-2 to measure seed std
+baselines:
+  fdi_threshold: single FDI threshold + direction tuned on val (scripts/baselines.py
+    sweep)
+  rf: RandomForest MARIDA params (data/case/detector_preds/rf_seed5.joblib, sha256
+    523a32d6529f3f5b...), trained on MARIDA train, 19 features; P(MD) >= t tuned on
+    val, and argmax
+acceptance:
+  primary_project_rule: ACCEPT if mean_seeds F1_val(cand) - F1_val(reference) >= max(0.01,
+    2*std_seeds(cand), 2*std_seeds(r0)) AND D false-alarm (none) not higher than reference
+    by > 0.05 AND B recall (if B exists) not lower than reference by > 0.05
+  secondary_domain_rule: DOMAIN CANDIDATE (orchestrator decides) if F1_val(cand) >=
+    F1_val(reference) - 0.01 for the seed mean AND the D false-alarm rate (none) is
+    lower than reference with exact McNemar p < 0.05 on the same D objects for every
+    seed AND B recall non-inferior (-0.05)
+  otherwise: REJECT (the rollback weights/lgbm stays)

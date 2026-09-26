@@ -1355,6 +1355,19 @@ def _case_sections(c: dict) -> dict:
     }
 
 
+def _case_search() -> dict:
+    """Раздел «Расследование данных» (§11): scripts/case/collect_search.py, только файлы в git (офлайн)."""
+    import importlib.util
+    try:
+        spec = importlib.util.spec_from_file_location("collect_search", ROOT / "scripts" / "case" / "collect_search.py")
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        return m.collect()
+    except Exception as e:  # noqa: BLE001
+        print(f"[final_numbers] collect_search: {type(e).__name__}: {e}")
+        return {"search": {"available": False, "error": f"{type(e).__name__}: {e}"}}
+
+
 def collect_case() -> dict:
     """Case «макропластик, шт./км²»: selection, pairs, detector on MARIDA test, concentration (dev CV + frozen test),
     pairs experiment, run_all summary. Sources: reports/case_run/run_summary.json, reports/case_conc/*, configs/case_*.yaml,
@@ -1432,6 +1445,7 @@ def collect_case() -> dict:
                                                  ("source", "protocol", "mode", "n_crops", "n_obj", "n_in_strip",
                                                   "wo_he460_false_share_pct", "no_harmonize_n_obj")},
                                               "visual_precision_pct": (dc.get("visual_review") or {}).get("h_out_precision_pct")}
+    out["sections"].update(_case_search())  # §11: search, labeled_data, adis_pairs, baselines, quantity, oil, detector_v2
     out["splits_files"] = len(glob.glob(str(ROOT / "reports" / "case_splits" / "*.csv"))) or None
     tests = 0
     for p in glob.glob(str(ROOT / "tests" / "test_case_*.py")) + [str(ROOT / "tests" / "test_api_v3.py")]:

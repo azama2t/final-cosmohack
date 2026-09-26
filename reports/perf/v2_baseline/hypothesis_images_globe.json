@@ -1,0 +1,66 @@
+{
+ "as_is": [
+  {
+   "pan_fps": 47.7,
+   "pan_over17": 0.559,
+   "fly_fps": 45.6,
+   "fly_long50": 0.053,
+   "fly_over17": 0.548
+  },
+  {
+   "pan_fps": 55.8,
+   "pan_over17": 0.425,
+   "fly_fps": 43.6,
+   "fly_long50": 0.053,
+   "fly_over17": 0.559
+  }
+ ],
+ "no_images": [
+  {
+   "pan_fps": 93.2,
+   "pan_over17": 0.1,
+   "fly_fps": 45,
+   "fly_long50": 0.043,
+   "fly_over17": 0.575
+  },
+  {
+   "pan_fps": 99.7,
+   "pan_over17": 0.082,
+   "fly_fps": 52.8,
+   "fly_long50": 0.02,
+   "fly_over17": 0.493
+  }
+ ],
+ "mercator": [
+  {
+   "pan_fps": 124.8,
+   "pan_over17": 0.024,
+   "fly_fps": 80.1,
+   "fly_long50": 0.005,
+   "fly_over17": 0.127
+  },
+  {
+   "pan_fps": 100.5,
+   "pan_over17": 0.083,
+   "fly_fps": 62.4,
+   "fly_long50": 0.006,
+   "fly_over17": 0.336
+  }
+ ],
+ "no_images_mercator": [
+  {
+   "pan_fps": 110.6,
+   "pan_over17": 0.054,
+   "fly_fps": 88.6,
+   "fly_long50": 0.002,
+   "fly_over17": 0.108
+  },
+  {
+   "pan_fps": 134.2,
+   "pan_over17": 0.012,
+   "fly_fps": 92,
+   "fly_long50": 0.006,
+   "fly_over17": 0.082
+  }
+ ]
+}

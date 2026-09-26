@@ -1,0 +1,248 @@
+{
+ "open_studio_s": 0.648,
+ "cpu": {
+  "total_ms": 8832,
+  "idle_program_ms": 6045,
+  "top_self": [
+   {
+    "fn": "texImage2D",
+    "file": "",
+    "line": 0,
+    "col": 0,
+    "ms": 172.2,
+    "share_busy": 0.062
+   },
+   {
+    "fn": "receive",
+    "file": "maplibre-CMX7JeUv.js",
+    "line": 5,
+    "col": 300391,
+    "ms": 110.1,
+    "share_busy": 0.039
+   },
+   {
+    "fn": "draw",
+    "file": "maplibre-CMX7JeUv.js",
+    "line": 801,
+    "col": 2157,
+    "ms": 89.6,
+    "share_busy": 0.032
+   },
+   {
+    "fn": "fromInvProjectionMatrix",
+    "file": "maplibre-CMX7JeUv.js",
+    "line": 799,
+    "col": 13672,
+    "ms": 74.2,
+    "share_busy": 0.027
+   },
+   {
+    "fn": "(garbage collector)",
+    "file": "",
+    "line": 0,
+    "col": 0,
+    "ms": 70.3,
+    "share_busy": 0.025
+   },
+   {
+    "fn": "uniformMatrix4fv",
+    "file": "",
+    "line": 0,
+    "col": 0,
+    "ms": 68.1,
+    "share_busy": 0.024
+   },
+   {
+    "fn": "line",
+    "file": "maplibre-CMX7JeUv.js",
+    "line": 801,
+    "col": 60982,
+    "ms": 67.0,
+    "share_busy": 0.024
+   },
+   {
+    "fn": "drawElements",
+    "file": "",
+    "line": 0,
+    "col": 0,
+    "ms": 66.1,
+    "share_busy": 0.024
+   },
+   {
+    "fn": "O_.R.S",
+    "file": "maplibre-CMX7JeUv.js",
+    "line": 5,
+    "col": 302668,
+    "ms": 63.7,
+    "share_busy": 0.023
+   },
+   {
+    "fn": "set",
+    "file": "maplibre-CMX7JeUv.js",
+    "line": 5,
+    "col": 61800,
+    "ms": 61.2,
+    "share_busy": 0.022
+   },
+   {
+    "fn": "Jr",
+    "file": "maplibre-CMX7JeUv.js",
+    "line": 5,
+    "col": 421678,
+    "ms": 60.0,
+    "share_busy": 0.022
+   },
+   {
+    "fn": "getAllTiles",
+    "file": "maplibre-CMX7JeUv.js",
+    "line": 5,
+    "col": 425405,
+    "ms": 50.7,
+    "share_busy": 0.018
+   },
+   {
+    "fn": "_calcMatrices",
+    "file": "maplibre-CMX7JeUv.js",
+    "line": 799,
+    "col": 9576,
+    "ms": 48.8,
+    "share_busy": 0.017
+   },
+   {
+    "fn": "calculatePosMatrix",
+    "file": "maplibre-CMX7JeUv.js",
+    "line": 799,
+    "col": 22672,
+    "ms": 43.3,
+    "share_busy": 0.016
+   },
+   {
+    "fn": "ln",
+    "file": "maplibre-CMX7JeUv.js",
+    "line": 799,
+    "col": 52633,
+    "ms": 43.0,
+    "share_busy": 0.015
+   },
+   {
+    "fn": "set",
+    "file": "maplibre-CMX7JeUv.js",
+    "line": 801,
+    "col": 24819,
+    "ms": 42.6,
+    "share_busy": 0.015
+   },
+   {
+    "fn": "(anonymous)",
+    "file": "maplibre-CMX7JeUv.js",
+    "line": 799,
+    "col": 14028,
+    "ms": 39.0,
+    "share_busy": 0.014
+   },
+   {
+    "fn": "_renderTileMasks",
+    "file": "maplibre-CMX7JeUv.js",
+    "line": 803,
+    "col": 5833,
+    "ms": 37.7,
+    "share_busy": 0.014
+   },
+   {
+    "fn": "$e",
+    "file": "maplibre-CMX7JeUv.js",
+    "line": 4,
+    "col": 5165,
+    "ms": 34.1,
+    "share_busy": 0.012
+   },
+   {
+    "fn": "useProgram",
+    "file": "maplibre-CMX7JeUv.js",
+    "line": 803,
+    "col": 13752,
+    "ms": 33.9,
+    "share_busy": 0.012
+   }
+  ],
+  "by_file": [
+   {
+    "file": "(idle)",
+    "ms": 5303.7
+   },
+   {
+    "file": "maplibre-CMX7JeUv.js",
+    "ms": 2038.8
+   },
+   {
+    "file": "(program)",
+    "ms": 741.2
+   },
+   {
+    "file": "texImage2D",
+    "ms": 172.2
+   },
+   {
+    "file": "index-DtLfk58M.js",
+    "ms": 86.0
+   },
+   {
+    "file": "(garbage collector)",
+    "ms": 70.3
+   },
+   {
+    "file": "uniformMatrix4fv",
+    "ms": 68.1
+   },
+   {
+    "file": "drawElements",
+    "ms": 66.1
+   },
+   {
+    "file": "bindVertexArray",
+    "ms": 30.2
+   },
+   {
+    "file": "fetch",
+    "ms": 28.0
+   },
+   {
+    "file": "Blob",
+    "ms": 19.2
+   },
+   {
+    "file": "requestAnimationFrame",
+    "ms": 13.6
+   },
+   {
+    "file": "bindTexture",
+    "ms": 12.0
+   },
+   {
+    "file": "(anonymous)",
+    "ms": 12.0
+   },
+   {
+    "file": "useProgram",
+    "ms": 12.0
+   }
+  ]
+ },
+ "resources": [
+  {
+   "u": "http://127.0.0.1:8072/api/v3/studio/scenes?limit=2000",
+   "ms": 754,
+   "kb": 36
+  },
+  {
+   "u": "tp://127.0.0.1:8072/api/v3/studio/scenes?bbox=-58.0739,29.0041,-57.9793,29.2784&limit=2000",
+   "ms": 1036,
+   "kb": 1
+  },
+  {
+   "u": "tp://127.0.0.1:8072/api/v3/studio/scenes?bbox=-58.0739,29.0041,-57.9793,29.2784&limit=2000",
+   "ms": 45,
+   "kb": 1
+  }
+ ]
+}
