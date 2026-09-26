@@ -63,6 +63,8 @@ export interface CaseMapProps {
   /** §54 п.1: NASA GIBS daily overview (tile URL of one layer + day), off by default; not a detection */
   nasa?: { url: string; maxzoom: number } | null;
   /** §55 п.1: «Реальное время» — a fresh Sentinel-2 snapshot processed by our model (RGB + its zones), not human-checked */
+  /** a click on a fresh-snapshot point (c-rt-pts) */
+  onFreshPick?: (key: string) => void;
   fresh?: { key: string; img: string | null; bounds: number[] | null; zones: FC<any> | null; pts?: { key: string; c: number[]; finds: number; label: string }[] } | null;
   /** §34 п.3: numbers of the zones of the snapshot opened in the left list (same numbers as the list) */
   numbered?: { id: string; n: number; at: [number, number]; ds: string }[];
@@ -632,6 +634,10 @@ export default function CaseMap(p: CaseMapProps) {
       });
     });
     map.on('mouseout', () => props.current.onHover(null));
+    map.on('click', 'c-rt-pts', (e: any) => {
+      const id = e.features?.[0]?.properties?.id;
+      if (id) props.current.onFreshPick?.(String(id));
+    });
     map.on('click', (e) => {
       const h: any = hit(e.point);
       props.current.onHover(null); // the tooltip goes out after a click

@@ -16,6 +16,29 @@ export function setPrime(on: boolean) {
   primeOn = on;
   window.dispatchEvent(new CustomEvent<boolean>(EV, { detail: on }));
 }
+/** §60 А1: last settled camera of the REAL map (updated only while PRIME is off; the first one is the start view).
+ *  Used when PRIME was switched on before the map existed (?prime=1, early click) → on off we still return there. */
+type Cam = { center: any; zoom: number; bearing: number; pitch: number; padding: any };
+const camOf = (m: any): Cam => ({ center: m.getCenter(), zoom: m.getZoom(), bearing: m.getBearing(), pitch: m.getPitch(), padding: m.getPadding?.() });
+const noPad = (p: any) => !p || (!p.top && !p.bottom && !p.left && !p.right);
+let realCam: Cam | null = null;
+let camMap: any = null;
+let camWatch = 0;
+function watchRealCamera() {
+  if (camWatch) return;
+  const tick = () => {
+    const m = (window as any).__caseMap;
+    if (!m?.getCenter || m === camMap) return;
+    camMap = m;
+    realCam = !primeOn || (noPad(m.getPadding?.()) && !m.isMoving?.()) ? camOf(m) : null;
+    m.on('moveend', () => {
+      if (!primeOn && !m.isMoving()) realCam = camOf(m);
+    });
+  };
+  tick();
+  camWatch = window.setInterval(tick, 250);
+}
+
 function usePrime(): boolean {
   const [on, setOn] = useState(primeOn);
   useEffect(() => {
@@ -56,9 +79,7 @@ function useDimRealLayers(on: boolean) {
     // §60 А1: the full camera is restored on off. flyToScene / fitBounds of the demo points fly with a big
     // left/bottom padding, and MapLibre keeps flyTo padding on the camera → restoring only center+zoom
     // left the globe shifted off screen. So padding, bearing and pitch are saved and restored too.
-    const cam = m0?.getCenter
-      ? { center: m0.getCenter(), zoom: m0.getZoom(), bearing: m0.getBearing(), pitch: m0.getPitch(), padding: m0.getPadding?.() }
-      : null;
+    const cam0: Cam | null = m0?.getCenter ? camOf(m0) : null;
     const apply = () => {
       map = (window as any).__caseMap;
       if (!map?.getStyle || !map.style) return;
@@ -96,11 +117,13 @@ function useDimRealLayers(on: boolean) {
       }
       // camera: stop a demo fly still in progress, then put back the pre-PRIME view (or at least clear the demo padding)
       const mc = (window as any).__caseMap;
+      // camera at switch-on; if the map did not exist yet — the last real (or start) camera of this map
+      const cam = cam0 && mc === m0 ? cam0 : realCam && mc === camMap ? realCam : null;
       try {
         if (mc?.jumpTo && mc.style) {
           mc.stop?.();
           const zero = { top: 0, bottom: 0, left: 0, right: 0 };
-          if (cam && mc === m0) mc.jumpTo({ ...cam, padding: cam.padding ?? zero });
+          if (cam) mc.jumpTo({ ...cam, padding: cam.padding ?? zero });
           else mc.jumpTo({ padding: zero });
         }
       } catch {
@@ -300,6 +323,7 @@ function PrimeHostInner() {
   const [inlinePresent, setInlinePresent] = useState(false);
   const [pos, setPos] = useState<Pos | null | undefined>(undefined);
   const rect = useMainRect(true);
+  useEffect(watchRealCamera, []);
   useDimRealLayers(on);
   useEffect(() => {
     const chk = () => {

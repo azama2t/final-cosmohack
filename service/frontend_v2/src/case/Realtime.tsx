@@ -42,6 +42,11 @@ export interface FreshInfo {
   counter?: string;
   last_update?: string | null;
   new_scenes_last_run?: number | null;
+  funnel_label?: string;
+  last_success_label?: string;
+  counter_note?: string;
+  search_window?: { days?: number; label?: string };
+  funnel?: { status_note?: string | null; complete?: boolean };
   honesty?: { nasa?: string; detector_on?: string; quantity?: string; class?: string };
   regions: FreshRegion[];
 }
@@ -92,7 +97,8 @@ export function RealtimeFolder({
         <span className="c-mk rt" aria-hidden /> {fi?.folder ?? 'Реальное время'} · свежие Sentinel-2 (авто)
         <span className="faint c-rt-sum" data-testid="realtime-summary">
           {' '}
-          · {fi ? fi.counter : fresh === 'error' ? 'недоступно' : 'загрузка…'}
+          · {fi ? fi.search_window?.label ?? fi.counter : fresh === 'error' ? 'недоступно' : 'загрузка…'}
+          {fi?.last_success_label ? ` · ${fi.last_success_label}` : ''}
         </span>
       </summary>
       <details className="c-rt-sub" open data-testid="realtime-s2">
@@ -101,11 +107,18 @@ export function RealtimeFolder({
         {!fresh && <div className="note c-pad-s">загрузка…</div>}
         {fi && (
           <>
+            {fi.funnel_label && (
+              <div className="c-rt-counter" data-testid="realtime-funnel">
+                {fi.funnel_label}
+              </div>
+            )}
+            {fi.funnel?.status_note && <div className="note c-pad-s">{fi.funnel.status_note}</div>}
             <div className="c-rt-counter" data-testid="realtime-counter">
               {fi.counter}
             </div>
+            {fi.counter_note && <div className="note c-pad-s">{fi.counter_note}</div>}
             <div className="note c-pad-s" data-testid="realtime-updated">
-              последнее обновление: {hhmm(fi.last_update)}, новых снимков: {fi.new_scenes_last_run ?? 0}
+              {fi.last_success_label ?? `последнее обновление: ${hhmm(fi.last_update)}`}, новых снимков в последнем запуске: {fi.new_scenes_last_run ?? 0}
             </div>
             <div className="c-rt-label" data-testid="realtime-label">
               {fi.label ?? 'автоматически, не проверено человеком'}

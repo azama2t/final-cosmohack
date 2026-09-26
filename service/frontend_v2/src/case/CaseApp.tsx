@@ -1157,6 +1157,12 @@ export default function CaseApp() {
           scenes={sceneList}
           nasa={nasa}
           fresh={freshMap}
+          onFreshPick={(k) => {
+            const s = freshAll.find((x) => x.key === k) ?? null;
+            if (!s) return;
+            setFreshScene(s);
+            if (s.bounds) flyToBox(s.bounds as Bbox, { maxZoom: 12, duration: 1200 });
+          }}
           layers={q.layers}
           selected={sel}
           pairHl={pairHl}
