@@ -60,6 +60,8 @@ export interface CaseMapProps {
   detections: FC<any> | null;
   /** satellite scene zones (/api/v3/scene_zones, 3.10) */
   szones?: FC<any> | null;
+  /** §54 п.1: NASA GIBS daily overview (tile URL of one layer + day), off by default; not a detection */
+  nasa?: { url: string; maxzoom: number } | null;
   /** §34 п.3: numbers of the zones of the snapshot opened in the left list (same numbers as the list) */
   numbered?: { id: string; n: number; at: [number, number]; ds: string }[];
 }
@@ -222,6 +224,7 @@ export default function CaseMap(p: CaseMapProps) {
   const appliedStyle = useRef<Basemap | null>(null);
   const selMarker = useRef<maplibregl.Marker | null>(null);
   const sceneKeys = useRef<string[]>([]);
+  const nasaKey = useRef('');
 
   /** (re)create sources + layers after every style load; then update data */
   const sync = () => {
@@ -429,6 +432,27 @@ export default function CaseMap(p: CaseMapProps) {
     // keep quality above rgb when an rgb layer is added later
     for (const w of want) if (w.kind === 'q' && map.getLayer(w.key)) map.moveLayer(w.key, 'c-scene-fp');
     sceneKeys.current = [...wantKeys];
+
+    // §53 п.6: NASA GIBS overview — below the snapshot images and every vector layer, above the basemap
+    {
+      const nk = cur.nasa ? cur.nasa.url : '';
+      if (map.getSource('c-nasa') && nasaKey.current !== nk) {
+        if (map.getLayer('c-nasa')) map.removeLayer('c-nasa');
+        map.removeSource('c-nasa');
+      }
+      if (cur.nasa && !map.getSource('c-nasa')) {
+        map.addSource('c-nasa', {
+          type: 'raster',
+          tiles: [cur.nasa.url],
+          tileSize: 256,
+          maxzoom: cur.nasa.maxzoom,
+          attribution: 'NASA EOSDIS GIBS',
+        });
+        const below = sceneKeys.current.find((k) => map.getLayer(k)) ?? 'c-scene-fp';
+        map.addLayer({ id: 'c-nasa', type: 'raster', source: 'c-nasa', paint: { 'raster-opacity': 0.9, 'raster-fade-duration': 0 } }, below);
+      }
+      nasaKey.current = nk;
+    }
 
     // visibility + selection
     const vis = (id: string, on: boolean) => map.getLayer(id) && map.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none');
@@ -662,7 +686,7 @@ export default function CaseMap(p: CaseMapProps) {
   }, [p.projection]);
 
   // ---- data ----
-  useEffect(sync, [p.obs, p.zones, p.scenes, p.layers, p.selected, p.pairHl, p.meta, p.detections, p.szones]);
+  useEffect(sync, [p.obs, p.zones, p.scenes, p.layers, p.selected, p.pairHl, p.meta, p.detections, p.szones, p.nasa]);
 
   // ---- scenes with a quality mask but no RGB preview: say so (the translucent mask alone is not a picture) ----
   const noPrevMarkers = useRef<maplibregl.Marker[]>([]);

@@ -11,6 +11,8 @@ import { ObsCard, ZoneCard } from './Cards';
 import PairsDrawer from './PairsDrawer';
 import SceneZoneCard, { zoneTitle, type CardTab, type SceneZoneDetail, type SceneZoneProps } from './SceneZoneCard';
 import { SZ_COLORS, szKey, isFind, geomCenter } from './CaseMap';
+import { NasaFolder, NasaMapPanel, useNasaInfo } from './Nasa';
+import { DronesOptions, openDrones, openDronesFromValue } from './DronesHost';
 import { PhotoRolesLine } from './PhotoRoles';
 import ZoneStudio from './Studio'; // §50 P1-4/5/6 L142
 import { QualityToggle } from './QualityMask'; // §50 P1-6 L142
@@ -50,6 +52,7 @@ import type { DriftFile } from '../types';
 import { checkLine, closeDrift, driftBounds, driftCaption, driftKey, driftPaths, openDrift, renderDrift } from './drift';
 import { DRIFT_CORRIDOR_LABEL } from './DriftLayer';
 import DemoTour, { type DemoTourHandle } from './DemoTour';
+import DriftMapButton from './DriftMapButton'; // §54 п.4 (L141): «Дрейф» visible on the map next to the selected find
 
 type Load<T> = { data: T | null; err: string | null; loading: boolean };
 const L0 = { data: null, err: null, loading: false };
@@ -158,6 +161,12 @@ export default function CaseApp() {
   const queryMenu = useMenu();
   const layerMenu = useMenu();
   const moreMenu = useMenu();
+  // §54 п.1: NASA «ежедневно» — one «NASA» button shows / hides the folder, the layer and its captions; off by default,
+  // not part of the query / URL
+  const [nasaOn, setNasaOn] = useState(false);
+  const [nasaLayerId, setNasaLayerId] = useState<string | null>(null);
+  const [nasaDay, setNasaDay] = useState<string | null>(null);
+  const nasaInfo = useNasaInfo(nasaOn);
   // «Запросы» live inside «Ещё ▾»: closing «Ещё» closes them too (no stale open state behind a closed menu)
   useEffect(() => {
     if (!moreMenu.open) queryMenu.setOpen(false);
@@ -292,6 +301,13 @@ export default function CaseApp() {
   /** the snapshot shown: the one opened in the list, else the scene of the open zone */
   const curScene = scene ?? selSz?.properties.scene_key ?? null;
   const szScene = useMemo(() => (szScenes.data?.scenes ?? []).find((s) => s.scene_key === curScene) ?? null, [szScenes.data, curScene]);
+  /** §54 п.1: the NASA day — chosen by the user (arrows / timeline), else the latest full day from the API */
+  const nasaDate = nasaDay ?? nasaInfo?.latestFull ?? new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+  const nasaLayer = nasaInfo ? nasaInfo.layers.find((x) => x.id === (nasaLayerId ?? nasaInfo.defaultLayer)) ?? nasaInfo.layers[0] : null;
+  const nasa = useMemo(
+    () => (nasaOn && nasaLayer ? { url: nasaLayer.tile_url.replace('{date}', nasaDate), maxzoom: nasaLayer.max_native_zoom ?? 9 } : null),
+    [nasaOn, nasaLayer, nasaDate],
+  );
   // image overlays: the chosen snapshot; candidate scenes of the field pairs only with the «Полевые измерения» layer
   const sceneList = useMemo(() => {
     const extra = szScene && szScene.evaluable !== false ? [szScene as Scene] : [];
@@ -802,6 +818,8 @@ export default function CaseApp() {
           two share one top-right action group with fixed gaps — a standalone fixed button used to sit at the exact
           same corner and cover «Слои» once the card panel was closed (Егор, скрин 11). */}
       <DemoTour ref={demoRef} />
+      {/* §54 п.4: «Дрейф» кнопка на карте у выбранной находки, не только во вкладке карточки */}
+      <DriftMapButton zone={selSz} path={selDriftPath} on={!!drift} onToggle={toggleDrift} />
       {/* ------------------------------------------------ left: mode, filters, snapshots → zones */}
       <aside className="left" data-panel="left">
         <div className="modebar">
@@ -841,7 +859,12 @@ export default function CaseApp() {
               </div>
               <label className="c-f">
                   <span>Район</span>
-                  <select value={q.area && q.area !== 'bbox' ? q.area : q.area === 'bbox' ? 'bbox' : ''} onChange={(e) => setArea(e.target.value)} data-testid="f-source">
+                  <select value={q.area && q.area !== 'bbox' ? q.area : q.area === 'bbox' ? 'bbox' : ''} onChange={(e) => {
+                      if (openDronesFromValue(e.target.value)) return;
+                      setArea(e.target.value);
+                    }}
+                    data-testid="f-source"
+                  >
                     <option value="">Все</option>
                     {q.area === 'bbox' && <option value="bbox">Рамка сохранённого запроса</option>}
                     <optgroup label="Районы снимков Sentinel-2">
@@ -859,6 +882,7 @@ export default function CaseApp() {
                         </option>
                       ))}
                     </optgroup>
+                    <DronesOptions />
                   </select>
                 </label>
                 <div className="c-f">
@@ -952,6 +976,7 @@ export default function CaseApp() {
         </div>
 
         <div className="left-body" data-testid="zone-list">
+          {nasaOn && !curScene && <NasaFolder info={nasaInfo} onRegion={(r) => flyToBox(r.bbox, { maxZoom: Math.min(r.zoom ?? 9, 9), duration: 1200 })} />}
           {!curScene ? (
             <SceneList rows={sceneRows} loading={!szones.data && !szones.err} err={szones.err} onPick={openScene} filtered={!isDefault(q)} fieldArea={!!q.source}
               drift={hasDrift}
@@ -991,6 +1016,7 @@ export default function CaseApp() {
           zones={zones.data}
           szones={szMap}
           scenes={sceneList}
+          nasa={nasa}
           layers={q.layers}
           selected={sel}
           pairHl={pairHl}
@@ -1112,6 +1138,26 @@ export default function CaseApp() {
                 >
                   Слои карты
                 </button>
+                <button
+                  className={`menu-row ${nasaOn ? 'on' : ''}`}
+                  onClick={() => setNasaOn((v) => !v)}
+                  aria-pressed={nasaOn}
+                  data-testid="more-nasa"
+                  title="Ежедневный обзорный снимок NASA GIBS — фон для облачности / цветения / пятен, не обнаружение пластика"
+                >
+                  <span className={`check ${nasaOn ? 'on' : ''}`} aria-hidden /> NASA: обзор (MODIS/VIIRS, ~250 м)
+                </button>
+                <button
+                  className="menu-row"
+                  onClick={() => {
+                    moreMenu.setOpen(false);
+                    openDrones();
+                  }}
+                  data-testid="more-drones"
+                  title="Детальные кадры с дронов: предметы по классам — не спутник"
+                >
+                  Дроны: кадры с предметами (не спутник)
+                </button>
                 <a className="menu-row" href="?mode=photo" data-testid="more-photo">
                   Посчитать предметы по фото
                 </a>
@@ -1185,6 +1231,15 @@ export default function CaseApp() {
 
         <div className="toolbar" ref={layerMenu.box} data-testid="toolbar">
           {/* §50 п.8: same group as «Слои», fixed gap (flex, .toolbar) — not a separate fixed button anymore */}
+          <button
+            className={`btn c-nasa-btn ${nasaOn ? 'on' : ''}`}
+            onClick={() => setNasaOn((v) => !v)}
+            aria-pressed={nasaOn}
+            data-testid="nasa-toggle"
+            title="NASA · ежедневно: показать / скрыть папку, слой и подписи (обзор, не обнаружение пластика)"
+          >
+            NASA
+          </button>
           <button className="btn" onClick={() => demoRef.current?.open()} data-testid="demo-tour-btn">
             Демо ▶
           </button>
@@ -1207,6 +1262,10 @@ export default function CaseApp() {
                   <span>{l}</span>
                 </button>
               ))}
+              <button className="menu-row" onClick={() => setNasaOn((v) => !v)} data-testid="layer-nasa" aria-pressed={nasaOn}>
+                <span className={`check ${nasaOn ? 'on' : ''}`} aria-hidden />
+                <span>NASA: обзор (MODIS/VIIRS, ~250 м) · не обнаружение</span>
+              </button>
               <div className="menu-sep" />
               <div className="menu-group">Подложка{offline ? ' · сейчас офлайн' : ''}</div>
               {(
@@ -1310,7 +1369,19 @@ export default function CaseApp() {
           {!offline && basemap === 'satellite' && 'Tiles © Esri — Esri, Maxar, Earthstar Geographics'}
           {(offline || basemap === 'none') && 'Natural Earth'}
           {' · Снимки: Copernicus Sentinel-2, USGS Landsat · Поле: данные организаторов (CSV)'}
+          {nasa && ' · Обзор: NASA EOSDIS GIBS'}
         </div>
+        {nasaOn && (
+          <NasaMapPanel
+            info={nasaInfo}
+            layerId={nasaLayer?.id ?? ''}
+            date={nasaDate}
+            sceneDate={szScene?.datetime?.slice(0, 10) ?? null}
+            onLayer={setNasaLayerId}
+            onDate={setNasaDay}
+            onClose={() => setNasaOn(false)}
+          />
+        )}
         {toast && (
           <div className="toast" role="status" data-testid="toast">
             {toast}
@@ -1370,6 +1441,11 @@ export default function CaseApp() {
           }}
           period={[q.from ? Date.parse(q.from) : null, q.to ? Date.parse(q.to) + 86400e3 - 1 : null]}
           onDynamics={dynRegion || curScene ? () => openDynamics({ region: dynRegion, scene: curScene }) : null}
+          nasa={{ on: nasaOn, date: nasaDate, latest: nasaInfo?.latest ?? nasaDate }}
+          onNasaDate={(d) => {
+            setNasaDay(d);
+            setNasaOn(true);
+          }}
         />
         {drift && (
           <div className="c-drift-wrap" data-testid="drift-wrap">
@@ -1501,6 +1577,9 @@ function buildSceneRows(scenes: SzScene[], zones: Feat<SceneZoneProps>[], q: Cas
   const inBox = (b: number[] | null | undefined) => !q.bbox || (!!b && b[0] <= q.bbox[2] && b[2] >= q.bbox[0] && b[1] <= q.bbox[3] && b[3] >= q.bbox[1]);
   const rows: SceneRow[] = [];
   for (const s of scenes) {
+    // L146 21:03: dates / frame also on the client — the list follows the filter at once (no stale rows while the
+    // filtered zones load); the API filters the zones by the same params
+    if (!inDates(s.datetime) || !inBox(s.bounds)) continue;
     const zs = by.get(s.scene_key) ?? [];
     const finds = zs.filter((f) => isFind(f.properties)).length;
     const b = zs.filter((f) => f.properties.verification === 'level_B_cozar').length;

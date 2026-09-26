@@ -65,6 +65,19 @@ export function driftBounds(d: DriftFile): [number, number, number, number] | nu
   return Number.isFinite(x0) ? [x0, y0, x1, y1] : null;
 }
 
+/** §54 п.4: defence against ever drawing a forecast built on "today's weather" for a historical scene.
+ *  `path` (data/live/<region>/<date>/drift.json) encodes the published run's own date — must match the zone's
+ *  own scene date. Verified 0 mismatches across all current data/live drift.json files (out/tmp_check_drift.py);
+ *  kept as a runtime guard, not just a one-off check, since a future pipeline bug could break this silently. */
+export function driftDateReason(path: string, zone: { datetime?: string | null }): string | null {
+  const m = /[\\/](\d{4}-\d{2}-\d{2})[\\/]drift\.json$/.exec(path);
+  const pathDate = m?.[1];
+  const zoneDate = (zone.datetime ?? '').slice(0, 10);
+  if (pathDate && zoneDate && pathDate !== zoneDate)
+    return `дата прогноза (${pathDate}) не совпадает с датой сцены (${zoneDate}) — не показываем как расчёт на сегодняшнюю погоду`;
+  return null;
+}
+
 /** the honest check line (reports/drift_check.md via /api/drift_check); fallback = the published numbers */
 export function checkLine(s: any): string {
   const n = s?.n_pairs, k = s?.k_hit, z = s?.k_hit_baseline;

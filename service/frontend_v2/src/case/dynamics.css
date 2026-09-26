@@ -96,7 +96,9 @@
   fill: #4ea3ff;
 }
 .dy-bar.on rect:not(.dy-hit) {
-  fill: #fff;
+  stroke: #fff;
+  stroke-width: 0.8;
+  vector-effect: non-scaling-stroke;
 }
 .dy-bar:hover rect:not(.dy-hit) {
   opacity: 0.8;

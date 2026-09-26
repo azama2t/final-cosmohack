@@ -1,0 +1,359 @@
+/* L151 · §54 п.2 «Дроны» (DronesPanel.tsx). Detailed frames — not satellite: own teal tint, never the amber of S2. */
+.dr-panel {
+  --dr-plastic: #ff5d8f;
+  --dr-algae: #4cc38a;
+  --dr-wood: #d19a5b;
+  --dr-other: #9fb3c8;
+  --dr-pred: #5fd0ff;
+  --dr-tint: #3fb8a8;
+  position: fixed;
+  inset: 24px 24px 24px calc(var(--lwc, 328px) + 12px);
+  z-index: 65;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+}
+@media (max-width: 1100px) {
+  .dr-panel {
+    inset: 12px;
+  }
+}
+.dr-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 16px 8px;
+  border-bottom: 1px solid var(--line);
+}
+.dr-kicker {
+  font-size: 12px;
+  color: var(--dr-tint);
+}
+.dr-title {
+  font-size: 17px;
+  font-weight: 600;
+}
+.dr-title2 {
+  font-size: 15px;
+  font-weight: 600;
+}
+.dr-banner {
+  padding: 7px 16px;
+  font-size: 13px;
+  background: rgba(63, 184, 168, 0.12);
+  border-bottom: 1px solid rgba(63, 184, 168, 0.35);
+  color: #bfeee6;
+}
+.dr-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 12px 16px 20px;
+}
+.dr-grp {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+  margin: 6px 0 8px;
+}
+.dr-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.dr-card {
+  display: flex;
+  gap: 10px;
+  text-align: left;
+  padding: 8px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+.dr-card:hover {
+  border-color: var(--dr-tint);
+}
+.dr-card img {
+  width: 92px;
+  height: 92px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex: none;
+  background: #000;
+}
+.dr-card-b {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 12.5px;
+  min-width: 0;
+}
+.dr-card-t {
+  font-weight: 600;
+  font-size: 13.5px;
+}
+.dr-sensor {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: 3px;
+  font-size: 11.5px;
+  background: rgba(63, 184, 168, 0.18);
+  color: #bfeee6;
+}
+.dr-sensor.s-aircraft,
+.dr-sensor.s-vessel,
+.dr-sensor.s-shore {
+  background: rgba(159, 179, 200, 0.18);
+  color: #d5e0ea;
+}
+.dr-note {
+  font-size: 12.5px;
+  margin: 6px 0;
+  line-height: 1.4;
+}
+.dr-err,
+.dr-load {
+  padding: 16px 0;
+  color: var(--text-2);
+}
+.dr-frame-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.dr-grow {
+  flex: 1;
+}
+.dr-set-h {
+  margin-bottom: 10px;
+}
+.dr-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+}
+.dr-thumb {
+  position: relative;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  overflow: hidden;
+  background: #000;
+  cursor: pointer;
+  aspect-ratio: 4 / 3;
+}
+.dr-thumb:hover {
+  border-color: var(--dr-tint);
+}
+.dr-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.dr-thumb-n,
+.dr-thumb-p {
+  position: absolute;
+  left: 4px;
+  bottom: 4px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  font-size: 12px;
+}
+.dr-thumb-p {
+  left: auto;
+  right: 4px;
+  color: var(--dr-pred);
+}
+.dr-frame-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 14px;
+  align-items: start;
+}
+.dr-imgwrap {
+  position: relative;
+  width: min(100%, calc((100vh - 220px) * var(--ar, 1.5)));
+  background: #000;
+  border-radius: 5px;
+  overflow: hidden;
+  margin: 0 auto;
+}
+.dr-imgwrap img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.dr-ov {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.dr-shape {
+  fill: none;
+  stroke-width: 2px;
+}
+.dr-shape.g-plastic {
+  stroke: var(--dr-plastic);
+  fill: rgba(255, 93, 143, 0.12);
+}
+.dr-shape.g-algae {
+  stroke: var(--dr-algae);
+  fill: rgba(76, 195, 138, 0.14);
+}
+.dr-shape.g-wood {
+  stroke: var(--dr-wood);
+  fill: rgba(209, 154, 91, 0.14);
+}
+.dr-shape.g-other {
+  stroke: var(--dr-other);
+  fill: rgba(159, 179, 200, 0.1);
+}
+.dr-shape.pred {
+  stroke: var(--dr-pred);
+  stroke-dasharray: 4 3;
+}
+.dr-img-tag {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #bfeee6;
+  font-size: 12px;
+}
+.dr-side {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 13px;
+}
+.dr-sec {
+  padding: 8px 10px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.dr-h {
+  font-size: 12px;
+  color: var(--text-3);
+}
+.dr-big {
+  font-size: 26px;
+  font-weight: 600;
+}
+.dr-big span {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-2);
+}
+.dr-big.na {
+  font-size: 20px;
+}
+.dr-na {
+  color: var(--text-2);
+}
+.dr-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+.dr-lg {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.dr-lg.off {
+  color: var(--text-3);
+}
+.dr-lg em {
+  font-style: normal;
+  font-size: 11.5px;
+}
+.dr-sw {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+  border: 2px solid var(--dr-other);
+}
+.dr-sw.g-plastic {
+  border-color: var(--dr-plastic);
+}
+.dr-sw.g-algae {
+  border-color: var(--dr-algae);
+}
+.dr-sw.g-wood {
+  border-color: var(--dr-wood);
+}
+.dr-sw.pred {
+  border-color: var(--dr-pred);
+  border-style: dashed;
+}
+.dr-src-cls {
+  font-size: 12px;
+}
+.dr-tg {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 12.5px;
+}
+.dr-meta a {
+  color: var(--dr-tint);
+  word-break: break-all;
+}
+.dr-file {
+  word-break: break-all;
+  font-size: 11.5px;
+}
+
+/* mobile (≤ 820 px, MobileShell breakpoint): full screen, frame above the facts */
+@media (max-width: 820px) {
+  .dr-panel {
+    inset: 0;
+    border-radius: 0;
+    border: 0;
+    z-index: 1200;
+  }
+  .dr-frame-main {
+    grid-template-columns: 1fr;
+  }
+  .dr-imgwrap {
+    width: 100%;
+  }
+  .dr-cards {
+    grid-template-columns: 1fr;
+  }
+  .dr-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .dr-card img {
+    width: 72px;
+    height: 72px;
+  }
+}

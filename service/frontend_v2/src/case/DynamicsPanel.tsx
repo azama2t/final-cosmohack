@@ -100,6 +100,11 @@ function MiniBars({ rows, m, cur, onPick }: { rows: DynRow[]; m: Metric; cur?: s
       <figcaption>{METRIC[m].title}</figcaption>
       {!any ? (
         <div className="dy-none">{m === 'field' ? 'полевых измерений в эти даты рядом нет' : 'нет оцениваемых снимков'}</div>
+      ) : n < 2 ? (
+        // L145 §51 п.3: one date — a lone full-height bar read as an empty white box; the value + why there is no chart
+        <div className="dy-none" data-testid={`dyn-single-${m}`}>
+          {dateRu(rows[0]?.date)}: <b>{vals[0] === null || vals[0] === undefined ? '—' : `${num(vals[0])} ${METRIC[m].unit}`}</b> · у района одна дата снимка — сравнивать по датам не с чем
+        </div>
       ) : (
         <svg viewBox={`0 0 ${W} ${H + 14}`} preserveAspectRatio="none" className="dy-svg" role="img" aria-label={METRIC[m].title}>
           <line x1={0} x2={W} y1={H} y2={H} className="dy-base" />
@@ -125,7 +130,7 @@ function MiniBars({ rows, m, cur, onPick }: { rows: DynRow[]; m: Metric; cur?: s
           })}
         </svg>
       )}
-      {any && (
+      {any && n >= 2 && (
         <div className="dy-axis">
           <span>{dateRu(rows[0]?.date)}</span>
           <span>макс. {num(max)} {METRIC[m].unit}</span>

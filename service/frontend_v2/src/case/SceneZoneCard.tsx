@@ -212,6 +212,22 @@ export default function SceneZoneCard({
               ← к снимку
             </button>
           )}
+          {/* §55 п.3: «Дрейф ▶» large and high-contrast in the top row (the tab «Дрейф» keeps the details) */}
+          {onDrift ? (
+            <button
+              className={`btn sz-drift-top ${driftOn ? 'on' : ''}`}
+              onClick={onDrift}
+              aria-pressed={!!driftOn}
+              data-testid="sz-drift-top"
+              title="Прогноз дрейфа ≤ 72 ч: OpenDrift по течениям (HYCOM) и ветру (GFS) на дату снимка — эксперимент"
+            >
+              {driftOn ? 'Дрейф ✓' : 'Дрейф ▶'}
+            </button>
+          ) : (
+            <span className="sz-drift-top-none" data-testid="sz-drift-top-none" title="Для даты этого снимка прогноз дрейфа (OpenDrift, HYCOM + GFS) не рассчитывался">
+              Дрейф: нет расчёта
+            </span>
+          )}
           {onStudio && p.detection_status !== 'not_detected' && (
             <button className="btn sz-studio-btn" onClick={onStudio} data-testid="sz-studio" title="Снимок, маска качества и детекция этой зоны">
               Открыть в студии →
