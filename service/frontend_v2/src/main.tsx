@@ -6,6 +6,7 @@ import '@fontsource/inter/600.css';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './styles.css';
 import { reloadOnceAfterBuild } from './lib/reload';
+import MobileShell from './mobile/MobileShell'; // L140 §45: mobile layer (≤ 820 px), CSS + chrome only
 
 // L66: «Кейс» (API v3) is the default mode; the earlier «живые снимки» scenario stays at ?mode=live.
 const MODE = new URLSearchParams(location.search).get('mode');
@@ -24,5 +25,6 @@ window.addEventListener('load', () => setTimeout(() => sessionStorage.removeItem
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Suspense fallback={<div className="boot">Загрузка…</div>}>{PHOTO ? <PhotoApp /> : LIVE ? <App /> : <CaseApp />}</Suspense>
+    {!PHOTO && !LIVE && <MobileShell />}
   </StrictMode>,
 );

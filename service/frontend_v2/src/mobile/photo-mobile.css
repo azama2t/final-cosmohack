@@ -1,0 +1,121 @@
+/* L140 (§45): «Фото» on a phone — the whole page scrolls vertically, image with boxes fits the width,
+   camera button (input capture) visible only here. Scoped to .ph-* (PhotoApp), ≤ 820 px. */
+.ph-cam {
+  display: none;
+}
+@media (max-width: 820px) {
+  .ph-app {
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    -webkit-text-size-adjust: 100%;
+  }
+  .ph-top {
+    flex-wrap: wrap;
+    padding: 8px 12px;
+  }
+  .ph-top :is(button, .btn, a) {
+    min-height: 44px;
+    min-width: 44px;
+    font-size: 14px;
+  }
+  .ph-main {
+    flex: none;
+    flex-direction: column;
+    min-height: auto;
+  }
+  .ph-view {
+    padding: 12px;
+  }
+  .ph-drop {
+    flex: none;
+    min-height: 180px;
+  }
+  .ph-stage {
+    display: block;
+    width: 100%;
+  }
+  .ph-img {
+    width: 100%;
+    max-width: 100%;
+    max-height: none;
+    height: auto;
+  }
+  .ph-actions {
+    gap: 8px;
+  }
+  .ph-actions > .btn,
+  .ph-cam {
+    min-height: 44px;
+    flex: 1 1 140px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+  }
+  .ph-cam {
+    cursor: pointer;
+  }
+  .ph-cam.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .ph-samples {
+    flex: 1 1 100%;
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .ph-samples button {
+    flex: 1 1 auto;
+    min-height: 44px;
+    font-size: 14px;
+    white-space: normal;
+  }
+  .ph-side {
+    width: auto;
+    max-width: 100%;
+  }
+  .ph-app :is(.ph-sub, .ph-empty-s, .ph-name, .ph-sample-info, .ph-src, .faint, .tiny, .note, label, .ph-row, .ph-lim, .ph-m, .ph-unit, .ph-link) {
+    font-size: 14px;
+  }
+  .ph-app :is(button, select, input:not([type='file']):not([type='range']), .btn) {
+    min-height: 44px;
+  }
+  .ph-app input[type='range'] {
+    width: 100%;
+    min-height: 44px;
+  }
+  .ph-inrow {
+    flex-wrap: wrap;
+  }
+  .ph-inrow .ph-in {
+    flex: 1 1 120px;
+    width: auto;
+    font-size: 16px; /* iOS: no zoom-on-focus below 16 px */
+  }
+  .ph-app .info-pop {
+    position: fixed;
+    left: 10px;
+    right: 10px;
+    top: auto;
+    bottom: 16px;
+    width: auto;
+    z-index: 70;
+    font-size: 14px;
+  }
+}
+@media (max-width: 820px) {
+  .ph-app .info-btn {
+    width: 44px;
+    height: 44px;
+    margin: -14px -12px;
+    border: 0;
+    font-size: 14px;
+    background: radial-gradient(circle, transparent 9px, var(--text-3) 9.5px, var(--text-3) 10.5px, transparent 11px);
+  }
+}
+@media (max-width: 820px) {
+  .ph-app :is(.ph-title, .ph-top .seg button, [data-testid^='survey-']) {
+    font-size: 14px;
+  }
+}

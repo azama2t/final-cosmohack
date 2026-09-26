@@ -1501,7 +1501,34 @@ def _geom_bounds(g) -> Optional[list[float]]:
     return [min(xs), min(ys), max(xs), max(ys)]
 
 
-def zones_fc(feats: list[dict]) -> dict:
+STRIPS_FILTER_NOTE = ("Полосы обследования — снимки, на которые попали полевые пробы организаторов (акватории S1–S4); "
+                      "фильтры акватории, рамки района, дат, профиля и статуса применяются — вне рамки полосы не выдаются. "
+                      "Спутниковые зоны районов снимков — отдельный слой scene_zones")
+
+
+def strips_sources() -> list[str]:
+    """Field sources (labels) that have at least one survey strip (via linked samples)."""
+    ids = set()
+    for f in zones_all():
+        for sid in f["properties"]["support"]["linked_sample_ids"]:
+            ids.add((sample_row(sid) or {}).get("source_id"))
+    return [lab for sid, lab in SOURCES if sid in ids]
+
+
+def zones_empty_reason(n: int, filters: Optional[dict] = None) -> Optional[str]:
+    """Acceptance 15:49 / 16:03 п.1: an honest reason when the strips are 0 (e.g. the frame of a snapshot район)."""
+    if n:
+        return None
+    if not pair_quality_raw():
+        return "Проверка пар снимком ещё не выполнена (data/pairs/pair_quality.csv) — недостаточно данных"
+    bbox = (filters or {}).get("bbox")
+    if bbox is not None and not filter_zones(bbox=bbox):
+        return ("В рамке района нет полос обследования: они есть только там, где есть полевые пробы ("
+                + "; ".join(strips_sources()) + "). Спутниковые зоны района — слой «Спутниковые зоны» (scene_zones)")
+    return "Нет полос обследования под выбранные фильтры"
+
+
+def zones_fc(feats: list[dict], filters: Optional[dict] = None) -> dict:
     lg = _cached("lgbm_meta", PATHS["lgbm_meta"], _read_json) or {}
     fc = {"type": "FeatureCollection", "kind": "candidate_strip", "layer_kind": "candidate_strip",
           "label": "Проверенные снимки-кандидаты (полосы обследования)", "count": len(feats), "empty_reason": None,
@@ -1510,9 +1537,10 @@ def zones_fc(feats: list[dict]) -> dict:
                     "weights_sha256": detector_model_info().get("sha256"),
                     "concentration_note": "калибровки спутник → шт./км² нет; концентрация в зонах не выдаётся"},
           "features": feats}
-    if not feats:
-        fc["empty_reason"] = ("Проверка пар снимком ещё не выполнена (data/pairs/pair_quality.csv) — недостаточно данных"
-                              if not pair_quality_raw() else "Нет зон под выбранные фильтры")
+    fc["filter_note"] = STRIPS_FILTER_NOTE
+    if filters is not None:
+        fc["filters_applied"] = {k: v for k, v in filters.items() if v not in (None, [], "")}
+    fc["empty_reason"] = zones_empty_reason(len(feats), filters)
     return fc
 
 
@@ -2492,6 +2520,159 @@ def sz_examples() -> list[dict]:
                     "zone_id": p["zone_id"], "crop_url": p["crop_url"], "title": p["title"],
                     "note": "пиксели у яркой цели и её следа — признак судна; это не «верное срабатывание»: статус «недостаточно данных»"})
     return out
+
+
+DEFENSE_JSON = "defense_examples.json"  # scripts/case/defense_examples.py (the miss: a Cózar B filament)
+DEFENSE_KINDS = [("success", "Правильное обнаружение скопления"), ("miss", "Пропуск скопления"),
+                 ("false_alarm", "Ложное обнаружение судна или следа"),
+                 ("background_error", "Ошибка на пене, блике или другом сложном фоне"),
+                 ("no_analysis", "Область, где анализ невозможен из-за качества")]
+
+
+def _defense_settings() -> dict:
+    idx = scene_zones_index()
+    m = idx.get("model") or {}
+    return {"weights": m.get("weights"), "model_sha256": m.get("sha256"), "threshold": m.get("threshold"),
+            "harmonize": m.get("harmonize"), "class": m.get("class"), "rules": idx.get("rules"),
+            "rules_source": "scripts/case/scene_zones.py (фильтры судна/кильватера/шва, пены, блика, берега, "
+                            "мелководья, облаков; ветер > 5 м/с), src/macroplastic/case/illumination.py"}
+
+
+def _bbox_poly(b: list) -> dict:
+    return {"type": "Polygon", "coordinates": [[[b[0], b[1]], [b[2], b[1]], [b[2], b[3]], [b[0], b[3]], [b[0], b[1]]]]}
+
+
+def _defense_zone(kind: str, f: dict, reference: str, verdict: str, basis: str, explanation: str, rule: str) -> dict:
+    p = f["properties"]
+    base = f"/api/v3/scene_zones/scenes/{p['scene_key']}"
+    meas = p.get("measured") or {}
+    prob = p.get("probable") or {}
+    return {"kind": kind, "label": dict(DEFENSE_KINDS)[kind], "zone_id": p["zone_id"], "scene_key": p["scene_key"],
+            "scene_id": p["scene_id"], "datetime": p["datetime"], "title": p["title"], "geometry": f["geometry"],
+            "image": {"crop_url": p.get("crop_url"), "rgb_url": f"{base}/rgb.jpg", "quality_url": f"{base}/quality.png",
+                      "crop_note": "слева снимок B4-B3-B2, справа он же с пикселями детектора (красные; "
+                                   "судно/кильватер/шов — жёлтые)"},
+            "model_result": {"n_pixels": meas.get("n_pixels"), "detected_area_m2": p.get("detected_area_m2"),
+                             "prob_max": prob.get("prob_max"), "prob_mean": prob.get("prob_mean"),
+                             "flags": p.get("flags") or []},
+            "reference": reference, "verdict": verdict, "basis": basis,
+            "status": p.get("status"), "status_label": p.get("status_label"), "status_explanation": explanation,
+            "rule": rule,
+            "repeat": {"api": f"/api/v3/scene_zones/{p['zone_id']}",
+                       "command": f".venv/Scripts/python.exe scripts/case/scene_zones.py --only {p['scene_key'].split('-')[0]}  (все сцены этого вида)"}}
+
+
+def defense_examples() -> dict:
+    """MATVEY_ACCEPTANCE п.4: the five mandatory examples of the working map mode (detector + quality mask + filters).
+    Each: image, quality mask, model result, basis of the verdict, status explanation, settings, how to repeat.
+    The choice rules are fixed in code (field `rule`), not picked by the result."""
+    zs = scene_zones_all()
+    byid = {f["id"]: f for f in zs}
+    ex = {e["kind"]: e for e in sz_examples()}
+    out = []
+    if "success" in ex:
+        f = byid[ex["success"]["zone_id"]]
+        p = f["properties"]
+        out.append(_defense_zone(
+            "success", f, "каталог Cózar 2024, уровень B (нити проверены людьми по снимку)", "правильно",
+            f"контур зоны пересекает {p.get('n_cozar_filaments')} нит(и) Cózar; ни один фильтр артефактов не сработал; "
+            "сцена отложена (не в обучении детектора)",
+            f"«{p.get('status_label')}» — детектор сработал после всех фильтров; «{p.get('confirmation_label')}»",
+            "зона уровня B с наибольшим числом пересечённых нитей Cózar (затем — пикселей детектора)"))
+    dpath = PATHS["scene_zones_dir"] / DEFENSE_JSON
+    dj = _read_json(dpath) if dpath.is_file() else None
+    if dj and dj.get("miss"):
+        m = dj["miss"]
+        key = dj["scene_key"]
+        base = f"/api/v3/scene_zones/scenes/{key}"
+        crop = PATHS["scene_zones_dir"] / key / (m.get("crop_file") or "-")
+        sc = next((s for s in scene_zones_index().get("scenes") or [] if s["key"] == key), {})
+        rel = [f["id"] for f in zs if f["properties"].get("scene_key") == key and f.get("geometry")
+               and bbox_intersects(_geom_bounds(f["geometry"]), m["bbox_wgs84"])]
+        out.append({
+            "kind": "miss", "label": dict(DEFENSE_KINDS)["miss"], "zone_id": None, "scene_key": key,
+            "scene_id": dj["scene_id"], "datetime": sc.get("datetime"),
+            "title": f"30SXE · нить Cózar {m['fil_idx']}", "geometry": _bbox_poly(m["bbox_wgs84"]),
+            "image": {"crop_url": f"{base}/crops/{m['zone_like_id']}.jpg" if crop.is_file() else None,
+                      "rgb_url": f"{base}/rgb.jpg", "quality_url": f"{base}/quality.png",
+                      "crop_note": "слева снимок, справа пиксели детектора (красные) в прямоугольнике нити каталога"},
+            "model_result": {"n_pixels_in_bbox": m["det_px_in_bbox"], "prob_max_in_bbox": m["prob_max_in_bbox"],
+                             "water_px_in_bbox": m["water_px_in_bbox"], "flags": []},
+            "reference": f"каталог Cózar 2024, уровень {m['level']}: нить {m['fil_idx']}, {m['n_pixels_fil']} пикс.",
+            "verdict": "пропуск (большая часть нити не отмечена)",
+            "basis": (f"в нити {m['n_pixels_fil']} пикс. по каталогу; детектор отметил в её прямоугольнике "
+                      f"{m['det_px_in_bbox']} (≤ {round(100 * m['det_share_upper'])} %) → пропущено не менее "
+                      f"{m['missed_px_min']} пикс.; вода в рамке пригодна ({m['water_px_in_bbox']} из {m['bbox_px']} "
+                      f"пикс.), ветер {sc.get('wind10m_ms')} м/с. По всему размеченному набору доля найденных "
+                      "пикселей B — 2.8 % (final_numbers: labeled_data.zero_shot.refined_B_recall_pct)"),
+            "status": "detected", "status_label": "обнаружено",
+            "related_zones": rel,
+            "status_explanation": (f"отмеченные пиксели рядом с нитью входят в зоны «обнаружено» ({', '.join(rel) or 'нет'}); "
+                                   "непокрытая часть нити на карте не отмечена — отсутствие зоны не означает «чистая вода»"),
+            "rule": dj.get("rule"),
+            "repeat": {"api": "/api/v3/defense_examples",
+                       "command": ".venv/Scripts/python.exe scripts/case/defense_examples.py",
+                       "inputs": "reports/extra_data/registry_cozar2024.csv.gz, data/case/demo/cozar_demo_2021-03-11/*.tif"}})
+    if "false_alarm" in ex:
+        f = byid[ex["false_alarm"]["zone_id"]]
+        p = f["properties"]
+        sh = (((p.get("probable") or {}).get("signs") or {}).get("ship") or {}).get("share")
+        out.append(_defense_zone(
+            "false_alarm", f, "независимой разметки нет — качественный разбор по снимку", "ложное срабатывание",
+            f"пиксели детектора у яркой цели и её кильватера (доля {sh}); правило судна/кильватера (reports/artifacts.md)",
+            f"«{p.get('status_label')}» — признаки судна/кильватера; находкой не считается",
+            "зона с флагом ship на открытой воде с наибольшей долей признака; из равных выбрана самая читаемая вырезка"))
+    bg = [f for f in zs if f["properties"].get("flags") and set(f["properties"]["flags"]) <= {"foam", "glint"}
+          and f["properties"].get("crop_url")]
+    bg.sort(key=lambda f: (-(f["properties"]["measured"].get("n_pixels") or 0), f["id"]))
+    if bg:
+        f = bg[0]
+        p = f["properties"]
+        sg = (p.get("probable") or {}).get("signs") or {}
+        fo, gl = sg.get("foam") or {}, sg.get("glint") or {}
+        why = []
+        if fo.get("flag"):
+            why.append(f"пена: «белый» спектр, прирост B2 к B8 = {fo.get('white_ratio_b2_b8')} ≥ 0.8 "
+                       f"(ветер {fo.get('wind10m_ms')} м/с)")
+        if gl.get("flag"):
+            why.append(f"блик: B11 воды {gl.get('b11_water_median')}, доля блика {gl.get('glint_share')}")
+        out.append(_defense_zone(
+            "background_error", f, "независимой разметки нет — качественный разбор по снимку",
+            "ошибка модели на сложном фоне (поймана фильтром)",
+            f"детектор уверен (P max {(p.get('probable') or {}).get('prob_max')}), но " + "; ".join(why)
+            + " — пена/блик, а не плавающий мусор",
+            f"«{p.get('status_label')}» — признак сложного фона; находкой не считается",
+            "зона, у которой из признаков только пена и/или блик; наибольшее число пикселей детектора"))
+    na = [s for s in scene_zones_index().get("scenes") or [] if s.get("evaluable") is False]
+    na.sort(key=lambda s: (-(s.get("det_pixels") or 0), s["key"]))
+    if na:
+        s = na[0]
+        base = f"/api/v3/scene_zones/scenes/{s['key']}"
+        why = (f"низкое солнце: зенит {s.get('sun_zenith_deg')}° ≥ 58°" if s.get("low_sun")
+               else f"слабый сигнал воды: медиана B3 {s.get('water_b3_median')} < 0.003")
+        out.append({
+            "kind": "no_analysis", "label": dict(DEFENSE_KINDS)["no_analysis"], "zone_id": None, "scene_key": s["key"],
+            "scene_id": s["scene_id"], "datetime": s["datetime"],
+            "title": f"{s.get('region_name') or s['region']} · {s['date']}", "geometry": _bbox_poly(s["bounds"]),
+            "image": {"crop_url": None, "rgb_url": f"{base}/rgb.jpg", "quality_url": f"{base}/quality.png",
+                      "crop_note": "снимок и маска качества всей вырезки; зоны не строятся"},
+            "model_result": {"det_pixels": s.get("det_pixels"), "n_zones": None, "flags": []},
+            "reference": "не нужен: вывод по правилу освещённости, до модели",
+            "verdict": "анализ невозможен",
+            "basis": (f"{why}; условия вне обучения детектора — его {s.get('det_pixels')} пикс. не учитываются "
+                      "(правило src/macroplastic/case/illumination.py, общее со студией)"),
+            "status": "insufficient_data", "status_label": "недостаточно данных",
+            "status_explanation": "сцена «не оценивается»: зон нет, пиксели детектора не показываются как находки",
+            "rule": "сцена с evaluable = false и наибольшим числом пикселей детектора",
+            "repeat": {"api": "/api/v3/scene_zones/scenes",
+                       "command": f".venv/Scripts/python.exe scripts/case/scene_zones.py --only {s['key'].split('-')[0]}  (все сцены этого вида)"}})
+    order = [k for k, _ in DEFENSE_KINDS]
+    out.sort(key=lambda e: order.index(e["kind"]))
+    return {"count": len(out), "required": [{"kind": k, "label": lab} for k, lab in DEFENSE_KINDS],
+            "missing": [k for k in order if k not in {e["kind"] for e in out}],
+            "settings": _defense_settings(), "examples": out,
+            "note": ("рабочий режим карты: детектор, порог, маска качества, фильтры артефактов, правило освещённости; "
+                     "эталон — только каталог Cózar 2024 (B); без независимой разметки — качественный разбор")}
 
 
 def sz_file(key: str, name: str) -> Optional[Path]:

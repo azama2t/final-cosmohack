@@ -24,7 +24,7 @@
 | 1. Предмет на кадре (фото, счётчик) | шт. на кадр | отложенный test FML ({{case.sections.photo_count.frame.n_images|int}} кадров, по сессиям) | MAE {{case.sections.photo_count.frame.mae|f2}} шт./кадр [{{case.sections.photo_count.frame.mae_ci95.0|f2}}–{{case.sections.photo_count.frame.mae_ci95.1|f2}}] |
 | 2. Плотность на кадре (известная площадь) | шт./м² → шт./км² | аэро Winans, шт. на {{case.sections.photo_count.area.frame_area_m2|int}} м² кадра берега, {{case.sections.photo_count.area.n_test_frames|int}} кадров | MAE {{case.sections.photo_count.area.density_mae_km2|int}} против {{case.sections.photo_count.area.baseline_density_mae_km2|int}} шт./км² у медианы |
 | 3. Маршрут судна (поле, C = N/A) — главный результат | шт./км² | отложенный test, модель против медианы | S2 {{case.sections.quantity.field_S2.pooled_C|f1}} [{{case.sections.quantity.field_S2.boot_lo95|f1}}–{{case.sections.quantity.field_S2.boot_hi95|f1}}]; ADIS > 10 см {{case.sections.quantity.adis_forecast.C|f2}} |
-| 4. Спутниковая зона | м² маски, LWD м²/км² | {{case.sections.scene_zones.n_finds}} находок из {{case.sections.scene_zones.n_zones}} зон; калибровочных пар «снимок → шт./км²» {{case.sections.quantity.levels.calibration_pairs}} | концентрация по снимку не подтверждена |
+| 4. Спутниковая зона | м² маски, LWD м²/км² | {{case.sections.scene_zones.n_finds}} находок из {{case.sections.scene_zones.n_zones}} зон; калибровочных пар «снимок → шт./км²» {{case.sections.quantity.levels.calibration_pairs}} | количество предметов по снимку не определено; сценарий PLP — свёрнутая исследовательская оценка |
 
 ## 1. Поле: концентрация, шт./км² (измерение) — главный количественный результат
 
@@ -59,9 +59,11 @@
 - Пол точности: пятнистость и Пуассон не дают интервалу одной оценки быть уже ×/÷{{case.sections.quantity.calibration.floor_factor|f1}} даже при идеальном спутнике (у медианы профиля ×/÷{{case.sections.quantity.calibration.median_factor|f1}}).
 - Пары ADIS «0 на снимке при N шт./км²» годятся для проверки согласованности нуля и оценки ложных тревог, но не для регрессии: сигнал снимка в них нулевой.
 
-## 4. Перевод площади в штуки — не используется
+## 4. Как получаем шт./км² по снимку и насколько этому верить
 
-Перевод «площадь маски / размер предмета = штуки» при допущениях о заполнении пикселя и размере предметов даёт разброс в {{case.sections.quantity.scenario.spread_ratio|int}} раз (≈ {{case.sections.quantity.scenario.spread_orders_text}} порядка), поэтому он нигде не показывается: перевод площади маски в штуки не показываем — нет калибровочных пар «снимок → шт./км²». Главный статус спутниковой зоны — «концентрация по снимку не подтверждена». Массу и физическую концентрацию не оцениваем.
+{{derived.case_sat_count_block}}
+
+Почему сценарий один и зафиксирован: свободный перевод «площадь маски / размер предмета = штуки» при разных допущениях о заполнении пикселя и размере предметов даёт разброс в {{case.sections.quantity.scenario.spread_ratio|int}} раз (≈ {{case.sections.quantity.scenario.spread_orders_text}} порядка). Поэтому в продукте — только сценарий с допущениями, записанными в `configs/zone_estimate.yaml`, свёрнутый под строкой «Количество». Массу и физическую концентрацию не оцениваем.
 
 ## 5. Калибровка по ячейкам: аналогия и отрицательный результат
 

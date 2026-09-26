@@ -1398,6 +1398,8 @@
   padding-left: 10px;
 }
 .sz-qtop .c-line,
+.sz-qbody .c-line,
+.sz-drift .c-line,
 .sz-plain .c-line {
   white-space: normal;
   overflow: visible;
@@ -1824,4 +1826,94 @@ a.c-head-r.c-head-link {
 .c-list-note.c-est-cap {
   gap: 4px;
   padding-right: 16px;
+}
+
+/* §40 п.2: class label in the zone list and «Что это» as the first large line of the zone card */
+.c-zi-cls {
+  display: block;
+  font-size: 12px;
+  color: var(--text-2);
+  font-weight: 500;
+  margin-top: 1px;
+}
+.sz-what {
+  font-size: 15px;
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+.sz-what b {
+  font-weight: 600;
+}
+.obs-measured {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* §44 п.1: card hierarchy — the thumbnail is compact so «Количество» stays on the first screen at 1366×768 */
+[data-testid='scene-zone-card'] .sz-thumb {
+  aspect-ratio: 2 / 1;
+  max-height: 150px;
+}
+.sz-cls-sw {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: 1px;
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.35);
+}
+.sz-more > summary {
+  cursor: pointer;
+  color: var(--text-2);
+}
+/* §44 п.3: drift forecast — its own «прогноз» style (violet, dashed), never the class colours */
+.sz-drift-btn {
+  border: 1px dashed #b197fc !important;
+  color: #d0bfff !important;
+}
+.sz-drift-btn.on {
+  background: rgba(177, 151, 252, 0.18) !important;
+}
+.c-drift-wrap {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  z-index: 6;
+  width: min(620px, calc(100% - 40px));
+}
+.c-drift-wrap .bottom-bar {
+  position: static;
+  transform: none;
+  width: 100%;
+  border: 1px dashed #b197fc;
+}
+.c-drift-tag {
+  display: block;
+  font-size: 12px;
+  color: #d0bfff;
+  background: rgba(20, 16, 36, 0.88);
+  border: 1px dashed #b197fc;
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  padding: 4px 10px;
+}
+.c-drift-tag b {
+  color: #e5dbff;
+}
+.app.case .c-counts.c-hide {
+  display: none;
+}
+/* §44 п.1: the legend = the 4 classes, one per line; details under (i) */
+.c-lg-classes .c-lg-cl {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.c-legend:not(.min) {
+  min-width: 300px;
 }

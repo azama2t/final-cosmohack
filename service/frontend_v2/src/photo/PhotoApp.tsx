@@ -317,6 +317,11 @@ export default function PhotoApp() {
               Загрузить фото
             </button>
             <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => onFiles(e.target.files)} data-testid="photo-file" />
+            {/* L140 §45: phone camera (shown only on ≤ 820 px, src/mobile/photo-mobile.css) */}
+            <label className={`btn ph-cam ${busy ? 'disabled' : ''}`} data-testid="photo-camera">
+              Снять камерой
+              <input type="file" accept="image/*" capture="environment" hidden disabled={busy} onChange={(e) => onFiles(e.target.files)} data-testid="photo-camera-file" />
+            </label>
             <div className="seg ph-samples" role="tablist" aria-label="Примеры" data-testid="photo-samples">
               {SAMPLES.map((x) => (
                 <button

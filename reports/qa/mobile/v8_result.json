@@ -1,0 +1,474 @@
+[
+ {
+  "device": "iphone12",
+  "steps": [
+   "open",
+   "sheet",
+   "scene",
+   "card",
+   "back",
+   "export",
+   "filters",
+   "qc",
+   "legend",
+   "photo"
+  ],
+  "measures": {
+   "01_open": {
+    "vw": 390,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "02_sheet": {
+    "vw": 390,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "03_scene": {
+    "vw": 390,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "04_card": {
+    "vw": 390,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "05_card_bottom": {
+    "vw": 390,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "06_back": {
+    "vw": 390,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "07_export": {
+    "vw": 390,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "08_filters": {
+    "vw": 390,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "08b_qc": {
+    "vw": 390,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [
+     "qc-close:13",
+     "B:12",
+     "metrics-det-f1:12",
+     "c-line:12"
+    ],
+    "nTiny": 7,
+    "over": []
+   },
+   "10_photo": {
+    "vw": 390,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   }
+  },
+  "card_after_back": 0,
+  "photo_cam_visible": true,
+  "photo_img_w": "356/390",
+  "console_errors": []
+ },
+ {
+  "device": "pixel5",
+  "steps": [
+   "open",
+   "sheet",
+   "scene",
+   "card",
+   "back",
+   "export",
+   "filters",
+   "qc",
+   "legend",
+   "photo"
+  ],
+  "measures": {
+   "01_open": {
+    "vw": 393,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "02_sheet": {
+    "vw": 393,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "03_scene": {
+    "vw": 393,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "04_card": {
+    "vw": 393,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "05_card_bottom": {
+    "vw": 393,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "06_back": {
+    "vw": 393,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "07_export": {
+    "vw": 393,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "08_filters": {
+    "vw": 393,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "08b_qc": {
+    "vw": 393,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [
+     "qc-close:13",
+     "B:12",
+     "metrics-det-f1:12",
+     "c-line:12"
+    ],
+    "nTiny": 7,
+    "over": []
+   },
+   "10_photo": {
+    "vw": 393,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   }
+  },
+  "card_after_back": 0,
+  "photo_cam_visible": true,
+  "photo_img_w": "359/393",
+  "console_errors": []
+ },
+ {
+  "device": "w360",
+  "steps": [
+   "open",
+   "sheet",
+   "scene",
+   "card",
+   "back",
+   "export",
+   "filters",
+   "qc",
+   "legend",
+   "photo"
+  ],
+  "measures": {
+   "01_open": {
+    "vw": 360,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "02_sheet": {
+    "vw": 360,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "03_scene": {
+    "vw": 360,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "04_card": {
+    "vw": 360,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "05_card_bottom": {
+    "vw": 360,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "06_back": {
+    "vw": 360,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "07_export": {
+    "vw": 360,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "08_filters": {
+    "vw": 360,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "08b_qc": {
+    "vw": 360,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [
+     "qc-close:13",
+     "B:12",
+     "metrics-det-f1:12",
+     "c-line:12"
+    ],
+    "nTiny": 7,
+    "over": []
+   },
+   "10_photo": {
+    "vw": 360,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   }
+  },
+  "card_after_back": 0,
+  "photo_cam_visible": true,
+  "photo_img_w": "326/360",
+  "console_errors": []
+ },
+ {
+  "device": "w768",
+  "steps": [
+   "open",
+   "sheet",
+   "scene",
+   "card",
+   "back",
+   "export",
+   "filters",
+   "qc",
+   "legend",
+   "photo"
+  ],
+  "measures": {
+   "01_open": {
+    "vw": 768,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "02_sheet": {
+    "vw": 768,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "03_scene": {
+    "vw": 768,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "04_card": {
+    "vw": 768,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "05_card_bottom": {
+    "vw": 768,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "06_back": {
+    "vw": 768,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "07_export": {
+    "vw": 768,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "08_filters": {
+    "vw": 768,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [],
+    "nTiny": 0,
+    "over": []
+   },
+   "08b_qc": {
+    "vw": 768,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [
+     "qc-close:13",
+     "B:12",
+     "metrics-det-f1:12",
+     "c-line:12",
+     "H3:13",
+     "r:10",
+     "TD:11",
+     "B:9.5",
+     "faint tiny c-ci:9.5",
+     "r:11"
+    ],
+    "nTiny": 34,
+    "over": []
+   },
+   "10_photo": {
+    "vw": 768,
+    "hscroll": false,
+    "small": [],
+    "nSmall": 0,
+    "tiny": [
+     "ph-h:13"
+    ],
+    "nTiny": 2,
+    "over": []
+   }
+  },
+  "card_after_back": 0,
+  "photo_cam_visible": true,
+  "photo_img_w": "734/768",
+  "console_errors": []
+ }
+]

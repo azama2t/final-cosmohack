@@ -232,3 +232,27 @@ const PCFG_RU: Record<string, string> = {
   S4_visual_all_litter: 'Чёрное море: визуально с судна, весь мусор > 2,5 см',
 };
 export const profileCfgRu = (id: string) => PCFG_RU[id] ?? id.replace(/_/g, ' ');
+
+/** §40 п.2: first line of a field measurement card — «Измерено: пластик > 2 см (визуально с судна)»
+ *  (target population + size + method, from measurement_profile and target_scope of the record) */
+const SCOPE_SHORT: Record<string, string> = {
+  total_plastic: 'пластик',
+  plastic_category: 'категория пластика',
+  fisheries_litter_category: 'рыболовный мусор',
+  all_litter: 'весь мусор',
+  object_context: 'отдельный предмет',
+};
+export function measuredLine(meta: Meta, p: { measurement_profile: string | null; target_scope: string; size_class?: string | null }): string {
+  const prof: any = (meta.measurement_profiles as any[] | undefined)?.find((x: any) => x.id === p.measurement_profile) ?? null;
+  const scope = SCOPE_SHORT[p.target_scope] ?? scopeRu(meta, p.target_scope);
+  const sc = String(prof?.size_class ?? p.size_class ?? '').replace(/\s*\(.*\)$/, '').trim();
+  const size = sc
+    ? sc
+        .replace(/cm/g, 'см')
+        .replace(/^>\s*/, '> ')
+        .replace(/(\d)\s*-\s*(\d)/, '$1–$2')
+        .replace(/(\d)\.(\d)/, '$1,$2')
+    : '';
+  const method = prof?.label ? String(prof.label).split(',')[0].trim().toLowerCase() : '';
+  return `Измерено: ${scope}${size ? ` ${size}` : ''}${method ? ` (${method})` : ''}`;
+}

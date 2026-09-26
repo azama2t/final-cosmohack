@@ -53,15 +53,15 @@
 
 **Зоны на отложенной сцене.** Сцена Sentinel-2 {{case.sections.scene_zones.demo.tile}} ({{case.sections.scene_zones.demo.date}}) не участвовала ни в обучении, ни в подборе порога, ни в экспериментах. На ней {{case.sections.scene_zones.demo.n_zones}} зон, из них {{case.sections.scene_zones.demo.n_zones_cozar}} совпадают с нитями каталога Cózar 2024 (уровень B). Во всём слое {{case.sections.scene_zones.n_finds}} находок из {{case.sections.scene_zones.n_zones}} обработанных зон на {{case.sections.scene_zones.n_scenes_eval}} оцениваемых сценах:
 
-| Статус зоны | Число зон |
-|---|---:|
-| обнаружено с подтверждением B | {{case.sections.scene_zones.by_level_b}} |
-| срабатывание, не проверено | {{case.sections.scene_zones.by_unverified}} |
-| недостаточно данных (пена, блик, судно, берег, мелководье) | {{case.sections.scene_zones.by_insufficient}} |
-| не обнаружено | {{case.sections.scene_zones.by_not_detected}} |
-| ноль не информативен (ветер > 5 м/с) | {{case.sections.scene_zones.by_not_informative}} |
+| Статус зоны (четыре постановочных) | Подтверждение / причина | Число зон |
+|---|---|---:|
+| обнаружено | совпадает с разметкой Cózar 2024 (B) | {{case.sections.scene_zones.by_level_b}} |
+| обнаружено | независимой разметки нет (в т. ч. снимок из обучения детектора — {{case.sections.scene_zones.n_finds_training}}) | {{case.sections.scene_zones.by_unverified}} |
+| недостаточно данных | признаки пены, блика, судна, берега, мелководья | {{case.sections.scene_zones.by_insufficient}} |
+| недостаточно данных | ветер > {{case.sections.scene_zones.wind_rule_ms|f0}} м/с: ноль не информативен | {{case.sections.scene_zones.by_not_informative}} |
+| не обнаружено | детектор оценивается, объектов нет | {{case.sections.scene_zones.by_not_detected}} |
 
-Главный статус концентрации у любой зоны — «{{case.sections.scene_zones.zone_main_status}}».
+Что это у находки: {{case.sections.scene_zones.class_label}}. Количество: «{{case.sections.scene_zones.quantity_line}}»; у находок статус концентрации — «исследовательская оценка» (сценарий по мишеням PLP, свёрнут; см. раздел «Как получаем шт./км² по снимку и насколько этому верить» в [README](../README.md)).
 
 ![Карточка зоны на отложенной сцене: площадь и доля покрытия — оценка детектора по маске, маска качества — SCL, погода — ERA5](../reports/case_deck_img/09_demo_zone_card.jpg)
 

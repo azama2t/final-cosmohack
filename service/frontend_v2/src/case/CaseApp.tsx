@@ -15,6 +15,7 @@ import MetricsPanel from './MetricsPanel';
 import { plural, dateRu, eventRu, label, missionShort, num, profileRu, scopeRu, sourceShort } from './fmt';
 import { estLine, estTxt, RES_CAPTION, RES_CAPTION_LIST, RES_CONTEXT, RES_NOTE, researchEst } from './estimate';
 import { shortName } from '../lib/data';
+import { statusLabel, classShort, confirmation } from './zoneinfo';
 import {
   DEFAULT_QUERY,
   dateError,
@@ -37,6 +38,9 @@ import {
   type CaseQuery,
 } from './query';
 import './case.css';
+import DriftPlayer from '../components/DriftPlayer';
+import type { DriftFile } from '../types';
+import { checkLine, closeDrift, driftBounds, driftKey, driftPaths, openDrift, renderDrift } from './drift';
 
 type Load<T> = { data: T | null; err: string | null; loading: boolean };
 const L0 = { data: null, err: null, loading: false };
@@ -218,6 +222,46 @@ export default function CaseApp() {
   }, [szones.data]);
   const szList = useMemo(() => szones.data?.features ?? [], [szones.data]);
   const selSz = selSzId ? szList.find((f) => f.id === selSzId) ?? null : null;
+  // §44 п.3: drift forecast of the open zone's snapshot (published OpenDrift run), experiment, own style
+  const [dPaths, setDPaths] = useState<Map<string, string> | null>(null);
+  const [drift, setDrift] = useState<DriftFile | null>(null);
+  const [driftKeyOn, setDriftKeyOn] = useState<string | null>(null);
+  const [driftSum, setDriftSum] = useState<any>(null);
+  useEffect(() => {
+    driftPaths().then(setDPaths);
+  }, []);
+  const selDriftPath = selSz && dPaths ? dPaths.get(driftKey(selSz.properties as any)) ?? null : null;
+  const stopDrift = useCallback(() => {
+    closeDrift();
+    setDrift(null);
+    setDriftKeyOn(null);
+  }, []);
+  useEffect(() => {
+    // another snapshot (or no zone) → the forecast of the previous one goes away
+    if (driftKeyOn && (!selSz || driftKey(selSz.properties as any) !== driftKeyOn)) stopDrift();
+  }, [selSz, driftKeyOn, stopDrift]);
+  useEffect(() => {
+    if (!drift) return;
+    const t = window.setTimeout(renderDrift, 900); // the style may have been reloaded (basemap/projection)
+    return () => window.clearTimeout(t);
+  }, [drift, basemap, projection]);
+  const toggleDrift = useCallback(async () => {
+    if (drift || !selSz || !selDriftPath) {
+      stopDrift();
+      return;
+    }
+    const d = await openDrift(selDriftPath);
+    if (!d) return;
+    setDrift(d);
+    setDriftKeyOn(driftKey(selSz.properties as any));
+    if (!driftSum)
+      fetch(API_BASE + '/api/drift_check')
+        .then((r) => (r.ok ? r.json() : null))
+        .then(setDriftSum)
+        .catch(() => undefined);
+    const b = driftBounds(d);
+    if (b && ctl.map) ctl.map.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: 80, duration: 1200, maxZoom: 12 });
+  }, [drift, selSz, selDriftPath, driftSum, stopDrift]);
   /** the snapshot shown: the one opened in the list, else the scene of the open zone */
   const curScene = scene ?? selSz?.properties.scene_key ?? null;
   const szScene = useMemo(() => (szScenes.data?.scenes ?? []).find((s) => s.scene_key === curScene) ?? null, [szScenes.data, curScene]);
@@ -628,7 +672,7 @@ export default function CaseApp() {
     ['scene_zones', 'Спутниковые зоны', szones.err ? undefined : szones.data?.count],
     ['observations', 'Полевые измерения', obs.data?.count],
     ['zones', 'Полосы обследования (поле ↔ снимок)', zones.data?.count],
-    ['pairs', 'Пары снимок ↔ поле', pairs.data?.count],
+    ['pairs', q.bbox && !q.source ? 'Пары снимок ↔ поле (все: рамка района к парам не применяется)' : 'Пары снимок ↔ поле', pairs.data?.count],
   ];
 
   // ---------------------------------------------------------------- render
@@ -768,7 +812,8 @@ export default function CaseApp() {
               </div>
             </div>
           )}
-          <div className="c-counts" data-testid="counts">
+          {/* §44 п.1: with a snapshot open the list goes first — the totals stay on the overview */}
+          <div className={`c-counts ${curScene ? 'c-hide' : ''}`} data-testid="counts">
             {szones.err ? (
               <span className="c-err-inline" title={szones.err} data-testid="count-szones">
                 спутниковые зоны: данные недоступны
@@ -779,7 +824,7 @@ export default function CaseApp() {
                   <b>{num(szones.data ? sceneRows.withZones : null, 0)}</b> {pluralW(sceneRows.withZones, 'снимок', 'снимка', 'снимков')}
                 </span>
                 <span data-testid="count-szones" title={`всего спутниковых зон ${num(szones.data?.count ?? null, 0)}: вместе с «недостаточно данных» и «не обнаружено»`}>
-                  <b>{num(szones.data ? nFinds.n : null, 0)}</b> {pluralW(nFinds.n, 'находка', 'находки', 'находок')} ({num(szones.data ? nFinds.b : null, 0)} совпали с Cózar)
+                  <b>{num(szones.data ? nFinds.n : null, 0)}</b> {pluralW(nFinds.n, 'находка', 'находки', 'находок')} ({num(szones.data ? nFinds.b : null, 0)} · Cózar B)
                 </span>
               </>
             )}
@@ -794,7 +839,7 @@ export default function CaseApp() {
 
         <div className="left-body" data-testid="zone-list">
           {!curScene ? (
-            <SceneList rows={sceneRows} loading={!szones.data && !szones.err} err={szones.err} onPick={openScene} filtered={!isDefault(q)} />
+            <SceneList rows={sceneRows} loading={!szones.data && !szones.err} err={szones.err} onPick={openScene} filtered={!isDefault(q)} fieldArea={!!q.source} />
           ) : (
             <SceneZones
               s={szScene}
@@ -1122,6 +1167,14 @@ export default function CaseApp() {
             </div>
           </div>
         )}
+        {drift && (
+          <div className="c-drift-wrap" data-testid="drift-wrap">
+            <div className="c-drift-tag">
+              <b>Прогноз дрейфа</b> · эксперимент (OpenDrift: течения + ветер), не наблюдение · кольца — частицы, белые точки — старт
+            </div>
+            <DriftPlayer drift={drift} onRender={renderDrift} flow={[]} autoplay />
+          </div>
+        )}
       </main>
 
       <aside className="right" data-testid="right-panel">
@@ -1138,6 +1191,9 @@ export default function CaseApp() {
               setQ((qq) => ({ ...qq, layers: { ...qq.layers, obs: true } }));
               openObs(sid);
             }}
+            onDrift={selDriftPath ? toggleDrift : null}
+            driftOn={!!drift}
+            driftCheck={checkLine(driftSum)}
             onStudio={() => {
               setStudio(true);
               setQ((x) => ({ ...x, layers: { ...x.layers, scenes: true } }));
@@ -1296,7 +1352,7 @@ function SceneRowBtn({ r, onPick }: { r: SceneRow; onPick: (k: string) => void }
   );
 }
 
-function SceneList({ rows, loading, err, onPick, filtered }: { rows: SceneRows; loading: boolean; err: string | null; onPick: (k: string) => void; filtered: boolean }) {
+function SceneList({ rows, loading, err, onPick, filtered, fieldArea }: { rows: SceneRows; loading: boolean; err: string | null; onPick: (k: string) => void; filtered: boolean; fieldArea?: boolean }) {
   const [openNo, setOpenNo] = useState(false);
   const [openBad, setOpenBad] = useState(false);
   if (err)
@@ -1315,7 +1371,15 @@ function SceneList({ rows, loading, err, onPick, filtered }: { rows: SceneRows; 
           мелководья и ветра {'>'} 5 м/с; «Cózar» — совпала с нитью каталога Cózar 2024 (разметка людьми). Клик — снимок на карте и его зоны по номерам.
         </Info>
       </div>
-      {!rows.all.length && <div className="empty">{filtered ? 'Нет снимков с зонами под выбранные фильтры' : 'Слой спутниковых зон не построен'}</div>}
+      {!rows.all.length && (
+        <div className="empty" data-testid="scene-list-empty">
+          {fieldArea
+            ? 'Выбрана акватория полевых данных: это судовые измерения, у них нет снимков с зонами детектора. Измерения — в слое «Полевые измерения»; снимки — выберите район снимков в «Фильтрах».'
+            : filtered
+              ? 'Нет снимков с зонами под выбранные фильтры'
+              : 'Слой спутниковых зон не построен'}
+        </div>
+      )}
       {rows.finds.map((r) => (
         <SceneRowBtn key={r.s.scene_key} r={r} onPick={onPick} />
       ))}
@@ -1390,25 +1454,10 @@ function SceneZones({
           </label>
         </div>
       </div>
-      {anyEst && (
-        <div className="c-list-note c-est-cap" data-testid="est-caption">
-          <span className="c-est-cap-t">
-            нижняя граница · исследовательская оценка
-          </span>
-          <Info label="Как получено" align="left">
-            {RES_CONTEXT}. {est0?.context ? `${est0.context}. ` : ''}
-            {est0?.scenario ? `${est0.scenario}. ` : `${RES_CAPTION}. ${RES_NOTE} `}
-            {est0?.formula ? `${est0.formula}. ` : ''}
-            {est0?.calibration ? `Действующая калибровка: ${est0.calibration}. ` : ''}
-            Приглушённые — находки «требует проверки» (не совпадают с разметкой Cózar).
-          </Info>
-        </div>
-      )}
       {!numbered.length && <div className="empty">{whole ? 'Зон детектора на этом снимке нет' : 'Нет зон под выбранные фильтры'}</div>}
       {numbered.map(({ f, n }) => {
         const p = f.properties;
         const est = researchEst(p);
-        const flags = p.flags.map((x) => SZ_FLAG_RU[x] ?? x).join(', ');
         return (
           <button
             key={f.id}
@@ -1416,7 +1465,7 @@ function SceneZones({
             onClick={() => onPick(f.id)}
             data-testid="sz-item"
             data-zone={f.id}
-            title={`${zoneTitle(p)} · ${p.detection_label} · площадь зоны ${num(p.measured.zone_area_km2 !== null && p.measured.zone_area_km2 !== undefined ? p.measured.zone_area_km2 * 1e6 : null, 0)} м², пикселей детектора ${num(p.measured.suspicious_area_m2, 0)} м²${est ? ` · ${estLine(est)} — ${RES_CONTEXT}; ${RES_CAPTION}` : ''}`}
+            title={`${zoneTitle(p)} · ${classShort(p)} · ${statusLabel(p)}${confirmation(p) ? ` · подтверждение: ${confirmation(p)}` : ''} · площадь зоны ${num(p.measured.zone_area_km2 !== null && p.measured.zone_area_km2 !== undefined ? p.measured.zone_area_km2 * 1e6 : null, 0)} м², пикселей детектора ${num(p.measured.suspicious_area_m2, 0)} м²`}
           >
             <span className={`c-znum-i ${szKey(p)}`} aria-hidden>
               {n}
@@ -1424,13 +1473,11 @@ function SceneZones({
             <span className="c-zi-main">
               <span className="c-zi-t">
                 {num(p.measured.zone_area_km2 !== null && p.measured.zone_area_km2 !== undefined ? p.measured.zone_area_km2 * 1e6 : null, 0)} м²
-                <span className="c-zi-st"> · {SZ_STATUS_SHORT[szKey(p)] ?? p.detection_label.split(' (')[0]}{flags ? ` · ${flags}` : ''}</span>
+                <span className="c-zi-st"> · {statusLabel(p)}</span>
               </span>
-              {est && (
-                <span className={`c-zi-est ${est.muted ? 'muted' : ''}`} data-testid="sz-item-est">
-                  {estTxt(est)} · нижняя граница
-                </span>
-              )}
+              <span className="c-zi-cls" data-testid="sz-item-class">
+                {classShort(p)}
+              </span>
             </span>
           </button>
         );
@@ -1610,7 +1657,7 @@ function HoverTip({ meta, h, obs, zones, szones }: { meta: Meta; h: HoverInfo; o
     }
     const n = Number(n0), nb = Number(nb0);
     const dd = (v: string) => (v && v !== '0' ? `${v.slice(6, 8)}.${v.slice(4, 6)}.${v.slice(0, 4)}` : '—');
-    t = `${plural(n, 'находка', 'находки', 'находок')} детектора рядом${nb ? `, из них ${nb} совпали с Cózar` : ' — требуют проверки'}`;
+    t = `${plural(n, 'находка', 'находки', 'находок')} детектора рядом${nb ? `, из них ${nb} совпали с Cózar` : ' — независимой разметки нет'}`;
     s = scenes.size
       ? `${scenes.size === 1 ? 'сцена' : `сцен: ${scenes.size}`} — ${[...scenes.values()].slice(0, 3).join('; ')}${scenes.size > 3 ? '…' : ''} · нажмите — ${scenes.size === 1 ? 'к сцене' : 'приблизить'}`
       : `снимки Sentinel-2 ${d0 === d1 ? dd(d0) : `${dd(d0)} – ${dd(d1)}`} · нажмите — приблизить и раскрыть`;
@@ -1619,8 +1666,8 @@ function HoverTip({ meta, h, obs, zones, szones }: { meta: Meta; h: HoverInfo; o
     if (!f) return null;
     const p = f.properties;
     const est = researchEst(p);
-    t = `${isFind(p) ? 'Находка детектора' : 'Спутниковая зона'} · ${p.detection_label}`;
-    s = `снимок Sentinel-2 ${dateRu(p.datetime)} · ${zoneTitle(p)} · площадь пикселей ${num(p.measured.suspicious_area_m2, 0)} м²${est ? ` · ${estLine(est)}` : ''}`;
+    t = `${classShort(p)} · ${statusLabel(p)}`;
+    s = `снимок Sentinel-2 ${dateRu(p.datetime)} · ${zoneTitle(p)} · площадь пикселей ${num(p.measured.suspicious_area_m2, 0)} м²`;
   } else {
     const f = zones?.features.find((x) => x.id === h.id);
     if (!f) return null;
@@ -1643,13 +1690,13 @@ function HoverTip({ meta, h, obs, zones, szones }: { meta: Meta; h: HoverInfo; o
 /** §34 п.3: zone status filter (detection_status of /scene_zones: the same for the list, the map and the export) */
 const SZ_FILTER = ['detected', 'insufficient_data', 'not_detected'];
 const SZ_FILTER_RU: Record<string, string> = {
-  detected: 'находка',
+  detected: 'обнаружено',
   insufficient_data: 'недостаточно данных',
   not_detected: 'не обнаружено',
 };
 const SZ_STATUS_SHORT: Record<string, string> = {
-  detected: 'находка · Cózar (B)',
-  unverified: 'находка · требует проверки',
+  detected: 'обнаружено · Cózar (B)',
+  unverified: 'обнаружено',
   insufficient_data: 'недостаточно данных',
   not_detected: 'не обнаружено',
 };
@@ -1692,6 +1739,12 @@ function CaseLegend({
       <div className="c-lg-head">
         <span className="lg-title">Легенда</span>
         <Info label="Как читать" testid="legend-info">
+          Цвет зоны = класс, так же в списке, в карточке и в выгрузке (поле class): плавающий материал = класс MARIDA Marine Debris (любой плавающий мусор; пластик не
+          подтверждён; состав по снимку не определяется); «Cózar B» — совпадает с разметкой Cózar 2024; «не определено» — сработал признак судна/кильватера, пены,
+          блика, облаков, берега, мелководья или ветер {'>'} 5 м/с (правило Cózar 2024); цифра на карте — номер зоны в списке снимка.
+          {(meta as any).detector?.version?.sha256_short
+            ? ` Модель: ${(meta as any).detector.version.weights} · sha256 ${(meta as any).detector.version.sha256_short} · порог ${num((meta as any).detector.version.threshold, 2)}.`
+            : ''}{' '}
           Сплошной символ — полевое измерение. Пунктир — полоса обследования на снимке-кандидате (не контур пятна). Жёлтые контуры — подозрительные пиксели детектора
           выбранной полосы. Цвет точки — концентрация, шт./км²: сравнима только внутри одного размерного профиля.
           {absent.length ? ` ${absent.map((c) => `${c.label}: ${c.note ?? 'в маске не выделяется'}`).join('. ')}.` : ''}
@@ -1703,8 +1756,8 @@ function CaseLegend({
       {!open && (
         <button className="c-lg-compact" onClick={() => setOpen(true)} data-testid="legend-compact" title="Развернуть легенду">
           <span className="c-lg-finds" data-testid="legend-finds">
-            <i className="c-sw-find" style={{ background: SZ_COLORS.detected }} /> находка, совпадает с Cózar
-            <i className="c-sw-find" style={{ background: SZ_COLORS.unverified }} /> находка, требует проверки
+            <i className="c-sw-find" style={{ background: SZ_COLORS.detected }} /> плавающий материал · Cózar B
+            <i className="c-sw-find" style={{ background: SZ_COLORS.unverified }} /> плавающий материал · без разметки
           </span>
           {layers.obs ? (
             <>
@@ -1725,9 +1778,13 @@ function CaseLegend({
       )}
       {open && (
         <>
-          <div className="lg-row c-lg-finds" data-testid="legend-finds">
-            <i className="c-sw-find" style={{ background: SZ_COLORS.detected }} /> находка детектора, совпадает с разметкой Cózar
-            <i className="c-sw-find" style={{ background: SZ_COLORS.unverified }} /> находка, требует проверки · кружок с белой обводкой крупнее — несколько находок рядом
+          <div className="c-lg-classes" data-testid="legend-finds">
+            <div data-testid="legend-szones">
+              <span className="c-lg-cl"><i className="c-sw-find" style={{ background: SZ_COLORS.detected }} /> плавающий материал · Cózar B</span>
+              <span className="c-lg-cl"><i className="c-sw-find" style={{ background: SZ_COLORS.unverified }} /> плавающий материал · без разметки</span>
+              <span className="c-lg-cl" data-testid="legend-sz-wind"><i className="c-sw-find" style={{ background: SZ_COLORS.insufficient_data }} /> не определено: судно, пена, блик, облака, берег, ветер</span>
+              <span className="c-lg-cl"><i className="c-sw-find" style={{ background: SZ_COLORS.not_detected }} /> объектов нет</span>
+            </div>
           </div>
           {layers.obs && (
             <>
@@ -1776,40 +1833,6 @@ function CaseLegend({
                 <span className="c-sw-px" />
                 Подозрительные пиксели детектора{hasDet ? '' : ' (у выбранной полосы)'}
               </div>
-            </>
-          )}
-          {layers.zones && (
-            <>
-              <div className="lg-row c-lg-sep">Спутниковые зоны детектора (цифра — номер зоны в списке снимка)</div>
-              <div className="c-lg-status" data-testid="legend-szones">
-                <span className="c-chip">
-                  <i className="sq" style={{ background: SZ_COLORS.detected }} />
-                  обнаружено · совпадает с разметкой Cózar (B)
-                </span>
-                <span className="c-chip">
-                  <i className="sq" style={{ background: SZ_COLORS.unverified }} />
-                  обнаружено · требует проверки
-                </span>
-                <span className="c-chip">
-                  <i className="sq" style={{ background: SZ_COLORS.insufficient_data }} />
-                  недостаточно данных / ложное (судно, пена, блик, облака, берег)
-                </span>
-                <span className="c-chip">
-                  <i className="sq" style={{ background: SZ_COLORS.not_detected }} />
-                  не обнаружено
-                </span>
-                <span className="c-chip" data-testid="legend-sz-wind">
-                  <i className="sq" style={{ background: SZ_COLORS.insufficient_data }} />
-                  недостаточно данных: ветер {'>'} 5 м/с (правило Cózar 2024)
-                </span>
-              </div>
-              <div className="c-lg-note">класс MARIDA Marine Debris = любой плавающий мусор, не только пластик; без полевого подтверждения</div>
-              {(meta as any).detector?.version?.sha256_short && (
-                <div className="c-lg-note" data-testid="legend-model">
-                  модель: {(meta as any).detector.version.weights} · sha256 {(meta as any).detector.version.sha256_short} · {dateRu((meta as any).detector.version.trained_at)} · порог{' '}
-                  {num((meta as any).detector.version.threshold, 2)}
-                </div>
-              )}
             </>
           )}
           {hasQuality && (
@@ -1890,7 +1913,7 @@ function Headline({ meta, photo, hasEst, onField, onZone }: { meta: Meta; photo:
         <div className="c-head-r c-head-sat">
           <button className="c-head-link" onClick={() => sat.open_zone_id && onZone(sat.open_zone_id)} data-testid="headline-sat">
             Спутник: {num(sat.n_finds ?? null, 0)} находок из {num(sat.n_zones, 0)} зон ({num(sat.n_level_b, 0)} совпали с Cózar);{' '}
-            {hasEst ? 'шт./км² по снимку — только исследовательская оценка (калибровка на мишенях PLP), не измерение' : 'шт./км² по снимку не подтверждены'}
+            шт./км² по снимку не определены (исследовательский сценарий по мишеням PLP — свёрнут в карточке зоны)
           </button>
           <Info label="почему →" testid="headline-why" align="left">
             {sat.why}. {(meta as any).quantity_levels?.calibration_pairs?.note ?? ''} {sat.finds_note ? `Находки: ${sat.finds_note}.` : ''}

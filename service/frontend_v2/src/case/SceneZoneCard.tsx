@@ -5,8 +5,9 @@
 import Info from '../components/Info';
 import { API_BASE, type Feat, type FC, type Meta } from './api3';
 import { dateRu, dateTimeRu, num, pct } from './fmt';
-import { geomCenter, szKey } from './CaseMap';
-import { cap, estLine, nItemsTxt, RES_CAPTION, RES_CONTEXT_SHORT, RES_NOTE, researchEst } from './estimate';
+import { geomCenter, szKey, SZ_COLORS } from './CaseMap';
+import { cap, RES_CAPTION, RES_NOTE, researchEst, scenarioLine } from './estimate';
+import { confirmation, excludedLabel, flaggedLabel, notCheckedLabel, quantityLine, statusLabel, whatLabel } from './zoneinfo';
 
 /** §33: the source of every number next to it */
 function Src({ k }: { k: 'image' | 'field' | 'photo' | 'research' | 'none' | 'model' | 'era5' | 'mask' }) {
@@ -70,6 +71,24 @@ export interface SceneZoneProps {
   scenario_reason?: string;
   quantity?: { status: string; label: string; detail: string };
   concentration_label?: string;
+  // §39 (L131 «§39 бэкенд готов»)
+  status?: string;
+  status_label?: string;
+  confirmation?: string | null;
+  confirmation_label?: string | null;
+  class?: string | null;
+  classification?: {
+    class?: string | null;
+    class_label?: string | null;
+    what_label?: string | null;
+    excluded_label?: string | null;
+    flagged_label?: string | null;
+    not_checked_label?: string | null;
+    composition?: string | null;
+    [k: string]: any;
+  } | null;
+  quantity_line?: string | null;
+  research_estimate?: any;
   field_nearby: {
     items: {
       source: string;
@@ -111,7 +130,7 @@ export function zoneTitle(p: { title: string; scene_kind?: string }): string {
   return p.scene_kind === 'demo' && !p.title.startsWith('Альборан') ? `Альборан · ${p.title}` : p.title;
 }
 
-export const SZ_COLOR: Record<string, string> = { detected: '#ff8c42', unverified: '#d9b870', not_detected: '#2b8a3e', insufficient_data: '#868e96' };
+export const SZ_COLOR: Record<string, string> = SZ_COLORS; // §44 п.2: one class colour set — map = list = card = legend
 const SIGN_RU: Record<string, string> = { foam: 'пена', glint: 'блик', ship: 'судно / кильватер', seam: 'шов / граница яркости', coast: 'берег / прибой ближе 300 м', shallow: 'мелководье / мутная вода', cloud: 'облака ≥ 20 % зоны', wind: 'ветер > 5 м/с (правило Cózar 2024)' };
 
 
@@ -124,7 +143,14 @@ export default function SceneZoneCard({
   onStudio,
   onField,
   num: zoneNum,
+  onDrift,
+  driftOn,
+  driftCheck,
 }: {
+  /** §44 п.3: drift forecast of the snapshot (null = no published run for this date) */
+  onDrift?: (() => void) | null;
+  driftOn?: boolean;
+  driftCheck?: string;
   meta: Meta;
   /** §34 п.3: the zone's number in the snapshot list / on the map */
   num?: number;
@@ -143,6 +169,7 @@ export default function SceneZoneCard({
   const fn = p.field_nearby;
   const signs = pr.signs;
   const est = researchEst(p);
+  const ql = quantityLine(p);
   return (
     <div className="right-inner" data-testid="scene-zone-card">
       <div className="rp-head">
@@ -162,6 +189,72 @@ export default function SceneZoneCard({
         </button>
       </div>
       <div className="rp-body">
+        {/* §44 п.1: что это → статус → снимок → количество → исключено → «Подробнее» (свёрнуто) */}
+        <div className="sec sz-qtop" data-testid="sz-qtop">
+          <div className="sz-what" data-testid="sz-class-what">
+            <i className="sz-cls-sw" style={{ background: SZ_COLOR[szKey(p)] ?? '#868e96' }} aria-hidden />
+            <span className="faint">Что это:</span> <b>{whatLabel(p)}</b>
+          </div>
+          <div className="c-line sz-qstatus" data-testid="sz-plain-what">
+            <span className="faint">Статус:</span> <b data-testid="sz-status">{statusLabel(p)}</b> <Src k="model" />
+          </div>
+          {confirmation(p) && (
+            <div className="c-line sz-conf" data-testid="sz-confirm">
+              <span className="faint">Подтверждение:</span> {confirmation(p)}
+            </div>
+          )}
+        </div>
+        <ZoneThumb zone={zone} scene={detail?.scene ?? null} />
+        <div className="sec sz-qbody">
+          <div className="c-line sz-qty" data-testid="sz-plain-qty">
+            <b>{ql.head}</b> <Src k="none" />
+            {ql.why && <div className="sz-qty-why faint">{ql.why}</div>}
+          </div>
+          {est && (
+            <details className="sz-scen" data-testid="sz-scenario">
+              <summary>{est.scenarioTitle ?? 'Исследовательский сценарий (мишени PLP)'}</summary>
+              <div className="sz-scen-b" data-testid="sz-scenario-text">
+                {scenarioLine(est)}{' '}
+                <Info label="Как получено" align="right" testid="sz-est-info">
+                  {est.scenario ? `${cap(est.scenario)}. ` : `${RES_CAPTION}. ${RES_NOTE} `}
+                  {est.formula ? `${cap(est.formula)}. ` : ''}
+                  {est.essence ? `${cap(est.essence)}. ` : ''}
+                  {est.basis ? `Площадь — ${est.basis}. ` : ''}
+                  {est.calibration ? `Действующая калибровка: ${est.calibration}. ` : ''}
+                  {est.caveats.length ? `Ограничения: ${est.caveats.join('; ')}.` : ''}
+                </Info>
+              </div>
+            </details>
+          )}
+          <div className="sz-class" data-testid="sz-class">
+            {flaggedLabel(p) && (
+              <div className="c-line" data-testid="sz-flagged">
+                <span className="faint">Признаки:</span> {flaggedLabel(p)}
+              </div>
+            )}
+            {excludedLabel(p) && (
+              <div className="c-line" data-testid="sz-excluded">
+                <span className="faint">Исключено:</span> {excludedLabel(p)}
+              </div>
+            )}
+            <div className="c-line" data-testid="sz-notchecked">
+              <span className="faint">Не проверяется:</span> {notCheckedLabel(p)}
+            </div>
+          </div>
+            <div className="c-line sz-qty" data-testid="sz-plain-comp">
+              <b>{p.classification?.composition ?? 'Состав не определён'}</b> <Src k="none" />
+            </div>
+        </div>
+        {onDrift && (
+          <div className="sec sz-drift" data-testid="sz-drift">
+            <button className={`btn sm sz-drift-btn ${driftOn ? 'on' : ''}`} onClick={onDrift} data-testid="sz-drift-btn" aria-pressed={!!driftOn}>
+              {driftOn ? 'Скрыть прогноз дрейфа' : 'Прогноз дрейфа 24–72 ч (эксперимент)'}
+            </button>
+            <div className="c-line tiny faint" data-testid="sz-drift-check">
+              Статус: исследовательская оценка. {driftCheck}
+            </div>
+          </div>
+        )}
         {(onBack || onStudio) && (
           <div className="sec c-studio-bar" data-testid="sz-nav">
             {onBack && (
@@ -176,52 +269,18 @@ export default function SceneZoneCard({
             )}
           </div>
         )}
-        {/* ------------------------------------------------ §33а п.2: the zone card, strictly */}
-        <div className="sec sz-qtop" data-testid="sz-qtop">
-          <div className="c-line sz-qstatus" data-testid="sz-plain-what">
-            <span className="faint">Статус детекции:</span> <span data-testid="sz-status">{p.detection_label}</span> <Src k="model" />
-          </div>
-          {est ? (
-            <div className={`c-line sz-qty sz-est ${est.muted ? 'muted' : ''}`} data-testid="sz-plain-qty">
-              <span data-testid="sz-est">
-                <b>Количество: {estLine(est)}</b>
-              </span>
-              <span className="sz-est-ctx" data-testid="sz-est-ctx">
-                {RES_CONTEXT_SHORT}{' '}
-                <Info label="Как получено" align="right" testid="sz-est-info">
-                  {est.muted ? 'Находка не подтверждена разметкой Cózar — требует проверки. ' : ''}
-                  {est.context ? `${cap(est.context)}. ` : ''}
-                  {nItemsTxt(est) ? `В зоне ${nItemsTxt(est)}. ` : ''}
-                  {est.calibration ? `Действующая калибровка: ${est.calibration}. ` : ''}
-                  {est.scenario ? `${cap(est.scenario)}. ` : `${RES_CAPTION}. ${RES_NOTE} `}
-                  {est.formula ? `${cap(est.formula)}. ` : ''}
-                  {est.essence ? `${cap(est.essence)}. ` : ''}
-                  {est.basis ? `Площадь — ${est.basis}. ` : ''}
-                  {est.spread ? `${cap(est.spread)}. ` : ''}
-                  {est.caveats.length ? `Ограничения: ${est.caveats.join('; ')}.` : ''}
-                </Info>
-              </span>
-            </div>
-          ) : (
-            <div className="c-line sz-qty" data-testid="sz-plain-qty">
-              <b>Количество предметов по этому снимку не определено</b> <Src k="none" />
-            </div>
-          )}
-            <div className="c-line sz-qty" data-testid="sz-plain-comp">
-              <b>Состав не определён</b> <Src k="none" />
-            </div>
+        <details className="sec sz-more" data-testid="sz-more">
+          <summary>Подробнее: маска качества, признаки, площадь, модель, координаты, ветер</summary>
             <details className="sz-explore" data-testid="sz-explore">
               <summary className="btn sm">Исследовать дальше</summary>
               <ol className="sz-next-l">
-                <li>детальный снимок зоны — дрон или камера с судна (спутник даёт площадь пятна{est ? ' и исследовательскую оценку штук' : ''})</li>
+                <li>детальный снимок зоны — дрон или камера с судна (спутник даёт только площадь пятна)</li>
                 <li>
                   счёт предметов на детальном снимке — <a href="?mode=photo">счётчик в «Фото»</a> (шт. на кадр, при известной площади кадра — шт./м²)
                 </li>
                 <li>сверка с полевым измерением на этом же месте и в это же время</li>
               </ol>
             </details>
-        </div>
-        <ZoneThumb zone={zone} scene={detail?.scene ?? null} />
         <div className="sec sz-plain" data-testid="sz-plain">
           <dl className="c-dl sz-plain-dl">
             <dt>Снимок</dt>
@@ -269,12 +328,11 @@ export default function SceneZoneCard({
             </div>
           )}
         </div>
-        <details className="sec sz-more" data-testid="sz-more">
-          <summary>Подробности: признаки ложных, модель, примеры</summary>
         <div className="sec">
           <span className="c-chip" data-testid="sz-status-chip">
             <i style={{ background: SZ_COLOR[szKey(p)] ?? '#868e96' }} />
-            {p.detection_label}
+            {statusLabel(p)}
+            {confirmation(p) ? ` · подтверждение: ${confirmation(p)}` : ''}
           </span>
           {p.detection_reason && <div className="c-line" data-testid="sz-reason">{p.detection_reason}</div>}
           {p.wind_note && (
@@ -349,8 +407,8 @@ export default function SceneZoneCard({
             <dd data-testid="sz-prob">
               {num(pr.prob_mean, 2)} / {num(pr.prob_max, 2)}
             </dd>
-            <dt>Статус находки</dt>
-            <dd>{pr.status}</dd>
+            <dt>Статус</dt>
+            <dd>{statusLabel(p)}</dd>
             {signs &&
               (['foam', 'glint', 'ship', 'seam', 'cloud', 'coast', 'shallow'] as const).map((k) =>
                 signs[k] ? (

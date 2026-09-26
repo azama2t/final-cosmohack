@@ -37,6 +37,10 @@ export interface ResEst {
   /** §36 п.2: the wording of the 470–670 scenario from the API (full / short), if given */
   scenario: string | null;
   scenarioShort: string | null;
+  /** §39 п.3: the ready line of the scenario from the API (research_estimate.scenario_line) */
+  scenarioLabel: string | null;
+  /** «Исследовательский сценарий (мишени PLP)» (research_estimate.scenario_title) */
+  scenarioTitle: string | null;
 }
 
 /** jury 14:30: one short line under the number; everything else — under (i) */
@@ -49,7 +53,7 @@ export const RES_CONTEXT = 'плотность внутри нити, в пер�
 
 /** the short caption required next to every estimate (§34 п.3) */
 export const RES_CAPTION =
-  'исследовательский сценарий по искусственным мишеням PLP (допущения: предметы размера бутылки PET 1,5 л, покрытие 28–40 %) — не доверительный интервал, на природе не проверено; на площадь контура зоны; нижняя граница (пиксели ниже порога не учтены)';
+  'исследовательский сценарий по искусственным мишеням PLP (допущения: предметы размера бутылки PET 1,5 л, покрытие 28–40 %) — не доверительный интервал, на природе не проверено; на площадь контура зоны; пиксели ниже порога детектора не учтены';
 /** the list caption (the card and the «i» carry the full one) */
 export const RES_CAPTION_LIST = 'исследовательский сценарий по искусственным мишеням PLP (бутылки PET 1,5 л, покрытие 28–40 %), на природе не проверено';
 /** the full caption (§34 п.2, §36 п.2) — card «i» / details (fallback when the API gives no wording) */
@@ -100,6 +104,8 @@ export function researchEst(p: any): ResEst | null {
     calibration: str(r.calibration_name),
     scenario: str(r.scenario) ?? str(r.scenario_label) ?? str(r.scenario?.label) ?? str(r.caption),
     scenarioShort: str(r.scenario_label_short) ?? str(r.scenario?.short) ?? str(r.caption_short),
+    scenarioLabel: str(r.scenario_line) ?? str(r.scenario_label),
+    scenarioTitle: str(r.scenario_title),
   };
 }
 
@@ -115,12 +121,20 @@ export const rough = (v: number | null) => (v === null ? '—' : sig2.format(v))
 export function estTxt(e: ResEst): string {
   return `≥ ~${rough(e.lb)} шт./км²`;
 }
-/** «≥ ~93 000 шт./км² · нижняя граница · исследовательская оценка» (or the API's own short wording) */
+/** §39 п.3: «≈ X шт./км², если бы это были предметы размера бутылки 1,5 л при покрытии 28–40 % (искусственные мишени
+ *  PLP); на природе не проверено; на оценщике хуже ответа «0»» — shown only folded, under «Количество … не определено» */
+export function scenarioLine(e: ResEst): string {
+  return (
+    e.scenarioLabel ??
+    `≈ ${rough(e.v)} шт./км², если бы это были предметы размера бутылки 1,5 л при покрытии 28–40 % (искусственные мишени PLP); на природе не проверено; на оценщике хуже ответа «0»`
+  );
+}
+/** «≈ 93 000 шт./км² · исследовательский сценарий» (or the API's own short wording) */
 export function estLine(e: ResEst): string {
-  return e.short ?? `${estTxt(e)} · нижняя граница · исследовательская оценка`;
+  return e.short ?? `≈ ${rough(e.v)} шт./км² · исследовательский сценарий`;
 }
 /** «≈ 390 000 шт. в пересчёте на бутылки PET 1,5 л» */
 export function nItemsTxt(e: ResEst): string | null {
   if (e.nItems === null) return null;
-  return e.nItemsLower ? `≥ ~${rough(e.nItems)} шт. в пересчёте на бутылки PET 1,5 л (нижняя граница)` : `≈ ${rough(e.nItems)} шт. в пересчёте на бутылки PET 1,5 л`;
+  return e.nItemsLower ? `≈ ${rough(e.nItems)} шт. в пересчёте на бутылки PET 1,5 л (сценарий)` : `≈ ${rough(e.nItems)} шт. в пересчёте на бутылки PET 1,5 л`;
 }

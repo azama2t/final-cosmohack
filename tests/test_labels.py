@@ -155,7 +155,7 @@ def test_targets_table():
     aer = next(t for t in T.TARGETS if t["id"] == "photo_aerial")
     assert "164 м² кадра берега" in aer["unit"]
     sz = next(t for t in T.TARGETS if t["id"] == "scene_zones")
-    assert "не выдаём" in sz["unit"]
+    assert "не определено" in sz["unit"] and "исследовательский сценарий" in sz["unit"]  # §39 п.3
     md = T.markdown()
     assert md.count("\n") == len(T.TARGETS) + 2
 

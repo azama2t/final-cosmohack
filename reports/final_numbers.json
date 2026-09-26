@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-26T11:15:35+03:00",
+ "generated": "2026-09-26T16:31:21+03:00",
  "note": "генерируется scripts/final_numbers.py; руками не править; null = ещё не посчитано",
  "l3_lgbm": {
   "available": true,
@@ -5223,15 +5223,15 @@
   "selfcheck": {
    "available": true,
    "file": "reports/selfcheck/consistency_latest.json",
-   "when": "2026-09-26T10:09:57",
-   "checks": 259,
-   "ok": 259,
+   "when": "2026-09-26T15:33:38",
+   "checks": 284,
+   "ok": 268,
    "fail": 0,
-   "warn": 0,
-   "seconds": 14.0,
+   "warn": 16,
+   "seconds": 269.0,
    "invalid_ok": 46,
    "invalid_total": 46,
-   "p95_max_ms": 106.0
+   "p95_max_ms": 4304.0
   },
   "control": {
    "n": 12,
@@ -5795,11 +5795,11 @@
      "nb2_hi95": 64.5,
      "nb2_alpha": 0.489,
      "test_mean": 46.0,
-     "dev_mean": 56.3,
+     "dev_mean": 56.9,
      "garwood_covers_test_mean": false,
      "boot_covers_test_mean": true,
-     "event_lo95": 10.2,
-     "event_hi95": 157.0,
+     "event_lo95": 10.0,
+     "event_hi95": 160.3,
      "event_cov_test": 0.929,
      "event_n_test": 14,
      "garwood_event_cov_test": 0.0,
@@ -6223,12 +6223,130 @@
      "lo": 0.0,
      "hi": 13.2
     },
-    "zone_main_status": "концентрация по снимку не подтверждена",
-    "no_count_reason": "перевод площади маски в штуки не показываем — нет калибровочных пар «снимок → шт./км²»",
+    "zone_main_status": "количество предметов по снимку не определено",
+    "no_count_reason": "перенос «снимок → шт./км²» не подтверждён: природных пар 0 (см. ISPRA 604); число сценария PLP — свёрнутая исследовательская оценка, не измерение",
     "export": {
      "ui": 23,
      "csv": 23,
      "geojson": 23
+    },
+    "wind_rule_ms": 5.0,
+    "class_label": "плавающий материал (класс MARIDA Marine Debris; пластик не подтверждён)",
+    "status4": {
+     "detected": 78,
+     "not_detected": 28,
+     "insufficient_data": 180
+    },
+    "status4_labels": {
+     "detected": "обнаружено",
+     "not_detected": "не обнаружено",
+     "insufficient_data": "недостаточно данных",
+     "research_estimate": "исследовательская оценка"
+    },
+    "status4_note": "статус зоны — одно из четырёх постановочных; «исследовательская оценка» — статус концентрации у находок",
+    "by_no_independent_labels": 64,
+    "n_confirmed_cozar_b": 14,
+    "n_no_independent_labels": 63,
+    "quantity_line": "Количество предметов по этому снимку не определено (перенос не подтверждён: нет природных пар; см. ISPRA 604)",
+    "research_estimate": {
+     "available": true,
+     "status": "исследовательская оценка",
+     "method": "исследовательский сценарий: калибровка на искусственных мишенях PLP (бутылки PET 1.5 л)",
+     "note": "для природных скоплений не проверена; мелкие предметы → больше штук",
+     "unit": "шт./км²",
+     "scenario": "исследовательский сценарий по искусственным мишеням PLP (допущения: предметы размера бутылки PET 1,5 л, покрытие пикселя 28–40 %): 470–670 предметов-бутылок на пиксель — не доверительный интервал и не проверено на природе",
+     "kind": "scenario",
+     "natural_pair_note": "на природной паре ISPRA 604 (16.09.2019; протокол SNPA Modulo 2bis: предметы 2,5–50 см, 15 из 16 — полимеры; ширина полосы в файле 2019 г. не записана, протокол 2024 — ≤ 5 м; часовой пояс не указан) ни один из 16 предметов не ближе 50 м к пикселю детектора, ближайший — 85 м; их суммарная площадь ~10⁻⁵ площади полосы — сигнал нити дают не посчитанные предметы",
+     "quantity_line": "Количество предметов по этому снимку не определено (перенос не подтверждён: нет природных пар; см. ISPRA 604)",
+     "scenario_title": "Исследовательский сценарий (мишени PLP)",
+     "scenario_status": "исследовательский сценарий: не результат, на природе не проверено",
+     "calibration_id": "flat_plp",
+     "calibration_name": "плоская калибровка по мишеням PLP (470–670 предметов-бутылок на пиксель)",
+     "firing_caveat": "срабатывание не монотонно по числу: из 9 водных пикселей мишеней с ≥ 400 бутылками детектор сработал на 2; пиксель PLP2018 с ≈ 1 670 бутылками — без срабатывания; сценарий — две точки, не закон",
+     "firing": {
+      "n_water_pixels_ge400": 9,
+      "n_fired": 2,
+      "max_not_fired": 1670,
+      "max_not_fired_campaign": "PLP2018",
+      "source": "docs/research/pairs/p1_targets.csv; docs/research/pairs/PAIRS.md (ИТОГ П1)"
+     },
+     "formula_short": "пиксели маски × 470–670 / площадь контура = пересчёт доли покрытия",
+     "coverage_pct_lo": 28,
+     "coverage_pct_hi": 40,
+     "items_per_pixel_lo": 470,
+     "items_per_pixel_hi": 670,
+     "items_per_pixel_value": 561.16,
+     "point": "geometric_mean",
+     "calibration_n_dates": 2,
+     "calibration_dates": [
+      "2019-04-18",
+      "2019-05-18"
+     ],
+     "source": "reports/count_datasets/115_bridge_s2.md (§3.1 «Сработавшие пиксели», ИТОГ п.3): PLP2019, Topouzelis et al. 2020, Remote Sens. 12:2013, данные Zenodo 3752719 (CC BY 4.0); детектор weights/lgbm, порог 0.63, S2 L2A того же дня.",
+     "config": "configs/zone_estimate.yaml",
+     "n_finds": 77,
+     "n_zones_with_estimate": 77,
+     "lower_bound_median": 32000,
+     "lower_bound_min": 9100,
+     "lower_bound_max": 130000,
+     "n_muted": 63,
+     "n_not_muted": 14,
+     "n_confirmed_cozar_b": 14,
+     "n_no_independent_labels": 63,
+     "scenario_value_median": 32000,
+     "scenario_value_min": 9100,
+     "scenario_value_max": 130000,
+     "interval_kind": "calibration_spread",
+     "c_median": 37600,
+     "c_min": 10800,
+     "c_max": 160000,
+     "c_lo_min": 9080,
+     "c_hi_max": 191000,
+     "n_pixels_total": 2474,
+     "area_km2_total": 21.77,
+     "n_items_total_lo": 1162780,
+     "n_items_total_hi": 1657580,
+     "n_items_total_value": 1390000,
+     "c_pooled": 63800,
+     "c_pooled_lo": 53400,
+     "c_pooled_hi": 76100,
+     "example": {
+      "zone_id": "SZ-demo-cozar-2021-03-11-016",
+      "n_cozar_filaments": 2,
+      "n_pixels": 691,
+      "area_km2": 4.1767,
+      "value": 92800,
+      "lo": 77800,
+      "hi": 111000,
+      "lower_bound": 78000
+     },
+     "code": "src/macroplastic/case/zone_estimate.py (summary_from_dir), configs/zone_estimate.yaml",
+     "harness": {
+      "available": true,
+      "source": "docs/research/discovery/LEADERBOARD.csv (набор v2; б1 = сценарий PLP продукта, б2 = ответ «0»); метрики — docs/research/discovery/HARNESS.md",
+      "n_a2_pairs": 77,
+      "n_a3_windows": 427,
+      "n_a1_dates": 15,
+      "n_a5_natural": 0,
+      "plp": {
+       "E1_err": 2.143,
+       "ABST2": 0.701,
+       "G2_thousands": 0.182,
+       "FP3": 0.147,
+       "R4_detect": 0.371
+      },
+      "zero": {
+       "E1_err": 2.509,
+       "ABST2": 1.0,
+       "G2_thousands": 0.0,
+       "FP3": 0.0,
+       "R4_detect": 0.0
+      },
+      "plp_worse_than_zero_on": [
+       "ABST2",
+       "FP3"
+      ]
+     }
     }
    },
    "photo_count": {
@@ -6269,7 +6387,157 @@
      ],
      "accepted": true,
      "license": "DebrisScan — Apache-2.0"
+    },
+    "transfer": {
+     "available": true,
+     "source": "reports/photo_count/cross_grouped.json (порог с FML val, без дообучения, IoU 0.5)",
+     "fml_test_ap50": 0.914,
+     "sets": {
+      "maharjan": {
+       "name": "дрон Maharjan 2022",
+       "ap50": 0.01,
+       "count_mae": 1.97,
+       "n_images": 855
+      },
+      "tud_gv": {
+       "name": "камера над каналом TUD-GV",
+       "ap50": 0.406,
+       "count_mae": 2.92,
+       "n_images": 60
+      },
+      "tocl_val": {
+       "name": "камера над рекой The Ocean Cleanup",
+       "ap50": 0.001,
+       "count_mae": 10.5,
+       "n_images": 127
+      }
+     },
+     "verdict": "без дообучения не переносится: AP50 0.914 на отложенном FML против дрон Maharjan 2022 0.01, камера над каналом TUD-GV 0.406, камера над рекой The Ocean Cleanup 0.001"
+    },
+    "materials": {
+     "available": true,
+     "source": "reports/labels/material_winans.json (test, строки — истина, столбцы — прогноз)",
+     "classes": [
+      "plastic",
+      "organic",
+      "metal",
+      "other",
+      "unknown"
+     ],
+     "f1": {
+      "plastic": 0.866,
+      "organic": 0.741,
+      "metal": 0.377,
+      "other": 0.887,
+      "unknown": 0.876
+     },
+     "macro_f1": 0.749,
+     "n_chips": 397,
+     "accepted": [
+      "organic"
+     ],
+     "rule": "docs/LOG.md 26.09 06:30 (записано до обучения)"
     }
+   },
+   "research_log": {
+    "available": true,
+    "source": "docs/PIPELINE.md (строки таблиц с номером эксперимента: D детектор, S синхронизация, C концентрация, E связь снимок ↔ поле, P подготовительный этап, R расследование данных, G независимая проверка, Q количество); docs/research/pairs/PAIRS.csv (реестр пар «снимок + число предметов»)",
+    "protocol": "одна строка PIPELINE = одна проверенная гипотеза или эксперимент с числом и решением; пары — строки реестра, класс по первой букве (A, A*, B, C, D)",
+    "n_experiments": 71,
+    "n_hypotheses": 71,
+    "by_prefix": {
+     "C": 11,
+     "D": 24,
+     "E": 3,
+     "G": 4,
+     "P": 5,
+     "Q": 7,
+     "R": 11,
+     "S": 6
+    },
+    "n_pairs_registry": 441,
+    "pairs_by_class": {
+     "A": 5,
+     "A*": 63,
+     "B": 49,
+     "C": 121,
+     "D": 196,
+     "—": 7
+    }
+   },
+   "ispra": {
+    "available": true,
+    "source": "docs/research/pairs/ispra_levels.csv (scripts/search/ispra_scan.py)",
+    "protocol": "уровни A–D как в docs/INDEX.md; A — пара по месту и дню, не калибровочная",
+    "n_transects": 167,
+    "A": 1,
+    "B": 0,
+    "C": 39,
+    "D": 127
+   },
+   "resolution_physics": {
+    "available": true,
+    "source": "docs/research/marine_quantity/results/resolution_physics.json (docs/research/marine_quantity/scripts/resolution_physics.py; размеры объектов ADIS)",
+    "protocol": "предмет считаем поштучно, если он занимает ≥ 2×2 пикселя",
+    "pixel_m": 10,
+    "item_cm_min": 2.5,
+    "item_cm_max": 50.0,
+    "item_cm_source": "протокол SNPA Modulo 2bis (природная пара ISPRA 604), configs/zone_estimate.yaml natural_pair",
+    "countable_pct_10m": 0.0,
+    "countable_pct_03m": 25.0,
+    "countable_pct_05m": 5.0,
+    "n_objects": 22642
+   },
+   "targets": {
+    "available": true,
+    "source": "docs/research/pairs/PAIRS.csv (класс «A*»: искусственные мишени с известным числом предметов)",
+    "protocol": "одна строка = одна дата съёмки мишени; «A* (покрытие)» — известна только доля покрытия, не число",
+    "n_dates_counted": 19,
+    "n_dates_counted_s2": 13,
+    "n_dates_counted_planetscope": 6,
+    "n_dates_cover_only": 38,
+    "campaigns": [
+     "Maathuis2026",
+     "PLP2018",
+     "PLP2019",
+     "Themistocleous2020"
+    ]
+   },
+   "estimator": {
+    "available": true,
+    "source": "docs/research/discovery/LEADERBOARD.csv (v2), правило — docs/research/discovery/HARNESS.md",
+    "n_methods": 5,
+    "n_runs": 5,
+    "n_passed_gate": 0,
+    "passed": [],
+    "natural_pairs_a5": 0
+   },
+   "synthetic_p3": {
+    "available": true,
+    "source": "reports/p3/p3_synth.json (configs/p3_synth.yaml, правило записано до метрики)",
+    "accepted": false,
+    "n_dates": 11,
+    "mae_p3": 893.5,
+    "mae_flat": 100.9,
+    "mae_zero": 113.5,
+    "verdict": "не принята: на 11 датах мишеней A* (оставь-одну-дату) MAE 893.5 против 100.9 у плоской калибровки и 113.5 у ответа «0»"
+   },
+   "archives": {
+    "available": true,
+    "source": "docs/research/pairs/archives/{FILES.csv, CANDIDATES.csv}, описание — ARCHIVES.md",
+    "n_files": 39,
+    "n_candidates": 16
+   },
+   "jury": {
+    "available": true,
+    "source": "docs/LOG.md (строки «жюри-человек», итог NN/105); отчёты — reports/jury_human/",
+    "note": "внутренний балл проверяющего по чек-листу ТЗ, не конкурсная оценка",
+    "score_first": 77,
+    "score_last": 89,
+    "score_max": 105,
+    "n_runs": 7,
+    "first_when": "26.09 08:52",
+    "last_when": "26.09 14:51"
    }
   },
   "clean_clone": {
@@ -6389,8 +6657,8 @@
    "passed": 255,
    "skipped": 2,
    "failed": 0,
-   "seconds": 21.7,
-   "when": "26.09.2026 11:15",
+   "seconds": 75.8,
+   "when": "26.09.2026 16:31",
    "command": "python -m pytest -q tests/test_case_conc_model.py tests/test_case_concentration.py tests/test_case_consistency.py tests/test_case_coverage.py tests/test_case_docs_numbers.py tests/test_case_expert_check.py tests/test_case_field_intervals.py tests/test_case_geometry.py tests/test_case_geometry_integration.py tests/test_case_pairfinder.py tests/test_case_run_all.py tests/test_api_v3.py"
   },
   "n_test_funcs": 166,

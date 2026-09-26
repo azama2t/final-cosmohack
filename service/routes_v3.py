@@ -12,6 +12,7 @@ import functools
 import inspect
 import json
 import traceback
+from urllib.parse import quote
 
 from fastapi import APIRouter, Request
 from fastapi.responses import FileResponse, JSONResponse, Response
@@ -58,7 +59,7 @@ PARAMS: dict = {
     "zone": set(), "metrics": set(), "query_list": set(), "query_get": set(), "query_run": set(),
     "query_add": set(), "query_delete": set(),
     "export": None,  # checked inside (depends on layer / query_id)
-    "scene_zones": None, "scene_zone": set(), "sz_scenes": set(), "sz_scene_png": set(), "sz_crop": set(),  # 3.10
+    "scene_zones": None, "defense_examples": set(), "scene_zone": set(), "sz_scenes": set(), "sz_scene_png": set(), "sz_crop": set(),  # 3.10
 }
 _SZ_P = {"bbox", "date_from", "date_to", "status", "detection_status", "concentration_status", "scene_kind",
          "scene_key", "limit", "offset",
@@ -321,10 +322,13 @@ def scene_mask(scene_id: str):
 @api
 def zones(request: Request):
     q = _q(request)
-    feats = cs.filter_zones(**_zone_filters(q))
+    zf = _zone_filters(q)
+    feats = cs.filter_zones(**zf)
     limit, offset = _page(q)
-    fc = cs.zones_fc(feats[offset:offset + limit])
+    fc = cs.zones_fc(feats[offset:offset + limit], zf)
     fc["total"], fc["offset"], fc["limit"] = len(feats), offset, limit
+    if not fc["features"] and feats:
+        fc["empty_reason"] = "Нет полос на этой странице (offset больше числа полос)"
     return _ok(fc)
 
 
@@ -411,6 +415,7 @@ def export(request: Request):
         q = {**_query_to_params(qr, "zones" if layer in ("detections", "scene_zones") else layer),
              **{k: v for k, v in q.items() if k in ("geometry",)}}
     stamp = dt.date.today().isoformat()
+    extra_headers: dict = {}
     if layer == "observations":
         rows = ran["obs_rows"] if ran is not None else cs.filter_samples(**_obs_filters(q))
         if fmt == "csv":
@@ -440,13 +445,17 @@ def export(request: Request):
         else:
             obj = dfc
     else:
-        feats = ran["zones"] if ran is not None else cs.filter_zones(**_zone_filters(q))
+        zf = None if ran is not None else _zone_filters(q)
+        feats = ran["zones"] if ran is not None else cs.filter_zones(**zf)
         if fmt == "csv":
             body = cs.zones_csv(feats)
+            # acceptance 16:03 п.1: CSV carries the same note / empty reason (headers; the rows stay = API)
+            extra_headers = {"X-Filter-Note": quote(cs.STRIPS_FILTER_NOTE),
+                             "X-Empty-Reason": quote(cs.zones_empty_reason(len(feats), zf) or "")}
         else:
-            obj = cs.zones_fc(feats)
+            obj = cs.zones_fc(feats, zf)
     name = f"{layer}_{stamp}.{fmt}"
-    headers = {**CORS, "Content-Disposition": f'attachment; filename="{name}"'}
+    headers = {**CORS, "Content-Disposition": f'attachment; filename="{name}"', **extra_headers}
     if fmt == "csv":
         return Response(("﻿" + body).encode("utf-8"), media_type=CSV_UTF8, headers=headers)
     return Response(json.dumps(obj, ensure_ascii=False).encode("utf-8"), media_type=GEOJSON_UTF8,
@@ -517,6 +526,12 @@ def scene_zones(request: Request):
     fc = cs.scene_zones_fc(feats[offset:offset + limit], field_filter=_sz_field_filter(szf))
     fc["total"], fc["offset"], fc["limit"] = len(feats), offset, limit
     return _ok(fc)
+
+
+@router.get("/defense_examples", summary="5 обязательных примеров для защиты (рабочий режим карты)")
+@api
+def defense_examples():
+    return _ok(cs.defense_examples())
 
 
 @router.get("/scene_zones/scenes", summary="Сцены слоя спутниковых зон (снимок + маска качества)")

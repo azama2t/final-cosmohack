@@ -24,6 +24,8 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--base", default="http://localhost:8070")
     ap.add_argument("--out", default=str(OUT), help="папка скринов (для пробы — не presentation/img)")
+    ap.add_argument("--size", default="1366x768", help="окно браузера (§43: 1366×768; снимается с масштабом 2)")
+    ap.add_argument("--drift-scene", default="live-guanabara-2025-09-04", help="снимок для кадра дрейфа (?scene=)")
     a = ap.parse_args(argv)
     out = Path(a.out)
     from playwright.sync_api import sync_playwright
@@ -33,7 +35,8 @@ def main(argv=None) -> int:
     made, notes = [], []
     with sync_playwright() as p:
         b = p.chromium.launch()
-        pg = b.new_page(viewport={"width": 1920, "height": 1080})
+        w, h = (int(x) for x in a.size.split("x"))
+        pg = b.new_page(viewport={"width": w, "height": h}, device_scale_factor=2)
         pg.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
 
         def shot(name):
@@ -61,6 +64,9 @@ def main(argv=None) -> int:
         pg.wait_for_selector("[data-testid=scene-zone-card]", timeout=30000)
         pg.wait_for_timeout(6000)
         shot("card")
+        # сама карточка («Что это» → статус → подтверждение → «Количество … не определено») — для слайда «Сервис»
+        pg.locator("[data-testid=scene-zone-card]").first.screenshot(path=str(out / "card_panel.png"))
+        made.append("card_panel")
         # студия → назад
         if pg.locator("[data-testid=sz-studio]").count():
             pg.click("[data-testid=sz-studio]")
@@ -100,6 +106,21 @@ def main(argv=None) -> int:
                 break
         pg.wait_for_timeout(1500)
         shot("photo")
+        # дрейф: снимок Гуанабара, первая зона → «Дрейф»
+        pg.goto(a.base + f"/?scene={a.drift_scene}", wait_until="networkidle", timeout=90000)
+        try:
+            pg.wait_for_selector("[data-testid=sz-item]", timeout=60000)
+            pg.locator("[data-testid=sz-item]").first.click()
+            pg.wait_for_selector("[data-testid=scene-zone-card]", timeout=30000)
+            pg.wait_for_timeout(3000)
+            if pg.locator("[data-testid=sz-drift-btn]").count():
+                pg.locator("[data-testid=sz-drift-btn]").first.click()
+                pg.wait_for_timeout(6000)
+                shot("drift")
+            else:
+                notes.append("кнопки дрейфа нет у первой зоны")
+        except Exception as e:  # noqa: BLE001
+            notes.append(f"кадр дрейфа не снят: {e}"[:200])
         b.close()
     print("скрины:", ", ".join(made), "->", out)
     for n in notes:

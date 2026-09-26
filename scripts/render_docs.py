@@ -629,6 +629,54 @@ def case_labeled_table(fn: dict) -> str:
     return "\n".join(rows)
 
 
+def case_sat_count_block(fn: dict) -> str:
+    """§39 п.3 / аудит В20: «Как получаем шт./км² по снимку и насколько этому верить» (case.sections.scene_zones.research_estimate)."""
+    sz = _sec(fn, "scene_zones")
+    re_ = sz.get("research_estimate") or {}
+    if not re_.get("available"):
+        return "_Раздел недоступен: нет case.sections.scene_zones.research_estimate (scripts/case/collect_search.py)._"
+    lv = _sec(fn, "quantity").get("levels") or {}
+    h = re_.get("harness") or {}
+    pl, z = h.get("plp") or {}, h.get("zero") or {}
+
+    def _cap(t):
+        t = str(t or "")
+        return t[:1].upper() + t[1:]
+
+    def pc(v):
+        return DASH if v is None else f"{100 * float(v):.0f} %"
+    dates = ", ".join(f"{d[8:10]}.{d[5:7]}.{d[:4]}" for d in (re_.get("calibration_dates") or []) if len(str(d)) == 10) or DASH
+    rows = [
+        f"**Ответ продукта: «{re_.get('quantity_line')}».** Статус зоны — один из четырёх постановочных "
+        f"(обнаружено / не обнаружено / недостаточно данных; у {fmt(re_.get('n_zones_with_estimate'), None)} находок статус "
+        f"концентрации — «{re_.get('status')}»). Измеренного числа штук по снимку нет; в списке зон шт./км² не показываются.",
+        "",
+        "| Вопрос | Ответ | Где проверить |",
+        "|---|---|---|",
+        f"| Что измеряет снимок | площадь маски и долю покрытия пикселя; класс — {sz.get('class_label') or DASH} | "
+        f"`case.sections.scene_zones`, карточка зоны «Что это» |",
+        f"| Почему штуки не определены | калибровочных пар «снимок → шт./км²» {fmt(lv.get('calibration_pairs'), None)}; "
+        f"природных синхронных пар, подтверждённых критиком пар, {fmt(h.get('n_a5_natural'), None)}. {_cap(re_.get('natural_pair_note'))} "
+        f"| `docs/research/pairs/PAIRS.md`, `docs/research/pairs/CRITIC.md`, `docs/research/pairs/img/` |",
+        f"| Что под раскрывашкой «▸ {re_.get('scenario_title')}» | {re_.get('formula_short')}. Допущения: предметы размера бутылки PET 1,5 л, "
+        f"покрытие пикселя {fmt(re_.get('coverage_pct_lo'), None)}–{fmt(re_.get('coverage_pct_hi'), None)} % — это искусственные мишени PLP "
+        f"({fmt(re_.get('calibration_n_dates'), None)} даты: {dates}), где детектор сработал. По {fmt(re_.get('n_zones_with_estimate'), None)} "
+        f"находкам сценарий даёт медиану ≈ {fmt(re_.get('scenario_value_median'), 'int')} шт./км² "
+        f"(от {fmt(re_.get('scenario_value_min'), 'int')} до {fmt(re_.get('scenario_value_max'), 'int')}) — «если бы это были бутылки» "
+        f"| `configs/zone_estimate.yaml`, `src/macroplastic/case/zone_estimate.py`; API `research_estimate`, CSV `research_scenario_*` |",
+        f"| Насколько этому верить | {re_.get('scenario_status')}. {_cap(re_.get('firing_caveat'))}. "
+        f"На оценщике (набор v2) сценарий хуже ответа «0»: на {fmt(h.get('n_a2_pairs'), None)} парах без видимого сигнала "
+        f"правильно воздерживается в {pc(pl.get('ABST2'))} против {pc(z.get('ABST2'))} у «0» (тысячи шт./км² при полевых < 100 — "
+        f"{pc(pl.get('G2_thousands'))} пар); на {fmt(h.get('n_a3_windows'), None)} окнах фона (суда, пена, облака, саргассум, "
+        f"мутная вода) даёт предметы в {pc(pl.get('FP3'))} окон против {pc(z.get('FP3'))} (порог ≤ 1 %). Ошибка числа на "
+        f"{fmt(h.get('n_a1_dates'), None)} датах мишеней меньше, чем у «0» (средний |log10| ошибки {fmt(pl.get('E1_err'), 'f2')} "
+        f"против {fmt(z.get('E1_err'), 'f2')}), — но это те же искусственные мишени | `docs/research/discovery/LEADERBOARD.csv`, `HARNESS.md` |",
+        "| Чем это не является | не измерение, не доверительный интервал, не концентрация пластика, не состав и не масса; "
+        "в выгрузке CSV — отдельные колонки research_scenario_* со статусом сценария | `docs/CONTRACTS_V3.md` (поля зон) |",
+    ]
+    return "\n".join(rows)
+
+
 def case_quantity_levels_table(fn: dict) -> str:
     """§15: три уровня связи «снимок ↔ полевое число» (case.sections.quantity.levels)."""
     lv = _sec(fn, "quantity").get("levels") or {}
@@ -861,7 +909,7 @@ def derived(fn: dict) -> dict:
             "case_search_table": case_search_table(fn), "case_labeled_table": case_labeled_table(fn),
             "case_baselines_u_table": case_baselines_u_table(fn),
             "case_quantity_levels_table": case_quantity_levels_table(fn), "case_field_table": case_field_table(fn), "case_targets_table": case_targets_table(fn),
-            "case_quantity_profiles_table": case_quantity_profiles_table(fn)}
+            "case_quantity_profiles_table": case_quantity_profiles_table(fn), "case_sat_count_block": case_sat_count_block(fn)}
 
 
 def render(text: str, ctx: dict, missing: list) -> str:

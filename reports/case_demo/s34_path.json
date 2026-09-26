@@ -22,7 +22,7 @@
     "Гондурас · Омоа | 8 находок | 30.01.2025 · облачность 0,3 %",
     "Гондурас · Омоа | 5 находок | 28.12.2025 · облачность 3 %"
    ],
-   "counts": "75 снимков 77 находок (14 совпали с Cózar)",
+   "counts": "75 снимков 77 находок (14 · Cózar B)",
    "one_block": {
     "filters": 0,
     "nums": 0,
@@ -36,28 +36,48 @@
    "zones_listed": 23,
    "numbers_on_map": 23,
    "with_estimate": 23,
-   "item0": "1 | 213 600 м² · находка · Cózar (B) | ≥ ~51 000 шт./км² · нижняя граница",
-   "caption": "нижняя граница · исследовательская оценка\ni"
+   "item0": "1 | 213 600 м² · обнаружено | плавающий материал · Cózar B",
+   "caption": null,
+   "row_classes": [
+    "плавающий материал · Cózar B",
+    "плавающий материал · без разметки"
+   ],
+   "row_class_ok": true
   },
   "card": {
    "card-title": "Альборан · 30SXE · зона 1",
-   "sz-plain-what": "Статус детекции: обнаружено детектором · совпадает с разметкой Cózar (B) оценка детектора",
-   "sz-plain-qty": "Количество: ≥ ~51 000 шт./км² · нижняя граница · исследовательская оценка\nвнутри нити, с полевыми шт./км² не сравнивать: другой масштаб \ni",
+   "sz-plain-what": "Статус: обнаружено оценка детектора",
+   "sz-plain-qty": "Количество предметов по этому снимку не определено нет данных\nперенос не подтверждён: нет природных пар; см. ISPRA 604",
    "sz-plain-comp": "Состав не определён нет данных",
-   "sz-plain-area": "213 600 м² оценка детектора",
+   "sz-plain-area": "",
    "zone_id": "SZ-demo-cozar-2021-03-11-001",
    "above_fold": true,
-   "qty_lines": 4,
-   "no_orders_wording": true,
    "api_estimate": {
     "value": 60400,
     "lo": 50600,
     "hi": 72100
    },
-   "ui_expected": "≥ ~51 000 шт./км²",
+   "status_ok": true,
+   "confirm": "Подтверждение: совпадает с разметкой Cózar 2024 (B)",
+   "class": {
+    "sz-class-what": "Что это: плавающий материал (класс MARIDA Marine Debris; пластик не подтверждён)",
+    "sz-excluded": "Исключено: судно/кильватер, шов/граница яркости, пена, блик, облака, берег/прибой, мелководье/мутная вода, ветер > 5 м/с",
+    "sz-notchecked": "Не проверяется: водоросли/саргассум, древесина и прочая органика (флага нет)"
+   },
+   "what_first": true,
+   "what_equals_api": true,
+   "qty_first_undetermined": true,
+   "no_number_in_qty": true,
+   "no_forbidden_words": true,
+   "list_has_no_items_km2": true,
+   "scenario": {
+    "folded_by_default": true,
+    "text": "≈ 51 000 шт./км², если бы это были предметы размера бутылки 1.5 л при покрытии 28–40 % (искусственные мишени PLP); на природе не проверено; на оценщике хуже ответа «0» \ni",
+    "expected": "≈ 60 000 шт./км²",
+    "ui_equals_api": true
+   },
    "ui_equals_api": true,
-   "muted_expected": false,
-   "muted_ui": false
+   "drift_button": 0
   },
   "back": {
    "card_closed": true,
@@ -94,6 +114,7 @@
    "panel": 1,
    "profile_inside": 1,
    "on": true,
+   "measured": "Измерено: пластик 5–50 см (трал)",
    "off_again": true
   },
   "filter_export": {
@@ -102,14 +123,14 @@
    "n_csv": 32,
    "same_ids": true,
    "rows_after_filter": 9,
-   "counts": "9 снимков 32 находки (0 совпали с Cózar) · Гондурасский залив сбросить"
+   "counts": "9 снимков 32 находки (0 · Cózar B) · Гондурасский залив сбросить"
   },
   "query": {
    "n_after_reset": 286,
    "n_after_run": 32,
    "same_as_saved": true,
    "area_after_run": "r:honduras",
-   "toast": null
+   "toast": "«s34 1366»: 0 наблюдений, 0 полос, 32 спутниковые зоны"
   },
   "console_errors": [],
   "http_errors": []
@@ -132,7 +153,7 @@
     "Гондурас · Омоа | 8 находок | 30.01.2025 · облачность 0,3 %",
     "Гондурас · Омоа | 5 находок | 28.12.2025 · облачность 3 %"
    ],
-   "counts": "75 снимков 77 находок (14 совпали с Cózar)",
+   "counts": "75 снимков 77 находок (14 · Cózar B)",
    "one_block": {
     "filters": 0,
     "nums": 0,
@@ -146,28 +167,48 @@
    "zones_listed": 23,
    "numbers_on_map": 23,
    "with_estimate": 23,
-   "item0": "1 | 213 600 м² · находка · Cózar (B) | ≥ ~51 000 шт./км² · нижняя граница",
-   "caption": "нижняя граница · исследовательская оценка\ni"
+   "item0": "1 | 213 600 м² · обнаружено | плавающий материал · Cózar B",
+   "caption": null,
+   "row_classes": [
+    "плавающий материал · Cózar B",
+    "плавающий материал · без разметки"
+   ],
+   "row_class_ok": true
   },
   "card": {
    "card-title": "Альборан · 30SXE · зона 1",
-   "sz-plain-what": "Статус детекции: обнаружено детектором · совпадает с разметкой Cózar (B) оценка детектора",
-   "sz-plain-qty": "Количество: ≥ ~51 000 шт./км² · нижняя граница · исследовательская оценка\nвнутри нити, с полевыми шт./км² не сравнивать: другой масштаб \ni",
+   "sz-plain-what": "Статус: обнаружено оценка детектора",
+   "sz-plain-qty": "Количество предметов по этому снимку не определено нет данных\nперенос не подтверждён: нет природных пар; см. ISPRA 604",
    "sz-plain-comp": "Состав не определён нет данных",
-   "sz-plain-area": "213 600 м² оценка детектора",
+   "sz-plain-area": "",
    "zone_id": "SZ-demo-cozar-2021-03-11-001",
    "above_fold": true,
-   "qty_lines": 4,
-   "no_orders_wording": true,
    "api_estimate": {
     "value": 60400,
     "lo": 50600,
     "hi": 72100
    },
-   "ui_expected": "≥ ~51 000 шт./км²",
+   "status_ok": true,
+   "confirm": "Подтверждение: совпадает с разметкой Cózar 2024 (B)",
+   "class": {
+    "sz-class-what": "Что это: плавающий материал (класс MARIDA Marine Debris; пластик не подтверждён)",
+    "sz-excluded": "Исключено: судно/кильватер, шов/граница яркости, пена, блик, облака, берег/прибой, мелководье/мутная вода, ветер > 5 м/с",
+    "sz-notchecked": "Не проверяется: водоросли/саргассум, древесина и прочая органика (флага нет)"
+   },
+   "what_first": true,
+   "what_equals_api": true,
+   "qty_first_undetermined": true,
+   "no_number_in_qty": true,
+   "no_forbidden_words": true,
+   "list_has_no_items_km2": true,
+   "scenario": {
+    "folded_by_default": true,
+    "text": "≈ 51 000 шт./км², если бы это были предметы размера бутылки 1.5 л при покрытии 28–40 % (искусственные мишени PLP); на природе не проверено; на оценщике хуже ответа «0» \ni",
+    "expected": "≈ 60 000 шт./км²",
+    "ui_equals_api": true
+   },
    "ui_equals_api": true,
-   "muted_expected": false,
-   "muted_ui": false
+   "drift_button": 0
   },
   "back": {
    "card_closed": true,
@@ -204,6 +245,7 @@
    "panel": 1,
    "profile_inside": 1,
    "on": true,
+   "measured": "Измерено: пластик 5–50 см (трал)",
    "off_again": true
   },
   "filter_export": {
@@ -212,7 +254,7 @@
    "n_csv": 32,
    "same_ids": true,
    "rows_after_filter": 9,
-   "counts": "9 снимков 32 находки (0 совпали с Cózar) · Гондурасский залив сбросить"
+   "counts": "9 снимков 32 находки (0 · Cózar B) · Гондурасский залив сбросить"
   },
   "query": {
    "n_after_reset": 286,

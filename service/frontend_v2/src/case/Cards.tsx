@@ -4,7 +4,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import Info from '../components/Info';
 import { get, send, API_BASE, ApiErr, type Feat, type Interval, type Meta, type ObsProps, type Pair, type Scene, type ZoneDetail, type ZoneProps } from './api3';
-import { plural, color, dateRu, dateTimeRu, driftTitle, driftTxt, dtTitle, dtTxt, eventRu, flagRu, label, missionShort, num, pairDecision, pairReasons, pct, poissonCI, profileRu, reasonRu, scopeRu, sourceShort, unitRu, zoneFlagRu, modelRu } from './fmt';
+import { plural, color, dateRu, dateTimeRu, driftTitle, driftTxt, dtTitle, dtTxt, eventRu, flagRu, label, missionShort, num, pairDecision, pairReasons, pct, poissonCI, profileRu, reasonRu, scopeRu, sourceShort, unitRu, zoneFlagRu, modelRu, measuredLine } from './fmt';
 
 function useFetch<T>(fn: (() => Promise<T>) | null, deps: unknown[]): { data: T | null; err: string | null; loading: boolean } {
   const [s, setS] = useState<{ data: T | null; err: string | null; loading: boolean }>({ data: null, err: null, loading: !!fn });
@@ -437,6 +437,9 @@ export function ObsCard({
         onClose={onClose}
       />
       <div className="rp-body">
+        <div className="sec obs-measured" data-testid="obs-measured">
+          {measuredLine(meta, p)}
+        </div>
         <div className="sec" data-testid="obs-conc">
           {v === null ? (
             <>

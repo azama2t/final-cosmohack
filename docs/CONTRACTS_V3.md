@@ -865,3 +865,14 @@ GET /api/v3/photo/meta: + headline {count_mae_per_frame, count_mae_ci95, n_image
     excluded_backgrounds, flagged_backgrounds, not_checked_backgrounds, composition, quantity_line; research_estimate_lower_bound
     → research_scenario_value, + research_scenario_status, research_scenario_line. Сводка: + quantity_line, scenario_title,
     scenario_status, n_confirmed_cozar_b, n_no_independent_labels, scenario_value_median/min/max.
+  (приёмка 16:03 п.1 — ДОБАВЛЕНИЕ) /zones и /export?layer=zones (полосы обследования): + filter_note (что фильтруется:
+    акватория, рамка района, даты, профиль, статус — вне рамки полосы не выдаются), + filters_applied (в /zones и GeoJSON);
+    empty_reason при рамке района без полос — «В рамке района нет полос обследования: они есть только там, где есть полевые
+    пробы (…)»; CSV — те же тексты в заголовках X-Filter-Note / X-Empty-Reason (URL-encoded UTF-8), строки CSV = API.
+  (приёмка 16:03 п.4 — НОВЫЙ) GET /api/v3/defense_examples (без параметров; иной → 400) → {count, required[{kind,label}],
+    missing[], settings{weights, model_sha256, threshold, harmonize, class, rules, rules_source}, note, examples[]}.
+    kind: success | miss | false_alarm | background_error | no_analysis (порядок фиксирован). Пример: {kind, label, zone_id
+    (null у miss / no_analysis), scene_key, scene_id, datetime, title, geometry (зона / прямоугольник нити / рамка сцены),
+    image{crop_url, rgb_url, quality_url, crop_note}, model_result{…}, reference, verdict, basis, status, status_label (из 4),
+    status_explanation, rule (правило выбора, записано в коде), repeat{api, command[, inputs]}; у miss + related_zones}.
+    miss — data/case/scene_zones/defense_examples.json (scripts/case/defense_examples.py). scene_zones.examples — без изменений.

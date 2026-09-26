@@ -80,6 +80,13 @@ def n(x, d: int = 1) -> str:
     return mdc.num(x, d)
 
 
+def nn(x) -> str:
+    """Целое без дробной части, иначе один знак: 10, 2.5, 50."""
+    if x is None:
+        return "—"
+    return n(x, 0) if float(x).is_integer() else n(x, 1)
+
+
 def th(x) -> str:
     """Целое с неразрывным узким пробелом тысяч: 21 444."""
     if x is None:
@@ -105,8 +112,8 @@ def prepare_images(shots_ok: bool) -> dict:
         if not src.exists():
             return None
         im = Image.open(src).convert("RGB")
-        if box:
-            im = im.crop(box)
+        if box:  # доли ширины/высоты — скрины бывают 1920×1080 и 2732×1536
+            im = im.crop(tuple(round(v * (im.width if i % 2 == 0 else im.height)) for i, v in enumerate(box)))
         if size:
             tw, th_ = size
             r = max(tw / im.width, th_ / im.height)
@@ -119,9 +126,9 @@ def prepare_images(shots_ok: bool) -> dict:
         return dst
 
     # титул: снимок сцены с найденными полосами (без панелей интерфейса), затемнён
-    out["title_bg"] = cover(IMG / "scene.jpg", CK / "title_bg.jpg", box=(700, 60, 1450, 1060), dark=0.42)
+    out["title_bg"] = cover(IMG / "scene.jpg", CK / "title_bg.jpg", box=(0.40, 0.12, 0.84, 0.87), dark=0.42)
     # сцена с контурами зон (слайд «Зоны»)
-    out["scene"] = cover(IMG / "scene.jpg", CK / "scene_zones.jpg", box=(640, 60, 1450, 1060), size=None)
+    out["scene"] = cover(IMG / "scene.jpg", CK / "scene_zones.jpg", box=(0.39, 0.10, 0.85, 0.88), size=None)
     # команда — фото и имена из образца
     team = CK / "team.png"
     if not team.exists() and TEMPLATE.exists():
@@ -142,7 +149,7 @@ def prepare_images(shots_ok: bool) -> dict:
     out["adis_pair"] = ROOT / "docs" / "img" / "search_adis_pair.jpg"
     out["indep"] = ROOT / "docs" / "img" / "independent_adis_pairs.jpg"
     # интерфейс: до вехи 6 — прежние кадры presentation/img (make_shots.py), после — пересъёмка
-    out["card"] = cover(IMG / "card.jpg", CK / "card.jpg", box=(1180, 40, 1920, 1080), size=None)
+    out["card"] = IMG / "card.jpg"  # карта + карточка зоны («Что это» → статус → подтверждение → количество)
     out["photo"] = IMG / "photo.jpg"
     out["export"] = IMG / "export.jpg"
     out["earth"] = IMG / "earth.jpg"
@@ -182,14 +189,15 @@ def main_slides(N: Numbers) -> list[dict]:
     sz_hi = N.opt("case.sections.resolution_physics.item_cm_max")
     cnt10 = N.opt("case.sections.resolution_physics.countable_pct_10m")
     if px is not None and sz_lo is not None and sz_hi is not None:
-        t3 = (f"Спутник видит пиксель {n(px, 0)} м, а предмет — {n(sz_lo, 0)}–{n(sz_hi, 0)} см: "
+        t3 = (f"Спутник видит пиксель {nn(px)} м, а предмет — {nn(sz_lo)}–{nn(sz_hi)} см: "
               "прямого счёта штук по снимку не существует")
     else:
         t3 = "Спутник видит пиксель, а не предмет: прямого счёта штук по снимку не существует"
     nums3 = [(th(k["sr_events"]), "событий в полевом CSV организаторов"),
              (n(k["ql_calibration_pairs"], 0), "синхронных пар «снимок → шт./км²»")]
     if cnt10 is not None:
-        nums3[1] = (f"{n(cnt10, 0)} %", "предметов считаемы поштучно при пикселе 10 м")
+        nums3[1] = (f"{n(cnt10, 0)} %", f"предметов считаемы поштучно при пикселе {nn(px)} м" if px is not None
+                    else "предметов считаемы поштучно на снимке Sentinel-2")
     S.append(dict(kind="std", title=t3, nums=nums3, img="funnel",
                   details=[f"Воронка по событиям CSV: {th(k['sr_events'])} → снимок рядом по времени → отбор по "
                            f"метаданным {k['p_events_accept_meta']} → маски качества {k['p_quality_accept']} → "
@@ -379,15 +387,19 @@ def main_slides(N: Numbers) -> list[dict]:
                          "моделей мы записывали до сравнения: например, модель поля берётся, только если она лучше "
                          "медианы на отложенном рейсе. Это защищает от подгонки под тест.")))
     # --- 13. финал
+    nh_fin = N.opt("case.sections.research_log.n_hypotheses")
     S.append(dict(kind="final",
                   nums=[(n(k["d_lgbm_f1"], 3), "F1 детектора на отложенном тесте"),
                         (n(k["q_pooled_C"], 1), "шт./км² по полю"),
-                        (str(k["ad_A"]), "пар «снимок — поле» проверено")],
+                        (str(nh_fin), "проверенных гипотез и экспериментов") if nh_fin is not None else (str(k["ad_A"]), "пар «снимок — поле» проверено")],
                   title="SAMARKAND · спасибо за внимание",
                   notes=("Три числа, которые стоит запомнить. Детектор находит полосы мусора с F1 "
                          f"{n(k['d_lgbm_f1'], 3)} на отложенном тесте. Поле даёт {n(k['q_pooled_C'], 1)} штуки на "
                          f"квадратный километр с честным интервалом. И {k['ad_A']} пар «снимок — поле» мы проверили и "
-                         "показали, почему штуки по снимку пока не измеряются. Спасибо, готовы к вопросам.")))
+                         "показали, почему штуки по снимку пока не измеряются. "
+                         + (f"Всего за эти дни мы проверили {mdc.pl(nh_fin, 'гипотезу', 'гипотезы', 'гипотез')} и эксперименты, и каждое решение записано "
+                            "до сравнения. " if nh_fin is not None else "")
+                         + "Спасибо, готовы к вопросам.")))
     # продолжение заметок (60–90 с на слайд, §41): то, что говорим после главной мысли
     more = {
         5: ("Порог детектора мы выбирали только на валидационных сценах, а тест открыли один раз. Интервал F1 "
@@ -551,13 +563,12 @@ def appendix_slides(N: Numbers) -> list[dict]:
        "матрица ошибок по классам материала на отложенном источнике.",
        (n(mat, 2), "macro-F1 по материалам") if mat is not None else None,
        "число по классам — только при разметке и матрице ошибок; иначе «состав не определён».")
-    jb = N.opt("case.sections.jury.finds_before")
-    ja = N.opt("case.sections.jury.finds_after")
-    ap("Проверка глазами жюри-человека меняет подписи и статусы",
-       "интерфейс понятен без объяснений.",
-       "независимый проверяющий листает сервис и деку и записывает, что понял неверно.",
-       (f"{jb} → {ja}", "находок до и после исправлений") if jb is not None and ja is not None else None,
-       "подписи «оценка детектора», «пластик не подтверждён», статусы по постановке.")
+    # внутренний балл проверяющего (jury.score_*) — не конкурсная оценка и не число находок: на слайд не выносим
+    ap("Внутренняя проверка глазами «жюри-человека» меняет подписи и статусы",
+       "интерфейс и дека понятны без объяснений.",
+       "независимый проверяющий внутри команды листает сервис и деку по чек-листу ТЗ и записывает, что понял неверно.",
+       None,
+       "подписи «оценка детектора», «пластик не подтверждён», статусы по постановке, «количество не определено».")
     nh = N.opt("case.sections.research_log.n_hypotheses")
     ap("Сколько гипотез мы проверили",
        "итог — это отбор из многих проверенных идей, а не первая удачная.",

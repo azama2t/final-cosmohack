@@ -764,11 +764,235 @@ def collect_scene_zones() -> dict:
         "field_nearby": {"distance_km": _r(fn.get("distance_km"), 0), "date": _dmy(fn.get("date")), "n": fn.get("n_items"),
                          "area_km2": _r(fn.get("area_km2"), 2), "c": _r(fn.get("c_items_km2"), 1), "lo": _r(fn.get("ci95_lo"), 1),
                          "hi": _r(fn.get("ci95_hi"), 1)},
-        "zone_main_status": "концентрация по снимку не подтверждена",
-        "no_count_reason": "перевод площади маски в штуки не показываем — нет калибровочных пар «снимок → шт./км²»",
+        "zone_main_status": "количество предметов по снимку не определено",
+        "no_count_reason": "перенос «снимок → шт./км²» не подтверждён: природных пар 0 (см. ISPRA 604); число сценария PLP — "
+                           "свёрнутая исследовательская оценка, не измерение",
         "export": {"ui": (path.get("export") or {}).get("ui_count"), "csv": (path.get("export") or {}).get("csv"),
                    "geojson": (path.get("export") or {}).get("geojson")},
     })
+    out.update(_scene_zones_s39(by))
+    return out
+
+
+SZ_CLASS_LABEL = "плавающий материал (класс MARIDA Marine Debris; пластик не подтверждён)"   # = service/case_store.py
+SZ_STATUS4_LABEL = {"detected": "обнаружено", "not_detected": "не обнаружено", "insufficient_data": "недостаточно данных",
+                    "research_estimate": "исследовательская оценка"}                         # = service/case_store.py
+
+
+def _class_label() -> str:
+    """Класс зоны — из кода сервиса (SZ_CLASS_LABEL), если строка там есть; иначе та же формулировка §39."""
+    p = ROOT / "service" / "case_store.py"
+    m = re.search(r'^SZ_CLASS_LABEL\s*=\s*"([^"]+)"', p.read_text(encoding="utf-8"), re.M) if p.is_file() else None
+    return m.group(1) if m else SZ_CLASS_LABEL
+
+
+def _harness_baselines() -> dict:
+    """Сценарий PLP против ответа «0» на оценщике v2 (docs/research/discovery/LEADERBOARD.csv, последние строки б1 / б2)."""
+    import csv
+    p = ROOT / "docs" / "research" / "discovery" / "LEADERBOARD.csv"
+    if not p.is_file():
+        return {"available": False}
+    rows = {}
+    with p.open(encoding="utf-8", newline="") as f:
+        for r in csv.DictReader(f):
+            if r.get("set_version") == "v2" and r.get("method") in ("b1_flat_plp", "b2_zero"):
+                rows[r["method"]] = r
+    if len(rows) < 2:
+        return {"available": False}
+
+    def g(m, k, nd=3):
+        try:
+            return round(float(rows[m][k]), nd)
+        except (KeyError, TypeError, ValueError):
+            return None
+    out = {"available": True, "source": "docs/research/discovery/LEADERBOARD.csv (набор v2; б1 = сценарий PLP продукта, б2 = ответ «0»); "
+                                        "метрики — docs/research/discovery/HARNESS.md",
+           "n_a2_pairs": int(rows["b1_flat_plp"].get("n_A2") or 0), "n_a3_windows": int(rows["b1_flat_plp"].get("n_A3") or 0),
+           "n_a1_dates": int(rows["b1_flat_plp"].get("n_A1") or 0), "n_a5_natural": int(rows["b1_flat_plp"].get("n_A5") or 0)}
+    for m, key in (("b1_flat_plp", "plp"), ("b2_zero", "zero")):
+        out[key] = {"E1_err": g(m, "E1_err"), "ABST2": g(m, "ABST2"), "G2_thousands": g(m, "G2_thousands"), "FP3": g(m, "FP3"),
+                    "R4_detect": g(m, "R4_detect")}
+    out["plp_worse_than_zero_on"] = [k for k, worse in (("ABST2", out["plp"]["ABST2"] < out["zero"]["ABST2"]),
+                                                       ("FP3", out["plp"]["FP3"] > out["zero"]["FP3"])) if worse]
+    return out
+
+
+def _scene_zones_s39(by: dict) -> dict:
+    """§39: четыре статуса постановки, подтверждение, класс, строка «Количество» и свёрнутый сценарий PLP (research_estimate).
+
+    Сценарий считает тот же код, что сервис и выгрузка (src/macroplastic/case/zone_estimate.py: summary_from_dir)."""
+    det_b, det_other = by.get("level_B", 0), by.get("unverified", 0)
+    status4 = {"detected": det_b + det_other, "not_detected": by.get("not_detected", 0),
+               "insufficient_data": by.get("insufficient_data", 0) + by.get("not_informative", 0)}
+    res = {"wind_rule_ms": _wind_zero(),
+           "class_label": _class_label(),
+           "status4": status4, "status4_labels": SZ_STATUS4_LABEL,
+           "status4_note": "статус зоны — одно из четырёх постановочных; «исследовательская оценка» — статус концентрации у находок",
+           "by_no_independent_labels": det_other}
+    try:
+        sys.path.insert(0, str(ROOT / "src"))
+        from macroplastic.case.zone_estimate import summary_from_dir  # noqa: WPS433
+        re_ = summary_from_dir()
+    except Exception as e:  # noqa: BLE001
+        re_ = {"available": False, "error": f"{type(e).__name__}: {e}"}
+    if re_.get("available"):
+        re_["source"] = str(re_.get("source") or "")
+        re_["code"] = "src/macroplastic/case/zone_estimate.py (summary_from_dir), configs/zone_estimate.yaml"
+        re_["harness"] = _harness_baselines()
+        res.update({"n_confirmed_cozar_b": re_.get("n_confirmed_cozar_b"),
+                    "n_no_independent_labels": re_.get("n_no_independent_labels"),
+                    "quantity_line": re_.get("quantity_line")})
+    res["research_estimate"] = re_
+    return res
+
+
+def collect_ispra() -> dict:
+    """ISPRA MSFD: 167 трансект на обработке _0 (docs/research/pairs/ispra_levels.csv, scripts/search/ispra_scan.py)."""
+    import csv
+    from collections import Counter
+    p = ROOT / "docs" / "research" / "pairs" / "ispra_levels.csv"
+    if not p.is_file():
+        return {"available": False}
+    with p.open(encoding="utf-8", newline="") as f:
+        rows = list(csv.DictReader(f))
+    lv = Counter((r.get("уровень") or "").strip()[:1] or "—" for r in rows)
+    return {"available": True, "source": "docs/research/pairs/ispra_levels.csv (scripts/search/ispra_scan.py)",
+            "protocol": "уровни A–D как в docs/INDEX.md; A — пара по месту и дню, не калибровочная",
+            "n_transects": len(rows), "A": lv.get("A", 0), "B": lv.get("B", 0), "C": lv.get("C", 0), "D": lv.get("D", 0)}
+
+
+def collect_resolution_physics() -> dict:
+    """Доля предметов ADIS, поштучно считаемых (≥ 2×2 пикселя) при данном разрешении (docs/research/marine_quantity)."""
+    p = ROOT / "docs" / "research" / "marine_quantity" / "results" / "resolution_physics.json"
+    d = _load_json(p) or {}
+    if not d.get("table"):
+        return {"available": False}
+    by = {float(t["gsd_m"]): t for t in d["table"]}
+
+    def pct(g):
+        t = by.get(g)
+        return None if t is None else _r(100 * float(t["share_countable_2x2px"]), 0)
+    sd = d.get("size_distribution") or {}
+    return {"available": True, "source": "docs/research/marine_quantity/results/resolution_physics.json "
+                                         "(docs/research/marine_quantity/scripts/resolution_physics.py; размеры объектов ADIS)",
+            "protocol": "предмет считаем поштучно, если он занимает ≥ 2×2 пикселя",
+            "pixel_m": 10, **_item_cm(), "countable_pct_10m": pct(10.0), "countable_pct_03m": pct(0.3), "countable_pct_05m": pct(0.5),
+            "n_objects": sd.get("n_objects_total")}
+
+def _item_cm() -> dict:
+    """Размер учитываемых предметов по протоколу природной пары ISPRA (SNPA Modulo 2bis) — из configs/zone_estimate.yaml."""
+    p = ROOT / "configs" / "zone_estimate.yaml"
+    m = re.search(r"предметы\s+([\d,.]+)\s*–\s*([\d,.]+)\s*см", p.read_text(encoding="utf-8")) if p.is_file() else None
+    if not m:
+        return {}
+
+    def f(x):
+        return float(x.replace(",", "."))
+    return {"item_cm_min": f(m.group(1)), "item_cm_max": f(m.group(2)),
+            "item_cm_source": "протокол SNPA Modulo 2bis (природная пара ISPRA 604), configs/zone_estimate.yaml natural_pair"}
+
+
+def collect_targets() -> dict:
+    """Мишени A* со счётом предметов (docs/research/pairs/PAIRS.csv: класс «A*», строка на дату съёмки)."""
+    import csv
+    p = ROOT / "docs" / "research" / "pairs" / "PAIRS.csv"
+    if not p.is_file():
+        return {"available": False}
+    with p.open(encoding="utf-8", newline="") as f:
+        rows = list(csv.DictReader(f))
+    cnt = [r for r in rows if (r.get("класс") or "").strip() == "A*" and re.search(r"-\d{8}$", r.get("id") or "")]
+    cov = [r for r in rows if (r.get("класс") or "").strip().startswith("A* (покрыт")]
+    ps = sum(1 for r in cnt if "PS-" in r["id"])
+    camp = sorted({re.sub(r"(PS)?-\d{8}$", "", re.sub(r"^P1-", "", r["id"])) for r in cnt})
+    return {"available": True, "source": "docs/research/pairs/PAIRS.csv (класс «A*»: искусственные мишени с известным числом предметов)",
+            "protocol": "одна строка = одна дата съёмки мишени; «A* (покрытие)» — известна только доля покрытия, не число",
+            "n_dates_counted": len(cnt), "n_dates_counted_s2": len(cnt) - ps, "n_dates_counted_planetscope": ps,
+            "n_dates_cover_only": len(cov), "campaigns": camp}
+
+
+def collect_estimator() -> dict:
+    """Оценщик методов «снимок → штуки» (docs/research/discovery/LEADERBOARD.csv, набор v2)."""
+    import csv
+    p = ROOT / "docs" / "research" / "discovery" / "LEADERBOARD.csv"
+    if not p.is_file():
+        return {"available": False}
+    with p.open(encoding="utf-8", newline="") as f:
+        rows = [r for r in csv.DictReader(f) if r.get("set_version") == "v2"]
+    methods = {r["method"] for r in rows}
+    passed = {r["method"] for r in rows if (r.get("gate_product") or "") not in ("fail", "reference", "")}
+    return {"available": bool(rows), "source": "docs/research/discovery/LEADERBOARD.csv (v2), правило — docs/research/discovery/HARNESS.md",
+            "n_methods": len(methods), "n_runs": len(rows), "n_passed_gate": len(passed), "passed": sorted(passed),
+            "natural_pairs_a5": int(rows[-1].get("n_A5") or 0) if rows else None}
+
+
+def collect_synthetic_p3() -> dict:
+    """П3: модель «синтетические пиксели → штуки» (reports/p3/p3_synth.json)."""
+    d = _load_json(REP / "p3" / "p3_synth.json") or {}
+    if not d:
+        return {"available": False}
+    pr = d.get("primary") or {}
+    ok = bool(d.get("accepted"))
+    return {"available": True, "source": "reports/p3/p3_synth.json (configs/p3_synth.yaml, правило записано до метрики)",
+            "accepted": ok, "n_dates": pr.get("n_dates"), "mae_p3": pr.get("mae_p3"), "mae_flat": pr.get("mae_flat"),
+            "mae_zero": pr.get("mae_zero"),
+            "verdict": (f"{'принята' if ok else 'не принята'}: на {pr.get('n_dates')} датах мишеней A* (оставь-одну-дату) MAE "
+                        f"{pr.get('mae_p3')} против {pr.get('mae_flat')} у плоской калибровки и {pr.get('mae_zero')} у ответа «0»")}
+
+
+def collect_archives() -> dict:
+    """Разбор архивов пар (docs/research/pairs/archives/{FILES,CANDIDATES}.csv)."""
+    import csv
+    d = ROOT / "docs" / "research" / "pairs" / "archives"
+    n = {}
+    for key, fn in (("n_files", "FILES.csv"), ("n_candidates", "CANDIDATES.csv")):
+        if (d / fn).is_file():
+            with (d / fn).open(encoding="utf-8", newline="") as f:
+                n[key] = sum(1 for _ in csv.DictReader(f))
+    return {"available": bool(n), "source": "docs/research/pairs/archives/{FILES.csv, CANDIDATES.csv}, описание — ARCHIVES.md", **n}
+
+
+def collect_jury() -> dict:
+    """Внутренняя проверка «жюри-человек» (docs/LOG.md): первый и последний балл. ВНУТРЕННИЙ балл, не конкурсный."""
+    p = ROOT / "docs" / "LOG.md"
+    if not p.is_file():
+        return {"available": False}
+    sc = []
+    for ln in p.read_text(encoding="utf-8").splitlines():
+        if "жюри-человек" in ln.lower():
+            m = re.search(r"(\d{2,3})\s*/\s*105", ln)
+            if m:
+                sc.append((ln[:11].strip(), int(m.group(1))))
+    if not sc:
+        return {"available": False}
+    return {"available": True, "source": "docs/LOG.md (строки «жюри-человек», итог NN/105); отчёты — reports/jury_human/",
+            "note": "внутренний балл проверяющего по чек-листу ТЗ, не конкурсная оценка",
+            "score_first": sc[0][1], "score_last": sc[-1][1], "score_max": 105, "n_runs": len(sc),
+            "first_when": sc[0][0], "last_when": sc[-1][0]}
+
+def collect_research_log() -> dict:
+    """Число проверенных гипотез/экспериментов (строки-эксперименты docs/PIPELINE.md) и реестр пар (docs/research/pairs/PAIRS.csv)."""
+    import csv
+    from collections import Counter
+    pl = ROOT / "docs" / "PIPELINE.md"
+    out = {"available": pl.is_file(),
+           "source": "docs/PIPELINE.md (строки таблиц с номером эксперимента: D детектор, S синхронизация, C концентрация, "
+                     "E связь снимок ↔ поле, P подготовительный этап, R расследование данных, G независимая проверка, Q количество); "
+                     "docs/research/pairs/PAIRS.csv (реестр пар «снимок + число предметов»)",
+           "protocol": "одна строка PIPELINE = одна проверенная гипотеза или эксперимент с числом и решением; пары — строки реестра, "
+                       "класс по первой букве (A, A*, B, C, D)"}
+    if pl.is_file():
+        ids = re.findall(r"^\|\s*([A-Z]+)(\d+[a-z]?)\s*\|", pl.read_text(encoding="utf-8"), re.M)
+        by = Counter(p for p, _ in ids)
+        out.update({"n_experiments": len(ids), "n_hypotheses": len(ids), "by_prefix": dict(sorted(by.items()))})
+    pr = ROOT / "docs" / "research" / "pairs" / "PAIRS.csv"
+    if pr.is_file():
+        with pr.open(encoding="utf-8", newline="") as f:
+            rows = list(csv.DictReader(f))
+        cls = Counter()
+        for r in rows:
+            c = (r.get("класс") or "").strip()
+            cls["A*" if c.startswith("A*") else (c[:1] if c[:1] in "ABCD" else "—")] += 1
+        out.update({"n_pairs_registry": len(rows), "pairs_by_class": dict(sorted(cls.items()))})
     return out
 
 
@@ -804,7 +1028,46 @@ def collect_photo_count() -> dict:
                              "base_mae": _r(base.get("count_mae"), 2),
                              "diff_ci95": [_r(x, 2) for x in (base.get("mae_diff_ci95") or [])] or None,
                              "accepted": base.get("ours_accepted"), "license": "DebrisScan — Apache-2.0"}
+    out["transfer"] = _photo_transfer(out.get("frame") or {})
+    out["materials"] = _photo_materials()
     return out
+
+
+def _photo_transfer(frame: dict) -> dict:
+    """Перенос счётчика FML на реку и дрон других источников без дообучения (reports/photo_count/cross_grouped.json)."""
+    d = _load_json(REP / "photo_count" / "cross_grouped.json") or {}
+    sets = d.get("sets") or {}
+    if not sets:
+        return {"available": False}
+    names = {"maharjan": "дрон Maharjan 2022", "tud_gv": "камера над каналом TUD-GV", "tocl_val": "камера над рекой The Ocean Cleanup"}
+    rows = {k: {"name": names.get(k, k), "ap50": _r(v.get("ap50"), 3), "count_mae": _r(v.get("count_mae"), 2),
+                "n_images": v.get("n_images")} for k, v in sets.items()}
+    fml = frame.get("ap50")
+    parts = ", ".join(f"{r['name']} {r['ap50']}" for r in rows.values())
+    return {"available": True, "source": "reports/photo_count/cross_grouped.json (порог с FML val, без дообучения, IoU 0.5)",
+            "fml_test_ap50": fml, "sets": rows,
+            "verdict": f"без дообучения не переносится: AP50 {fml} на отложенном FML против {parts}"}
+
+
+def _photo_materials() -> dict:
+    """Материал предмета на фото Winans: матрица ошибок test (reports/labels/material_winans.json), макро-F1 по классам."""
+    d = _load_json(REP / "labels" / "material_winans.json") or {}
+    te = (d.get("splits") or {}).get("test") or {}
+    cm = te.get("confusion_material")
+    classes = list((d.get("train_share") or {}).keys())
+    if not cm or len(cm) != len(classes):
+        return {"available": False}
+    f1 = {}
+    for i, c in enumerate(classes):
+        tp = cm[i][i]
+        pred = sum(row[i] for row in cm)
+        true = sum(cm[i])
+        p_, r_ = (tp / pred if pred else 0.0), (tp / true if true else 0.0)
+        f1[c] = _r(2 * p_ * r_ / (p_ + r_), 3) if p_ + r_ else 0.0
+    dec = d.get("decision") or {}
+    return {"available": True, "source": "reports/labels/material_winans.json (test, строки — истина, столбцы — прогноз)",
+            "classes": classes, "f1": f1, "macro_f1": _r(sum(f1.values()) / len(f1), 3), "n_chips": te.get("n_chips"),
+            "accepted": dec.get("accepted"), "rule": d.get("rule")}
 
 
 def quantity_levels(ad: dict, q: dict) -> dict:
@@ -828,7 +1091,10 @@ def collect() -> dict:
     res = {"search": collect_search(), "labeled_data": collect_labeled(), "adis_pairs": ad,
            "baselines": collect_baselines(), "quantity": q, "oil": collect_oil(),
            "detector_v2": collect_detector_v2(), "independent_check": collect_independent(), "scene_zones": collect_scene_zones(),
-           "photo_count": collect_photo_count()}
+           "photo_count": collect_photo_count(), "research_log": collect_research_log(),
+           "ispra": collect_ispra(), "resolution_physics": collect_resolution_physics(), "targets": collect_targets(),
+           "estimator": collect_estimator(), "synthetic_p3": collect_synthetic_p3(), "archives": collect_archives(),
+           "jury": collect_jury()}
     return _clean_ids(res)
 
 

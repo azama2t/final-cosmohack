@@ -7,7 +7,7 @@
 
 Три вопроса:
   1. Интервал СРЕДНЕГО профиля по всем 63 событиям: Гарвуд (только счёт) / бутстреп по дням рейса / NB2-MLE.
-  2. Среднее dev → среднее test: накрывает ли интервал среднего по dev (49 событий) ΣN/ΣA отложенного test (14)?
+  2. Среднее dev → среднее test: накрывает ли интервал среднего по dev (44 события; буфер 1 сут не входит) ΣN/ΣA отложенного test (14)?
      Это один исход (да/нет) — показатель, не оценка покрытия.
   3. Диапазон для ОДНОГО нового события (95 %): Гарвуд по среднему dev, прогноз NB2 (с площадью полосы события),
      эмпирические квантили событий dev; доля 14 событий test внутри (покрытие), номинал 95 %.
@@ -28,6 +28,7 @@ from scipy import optimize, stats
 ROOT = Path(__file__).resolve().parents[2]
 SAMPLES = ROOT / "task" / "macroplastic_marine_samples.csv"
 TEST = ROOT / "reports" / "case_conc" / "final_test_predictions.csv"
+DEV = ROOT / "reports" / "case_conc" / "dev_predictions.csv"
 OUT = ROOT / "reports" / "quantity"
 PROFILE = "S2_visual_total_plastic"
 B = 2000
@@ -49,8 +50,12 @@ def load():
     assert t.N.notna().all() and t.A.notna().all() and t.event_id.is_unique
     p = pd.read_csv(TEST)
     test_ids = set(p[(p.profile == PROFILE) & (p.model == "median")].sample_id)
-    t["split"] = np.where(t.sample_id.isin(test_ids), "test", "dev")
-    assert (t.split == "test").sum() == len(test_ids) == 14
+    # dev — ровно тот состав, на котором выбирали модели (dev_predictions.csv, 44 события): события в буфере 1 сут
+    # вокруг участка test в dev не входят (сплит «участок маршрута + 1 сут», docs/PIPELINE.md C4–C5)
+    dv = pd.read_csv(DEV)
+    dev_ids = set(dv[dv.profile == PROFILE].sample_id)
+    t["split"] = np.select([t.sample_id.isin(test_ids), t.sample_id.isin(dev_ids)], ["test", "dev"], "buffer")
+    assert (t.split == "test").sum() == len(test_ids) == 14 and not (test_ids & dev_ids)
     return t
 
 
@@ -111,7 +116,8 @@ def main():
     out = {"profile": PROFILE, "rule": RULE, "B": B, "seed": SEED,
            "n_events": int(len(t)), "n_days": int(t.day.nunique()),
            "dev": {"n": int(len(dev)), "days": int(dev.day.nunique())},
-           "test": {"n": int(len(test)), "days": int(test.day.nunique())}}
+           "test": {"n": int(len(test)), "days": int(test.day.nunique())},
+           "buffer": {"n": int((t.split == "buffer").sum()), "note": "буфер 1 сут вокруг test: не dev и не test"}}
 
     # 1. среднее профиля, все 63
     c, lo, hi = garwood(t.N.sum(), t.A.sum())
@@ -182,7 +188,7 @@ def main():
     L = [f"# Г1-2: интервалы профиля S2 (поле, пластик > 2 см, визуально)", "",
          RULE, "",
          f"Событий {out['n_events']} ({out['n_days']} дней рейса); dev {out['dev']['n']} ({out['dev']['days']} дн.), "
-         f"отложенный test {out['test']['n']} ({out['test']['days']} дн.). Бутстреп: {B} повторов по дням рейса.", "",
+         f"отложенный test {out['test']['n']} ({out['test']['days']} дн.), буфер 1 сут {out['buffer']['n']} (не используется). Бутстреп: {B} повторов по дням рейса.", "",
          "## 1. Среднее профиля ΣN/ΣA (все события), шт./км²", "",
          "| интервал 95 % | нижн. | верх. | что учитывает |", "|---|---:|---:|---|",
          f"| Гарвуд | {m['garwood95'][0]} | {m['garwood95'][1]} | только ошибка счёта (Пуассон) |",

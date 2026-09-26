@@ -85,6 +85,11 @@ def run(base: str, W: int, H: int, pw, api: dict) -> dict:
         "item0": tid("sz-item").first.inner_text().replace("\n", " | ") if tid("sz-item").count() else None,
         "caption": tid("est-caption").inner_text() if tid("est-caption").count() else None,
     }
+    # §40 п.2: every zone row carries a short class + confirmation label
+    cls = [tid("sz-item-class").nth(i).inner_text().strip() for i in range(tid("sz-item-class").count())]
+    res["scene"]["row_classes"] = sorted(set(cls))
+    res["scene"]["row_class_ok"] = len(cls) == res["scene"]["zones_listed"] and all(
+        c.startswith(("плавающий материал · ", "не определено", "объектов нет")) for c in cls)
     shot("02_scene")
     # 3. zone → card
     tid("sz-item").first.click()
@@ -93,25 +98,41 @@ def run(base: str, W: int, H: int, pw, api: dict) -> dict:
     zid = pg.evaluate("() => window.__app.sel && window.__app.sel.id")
     card = {k: tid(k).inner_text() for k in ("card-title", "sz-plain-what", "sz-plain-qty", "sz-plain-comp", "sz-plain-area") if tid(k).count()}
     card["zone_id"] = zid
-    # jury 14:30: status and «Количество» visible without scrolling the card
+    # status and «Количество» visible without scrolling the card
     card["above_fold"] = pg.evaluate("""() => ['sz-plain-what', 'sz-plain-qty'].every(k => {
       const e = document.querySelector(`[data-testid=${k}]`); if (!e) return false; const r = e.getBoundingClientRect();
       return r.top >= 0 && r.bottom <= innerHeight; })""")
-    card["qty_lines"] = pg.evaluate("() => { const e = document.querySelector('[data-testid=sz-plain-qty]'); return e ? Math.round(e.getBoundingClientRect().height / 18) : null }")
-    card["no_orders_wording"] = "порядка" not in pg.evaluate("() => document.body.innerText")
     feat = next((f for f in api["features"] if f["id"] == zid), None)
     re_api = (feat or {}).get("properties", {}).get("research_estimate")
     card["api_estimate"] = None if not re_api else {k: re_api.get(k) for k in ("value", "lo", "hi")}
-    if re_api:
-        # §34 (13:5x): «≥ ~X шт./км² · нижняя граница» — X = API value (or display_value / lower_bound), 2 significant digits
+    # §39: status strictly one of four; «Количество … не определено» first; the scenario number only folded
+    card["status_ok"] = tid("sz-status").inner_text().strip() in ("обнаружено", "не обнаружено", "недостаточно данных", "исследовательская оценка")
+    card["confirm"] = tid("sz-confirm").inner_text() if tid("sz-confirm").count() else None
+    card["class"] = {k: tid(k).inner_text() for k in ("sz-class-what", "sz-excluded", "sz-notchecked") if tid(k).count()}
+    # §40 п.2: «Что это» is the first line after the title (above the status) and equals the API what_label
+    card["what_first"] = pg.evaluate("""() => { const w = document.querySelector('[data-testid=sz-class-what]'), s = document.querySelector('[data-testid=sz-plain-what]');
+      return !!(w && s && w.getBoundingClientRect().top < s.getBoundingClientRect().top && w.getBoundingClientRect().bottom <= innerHeight); }""")
+    wl = ((feat or {}).get("properties", {}).get("classification") or {}).get("what_label") or ""
+    card["what_equals_api"] = bool(wl) and " ".join(card["class"].get("sz-class-what", "").split()) == " ".join(wl.split())
+    card["qty_first_undetermined"] = "не определено" in card.get("sz-plain-qty", "")
+    card["no_number_in_qty"] = "шт./км²" not in card.get("sz-plain-qty", "")
+    card["no_forbidden_words"] = not any(w in pg.evaluate("() => document.body.innerText") for w in ("требует проверки", "нижняя граница", "порядка"))
+    card["list_has_no_items_km2"] = "шт./км²" not in (tid("scene-zones").inner_text() if tid("scene-zones").count() else "")
+    if re_api and tid("sz-scenario").count():
         from math import floor, log10
-        x = re_api.get("display_value") or re_api.get("lower_bound") or re_api["value"]
+        x = re_api["value"]
         r2 = round(x, -int(floor(log10(abs(x)))) + 1) if x else 0
-        want = "≥ ~" + f"{int(r2):,}".replace(",", " ") + " шт./км²"
-        card["ui_expected"] = want
-        card["ui_equals_api"] = want in card.get("sz-plain-qty", "") and "нижняя граница" in card.get("sz-plain-qty", "")
-        card["muted_expected"] = feat["properties"].get("verification") != "level_B_cozar"
-        card["muted_ui"] = pg.evaluate("() => !!document.querySelector('[data-testid=sz-plain-qty].muted')")
+        want = "≈ " + f"{int(r2):,}".replace(",", " ") + " шт./км²"
+        folded = tid("sz-scenario-text").is_visible()
+        tid("sz-scenario").locator("summary").click()
+        pg.wait_for_timeout(400)
+        txt = tid("sz-scenario-text").inner_text()
+        card["scenario"] = {"folded_by_default": not folded, "text": txt, "expected": want,
+                            "ui_equals_api": want in txt or (re_api.get("scenario_line") or re_api.get("scenario_label") or "#") in txt}
+        card["ui_equals_api"] = card["scenario"]["ui_equals_api"]
+        shot("03b_scenario")
+        tid("sz-scenario").locator("summary").click()
+    card["drift_button"] = tid("sz-drift-btn").count()
     res["card"] = card
     shot("03_card")
     # 4. studio → back to the card → back to the map
@@ -168,6 +189,18 @@ def run(base: str, W: int, H: int, pw, api: dict) -> dict:
     tid("act-field").click()
     pg.wait_for_timeout(2500)
     res["field"] = {"panel": tid("field-panel").count(), "profile_inside": tid("field-panel").locator("[data-testid=f-profile]").count(), "on": pg.evaluate("() => window.__app.q.layers.obs")}
+    # §40 п.2: a field measurement card starts with «Измерено: <совокупность> <размер> (<метод>)»
+    if tid("tab-obs").count():
+        tid("tab-obs").click()
+        pg.wait_for_timeout(1200)
+        if tid("obs-item").count():
+            tid("obs-item").first.click()
+            pg.wait_for_timeout(1500)
+            res["field"]["measured"] = tid("obs-measured").inner_text() if tid("obs-measured").count() else None
+            shot("09b_obs_card")
+            if tid("card-close").count():
+                tid("card-close").first.click()
+                pg.wait_for_timeout(500)
     shot("09_field")
     tid("act-field").click()
     pg.wait_for_timeout(1000)
@@ -182,6 +215,10 @@ def run(base: str, W: int, H: int, pw, api: dict) -> dict:
     tid("f-det-detected").click()
     pg.wait_for_function("() => window.__app.szReady", timeout=60000)
     pg.wait_for_timeout(3000)
+    for _ in range(20):  # the filtered list may land a moment after szReady (1920: once read 286 before the filter applied)
+        if pg.evaluate("() => window.__app.counts.szones") != api["n_zones_total"]:
+            break
+        pg.wait_for_timeout(500)
     n_ui = pg.evaluate("() => window.__app.counts.szones")
     ids_ui = sorted(pg.evaluate("() => window.__app.szIds()"))
     href = pg.evaluate("() => window.__app.exportUrl('scene_zones', 'csv')")
@@ -236,7 +273,7 @@ def main():
     a = ap.parse_args()
     fc = json.loads(fetch(a.base_url + "/api/v3/scene_zones?limit=1000"))
     finds = [f for f in fc["features"] if f["properties"].get("is_find", f["properties"]["detection_status"] == "detected")]
-    api = {"n_finds": len(finds), "features": fc["features"]}
+    api = {"n_finds": len(finds), "features": fc["features"], "n_zones_total": fc.get("total", len(fc["features"]))}
     out = {"base": a.base_url, "n_finds_api": len(finds),
            "n_finds_with_estimate_api": sum(1 for f in finds if f["properties"].get("research_estimate")),
            "n_nonfinds_with_estimate_api": sum(1 for f in fc["features"] if f not in finds and f["properties"].get("research_estimate")),

@@ -66,8 +66,11 @@ export interface CaseMapProps {
 export const SZ_COLORS: Record<string, string> = { detected: '#ff8c42', unverified: '#d9b870', not_detected: '#2b8a3e', insufficient_data: '#9aa0a8' };
 /** map colour key: a detector hit without level-B evidence is «unverified», not «detected» */
 export const isFind = (p: any) => (p.is_find ?? p.detection_status === 'detected') as boolean;
+// orchestrator 16:4x: a detection on a scene of the detector's training set keeps the API status «обнаружено» and the
+// colour of «плавающий материал · без разметки» (its label says «снимок обучения (не независимая проверка)»)
+const isTraining = (p: any) => p.confirmation === 'training_scene' || !!p.training_scene;
 export const szKey = (p: any) =>
-  p.detection_status === 'detected' && !isFind(p) ? 'insufficient_data' : p.detection_status === 'detected' && p.verification !== 'level_B_cozar' ? 'unverified' : p.detection_status;
+  p.detection_status === 'detected' && !isFind(p) && !isTraining(p) ? 'insufficient_data' : p.detection_status === 'detected' && p.verification !== 'level_B_cozar' ? 'unverified' : p.detection_status;
 
 /** §33: field points and survey strips are not satellite finds — hidden on the Earth overview, shown when zoomed in */
 export const FIELD_MINZOOM = 3.2;

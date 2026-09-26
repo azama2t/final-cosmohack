@@ -69,8 +69,10 @@ export function szParams(q: CaseQuery): Params {
 }
 /** zones: source / scope via their linked field samples (API ≥ 6e601c2) */
 export function zoneParams(q: CaseQuery): Params {
+  // acceptance 15:49: the район frame (bbox=) filters the survey strips too — «то, что отфильтровано» = the район
   return {
     source: q.source,
+    bbox: q.source ? null : bboxStr(q.bbox),
     scope: q.scope,
     date_from: q.from,
     date_to: q.to,

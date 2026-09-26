@@ -52,11 +52,14 @@ def run(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:
     return p
 
 
-def docs() -> None:
+def docs(deck: bool = True) -> None:
     run([PY, "scripts/final_numbers.py"])
     run([PY, "scripts/case/units_ladder_fig.py"])  # лестница единиц docs/img/units_ladder.png из final_numbers
     run([PY, "scripts/render_docs.py"])
-    run([PY, "scripts/make_deck_case.py"])
+    if deck:
+        run([PY, "scripts/make_deck_case.py"])
+    else:  # дека, речь, QA — у презентации; блок демо-сцены в docs/DEMO.md обновляем сами
+        run([PY, "scripts/case/demo_sz_md.py", "--write"], check=False)
 
 
 def pytest_case() -> dict:
@@ -83,6 +86,7 @@ def pytest_case() -> dict:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="run_all → тесты → final_numbers → render_docs → make_deck_case → сверка")
     ap.add_argument("--no-run", action="store_true", help="не запускать маршрут run_all (взять текущий run_summary.json)")
+    ap.add_argument("--no-deck", action="store_true", help="не пересобирать деку/речь/QA (scripts/make_deck_case.py) — её пересобирает презентация")
     a = ap.parse_args(argv)
     sys.stdout.reconfigure(encoding="utf-8")
     t0 = time.time()
@@ -93,9 +97,10 @@ def main(argv=None) -> int:
     first = run([PY, "scripts/final_numbers.py"])  # noqa: F841
     run([PY, "scripts/case/units_ladder_fig.py"])
     run([PY, "scripts/render_docs.py"])
-    run([PY, "scripts/make_deck_case.py"], check=False)  # при самом первом запуске ещё нет case_tests.json
+    if not a.no_deck:
+        run([PY, "scripts/make_deck_case.py"], check=False)  # при самом первом запуске ещё нет case_tests.json
     res = pytest_case()
-    docs()
+    docs(deck=not a.no_deck)
     run([PY, "scripts/case/report_export.py"], check=False)  # reports/report_final.md -> report.docx + report.pdf (LibreOffice)
     fin = run([PY, "-m", "pytest", "-q", "-p", "no:cacheprovider", DOCS_TEST, DOCS_TEST_SEARCH], check=False)
     ok = fin.returncode == 0 and res["failed"] == 0

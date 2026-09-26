@@ -1,0 +1,224 @@
+[
+ {
+  "device": "iphone12",
+  "steps": [
+   "open",
+   "scene",
+   "card",
+   "back",
+   "export"
+  ],
+  "measures": {
+   "01_open": {
+    "vw": 390,
+    "hscroll": false,
+    "small": [
+     "mode-case:38x26",
+     "mode-photo:40x26",
+     "info-about:16x16",
+     "filters-toggle:129x30",
+     "headline-open:129x30",
+     "info-btn :16x16",
+     "act-earth:61x40",
+     "layers-menu:58x32",
+     "legend-compact:246x35"
+    ],
+    "nSmall": 9,
+    "tiny": [
+     "mode-case:11",
+     "mode-photo:11",
+     "brand-name:13",
+     "info-about:10",
+     "filters-toggle:13",
+     "headline-open:13",
+     "B:13",
+     "count-scenes:12",
+     "count-szones:12",
+     "c-list-note:12",
+     "info-btn :10",
+     "ri-name:13"
+    ],
+    "nTiny": 41,
+    "over": [
+     "stars:510",
+     "halo:626",
+     "actions:726",
+     "legend:628",
+     "c-lg-head:591",
+     "legend-compact:591"
+    ]
+   },
+   "03_scene": {
+    "vw": 390,
+    "hscroll": false,
+    "small": [
+     "mode-case:38x26",
+     "mode-photo:40x26",
+     "info-about:16x16",
+     "filters-toggle:129x30",
+     "headline-open:129x30",
+     "scene-back:89x21",
+     "scene-rgb:13x13",
+     "scene-quality:13x13",
+     "act-earth:61x40",
+     "layers-menu:58x32",
+     "legend-compact:246x35"
+    ],
+    "nSmall": 11,
+    "tiny": [
+     "mode-case:11",
+     "mode-photo:11",
+     "brand-name:13",
+     "info-about:10",
+     "filters-toggle:13",
+     "headline-open:13",
+     "B:13",
+     "count-scenes:12",
+     "count-szones:12",
+     "scene-back:13",
+     "c-scene-s:12",
+     "LABEL:12"
+    ],
+    "nTiny": 45,
+    "over": [
+     "stars:510",
+     "halo:626",
+     "actions:726",
+     "legend:628",
+     "c-lg-head:591",
+     "legend-compact:591"
+    ]
+   },
+   "04_card": {
+    "vw": 390,
+    "hscroll": false,
+    "small": [
+     "mode-case:38x26",
+     "mode-photo:40x26",
+     "info-about:16x16",
+     "filters-toggle:129x30",
+     "headline-open:129x30",
+     "scene-back:89x21",
+     "scene-rgb:13x13",
+     "scene-quality:13x13",
+     "act-earth:61x40",
+     "act-field:54x40",
+     "layers-menu:58x32",
+     "legend-compact:246x35"
+    ],
+    "nSmall": 13,
+    "tiny": [
+     "mode-case:11",
+     "mode-photo:11",
+     "brand-name:13",
+     "info-about:10",
+     "filters-toggle:13",
+     "headline-open:13",
+     "B:13",
+     "count-scenes:12",
+     "count-szones:12",
+     "scene-back:13",
+     "c-scene-s:12",
+     "LABEL:12"
+    ],
+    "nTiny": 66,
+    "over": [
+     "stars:432",
+     "halo:587",
+     "maplibregl-canvas:712",
+     "actions:685",
+     "act-field:444",
+     "legend:628"
+    ]
+   },
+   "06_back": {
+    "vw": 390,
+    "hscroll": false,
+    "small": [
+     "mode-case:38x26",
+     "mode-photo:40x26",
+     "info-about:16x16",
+     "filters-toggle:129x30",
+     "headline-open:129x30",
+     "scene-back:89x21",
+     "scene-rgb:13x13",
+     "scene-quality:13x13",
+     "act-earth:61x40",
+     "layers-menu:58x32",
+     "legend-compact:246x35"
+    ],
+    "nSmall": 11,
+    "tiny": [
+     "mode-case:11",
+     "mode-photo:11",
+     "brand-name:13",
+     "info-about:10",
+     "filters-toggle:13",
+     "headline-open:13",
+     "B:13",
+     "count-scenes:12",
+     "count-szones:12",
+     "scene-back:13",
+     "c-scene-s:12",
+     "LABEL:12"
+    ],
+    "nTiny": 45,
+    "over": [
+     "stars:510",
+     "halo:626",
+     "actions:726",
+     "legend:628",
+     "c-lg-head:591",
+     "legend-compact:591"
+    ]
+   },
+   "07_export": {
+    "vw": 390,
+    "hscroll": false,
+    "small": [
+     "mode-case:38x26",
+     "mode-photo:40x26",
+     "info-about:16x16",
+     "filters-toggle:129x30",
+     "headline-open:129x30",
+     "scene-back:89x21",
+     "scene-rgb:13x13",
+     "scene-quality:13x13",
+     "act-earth:61x40",
+     "act-field:92x40",
+     "act-qc:84x40",
+     "act-export:80x40"
+    ],
+    "nSmall": 16,
+    "tiny": [
+     "mode-case:11",
+     "mode-photo:11",
+     "brand-name:13",
+     "info-about:10",
+     "filters-toggle:13",
+     "headline-open:13",
+     "B:13",
+     "count-scenes:12",
+     "count-szones:12",
+     "scene-back:13",
+     "c-scene-s:12",
+     "LABEL:12"
+    ],
+    "nTiny": 58,
+    "over": [
+     "maplibregl-ctrl-bottom-left :441",
+     "maplibregl-ctrl maplibregl-ctrl-scale:441",
+     "actions:469",
+     "export-menu:630",
+     "menu-group:629",
+     "c-exp-row:629"
+    ]
+   }
+  },
+  "card_after_back": 0,
+  "console_errors": [
+   "PAGEERR Cannot read properties of undefined (reading 'center')",
+   "PAGEERR Cannot read properties of undefined (reading 'center')"
+  ]
+ }
+]
