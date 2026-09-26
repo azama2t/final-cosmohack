@@ -1442,6 +1442,13 @@ input[type='range'].slider::-webkit-slider-thumb {
   color: var(--text-2);
   font-weight: 500;
 }
+/* §60 В: compact drift block — one short caption + 2–3 numbers, everything else behind the (i) expander */
+.dp-compact {
+  padding: 8px 12px;
+}
+.dp-cap-compact {
+  margin-top: 6px;
+}
 
 .tour-cap {
   position: absolute;

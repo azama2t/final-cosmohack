@@ -162,10 +162,20 @@ export interface DriftFile {
   start_time: string;
   hours: number[];
   particles: DriftParticle[];
-  forcing: { currents?: string; wind?: string; wind_drift_factor?: number; model?: string };
+  forcing: {
+    currents?: string;
+    wind?: string;
+    wind_drift_factor?: number;
+    model?: string;
+    horizontal_diffusivity_m2s?: number;
+    stokes_drift?: string;
+  };
   note?: string;
   /** optional: extra runs with other wind drift factors (uncertainty range) */
   ensemble?: { wind_drift_factor: number; particles: DriftParticle[] }[];
+  /** §60 В: the 2–3 headline numbers for the compact on-map block — whatever the published run actually computed,
+   *  nothing invented if absent. mean_displacement_km/stranded_pct are at the file's own final hour (≤ 72 h). */
+  stats?: { n_particles?: number; stranded_pct?: number; mean_path_km?: number; mean_displacement_km?: number; max_displacement_km?: number };
 }
 
 export interface TsRow {

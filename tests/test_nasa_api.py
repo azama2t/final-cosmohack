@@ -45,7 +45,7 @@ def test_layers_contract(client):
         assert "пластик" in l["caption"] or "не обнаружение пластика" in l["caption"]
         if l["cadence"] == "daily":
             assert 250 <= l["resolution_m"] <= 375
-            assert "GoogleMapsCompatible_Level9" in l["tile_url"] and l["max_native_zoom"] == 9
+            assert "GoogleMapsCompatible_Level9" in l["tile_url_gibs"] and l["max_native_zoom"] == 9
             assert l["caption"] == rn.CAPTION
     assert "пластик на таком разрешении не обнаруживается" in j["caption"]
 
@@ -108,3 +108,75 @@ def test_fresh_s2_separate_and_labelled(client):
     main_zone_scenes = {f["properties"].get("scene_key") for f in cs.scene_zones_all()}
     assert not any(str(k).startswith("fresh-") for k in main_zone_scenes)
     assert client.get("/api/v3/fresh_s2/nope/zones").status_code == 404
+
+
+# ------------------------------------------------------------------ §60 А2: GIBS tile proxy (network mocked)
+@pytest.fixture()
+def tiles(monkeypatch, tmp_path):
+    monkeypatch.setattr(rn, "_today_utc", lambda: TODAY)
+    monkeypatch.setattr(rn, "TILE_CACHE", tmp_path / "nasa_tiles")
+    monkeypatch.setitem(rn._tile_bytes, "total", None)
+    calls = []
+
+    def fetch(url):
+        calls.append(url)
+        if "/9/300/" in url:
+            return 404, None, ""
+        if "/9/301/" in url:
+            return 0, None, ""
+        return 200, b"\xff\xd8JPEGDATA" + url.encode()[-8:], "image/jpeg"
+    monkeypatch.setattr(rn, "_fetch_tile", fetch)
+    return TestClient(app), calls
+
+
+def test_layers_tile_url_is_our_proxy(client):
+    j = client.get("/api/v3/nasa/layers").json()
+    for l in j["layers"]:
+        assert l["tile_url"].startswith("/api/v3/nasa/tile/" + l["id"] + "/{date}/{z}/{y}/{x}.")
+        assert l["tile_url_gibs"].startswith("https://gibs.earthdata.nasa.gov/") and l["proxied"] is True
+
+
+def test_tile_proxy_fetch_then_cache(tiles):
+    c, calls = tiles
+    u = "/api/v3/nasa/tile/VIIRS_SNPP_CorrectedReflectance_TrueColor/2026-09-20/3/2/5.jpg"
+    r = c.get(u)
+    assert r.status_code == 200 and r.headers["content-type"].startswith("image/jpeg")
+    assert r.headers["x-cache"] == "MISS" and "NASA" in r.headers["x-attribution"]
+    assert "max-age" in r.headers["cache-control"]
+    assert calls == ["https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_SNPP_CorrectedReflectance_TrueColor/default/"
+                     "2026-09-20/GoogleMapsCompatible_Level9/3/2/5.jpg"]
+    r2 = c.get(u)
+    assert r2.status_code == 200 and r2.headers["x-cache"] == "HIT" and r2.content == r.content and len(calls) == 1
+
+
+@pytest.mark.parametrize("path,code", [
+    ("NOT_A_LAYER/2026-09-20/3/2/5.jpg", 404),
+    ("VIIRS_SNPP_CorrectedReflectance_TrueColor/2026-09-20/3/2/5.png", 404),       # wrong extension
+    ("VIIRS_SNPP_CorrectedReflectance_TrueColor/2026-09-27/3/2/5.jpg", 422),       # future (UTC)
+    ("VIIRS_SNPP_CorrectedReflectance_TrueColor/2025-09-01/3/2/5.jpg", 422),       # older than a year
+    ("VIIRS_SNPP_CorrectedReflectance_TrueColor/26-09-2026/3/2/5.jpg", 422),
+    ("VIIRS_SNPP_CorrectedReflectance_TrueColor/2026-09-20/10/2/5.jpg", 422),      # z > max_zoom 9
+    ("VIIRS_SNPP_CorrectedReflectance_TrueColor/2026-09-20/3/8/5.jpg", 422),       # y ≥ 2^z
+    ("VIIRS_SNPP_CorrectedReflectance_TrueColor/2026-09-20/9/300/5.jpg", 404),     # GIBS 404
+    ("VIIRS_SNPP_CorrectedReflectance_TrueColor/2026-09-20/9/301/5.jpg", 504),     # GIBS timeout
+])
+def test_tile_proxy_rejects(tiles, path, code):
+    c, calls = tiles
+    r = c.get("/api/v3/nasa/tile/" + path)
+    assert r.status_code == code
+    if code == 422 or path.startswith("NOT_A") or path.endswith(".png"):
+        assert calls == []  # nothing outside the allow-list goes upstream
+
+
+def test_tile_cache_evicts_oldest(tiles, monkeypatch):
+    import os
+    c, _ = tiles
+    monkeypatch.setattr(rn, "TILE_CACHE_MAX_BYTES", 40)
+    for i, x in enumerate((1, 2, 3)):
+        c.get(f"/api/v3/nasa/tile/MODIS_Terra_CorrectedReflectance_TrueColor/2026-09-20/2/1/{x}.jpg")
+        for f in rn.TILE_CACHE.rglob("*.jpg"):
+            if f.name == f"{x}.jpg":
+                os.utime(f, (1000 + i, 1000 + i))
+    left = sorted(f.name for f in rn.TILE_CACHE.rglob("*.jpg"))
+    total = sum(f.stat().st_size for f in rn.TILE_CACHE.rglob("*.jpg"))
+    assert total <= 40 and "3.jpg" in left and "1.jpg" not in left

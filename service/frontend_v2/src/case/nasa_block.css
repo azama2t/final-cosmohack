@@ -1,0 +1,74 @@
+/* §58 п.3 (L140): блок «NASA · ежедневный обзор» в левой колонке */
+.c-nasa-block {
+  margin: 6px 12px 8px;
+  border: 1px solid rgba(94, 200, 255, 0.45);
+  border-radius: 8px;
+  background: rgba(94, 200, 255, 0.06);
+  font-size: 13px;
+}
+.c-nasa-block.off {
+  border-style: dashed;
+  background: transparent;
+}
+.c-nasa-block > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.c-nasa-block-off,
+.c-nasa-block-on {
+  min-height: 30px;
+  padding: 2px 10px;
+  border: 1px solid rgba(94, 200, 255, 0.6);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+.c-nasa-block-off {
+  margin-left: auto;
+}
+.c-nasa-block-on {
+  width: 100%;
+  border: 0;
+  text-align: left;
+}
+.c-nasa-block-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 8px 8px;
+}
+.c-nasa-block .c-nasa-date,
+.c-nasa-block .c-nasa-sw {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+.c-nasa-lab {
+  font-weight: 500;
+}
+.c-nasa-zoomhint {
+  padding: 4px 6px;
+  border-left: 3px solid #5ec8ff;
+  color: #cfe9f7;
+}
+@media (max-width: 820px) {
+  .c-nasa-block,
+  .c-nasa-block .faint,
+  .c-nasa-block .note {
+    font-size: 14px;
+  }
+  .c-nasa-block-off,
+  .c-nasa-block-on,
+  .c-nasa-block .c-nasa-date button,
+  .c-nasa-block .c-nasa-sw button {
+    min-height: 44px;
+  }
+}

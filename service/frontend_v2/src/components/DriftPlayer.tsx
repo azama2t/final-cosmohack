@@ -65,9 +65,18 @@ export default function DriftPlayer({ drift, onRender, flow, autoplay }: { drift
   const f = drift.forcing ?? {};
   const start = Date.parse(drift.start_time);
   const cur = Number.isFinite(start) ? new Date(start + hour * 3600e3).toISOString() : null;
+  // §60 В (Фёдор, 23:08, «дрейф без захламления»): ONE compact block — time control + 2–3 headline numbers, taken
+  // only from what the published run actually computed (drift.json.stats); no invented «median distance» when the
+  // file only has a mean. Everything else (model, sources, wind coefficient, diffusivity, Stokes drift, corridor
+  // definition) moves behind the (i) expander below — collapsed by default, was previously always-on text
+  // duplicated both here and in CaseApp.tsx's outer `.c-drift-tag` (removed there, see drift tasklog).
+  const st = drift.stats;
+  const nums: string[] = [`горизонт ≤ ${maxH} ч`];
+  if (typeof st?.mean_displacement_km === 'number') nums.push(`смещение ≈ ${st.mean_displacement_km.toFixed(1)} км`);
+  if (typeof st?.stranded_pct === 'number') nums.push(`на берегу ${st.stranded_pct.toFixed(0)} % (72 ч)`);
 
   return (
-    <div className="bottom-bar" data-testid="drift-player">
+    <div className="bottom-bar dp-compact" data-testid="drift-player">
       <div className="dp-row">
         <button className="play" onClick={() => setPlaying((v) => !v)} data-testid="drift-play" aria-label={playing ? 'Пауза' : 'Старт'}>
           {playing ? (
@@ -103,30 +112,36 @@ export default function DriftPlayer({ drift, onRender, flow, autoplay }: { drift
             </button>
           ))}
         </div>
-        {ens.length > 0 && (
-          <button
-            className="menu-row"
-            style={{ width: 'auto', padding: 0 }}
-            onClick={() => {
-              anim.spread = !spread;
-              setSpread(anim.spread);
-              render.current();
-            }}
-            data-testid="drift-spread"
-            title={`Где были бы частицы при ветровом коэффициенте ${wdfs.join(' и ')}`}
-          >
-            <span className={`check ${spread ? 'on' : ''}`} aria-hidden />
-            <span className="small">неопределённость</span>
-          </button>
-        )}
       </div>
-      <div className="dp-cap" data-testid="drift-caption">
-        {driftCaption(f)} {DRIFT_CORRIDOR_LABEL}
-        {cur ? ` · +${Math.floor(hour)} ч ≈ ${cur.slice(8, 10)}.${cur.slice(5, 7)} ${cur.slice(11, 16)} UTC` : ''}
-        <Info label="Источники прогноза" testid="info-drift-src">
-          {f.model ?? 'OpenDrift'} · течения {shortSrc(f.currents)} · ветер {shortSrc(f.wind)} · коэф. ветра {f.wind_drift_factor ?? '—'}
+      <div className="dp-cap dp-cap-compact" data-testid="drift-caption">
+        <b>Модельный сценарий</b> по погоде/течениям — не наблюдавшееся перемещение. {nums.join(' · ')}
+        {cur ? ` · ≈ ${cur.slice(8, 10)}.${cur.slice(5, 7)} ${cur.slice(11, 16)} UTC` : ''}
+        <Info label="Допущения и источники" testid="info-drift-src">
+          {driftCaption(f)} {DRIFT_CORRIDOR_LABEL}
+          <br />
+          {f.model ?? 'OpenDrift'} · течения {shortSrc(f.currents)} · ветер {shortSrc(f.wind)} · коэф. ветра {f.wind_drift_factor ?? '—'} · диффузия{' '}
+          {f.horizontal_diffusivity_m2s ?? '—'} м²/с · стоксов дрейф {f.stokes_drift ?? 'не учтён'}
           {ens.length > 0 ? ` · облако неопределённости: коэф. ${wdfs.join('–')}` : ''}
           {flow.length ? ` · частицы: ${flow.map((x) => (x.kind === 'wind' ? 'ветер' : 'течения')).join(' и ')}, поле на +${Math.floor(hour / 6) * 6} ч` : ''}
+          {ens.length > 0 && (
+            <>
+              <br />
+              <button
+                className="menu-row"
+                style={{ width: 'auto', padding: '4px 0 0' }}
+                onClick={() => {
+                  anim.spread = !spread;
+                  setSpread(anim.spread);
+                  render.current();
+                }}
+                data-testid="drift-spread"
+                title={`Где были бы частицы при ветровом коэффициенте ${wdfs.join(' и ')}`}
+              >
+                <span className={`check ${spread ? 'on' : ''}`} aria-hidden />
+                <span className="small">показывать разброс ансамбля на карте</span>
+              </button>
+            </>
+          )}
         </Info>
       </div>
     </div>

@@ -63,7 +63,7 @@ export interface CaseMapProps {
   /** §54 п.1: NASA GIBS daily overview (tile URL of one layer + day), off by default; not a detection */
   nasa?: { url: string; maxzoom: number } | null;
   /** §55 п.1: «Реальное время» — a fresh Sentinel-2 snapshot processed by our model (RGB + its zones), not human-checked */
-  fresh?: { key: string; img: string | null; bounds: number[] | null; zones: FC<any> | null } | null;
+  fresh?: { key: string; img: string | null; bounds: number[] | null; zones: FC<any> | null; pts?: { key: string; c: number[]; finds: number; label: string }[] } | null;
   /** §34 п.3: numbers of the zones of the snapshot opened in the left list (same numbers as the list) */
   numbered?: { id: string; n: number; at: [number, number]; ds: string }[];
 }
@@ -479,6 +479,24 @@ export default function CaseMap(p: CaseMapProps) {
       const col: any = ['match', ['get', 'detection_status'], 'detected', '#ff8c42', 'not_detected', '#51cf66', '#adb5bd'];
       add({ id: 'c-rt-fill', type: 'fill', source: 'c-rt-zones', paint: { 'fill-color': col, 'fill-opacity': ['match', ['get', 'detection_status'], 'not_detected', 0.04, 0.18] } });
       add({ id: 'c-rt-line', type: 'line', source: 'c-rt-zones', paint: { 'line-color': col, 'line-width': 2, 'line-dasharray': [2, 1] } });
+      // §58 п.2: fresh (automatic) Sentinel-2 snapshots — teal ring (colour + shape differ from the orange archive finds)
+      src('c-rt-pts', {
+        type: 'FeatureCollection',
+        features: (fr?.pts ?? []).map((q) => ({ type: 'Feature', geometry: { type: 'Point', coordinates: q.c }, properties: { id: q.key, finds: q.finds } })),
+      });
+      add({
+        id: 'c-rt-pts',
+        type: 'circle',
+        source: 'c-rt-pts',
+        maxzoom: 10,
+        paint: { 'circle-radius': 6, 'circle-color': 'rgba(32, 201, 151, 0.35)', 'circle-stroke-color': '#20c997', 'circle-stroke-width': 2.5 },
+      });
+      // under the archive finds (they stay clickable and visible)
+      {
+        const ids = (map.getStyle()?.layers ?? []).map((l) => l.id);
+        const firstSz = ids.find((id) => id.startsWith('c-sz-'));
+        if (firstSz && ids.indexOf('c-rt-pts') > ids.indexOf(firstSz)) map.moveLayer('c-rt-pts', firstSz);
+      }
     }
 
     // visibility + selection

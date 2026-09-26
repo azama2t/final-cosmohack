@@ -11,7 +11,8 @@ import { ObsCard, ZoneCard } from './Cards';
 import PairsDrawer from './PairsDrawer';
 import SceneZoneCard, { zoneTitle, type CardTab, type SceneZoneDetail, type SceneZoneProps } from './SceneZoneCard';
 import { SZ_COLORS, szKey, isFind, geomCenter } from './CaseMap';
-import { NasaMapPanel, RealtimeFolder, useFreshInfo, useNasaInfo, type FreshScene } from './Nasa';
+import { NasaBlock, useNasaInfo } from './Nasa';
+import { RealtimeFolder, useFreshInfo, type FreshScene } from './Realtime';
 import { DronesOptions, openDrones, openDronesFromValue } from './DronesHost';
 import { PrimeToggle, setPrime } from './PrimeMode';
 import { PhotoRolesLine } from './PhotoRoles';
@@ -50,8 +51,7 @@ import {
 import './case.css';
 import DriftPlayer from '../components/DriftPlayer';
 import type { DriftFile } from '../types';
-import { checkLine, closeDrift, driftBounds, driftCaption, driftKey, driftPaths, openDrift, renderDrift } from './drift';
-import { DRIFT_CORRIDOR_LABEL } from './DriftLayer';
+import { checkLine, closeDrift, driftBounds, driftKey, driftPaths, openDrift, renderDrift } from './drift';
 import DemoTour, { type DemoTourHandle } from './DemoTour';
 import DriftMapButton from './DriftMapButton'; // §54 п.4 (L141): «Дрейф» visible on the map next to the selected find
 
@@ -170,7 +170,27 @@ export default function CaseApp() {
   const nasaInfo = useNasaInfo(nasaOn);
   // §55 п.1: папка «Реальное время» (the same one button): fresh Sentinel-2 by our model + NASA daily overview
   const [nasaLayerOn, setNasaLayerOn] = useState(true);
-  const freshInfo = useFreshInfo(nasaOn);
+  // §58 п.2: independent source toggles — Sentinel-2 archive (= layer «zones») / fresh (auto) · field (= layer «obs») · drones
+  const [src, setSrc] = useState<{ fresh: boolean; drones: boolean }>(() => {
+    try {
+      return { fresh: true, drones: false, ...JSON.parse(localStorage.getItem('mp.case.src') ?? '{}') };
+    } catch {
+      return { fresh: true, drones: false };
+    }
+  });
+  const toggleSrc = (k: 'fresh' | 'drones') =>
+    setSrc((x) => {
+      const n = { ...x, [k]: !x[k] };
+      try {
+        localStorage.setItem('mp.case.src', JSON.stringify(n));
+      } catch {
+        /* no storage */
+      }
+      return n;
+    });
+  const freshOn = src.fresh;
+  const droneSets = useLoad<{ sets: any[] }>(src.drones ? (sg) => get('/api/v3/drones', {}, sg) : null, src.drones ? 'drones' : '');
+  const freshInfo = useFreshInfo(freshOn);
   const [freshScene, setFreshScene] = useState<FreshScene | null>(null);
   const [freshZones, setFreshZones] = useState<FC<any> | null>(null);
   useEffect(() => {
@@ -183,16 +203,27 @@ export default function CaseApp() {
   const freshAll = useMemo<FreshScene[]>(() => (freshInfo && freshInfo !== 'error' ? freshInfo.regions.flatMap((r) => r.dates) : []), [freshInfo]);
   const tlFresh = useMemo(
     () =>
-      nasaOn
+      freshOn
         ? freshAll
             .map((f) => ({ key: f.key, t: Date.parse(f.datetime ?? f.date), label: `${f.region_name ?? f.region} · ${dateRu(f.date)}`, finds: f.by_status?.detected ?? 0 }))
             .filter((f) => Number.isFinite(f.t))
         : [],
-    [nasaOn, freshAll],
+    [freshOn, freshAll],
   );
   const freshMap = useMemo(
-    () => (nasaOn && freshScene ? { key: freshScene.key, img: freshScene.rgb_url ?? null, bounds: freshScene.bounds ?? null, zones: freshZones } : null),
-    [nasaOn, freshScene, freshZones],
+    () =>
+      freshOn
+        ? {
+            key: freshScene?.key ?? '',
+            img: freshScene?.rgb_url ?? null,
+            bounds: freshScene?.bounds ?? null,
+            zones: freshScene ? freshZones : null,
+            pts: freshAll
+              .filter((f) => f.bounds)
+              .map((f) => ({ key: f.key, c: [(f.bounds![0] + f.bounds![2]) / 2, (f.bounds![1] + f.bounds![3]) / 2], finds: f.by_status?.detected ?? 0, label: `${f.region_name ?? f.region} · ${dateRu(f.date)}` })),
+          }
+        : null,
+    [freshOn, freshScene, freshZones, freshAll],
   );
   // «Запросы» live inside «Ещё ▾»: closing «Ещё» closes them too (no stale open state behind a closed menu)
   useEffect(() => {
@@ -950,6 +981,21 @@ export default function CaseApp() {
               Цифры
             </button>
           </div>
+          <div className="c-srcbar" data-testid="source-bar" role="group" aria-label="Источники данных">
+            <span className="c-src-lbl">Sentinel-2:</span>
+            <button className={`c-src ${q.layers.zones ? 'on' : ''}`} onClick={() => setLayer('zones')} aria-pressed={q.layers.zones} data-testid="src-s2-hist" title="Архив Sentinel-2 кейса (исторические снимки с датой съёмки) — список, карта, шкала">
+              <span className="c-mk s2" aria-hidden /> архив
+            </button>
+            <button className={`c-src ${freshOn ? 'on' : ''}`} onClick={() => toggleSrc('fresh')} aria-pressed={freshOn} data-testid="src-s2-fresh" title="Свежие Sentinel-2, обработанные нашей моделью автоматически (не проверено человеком)">
+              <span className="c-mk rt" aria-hidden /> свежие · авто
+            </button>
+            <button className={`c-src ${q.layers.obs ? 'on' : ''}`} onClick={() => setLayer('obs')} aria-pressed={q.layers.obs} data-testid="src-field" title="Полевые измерения организаторов (CSV, судно)">
+              <span className="c-mk fd" aria-hidden /> Полевые (CSV)
+            </button>
+            <button className={`c-src ${src.drones ? 'on' : ''}`} onClick={() => toggleSrc('drones')} aria-pressed={src.drones} data-testid="src-drones" title="Дроны и детальные фото (не спутник)">
+              <span className="c-mk dr" aria-hidden /> Дроны и фото
+            </button>
+          </div>
           {panel === 'filters' && (
             <div className="c-filters-body">
               <div className="c-f">
@@ -1002,13 +1048,57 @@ export default function CaseApp() {
           </div>
         </div>
 
+        <NasaBlock
+          on={nasaOn}
+          info={nasaInfo}
+          layerOn={nasaLayerOn}
+          layerId={nasaLayer?.id ?? ''}
+          date={nasaDate}
+          onLayer={setNasaLayerId}
+          onDate={setNasaDay}
+          onLayerOn={setNasaLayerOn}
+        />
         <div className="left-body" data-testid="zone-list">
-          {nasaOn && !curScene && (
+          {!curScene && !q.layers.zones && !freshOn && !q.layers.obs && !src.drones && (
+            <div className="c-empty-src" data-testid="sources-empty">
+              Все источники выключены. Включите хотя бы один:{' '}
+              <button className="link" onClick={() => setLayer('zones')}>
+                Sentinel-2 (архив)
+              </button>{' '}
+              ·{' '}
+              <button className="link" onClick={() => toggleSrc('fresh')}>
+                свежие Sentinel-2
+              </button>{' '}
+              ·{' '}
+              <button className="link" onClick={() => setLayer('obs')}>
+                полевые
+              </button>{' '}
+              ·{' '}
+              <button className="link" onClick={() => toggleSrc('drones')}>
+                дроны и фото
+              </button>
+            </div>
+          )}
+          {src.drones && !curScene && (
+            <details className="c-nasa-folder c-dr-folder" open data-testid="drones-folder">
+              <summary>
+                <span className="c-mk dr" aria-hidden /> Дроны и детальные фото
+                <span className="faint"> · {droneSets.data ? `${droneSets.data.sets.length} наборов` : droneSets.err ? 'недоступно' : 'загрузка…'}</span>
+              </summary>
+              <div className="note c-pad-s">детальные кадры, не спутник; дата съёмки не указана — на шкале времени их нет</div>
+              {(droneSets.data?.sets ?? []).map((d: any) => (
+                <button key={d.id} className="reg-item c-nasa-reg" onClick={() => openDrones(d.id)} data-testid="drones-set" data-set={d.id}>
+                  <span className="ri-name">{d.name}</span>
+                  <span className="ri-sub">
+                    {d.sensor_label ?? d.sensor} · {d.n_frames} кадр. · дата съёмки не указана
+                  </span>
+                </button>
+              ))}
+            </details>
+          )}
+          {freshOn && !curScene && (
             <RealtimeFolder
               fresh={freshInfo}
-              nasa={nasaInfo}
-              nasaLayerOn={nasaLayerOn}
-              onNasaLayer={() => setNasaLayerOn((v) => !v)}
               freshKey={freshScene?.key ?? null}
               freshZones={freshZones}
               onFresh={(s) => {
@@ -1019,7 +1109,14 @@ export default function CaseApp() {
               onFreshZone={(f) => flyToFeat(f, 14)}
             />
           )}
-          {!curScene ? (
+          {!curScene && !q.layers.zones ? (
+            <div className="note c-pad-s" data-testid="s2-hist-off">
+              Архив Sentinel-2 скрыт.{' '}
+              <button className="link" onClick={() => setLayer('zones')}>
+                показать
+              </button>
+            </div>
+          ) : !curScene ? (
             <SceneList rows={sceneRows} loading={!szones.data && !szones.err} err={szones.err} onPick={openScene} filtered={!isDefault(q)} fieldArea={!!q.source}
               drift={hasDrift}
               area={q.area && q.area.startsWith('r:') ? areaLabel : null}
@@ -1188,7 +1285,7 @@ export default function CaseApp() {
                   data-testid="more-nasa"
                   title="Папка «Реальное время»: свежие Sentinel-2, обработанные нашей моделью + ежедневный обзор NASA — показать / скрыть целиком"
                 >
-                  <span className={`check ${nasaOn ? 'on' : ''}`} aria-hidden /> Реальное время (Sentinel-2 + NASA)
+                  <span className={`check ${nasaOn ? 'on' : ''}`} aria-hidden /> NASA · ежедневный обзор (не обнаружение)
                 </button>
                 <button
                   className="menu-row"
@@ -1290,9 +1387,9 @@ export default function CaseApp() {
             onClick={() => setNasaOn((v) => !v)}
             aria-pressed={nasaOn}
             data-testid="nasa-toggle"
-            title="Реальное время: свежие Sentinel-2, обработанные нашей моделью (автоматически, не проверено человеком) + ежедневный обзор NASA — показать / скрыть всю папку, слои и подписи"
+            title="NASA · ежедневный обзор (MODIS/VIIRS 250–375 м) — подложка для облаков/цветения/пятен, не обнаружение пластика; одна кнопка включает / выключает весь режим"
           >
-            <span className="c-rt-dot" aria-hidden /> Реальное время {nasaOn ? '✓' : ''}
+            NASA · обзор {nasaOn ? '✓' : ''}
           </button>
           <PrimeToggle />
           <button className="btn" onClick={() => demoRef.current?.open()} data-testid="demo-tour-btn">
@@ -1319,7 +1416,7 @@ export default function CaseApp() {
               ))}
               <button className="menu-row" onClick={() => setNasaOn((v) => !v)} data-testid="layer-nasa" aria-pressed={nasaOn}>
                 <span className={`check ${nasaOn ? 'on' : ''}`} aria-hidden />
-                <span>Реальное время: Sentinel-2 нашей моделью + NASA-обзор</span>
+                <span>NASA · ежедневный обзор (не обнаружение)</span>
               </button>
               <div className="menu-sep" />
               <div className="menu-group">Подложка{offline ? ' · сейчас офлайн' : ''}</div>
@@ -1435,17 +1532,6 @@ export default function CaseApp() {
             </button>
           </div>
         )}
-        {nasaOn && nasaLayerOn && (
-          <NasaMapPanel
-            info={nasaInfo}
-            layerId={nasaLayer?.id ?? ''}
-            date={nasaDate}
-            sceneDate={szScene?.datetime?.slice(0, 10) ?? null}
-            onLayer={setNasaLayerId}
-            onDate={setNasaDay}
-            onClose={() => setNasaOn(false)}
-          />
-        )}
         {toast && (
           <div className="toast" role="status" data-testid="toast">
             {toast}
@@ -1518,15 +1604,10 @@ export default function CaseApp() {
             setNasaOn(true);
           }}
         />
+        {/* §60 В (Фёдор 23:08, «дрейф без захламления»): ONE compact block, not a caption + player duplicating the
+            same text — DriftPlayer.tsx now carries the single caption line + 2–3 numbers + (i) expander itself. */}
         {drift && (
           <div className="c-drift-wrap" data-testid="drift-wrap">
-            <div className="c-drift-tag">
-              {/* §48/§51 п.8: текст даёт driftCaption()/DRIFT_CORRIDOR_LABEL (DriftLayer.ts) — L141, одна строка на карте и в панели */}
-              <b>Модельный сценарий, не наблюдаемое перемещение.</b> {driftCaption(drift.forcing)} Линия — медианная траектория. {DRIFT_CORRIDOR_LABEL} ·{' '}
-              <span data-testid="drift-horizon">
-                горизонт ≤ {Math.min(72, drift.hours?.length ? drift.hours[drift.hours.length - 1] : 72)} ч, шаг расчёта {(drift.forcing as any)?.output_step_h ?? 1} ч
-              </span>
-            </div>
             <DriftPlayer drift={drift} onRender={renderDrift} flow={[]} autoplay />
           </div>
         )}
@@ -2228,6 +2309,10 @@ function CaseLegend({
             <i className="c-sw-find" style={{ background: SZ_COLORS.detected }} /> плавающий материал · Cózar B
             <i className="c-sw-find" style={{ background: SZ_COLORS.unverified }} /> плавающий материал · без разметки
           </span>
+          <span className="c-lg-src" data-testid="legend-sources">
+            <span className="c-mk s2" aria-hidden /> архив S2 <span className="c-mk rt" aria-hidden /> свежие S2 (авто) <span className="c-mk fd" aria-hidden /> поле{' '}
+            <span className="c-mk dr" aria-hidden /> дроны · цвет — источник, не доказательство пластика
+          </span>
           {layers.obs ? (
             <>
               <span className="c-lg-conc-t">Концентрация, шт./км² (полевые измерения)</span>
@@ -2254,6 +2339,10 @@ function CaseLegend({
               <span className="c-lg-cl" data-testid="legend-sz-wind"><i className="c-sw-find" style={{ background: SZ_COLORS.insufficient_data }} /> не определено: судно, пена, блик, облака, берег, ветер</span>
               <span className="c-lg-cl"><i className="c-sw-find" style={{ background: SZ_COLORS.not_detected }} /> объектов нет</span>
               <OrganicLegend />
+            </div>
+            <div className="c-lg-src" data-testid="legend-sources-open">
+              Источники: <span className="c-mk s2" aria-hidden /> архив Sentinel-2 (дата съёмки в подписи) <span className="c-mk rt" aria-hidden /> свежие Sentinel-2 (авто, не проверено человеком){' '}
+              <span className="c-mk fd" aria-hidden /> полевые (CSV) <span className="c-mk dr" aria-hidden /> дроны и фото — цвет источника не доказательство пластика
             </div>
           </div>
           {layers.obs && (

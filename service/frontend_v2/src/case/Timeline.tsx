@@ -275,7 +275,7 @@ export default function Timeline({
     const m = new Map<number, { key: string; t: number; label: string; finds: number }[]>();
     for (const f of fresh ?? []) {
       if (f.t < t0 || f.t > t1) continue;
-      const px = Math.round(x(f.t) / 14) * 14;
+      const px = Math.round(x(f.t) / 22) * 22;
       if (!m.has(px)) m.set(px, []);
       m.get(px)!.push(f);
     }
@@ -427,7 +427,7 @@ export default function Timeline({
                 return (
                   <g key={'f' + fs[0].key} className={`c-tl-fresh ${on ? 'on' : ''}`} onClick={() => !moved() && onFresh?.(fs[0].key)} data-testid="timeline-fresh" data-scene={fs[0].key} style={{ cursor: 'pointer' }}>
                     <circle cx={px} cy={cy} r={on ? 6 : 4.5} />
-                    <title>Реальное время · {fs[0].label} · {fs[0].finds ? `${fs[0].finds} наход.` : '0 находок'} — автоматически, не проверено человеком</title>
+                    <title>Свежий Sentinel-2 (авто) · {fs[0].label} · {fs[0].finds ? `${fs[0].finds} наход.` : '0 находок'} — автоматически, не проверено человеком</title>
                   </g>
                 );
               const a = Math.min(...fs.map((f) => f.t));
@@ -444,11 +444,11 @@ export default function Timeline({
                   data-testid="timeline-fresh-group"
                   style={{ cursor: 'zoom-in' }}
                 >
-                  <rect x={px - 9} y={cy - 7} width={18} height={14} rx={7} />
+                  <rect x={px - (5 + String(fs.length).length * 3.5)} y={cy - 7} width={10 + String(fs.length).length * 7} height={14} rx={7} />
                   <text x={px} y={cy + 3.5} className="c-tl-n fresh">
                     {fs.length}
                   </text>
-                  <title>Реальное время: {fs.length} свежих снимков Sentinel-2 ({ru(a)} – {ru(b)}) — нажмите, чтобы приблизить</title>
+                  <title>Свежие Sentinel-2 (авто): {fs.length} снимков Sentinel-2 ({ru(a)} – {ru(b)}) — нажмите, чтобы приблизить</title>
                 </g>
               );
             })}

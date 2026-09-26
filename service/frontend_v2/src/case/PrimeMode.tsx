@@ -53,7 +53,12 @@ function useDimRealLayers(on: boolean) {
     const dimmed = new Map<string, any>();
     let map: any = null;
     const m0 = (window as any).__caseMap;
-    const cam = m0?.getCenter ? { center: m0.getCenter(), zoom: m0.getZoom() } : null; // restored on off
+    // §60 А1: the full camera is restored on off. flyToScene / fitBounds of the demo points fly with a big
+    // left/bottom padding, and MapLibre keeps flyTo padding on the camera → restoring only center+zoom
+    // left the globe shifted off screen. So padding, bearing and pitch are saved and restored too.
+    const cam = m0?.getCenter
+      ? { center: m0.getCenter(), zoom: m0.getZoom(), bearing: m0.getBearing(), pitch: m0.getPitch(), padding: m0.getPadding?.() }
+      : null;
     const apply = () => {
       map = (window as any).__caseMap;
       if (!map?.getStyle || !map.style) return;
@@ -88,7 +93,18 @@ function useDimRealLayers(on: boolean) {
       if (map?.getLayer && map.style) {
         for (const id of hidden) if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'visible');
         for (const [id, v] of dimmed) if (map.getLayer(id)) map.setPaintProperty(id, 'raster-opacity', v);
-        if (cam && map === m0) map.jumpTo(cam);
+      }
+      // camera: stop a demo fly still in progress, then put back the pre-PRIME view (or at least clear the demo padding)
+      const mc = (window as any).__caseMap;
+      try {
+        if (mc?.jumpTo && mc.style) {
+          mc.stop?.();
+          const zero = { top: 0, bottom: 0, left: 0, right: 0 };
+          if (cam && mc === m0) mc.jumpTo({ ...cam, padding: cam.padding ?? zero });
+          else mc.jumpTo({ padding: zero });
+        }
+      } catch {
+        /* map removed */
       }
     };
   }, [on]);
@@ -216,7 +232,7 @@ function placeToggle(R: DOMRect, mobile: boolean, tw: number, th: number): Pos |
   }
   const free = (p: Pos) => {
     const l = W - p.right - tw, t = p.top, r = W - p.right, b = p.top + th;
-    if (l < R.left + 4 || b > R.bottom - 4) return false;
+    if (l < Math.max(R.left, 0) + 4 || r > W - 2 || b > R.bottom - 4) return false;
     return !obs.some((q) => q.left < r + 4 && q.right > l - 4 && q.top < b + 4 && q.bottom > t - 4);
   };
   const cands: Pos[] = [];

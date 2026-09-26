@@ -2,7 +2,8 @@
 // Not a detection: our detector does not run on these images; the caption says so. API: /api/v3/nasa/{layers,latest,regions}
 // (L131); without the API — the direct GIBS URL (the same WMTS template).
 import { useEffect, useState } from 'react';
-import { get } from './api3';
+import './nasa_block.css';
+import { get, API_BASE } from './api3';
 import { dateRu } from './fmt';
 
 export interface NasaLayer {
@@ -37,11 +38,16 @@ export interface NasaInfo {
 }
 
 const FALLBACK_CAPTION = 'ежедневный обзорный снимок NASA 250–375 м; пластик на таком разрешении не обнаруживается — для обзора облачности/цветения/пятен';
-const gibs = (id: string) => `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/${id}/default/{date}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`;
+// §60: the browser never goes to GIBS directly — tiles come through our server (same domain, L151 proxy);
+// the template is taken from /api/v3/nasa/layers; this fallback (API down) also points at our proxy, not at GIBS.
+const proxyTile = (id: string) => `/api/v3/nasa/tile/${id}/{date}/{z}/{y}/{x}.jpg`;
+/** MapLibre loads tiles in a worker (blob: base) — a relative template must be made absolute */
+const absTile = (u: string) =>
+  /^https?:\/\//.test(u) ? u : new URL((u.startsWith('/') ? API_BASE : '') + u, window.location.href).toString().replace(/%7B/g, '{').replace(/%7D/g, '}');
 const FALLBACK_LAYERS: NasaLayer[] = [
-  { id: 'VIIRS_SNPP_CorrectedReflectance_TrueColor', title: 'VIIRS (Suomi NPP) · истинные цвета', sensor: 'VIIRS', resolution_m: 375, tile_url: gibs('VIIRS_SNPP_CorrectedReflectance_TrueColor') },
-  { id: 'MODIS_Terra_CorrectedReflectance_TrueColor', title: 'MODIS (Terra) · истинные цвета', sensor: 'MODIS', resolution_m: 250, tile_url: gibs('MODIS_Terra_CorrectedReflectance_TrueColor') },
-  { id: 'MODIS_Aqua_CorrectedReflectance_TrueColor', title: 'MODIS (Aqua) · истинные цвета', sensor: 'MODIS', resolution_m: 250, tile_url: gibs('MODIS_Aqua_CorrectedReflectance_TrueColor') },
+  { id: 'VIIRS_SNPP_CorrectedReflectance_TrueColor', title: 'VIIRS (Suomi NPP) · истинные цвета', sensor: 'VIIRS', resolution_m: 375, tile_url: proxyTile('VIIRS_SNPP_CorrectedReflectance_TrueColor') },
+  { id: 'MODIS_Terra_CorrectedReflectance_TrueColor', title: 'MODIS (Terra) · истинные цвета', sensor: 'MODIS', resolution_m: 250, tile_url: proxyTile('MODIS_Terra_CorrectedReflectance_TrueColor') },
+  { id: 'MODIS_Aqua_CorrectedReflectance_TrueColor', title: 'MODIS (Aqua) · истинные цвета', sensor: 'MODIS', resolution_m: 250, tile_url: proxyTile('MODIS_Aqua_CorrectedReflectance_TrueColor') },
 ];
 const isoDay = (t: number) => new Date(t).toISOString().slice(0, 10);
 export const shiftDay = (d: string, n: number) => isoDay(Date.parse(d + 'T00:00:00Z') + n * 864e5);
@@ -67,7 +73,7 @@ export function useNasaInfo(on: boolean): NasaInfo | null {
         caption: l?.caption ?? FALLBACK_CAPTION,
         notWhat: l?.not_what ?? 'не обнаружение пластика и не оценка количества; наш детектор на этих снимках не запускается',
         attribution: l?.attribution ?? 'Снимки: NASA EOSDIS GIBS',
-        layers: layers.length ? layers : FALLBACK_LAYERS,
+        layers: (layers.length ? layers : FALLBACK_LAYERS).map((x) => ({ ...x, tile_url: absTile(x.tile_url) })),
         defaultLayer: l?.default_layer ?? FALLBACK_LAYERS[0].id,
         latest: t?.date ?? y,
         latestFull: t?.latest_full ?? t?.date ?? y,
@@ -79,6 +85,7 @@ export function useNasaInfo(on: boolean): NasaInfo | null {
   return info;
 }
 
+/** @deprecated §58 п.3: the right floating panel is replaced by <NasaBlock/> in the left column (kept until the mount moves) */
 export function NasaMapPanel({
   info,
   layerId,
@@ -91,11 +98,12 @@ export function NasaMapPanel({
   info: NasaInfo | null;
   layerId: string;
   date: string;
-  sceneDate: string | null;
+  sceneDate?: string | null;
   onLayer: (id: string) => void;
   onDate: (d: string) => void;
   onClose: () => void;
 }) {
+  void sceneDate; // §58 п.3: the NASA date is NOT linked to the Sentinel-2 scene date
   const layers = info?.layers ?? FALLBACK_LAYERS;
   const L = layers.find((x) => x.id === layerId) ?? layers[0];
   const max = info?.latest ?? date;
@@ -123,11 +131,6 @@ export function NasaMapPanel({
             {x.id.startsWith('VIIRS') ? 'VIIRS' : x.id.includes('Aqua') ? 'MODIS Aqua' : 'MODIS Terra'}
           </button>
         ))}
-        {sceneDate && sceneDate !== date && (
-          <button onClick={() => onDate(sceneDate)} data-testid="nasa-scene-date" title="Та же дата, что у открытого снимка Sentinel-2">
-            к дате снимка
-          </button>
-        )}
         {info && date !== info.latestFull && (
           <button onClick={() => onDate(info.latestFull)} data-testid="nasa-latest" title="Последний полный день">
             последний
@@ -139,6 +142,159 @@ export function NasaMapPanel({
       </span>
       <span className="faint c-nasa-attr">{info?.attribution ?? 'Снимки: NASA EOSDIS GIBS'}</span>
     </div>
+  );
+}
+
+// ---- §58 п.3: блок «NASA · ежедневный обзор» в левой колонке (вместо правой плавающей панели) ----
+/** min zoom of the NASA raster: on the world-scale 3D globe GIBS tiles give a black patch at the pole
+ *  (no-data / polar-night pixels are black JPEG, stretched over the pole cap) → NASA only on the regional map */
+export const NASA_MIN_ZOOM = 3;
+
+/** keeps the case map's 'c-nasa' layer regional (zoom ≥ NASA_MIN_ZOOM) — no NASA texture on the world globe */
+function useNasaRegionalOnly(active: boolean) {
+  useEffect(() => {
+    if (!active) return;
+    const fix = () => {
+      const m = (window as any).__caseMap;
+      try {
+        if (!m?.style || !m.getLayer('c-nasa')) return;
+        const l = m.getLayer('c-nasa');
+        if ((l.minzoom ?? 0) !== NASA_MIN_ZOOM) m.setLayerZoomRange('c-nasa', NASA_MIN_ZOOM, 24);
+      } catch {
+        /* style reloading */
+      }
+    };
+    fix();
+    const t = window.setInterval(fix, 400);
+    return () => window.clearInterval(t);
+  }, [active]);
+}
+
+function useMapZoom(active: boolean) {
+  const [z, setZ] = useState<number | null>(null);
+  useEffect(() => {
+    if (!active) return;
+    const upd = () => {
+      const m = (window as any).__caseMap;
+      if (m?.getZoom) setZ(Math.round(m.getZoom() * 10) / 10);
+    };
+    upd();
+    const t = window.setInterval(upd, 700);
+    return () => window.clearInterval(t);
+  }, [active]);
+  return z;
+}
+
+export function NasaBlock({
+  on,
+  info,
+  layerOn,
+  layerId,
+  date,
+  onLayer,
+  onDate,
+  onLayerOn,
+}: {
+  on: boolean; // «Реальное время» mode (nasaOn in CaseApp)
+  info: NasaInfo | null;
+  layerOn: boolean; // the NASA overview itself (nasaLayerOn)
+  layerId: string;
+  date: string;
+  onLayer: (id: string) => void;
+  onDate: (d: string) => void;
+  onLayerOn: (v: boolean) => void;
+}) {
+  const active = on && layerOn;
+  useNasaRegionalOnly(active);
+  const zoom = useMapZoom(active);
+  if (!on) return null;
+  if (!layerOn)
+    return (
+      <div className="c-nasa-block off" data-testid="nasa-block">
+        <button className="c-nasa-block-on" onClick={() => onLayerOn(true)} data-testid="nasa-block-on">
+          <span className="c-nasa-dot" aria-hidden /> NASA · ежедневный обзор — включить
+        </button>
+      </div>
+    );
+  const layers = info?.layers ?? FALLBACK_LAYERS;
+  const L = layers.find((x) => x.id === layerId) ?? layers[0];
+  const max = info?.latest ?? date;
+  const partial = !!info && date === info.latest && info.latest !== info.latestFull;
+  const lowZoom = zoom != null && zoom < NASA_MIN_ZOOM;
+  return (
+    <details className="c-nasa-block" open data-testid="nasa-block">
+      <summary>
+        <span className="c-nasa-dot" aria-hidden /> NASA · ежедневный обзор
+        <button
+          className="c-nasa-block-off"
+          onClick={(e) => {
+            e.preventDefault();
+            onLayerOn(false);
+          }}
+          data-testid="nasa-off"
+          title="Выключить NASA: подложка, элемент таймлайна и это управление"
+        >
+          Выключить NASA
+        </button>
+      </summary>
+      <div className="c-nasa-block-body">
+        <div className="note" data-testid="nasa-caption">
+          Обзорный снимок {L.sensor ?? ''} ~{L.resolution_m} м — облака, цветение, пятна. <b>Не обнаружение пластика</b>: наш детектор на кадрах NASA не
+          запускается.
+        </div>
+        <label className="c-nasa-lab" htmlFor="nasa-date-input">
+          Дата обзора NASA <span className="faint">(день подложки; не связана с периодом снимков Sentinel-2)</span>
+        </label>
+        <span className="c-nasa-date">
+          <button onClick={() => onDate(shiftDay(date, -1))} data-testid="nasa-prev" title="Предыдущий день" aria-label="Предыдущий день">
+            ◀
+          </button>
+          <input
+            id="nasa-date-input"
+            type="date"
+            value={date}
+            min="2012-01-19"
+            max={max}
+            onChange={(e) => e.target.value && onDate(e.target.value)}
+            data-testid="nasa-date"
+            aria-label="Дата обзора NASA"
+          />
+          <button onClick={() => onDate(shiftDay(date, 1))} disabled={date >= max} data-testid="nasa-next" title="Следующий день" aria-label="Следующий день">
+            ▶
+          </button>
+          {info && date !== info.latestFull && (
+            <button onClick={() => onDate(info.latestFull)} data-testid="nasa-latest" title="Последний полный день">
+              последний
+            </button>
+          )}
+        </span>
+        <span className="c-nasa-sw" role="radiogroup" aria-label="Спутник NASA">
+          {layers.map((x) => (
+            <button
+              key={x.id}
+              role="radio"
+              aria-checked={x.id === L.id}
+              className={x.id === L.id ? 'on' : ''}
+              onClick={() => onLayer(x.id)}
+              data-testid={`nasa-layer-${x.sensor?.toLowerCase() ?? x.id}`}
+              title={x.title}
+            >
+              {x.id.startsWith('VIIRS') ? 'VIIRS' : x.id.includes('Aqua') ? 'MODIS Aqua' : 'MODIS Terra'}
+            </button>
+          ))}
+        </span>
+        <div className="faint" data-testid="nasa-date-line">
+          Изображение: {L.sensor ?? ''} {L.satellite ? `(${L.satellite})` : ''} за {dateRu(date)} (UTC), ~{L.resolution_m} м
+          {partial ? ' · день ещё собирается, часть Земли может быть пустой' : ''}. Чёрные полосы — в этот день там нет съёмки.
+        </div>
+        {lowZoom && (
+          <div className="c-nasa-zoomhint" data-testid="nasa-zoomhint">
+            На глобусе NASA не рисуется (у полюса тайлы дают чёрное пятно) — приблизьте карту к району, обзор появится.
+          </div>
+        )}
+        <div className="faint c-nasa-attr">{info?.attribution ?? 'Снимки: NASA EOSDIS GIBS'}</div>
+      </div>
+    </details>
   );
 }
 
