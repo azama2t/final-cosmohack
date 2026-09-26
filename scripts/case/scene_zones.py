@@ -62,31 +62,14 @@ COAST_M = 300.0         # land (quality code 2) closer than this -> coast / surf
 SHALLOW_B3_RATIO = 2.0  # zone water B3 median >= 2 x scene water median and >= SHALLOW_B3_ABS -> shallow / turbid water
 SHALLOW_B3_ABS = 0.03
 
-SCENARIO = {
-    "label": "Условный диапазон, ЕСЛИ это мусорная полоса",
-    "unit": "items/km2",
-    "lo": 1.0e4, "typical_lo": 1.0e6, "typical_hi": 1.0e7, "hi": 1.0e8,
-    "size_class": "> 2 см (в полосах Ruiz 2020 — предметы > 2,5 см)",
-    "applies_to": "плотность внутри самой мусорной полосы (ширина полос — обычно < 10 м), не средняя по зоне и не по пикселю",
-    "assumption": ("Допущение: зона — развитая мусорная полоса того же типа, что обследованы в Бискайском заливе "
-                   "(Ruiz et al. 2020). Это не проверено: детектор не отличает мусор от водорослей и органики."),
-    "not_what": "Не доверительный интервал, не измерение и не результат модели: числа взяты из литературы.",
-    "basis": [
-        {"value": "10 000 шт./км² (нижняя граница)",
-         "quote": "we used 1 macro-item per 100 m2 and 10 micro-items per m2 as minimum concentrations for well-developed macro- and micro-litter windrows",
-         "where": "Cózar et al. 2021, Front. Mar. Sci. 8:571796, раздел «Litter Concentrations in the Windrows»"},
-        {"value": "10⁵–10⁸ шт./км² (0,1–100 шт./м²; 72 % измерений — 1–10 шт./м²)",
-         "quote": "Litter concentrations in windrows were based on the macro-litter measurements by Ruiz et al. (2020) (n = 163)",
-         "where": "Cózar et al. 2021, рис. 2A (значения классов прочитаны с гистограммы, в тексте их нет)"},
-        {"value": "для сравнения: вне полос ≤ 1 000 шт./км²",
-         "quote": "the highest abundances of macro-litter (>2 cm) counted in visual transects are on the order of 1 macro-item per 1,000 m2",
-         "where": "Cózar et al. 2021 (по Galgani et al. 2015)"},
-    ],
-    "source": "Cózar A. et al. (2021) Marine Litter Windrows: A Strategic Target to Understand and Manage the Ocean "
-              "Plastic Pollution. Front. Mar. Sci. 8:571796. doi:10.3389/fmars.2021.571796",
-    "hidden_reason": ("Сценарий не показывается: у зоны признаки пены, блика, судна, берега или мелководья — вероятно, это "
-                      "не мусорная полоса."),
+# INBOX §23 п.2 (26.09): no items/km2 scenario for satellite zones — the text in Cózar et al. 2021 gives only a lower
+# bound for windrows, a narrow honestly derived range does not exist; the zone's quantity status is «not confirmed».
+QUANTITY = {
+    "status": "not_confirmed",
+    "label": "концентрация по снимку не подтверждена",
+    "detail": "перевод площади в штуки не показываем: нет калибровочных пар (см. docs/QUANTITY.md)",
 }
+CLOUD_ZONE = 0.2        # cloud / cloud shadow (quality codes 3, 4) >= 20 % of the zone -> cloud sign
 
 
 def model_info() -> dict:
@@ -382,7 +365,10 @@ def build_scene(s: dict, cozar: pd.DataFrame, minfo: dict) -> dict:
             b3z = float(np.nanmedian(B["B3"][wz])) if wz.sum() >= 20 else None
             b3_ratio = (b3z / wmed["B3"]) if (b3z is not None and wmed["B3"] > 1e-4) else None
             shallow = b3z is not None and b3_ratio is not None and b3_ratio >= SHALLOW_B3_RATIO and b3z >= SHALLOW_B3_ABS
+            cloud_share = float(np.isin(qa[m], (3, 4)).mean())
             flags = []
+            if cloud_share >= CLOUD_ZONE:
+                flags.append("cloud")
             if ship_near_px > 0 and not (art_share.get("ship", 0) + art_share.get("wake", 0) >= ART_FRAC):
                 flags.append("ship")
             if land_near_px > 0:
@@ -400,7 +386,7 @@ def build_scene(s: dict, cozar: pd.DataFrame, minfo: dict) -> dict:
             pz = prob[dm]
             n_cz = sum(1 for _, g, _ in cz_polys if g.intersects(poly))
             det_status = "insufficient_data" if flags else "detected"
-            # K2: the conditional scenario / research estimate only with independent level-B evidence (Cózar filament)
+            # K2 / §23: «detected» only after all false-alarm filters; level B = the contour crosses a Cózar filament
             verification = "level_B_cozar" if (n_cz > 0 and not flags) else ("false_alarm_signs" if flags else "unverified")
             signs = {
                 "foam": {"flag": "foam" in flags, "white_ratio_b2_b8": None if white is None else round(white, 3),
@@ -420,6 +406,8 @@ def build_scene(s: dict, cozar: pd.DataFrame, minfo: dict) -> dict:
                             "rule": "медиана B3 воды зоны ≥ 2× медианы воды снимка и ≥ 0,03 — мелководье или мутная вода"},
                 "seam": {"flag": "seam" in flags, "share": art_share.get("seam", 0),
                          "rule": "≥ 30 % пикселей — прямая линия вдоль трека/границы яркости (шов)"},
+                "cloud": {"flag": "cloud" in flags, "cloud_fraction": round(cloud_share, 3),
+                          "rule": "облака или тени облаков (маска качества) ≥ 20 % зоны"},
                 "note": "эвристики, не классификатор; на размеченных данных не проверены",
             }
             area_m2 = npx * 100
@@ -430,13 +418,13 @@ def build_scene(s: dict, cozar: pd.DataFrame, minfo: dict) -> dict:
                 "scene_kind": s["kind"], "scene_id": sj["scene_id"], "region": s["region"],
                 "title": f"{info['region_name']} · зона {k}", "mission": "Sentinel-2", "datetime": iso,
                 "detection_status": det_status, "status": det_status,
-                "concentration_status": "research_estimate" if verification == "level_B_cozar" else "unavailable",
+                "concentration_status": "unavailable", "quantity": QUANTITY,
                 "verification": verification, "training_scene": info.get("training_scene"),
                 "flags": flags, "n_cozar_filaments": n_cz, "crop_file": crop,
                 "measured": {"zone_area_km2": round(area_km2, 4), "suspicious_area_m2": area_m2, "n_pixels": npx,
                              "n_objects": int(len(ids)), "water_km2": round(wz_km2, 4), "lwd_m2_km2": lwd,
                              "quality": {"valid_water_fraction": round(float(wz.sum() / max(m.sum(), 1)), 3),
-                                         "cloud_fraction": round(float(np.isin(qa[m], (3, 4)).mean()), 3),
+                                         "cloud_fraction": round(cloud_share, 3),
                                          "glint_fraction": round(glint_share, 3)},
                              "model": minfo},
                 "probable": {"prob_max": round(float(pz.max()), 3), "prob_mean": round(float(pz.mean()), 3),
@@ -462,6 +450,7 @@ def build_scene(s: dict, cozar: pd.DataFrame, minfo: dict) -> dict:
                 "scene_kind": s["kind"], "scene_id": sj["scene_id"], "region": s["region"],
                 "title": f"{info['region_name']} · вся вырезка", "mission": "Sentinel-2", "datetime": iso,
                 "detection_status": "not_detected", "status": "not_detected", "concentration_status": "unavailable",
+                "quantity": QUANTITY,
                 "flags": [], "n_cozar_filaments": 0,
                 "measured": {"zone_area_km2": round(abs(Geod(ellps="WGS84").geometry_area_perimeter(poly)[0]) / 1e6, 3),
                              "suspicious_area_m2": int(det.sum()) * 100, "n_pixels": int(det.sum()), "n_objects": int(n),
@@ -512,7 +501,7 @@ def main():
     keep = {i["key"]: i for i in old}
     keep.update({i["key"]: i for i in infos})
     idx = {"generated": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "model": minfo,
-           "scenario": SCENARIO, "rules": {"cluster_m": CLUSTER_M, "min_zone_px": MIN_ZONE_PX, "glint_b11": GLINT_B11,
+           "scenario": None, "quantity": QUANTITY, "rules": {"cluster_m": CLUSTER_M, "min_zone_px": MIN_ZONE_PX, "glint_b11": GLINT_B11,
                                            "foam_white": FOAM_WHITE, "foam_wind_ms": FOAM_WIND, "artifact_share": ART_FRAC,
                                            "illumination": "src/macroplastic/case/illumination.py (зенит ≥ 58° или B3 воды < 0.003 → не оценивается)"},
            "scenes": sorted(keep.values(), key=lambda i: i["key"])}

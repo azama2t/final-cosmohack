@@ -2081,17 +2081,21 @@ def detections_csv(fc: dict) -> str:
 PATHS.setdefault("scene_zones_dir", REPO / "data" / "case" / "scene_zones")
 
 SZ_DET_LABEL = {
-    "detected": "срабатывание детектора (без полевого подтверждения)",
+    "detected": "обнаружено детектором (без полевого подтверждения)",
     "not_detected": "не обнаружено (детектор оценивается, объектов нет)",
     "insufficient_data": "недостаточно данных: признаки ложного срабатывания",
 }
 SZ_FLAG_RU = {"foam": "пена", "glint": "блик", "ship": "судно/кильватер", "seam": "шов/граница яркости",
-              "coast": "берег/прибой", "shallow": "мелководье/мутная вода"}
+              "coast": "берег/прибой", "shallow": "мелководье/мутная вода", "cloud": "облака"}
+# INBOX §23 п.2: «обнаружено детектором» only after all false-alarm filters (ship/wake, foam, glint, cloud, coast, shallow)
 SZ_VERIFY_LABEL = {
-    "level_B_cozar": "обнаружено детектором; совпадает с нитью Cózar 2024 (уровень B)",
-    "unverified": "срабатывание детектора, не проверено",
+    "level_B_cozar": "обнаружено детектором · совпадает с разметкой Cózar (B)",
+    "unverified": "обнаружено детектором · вероятный плавающий материал, требует проверки",
     "false_alarm_signs": "недостаточно данных: признаки ложного срабатывания",
 }
+SZ_FALSE_LABEL = "ложное срабатывание (признаки судна / кильватера / шва) — недостаточно данных"
+SZ_QUANTITY = {"status": "not_confirmed", "label": "концентрация по снимку не подтверждена",
+               "detail": "перевод площади в штуки не показываем: нет калибровочных пар (см. docs/QUANTITY.md)"}
 SZ_KIND_RU = {"demo": "отложенная сцена Cózar 2024 (демо)", "live": "район сервиса", "drift": "район (проверка дрейфа)"}
 SZ_STATUS_NOTE = ("«Обнаружено» здесь — вывод детектора по снимку (класс MARIDA Marine Debris: любой плавающий "
                   "материал), не подтверждённый полем; это не «обнаружен пластик».")
@@ -2109,11 +2113,12 @@ def _sz_enrich(f: dict, idx: dict) -> dict:
     import copy
     f = copy.deepcopy(f)
     p = f["properties"]
-    scen = idx.get("scenario") or {}
     st = p["detection_status"]
     ver = p.get("verification") or ("false_alarm_signs" if p.get("flags") else None)
     p["verification"] = ver if st != "not_detected" else "none"
     p["detection_label"] = SZ_VERIFY_LABEL.get(ver) if st != "not_detected" and ver else SZ_DET_LABEL.get(st, st)
+    if ver == "false_alarm_signs" and {"ship", "seam"} & set(p.get("flags") or []):
+        p["detection_label"] = SZ_FALSE_LABEL
     p["training_scene_note"] = (f"снимок из обучающей выборки детектора ({p['training_scene']}) — не независимая проверка"
                                 if p.get("training_scene") else None)
     if p.get("flags"):
@@ -2130,17 +2135,13 @@ def _sz_enrich(f: dict, idx: dict) -> dict:
     p["area_basis"] = "геодезическая площадь контура зоны (кластер объектов детектора + 150 м)"
     p["detected_area_m2"] = m.get("suspicious_area_m2")
     p["concentration"] = None
-    if p["concentration_status"] == "research_estimate":
-        p["scenario"] = {**scen, "shown": True}
-        p["concentration_reason"] = ("по снимку концентрация не измеряется; показан только условный сценарий по "
-                                     "литературе (блок scenario) — не измерение и не результат модели")
-    else:
-        p["scenario"] = {"shown": False, "label": scen.get("label"),
-                         "reason": scen.get("hidden_reason") if p.get("flags") else
-                         ("Сценарий не показывается: нет независимого подтверждения, что это плавучий материал "
-                          "(уровень B — пересечение с нитью каталога Cózar 2024); срабатывание не проверено"
-                          if st == "detected" else "сценарий не применяется: детектор ничего не нашёл")}
-        p["concentration_reason"] = "по снимку концентрация не измеряется; сценарий не показывается"
+    # INBOX §23 п.2: no items/km2 scenario for satellite zones (numbers removed from API, card and export)
+    p["concentration_status"] = "unavailable"
+    p["quantity"] = dict(SZ_QUANTITY)
+    p["concentration_label"] = SZ_QUANTITY["label"]
+    p["concentration_reason"] = SZ_QUANTITY["detail"]
+    p["scenario"] = None
+    p["scenario_reason"] = SZ_QUANTITY["detail"]
     pr = p.get("probable") or {}
     pr["status"] = p["detection_label"]
     pr["cozar_note"] = (f"контур пересекает {p.get('n_cozar_filaments')} нит(и) каталога Cózar et al. 2024 "
@@ -2224,7 +2225,7 @@ def sz_examples() -> list[dict]:
         p = bad[0]["properties"]
         out.append({"kind": "false_alarm", "label": "ложное срабатывание: судно / кильватер",
                     "zone_id": p["zone_id"], "crop_url": p["crop_url"], "title": p["title"],
-                    "note": "пиксели у яркой цели и её следа — признак судна; статус «недостаточно данных», сценарий скрыт"})
+                    "note": "пиксели у яркой цели и её следа — признак судна; это не «верное срабатывание»: статус «недостаточно данных»"})
     return out
 
 
@@ -2267,8 +2268,9 @@ def scene_zones_fc(feats: list[dict]) -> dict:
     fc = {"type": "FeatureCollection", "kind": "detection_zone", "layer_kind": "scene_zone",
           "label": "Спутниковые зоны детекции (текущий детектор)", "count": len(feats), "empty_reason": None,
           "model": idx.get("model"), "rules": idx.get("rules"), "status_note": SZ_STATUS_NOTE,
-          "blocks_note": ("measured — измерено по снимку; probable — вероятность и признаки; scenario — условный "
-                          "диапазон по литературе, ЕСЛИ это мусорная полоса (не измерение, не результат модели)"),
+          "quantity": dict(SZ_QUANTITY),
+          "blocks_note": ("measured — измерено по снимку; probable — вероятность и признаки; quantity — «концентрация по "
+                          "снимку не подтверждена» (scenario = null: перевод площади в штуки не показываем)"),
           "examples": sz_examples() if idx else [],
           "features": feats}
     if not feats:
@@ -2293,9 +2295,8 @@ def scene_zone_detections(zone_id: str) -> dict:
 SZ_COLS = ["zone_id", "scene_key", "scene_kind", "scene_id", "datetime", "detection_status", "detection_label",
            "concentration_status", "flags", "zone_area_km2", "suspicious_area_m2", "n_pixels", "n_objects",
            "water_km2", "lwd_m2_km2", "valid_water_fraction", "cloud_fraction", "glint_fraction", "prob_max",
-           "prob_mean", "foam_sign", "glint_sign", "ship_sign", "n_cozar_filaments", "scenario_shown",
-           "scenario_lo_items_km2", "scenario_typical_lo_items_km2", "scenario_typical_hi_items_km2",
-           "scenario_hi_items_km2", "scenario_label", "scenario_assumption_or_reason", "field_nearest_km",
+           "prob_mean", "foam_sign", "glint_sign", "ship_sign", "n_cozar_filaments", "verification",
+           "quantity_status", "quantity_label", "quantity_detail", "field_nearest_km",
            "field_nearest_c_items_km2", "field_nearest_ci95", "field_nearest_date", "model_weights", "model_sha256",
            "threshold", "centroid_lon", "centroid_lat", "kind"]
 
@@ -2304,21 +2305,18 @@ def scene_zones_csv(feats: list[dict]) -> str:
     rows = []
     for f in feats:
         p = f["properties"]
-        m, pr, sc = p.get("measured") or {}, p.get("probable") or {}, p.get("scenario") or {}
+        m, pr, qn = p.get("measured") or {}, p.get("probable") or {}, p.get("quantity") or {}
         q, sg, md = m.get("quality") or {}, pr.get("signs") or {}, m.get("model") or {}
         fn = ((p.get("field_nearby") or {}).get("items") or [None])[0] or {}
         b = _geom_bounds(f["geometry"]) if f.get("geometry") else None
         cen = [round((b[0] + b[2]) / 2, 6), round((b[1] + b[3]) / 2, 6)] if b else [None, None]
-        shown = bool(sc.get("shown"))
         rows.append([p["zone_id"], p["scene_key"], p["scene_kind"], p["scene_id"], p["datetime"], p["detection_status"],
                      p.get("detection_label"), p["concentration_status"], p.get("flags") or [], m.get("zone_area_km2"),
                      m.get("suspicious_area_m2"), m.get("n_pixels"), m.get("n_objects"), m.get("water_km2"),
                      m.get("lwd_m2_km2"), q.get("valid_water_fraction"), q.get("cloud_fraction"), q.get("glint_fraction"),
                      pr.get("prob_max"), pr.get("prob_mean"), (sg.get("foam") or {}).get("flag"),
                      (sg.get("glint") or {}).get("flag"), (sg.get("ship") or {}).get("flag"), p.get("n_cozar_filaments"),
-                     shown, sc.get("lo") if shown else None, sc.get("typical_lo") if shown else None,
-                     sc.get("typical_hi") if shown else None, sc.get("hi") if shown else None,
-                     sc.get("label"), sc.get("assumption") if shown else sc.get("reason"),
+                     p.get("verification"), qn.get("status"), qn.get("label"), qn.get("detail"),
                      fn.get("distance_km"), fn.get("c_items_km2"),
                      f"{fn.get('ci95_lo')}–{fn.get('ci95_hi')}" if fn else None, fn.get("date"),
                      md.get("weights"), md.get("sha256"), md.get("threshold"), cen[0], cen[1], "detection_zone"])

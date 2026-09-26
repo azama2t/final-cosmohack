@@ -31,20 +31,21 @@ def test_scene_zones_blocks_and_statuses(client):
         assert p["detection_status"] in ("detected", "not_detected", "insufficient_data")
         m = p["measured"]
         assert m["zone_area_km2"] > 0 and m["suspicious_area_m2"] == m["n_pixels"] * 100
-        sc = p["scenario"]
-        # K2: scenario only with independent level-B evidence (Cózar filament) and no false-alarm signs
-        assert sc["shown"] == (p.get("verification") == "level_B_cozar")
-        if sc["shown"]:
-            assert p["n_cozar_filaments"] > 0 and not p["flags"] and p["detection_status"] == "detected"
-        if p["detection_status"] == "detected" and p.get("verification") == "unverified":
-            assert p["concentration_status"] == "unavailable" and "не проверено" in p["detection_label"]
-        assert (p["concentration_status"] == "research_estimate") == sc["shown"]
+        # INBOX §23 п.2: no items/km2 scenario at all; quantity status «концентрация по снимку не подтверждена»
+        assert p["scenario"] is None and "калибровочных пар" in p["scenario_reason"]
+        assert p["concentration_status"] == "unavailable"
+        assert p["quantity"]["status"] == "not_confirmed" and p["concentration_label"] == "концентрация по снимку не подтверждена"
+        # «обнаружено детектором» only after all false-alarm filters; ships never «detected»
         if p["flags"]:
-            assert p["detection_status"] == "insufficient_data" and not sc["shown"] and sc["reason"]
-        if sc["shown"]:
-            assert sc["lo"] < sc["typical_lo"] < sc["typical_hi"] < sc["hi"]
-            assert "ЕСЛИ" in sc["label"] and "Не доверительный интервал" in sc["not_what"]
-            assert any("Cózar" in b["where"] for b in sc["basis"])
+            assert p["detection_status"] == "insufficient_data" and "обнаружено" not in p["detection_label"]
+        if "ship" in p["flags"]:
+            assert p["detection_label"].startswith("ложное срабатывание")
+        if p["detection_status"] == "detected":
+            assert not p["flags"] and p["detection_label"].startswith("обнаружено детектором")
+            if p["n_cozar_filaments"]:
+                assert p["verification"] == "level_B_cozar" and "совпадает с разметкой Cózar (B)" in p["detection_label"]
+            else:
+                assert p["verification"] == "unverified" and "требует проверки" in p["detection_label"]
         fn = p["field_nearby"]
         assert "Измерение ≠ оценка" in fn["note"]
         for it in fn["items"]:
@@ -86,9 +87,7 @@ def test_scene_zones_export_matches_api(client):
     for r in rows:
         p = by[r["zone_id"]]
         assert float(r["suspicious_area_m2"]) == p["measured"]["suspicious_area_m2"]
-        assert r["scenario_shown"] == ("true" if p["scenario"]["shown"] else "false")
-        if not p["scenario"]["shown"]:
-            assert r["scenario_lo_items_km2"] == ""
+        assert r["quantity_status"] == "not_confirmed" and not any(k.startswith("scenario") for k in r)
         assert r["kind"] == "detection_zone"
 
 
@@ -116,3 +115,19 @@ def test_meta_wording_and_model_version(client):
     assert "предел обнаружения доказан" not in txt
     z = client.get("/api/v3/zones").json()
     assert z["model"]["weights_sha256"] == v["sha256"] and z["model"]["trained_at"]
+
+
+def test_no_items_scenario_numbers_anywhere(client):
+    """INBOX §23 п.2: no 10⁴–10⁸ / «160–500 000» items/km2 for satellite zones in API or export."""
+    body = client.get("/api/v3/scene_zones").text + client.get(
+        "/api/v3/export", params={"layer": "scene_zones", "format": "csv"}).content.decode("utf-8-sig")
+    for bad in ("typical_lo", "10⁴", "100 млн", "500 000", "Условный диапазон"):
+        assert bad not in body
+
+
+def test_demo_scene_cozar_zones_detected_level_b(client):
+    fc = client.get("/api/v3/scene_zones", params={"scene_kind": "demo"}).json()
+    b = [f["properties"] for f in fc["features"] if f["properties"]["n_cozar_filaments"]]
+    assert len(b) >= 10
+    for p in b:
+        assert p["detection_label"] == "обнаружено детектором · совпадает с разметкой Cózar (B)"

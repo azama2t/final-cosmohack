@@ -244,7 +244,7 @@ export default function PhotoApp() {
             {metaErr && <div className="ph-err">{metaErr}</div>}
             {mg && (
               <div className="ph-m" data-testid="photo-metric-grouped">
-                <b>Новые сессии съёмки</b> ({mg.n_images} фото): mAP@0,5 {f2(mg.ap50)}
+                <b>Эта модель, отложенные сессии съёмки</b> ({mg.n_images} фото): mAP@0,5 {f2(mg.ap50)}
                 {ci(mg.ap50_ci95)}; ошибка числа {f2(mg.count_mae)}
                 {ci(mg.count_mae_ci95)} шт./кадр; точное число {pct(mg.count_exact)}
                 {ci(mg.count_exact_ci95, 2, true)}
@@ -252,11 +252,11 @@ export default function PhotoApp() {
             )}
             {mo && (
               <div className="ph-m" data-testid="photo-metric-official">
-                <b>Официальный test FML</b> ({mo.n_images} фото): mAP@0,5 {f2(mo.ap50)}
+                <b>Для сравнения: веса авторов FML, их test</b> ({mo.n_images} фото): mAP@0,5 {f2(mo.ap50)}
                 {ci(mo.ap50_ci95)}; ошибка числа {f2(mo.count_mae)}
                 {ci(mo.count_mae_ci95)}; точное число {pct(mo.count_exact)}
                 {ci(mo.count_exact_ci95, 2, true)}
-                <div className="faint ph-hint">Соседние кадры видео с обучением (~90 % в пределах 2 с) — оценка оптимистична.</div>
+                <div className="faint ph-hint">Соседние кадры видео с обучением (~90 % в пределах 2 с)  — оценка оптимистична; опора — строка выше.</div>
               </div>
             )}
           </div>

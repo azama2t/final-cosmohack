@@ -1046,7 +1046,7 @@ const DET_FILTER_RU: Record<string, string> = {
   detected: 'обнаружено',
 };
 
-const SZ_FLAG_RU: Record<string, string> = { foam: 'пена', glint: 'блик', ship: 'судно', seam: 'шов', coast: 'берег', shallow: 'мелководье' };
+const SZ_FLAG_RU: Record<string, string> = { foam: 'пена', glint: 'блик', ship: 'судно', seam: 'шов', coast: 'берег', shallow: 'мелководье', cloud: 'облака' };
 const SZ_ORDER = ['detected', 'unverified', 'insufficient_data', 'not_detected'];
 
 /** satellite scene zones of the current filter: the held-out Cózar scene first, then by status and pixel area */
@@ -1068,8 +1068,9 @@ function SzList({ szOn, fc, err, list, sel, onPick }: { szOn: boolean; fc: FC<Sc
         Спутниковые зоны детектора · {err ? '—' : list.length}
         <Info label="Спутниковые зоны">
           Зоны, где текущий детектор (weights/lgbm, порог 0,63) нашёл подозрительные пиксели на реальных снимках: отложенная сцена Cózar 2024 и снимки районов.
-          «Обнаружено» — только если контур совпадает с нитью каталога Cózar 2024 (независимая разметка людьми, уровень B); остальное — «срабатывание, не
-          проверено». Признаки пены, блика, судна, берега или мелководья → «недостаточно данных». Снимки, где детектор не оценивается (низкое солнце), зон не дают.
+          «Обнаружено детектором» — только после фильтров судов/кильватера, пены, блика, облаков, берега и мелководья; с нитью каталога Cózar 2024 (разметка
+          людьми) — «совпадает с разметкой Cózar (B)», без неё — «вероятный плавающий материал, требует проверки». Суда и прочие признаки → «недостаточно данных»
+          (не «верное срабатывание»). Концентрация по снимку не подтверждена: шт./км² не выдаём. Снимки с низким солнцем зон не дают.
         </Info>
       </div>
       {szOn && err && (
@@ -1212,15 +1213,15 @@ function CaseLegend({
               <div className="c-lg-status" data-testid="legend-szones">
                 <span className="c-chip">
                   <i className="sq" style={{ background: SZ_COLORS.detected }} />
-                  обнаружено, совпадает с нитью Cózar
+                  обнаружено · совпадает с разметкой Cózar (B)
                 </span>
                 <span className="c-chip">
                   <i className="sq" style={{ background: SZ_COLORS.unverified }} />
-                  срабатывание, не проверено
+                  обнаружено · требует проверки
                 </span>
                 <span className="c-chip">
                   <i className="sq" style={{ background: SZ_COLORS.insufficient_data }} />
-                  пена / блик / судно / берег
+                  недостаточно данных / ложное (судно, пена, блик, облака, берег)
                 </span>
                 <span className="c-chip">
                   <i className="sq" style={{ background: SZ_COLORS.not_detected }} />

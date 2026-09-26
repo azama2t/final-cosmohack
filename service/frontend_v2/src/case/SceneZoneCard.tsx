@@ -1,6 +1,6 @@
 // Satellite scene zone (/api/v3/scene_zones, contract 3.10): three separated blocks —
-// «Измерено» (by the image), «Вероятно» (detector probability + signs of foam/glint/ship), «Сценарий» (conditional
-// literature range IF this is a litter windrow; hidden for zones with false-alarm signs) — and «Поле рядом»
+// «Измерено» (by the image), «Вероятно» (detector probability + signs of foam/glint/ship/cloud/coast), «Количество»
+// («концентрация по снимку не подтверждена»; no items/km2 scenario — INBOX §23 п.2) — and «Поле рядом»
 // (independent field counts C = N/A; measurement ≠ estimate). Numbers only from the API.
 import Info from '../components/Info';
 import { API_BASE, type Feat, type FC, type Meta } from './api3';
@@ -47,21 +47,10 @@ export interface SceneZoneProps {
     context?: string;
     signs: Record<string, { flag: boolean; rule: string; [k: string]: any }> & { note?: string } | null;
   };
-  scenario: {
-    shown: boolean;
-    label?: string;
-    reason?: string;
-    lo?: number;
-    typical_lo?: number;
-    typical_hi?: number;
-    hi?: number;
-    size_class?: string;
-    applies_to?: string;
-    assumption?: string;
-    not_what?: string;
-    basis?: { value: string; quote: string; where: string }[];
-    source?: string;
-  };
+  scenario: null;
+  scenario_reason?: string;
+  quantity?: { status: string; label: string; detail: string };
+  concentration_label?: string;
   field_nearby: {
     items: {
       source: string;
@@ -98,9 +87,8 @@ export interface SceneZoneDetail extends Feat<SceneZoneProps> {
 }
 
 export const SZ_COLOR: Record<string, string> = { detected: '#ff8c42', unverified: '#d9b870', not_detected: '#2b8a3e', insufficient_data: '#868e96' };
-const SIGN_RU: Record<string, string> = { foam: 'пена', glint: 'блик', ship: 'судно / кильватер', seam: 'шов / граница яркости', coast: 'берег / прибой ближе 300 м', shallow: 'мелководье / мутная вода' };
+const SIGN_RU: Record<string, string> = { foam: 'пена', glint: 'блик', ship: 'судно / кильватер', seam: 'шов / граница яркости', coast: 'берег / прибой ближе 300 м', shallow: 'мелководье / мутная вода', cloud: 'облака ≥ 20 % зоны' };
 
-const big = (v: number | undefined | null) => (v === undefined || v === null ? '—' : v >= 1e6 ? `${num(v / 1e6, 0)} млн` : num(v, 0));
 
 export default function SceneZoneCard({
   zone,
@@ -117,7 +105,7 @@ export default function SceneZoneCard({
   const p = zone.properties;
   const m = p.measured;
   const pr = p.probable;
-  const sc = p.scenario;
+  const qn = p.quantity;
   const fn = p.field_nearby;
   const signs = pr.signs;
   return (
@@ -209,7 +197,7 @@ export default function SceneZoneCard({
             <dt>Статус находки</dt>
             <dd>{pr.status}</dd>
             {signs &&
-              (['foam', 'glint', 'ship', 'seam', 'coast', 'shallow'] as const).map((k) =>
+              (['foam', 'glint', 'ship', 'seam', 'cloud', 'coast', 'shallow'] as const).map((k) =>
                 signs[k] ? (
                   <FragmentRow key={k} k={SIGN_RU[k]} v={signs[k].flag ? 'есть' : 'нет'} on={signs[k].flag} rule={signs[k].rule} testid={`sz-sign-${k}`} />
                 ) : null,
@@ -223,42 +211,19 @@ export default function SceneZoneCard({
           </dl>
         </div>
 
-        {/* ------------------------------------------------ 3. scenario */}
-        <div className="sec sz-block sz-scenario" data-testid="sz-scenario">
+        {/* ------------------------------------------------ 3. quantity (no scenario, INBOX §23 п.2) */}
+        <div className="sec sz-block sz-quantity" data-testid="sz-quantity">
           <div className="sec-h">
-            <h3>Сценарий</h3>
-            <span className="aside">не измерение</span>
+            <h3>Количество</h3>
+            <span className="aside">шт./км² по снимку не выдаём</span>
           </div>
-          {sc.shown ? (
-            <>
-              <div className="c-line">
-                <b>{sc.label}</b>
-              </div>
-              <div className="c-big" data-testid="sz-scenario-range">
-                {big(sc.lo)} – {big(sc.hi)} <small>шт./км²</small>
-              </div>
-              <div className="c-line">
-                чаще всего {big(sc.typical_lo)} – {big(sc.typical_hi)} шт./км² · {sc.size_class}
-              </div>
-              <div className="c-line">{sc.applies_to}</div>
-              <div className="c-line sz-warn" data-testid="sz-scenario-assumption">
-                {sc.assumption} {sc.not_what}
-              </div>
-              <details className="sz-basis">
-                <summary>Откуда числа</summary>
-                {sc.basis?.map((b, i) => (
-                  <div key={i} className="c-line">
-                    <b>{b.value}</b> — «{b.quote}» ({b.where})
-                  </div>
-                ))}
-                <div className="c-line faint">{sc.source}</div>
-              </details>
-            </>
-          ) : (
-            <div className="c-line" data-testid="sz-scenario-hidden">
-              {sc.reason}
-            </div>
-          )}
+          <div className="c-line sz-qstatus" data-testid="sz-quantity-status">
+            <b>{qn?.label ?? p.concentration_label ?? 'концентрация по снимку не подтверждена'}</b>
+          </div>
+          <details className="sz-basis" data-testid="sz-quantity-more">
+            <summary>подробнее</summary>
+            <div className="c-line">{qn?.detail ?? p.scenario_reason}</div>
+          </details>
         </div>
 
         {/* ------------------------------------------------ field nearby */}
