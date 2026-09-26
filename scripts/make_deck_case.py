@@ -409,7 +409,7 @@ def load() -> dict:
     k["sz_demo_marida_same_tile"] = N(sz + "demo.marida_same_tile"); k["sz_demo_mados_verdict"] = N(sz + "demo.mados_verdict")
     k["mt_n_scenes"] = N(c + "sections.marida_test.n_scenes")
     k["S2_dev_median_c"] = N(c + "conc.S2.dev_median_c")
-    k["sz_n_finds"] = N(sz + "n_finds")
+    k["sz_n_finds"] = N(sz + "n_finds"); k["sz_n_finds_training"] = N(sz + "n_finds_training")
     return k
 
 
@@ -705,9 +705,9 @@ def main_slides(k: dict) -> list[dict]:
         kpis=[(f"{num(k['sz_demo_n_zones_cozar'], 0)} / {num(k['sz_demo_n_zones'], 0)}",
                "зон детектора совпали с разметкой Cózar (уровень B); сцена не участвовала в обучении и подборе порога"),
               (num(k["sz_n_finds"], 0),
-               f"находок детектора на {num(k['sz_n_scenes_eval'], 0)} сценах: {num(k['sz_by_level_b'], 0)} совпали с Cózar, "
-               f"{num(k['sz_by_unverified'], 0)} требуют проверки; ещё {num(k['sz_by_insufficient'], 0)} — недостаточно данных или "
-               f"ложные, {num(k['sz_by_not_detected'], 0)} — не обнаружено")],
+               f"находок детектора на {num(k['sz_n_scenes_eval'], 0)} сценах ({num(k['sz_by_level_b'], 0)} совпали с Cózar; "
+               f"на снимках из обучения MARIDA не считаем — {num(k['sz_n_finds_training'], 0)}); ещё {num(k['sz_by_insufficient'], 0)} — "
+               f"недостаточно данных или ложные, {num(k['sz_by_not_detected'], 0)} — не обнаружено")],
         image="sz_card",
         caption=f"Вывод: снимок даёт место, площадь и статус зоны; шт./км² — «{k['sz_zone_main_status']}»",
         source="data/case/scene_zones; reports/case_demo/heldout_check.json, demo_path.json (final_numbers → case.sections.scene_zones)",

@@ -692,6 +692,32 @@ def _dmy(s):
     return f"{s[8:10]}.{s[5:7]}.{s[:4]}" if len(s) == 10 else None
 
 
+def _wind_zero() -> float | None:
+    """Порог ветра правила «ноль не информативен» — из того же кода, что строит зоны (scripts/case/scene_zones.py)."""
+    p = ROOT / "scripts" / "case" / "scene_zones.py"
+    m = re.search(r"^WIND_ZERO\s*=\s*([\d.]+)", p.read_text(encoding="utf-8"), re.M) if p.is_file() else None
+    return float(m.group(1)) if m else None
+
+
+def _finds_excluding_training() -> tuple[int, int]:
+    """Находки = зоны «обнаружено» на оцениваемых сценах, кроме снимков из обучения детектора (MARIDA/MADOS той же съёмки)."""
+    sz = ROOT / "data" / "case" / "scene_zones"
+    idx = _load_json(sz / "index.json") or {}
+    finds = training = 0
+    for s in idx.get("scenes") or []:
+        p = sz / s["key"] / "zones.geojson"
+        if not (s.get("evaluable") and p.is_file()):
+            continue
+        for f in (_load_json(p) or {}).get("features") or []:
+            z = f.get("properties") or {}
+            if z.get("detection_status") == "detected":
+                if z.get("training_scene"):
+                    training += 1
+                else:
+                    finds += 1
+    return finds, training
+
+
 def collect_scene_zones() -> dict:
     """Слой «Спутниковые зоны» и демо на отложенной сцене (data/case/scene_zones, reports/case_demo) — для DEMO.md, деки, README."""
     idx = _load_json(ROOT / "data" / "case" / "scene_zones" / "index.json") or {}
@@ -717,7 +743,11 @@ def collect_scene_zones() -> dict:
         "by_level_b": by.get("level_B", 0), "by_unverified": by.get("unverified", 0),
         "by_insufficient": by.get("insufficient_data", 0), "by_not_detected": by.get("not_detected", 0),
         "by_not_informative": by.get("not_informative", 0),
-        "n_finds": by.get("level_B", 0) + by.get("unverified", 0),
+        "n_finds": _finds_excluding_training()[0],
+        "n_finds_training": _finds_excluding_training()[1],
+        "wind_zero_ms": _wind_zero(),
+        "wind_zero_source": "Cózar et al. 2024 (Nat. Commun.), Methods: вода с ветром > 5 м/с исключается из знаменателя LWD; "
+                            "константа WIND_ZERO в scripts/case/scene_zones.py, не подбиралась",
         "n_rejected": by.get("insufficient_data", 0) + by.get("not_detected", 0) + by.get("not_informative", 0),
         "demo_zone_title": f"{ds.get('tile')} · зона {int(str(ex.get('zone_id', '0')).rsplit('-', 1)[-1])}" if ex.get("zone_id") else None,
         "demo": {"tile": ds.get("tile"), "date": _dmy(ds.get("date")), "scene_id": ds.get("scene_id"),

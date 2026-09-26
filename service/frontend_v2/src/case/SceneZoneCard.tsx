@@ -218,14 +218,21 @@ export default function SceneZoneCard({
             </dd>
             <dt>Уверенность</dt>
             <dd data-testid="sz-plain-conf">
-              {pr.prob_mean !== null && pr.prob_mean !== undefined ? `вероятность детектора ${num(pr.prob_mean, 2)} (макс. ${num(pr.prob_max, 2)}); ` : ''}
+              {pr.prob_mean !== null && pr.prob_mean !== undefined
+                ? `детектор уверен в среднем на ${Math.round(pr.prob_mean * 100)} % (у самого уверенного пикселя ${Math.round((pr.prob_max ?? 0) * 100)} %); `
+                : ''}
               {p.verification === 'level_B_cozar' ? 'совпадает с разметкой людей (каталог Cózar 2024)' : p.detection_status === 'detected' ? 'независимо не проверено' : '—'}
             </dd>
           </dl>
-          {fn?.nearest_organizer_sample && (
+          {fn?.nearest_organizer_sample && fn.nearest_organizer_sample.distance_km <= 500 && (
             <button className="c-head-link" onClick={() => onField?.(fn.nearest_organizer_sample!.sample_id)} data-testid="sz-field-link">
               Ближайшее полевое измерение — {num(fn.nearest_organizer_sample.distance_km, 0)} км, в слое «Полевые измерения» →
             </button>
+          )}
+          {fn?.nearest_organizer_sample && fn.nearest_organizer_sample.distance_km > 500 && (
+            <div className="c-line faint" data-testid="sz-field-link">
+              ближе 500 км полевых измерений нет — сверка невозможна
+            </div>
           )}
         </div>
         <details className="sec sz-more" data-testid="sz-more">

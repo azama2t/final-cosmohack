@@ -769,7 +769,10 @@
   "by_insufficient": 180,
   "by_not_detected": 28,
   "by_not_informative": 0,
-  "n_finds": 78,
+  "n_finds": 77,
+  "n_finds_training": 1,
+  "wind_zero_ms": 5.0,
+  "wind_zero_source": "Cózar et al. 2024 (Nat. Commun.), Methods: вода с ветром > 5 м/с исключается из знаменателя LWD; константа WIND_ZERO в scripts/case/scene_zones.py, не подбиралась",
   "n_rejected": 208,
   "demo_zone_title": "30SXE · зона 16",
   "demo": {

@@ -26,7 +26,7 @@ const isModel = (o: any) => o && typeof o === 'object' && !Array.isArray(o) && t
 function detModels(d: any): any[] {
   const out: any[] = [];
   if (isModel(d.main)) out.push(d.main);
-  for (const [k, v] of Object.entries(d ?? {})) if (k !== 'main' && isModel(v)) out.push(v);
+  for (const [k, v] of Object.entries(d ?? {})) if (k !== 'main' && k !== 'unet' && isModel(v)) out.push(v); // U-Net: a line under the table
   if (Array.isArray(d?.baselines)) for (const v of d.baselines) if (isModel(v) && !out.some((x) => x.name === v.name)) out.push(v);
   return out;
 }
@@ -118,6 +118,12 @@ export default function MetricsPanel({ m, err }: { m: any | null; err: string | 
             ))}
           </tbody>
         </table>
+        {d.unet && (
+          <div className="c-line" data-testid="metrics-unet">
+            {d.unet.name}: F1 <b>{f1x(d.unet.f1)}</b>
+            {Array.isArray(d.unet.ci95_f1) ? ` [${f1x(d.unet.ci95_f1[0])}; ${f1x(d.unet.ci95_f1[1])}]` : ''} · P {f1x(d.unet.precision)} · R {f1x(d.unet.recall)} — тот же test
+          </div>
+        )}
       </div>
 
       <FinalTest ft={c.final_test} status={c.final_test_status} />
@@ -274,4 +280,8 @@ function FinalTest({ ft, status }: { ft: any; status: any }) {
       )}
     </>
   );
+}
+
+function f1x(v: number | null | undefined) {
+  return typeof v === 'number' ? v.toFixed(3).replace('.', ',') : '—';
 }

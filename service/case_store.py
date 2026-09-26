@@ -2133,7 +2133,14 @@ SZ_WIND_NOTE = ("ветер > 5 м/с (ERA5, час съёмки): Cózar et al.
 SZ_FALSE_LABEL = "ложное срабатывание (признаки судна / кильватера / шва) — недостаточно данных"
 SZ_QUANTITY = {"status": "not_confirmed", "label": "концентрация по снимку не подтверждена",
                "detail": "перевод площади в штуки не показываем: нет калибровочных пар (см. docs/QUANTITY.md)"}
-SZ_KIND_RU = {"demo": "отложенная сцена Cózar 2024 (не участвовала в обучении)", "live": "район сервиса", "drift": "район (проверка дрейфа)"}
+SZ_KIND_RU = {"demo": "отложенная сцена Cózar 2024 (не участвовала в обучении)", "live": "район мониторинга",
+              "drift": "район мониторинга (дополнительный снимок)"}
+# жюри 10:57: short list names («Гондурас · Омоа · зона 4»); the full region name stays in title_full
+SZ_SHORT = {"Аккра": "Аккра", "Бали": "Бали", "Гондурасский залив": "Гондурас · Омоа", "Дананг": "Дананг",
+            "Дельта Меконга": "Меконг", "Дельта Нила": "Нил · Розетта", "Джакартский залив": "Джакарта", "Дурбан": "Дурбан",
+            "Залив Гуанабара": "Гуанабара", "Залив Порт-о-Пренс": "Гаити · Порт-о-Пренс", "Карачи": "Карачи", "Лагос": "Лагос",
+            "Манильский залив": "Манила", "Мумбаи": "Мумбаи", "Санто-Доминго": "Санто-Доминго",
+            "Средиземное море: устье Тибра": "Тибр · Остия", "Устье Хугли": "Хугли · Сагар", "Шотландия": "Ферт-оф-Форт"}
 SZ_STATUS_NOTE = ("«Обнаружено» здесь — вывод детектора по снимку (класс MARIDA Marine Debris: любой плавающий "
                   "материал), не подтверждённый полем; это не «обнаружен пластик».")
 
@@ -2174,6 +2181,11 @@ def _sz_enrich(f: dict, idx: dict) -> dict:
     p["scene_kind_label"] = SZ_KIND_RU.get(p.get("scene_kind"), p.get("scene_kind"))
     if p.get("scene_kind") == "demo":  # short list title: tile of the held-out scene
         p["title"] = p["title"].replace("Демо Cózar 2024 (отложенная сцена)", "30SXE")  # §31 д: «30SXE · зона 16»
+    else:
+        p["title_full"] = p["title"]
+        reg, _, rest = p["title"].partition(" · ")
+        key = reg.split(" (")[0]
+        p["title"] = f"{SZ_SHORT.get(key, key)} · {rest}" if rest else SZ_SHORT.get(key, key)
     m = p.get("measured") or {}
     if isinstance(m.get("model"), dict):
         m["model"] = {**m["model"], "trained_at": detector_model_info().get("trained_at") or m["model"].get("trained_at")}

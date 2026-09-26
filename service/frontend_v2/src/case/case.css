@@ -1433,3 +1433,30 @@ a.c-head-r.c-head-link {
 .c-head {
   max-height: 54vh;
 }
+/* jury 10:57: «Метрики» fit the 312–336 px panel — wrap text, fixed-layout tables, no horizontal scroll */
+.c-metrics .c-line,
+.c-metrics .c-why {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+.c-metrics {
+  overflow-x: hidden;
+}
+.c-metrics table {
+  table-layout: fixed;
+  width: 100%;
+  max-width: 100%;
+  font-size: 11px;
+}
+.c-metrics th,
+.c-metrics td {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  padding-left: 3px;
+  padding-right: 3px;
+}
+.c-metrics th:first-child,
+.c-metrics td:first-child {
+  width: 30%;
+}
