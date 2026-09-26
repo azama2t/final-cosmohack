@@ -136,7 +136,8 @@ function useLiteGlobe() {
       else {
         const med = [...times].sort((a, b) => a - b)[times.length >> 1];
         html.dataset.mfps = String(Math.round(1000 / med));
-        if (med > 45 && !rm.matches) apply('fps');
+        // only phones/tablets: a slow desktop (e.g. headless demo recording) keeps the full globe
+        if (med > 45 && !rm.matches && matchMedia(`${MOBILE_MQ}, (pointer: coarse)`).matches) apply('fps');
       }
     };
     const t0 = setTimeout(() => {

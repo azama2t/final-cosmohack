@@ -1868,6 +1868,10 @@ def add_query(body) -> dict:
            "query": normalize_query(body.get("query"))}
     p = PATHS["queries"]
     with _qlock:
+        # повторное сохранение того же запроса под тем же именем не плодит копии (демо-прогоны, общий сервис)
+        for old in _read_queries():
+            if old.get("name") == rec["name"] and old.get("query") == rec["query"]:
+                return old
         p.parent.mkdir(parents=True, exist_ok=True)
         with open(p, "a", encoding="utf-8") as f:
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")

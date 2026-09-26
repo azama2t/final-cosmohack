@@ -1,0 +1,13 @@
+1_sheet_after_drag_up full
+1_camera_unchanged True
+1_cam ('?c=-42.0000,30.0000,1.43', '?c=-42.0000,30.0000,1.43')
+1b_sheet_after_drag_down peek
+2_map_pan_camera_moved True
+2_sheet_unchanged True
+3_card_from_map_tap True
+3_back_closes_card True
+3_still_on_site True
+4_lite reduced-motion
+4_stars_hidden True
+4_fps_probe None
+errors []
