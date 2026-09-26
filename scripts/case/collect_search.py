@@ -996,6 +996,42 @@ def collect_mobile() -> dict:
             "n_console_errors": sum(len(x.get("console_errors") or []) for x in d),
             "n_steps": len(d[0].get("steps") or [])}
 
+def collect_demo_tour() -> dict:
+    """Кнопка «Демо ▶» (service/frontend_v2/src/case/DemoTour.tsx): сцена, зона и шаги тура; данные зоны — из zones.geojson."""
+    p = ROOT / "service" / "frontend_v2" / "src" / "case" / "DemoTour.tsx"
+    if not p.is_file():
+        return {"available": False}
+    t = p.read_text(encoding="utf-8")
+    sk = re.search(r"DEMO_SCENE_KEY\s*=\s*'([^']+)'", t)
+    zid = re.search(r"DEMO_ZONE_ID\s*=\s*'([^']+)'", t)
+    steps = re.findall(r"title:\s*'\d+/\d+ · ([^']+)'", t)
+    out = {"available": bool(sk and zid), "source": "service/frontend_v2/src/case/DemoTour.tsx; data/case/scene_zones/<сцена>/zones.geojson",
+           "steps": steps, "n_steps": len(steps)}
+    if not out["available"]:
+        return out
+    sk, zid = sk.group(1), zid.group(1)
+    idx = _load_json(ROOT / "data" / "case" / "scene_zones" / "index.json") or {}
+    sc = next((s_ for s_ in idx.get("scenes") or [] if s_.get("key") == sk), {})
+    z = next((f.get("properties") or {} for f in (_load_json(ROOT / "data" / "case" / "scene_zones" / sk / "zones.geojson") or {})
+              .get("features") or [] if (f.get("properties") or {}).get("zone_id") == zid), {})
+    out.update({"scene_key": sk, "zone_id": zid, "zone_n": int(zid.rsplit("-", 1)[-1]), "tile": sc.get("tile"),
+                "date": _dmy(sc.get("date")), "scene_id": sc.get("scene_id"),
+                "status": z.get("detection_status"), "confirmation": "cozar_b" if z.get("verification") == "level_B_cozar" else "none",
+                "n_cozar_filaments": z.get("n_cozar_filaments"),
+                "area_km2": _r(((z.get("measured") or {}).get("zone_area_km2")), 2)})
+    # вкладки карточки зоны — только если они реально есть в коде карточки (SceneZoneCard.tsx), иначе None
+    cz = ROOT / "service" / "frontend_v2" / "src" / "case" / "SceneZoneCard.tsx"
+    ct = cz.read_text(encoding="utf-8") if cz.is_file() else ""
+    tabs = ["Главное", "Качество", "Подробно", "Дрейф", "Выгрузка"]
+    found = all(re.search(r"(>\s*|['\"`])" + re.escape(x) + r"(\s*<|['\"`])", ct) for x in tabs)
+    out["card_tabs"] = tabs if found else None
+    out["card_tabs_found"] = bool(found)
+    dc = json.dumps(_load_json(REP / "drift_check.json") or {}, ensure_ascii=False)
+    hy, gfs = re.search(r"HYCOM [A-Za-z0-9-]+", dc), re.search(r"NCEP GFS", dc)
+    out["drift_sources"] = " + ".join(m.group(0) for m in (hy, gfs) if m) or None
+    out["card_text"] = ("вкладки «" + " | ".join(tabs) + "»") if found else         "статус и подтверждение, качество снимка, подробности, дрейф и выгрузка"
+    return out
+
 def collect_research_log() -> dict:
     """Число проверенных гипотез/экспериментов (строки-эксперименты docs/PIPELINE.md) и реестр пар (docs/research/pairs/PAIRS.csv)."""
     import csv
@@ -1121,7 +1157,8 @@ def collect() -> dict:
            "photo_count": collect_photo_count(), "research_log": collect_research_log(),
            "ispra": collect_ispra(), "resolution_physics": collect_resolution_physics(), "targets": collect_targets(),
            "estimator": collect_estimator(), "synthetic_p3": collect_synthetic_p3(), "archives": collect_archives(),
-           "jury": collect_jury(), "defense_examples": collect_defense_examples(), "mobile": collect_mobile()}
+           "jury": collect_jury(), "defense_examples": collect_defense_examples(), "mobile": collect_mobile(),
+           "demo_tour": collect_demo_tour()}
     return _clean_ids(res)
 
 

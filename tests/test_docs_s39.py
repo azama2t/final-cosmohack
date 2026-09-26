@@ -122,3 +122,19 @@ def test_targets_not_confused_with_calibration():
     t = s["targets"]
     assert t["n_dates_counted"] == t["n_dates_counted_s2"] + t["n_dates_counted_planetscope"]
     assert t["n_dates_counted"] > s["scene_zones"]["research_estimate"]["calibration_n_dates"]
+
+
+STEPBAR = "1 Район и даты → 2 Снимок → 3 Зона → 4 Качество и статус → 5 Выгрузка"
+
+
+@pytest.mark.parametrize("rel", ["README.md", "docs/DEMO.md", "docs/SPEECH.md"])
+def test_demo_tour_path_in_docs(rel):
+    """§47 п.7: путь показа — кнопка «Демо ▶» (данные тура — case.sections.demo_tour из DemoTour.tsx)."""
+    dt = _fn()["case"]["sections"].get("demo_tour") or {}
+    if not dt.get("available"):
+        pytest.skip("нет DemoTour.tsx")
+    t = _read(rel)
+    assert "Демо ▶" in t, rel
+    if rel != "docs/SPEECH.md":
+        assert STEPBAR in t and dt["tile"] in t and dt["date"] in t, rel
+        assert dt["card_text"] in t, rel
