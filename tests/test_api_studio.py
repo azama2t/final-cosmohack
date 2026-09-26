@@ -45,7 +45,8 @@ def _json(path, obj):
 
 @pytest.fixture()
 def tree(tmp_path, monkeypatch):
-    roots = {k: tmp_path / k for k in ("pairs", "pairs_fdi", "live", "service", "drift", "search", "cache")}
+    roots = {k: tmp_path / k for k in ("pairs", "pairs_fdi", "live", "service", "drift", "search", "cache",
+                                        "det_current")}
     for p in roots.values():
         p.mkdir()
     # --- S2 pair: all four views
@@ -66,7 +67,9 @@ def tree(tmp_path, monkeypatch):
                             "scene_id": S2_PAIR, "source": "earth-search/sentinel-2-l2a",
                             "scene_datetime": "2024-06-02T08:58:16.484000Z", "tile": "35TQJ",
                             "decision": "accept", "reason": "", "quality": {"valid_water_frac": 0.8},
-                            "detector": {"threshold": 0.63, "n_det": 1, "prob_max": 0.98}})
+                            "config": {"detector": {"weights": "weights/lgbm", "harmonize": "none"}},
+                            "detector": {"threshold": 0.63, "n_det": 1, "det_px_strip": 1, "n_det_crop": 1,
+                                         "det_px_crop": 1, "prob_max": 0.98, "harmonize_offset": None}})
     (roots["pairs_fdi"] / "S4_DOORS3_T1").mkdir()
     fdi = np.linspace(-0.01, 0.03, H * W, dtype=np.float32).reshape(H, W)
     np.save(roots["pairs_fdi"] / "S4_DOORS3_T1" / "fdi.npy", fdi)
@@ -94,7 +97,35 @@ def tree(tmp_path, monkeypatch):
     pl[100, 90] = 255
     _tif(d / "prob_lgbm.tif", pl, crs="EPSG:32750", tr=trl)
     _tif(d / "prob_mdd.tif", np.zeros((H, W), np.uint8), crs="EPSG:32750", tr=trl)
-    _json(d / "prob_lgbm.json", {"threshold": 0.64, "weights": "lgbm_live", "n_above_threshold_water": 1})
+    _json(d / "prob_lgbm.json", {"threshold": 0.64, "weights": "lgbm_live", "harmonize": "water_median",
+                                 "n_above_threshold_water": 49,
+                                 "domain_note": "trained on ACOLITE rhorc (L1C); L2A levels differ"})
+    cur = roots["det_current"] / "live" / "bali" / "2025-05-11"
+    cur.mkdir(parents=True)
+    pc = np.zeros((H, W), np.uint8)
+    pc[100, 90] = 255
+    pc[30, 30] = 100  # below threshold -> yellow
+    _tif(cur / "prob.tif", pc, crs="EPSG:32750", tr=trl)
+    dm = np.zeros((H, W), np.uint8)
+    dm[100, 90] = 1
+    _tif(cur / "det.tif", dm, crs="EPSG:32750", tr=trl)
+    qc = np.ones((H, W), np.uint8)
+    qc[:, :10] = 2
+    qc[:5, :5] = 0
+    qc[50:52, 50:52] = 6  # glint: only the current-mode quality mask has it
+    _tif(cur / "quality.tif", qc, crs="EPSG:32750", tr=trl)
+    _json(cur / "det.json", {"weights": "weights/lgbm", "harmonize": "none", "threshold": 0.63, "pixels": 1,
+                             "objects": 1})
+    # drift scene with raw channels but WITHOUT the current-mode run: detection must not fall back to the legacy mode
+    dd = roots["drift"] / "bali" / "2025-05-13"
+    dd.mkdir(parents=True)
+    trd = from_origin(310000.0, 9100000.0, 10.0, 10.0)
+    _tif(dd / "bands.tif", bands, desc=st.S2_BANDS, crs="EPSG:32750", tr=trd)
+    _tif(dd / "scl.tif", scl, crs="EPSG:32750", tr=trd)
+    _tif(dd / "prob_lgbm.tif", pl, crs="EPSG:32750", tr=trd)
+    _json(dd / "prob_lgbm.json", {"threshold": 0.64, "weights": "lgbm_live", "harmonize": "water_median"})
+    _json(dd / "scene.json", {"datetime": "2025-05-13T02:25:49Z", "scene_id": "S2A_MSIL2A_20250513T0225",
+                              "source": "planetary-computer"})
     _json(d / "scene.json", {"region": "bali", "region_name": "Бали", "date": "2025-05-11",
                              "datetime": "2025-05-11T02:25:49Z", "scene_id": LIVE_ID, "tile": "50LKR",
                              "source": "planetary-computer", "water_frac": 0.9})
@@ -113,7 +144,7 @@ def tree(tmp_path, monkeypatch):
     (src / "candidates.csv").write_text(
         "event_id,scene_id,sensor,dt_h,drift_zone,usable_frac,level,reason\n"
         "S4:DOORS3:T1,S2A_35TQJ_20240602_0_L2A,S2,-3,,0.8,C,кандидат для ручной проверки\n"
-        "S9:E1,S2B_X,S2,1,,0.5,D,блик\n"
+        "S9:E1,S2B_X,S2,1,,0.5,D,glint on water rejected\n"
         "S9:E2,S2B_Y,S2,1,,0.5,x,мусорная строка\n", encoding="utf-8")
     for k, p in roots.items():
         monkeypatch.setitem(st.ROOTS, k, p)
@@ -136,12 +167,12 @@ def _scenes(client, **params):
 def test_list_sources_views_and_reasons(client):
     j = _scenes(client)
     ids = [s["id"] for s in j["scenes"]]
-    assert j["total"] == 4 and j["count"] == 4
+    assert j["total"] == 5 and j["count"] == 5
     assert set(ids) == {"pair.S4_DOORS3_T1", "pair.S3_HE419_MarLitter_transect29", "live.bali.2025-05-11",
-                        "search.s9.pairs~E1__S2B_X"}
+                        "search.s9.pairs~E1__S2B_X", "drift.bali.2025-05-13"}
     assert "search.s9.cache~x" not in ids
     assert ids == sorted(ids, key=lambda i: next(s["datetime"] for s in j["scenes"] if s["id"] == i))
-    assert j["by_source_type"] == {"live": 1, "pair": 2, "search": 1}
+    assert j["by_source_type"] == {"drift": 1, "live": 1, "pair": 2, "search": 1}
     assert [k["id"] for k in j["kinds"]] == ["rgb", "spectral", "detection", "quality"]
     by = {s["id"]: s for s in j["scenes"]}
     p = by["pair.S4_DOORS3_T1"]
@@ -161,7 +192,7 @@ def test_list_sources_views_and_reasons(client):
     lv = by["live.bali.2025-05-11"]
     assert lv["available_views"] == ["rgb", "spectral", "detection", "quality"]
     assert lv["views"]["spectral"]["variants"] == ["fdi", "swir"]
-    assert lv["views"]["detection"]["variants"] == ["lgbm", "mdd"]
+    assert lv["views"]["detection"]["variants"] is None  # the legacy prob_mdd/prob_lgbm are not offered
     assert lv["platform"] == "Sentinel-2B" and lv["collection"] == "sentinel-2-l2a"
     assert -180 <= lv["bounds"][0] <= 180 and lv["bounds"][1] < 0  # UTM south zone -> southern latitudes
 
@@ -174,9 +205,12 @@ def test_evidence_levels_from_candidates(client):
     one = client.get("/api/v3/studio/scenes/pair.S4_DOORS3_T1").json()
     assert one["level_records"][0]["reason"] == "кандидат для ручной проверки"
     assert one["views"]["detection"]["legend"]["threshold"] == 0.63
+    srch = client.get("/api/v3/studio/scenes/search.s9.pairs~E1__S2B_X").json()
+    assert srch["level_records"][0]["reason"] == st.LEVEL_REASON_RU["D"]  # English registry text is not shown
+    assert srch["level_records"][0]["reason_raw"] == "glint on water rejected"
     assert [x["id"] for x in _scenes(client, level="C,D")["scenes"]] == ["search.s9.pairs~E1__S2B_X",
                                                                          "pair.S4_DOORS3_T1"]
-    assert _scenes(client, level="none")["total"] == 2
+    assert _scenes(client, level="none")["total"] == 3
 
 
 def test_filters_and_strict_params(client):
@@ -184,7 +218,7 @@ def test_filters_and_strict_params(client):
         ["pair.S4_DOORS3_T1"]
     assert _scenes(client, source="pair")["total"] == 2
     assert _scenes(client, sources="live")["total"] == 1  # plural alias
-    assert _scenes(client, view="spectral")["total"] == 2
+    assert _scenes(client, view="spectral")["total"] == 3
     j = _scenes(client, bbox="-10,-10,-9,-9")
     assert j["total"] == 0 and j["empty_reason"]
     p = next(s for s in _scenes(client)["scenes"] if s["id"] == "pair.S4_DOORS3_T1")
@@ -244,10 +278,14 @@ def test_views_render_from_real_files(client):
     im = np.asarray(_img(client.get(f"{live}/rgb.png")).convert("RGBA"))
     assert im[0, 0, 3] == 0 and im[50, 50, 3] == 255      # NaN bands -> transparent
     assert _img(client.get(f"{live}/spectral.png", params={"variant": "swir"})).size == (W, H)
-    assert client.get(f"{live}/detection.png").headers["x-detection-pixels"] == "1"
-    assert client.get(f"{live}/detection.png", params={"variant": "mdd"}).headers["x-detection-pixels"] == "0"
+    r = client.get(f"{live}/detection.png")
+    assert r.headers["x-detection-pixels"] == "1" and "harmonization=none" in r.headers["x-view-scale"]
+    im = np.asarray(_img(r).convert("RGBA"))
+    assert tuple(im[100, 90]) == (255, 45, 85, 242) and im[30, 30, 3] > 0 and im[60, 60, 3] == 0
+    assert client.get(f"{live}/detection.png", params={"variant": "mdd"}).status_code == 400
     q = np.asarray(_img(client.get(f"{live}/quality.png")).convert("RGBA"))
-    assert tuple(q[50, 50]) == pal[1] and tuple(q[50, 5]) == pal[2] and tuple(q[0, 0]) == pal[0]
+    assert tuple(q[80, 80]) == pal[1] and tuple(q[50, 5]) == pal[2] and tuple(q[0, 0]) == pal[0]
+    assert tuple(q[50, 50]) == pal[6]  # current-mode quality mask (with glint), not the bare SCL
 
 
 def test_missing_view_is_404_with_reason(client):
@@ -276,9 +314,9 @@ def test_png_cache_memory_disk_and_etag(client, tree):
 def test_scene_detail_timeline(client):
     j = client.get("/api/v3/studio/scenes/live.bali.2025-05-11").json()
     assert j["id"] == "live.bali.2025-05-11" and j["region"] == "bali"
-    assert [t["id"] for t in j["timeline"]] == ["live.bali.2025-05-11"]
+    assert [t["id"] for t in j["timeline"]] == ["live.bali.2025-05-11", "drift.bali.2025-05-13"]
     assert j["views"]["quality"]["legend"]["type"] == "classes"
-    assert j["detector"]["threshold"] == 0.64
+    assert j["detector"]["threshold"] == 0.63
 
 
 def test_real_repo_smoke():
@@ -293,3 +331,122 @@ def test_real_repo_smoke():
     for k in s["available_views"]:
         r = c.get(s["views"][k]["url"], params={"px": 256})
         assert r.status_code == 200 and r.headers["content-type"] == "image/png"
+
+
+def test_detector_is_current_mode_only(client):
+    by = {s["id"]: s for s in _scenes(client)["scenes"]}
+    lv = by["live.bali.2025-05-11"]["detector"]
+    assert lv["run"] is True and lv["weights"] == "lgbm" and lv["harmonization"] is False
+    assert lv["threshold"] == 0.63 and lv["pixels"] == 1 and lv["objects"] == 1
+    assert lv["label"].startswith("Детектор (текущий режим: веса lgbm, без гармонизации, порог 0,63): 1 объект, 1 пиксель")
+    assert lv["legacy"]["weights"] == "lgbm_live" and "отвергнут" in lv["legacy"]["note"]
+    p = by["pair.S4_DOORS3_T1"]["detector"]
+    assert p["run"] and p["objects"] == 1 and p["pixels"] == 1 and p["strip"] == {"objects": 1, "pixels": 1}
+    assert "в полосе наблюдения — 1 объект" in p["label"]
+    dr = by["drift.bali.2025-05-13"]
+    assert "detection" not in dr["available_views"] and dr["detector"]["run"] is False
+    assert "прежний режим не показывается" in dr["views"]["detection"]["reason"]
+    assert dr["detector"]["label"].startswith("Детектор на этой сцене не запускался")
+    r = client.get("/api/v3/studio/scenes/drift.bali.2025-05-13/view/detection.png")
+    assert r.status_code == 404 and r.json()["error"]["code"] == "NO_VIEW"
+    ls = by["pair.S3_HE419_MarLitter_transect29"]
+    assert ls["detector"]["run"] is False and "Sentinel-2" in ls["detector"]["label"]
+    assert ls["quality"]["reason_label"] == "облачность в полосе"
+
+
+def test_legacy_harmonized_pair_is_not_shown(client, tree):
+    d = tree["pairs"] / "S4_DOORS3_T1"
+    m = json.loads((d / "meta.json").read_text(encoding="utf-8"))
+    m["detector"]["harmonize_offset"] = [0.001] * 11
+    (d / "meta.json").write_text(json.dumps(m), encoding="utf-8")
+    st._memo.clear()
+    s = client.get("/api/v3/studio/scenes/pair.S4_DOORS3_T1").json()
+    assert "detection" not in s["available_views"] and s["detector"]["run"] is False
+    assert "прежним режимом" in s["views"]["detection"]["reason"]
+
+
+def test_no_english_text_in_api(client):
+    import re
+    eng = re.compile(r"\b[A-Za-z]{3,}\s+[A-Za-z]{2,}\s+[A-Za-z]{3,}\b")
+    bad = []
+
+    def walk(x, key=""):
+        if isinstance(x, dict):
+            for k, v in x.items():
+                walk(v, k)
+        elif isinstance(x, list):
+            for v in x:
+                walk(v, key)
+        elif isinstance(x, str) and key in ("label", "reason", "source", "note", "decision_label", "reason_label",
+                                            "footprint_note", "source_label", "empty_reason", "message"):
+            if eng.search(x):
+                bad.append((key, x))
+    walk(_scenes(client))
+    for sid in ("live.bali.2025-05-11", "pair.S4_DOORS3_T1", "drift.bali.2025-05-13",
+                "pair.S3_HE419_MarLitter_transect29"):
+        walk(client.get(f"/api/v3/studio/scenes/{sid}").json())
+    assert not bad, bad
+    body = client.get("/api/v3/studio/scenes/live.bali.2025-05-11").text
+    assert "ACOLITE" not in body and "trained on" not in body
+
+
+def test_solar_zenith_reference_points():
+    # ADIS 11.12.2021 10:56 UTC, North Sea 53.5N 4.6E: low winter sun (L94: «почти чёрный снимок»)
+    assert abs(st.solar_zenith("2021-12-11T10:56:07Z", [4.5, 53.4, 4.7, 53.6]) - 76.9) < 1.0
+    # equinox, local noon on the equator: sun near zenith
+    assert st.solar_zenith("2024-03-20T12:07:00Z", [-0.1, -0.1, 0.1, 0.1]) < 3.0
+    assert st.solar_zenith(None, [0, 0, 1, 1]) is None
+
+
+def test_low_sun_detector_not_evaluated(client, tree):
+    d = tree["pairs"] / "S4_DOORS3_T1"
+    m = json.loads((d / "meta.json").read_text(encoding="utf-8"))
+    m["scene_datetime"] = "2024-12-21T06:00:00Z"  # ~43.6N 29.5E, winter morning: zenith > 58
+    (d / "meta.json").write_text(json.dumps(m), encoding="utf-8")
+    st._memo.clear()
+    s = client.get("/api/v3/studio/scenes/pair.S4_DOORS3_T1").json()
+    assert s["illumination"]["low_sun"] is True and s["illumination"]["sun_zenith_deg"] >= st.SUN_ZENITH_MAX
+    det = s["detector"]
+    assert det["status"] == "not_evaluated" and det["objects"] is None and det["pixels"] is None
+    assert det["raw"]["objects"] == 1 and det["label"].startswith("Детектор не оценивается: низкое солнце")
+    assert "detection" not in s["available_views"] and "низкое солнце" in s["views"]["detection"]["reason"]
+    r = client.get("/api/v3/studio/scenes/pair.S4_DOORS3_T1/view/detection.png")
+    assert r.status_code == 404 and r.json()["error"]["code"] == "NO_VIEW"
+
+
+def test_weak_water_signal_not_evaluated(client, monkeypatch):
+    monkeypatch.setattr(st, "WATER_B3_MIN", 0.5)  # synthetic water B3 ≈ 0.025 -> «weak» against this floor
+    st._memo.clear()
+    s = client.get("/api/v3/studio/scenes/live.bali.2025-05-11").json()
+    assert s["illumination"]["weak_signal"] is True and 0.01 < s["illumination"]["water_b3_median"] < 0.04
+    assert s["detector"]["status"] == "not_evaluated" and "слабый сигнал воды" in s["detector"]["label"]
+    monkeypatch.setattr(st, "WATER_B3_MIN", 0.003)
+    st._memo.clear()
+    s = client.get("/api/v3/studio/scenes/live.bali.2025-05-11").json()
+    assert s["detector"]["status"] == "evaluated" and s["illumination"]["weak_signal"] is False
+
+
+def test_field_count_next_to_level(client, tree):
+    (tree["search"] / "s9" / "candidates.csv").write_text(
+        "event_id,scene_id,level,reason,field_count_by_size,survey_area_km2,dhat_5cm_km2\n"
+        "S4:DOORS3:T1,S2A_35TQJ_20240602_0_L2A,C,кандидат,,,\n"
+        "S9:E1,S2B_X,A,time <= 3 h,>5cm:3;>10cm:2;>50cm:0,0.5644,5.316\n", encoding="utf-8")
+    st._memo.clear()
+    s = client.get("/api/v3/studio/scenes/search.s9.pairs~E1__S2B_X").json()
+    f = s["field"]
+    assert s["level"] == "A" and f["count"] == 3 and f["size_class"] == "> 5 см"
+    assert f["count_by_size"] == {"> 5 см": 3, "> 10 см": 2, "> 50 см": 0}
+    assert f["survey_area_km2"] == 0.5644 and f["items_km2"] == 5.316
+    assert f["label"].startswith("Полевой счёт: 3 предмета > 5 см на 0,56 км² обзора; оценка 5,3 шт./км²")
+    assert all(not k.startswith("_") for r in s["level_records"] for k in r)
+
+
+def test_rgb_water_stretch_default(client):
+    j = client.get("/api/v3/studio/scenes/live.bali.2025-05-11").json()
+    assert j["views"]["rgb"]["variants"] == ["water", "natural"]
+    base = "/api/v3/studio/scenes/live.bali.2025-05-11/view/rgb.png"
+    rw, rn = client.get(base), client.get(base, params={"variant": "natural"})
+    assert "0..p98 water" in rw.headers["x-view-scale"] and "0.0..0.16" in rn.headers["x-view-scale"]
+    w = np.asarray(_img(rw).convert("RGB")).astype(float)[20:, 20:].mean()
+    n = np.asarray(_img(rn).convert("RGB")).astype(float)[20:, 20:].mean()
+    assert w > n + 30  # dark sea water is brightened

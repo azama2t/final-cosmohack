@@ -7,7 +7,9 @@ GET /api/v3/studio/scenes/{scene_id}/view/{kind}.png?px=&variant=     kind = rgb
 Сцены (только каталоги с файлами растров; всё читается с диска, сеть не нужна):
   pair.<dir>              data/pairs/quality/<dir>/ (pair_quality.py: rgb.png, quality.tif, prob.tif, mask.png, meta.json)
                           + FDI из тех же вырезок S2 L2A: data/pairs/experiment/<dir>/fdi.npy (pairs_experiment.py)
-  live.<region>.<date>    data/live/<region>/<date>/ (bands.tif 12 каналов L2A, scl.tif, prob_lgbm.tif, prob_mdd.tif, scene.json)
+  live.<region>.<date>    data/live/<region>/<date>/ (bands.tif 12 каналов L2A, scl.tif, scene.json); детектор и маска качества —
+                          ТЕКУЩИЙ режим из out/studio_cache/detector_current (scripts/case/studio_detector_current.py);
+                          prob_lgbm.tif/prob_mdd.tif (прежний режим, отвергнут) как детекция не показываются
                           + service/data/<region>/<date>/ (подготовленные слои; rgb.png в EPSG:4326)
   drift.<region>.<date>   data/drift_check/<region>/<date>/ (тот же формат, что live)
   search.<src>.<name>     data/search/<src>/**/<name>/ — любой каталог с meta.json|scene.json и хотя бы одним растром
@@ -25,6 +27,7 @@ import io
 import json
 import math
 import os
+import re
 import sys
 import threading
 import time
@@ -42,6 +45,8 @@ _SRC = str(Path(__file__).resolve().parents[1] / "src")
 if _SRC not in sys.path:
     sys.path.insert(0, _SRC)
 from macroplastic.indices import fdi as _fdi  # noqa: E402  (Biermann 2020, the same function as pairs_experiment.py)
+from macroplastic.grid import cloudmask  # noqa: E402
+from scipy import ndimage  # noqa: E402
 from . import routes_v3 as v3
 from .case_store import ApiError
 
@@ -54,7 +59,21 @@ ROOTS: dict[str, Path] = {  # tests monkeypatch these
     "drift": REPO / "data" / "drift_check",
     "search": REPO / "data" / "search",
     "cache": Path(os.environ.get("MACROPLASTIC_STUDIO_CACHE") or (REPO / "out" / "studio_cache")),
+    # current-mode detector (weights/lgbm, no harmonization) on scenes with raw channels:
+    # scripts/case/studio_detector_current.py -> <kind>/<region>/<date>/{prob.tif, det.tif, quality.tif, det.json}
+    "det_current": REPO / "out" / "studio_cache" / "detector_current",
 }
+LEGACY_NOTE = "прежний режим (веса lgbm_live + гармонизация water_median), отвергнут — docs/DECISIONS.md, 25.09 22:40"
+QREASON_RU = {"cloud": "облачность в полосе", "glint": "солнечные блики", "insufficient_coverage": "снимок не покрывает полосу",
+              "land": "суша в полосе", "low_valid_water": "мало пригодной воды", "error": "ошибка обработки"}
+DECISION_RU = {"accept": "принят масками качества", "reject": "отклонён масками качества"}
+# Detector is «не оценивается» (numbers are noise, not debris) when the sun is low or the water signal is too weak.
+# Chosen on the studio scenes (out/l95_frac.py, reports/tasklog/95_studio_api.md): every scene with a mass response
+# (> 130 ppm of usable water, up to 7575 «objects») outside the coastal Guanabara crops has sun zenith 59.7–61.2°
+# (ADIS 30.10.2021, 17.11.2020, 25.11.2023); below 58° the maximum is 160 ppm. Weak signal: median B3 of usable water
+# < 0.003 (ADIS 30.10.2021: 0.0001 — the water is black after L2A correction).
+SUN_ZENITH_MAX = 58.0
+WATER_B3_MIN = 0.003
 
 KINDS = [
     {"id": "rgb", "label": "Снимок", "overlay": False},
@@ -81,7 +100,7 @@ PX_DEFAULT, PX_MIN, PX_MAX = 1024, 64, 4096
 SEARCH_SKIP = {"cache", "src", "src_csv", "code", "__pycache__"}
 S2_BANDS = ["B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B8A", "B9", "B11", "B12"]
 RGB_STRETCH = (0.0, 0.16, 1 / 1.8)  # as data/live rgb.json note: 0..0.16 reflectance, gamma 1/1.8
-STUDIO_VERSION = "3.8"
+STUDIO_VERSION = "3.8.3"  # 3.8.2: illumination gate, field count, water-stretched RGB
 
 P_SCENES = {"bbox", "date_from", "date_to", "source", "level", "view", "limit", "offset"}
 P_SCENE: set = set()
@@ -272,8 +291,10 @@ def _levels_index() -> dict:
                     continue
                 rec = {"level": lv, "event_id": (r.get("event_id") or "").strip() or None,
                        "scene_id": (r.get("scene_id") or "").strip() or None,
-                       "reason": (r.get("reason") or "").strip() or None,
-                       "file": f.relative_to(REPO).as_posix() if f.is_relative_to(REPO) else str(f)}
+                       "reason": _reason_ru((r.get("reason") or "").strip(), lv),
+                       "reason_raw": (r.get("reason") or "").strip() or None,
+                       "file": f.relative_to(REPO).as_posix() if f.is_relative_to(REPO) else str(f),
+                       "_field": _field_from_row(r, f.parent.name)}
                 if rec["scene_id"] and rec["event_id"]:
                     by_pair.setdefault((rec["event_id"], rec["scene_id"]), []).append(rec)
                 if rec["scene_id"]:
@@ -284,22 +305,87 @@ def _levels_index() -> dict:
     return _cached(("levels",), files, load)
 
 
+FIELD_SRC_RU = {"adis": "ADIS, The Ocean Cleanup — камера с судна", "s3": "PANGAEA, судовой визуальный трансект",
+                "s4": "DOORS, судовой визуальный трансект"}
+
+
+def _field_from_row(r: dict, src: str) -> Optional[dict]:
+    """Field count of a search-registry row (ADIS: field_count_by_size, survey_area_km2, dhat_5cm_km2;
+    S3: field_items_km2) -> Russian-labelled block. None when the row has no field numbers."""
+    out: dict = {}
+    fc = (r.get("field_count_by_size") or "").strip()
+    if fc:
+        by = {}
+        for part in fc.split(";"):
+            if ":" in part:
+                k, v = part.split(":", 1)
+                n = cs.fnum(v)
+                if n is not None:
+                    by[k.strip().replace(">", "> ").replace("cm", " см")] = int(n)
+        if by:
+            out["count_by_size"] = by
+            k0 = next(iter(by))
+            out["count"], out["size_class"] = by[k0], k0
+    area = cs.fnum(r.get("survey_area_km2"))
+    dens = cs.fnum(r.get("dhat_5cm_km2"))
+    if dens is None:
+        dens = cs.fnum(r.get("field_items_km2"))
+    if area is not None:
+        out["survey_area_km2"] = round(area, 4)
+    if dens is not None:
+        out["items_km2"] = round(dens, 3)
+    if not out:
+        return None
+    out["source"] = FIELD_SRC_RU.get(src, f"реестр розыска {src}")
+    parts = []
+    if out.get("count") is not None:
+        c = out["count"]
+        parts.append(f"{c} {_plural(c, 'предмет', 'предмета', 'предметов')} {out['size_class']}")
+        if area is not None:
+            parts[-1] += f" на {_num_ru(area)} км² обзора"
+    if dens is not None:
+        parts.append(f"{'оценка ' if out.get('count') is not None else ''}{_num_ru(dens, 1)} шт./км²")
+    out["label"] = "Полевой счёт: " + "; ".join(parts) + f" ({out['source']})"
+    return out
+
+
+LEVEL_REASON_RU = {"A": "снимок и полевое число связаны по времени, месту, площади и категории",
+                   "B": "подтверждённая разметка спутникового скопления", "C": "кандидат для ручной проверки",
+                   "D": "отвергнутый кандидат / отрицательный пример"}
+
+
+def _reason_ru(text: str, level: str) -> str:
+    """Registry reasons are written by the search workers, often in English: shown text is Russian (the reason
+    itself if it is Cyrillic, else the level definition); the original is kept in reason_raw."""
+    if text and re.search(r"[А-Яа-яЁё]", text):
+        return text
+    return LEVEL_REASON_RU.get(level, "")
+
+
 def _best(recs: list) -> Optional[str]:
     lv = sorted({r["level"] for r in recs})
     return lv[0] if lv else None  # A < B < C < D: the strongest level recorded; all records are in level_records
 
 
-def evidence_level(event_id: Optional[str], scene_ids: list) -> tuple[Optional[str], list, Optional[str]]:
+def evidence_level(event_id: Optional[str], scene_ids: list) -> tuple[Optional[str], list, Optional[str], Optional[dict]]:
+    """(level, public records, match, field block of the strongest record with field numbers)."""
     idx = _levels_index()
+    found = None
     for sid in scene_ids:
         if event_id and sid and (event_id, sid) in idx["pair"]:
-            recs = idx["pair"][(event_id, sid)]
-            return _best(recs), recs, "event_id+scene_id"
-    for sid in scene_ids:
-        if sid and sid in idx["scene"]:
-            recs = idx["scene"][sid]
-            return _best(recs), recs, "scene_id"
-    return None, [], None
+            found = (idx["pair"][(event_id, sid)], "event_id+scene_id")
+            break
+    if found is None:
+        for sid in scene_ids:
+            if sid and sid in idx["scene"]:
+                found = (idx["scene"][sid], "scene_id")
+                break
+    if found is None:
+        return None, [], None, None
+    recs, how = found
+    fld = next((r["_field"] for r in sorted(recs, key=lambda x: x["level"]) if r.get("_field")), None) \
+        if how == "event_id+scene_id" else None
+    return _best(recs), [{k: v for k, v in r.items() if not k.startswith("_")} for r in recs], how, fld
 
 
 # ------------------------------------------------------------------ scene registry
@@ -331,9 +417,72 @@ def _view(kind: str, sid: str, recipe: Optional[dict], reason: Optional[str]) ->
 
 def _detection_legend(thr: Optional[float]) -> dict:
     return {"type": "probability", "threshold": thr,
-            "items": [{"label": "P ≥ порога (срабатывание)", "color": "#ff2d55f2"},
-                      {"label": "0.2 ≤ P < порога", "color": "#ffd43b80"}],
-            "note": "вероятность детектора по пикселям; при уменьшении — максимум по блоку, чтобы мелкие объекты не пропадали"}
+            "items": [{"label": "Объект детектора (P ≥ порога, после фильтров облака/тени)", "color": "#ff2d55f2"},
+                      {"label": "0,2 ≤ P < порога", "color": "#ffd43b80"}],
+            "note": "текущий режим детектора (веса lgbm, без гармонизации); при уменьшении — максимум по блоку, "
+                    "чтобы мелкие объекты не пропадали"}
+
+
+def _num_ru(x: float, nd: int = 2) -> str:
+    return f"{x:.{nd}f}".replace(".", ",")
+
+
+def _plural(n: int, one: str, few: str, many: str) -> str:
+    n10, n100 = n % 10, n % 100
+    if n10 == 1 and n100 != 11:
+        return one
+    if 2 <= n10 <= 4 and not 12 <= n100 <= 14:
+        return few
+    return many
+
+
+def detector_block(run: bool, *, threshold=None, pixels=None, objects=None, strip=None, source=None,
+                   reason=None, legacy=None) -> dict:
+    """API field `detector`: always the CURRENT mode (weights lgbm, no harmonization) or «не запускался» + reason."""
+    if not run:
+        return {"run": False, "status": "not_run", "weights": None, "harmonization": None, "threshold": None,
+                "pixels": None, "objects": None, "scope": None, "strip": None, "source": None,
+                "label": f"Детектор на этой сцене не запускался: {reason}" if reason else
+                         "Детектор на этой сцене не запускался", "legacy": legacy}
+    thr = _num_ru(threshold) if threshold is not None else "—"
+    objects, pixels = int(objects or 0), int(pixels or 0)
+    lab = (f"Детектор (текущий режим: веса lgbm, без гармонизации, порог {thr}): "
+           f"{objects} {_plural(objects, 'объект', 'объекта', 'объектов')}, "
+           f"{pixels} {_plural(pixels, 'пиксель', 'пикселя', 'пикселей')} на всей вырезке")
+    if strip is not None and strip.get("objects") is not None:
+        so = int(strip["objects"])
+        lab += f"; в полосе наблюдения — {so} {_plural(so, 'объект', 'объекта', 'объектов')}"
+    return {"run": True, "status": "evaluated", "weights": "lgbm", "harmonization": False, "threshold": threshold,
+            "pixels": pixels, "objects": objects, "scope": "вся вырезка", "strip": strip, "source": source,
+            "label": lab, "legacy": legacy}
+
+
+def _not_evaluated(det: dict, why: str) -> dict:
+    """The detector ran, but on this image its response is noise: numbers are moved to `raw`, not shown as result."""
+    out = dict(det)
+    out.update({"status": "not_evaluated", "pixels": None, "objects": None, "strip": None,
+                "raw": {"pixels": det.get("pixels"), "objects": det.get("objects"), "strip": det.get("strip"),
+                        "note": "срабатывания на этом снимке — шум, не мусор; не использовать как результат"},
+                "label": f"Детектор не оценивается: {why}"})
+    return out
+
+
+def _meta_is_current(meta: dict) -> bool:
+    """pair_quality-like meta.json computed in the current mode: no harmonization offset, harmonize none in config."""
+    det = meta.get("detector") if isinstance(meta.get("detector"), dict) else None
+    if not det:
+        return False
+    cfg = (meta.get("config") or {}).get("detector") or meta.get("detector_cfg") or {}
+    h = str(cfg.get("harmonize") or "none").lower()
+    return det.get("harmonize_offset") is None and h in ("none", "false", "")
+
+
+def _legacy_live(d: Path) -> Optional[dict]:
+    pj = _json(d / "prob_lgbm.json")
+    if not pj:
+        return None
+    return {"weights": "lgbm_live", "harmonization": "water_median", "threshold": cs.fnum(pj.get("threshold")),
+            "note": LEGACY_NOTE}
 
 
 def _quality_legend(kind: str) -> dict:
@@ -407,12 +556,14 @@ def _build_generic(sid: str, stype: str, d: Path, meta: dict, extra_dirs: Option
     # rgb
     rgb_idx = _band_idx(grid, ["B4", "B3", "B2"]) if bands else None
     if bands and rgb_idx:
-        rec["rgb"] = {"op": "rgb_bands", "path": bands, "idx": rgb_idx,
-                      "source_note": "bands.tif B4,B3,B2 (L2A), 0..0.16, гамма 1/1.8"}
+        rec["rgb"] = {"op": "rgb_bands", "path": bands, "idx": rgb_idx, "variants": ["water", "natural"],
+                      "source_note": "bands.tif B4,B3,B2 (L2A); растяжка по воде 0..p98 (water) или 0..0,16 (natural)"}
     elif rgbpng and same_grid(rgbpng):
-        rec["rgb"] = {"op": "png", "path": rgbpng, "source_note": "rgb.png из тех же каналов (B4,B3,B2)"}
+        rec["rgb"] = {"op": "png", "path": rgbpng, "variants": ["water", "natural"],
+                      "source_note": "rgb.png из тех же каналов (B4,B3,B2); растяжка по воде 0..p98 или как есть"}
     elif rgbpng and grid["crs"] == "EPSG:4326":
-        rec["rgb"] = {"op": "png", "path": rgbpng, "source_note": "rgb.png (EPSG:4326)"}
+        rec["rgb"] = {"op": "png", "path": rgbpng, "variants": ["water", "natural"],
+                      "source_note": "rgb.png (EPSG:4326); растяжка по воде 0..p98 или как есть"}
     else:
         reasons["rgb"] = landsat_note if is_landsat else "каналы сцены не сохранены"
 
@@ -428,41 +579,60 @@ def _build_generic(sid: str, stype: str, d: Path, meta: dict, extra_dirs: Option
     if variants:
         sp["variants"] = variants
         sp["qmask"] = qtif if (qtif and same_grid(qtif)) else (scl if (scl and same_grid(scl)) else None)
+        _cq = (extra_dirs.get("current") / "quality.tif") if extra_dirs.get("current") is not None else None
+        if not qtif and _cq is not None and _cq.is_file() and same_grid(_cq):
+            sp["qmask"] = _cq
         rec["spectral"] = sp
     else:
         reasons["spectral"] = (landsat_note if is_landsat else
                                "каналы сцены не сохранены (есть только готовый RGB)" if rgbpng else
                                "каналы сцены не сохранены")
 
-    # detection
-    dvars = []
-    dsrc = {}
-    if prob and same_grid(prob):
-        dvars.append("lgbm")
-        dsrc["lgbm"] = prob
-    if prob_mdd and same_grid(prob_mdd):
-        dvars.append("mdd")
-        dsrc["mdd"] = prob_mdd
-    thr = None
-    if det_meta and det_meta.get("threshold") is not None:
+    # detection: ONLY the current mode (weights lgbm, no harmonization). Pairs/search: prob.tif of pair_quality-like
+    # runs with harmonize none; live/drift: out/studio_cache/detector_current (scripts/case/studio_detector_current.py).
+    # The legacy prob_lgbm.tif / prob_mdd.tif of data/live are never shown as the detector.
+    cur = extra_dirs.get("current")
+    cur_info = _json(cur / "det.json") if cur is not None else None
+    det_block = None
+    if cur_info and _file(cur, "prob.tif") and _file(cur, "det.tif") and same_grid(cur / "prob.tif"):
+        thr = cs.fnum(cur_info.get("threshold"))
+        rec["detection"] = {"op": "detection", "prob": cur / "prob.tif", "det": cur / "det.tif", "qmask": None,
+                            "thr": thr, "pixels": cur_info.get("pixels"),
+                            "source_note": "текущий режим: веса lgbm, без гармонизации (studio_detector_current.py)",
+                            "legend": _detection_legend(thr)}
+        det_block = detector_block(True, threshold=thr, pixels=cur_info.get("pixels"), objects=cur_info.get("objects"),
+                                   source="out/studio_cache/detector_current", legacy=_legacy_live(d))
+    elif det_meta and _meta_is_current(meta) and prob and prob.name == "prob.tif" and same_grid(prob):
         thr = cs.fnum(det_meta.get("threshold"))
+        px = det_meta.get("det_px_crop")
+        rec["detection"] = {"op": "detection", "prob": prob, "det": None,
+                            "qmask": qtif if (qtif and same_grid(qtif)) else None, "thr": thr, "pixels": px,
+                            "source_note": "текущий режим: веса lgbm, без гармонизации (prob.tif pair_quality.py)",
+                            "legend": _detection_legend(thr)}
+        strip = ({"objects": det_meta.get("n_det"), "pixels": det_meta.get("det_px_strip")}
+                 if det_meta.get("n_det") is not None else None)
+        det_block = detector_block(True, threshold=thr, pixels=px, objects=det_meta.get("n_det_crop"), strip=strip,
+                                   source="meta.json (pair_quality.py)")
     else:
-        pj = _json(d / "prob_lgbm.json") or {}
-        thr = cs.fnum(pj.get("threshold"))
-    thr_mdd = cs.fnum((_json(d / "prob_mdd.json") or {}).get("threshold"))
-    if dvars:
-        rec["detection"] = {"op": "detection", "paths": dsrc, "variants": dvars if len(dvars) > 1 else None,
-                            "thr": {"lgbm": thr, "mdd": thr_mdd},
-                            "source_note": "вероятность детектора " + " / ".join(
-                                {"lgbm": "LightGBM (prob.tif)", "mdd": "Marine Debris Detector (prob_mdd.tif)"}[v]
-                                for v in dvars),
-                            "legend": _detection_legend(thr if dvars[0] == "lgbm" else thr_mdd)}
-    else:
-        reasons["detection"] = (landsat_note if is_landsat else
-                                (meta.get("substitution_note") or "детектор на этой сцене не запускался"))
+        if is_landsat:
+            reasons["detection"] = "Landsat: детектор обучен на каналах Sentinel-2 и на этом снимке не запускался"
+        elif det_meta and not _meta_is_current(meta):
+            reasons["detection"] = "вероятность посчитана прежним режимом (с гармонизацией) — не показывается"
+        elif (d / "prob_lgbm.json").is_file():
+            reasons["detection"] = ("текущий режим детектора (веса lgbm, без гармонизации) для этой сцены ещё не "
+                                    "рассчитан; прежний режим не показывается")
+        else:
+            reasons["detection"] = "детектор на этой сцене не запускался"
+        det_block = detector_block(False, reason=reasons["detection"],
+                                   legacy=_legacy_live(d) if (d / "prob_lgbm.json").is_file() else None)
 
     # quality
-    if qtif and same_grid(qtif):
+    cq = _file(cur, "quality.tif") if (cur is not None and cur_info) else None
+    if cq and not qtif and same_grid(cq):
+        rec["quality"] = {"op": "quality_codes", "path": cq,
+                          "source_note": "маска качества как у пар (pair_quality.py: SCL + спектральный тест облаков, "
+                                         "блики), studio_detector_current.py", "legend": _quality_legend("pair_quality")}
+    elif qtif and same_grid(qtif):
         rec["quality"] = {"op": "quality_codes", "path": qtif, "source_note": "quality.tif (pair_quality.py)",
                           "legend": _quality_legend("pair_quality")}
     elif scl and same_grid(scl):
@@ -478,8 +648,10 @@ def _build_generic(sid: str, stype: str, d: Path, meta: dict, extra_dirs: Option
               "coordinates": geo["coordinates"], "bounds": geo["bounds"], "crs": grid["crs"],
               "size_px": [gw, gh], "pixel_m": geo["pixel_m"],
               "views": views, "available_views": [k for k in KIND_IDS if views[k]["available"]]})
+    s["detector"] = det_block
     s.files = rec
-    s.files["_all"] = [p for p in (bands, qtif, scl, prob, prob_mdd, rgbpng, fdi) if p]
+    cur_files = [cur / n for n in ("prob.tif", "det.tif", "quality.tif", "det.json")] if cur_info else []
+    s.files["_all"] = [p for p in (bands, qtif, scl, prob, prob_mdd, rgbpng, fdi) if p] + cur_files
     return s
 
 
@@ -493,14 +665,56 @@ def _finish(s: Scene, *, product_id: Optional[str], datetime: Optional[str], src
     if collection is None and product_id and product_id.upper().endswith("_L2A"):
         collection = "sentinel-2-l2a"
     iso = cs.iso_dt(datetime) if datetime else None
-    lv, recs, how = evidence_level(event_id, [product_id] if product_id else [])
+    lv, recs, how, fld = evidence_level(event_id, [product_id] if product_id else [])
     s.update({"title": title, "datetime": iso, "date": iso[:10] if iso else None,
               "mission": mission, "platform": platform, "catalog": catalog, "collection": collection,
               "product_id": product_id, "tile": tile, "region": region, "event_id": event_id,
               "level": lv, "level_match": how, "level_records": recs})
     if extra:
         s.update(extra)
+    if fld:  # field count of the search registry (ADIS …) next to the level badge
+        base = dict(s.get("field") or {})
+        base.update({"count": fld.get("count"), "count_by_size": fld.get("count_by_size"),
+                     "size_class": fld.get("size_class"), "survey_area_km2": fld.get("survey_area_km2"),
+                     "items_km2": fld.get("items_km2"), "field_source": fld.get("source"), "label": fld.get("label")})
+        s["field"] = base
+    elif s.get("field") and s["field"].get("field_items_km2") is not None and not s["field"].get("label"):
+        s["field"]["label"] = f"Полевое измерение: {_num_ru(s['field']['field_items_km2'], 1)} шт./км²"
+    _gate_illumination(s)
     return s
+
+
+def _gate_illumination(s: "Scene") -> None:
+    """Low sun / weak water signal -> the detector result is not evaluated and the «Детекция» view is withheld."""
+    zen = solar_zenith(s.get("datetime"), s.get("bounds"))
+    det = s.get("detector") or {}
+    low = zen is not None and zen >= SUN_ZENITH_MAX
+    sig = water_signal(s) if det.get("run") and not low else None  # only where it can change the verdict
+    weak = sig is not None and sig < WATER_B3_MIN
+    s["illumination"] = {"sun_zenith_deg": zen, "water_b3_median": sig, "low_sun": low, "weak_signal": weak,
+                         "rule": f"не оценивается при зените Солнца ≥ {SUN_ZENITH_MAX:.0f}° или медиане B3 воды < "
+                                 f"{WATER_B3_MIN}"}
+    if not det.get("run") or not (low or weak):
+        return
+    why = []
+    if low:
+        why.append(f"низкое солнце (зенит {_num_ru(zen, 0)}°)")
+    if weak:
+        why.append(f"слабый сигнал воды (B3 {_num_ru(sig, 4)})")
+    reason = " и ".join(why) + " — срабатывания на таком снимке — шум, а не мусор"
+    s["detector"] = _not_evaluated(det, reason)
+    s.files.pop("detection", None)
+    s["views"]["detection"] = _view("detection", s["id"], None, "детектор не оценивается: " + reason)
+    s["available_views"] = [k for k in KIND_IDS if s["views"][k]["available"]]
+
+
+def _quality_block(meta: dict, q: dict) -> dict:
+    dec = meta.get("decision")
+    rs = meta.get("reason") or None
+    return {"decision": dec, "decision_label": DECISION_RU.get(dec) if dec else None,
+            "reason": rs, "reason_label": QREASON_RU.get(rs, rs) if rs else None,
+            "valid_water_frac": cs.fnum(q.get("valid_water_frac")), "cloud_frac": cs.fnum(q.get("cloud_frac")),
+            "glint_frac": cs.fnum(q.get("glint_frac")), "strip_area_km2": cs.fnum(q.get("strip_area_km2"))}
 
 
 def _pair_scenes() -> list:
@@ -514,7 +728,6 @@ def _pair_scenes() -> list:
         s = _build_generic(sid, "pair", d, meta, {"fdi": ROOTS["pairs_fdi"] / d.name})
         if s is None:
             continue
-        det = meta.get("detector") if isinstance(meta.get("detector"), dict) else None
         q = meta.get("quality") or {}
         pid = meta.get("scene_id")
         out.append(_finish(
@@ -524,17 +737,9 @@ def _pair_scenes() -> list:
             extra={"field": {"sample_ids": [x for x in str(meta.get("sample_ids") or "").split(";") if x],
                              "field_sample_id": meta.get("field_sample_id"),
                              "field_items_km2": cs.fnum(meta.get("field_items_km2")),
-                             "sampling_method": meta.get("sampling_method"),
                              "obs_datetime": cs.iso_dt(meta.get("obs_datetime")) if meta.get("obs_datetime") else None,
                              "time_known": meta.get("time_known"), "dt_hours": cs.fnum(meta.get("dt_hours"))},
-                   "quality": {"decision": meta.get("decision"), "reason": meta.get("reason") or None,
-                               "valid_water_frac": cs.fnum(q.get("valid_water_frac")),
-                               "cloud_frac": cs.fnum(q.get("cloud_frac")), "glint_frac": cs.fnum(q.get("glint_frac")),
-                               "strip_area_km2": cs.fnum(q.get("strip_area_km2"))},
-                   "detector": ({"threshold": cs.fnum(det.get("threshold")), "n_det": det.get("n_det"),
-                                 "n_det_crop": det.get("n_det_crop"), "prob_max": cs.fnum(det.get("prob_max")),
-                                 "weights": ((meta.get("config") or {}).get("detector") or {}).get("weights")}
-                                if det else None),
+                   "quality": _quality_block(meta, q),
                    "links": {"v3_scene": f"/api/v3/scenes/{pid}" if pid else None,
                              "dir": d.relative_to(REPO).as_posix() if d.is_relative_to(REPO) else str(d)},
                    "footprint_note": "вырезка вокруг наблюдения, не вся сцена"}))
@@ -550,17 +755,11 @@ def _live_like(stype: str, root: Path, prefix: str) -> list:
             meta = _json(d / "scene.json") or {}
             if not meta and not _file(d, "bands.tif", "rgb.png"):
                 continue
-            svc = ROOTS["service"] / rd.name / d.name if stype == "live" else None
             sid = f"{prefix}.{rd.name}.{d.name}"
-            s = _build_generic(sid, stype, d, meta)
+            s = _build_generic(sid, stype, d, meta, {"current": ROOTS["det_current"] / stype / rd.name / d.name})
             if s is None:
                 continue
-            pj = _json(d / "prob_lgbm.json") or {}
             links = {"dir": d.relative_to(REPO).as_posix() if d.is_relative_to(REPO) else str(d)}
-            if svc is not None and svc.is_dir():
-                for m in ("lgbm", "mdd"):
-                    if (svc / m / "detections.geojson").is_file():
-                        links[f"detections_{m}"] = f"/data/{rd.name}/{d.name}/{m}/detections.geojson"
             out.append(_finish(
                 s, product_id=meta.get("scene_id"), datetime=meta.get("datetime") or d.name,
                 src=meta.get("source") or "", title=f"{meta.get('region_name') or rd.name} · {d.name}",
@@ -570,11 +769,6 @@ def _live_like(stype: str, root: Path, prefix: str) -> list:
                                    "cloud_frac": cs.fnum(meta.get("crop_cloud_frac")),
                                    "cloud_cover_scene_pct": cs.fnum(meta.get("cloud_cover")),
                                    "glint_or_haze": meta.get("glint_or_haze")},
-                       "detector": ({"threshold": cs.fnum(pj.get("threshold")), "weights": pj.get("weights"),
-                                     "harmonize": pj.get("harmonize"),
-                                     "n_above_threshold": pj.get("n_above_threshold_water",
-                                                                 pj.get("n_above_threshold")),
-                                     "note": pj.get("domain_note")} if pj else None),
                        "field": None, "links": links,
                        "footprint_note": "вырезка района, не вся сцена"}))
     # service/data dates without raw channels (only prepared rgb.png): rgb view only
@@ -591,7 +785,7 @@ def _live_like(stype: str, root: Path, prefix: str) -> list:
                     continue
                 out.append(_finish(s, product_id=rj.get("scene_id"), datetime=d.name, src="",
                                    title=f"{rd.name} · {d.name}", region=rd.name,
-                                   extra={"quality": None, "detector": None, "field": None,
+                                   extra={"quality": None, "field": None,
                                           "links": {"dir": d.relative_to(REPO).as_posix()
                                                     if d.is_relative_to(REPO) else str(d)},
                                           "footprint_note": "подготовленный RGB без каналов"}))
@@ -615,7 +809,6 @@ def _search_scenes() -> list:
             s = _build_generic(sid, "search", d, meta)
             if s is None:
                 continue
-            det = meta.get("detector") if isinstance(meta.get("detector"), dict) else None
             q = meta.get("quality") if isinstance(meta.get("quality"), dict) else {}
             pid = meta.get("scene_id") or meta.get("product_id") or meta.get("item_id")
             out.append(_finish(
@@ -623,11 +816,7 @@ def _search_scenes() -> list:
                 src=meta.get("source") or meta.get("collection") or "",
                 title=f"{meta.get('event_id') or src.name} · {(pid or rel.name)[:24]}",
                 event_id=meta.get("event_id"), tile=meta.get("tile"), region=meta.get("region"),
-                extra={"quality": {"decision": meta.get("decision"), "reason": meta.get("reason") or None,
-                                   "valid_water_frac": cs.fnum(q.get("valid_water_frac")),
-                                   "cloud_frac": cs.fnum(q.get("cloud_frac"))},
-                       "detector": ({"threshold": cs.fnum(det.get("threshold")), "n_det": det.get("n_det")}
-                                    if det else None),
+                extra={"quality": _quality_block(meta, q),
                        "field": ({"sample_ids": [x for x in str(meta.get("sample_ids") or "").split(";") if x],
                                   "field_items_km2": cs.fnum(meta.get("field_items_km2")),
                                   "obs_datetime": cs.iso_dt(meta.get("obs_datetime"))
@@ -669,6 +858,7 @@ def scenes_all() -> list:
         items = _pair_scenes() + _live_like("live", ROOTS["live"], "live") + \
             _live_like("drift", ROOTS["drift"], "drift") + _search_scenes()
         items.sort(key=lambda s: (s.get("datetime") or "", s["id"]))
+        _wsig_flush()
         return items
     # signature: directory mtimes + a 60-s tick (files rewritten in place do not touch the directory mtime)
     return _cached(("scenes", tuple(str(v) for v in ROOTS.values())), _registry_sig_paths(), load,
@@ -689,6 +879,107 @@ def public(s: Scene, brief: bool = False) -> dict:
         out.pop("level_records", None)
         out["views"] = {k: {kk: vv for kk, vv in v.items() if kk != "legend"} for k, v in s["views"].items()}
     return out
+
+
+# ------------------------------------------------------------------ illumination / water signal
+def solar_zenith(iso: Optional[str], bounds) -> Optional[float]:
+    """Solar zenith angle (deg) at the scene centre and acquisition time (NOAA solar position, error < 0.5 deg).
+    Computed, not read from STAC: the scene directories keep no sun angles."""
+    if not iso or not bounds:
+        return None
+    import datetime as _dt
+    try:
+        t = _dt.datetime.fromisoformat(iso.replace("Z", "+00:00")).astimezone(_dt.timezone.utc)
+    except ValueError:
+        return None
+    lon, lat = (bounds[0] + bounds[2]) / 2, (bounds[1] + bounds[3]) / 2
+    doy = t.timetuple().tm_yday
+    hour = t.hour + t.minute / 60 + t.second / 3600
+    g = 2 * math.pi / 365 * (doy - 1 + (hour - 12) / 24)
+    eqt = 229.18 * (0.000075 + 0.001868 * math.cos(g) - 0.032077 * math.sin(g) - 0.014615 * math.cos(2 * g)
+                    - 0.040849 * math.sin(2 * g))
+    decl = (0.006918 - 0.399912 * math.cos(g) + 0.070257 * math.sin(g) - 0.006758 * math.cos(2 * g)
+            + 0.000907 * math.sin(2 * g) - 0.002697 * math.cos(3 * g) + 0.00148 * math.sin(3 * g))
+    tst = hour * 60 + eqt + 4 * lon
+    ha = math.radians(tst / 4 - 180)
+    la = math.radians(lat)
+    cz = math.sin(la) * math.sin(decl) + math.cos(la) * math.cos(decl) * math.cos(ha)
+    return round(math.degrees(math.acos(max(-1.0, min(1.0, cz)))), 1)
+
+
+def water_signal(s: "Scene") -> Optional[float]:
+    """Median green reflectance (B3) of usable water: from bands.tif, or inverted from rgb.png of pair_quality.py
+    (fixed stretch 0..0.16, gamma 1/1.8 -> reflectance = 0.16 * (v/255)^1.8). None if unknown."""
+    rgb = s.files.get("rgb")
+    qm = (s.files.get("quality") or {}).get("path")
+    if not rgb:
+        return None
+
+    def load():
+        try:
+            import rasterio
+            from PIL import Image
+            if rgb["op"] == "rgb_bands":
+                g = _read(rgb["path"], [rgb["idx"][1]], 512, 512, "nearest")
+                h, w = g.shape
+            elif rgb["op"] == "png" and rgb["path"].name == "rgb.png" and s["crs"] != "EPSG:4326":
+                with Image.open(rgb["path"]) as im:
+                    im = im.convert("RGB")
+                    im.thumbnail((512, 512), Image.NEAREST)
+                    v = np.asarray(im)[:, :, 1].astype(np.float32)
+                g = 0.16 * (v / 255.0) ** 1.8
+                h, w = g.shape
+            else:
+                return None
+            water = None
+            if qm is not None:
+                with rasterio.open(qm) as ds:
+                    q = ds.read(1)
+                water = _nearest(q, w, h) == (6 if qm.name == "scl.tif" else 1)
+            vals = g[water] if water is not None and water.sum() >= 50 else g[np.isfinite(g)]
+            vals = vals[np.isfinite(vals)]
+            return round(float(np.median(vals)), 4) if vals.size else None
+        except Exception as e:  # noqa: BLE001
+            print(f"[studio] water_signal {s['id']}: {e}")
+            return None
+    paths = [p for p in (rgb.get("path"), qm) if p]
+    key = hashlib.sha1(repr(_sig(paths)).encode()).hexdigest()[:16]
+    disk = _wsig_disk()
+    if s["id"] in disk and disk[s["id"]][0] == key:
+        return disk[s["id"]][1]
+    val = _cached(("wsig", s["id"]), paths, load)
+    with _lock:
+        disk[s["id"]] = (key, val)
+        _WSIG["dirty"] = True
+    return val
+
+
+_WSIG: dict = {"data": None, "dirty": False}
+
+
+def _wsig_disk() -> dict:
+    """Water-signal values persisted in out/studio_cache/_water_signal.json (the first scan reads every RGB once)."""
+    f = ROOTS["cache"] / "_water_signal.json"
+    if _WSIG["data"] is None or _WSIG.get("path") != f:  # the cache root may change (tests)
+        _wsig_flush()
+        _WSIG["path"], _WSIG["dirty"] = f, False
+        try:
+            _WSIG["data"] = {k: tuple(v) for k, v in json.loads(f.read_text(encoding="utf-8")).items()}
+        except Exception:  # noqa: BLE001
+            _WSIG["data"] = {}
+    return _WSIG["data"]
+
+
+def _wsig_flush() -> None:
+    if not _WSIG["dirty"]:
+        return
+    try:
+        f = _WSIG.get("path") or (ROOTS["cache"] / "_water_signal.json")
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(json.dumps(_WSIG["data"]), encoding="utf-8")
+        _WSIG["dirty"] = False
+    except OSError as e:
+        print(f"[studio] cannot write water-signal cache: {e}")
 
 
 # ------------------------------------------------------------------ rendering
@@ -777,6 +1068,19 @@ def _quality_lut() -> np.ndarray:
     return lut
 
 
+def _quality_water(s: Scene, ow: int, oh: int) -> Optional[np.ndarray]:
+    """Usable water of the scene on the output grid (quality code 1 or SCL 6), None if the scene has no mask."""
+    q = s.files.get("quality") or {}
+    path = q.get("path")
+    if path is None:
+        return None
+    import rasterio
+    with rasterio.open(path) as ds:
+        a = ds.read(1).astype(np.uint8)
+    a = _nearest(a, ow, oh)
+    return a == (6 if q.get("op") == "quality_scl" else 1)
+
+
 def _water_mask(s: Scene, ow: int, oh: int) -> Optional[np.ndarray]:
     qm = s.files.get("spectral", {}).get("qmask")
     if qm is None:
@@ -802,22 +1106,36 @@ def render(s: Scene, kind: str, variant: Optional[str], px: int) -> tuple[bytes,
     ow, oh = _out_shape(gw, gh, px)
     hdr = {"X-View-Kind": kind, "X-View-Variant": v or "", "X-View-Size": f"{ow}x{oh}"}
     op = r["op"]
-    if op == "png":
+    if op in ("png", "rgb_bands"):
         from PIL import Image
-        with Image.open(r["path"]) as im:
-            im = im.convert("RGBA" if im.mode in ("RGBA", "LA", "P") else "RGB")
-            if im.size != (ow, oh):
-                im = im.resize((ow, oh), Image.BILINEAR)
-            buf = io.BytesIO()
-            im.save(buf, "PNG")
-        return buf.getvalue(), hdr
-    if op == "rgb_bands":
-        a = _read(r["path"], r["idx"], ow, oh)
-        lo, hi, g = RGB_STRETCH
-        valid = np.isfinite(a).all(0)
-        rgb = np.stack([_stretch(a[i], lo, hi, g) for i in range(3)], -1)
+        if op == "png":  # pair_quality/live rgb.png: fixed stretch 0..0.16, gamma 1/1.8 -> back to reflectance
+            with Image.open(r["path"]) as im:
+                im = im.convert("RGBA")
+                if im.size != (ow, oh):
+                    im = im.resize((ow, oh), Image.BILINEAR)
+                arr = np.asarray(im).astype(np.float32)
+            valid = arr[:, :, 3] > 0
+            a = (0.16 * (arr[:, :, :3] / 255.0) ** 1.8).transpose(2, 0, 1)
+        else:
+            a = _read(r["path"], r["idx"], ow, oh)
+            valid = np.isfinite(a).all(0)
+        if (v or "water") == "natural":
+            lo, hi, g = RGB_STRETCH
+            rgb = np.stack([_stretch(a[i], lo, hi, g) for i in range(3)], -1)
+            hdr["X-View-Scale"] = f"reflectance {lo}..{hi} gamma {g:.3f}"
+        else:
+            wm = _quality_water(s, ow, oh)
+            sel = valid & wm if wm is not None and (valid & wm).sum() >= 200 else valid
+            if sel.sum() >= 50:
+                lo = 0.0  # keep the dark origin: a joint p2 floor turns open water into saturated blue
+                hi = float(max(np.percentile(a[i][sel], 98) for i in range(3)))
+            else:
+                lo, hi = 0.0, 0.16
+            hi = max(hi, lo + 0.005)
+            rgb = np.stack([_stretch(a[i], lo, hi, 1 / 1.4) for i in range(3)], -1)
+            hdr["X-View-Scale"] = (f"reflectance {lo:.4f}..{hi:.4f} gamma 0.714 "
+                                   f"(0..p98 {'water' if sel is not valid else 'all'})")
         alpha = np.where(valid, 255, 0).astype(np.uint8)
-        hdr["X-View-Scale"] = f"reflectance {lo}..{hi} gamma {g:.3f}"
         return _png(np.dstack([rgb, alpha]), "RGBA"), hdr
     if op == "spectral":
         wm = None
@@ -847,21 +1165,40 @@ def render(s: Scene, kind: str, variant: Optional[str], px: int) -> tuple[bytes,
         hdr["X-View-Scale"] = f"FDI {lo:.4f}..{hi:.4f} (p2..p99.5 {'water' if wm is not None else 'all'})"
         return _png(np.dstack([rgb, np.where(valid, 255, 0).astype(np.uint8)]), "RGBA"), hdr
     if op == "detection":
-        path = r["paths"][v or "lgbm"] if (v or "lgbm") in r["paths"] else next(iter(r["paths"].values()))
-        thr = (r["thr"].get(v or "lgbm") if r.get("thr") else None)
         import rasterio
-        with rasterio.open(path) as ds:
-            a = ds.read(1)
-        p = _block_max(a.astype(np.uint8), ow, oh).astype(np.float32) / 255.0
-        t = thr if thr is not None else 0.5
+        with rasterio.open(r["prob"]) as ds:
+            a = ds.read(1).astype(np.uint8)
+        t = r["thr"] if r.get("thr") is not None else 0.5
+        qa = None
+        if r.get("qmask") is not None:
+            with rasterio.open(r["qmask"]) as ds:
+                qa = ds.read(1).astype(np.uint8)
+        if r.get("det") is not None:  # final detector mask of studio_detector_current.py
+            with rasterio.open(r["det"]) as ds:
+                det = ds.read(1) > 0
+        else:  # pairs/search: the same rule as pair_quality.py from prob.tif + quality.tif (without the shadow test)
+            k = int(math.floor(t * 255 + 0.5))  # round(P*255) >= round(thr*255)
+            det = a >= k
+            if qa is not None:
+                det &= qa == 1
+                lab, n = ndimage.label(det, structure=np.ones((3, 3), bool))
+                if n:
+                    near = cloudmask.near_cloud_components(lab, n, np.isin(qa, (3, 4)), 5)
+                    lab, n = cloudmask.drop_components(lab, n, near)
+                det = lab > 0
+        soft = a.astype(np.float32) / 255.0
+        soft[det] = 0
+        if qa is not None:
+            soft[qa != 1] = 0
+        p = _block_max(soft, ow, oh)
+        hit = _block_max(det.astype(np.uint8), ow, oh) > 0
         out = np.zeros((oh, ow, 4), np.uint8)
-        mid = (p >= 0.2) & (p < t)
+        mid = (p >= 0.2) & ~hit
         out[mid] = (255, 212, 59, 0)
-        out[mid, 3] = (60 + 120 * (p[mid] - 0.2) / max(t - 0.2, 1e-6)).astype(np.uint8)
-        hit = p >= t
+        out[mid, 3] = np.clip(60 + 120 * (p[mid] - 0.2) / max(t - 0.2, 1e-6), 60, 180).astype(np.uint8)
         out[hit] = (255, 45, 85, 242)
-        hdr["X-View-Scale"] = f"P threshold {t:.2f}" + (" (default)" if thr is None else "")
-        hdr["X-Detection-Pixels"] = str(int(hit.sum()))
+        hdr["X-View-Scale"] = f"P>={t:.2f}; weights=lgbm; harmonization=none"
+        hdr["X-Detection-Pixels"] = str(int(r["pixels"])) if r.get("pixels") is not None else str(int(det.sum()))
         return _png(out, "RGBA"), hdr
     if op in ("quality_codes", "quality_scl"):
         import rasterio

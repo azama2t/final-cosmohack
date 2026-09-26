@@ -36,7 +36,7 @@ export interface StudioView {
   overlay: boolean; // true: draw over the «Снимок» (transparent PNG)
   url: string | null; // relative to API_BASE; null when not available
   source: string | null; // which files/channels the view is built from
-  variants: string[] | null; // spectral: fdi|swir; detection: lgbm|mdd (first = default)
+  variants: string[] | null; // rgb: water|natural; spectral: fdi|swir (first = default); detection: none
   reason: string | null; // why the view is missing (only when available=false)
   legend?: ViewLegend; // only in GET /studio/scenes/{id}
 }
@@ -57,6 +57,10 @@ export interface LegacyDetector {
 /** Always the CURRENT detector mode (weights lgbm, no harmonization) or run=false + reason in label. */
 export interface StudioDetector {
   run: boolean;
+  /** evaluated — numbers are the result; not_evaluated — ran, but low sun / weak water signal: numbers only in raw;
+   *  not_run — no current-mode run on this scene */
+  status: 'evaluated' | 'not_evaluated' | 'not_run';
+  raw?: { pixels: number | null; objects: number | null; strip: unknown; note: string };
   weights: 'lgbm' | null;
   harmonization: false | null;
   threshold: number | null;
@@ -103,7 +107,21 @@ export interface StudioScene {
     [k: string]: unknown;
   } | null;
   detector: StudioDetector;
+  illumination: {
+    sun_zenith_deg: number | null; // computed from time + scene centre
+    water_b3_median: number | null; // median green reflectance of usable water (null if not needed)
+    low_sun: boolean;
+    weak_signal: boolean;
+    rule: string;
+  };
   field: {
+    label?: string; // ready Russian caption to show next to the level badge
+    count?: number | null; // items of the smallest size class (ADIS: > 5 см)
+    count_by_size?: Record<string, number> | null;
+    size_class?: string | null;
+    survey_area_km2?: number | null;
+    items_km2?: number | null; // registry estimate, items/km²
+    field_source?: string | null;
     sample_ids?: string[];
     field_items_km2?: number | null;
     obs_datetime?: string | null;
