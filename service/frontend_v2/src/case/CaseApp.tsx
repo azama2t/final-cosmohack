@@ -9,6 +9,8 @@ import { apiUrl, ApiErr, get, MOCK, send, type FC, type Feat, type Meta, type Ob
 import CaseMap, { ACCENT, CONC_BREAKS, CONC_COLORS, STRIP_NO, STRIP_OK, flyToBox, geomBounds, WORLD_CENTER, worldZoom, type HoverInfo, type Pick } from './CaseMap';
 import { ObsCard, ZoneCard } from './Cards';
 import PairsDrawer from './PairsDrawer';
+import SceneZoneCard, { type SceneZoneDetail, type SceneZoneProps } from './SceneZoneCard';
+import { SZ_COLORS, szKey } from './CaseMap';
 import MetricsPanel from './MetricsPanel';
 import GoList, { rankSites } from './GoList';
 import { plural, color, dateRu, eventRu, label, missionShort, num, profileRu, scopeRu, sourceShort } from './fmt';
@@ -163,18 +165,32 @@ export default function CaseApp() {
     ready && drawer ? (s) => get('/api/v3/pairs', pP, s) : null,
     ready && drawer ? 'p' + fkey + pairStatus : '',
   );
-  const selZoneId = sel?.kind === 'zone' ? sel.id : null;
+  // 3.10 satellite scene zones: no field source/profile/scope of their own → hidden when such a filter is on
+  const szOn = !q.source && !q.profile && !q.scope;
+  const szP = { date_from: q.from, date_to: q.to, detection_status: q.det, concentration_status: q.conc };
+  const szones = useLoad<FC<SceneZoneProps>>(ready && szOn ? (s) => get('/api/v3/scene_zones', szP, s) : null, ready && szOn ? 'sz' + fkey : '');
+  const szScenes = useLoad<{ scenes: Scene[] }>(meta ? (s) => get('/api/v3/scene_zones/scenes', {}, s) : null, meta ? 'szs' : '');
+  const selZoneId = sel?.kind === 'zone' && !sel.id.startsWith('SZ-') ? sel.id : null;
+  const selSzId = sel?.kind === 'zone' && sel.id.startsWith('SZ-') ? sel.id : null;
   const zoneDetail = useLoad<ZoneDetail>(selZoneId ? (sg) => get(`/api/v3/zones/${encodeURIComponent(selZoneId)}`, {}, sg) : null, selZoneId ? 'zd' + selZoneId : '');
+  const szDetail = useLoad<SceneZoneDetail>(selSzId ? (sg) => get(`/api/v3/scene_zones/${encodeURIComponent(selSzId)}`, {}, sg) : null, selSzId ? 'szd' + selSzId : '');
   // detector objects of the selected strip; a quality-rejected scene (glint / clouds) → grey, «вероятно ложные»
   const detFC = useMemo(() => {
+    if (selSzId) return szDetail.data?.detections ?? null;
     const fc = zoneDetail.data?.detections;
     if (!fc) return null;
     const qr = !!zoneDetail.data?.properties?.suspicious_pixels?.quality_rejected;
     return { ...fc, features: fc.features.map((f) => ({ ...f, properties: { ...f.properties, qr } })) };
-  }, [zoneDetail.data]);
+  }, [zoneDetail.data, szDetail.data, selSzId]);
   const metrics = useLoad<any>(meta && leftTab === 'metrics' ? (s) => get('/api/v3/metrics', {}, s) : null, meta && leftTab === 'metrics' ? 'm' : '');
 
-  const sceneList = scenes.data?.scenes ?? [];
+  const szList = useMemo(() => (szOn ? szones.data?.features ?? [] : []), [szOn, szones.data]);
+  const selSz = selSzId ? szList.find((f) => f.id === selSzId) ?? null : null;
+  // scene overlays of the layer: the held-out demo scene always, others only while one of their zones is open
+  const sceneList = useMemo(() => {
+    const extra = (szScenes.data?.scenes ?? []).filter((s: any) => s.evaluable && (s.scene_kind === 'demo' || s.scene_key === selSz?.properties.scene_key));
+    return [...(scenes.data?.scenes ?? []), ...(szOn ? extra : [])];
+  }, [scenes.data, szScenes.data, selSz, szOn]);
   const sites = useMemo(() => rankSites(allObs.data, obs.data, zones.data), [allObs.data, obs.data, zones.data]);
   const obsById = useMemo(() => {
     const m = new Map<string, Feat<ObsProps>>();
@@ -252,7 +268,7 @@ export default function CaseApp() {
     setSel({ kind: 'zone', id });
     setActivePair(null);
     setPairHl(null);
-    if (fly) flyToFeat(zones.data?.features.find((f) => f.id === id), 11.5);
+    if (fly) flyToFeat(zones.data?.features.find((f) => f.id === id) ?? szList.find((f) => f.id === id), 12.5);
   };
   const openObs = (id: string, fly = true) => {
     setSel({ kind: 'obs', id });
@@ -313,7 +329,7 @@ export default function CaseApp() {
     setPairHl(null);
     lastSource.current = '__run__';
     setQ(nq);
-    showToast(summary ? `«${s.name}»: ${summary.n_obs} наблюдений, ${summary.n_zones} зон` : `«${s.name}» запущен`);
+    showToast(summary ? `«${s.name}»: ${plural(summary.n_obs, 'наблюдение', 'наблюдения', 'наблюдений')}, ${plural(summary.n_zones, 'полоса', 'полосы', 'полос')}, ${plural(summary.n_scene_zones ?? 0, 'спутниковая зона', 'спутниковые зоны', 'спутниковых зон')}` : `«${s.name}» запущен`);
   };
   const deleteQuery = async (s: SavedQuery) => {
     if (s.local) deleteLocalQuery(s.query_id);
@@ -353,12 +369,12 @@ export default function CaseApp() {
   const selZone = sel?.kind === 'zone' ? zones.data?.features.find((f) => f.id === sel.id) ?? null : null;
   useEffect(() => {
     if (!pendingFly.current || !sel || !mapReady) return;
-    const f = sel.kind === 'zone' ? zones.data?.features.find((x) => x.id === sel.id) : obsById.get(sel.id);
+    const f = sel.kind === 'zone' ? zones.data?.features.find((x) => x.id === sel.id) ?? szList.find((x) => x.id === sel.id) : obsById.get(sel.id);
     if (!f) return;
     pendingFly.current = false;
     flyToFeat(f, sel.kind === 'zone' ? 11.5 : 10);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [zones.data, obsById, sel, mapReady]);
+  }, [zones.data, szList, obsById, sel, mapReady]);
 
   // ---- test hooks ----
   const mapReadyRef = useRef(false);
@@ -370,7 +386,10 @@ export default function CaseApp() {
       mock: MOCK,
       ready: !!meta && !!obs.data && !!zones.data && !!scenes.data && !obs.loading && !zones.loading && !scenes.loading && mapReady,
       metaError: metaS.err?.message ?? null,
-      counts: { obs: obs.data?.count ?? null, zones: zones.data?.count ?? null, scenes: scenes.data?.count ?? null, pairs: pairs.data?.count ?? null },
+      counts: { obs: obs.data?.count ?? null, zones: zones.data?.count ?? null, scenes: scenes.data?.count ?? null, pairs: pairs.data?.count ?? null, szones: szOn ? szones.data?.count ?? null : 0 },
+      szIds: () => szList.map((f) => f.id),
+      szReady: !szOn || !!szones.data,
+      szDetailReady: !!szDetail.data,
       errors: [obs.err, zones.err, scenes.err, pairs.err].filter(Boolean),
       dateError: dErr,
       q,
@@ -413,7 +432,7 @@ export default function CaseApp() {
     apiUrl('/api/v3/export', {
       layer,
       format: fmt,
-      ...(layer === 'zones' ? zP : layer === 'pairs' ? pP : { ...oP, geometry: 'line' }),
+      ...(layer === 'zones' ? zP : layer === 'pairs' ? pP : layer === 'scene_zones' ? szP : { ...oP, geometry: 'line' }),
     });
 
   // ---------------------------------------------------------------- render
@@ -458,6 +477,9 @@ export default function CaseApp() {
             </button>
             <button onClick={() => (location.href = '?mode=live')} data-testid="mode-live">
               Живые снимки
+            </button>
+            <button onClick={() => (location.href = '?mode=photo')} data-testid="mode-photo" title="Счётчик предметов по фото (камера у воды; отдельный модуль, не спутник)">
+              Фото
             </button>
           </div>
         </div>
@@ -583,6 +605,9 @@ export default function CaseApp() {
             <span>
               <b>{num(zones.data?.count ?? null, 0)}</b> полос
             </span>
+            <span data-testid="count-szones">
+              <b>{num(szOn ? szones.data?.count ?? null : 0, 0)}</b> спутн. зон
+            </span>
             <span>
               <b>{num(scenes.data?.count ?? null, 0)}</b> снимков
             </span>
@@ -596,7 +621,7 @@ export default function CaseApp() {
 
         <div className="tabs">
           <button className={`tab ${leftTab === 'zones' ? 'on' : ''}`} onClick={() => setLeftTab('zones')} data-testid="tab-zones">
-            Полосы
+            Зоны
           </button>
           <button className={`tab ${leftTab === 'obs' ? 'on' : ''}`} onClick={() => setLeftTab('obs')} data-testid="tab-obs">
             Измерения
@@ -617,6 +642,8 @@ export default function CaseApp() {
             <ObsList meta={meta} fc={obs.data} sel={selObs} onPick={(id) => openObs(id)} />
           ) : (
             <div data-testid="zone-list">
+              <SzList szOn={szOn} fc={szones.data} err={szones.err} list={szList} sel={selSzId} onPick={(id) => openZone(id)} />
+              <div className="c-list-note c-lg-sep">Полосы обследования на снимках-кандидатах · {num(zones.data?.count ?? null, 0)}</div>
               {zones.data && !zoneList.length && <div className="empty">{zones.data.empty_reason ?? 'Нет зон под выбранные фильтры'}</div>}
               {zoneList.map((f) => {
                 const p = f.properties;
@@ -659,6 +686,7 @@ export default function CaseApp() {
           projection={projection}
           obs={obs.data}
           zones={zones.data}
+          szones={szOn ? szones.data : null}
           scenes={sceneList}
           layers={q.layers}
           selected={sel}
@@ -684,7 +712,7 @@ export default function CaseApp() {
             });
           }}
         />
-        {hover && <HoverTip meta={meta} h={hover} obs={obs.data} zones={zones.data} />}
+        {hover && <HoverTip meta={meta} h={hover} obs={obs.data} zones={zones.data} szones={szList} />}
 
         <div className="actions c-actions" data-testid="actions">
           <button className={drawer ? 'on' : ''} onClick={() => setDrawer((v) => !v)} data-testid="act-pairs">
@@ -699,7 +727,8 @@ export default function CaseApp() {
                 <div className="menu-group">То, что сейчас отфильтровано</div>
                 {(
                   [
-                    ['zones', 'Зоны', zones.data?.count],
+                    ['scene_zones', 'Спутниковые зоны', szOn ? szones.data?.count : 0],
+                    ['zones', 'Полосы', zones.data?.count],
                     ['observations', 'Наблюдения', obs.data?.count],
                     ['pairs', 'Пары', pairs.data?.count],
                   ] as [string, string, number | undefined][]
@@ -891,6 +920,7 @@ export default function CaseApp() {
       </main>
 
       <aside className="right" data-testid="right-panel">
+        {sel?.kind === 'zone' && selSz && <SceneZoneCard meta={meta} zone={selSz} detail={szDetail.data} onClose={closeCard} onZone={(id) => openZone(id)} />}
         {sel?.kind === 'zone' && selZone && (
           <ZoneCard
             meta={meta}
@@ -904,7 +934,7 @@ export default function CaseApp() {
             onPair={(p) => showPair(p, false)}
           />
         )}
-        {sel?.kind === 'zone' && !selZone && zones.data && (
+        {sel?.kind === 'zone' && !selZone && !selSz && zones.data && (!selSzId || szones.data) && (
           <div className="right-inner">
             <div className="sec note">Зона {sel.id} не входит в текущий фильтр</div>
           </div>
@@ -978,7 +1008,7 @@ function autoName(meta: Meta, q: CaseQuery): string {
   return parts.join(' · ').slice(0, 120);
 }
 
-function HoverTip({ meta, h, obs, zones }: { meta: Meta; h: HoverInfo; obs: FC<ObsProps> | null; zones: FC<ZoneProps> | null }) {
+function HoverTip({ meta, h, obs, zones, szones }: { meta: Meta; h: HoverInfo; obs: FC<ObsProps> | null; zones: FC<ZoneProps> | null; szones: Feat<SceneZoneProps>[] }) {
   let t = '';
   let s = '';
   if (h.kind === 'obs') {
@@ -988,6 +1018,12 @@ function HoverTip({ meta, h, obs, zones }: { meta: Meta; h: HoverInfo; obs: FC<O
     const v = p.concentration_items_km2;
     t = `Измерение · ${v === null ? 'без плотности' : `${num(v)} шт./км²`}`;
     s = `${profileRu(meta, p.measurement_profile)} · ${dateRu(p.date_utc)} · ${scopeRu(meta, p.target_scope)}`;
+  } else if (h.id.startsWith('SZ-')) {
+    const f = szones.find((x) => x.id === h.id);
+    if (!f) return null;
+    const p = f.properties;
+    t = `Спутниковая зона · ${p.detection_label}`;
+    s = `${p.title} · ${dateRu(p.datetime)} · подозрительные пиксели ${num(p.measured.suspicious_area_m2, 0)} м²`;
   } else {
     const f = zones?.features.find((x) => x.id === h.id);
     if (!f) return null;
@@ -1007,8 +1043,68 @@ const DET_FILTER_ORDER = ['insufficient_data', 'not_detected', 'detected'];
 const DET_FILTER_RU: Record<string, string> = {
   insufficient_data: 'связь не подтверждена',
   not_detected: 'пикселей не найдено',
-  detected: 'обнаружено (пара подтверждена)',
+  detected: 'обнаружено',
 };
+
+const SZ_FLAG_RU: Record<string, string> = { foam: 'пена', glint: 'блик', ship: 'судно', seam: 'шов', coast: 'берег', shallow: 'мелководье' };
+const SZ_ORDER = ['detected', 'unverified', 'insufficient_data', 'not_detected'];
+
+/** satellite scene zones of the current filter: the held-out Cózar scene first, then by status and pixel area */
+function SzList({ szOn, fc, err, list, sel, onPick }: { szOn: boolean; fc: FC<SceneZoneProps> | null; err: string | null; list: Feat<SceneZoneProps>[]; sel: string | null; onPick: (id: string) => void }) {
+  const [n, setN] = useState(40);
+  const rows = useMemo(
+    () =>
+      [...list].sort(
+        (a, b) =>
+          (a.properties.scene_kind === 'demo' ? 0 : 1) - (b.properties.scene_kind === 'demo' ? 0 : 1) ||
+          SZ_ORDER.indexOf(szKey(a.properties)) - SZ_ORDER.indexOf(szKey(b.properties)) ||
+          (b.properties.measured.suspicious_area_m2 ?? 0) - (a.properties.measured.suspicious_area_m2 ?? 0),
+      ),
+    [list],
+  );
+  return (
+    <div data-testid="sz-list">
+      <div className="c-list-note">
+        Спутниковые зоны детектора · {err ? '—' : list.length}
+        <Info label="Спутниковые зоны">
+          Зоны, где текущий детектор (weights/lgbm, порог 0,63) нашёл подозрительные пиксели на реальных снимках: отложенная сцена Cózar 2024 и снимки районов.
+          «Обнаружено» — только если контур совпадает с нитью каталога Cózar 2024 (независимая разметка людьми, уровень B); остальное — «срабатывание, не
+          проверено». Признаки пены, блика, судна, берега или мелководья → «недостаточно данных». Снимки, где детектор не оценивается (низкое солнце), зон не дают.
+        </Info>
+      </div>
+      {szOn && err && (
+        <div className="c-err" role="alert" data-testid="sz-error">
+          данные зон недоступны (ошибка API: {err})
+        </div>
+      )}
+      {!szOn && <div className="empty">скрыты: у спутниковых зон нет акватории, профиля и совокупности поля — сбросьте эти фильтры</div>}
+      {szOn && fc && !list.length && <div className="empty">{fc.empty_reason ?? 'Нет спутниковых зон под выбранные фильтры'}</div>}
+      {rows.slice(0, n).map((f) => {
+        const p = f.properties;
+        return (
+          <button key={f.id} className={`c-zi ${sel === f.id ? 'on' : ''}`} onClick={() => onPick(f.id)} data-testid="sz-item">
+            <i className="c-zi-dot sz" style={{ borderColor: SZ_COLORS[szKey(p)] ?? '#9aa0a8' }} />
+            <span className="c-zi-main">
+              <span className="c-zi-t">{p.title}</span>
+              <span className="c-zi-s">
+                {p.detection_label.split(' (')[0]}
+                {p.flags.length ? ` · ${p.flags.map((x) => SZ_FLAG_RU[x] ?? x).join(', ')}` : ''} · {dateRu(p.datetime)}
+              </span>
+            </span>
+            <span className="c-zi-v">{num(p.measured.suspicious_area_m2, 0)} м²</span>
+          </button>
+        );
+      })}
+      {rows.length > n && (
+        <div className="c-pad">
+          <button className="btn sm" onClick={() => setN((x) => x + 100)}>
+            Показать ещё ({rows.length - n})
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 /** one line for the whole view: /meta.summary.text, else counted from the zones of the current filter */
 function summaryText(meta: Meta, zones: FC<ZoneProps> | null): string | null {
@@ -1112,7 +1208,32 @@ function CaseLegend({
                 <span className="c-sw-px" />
                 Подозрительные пиксели детектора{hasDet ? '' : ' (у выбранной полосы)'}
               </div>
-              <div className="c-lg-note">класс MARIDA Marine Debris = любой плавающий мусор, не только пластик</div>
+              <div className="lg-row c-lg-sep">Спутниковые зоны детектора</div>
+              <div className="c-lg-status" data-testid="legend-szones">
+                <span className="c-chip">
+                  <i className="sq" style={{ background: SZ_COLORS.detected }} />
+                  обнаружено, совпадает с нитью Cózar
+                </span>
+                <span className="c-chip">
+                  <i className="sq" style={{ background: SZ_COLORS.unverified }} />
+                  срабатывание, не проверено
+                </span>
+                <span className="c-chip">
+                  <i className="sq" style={{ background: SZ_COLORS.insufficient_data }} />
+                  пена / блик / судно / берег
+                </span>
+                <span className="c-chip">
+                  <i className="sq" style={{ background: SZ_COLORS.not_detected }} />
+                  не обнаружено
+                </span>
+              </div>
+              <div className="c-lg-note">класс MARIDA Marine Debris = любой плавающий мусор, не только пластик; без полевого подтверждения</div>
+              {(meta as any).detector?.version?.sha256_short && (
+                <div className="c-lg-note" data-testid="legend-model">
+                  модель: {(meta as any).detector.version.weights} · sha256 {(meta as any).detector.version.sha256_short} · {dateRu((meta as any).detector.version.trained_at)} · порог{' '}
+                  {num((meta as any).detector.version.threshold, 2)}
+                </div>
+              )}
             </>
           )}
           {hasQuality && (

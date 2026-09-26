@@ -4,7 +4,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import Info from '../components/Info';
 import { get, send, API_BASE, ApiErr, type Feat, type Interval, type Meta, type ObsProps, type Pair, type Scene, type ZoneDetail, type ZoneProps } from './api3';
-import { plural, color, dateRu, dateTimeRu, driftTitle, driftTxt, dtTitle, dtTxt, eventRu, flagRu, label, missionShort, num, pairDecision, pairReasons, pct, poissonCI, profileRu, reasonRu, scopeRu, sourceShort, unitRu, zoneFlagRu } from './fmt';
+import { plural, color, dateRu, dateTimeRu, driftTitle, driftTxt, dtTitle, dtTxt, eventRu, flagRu, label, missionShort, num, pairDecision, pairReasons, pct, poissonCI, profileRu, reasonRu, scopeRu, sourceShort, unitRu, zoneFlagRu, modelRu } from './fmt';
 
 function useFetch<T>(fn: (() => Promise<T>) | null, deps: unknown[]): { data: T | null; err: string | null; loading: boolean } {
   const [s, setS] = useState<{ data: T | null; err: string | null; loading: boolean }>({ data: null, err: null, loading: !!fn });
@@ -60,7 +60,7 @@ function PairList({ meta, pairs, activePair, onPair, testid }: { meta: Meta; pai
   const rows = [...withScene].sort((a, b) => (b.quality_decision ? 1 : 0) - (a.quality_decision ? 1 : 0) || Math.abs(a.dt_hours ?? 1e9) - Math.abs(b.dt_hours ?? 1e9));
   return (
     <div data-testid={testid}>
-      {!rows.length && <div className="note">Снимков-кандидатов нет{noScene ? ` (${noScene} окон без снимка)` : ''}</div>}
+      {!rows.length && <div className="note">Снимков-кандидатов нет{noScene ? ` (${plural(noScene, 'окно', 'окна', 'окон')} без снимка)` : ''}</div>}
       {rows.length > 0 && (
         <table className="c-ptable">
           <thead>
@@ -95,7 +95,7 @@ function PairList({ meta, pairs, activePair, onPair, testid }: { meta: Meta; pai
         </table>
       )}
       {rows.length > 12 && <div className="note">ещё {rows.length - 12} в реестре пар</div>}
-      {rows.length > 0 && noScene > 0 && <div className="note">+ {noScene} окон без снимка</div>}
+      {rows.length > 0 && noScene > 0 && <div className="note">+ {plural(noScene, 'окно', 'окна', 'окон')} без снимка</div>}
     </div>
   );
 }
@@ -231,7 +231,7 @@ export function ZoneCard({
               </div>
               <div className="c-line">
                 {fe.lo !== null || fe.hi !== null ? `интервал ${num(fe.lo)}–${num(fe.hi)}` : 'интервал не рассчитан'} · {profileRu(meta, fe.measurement_profile)}
-                {fe.model ? ` · ${fe.model}` : ''}
+                {fe.model ? ` · ${modelRu(fe.model)}` : ''}
               </div>
             </>
           ) : (
@@ -578,7 +578,7 @@ function ModelEstimate({ meta, p }: { meta: Meta; p: ObsProps }) {
           <span className="c-kind est" aria-hidden /> Оценка по полевым данным, не по снимку
         </h3>
         <Info label="Что это" align="right">
-          {fe?.note ?? 'Оценка по полевым данным для профиля.'} {fe?.model ? `Модель: ${fe.model === 'median_train' ? 'медиана профиля (train)' : fe.model}.` : ''} Это не
+          {fe?.note ?? 'Оценка по полевым данным для профиля.'} {fe?.model ? `Модель: ${modelRu(fe.model)}${fe.model === 'median_train' ? ' (train)' : ''}.` : ''} Это не
           измерение.
         </Info>
       </div>
@@ -604,7 +604,7 @@ function ModelEstimate({ meta, p }: { meta: Meta; p: ObsProps }) {
         <details className="c-research" data-testid="obs-research-estimate">
           <summary>Исследовательская модель: на отложенном test не лучше медианы</summary>
           <div className="c-line">
-            {re.model ?? 'модель'}: {num(re.value)} {unitRu(re.unit || 'items/km2')}
+            {modelRu(re.model)}: {num(re.value)} {unitRu(re.unit || 'items/km2')}
             {re.lo !== null && re.lo !== undefined && re.hi !== null && re.hi !== undefined ? ` [${num(re.lo)}; ${num(re.hi)}]` : ''} · прогноз вне обучающего участка
           </div>
         </details>
@@ -791,7 +791,8 @@ function detTypes(fs: { properties: any }[]): string {
     if (k) t.set(String(k), (t.get(String(k)) ?? 0) + 1);
   }
   if (!t.size) return 'тип не классифицирован';
-  const known = [...t].map(([k, v]) => `${k}: ${v}`).join(', ');
+  const fa = fs.filter((f) => f.properties?.false_alarm).length;
+  const known = [...t].map(([k, v]) => `${k}: ${v}`).join(', ') + (fa === fs.length ? ' — все ложные, скоплений нет' : '');
   const rest = fs.length - [...t.values()].reduce((a, b) => a + b, 0);
   return rest ? `${known}, не классифицировано: ${rest}` : known;
 }

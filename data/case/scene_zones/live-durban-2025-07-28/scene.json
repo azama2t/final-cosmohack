@@ -1,0 +1,50 @@
+{
+ "key": "live-durban-2025-07-28",
+ "kind": "live",
+ "region": "durban",
+ "region_name": "Дурбан",
+ "date": "2025-07-28",
+ "datetime": "2025-07-28T07:40:31.024000Z",
+ "scene_id": "S2A_MSIL2A_20250728T074031_R092_T36JUN_20250728T105715",
+ "tile": "36JUN",
+ "bounds": [
+  30.958242,
+  -29.944936,
+  31.221377,
+  -29.714976
+ ],
+ "sun_zenith_deg": 59.8,
+ "water_b3_median": 0.0123,
+ "evaluable": false,
+ "low_sun": true,
+ "weak_signal": false,
+ "wind10m_ms": 1.88,
+ "wind_source": "ERA5 через Open-Meteo archive API, час съёмки",
+ "water_km2": 337.754,
+ "det_pixels": 24,
+ "det_area_m2": 2400,
+ "lwd_m2_km2": 7.11,
+ "model": {
+  "weights": "weights/lgbm",
+  "file": "weights/lgbm/model.txt",
+  "sha256": "0eeebf43fcccd8c7c07f053b7ec723229d1a3c9b92d12eec1bdb269258c51470",
+  "sha256_short": "0eeebf43fccc",
+  "trained_at": "2026-09-25T01:35:55Z",
+  "threshold": 0.63,
+  "harmonize": "none",
+  "class": "MARIDA Marine Debris (любой плавающий мусор, не только пластик)"
+ },
+ "crop_note": "вырезка вокруг района/сцены, не весь тайл",
+ "selection": "2025-07-01/2025-08-31; crop cloud<=0.3, valid>=0.8; ranked by glint among 10 OK of 14 screened",
+ "training_scene": null,
+ "not_evaluated_reason": "низкое солнце (зенит 60°)",
+ "rgb_file": "rgb.jpg",
+ "quality_file": "quality.png",
+ "rgb_note": "B4,B3,B2, растяжка 0..p98 по пригодной воде, гамма 1/1.4; EPSG:4326 по bounds",
+ "n_zones_total": 0,
+ "by_status": {
+  "detected": 0,
+  "not_detected": 0,
+  "insufficient_data": 0
+ }
+}

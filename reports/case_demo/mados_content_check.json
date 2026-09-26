@@ -1,0 +1,22 @@
+{
+ "method": "scripts/extra_data/mados_content_check.py: LBP 48 бит (B8,B4; 5x5), индекс MADOS+MARIDA все сплиты (out/l89_ref_lbp_index.npz); та же съёмка даёт сотни–тысячи голосов, случайные ≤ 7; MATCH ≥ 30",
+ "results": {
+  "data/live/cozar_demo/2021-03-11/bands.tif": {
+   "valid_keys": 1937209,
+   "best_ref": "Scene_0_1",
+   "best_ref_kind": "MADOS",
+   "votes": 3,
+   "second_votes": 3,
+   "verdict": "no match"
+  },
+  "data/live/durban/2019-04-24/bands.tif": {
+   "valid_keys": 11950636,
+   "best_ref": "C:\\Users\\User\\Documents\\GitHub\\final-cosmohack\\data\\MARIDA\\patches\\S2_24-4-19_36JUN\\S2_24-4-19_36JUN_4.tif",
+   "best_ref_kind": "MARIDA",
+   "votes": 7579,
+   "second_votes": 7569,
+   "verdict": "MATCH (same pixels)"
+  }
+ },
+ "elapsed_s": 13
+}

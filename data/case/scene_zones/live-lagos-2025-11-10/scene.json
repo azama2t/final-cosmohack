@@ -1,0 +1,51 @@
+{
+ "key": "live-lagos-2025-11-10",
+ "kind": "live",
+ "region": "lagos",
+ "region_name": "Лагос (вход в лагуну, порт Апапа)",
+ "date": "2025-11-10",
+ "datetime": "2025-11-10T10:01:39.024000Z",
+ "scene_id": "S2B_MSIL2A_20251110T100139_R122_T31NEG_20251110T134828",
+ "tile": "31NEG",
+ "bounds": [
+  3.286717,
+  6.186788,
+  3.513633,
+  6.413292
+ ],
+ "sun_zenith_deg": 32.0,
+ "water_b3_median": 0.0125,
+ "evaluable": true,
+ "low_sun": false,
+ "weak_signal": false,
+ "wind10m_ms": 1.93,
+ "wind_source": "ERA5 через Open-Meteo archive API, час съёмки",
+ "water_km2": 324.107,
+ "det_pixels": 0,
+ "det_area_m2": 0,
+ "lwd_m2_km2": 0.0,
+ "model": {
+  "weights": "weights/lgbm",
+  "file": "weights/lgbm/model.txt",
+  "sha256": "0eeebf43fcccd8c7c07f053b7ec723229d1a3c9b92d12eec1bdb269258c51470",
+  "sha256_short": "0eeebf43fccc",
+  "trained_at": "2026-09-25T01:35:55Z",
+  "threshold": 0.63,
+  "harmonize": "none",
+  "class": "MARIDA Marine Debris (любой плавающий мусор, не только пластик)"
+ },
+ "crop_note": "вырезка вокруг района/сцены, не весь тайл",
+ "selection": "2025-01-01/2026-09-25; crop cloud<=0.2, valid>=0.6; ranked by glint among 22 OK of 25 screened",
+ "training_scene": null,
+ "rgb_file": "rgb.jpg",
+ "quality_file": "quality.png",
+ "rgb_note": "B4,B3,B2, растяжка 0..p98 по пригодной воде, гамма 1/1.4; EPSG:4326 по bounds",
+ "n_zones": 0,
+ "small_cluster_px": 0,
+ "n_zones_total": 1,
+ "by_status": {
+  "detected": 0,
+  "not_detected": 1,
+  "insufficient_data": 0
+ }
+}

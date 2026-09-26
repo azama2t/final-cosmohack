@@ -35,6 +35,7 @@ PATHS: dict[str, Path] = {
     "det_metrics": REPO / "reports" / "case_detector" / "metrics.json",
     "transects": REPO / "data" / "case" / "geometry" / "transects.geojson",
     "pairs_cfg": REPO / "configs" / "case_pairs.yaml",
+    "pairs_visual": REPO / "data" / "case" / "pairs_visual_labels.csv",
 }
 
 # ------------------------------------------------------------------ dictionaries (contract section 2)
@@ -1318,7 +1319,7 @@ def _zones_all_build() -> list[dict]:
         scene_id = q.get("scene_id") or None
         prob_max = fnum(q.get("prob_max"))
         feats.append({"type": "Feature", "id": f"Z-{d}", "geometry": geom, "properties": {
-            "kind": "model_estimate", "zone_id": f"Z-{d}", "scene_id": scene_id,
+            "kind": "candidate_strip", "zone_id": f"Z-{d}", "scene_id": scene_id,
             "mission": mission_of(scene_id or ""), "datetime": iso_dt(q.get("scene_datetime")),
             "status": status, "detection_status": status, "status_reason": reason,
             "concentration_status": "unavailable",
@@ -1478,10 +1479,11 @@ def _geom_bounds(g) -> Optional[list[float]]:
 
 def zones_fc(feats: list[dict]) -> dict:
     lg = _cached("lgbm_meta", PATHS["lgbm_meta"], _read_json) or {}
-    fc = {"type": "FeatureCollection", "kind": "model_estimate", "layer_kind": "candidate_strip",
+    fc = {"type": "FeatureCollection", "kind": "candidate_strip", "layer_kind": "candidate_strip",
           "label": "Проверенные снимки-кандидаты (полосы обследования)", "count": len(feats), "empty_reason": None,
           "model": {"detector": "lgbm" if lg else None, "concentration": None,
-                    "trained_at": lg.get("trained_at") or lg.get("created") or None,
+                    "trained_at": lg.get("trained_at") or lg.get("created") or detector_model_info().get("trained_at"),
+                    "weights_sha256": detector_model_info().get("sha256"),
                     "concentration_note": "калибровки спутник → шт./км² нет; концентрация в зонах не выдаётся"},
           "features": feats}
     if not feats:
@@ -1637,11 +1639,15 @@ def meta() -> dict:
         "data_status": {"observations": len(rows), "pairs": len(pairs_all()), "pair_quality": len(pair_quality_raw())},
         "summary": map_summary(),
         "detector": {"model": "LightGBM (пиксельная, MARIDA + MADOS)", "class": "MARIDA Marine Debris",
-                     "note": "класс MARIDA Marine Debris = любой плавающий мусор, не только пластик"},
+                     "note": "класс MARIDA Marine Debris = любой плавающий мусор, не только пластик",
+                     "version": detector_model_info()},
+        "quantity_levels": quantity_levels(),
+        "scene_zone_statuses": [{"id": k, "label": v} for k, v in SZ_DET_LABEL.items()],
         "layers": [
             {"id": "observations", "kind": "measurement", "label": "Полевые измерения (настоящие шт./км²)"},
             {"id": "zones", "kind": "candidate_strip", "label": "Проверенные снимки-кандидаты (полосы обследования)"},
-            {"id": "detections", "kind": "detection", "label": "Подозрительные пиксели детектора"}],
+            {"id": "detections", "kind": "detection", "label": "Подозрительные пиксели детектора"},
+            {"id": "scene_zones", "kind": "detection_zone", "label": "Спутниковые зоны детекции (текущий детектор)"}],
     }
 
 
@@ -1903,7 +1909,7 @@ def zones_csv(feats: list[dict]) -> str:
                     c.get("unit") or "items/km2", c.get("measurement_profile"), c.get("size_class"),
                     c.get("target_scope"), p["detector"].get("prob_mean"), p["quality"]["valid_fraction"],
                     p["quality"]["cloud_fraction"], p["quality"]["flags"], p["support"]["n_linked_samples"],
-                    p["support"]["linked_sample_ids"], cen[0], cen[1], "model_estimate",
+                    p["support"]["linked_sample_ids"], cen[0], cen[1], "candidate_strip",
                     p["detection_status"], p["concentration_status"], (p.get("field_estimate") or {}).get("value"),
                     p.get("layer_kind"), p.get("detector_verdict"), p.get("detection_reason"),
                     (p.get("suspicious_pixels") or {}).get("n_objects"), (p.get("suspicious_pixels") or {}).get("area_m2"),
@@ -1930,7 +1936,10 @@ def run_query_layers(qr: dict) -> dict:
         ids = {r.get("sample_id") for r in obs_rows}
         linked = {p["scene_id"] for p in pairs_all() if p["sample_id"] in ids and p["scene_id"]}
         sc = [x for x in sc if x["scene_id"] in linked]
-    return {"obs_rows": obs_rows, "zones": zf, "scenes": sc}
+    szf = [] if (qr.get("sources") or qr.get("profiles") or qr.get("scopes")) else filter_scene_zones(
+        bbox=qr.get("bbox"), date_from=qr.get("date_from"), date_to=qr.get("date_to"),
+        statuses=qr.get("statuses") or None)  # 3.10: satellite zones have no field source/profile/scope
+    return {"obs_rows": obs_rows, "zones": zf, "scenes": sc, "scene_zones": szf}
 
 
 # ------------------------------------------------------------------ detector objects (g3)
@@ -2005,12 +2014,27 @@ def _detections_dir(d: str, zone_geom: Optional[dict] = None) -> list[dict]:
     return _cached(f"dets:{d}", tif, load) or []  # one zone geometry per crop -> cache key by dir is enough
 
 
+VISUAL_RU = {"foam_whitecap": "пена/барашки", "ship_wake": "судно", "cloud": "облако", "glint": "блик",
+             "accumulation": "скопление", "unclear": "неясно"}
+
+
+def _visual_labels(d: str) -> list[dict]:
+    """Visual review of the current-detector objects of the pair crops (L92/L107, out/detector_v2/pairs_objects.csv
+    set N -> data/case/pairs_visual_labels.csv): matched to the objects of the crop in label order + prob_max."""
+    rows = _cached("pairs_visual", PATHS["pairs_visual"], _read_csv) or []
+    return sorted((r for r in rows if r.get("scene") == d), key=lambda r: r.get("object_id") or "")
+
+
 def zone_detections(zone: dict) -> list[dict]:
     p = zone["properties"]
     d = p.get("quality_dir") or ""
     qrej = p.get("quality_decision") not in (None, "accept")
     feats = []
-    for i, x in enumerate(_detections_dir(d, zone.get("geometry")), 1):
+    objs = _detections_dir(d, zone.get("geometry"))
+    vis = _visual_labels(d)
+    if len(vis) != len(objs) or any(abs((fnum(v.get("prob_max")) or -1) - o["prob_max"]) > 0.005 for v, o in zip(vis, objs)):
+        vis = []
+    for i, x in enumerate(objs, 1):
         in_strip = x.get("in_strip")
         did = f"D-{d}-{i:04d}"
         feats.append({"type": "Feature", "id": did, "geometry": x["geometry"], "properties": {
@@ -2018,6 +2042,11 @@ def zone_detections(zone: dict) -> list[dict]:
             "datetime": p.get("datetime"), "n_pixels": x["n_pixels"], "area_m2": x["area_m2"],
             "prob_max": x["prob_max"], "prob_mean": x["prob_mean"], "threshold": x["threshold"],
             "in_strip": in_strip, "quality_rejected": qrej,
+            **({"type_label": VISUAL_RU.get(vis[i - 1].get("class"), vis[i - 1].get("class")),
+                "visual_class": vis[i - 1].get("class"), "visual_level": vis[i - 1].get("level"),
+                "visual_id": vis[i - 1].get("visual_id"), "false_alarm": vis[i - 1].get("level") == "D",
+                "visual_source": "визуальная разметка L92 (data/case/pairs_visual_labels.csv), уровень D — ложное"}
+               if vis else {}),
             "note": (QREJ_NOTE if qrej else
                      "объект детектора (пиксели P ≥ порога), не концентрация; в полосе наблюдения — in_strip")}})
     return feats
@@ -2044,3 +2073,289 @@ def detections_csv(fc: dict) -> str:
         rows.append([p["det_id"], p["zone_id"], p["scene_id"], p["datetime"], p["n_pixels"], p["area_m2"],
                      p["prob_max"], p["prob_mean"], p["in_strip"], p["threshold"], cen[0], cen[1], "detection"])
     return _csv(DET_COLS, rows)
+
+
+# ------------------------------------------------------------------ satellite scene zones (L111, INBOX §15, 3.10)
+# Built offline by scripts/case/scene_zones.py -> data/case/scene_zones/{index.json, <key>/{zones,detections}.geojson,
+# rgb.jpg, quality.png}. Separate layer: /api/v3/scene_zones (the candidate strips of /zones are unchanged).
+PATHS.setdefault("scene_zones_dir", REPO / "data" / "case" / "scene_zones")
+
+SZ_DET_LABEL = {
+    "detected": "срабатывание детектора (без полевого подтверждения)",
+    "not_detected": "не обнаружено (детектор оценивается, объектов нет)",
+    "insufficient_data": "недостаточно данных: признаки ложного срабатывания",
+}
+SZ_FLAG_RU = {"foam": "пена", "glint": "блик", "ship": "судно/кильватер", "seam": "шов/граница яркости",
+              "coast": "берег/прибой", "shallow": "мелководье/мутная вода"}
+SZ_VERIFY_LABEL = {
+    "level_B_cozar": "обнаружено детектором; совпадает с нитью Cózar 2024 (уровень B)",
+    "unverified": "срабатывание детектора, не проверено",
+    "false_alarm_signs": "недостаточно данных: признаки ложного срабатывания",
+}
+SZ_KIND_RU = {"demo": "отложенная сцена Cózar 2024 (демо)", "live": "район сервиса", "drift": "район (проверка дрейфа)"}
+SZ_STATUS_NOTE = ("«Обнаружено» здесь — вывод детектора по снимку (класс MARIDA Marine Debris: любой плавающий "
+                  "материал), не подтверждённый полем; это не «обнаружен пластик».")
+
+
+def scene_zones_index() -> dict:
+    return _cached("sz_index", PATHS["scene_zones_dir"] / "index.json", _read_json) or {}
+
+
+def _sz_scene_zones(key: str) -> list[dict]:
+    return (_cached(f"sz:{key}", PATHS["scene_zones_dir"] / key / "zones.geojson", _read_json) or {}).get("features") or []
+
+
+def _sz_enrich(f: dict, idx: dict) -> dict:
+    import copy
+    f = copy.deepcopy(f)
+    p = f["properties"]
+    scen = idx.get("scenario") or {}
+    st = p["detection_status"]
+    ver = p.get("verification") or ("false_alarm_signs" if p.get("flags") else None)
+    p["verification"] = ver if st != "not_detected" else "none"
+    p["detection_label"] = SZ_VERIFY_LABEL.get(ver) if st != "not_detected" and ver else SZ_DET_LABEL.get(st, st)
+    p["training_scene_note"] = (f"снимок из обучающей выборки детектора ({p['training_scene']}) — не независимая проверка"
+                                if p.get("training_scene") else None)
+    if p.get("flags"):
+        p["detection_reason"] = ("признаки: " + ", ".join(SZ_FLAG_RU.get(x, x) for x in p["flags"])
+                                 + " — вероятно, ложное срабатывание")
+    else:
+        p["detection_reason"] = None
+    p["status_note"] = SZ_STATUS_NOTE
+    p["scene_kind_label"] = SZ_KIND_RU.get(p.get("scene_kind"), p.get("scene_kind"))
+    if p.get("scene_kind") == "demo":  # short list title: tile of the held-out scene
+        p["title"] = p["title"].replace("Демо Cózar 2024 (отложенная сцена)", "Cózar, отложенная сцена 30SXE")
+    m = p.get("measured") or {}
+    p["area_km2"] = m.get("zone_area_km2")
+    p["area_basis"] = "геодезическая площадь контура зоны (кластер объектов детектора + 150 м)"
+    p["detected_area_m2"] = m.get("suspicious_area_m2")
+    p["concentration"] = None
+    if p["concentration_status"] == "research_estimate":
+        p["scenario"] = {**scen, "shown": True}
+        p["concentration_reason"] = ("по снимку концентрация не измеряется; показан только условный сценарий по "
+                                     "литературе (блок scenario) — не измерение и не результат модели")
+    else:
+        p["scenario"] = {"shown": False, "label": scen.get("label"),
+                         "reason": scen.get("hidden_reason") if p.get("flags") else
+                         ("Сценарий не показывается: нет независимого подтверждения, что это плавучий материал "
+                          "(уровень B — пересечение с нитью каталога Cózar 2024); срабатывание не проверено"
+                          if st == "detected" else "сценарий не применяется: детектор ничего не нашёл")}
+        p["concentration_reason"] = "по снимку концентрация не измеряется; сценарий не показывается"
+    pr = p.get("probable") or {}
+    pr["status"] = p["detection_label"]
+    pr["cozar_note"] = (f"контур пересекает {p.get('n_cozar_filaments')} нит(и) каталога Cózar et al. 2024 "
+                        "(уровень B: плавучий материал, найденный людьми по снимку, не только пластик)"
+                        if p.get("n_cozar_filaments") else None)
+    pr["context"] = ("полнота детектора на независимых нитях Cózar — 36 % [30–43] (234 сцены, L92); ложные на "
+                     "судах 26 % (2 061 рамка, L90) — reports/detector_v2/experiments.json")
+    p["probable"] = pr
+    p["crop_url"] = (f"/api/v3/scene_zones/scenes/{p['scene_key']}/crops/{p['zone_id']}.jpg"
+                     if p.get("crop_file") else None)
+    p["crop_note"] = "слева снимок, справа он же с пикселями детектора (красные; жёлтые — объекты с признаком судна/шва)"
+    return f
+
+
+def scene_zones_all() -> list[dict]:
+    idx = scene_zones_index()
+    out = []
+    for s in idx.get("scenes") or []:
+        if not s.get("evaluable") or s.get("error"):
+            continue
+        out.extend(_sz_enrich(f, idx) for f in _sz_scene_zones(s["key"]))
+    out.sort(key=lambda f: f["id"])
+    return out
+
+
+def sz_scenes() -> list[dict]:
+    """Scene records of the layer, in the /scenes shape (preview + quality overlay on bounds)."""
+    out = []
+    for s in scene_zones_index().get("scenes") or []:
+        if s.get("error"):
+            continue
+        base = f"/api/v3/scene_zones/scenes/{s['key']}"
+        b = s.get("bounds")
+        out.append({"scene_id": s["key"], "scene_key": s["key"], "product_id": s.get("scene_id"),
+                    "mission": "Sentinel-2", "source": "earth-search", "datetime": s.get("datetime"),
+                    "footprint": bounds_polygon(b), "bounds": b,
+                    "footprint_note": s.get("crop_note"), "cloud_pct": None, "valid_water_fraction": None,
+                    "preview_url": f"{base}/rgb.jpg", "quality_url": f"{base}/quality.png", "prob_url": None,
+                    "mask_url": None, "tiles": None, "n_zones": s.get("n_zones_total", 0), "n_linked_samples": 0,
+                    "status": "evaluated" if s.get("evaluable") else "not_evaluated",
+                    "reject_reasons": [], "scene_kind": s.get("kind"),
+                    "scene_kind_label": SZ_KIND_RU.get(s.get("kind"), s.get("kind")),
+                    "region": s.get("region"), "region_name": s.get("region_name"),
+                    "evaluable": s.get("evaluable"), "not_evaluated_reason": s.get("not_evaluated_reason"),
+                    "sun_zenith_deg": s.get("sun_zenith_deg"), "wind10m_ms": s.get("wind10m_ms"),
+                    "water_km2": s.get("water_km2"), "lwd_m2_km2": s.get("lwd_m2_km2"),
+                    "by_status": s.get("by_status"), "model": s.get("model")})
+    return out
+
+
+def sz_crop(key: str, zone_id: str) -> Optional[Path]:
+    if not zone_id.startswith(f"SZ-{key}-") or "/" in zone_id or "\\" in zone_id or ".." in zone_id:
+        return None
+    p = PATHS["scene_zones_dir"] / key / "crops" / f"{zone_id}.jpg"
+    return p if p.is_file() else None
+
+
+# false-alarm example chosen by eye among ship-flagged zones (open water, bright point + wake; L111): the others of
+# the top ship share are coastal (turbid bays) and less legible on a small crop
+SZ_EXAMPLE_FALSE = "SZ-drift-honduras-2026-02-19-007"
+
+
+def sz_examples() -> list[dict]:
+    """Two fixed examples for the card: a detected zone on the held-out Cózar scene crossing the most Cózar
+    filaments (success) and the zone with the largest ship/wake share (false alarm)."""
+    zs = scene_zones_all()
+    good = [f for f in zs if f["properties"].get("verification") == "level_B_cozar"]
+    good.sort(key=lambda f: (-(f["properties"].get("n_cozar_filaments") or 0),
+                             -(f["properties"]["measured"].get("n_pixels") or 0)))
+    bad = [f for f in zs if "ship" in (f["properties"].get("flags") or []) and f["properties"].get("crop_url")]
+    bad.sort(key=lambda f: (f["id"] != SZ_EXAMPLE_FALSE, -((((f["properties"].get("probable") or {}).get("signs") or {})
+                                                              .get("ship") or {}).get("share") or 0)))
+    out = []
+    if good and good[0]["properties"].get("crop_url"):
+        p = good[0]["properties"]
+        out.append({"kind": "success", "label": "удачно: нить каталога Cózar 2024 (отложенная сцена)",
+                    "zone_id": p["zone_id"], "crop_url": p["crop_url"], "title": p["title"],
+                    "note": f"детектор отметил {p['measured']['n_pixels']} пикс.; контур пересекает "
+                            f"{p.get('n_cozar_filaments')} нит(и) Cózar (уровень B, плавучий материал)"})
+    if bad:
+        p = bad[0]["properties"]
+        out.append({"kind": "false_alarm", "label": "ложное срабатывание: судно / кильватер",
+                    "zone_id": p["zone_id"], "crop_url": p["crop_url"], "title": p["title"],
+                    "note": "пиксели у яркой цели и её следа — признак судна; статус «недостаточно данных», сценарий скрыт"})
+    return out
+
+
+def sz_file(key: str, name: str) -> Optional[Path]:
+    if name not in ("rgb.jpg", "quality.png") or not any(s["key"] == key for s in scene_zones_index().get("scenes") or []):
+        return None
+    p = PATHS["scene_zones_dir"] / key / name
+    return p if p.is_file() else None
+
+
+def filter_scene_zones(bbox=None, date_from=None, date_to=None, detection_statuses=None, concentration_statuses=None,
+                       scene_kinds=None, scene_key=None, statuses=None) -> list[dict]:
+    out = []
+    for f in scene_zones_all():
+        p = f["properties"]
+        if scene_key and p["scene_key"] != scene_key:
+            continue
+        if scene_kinds and p["scene_kind"] not in scene_kinds:
+            continue
+        if detection_statuses and p["detection_status"] not in detection_statuses:
+            continue
+        if concentration_statuses and p["concentration_status"] not in concentration_statuses:
+            continue
+        if statuses:
+            tags = {p["detection_status"], p["concentration_status"]}
+            if p["concentration_status"] == "unavailable":
+                tags.add("concentration_unavailable")
+            if not set(statuses) & tags:
+                continue
+        if not in_dates(p["datetime"], date_from, date_to):
+            continue
+        if bbox is not None and not bbox_intersects(_geom_bounds(f["geometry"]), bbox):
+            continue
+        out.append(f)
+    return out
+
+
+def scene_zones_fc(feats: list[dict]) -> dict:
+    idx = scene_zones_index()
+    fc = {"type": "FeatureCollection", "kind": "detection_zone", "layer_kind": "scene_zone",
+          "label": "Спутниковые зоны детекции (текущий детектор)", "count": len(feats), "empty_reason": None,
+          "model": idx.get("model"), "rules": idx.get("rules"), "status_note": SZ_STATUS_NOTE,
+          "blocks_note": ("measured — измерено по снимку; probable — вероятность и признаки; scenario — условный "
+                          "диапазон по литературе, ЕСЛИ это мусорная полоса (не измерение, не результат модели)"),
+          "examples": sz_examples() if idx else [],
+          "features": feats}
+    if not feats:
+        fc["empty_reason"] = ("Слой не построен (scripts/case/scene_zones.py)" if not idx else
+                              "Нет спутниковых зон под выбранные фильтры")
+    return fc
+
+
+def scene_zone_detections(zone_id: str) -> dict:
+    for f in scene_zones_all():
+        if f["id"] == zone_id:
+            key = f["properties"]["scene_key"]
+            dets = (_cached(f"szd:{key}", PATHS["scene_zones_dir"] / key / "detections.geojson", _read_json) or {}
+                    ).get("features") or []
+            fs = [d for d in dets if d["properties"]["zone_id"] == zone_id]
+            return {"type": "FeatureCollection", "kind": "detection", "label": "Подозрительные пиксели детектора",
+                    "count": len(fs), "empty_reason": None if fs else "в зоне нет объектов детектора", "features": fs}
+    return {"type": "FeatureCollection", "kind": "detection", "count": 0, "empty_reason": "зона не найдена",
+            "features": []}
+
+
+SZ_COLS = ["zone_id", "scene_key", "scene_kind", "scene_id", "datetime", "detection_status", "detection_label",
+           "concentration_status", "flags", "zone_area_km2", "suspicious_area_m2", "n_pixels", "n_objects",
+           "water_km2", "lwd_m2_km2", "valid_water_fraction", "cloud_fraction", "glint_fraction", "prob_max",
+           "prob_mean", "foam_sign", "glint_sign", "ship_sign", "n_cozar_filaments", "scenario_shown",
+           "scenario_lo_items_km2", "scenario_typical_lo_items_km2", "scenario_typical_hi_items_km2",
+           "scenario_hi_items_km2", "scenario_label", "scenario_assumption_or_reason", "field_nearest_km",
+           "field_nearest_c_items_km2", "field_nearest_ci95", "field_nearest_date", "model_weights", "model_sha256",
+           "threshold", "centroid_lon", "centroid_lat", "kind"]
+
+
+def scene_zones_csv(feats: list[dict]) -> str:
+    rows = []
+    for f in feats:
+        p = f["properties"]
+        m, pr, sc = p.get("measured") or {}, p.get("probable") or {}, p.get("scenario") or {}
+        q, sg, md = m.get("quality") or {}, pr.get("signs") or {}, m.get("model") or {}
+        fn = ((p.get("field_nearby") or {}).get("items") or [None])[0] or {}
+        b = _geom_bounds(f["geometry"]) if f.get("geometry") else None
+        cen = [round((b[0] + b[2]) / 2, 6), round((b[1] + b[3]) / 2, 6)] if b else [None, None]
+        shown = bool(sc.get("shown"))
+        rows.append([p["zone_id"], p["scene_key"], p["scene_kind"], p["scene_id"], p["datetime"], p["detection_status"],
+                     p.get("detection_label"), p["concentration_status"], p.get("flags") or [], m.get("zone_area_km2"),
+                     m.get("suspicious_area_m2"), m.get("n_pixels"), m.get("n_objects"), m.get("water_km2"),
+                     m.get("lwd_m2_km2"), q.get("valid_water_fraction"), q.get("cloud_fraction"), q.get("glint_fraction"),
+                     pr.get("prob_max"), pr.get("prob_mean"), (sg.get("foam") or {}).get("flag"),
+                     (sg.get("glint") or {}).get("flag"), (sg.get("ship") or {}).get("flag"), p.get("n_cozar_filaments"),
+                     shown, sc.get("lo") if shown else None, sc.get("typical_lo") if shown else None,
+                     sc.get("typical_hi") if shown else None, sc.get("hi") if shown else None,
+                     sc.get("label"), sc.get("assumption") if shown else sc.get("reason"),
+                     fn.get("distance_km"), fn.get("c_items_km2"),
+                     f"{fn.get('ci95_lo')}–{fn.get('ci95_hi')}" if fn else None, fn.get("date"),
+                     md.get("weights"), md.get("sha256"), md.get("threshold"), cen[0], cen[1], "detection_zone"])
+    return _csv(SZ_COLS, rows)
+
+
+def detector_model_info() -> dict:
+    """weights/lgbm: sha256 of model.txt + file date (the model version shown in the legend / API)."""
+    import hashlib
+    p = PATHS["lgbm_meta"].parent / "model.txt"
+
+    def load(path):
+        h = hashlib.sha256(path.read_bytes()).hexdigest()
+        return {"weights": "weights/lgbm", "file": "weights/lgbm/model.txt", "sha256": h, "sha256_short": h[:12],
+                "trained_at": dt.datetime.fromtimestamp(path.stat().st_mtime, dt.timezone.utc).strftime(
+                    "%Y-%m-%dT%H:%M:%SZ"),
+                "threshold": (_cached("lgbm_meta", PATHS["lgbm_meta"], _read_json) or {}).get("threshold"),
+                "harmonize": "none"}
+    return (_cached("lgbm_model_info", p, load) or {}) if p.is_file() else {}
+
+
+def quantity_levels() -> dict:
+    """Three levels of the quantity logic (INBOX §15); numbers from final_numbers.json (case.sections)."""
+    fn = _cached("final_numbers", PATHS["final_numbers"], _read_json) or {}
+    s = (fn.get("case") or {}).get("sections") or {}
+    a = s.get("adis_pairs") or {}
+    cal = (s.get("quantity") or {}).get("calibration") or {}
+    return {
+        "place_time_pairs": {"n": a.get("A"), "n_detector_evaluable": a.get("A_eval"),
+                             "label": "пары по месту и времени (ADIS ↔ Sentinel-2)",
+                             "note": "совпадение по месту и времени не доказывает, что на снимке видны те же предметы"},
+        "visible_signal": {"n_with_items": a.get("A_with_items"), "n_with_items_evaluable": a.get("A_with_items_eval"),
+                           "n_detector_pixels": a.get("A_with_items_eval_det_px"),
+                           "label": "видимый сигнал на снимке",
+                           "note": ("на синхронных отрезках ADIS с единичными предметами детектор предметы не увидел; "
+                                    "это согласуется с физикой (доля покрытия ~10⁻⁷), но не задаёт общий предел для "
+                                    "всех скоплений")},
+        "calibration_pairs": {"n": cal.get("pairs_A_with_S_pos", 0), "label": "калибровочные пары «снимок → шт./км²»",
+                              "note": "калибровочных пар 0: перевод «снимок → шт./км²» не обучен"},
+    }

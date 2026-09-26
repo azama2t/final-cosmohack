@@ -1,0 +1,51 @@
+{
+ "key": "live-karachi-2025-11-11",
+ "kind": "live",
+ "region": "karachi",
+ "region_name": "Карачи (порт, устье Лиари)",
+ "date": "2025-11-11",
+ "datetime": "2025-11-11T06:10:09.024000Z",
+ "scene_id": "S2B_MSIL2A_20251111T061009_R134_T42RTN_20251111T070326",
+ "tile": "42RTN",
+ "bounds": [
+  66.82431,
+  24.684921,
+  67.075419,
+  24.914671
+ ],
+ "sun_zenith_deg": 45.0,
+ "water_b3_median": 0.0368,
+ "evaluable": true,
+ "low_sun": false,
+ "weak_signal": false,
+ "wind10m_ms": 1.2,
+ "wind_source": "ERA5 через Open-Meteo archive API, час съёмки",
+ "water_km2": 387.273,
+ "det_pixels": 223,
+ "det_area_m2": 22300,
+ "lwd_m2_km2": 57.58,
+ "model": {
+  "weights": "weights/lgbm",
+  "file": "weights/lgbm/model.txt",
+  "sha256": "0eeebf43fcccd8c7c07f053b7ec723229d1a3c9b92d12eec1bdb269258c51470",
+  "sha256_short": "0eeebf43fccc",
+  "trained_at": "2026-09-25T01:35:55Z",
+  "threshold": 0.63,
+  "harmonize": "none",
+  "class": "MARIDA Marine Debris (любой плавающий мусор, не только пластик)"
+ },
+ "crop_note": "вырезка вокруг района/сцены, не весь тайл",
+ "selection": "2025-10-01/2025-11-30; crop cloud<=0.2, valid>=0.95; ranked by glint among 8 OK of 20 screened",
+ "training_scene": null,
+ "rgb_file": "rgb.jpg",
+ "quality_file": "quality.png",
+ "rgb_note": "B4,B3,B2, растяжка 0..p98 по пригодной воде, гамма 1/1.4; EPSG:4326 по bounds",
+ "n_zones": 7,
+ "small_cluster_px": 105,
+ "n_zones_total": 7,
+ "by_status": {
+  "detected": 0,
+  "not_detected": 0,
+  "insufficient_data": 7
+ }
+}

@@ -1,4 +1,5 @@
 // «Метрики»: numbers ONLY from GET /api/v3/metrics (no constants here). Rows without data in the API are not shown.
+import { modelRu, profileCfgRu } from './fmt';
 import Info from '../components/Info';
 import { num, signed } from './fmt';
 
@@ -114,7 +115,7 @@ export default function MetricsPanel({ m, err }: { m: any | null; err: string | 
         return (
           <div className="sec" key={pid} data-testid="metrics-conc">
             <div className="sec-h">
-              <h3>Концентрация, dev CV · {pid.replace(/_/g, ' ')}</h3>
+              <h3>Концентрация, dev CV · {profileCfgRu(pid)}</h3>
               <Info label="Сплит" align="right">
                 Сплит: {pr.main_split ?? mm.split ?? '—'} (кросс-валидация по участкам маршрута), n = {num(mm.n ?? b.n ?? null, 0)}. {typeof c.note === 'string' ? c.note : ''}
               </Info>
@@ -123,7 +124,7 @@ export default function MetricsPanel({ m, err }: { m: any | null; err: string | 
               <thead>
                 <tr>
                   <th />
-                  <th className="r">{mm.name ?? 'основная'}</th>
+                  <th className="r">{mm.name ? modelRu(mm.name) : 'основная'}</th>
                   <th className="r">{b.name ? 'медиана' : '—'}</th>
                 </tr>
               </thead>
@@ -196,7 +197,7 @@ function FinalTest({ ft, status }: { ft: any; status: any }) {
         return (
           <div className="sec" key={pid} data-testid="metrics-final-test">
             <div className="sec-h">
-              <h3>Отложенный test · {pid.replace(/_/g, ' ')}</h3>
+              <h3>Отложенный test · {profileCfgRu(pid)}</h3>
               <Info label="Протокол" align="right">
                 {typeof ft.note === 'string' ? ft.note : ''} {typeof status === 'string' ? `Статус: ${status}.` : ''} n test = {num(pr.n_test ?? mm.n ?? null, 0)}, n dev ={' '}
                 {num(pr.n_dev ?? null, 0)}. {typeof pr.note === 'string' ? pr.note : ''}
@@ -206,8 +207,8 @@ function FinalTest({ ft, status }: { ft: any; status: any }) {
               <thead>
                 <tr>
                   <th />
-                  <th className="r">{pr.main_model ?? 'модель'}</th>
-                  <th className="r">{pr.baseline ?? 'медиана'}</th>
+                  <th className="r">{modelRu(pr.main_model)}</th>
+                  <th className="r">{pr.baseline ? modelRu(pr.baseline) : 'медиана'}</th>
                 </tr>
               </thead>
               <tbody>

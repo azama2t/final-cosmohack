@@ -1,0 +1,51 @@
+{
+ "key": "live-mumbai-2025-01-31",
+ "kind": "live",
+ "region": "mumbai",
+ "region_name": "Мумбаи (устье Ульхаса, крики Васаи и Малад)",
+ "date": "2025-01-31",
+ "datetime": "2025-01-31T05:41:21.025000Z",
+ "scene_id": "S2C_MSIL2A_20250131T054121_R005_T43QBB_20250131T124701",
+ "tile": "43QBB",
+ "bounds": [
+  72.659206,
+  19.085598,
+  72.900635,
+  19.314433
+ ],
+ "sun_zenith_deg": 44.4,
+ "water_b3_median": 0.0772,
+ "evaluable": true,
+ "low_sun": false,
+ "weak_signal": false,
+ "wind10m_ms": 2.3,
+ "wind_source": "ERA5 через Open-Meteo archive API, час съёмки",
+ "water_km2": 357.689,
+ "det_pixels": 71,
+ "det_area_m2": 7100,
+ "lwd_m2_km2": 19.85,
+ "model": {
+  "weights": "weights/lgbm",
+  "file": "weights/lgbm/model.txt",
+  "sha256": "0eeebf43fcccd8c7c07f053b7ec723229d1a3c9b92d12eec1bdb269258c51470",
+  "sha256_short": "0eeebf43fccc",
+  "trained_at": "2026-09-25T01:35:55Z",
+  "threshold": 0.63,
+  "harmonize": "none",
+  "class": "MARIDA Marine Debris (любой плавающий мусор, не только пластик)"
+ },
+ "crop_note": "вырезка вокруг района/сцены, не весь тайл",
+ "selection": "2025-01-01/2025-03-15; crop cloud<=0.2, valid>=0.95; ranked by glint among 13 OK of 15 screened",
+ "training_scene": null,
+ "rgb_file": "rgb.jpg",
+ "quality_file": "quality.png",
+ "rgb_note": "B4,B3,B2, растяжка 0..p98 по пригодной воде, гамма 1/1.4; EPSG:4326 по bounds",
+ "n_zones": 5,
+ "small_cluster_px": 25,
+ "n_zones_total": 5,
+ "by_status": {
+  "detected": 0,
+  "not_detected": 0,
+  "insufficient_data": 5
+ }
+}

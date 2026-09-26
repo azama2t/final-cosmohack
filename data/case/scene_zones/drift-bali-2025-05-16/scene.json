@@ -1,0 +1,51 @@
+{
+ "key": "drift-bali-2025-05-16",
+ "kind": "drift",
+ "region": "bali",
+ "region_name": "Бали (пролив Бадунг)",
+ "date": "2025-05-16",
+ "datetime": "2025-05-16T02:15:29.024000Z",
+ "scene_id": "S2B_MSIL2A_20250516T021529_R003_T50LLR_20250516T041723",
+ "tile": "50LLR",
+ "bounds": [
+  115.235529,
+  -8.943519,
+  115.464512,
+  -8.716301
+ ],
+ "sun_zenith_deg": 40.3,
+ "water_b3_median": 0.0108,
+ "evaluable": true,
+ "low_sun": false,
+ "weak_signal": false,
+ "wind10m_ms": 5.88,
+ "wind_source": "ERA5 через Open-Meteo archive API, час съёмки",
+ "water_km2": 454.724,
+ "det_pixels": 5,
+ "det_area_m2": 500,
+ "lwd_m2_km2": 1.1,
+ "model": {
+  "weights": "weights/lgbm",
+  "file": "weights/lgbm/model.txt",
+  "sha256": "0eeebf43fcccd8c7c07f053b7ec723229d1a3c9b92d12eec1bdb269258c51470",
+  "sha256_short": "0eeebf43fccc",
+  "trained_at": "2026-09-25T01:35:55Z",
+  "threshold": 0.63,
+  "harmonize": "none",
+  "class": "MARIDA Marine Debris (любой плавающий мусор, не только пластик)"
+ },
+ "crop_note": "вырезка вокруг района/сцены, не весь тайл",
+ "selection": "L45: next snapshot 2025-05-12/2025-05-16 of the same crop (bounds_utm of 2025-05-11); crop cloud<0.4, valid>=0.5; not for the service layer",
+ "training_scene": null,
+ "rgb_file": "rgb.jpg",
+ "quality_file": "quality.png",
+ "rgb_note": "B4,B3,B2, растяжка 0..p98 по пригодной воде, гамма 1/1.4; EPSG:4326 по bounds",
+ "n_zones": 0,
+ "small_cluster_px": 5,
+ "n_zones_total": 1,
+ "by_status": {
+  "detected": 0,
+  "not_detected": 1,
+  "insufficient_data": 0
+ }
+}

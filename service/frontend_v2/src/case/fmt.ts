@@ -214,3 +214,21 @@ export function reasonRu(s: string | null | undefined): string | null {
 }
 const ZFLAG_RU: Record<string, string> = { pair_rejected_drift: 'пара отклонена по дрейфу' };
 export const zoneFlagRu = (f: string) => ZFLAG_RU[f] ?? f.replace(/_/g, ' ');
+
+/** concentration models / profile configs of the API → Russian (jury-6: no raw ids in the UI) */
+export function modelRu(m: string | null | undefined): string {
+  if (!m) return 'модель';
+  if (/^median/.test(m)) return 'медиана профиля';
+  if (/^ridge/.test(m)) return 'гребневая регрессия (лог.)';
+  const k = m.match(/^knn(\d*)/);
+  if (k) return `k ближайших соседей${k[1] ? ` (k = ${k[1]})` : ''}${/log/.test(m) ? ' (лог.)' : ''}`;
+  if (/^gbm|lgbm|lightgbm/i.test(m)) return 'градиентный бустинг';
+  return m.replace(/_/g, ' ');
+}
+const PCFG_RU: Record<string, string> = {
+  S2_visual_total_plastic: 'Саргассово море: визуально с судна, весь пластик > 2 см',
+  S1_trawl_total_plastic: 'Тихоокеанское мусорное пятно: трал, весь пластик',
+  S3_visual_all_litter: 'Северное море: визуально с судна, весь мусор > 2 см',
+  S4_visual_all_litter: 'Чёрное море: визуально с судна, весь мусор > 2,5 см',
+};
+export const profileCfgRu = (id: string) => PCFG_RU[id] ?? id.replace(/_/g, ' ');

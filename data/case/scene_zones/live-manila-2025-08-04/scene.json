@@ -1,0 +1,51 @@
+{
+ "key": "live-manila-2025-08-04",
+ "kind": "live",
+ "region": "manila",
+ "region_name": "Манильский залив",
+ "date": "2025-08-04",
+ "datetime": "2025-08-04T02:15:29.024000Z",
+ "scene_id": "S2B_MSIL2A_20250804T021529_R003_T51PTS_20250804T041948",
+ "tile": "51PTS",
+ "bounds": [
+  120.702351,
+  14.485488,
+  120.937274,
+  14.714259
+ ],
+ "sun_zenith_deg": 26.0,
+ "water_b3_median": 0.0335,
+ "evaluable": true,
+ "low_sun": false,
+ "weak_signal": false,
+ "wind10m_ms": 1.21,
+ "wind_source": "ERA5 через Open-Meteo archive API, час съёмки",
+ "water_km2": 619.826,
+ "det_pixels": 118,
+ "det_area_m2": 11800,
+ "lwd_m2_km2": 19.04,
+ "model": {
+  "weights": "weights/lgbm",
+  "file": "weights/lgbm/model.txt",
+  "sha256": "0eeebf43fcccd8c7c07f053b7ec723229d1a3c9b92d12eec1bdb269258c51470",
+  "sha256_short": "0eeebf43fccc",
+  "trained_at": "2026-09-25T01:35:55Z",
+  "threshold": 0.63,
+  "harmonize": "none",
+  "class": "MARIDA Marine Debris (любой плавающий мусор, не только пластик)"
+ },
+ "crop_note": "вырезка вокруг района/сцены, не весь тайл",
+ "selection": "2025-07-01/2025-09-30; crop cloud<=0.3, valid>=0.95; ranked by glint among 2 OK of 6 screened",
+ "training_scene": null,
+ "rgb_file": "rgb.jpg",
+ "quality_file": "quality.png",
+ "rgb_note": "B4,B3,B2, растяжка 0..p98 по пригодной воде, гамма 1/1.4; EPSG:4326 по bounds",
+ "n_zones": 2,
+ "small_cluster_px": 102,
+ "n_zones_total": 2,
+ "by_status": {
+  "detected": 0,
+  "not_detected": 0,
+  "insufficient_data": 2
+ }
+}

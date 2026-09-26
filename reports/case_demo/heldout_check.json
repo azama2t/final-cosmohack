@@ -1,0 +1,74 @@
+{
+ "MARIDA": {
+  "file": "data/MARIDA/splits/{train,val,test}_X.txt + patches (scan_marida)",
+  "role": "обучение weights/lgbm (train), подбор порога 0.63 (val), test",
+  "n_acq": 63,
+  "n_tiles": 17,
+  "same_acquisition": false,
+  "same_tile": false,
+  "same_tile_acqs": []
+ },
+ "MADOS": {
+  "file": "data/MADOS (scan_mados, ACOLITE prefix)",
+  "role": "обучение weights/lgbm",
+  "n_acq": 0,
+  "n_tiles": 0,
+  "same_acquisition": false,
+  "same_tile": false,
+  "same_tile_acqs": []
+ },
+ "L98_cozar15": {
+  "file": "data/extra/features_cozar2024.npz (acq, acq_bg)",
+  "role": "эксперименты L92 (B Cózar, 15 съёмок)",
+  "n_acq": 15,
+  "n_tiles": 15,
+  "same_acquisition": false,
+  "same_tile": false,
+  "same_tile_acqs": []
+ },
+ "L92_cozar234": {
+  "file": "out/detector_v2/cozar_sample.csv + features_cozar2024_l2a.npz (acq)",
+  "role": "эксперименты L92 (234 случайные нити, полнота 36 %)",
+  "n_acq": 240,
+  "n_tiles": 121,
+  "same_acquisition": false,
+  "same_tile": false,
+  "same_tile_acqs": []
+ },
+ "PLP_FO": {
+  "file": "reports/extra_data/registry.csv",
+  "role": "B PLP/FloatingObjects (эксперименты L92)",
+  "n_acq": 66,
+  "n_tiles": 29,
+  "same_acquisition": false,
+  "same_tile": false,
+  "same_tile_acqs": []
+ },
+ "D_vessels_clouds": {
+  "file": "reports/extra_data/registry_negatives.csv",
+  "role": "D суда/облака (эксперименты L92)",
+  "n_acq": 47,
+  "n_tiles": 34,
+  "same_acquisition": false,
+  "same_tile": false,
+  "same_tile_acqs": []
+ },
+ "pairs": {
+  "file": "data/pairs/candidates.csv",
+  "role": "снимки пар кейса (D пар в L92)",
+  "n_acq": 105,
+  "n_tiles": 37,
+  "same_acquisition": false,
+  "same_tile": false,
+  "same_tile_acqs": []
+ },
+ "live_drift": {
+  "file": "data/live/*/*, data/drift_check/*/*",
+  "role": "районы сервиса",
+  "n_acq": 82,
+  "n_tiles": 18,
+  "same_acquisition": false,
+  "same_tile": false,
+  "same_tile_acqs": []
+ }
+}

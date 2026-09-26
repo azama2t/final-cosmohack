@@ -1,0 +1,2 @@
+Floating Marine Litter (FML) dataset v2 — G. Lazzerini, F. Ferreira, A. Ridolfi (2025), SEANOE, doi:10.17882/106148, CC BY 4.0.
+Resized to 1280x720. Frames from the grouped hold-out test sets: fml_1.jpg = image_20241004_084611_344800 (set17, 6 labelled items), fml_2.jpg = image_20241007_131245_288577 (set5, 3 labelled items), fml_3.jpg = image_20241007_091923_839343 (set11, 4 labelled items)

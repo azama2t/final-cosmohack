@@ -56,6 +56,26 @@ export interface CaseMapProps {
   onReady: () => void;
   /** suspicious detector pixels of the selected strip (/zones/{id}.detections) */
   detections: FC<any> | null;
+  /** satellite scene zones (/api/v3/scene_zones, 3.10) */
+  szones?: FC<any> | null;
+}
+
+/** colours of the satellite scene zones by detection status (detector verdict, no field confirmation) */
+export const SZ_COLORS: Record<string, string> = { detected: '#ff8c42', unverified: '#d9b870', not_detected: '#2b8a3e', insufficient_data: '#9aa0a8' };
+/** map colour key: a detector hit without level-B evidence is «unverified», not «detected» */
+export const szKey = (p: any) => (p.detection_status === 'detected' && p.verification !== 'level_B_cozar' ? 'unverified' : p.detection_status);
+
+function szFeatures(fc: FC<any> | null | undefined) {
+  const polys: any[] = [];
+  const pts: any[] = [];
+  for (const f of fc?.features ?? []) {
+    if (!f.geometry) continue;
+    const props = { id: f.id, ds: szKey(f.properties), full: f.properties.zone_id.endsWith('-000') ? 1 : 0 };
+    polys.push({ type: 'Feature', geometry: f.geometry, properties: props });
+    const c = geomCenter(f.geometry);
+    if (c) pts.push({ type: 'Feature', geometry: { type: 'Point', coordinates: c }, properties: props });
+  }
+  return { polys: { type: 'FeatureCollection', features: polys }, pts: { type: 'FeatureCollection', features: pts } };
 }
 
 function syncStyle(b: Basemap, proj: Projection): any | null {
@@ -209,6 +229,9 @@ export default function CaseMap(p: CaseMapProps) {
     const fp = cur.scenes.filter((s) => s.footprint).map((s) => ({ type: 'Feature', geometry: s.footprint, properties: { id: s.scene_id } }));
     src('c-scene-fp', { type: 'FeatureCollection', features: fp });
     src('c-det', cur.detections ?? EMPTY);
+    const sz = szFeatures(cur.szones);
+    src('c-sz', sz.polys);
+    src('c-sz-pts', sz.pts);
     const hl = cur.pairHl;
     src('c-pair', hl?.geom ? { type: 'FeatureCollection', features: [{ type: 'Feature', geometry: hl.geom, properties: {} }] } : EMPTY);
     src(
@@ -294,6 +317,18 @@ export default function CaseMap(p: CaseMapProps) {
       filter: ['==', ['get', 'id'], ''],
       paint: { 'circle-radius': 11, 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 2 },
     });
+    // satellite scene zones: solid outline (a zone of the detector on a real scene), colour = detector verdict
+    const szCol: any = ['match', ['get', 'ds'], 'detected', SZ_COLORS.detected, 'unverified', SZ_COLORS.unverified, 'not_detected', SZ_COLORS.not_detected, SZ_COLORS.insufficient_data];
+    add({ id: 'c-sz-fill', type: 'fill', source: 'c-sz', paint: { 'fill-color': szCol, 'fill-opacity': ['case', ['==', ['get', 'full'], 1], 0.04, 0.22] } });
+    add({ id: 'c-sz-line', type: 'line', source: 'c-sz', paint: { 'line-color': szCol, 'line-width': 1.8 } });
+    add({ id: 'c-sz-sel', type: 'line', source: 'c-sz', filter: ['==', ['get', 'id'], ''], paint: { 'line-color': '#ffffff', 'line-width': 3 } });
+    add({
+      id: 'c-sz-pts',
+      type: 'circle',
+      source: 'c-sz-pts',
+      maxzoom: 9,
+      paint: { 'circle-radius': 5, 'circle-color': szCol, 'circle-stroke-color': '#0b0c0e', 'circle-stroke-width': 1.5 },
+    });
     // suspicious detector pixels: object contours (signal colour), inside the strip solid, outside faint
     add({ id: 'c-det-fill', type: 'fill', source: 'c-det', paint: { 'fill-color': ['case', ['==', ['get', 'qr'], true], '#9aa0a8', ACCENT], 'fill-opacity': ['case', ['==', ['get', 'in_strip'], true], 0.55, 0.12] } });
     add({ id: 'c-det-line', type: 'line', source: 'c-det', paint: { 'line-color': ['case', ['==', ['get', 'qr'], true], '#9aa0a8', ACCENT], 'line-width': 1.2, 'line-opacity': ['case', ['==', ['get', 'in_strip'], true], 1, 0.45] } });
@@ -334,10 +369,11 @@ export default function CaseMap(p: CaseMapProps) {
     // visibility + selection
     const vis = (id: string, on: boolean) => map.getLayer(id) && map.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none');
     for (const id of ['c-obs-lines', 'c-obs-lines-approx', 'c-obs-items', 'c-obs-zero', 'c-obs-dens', 'c-obs-sel']) vis(id, cur.layers.obs);
-    for (const id of ['c-zones-fill', 'c-zones-line', 'c-zones-sel', 'c-zone-pts']) vis(id, cur.layers.zones);
+    for (const id of ['c-zones-fill', 'c-zones-line', 'c-zones-sel', 'c-zone-pts', 'c-sz-fill', 'c-sz-line', 'c-sz-sel', 'c-sz-pts']) vis(id, cur.layers.zones);
     vis('c-scene-fp', cur.layers.scenes);
     const sel = cur.selected;
     map.setFilter('c-zones-sel', ['==', ['get', 'id'], sel?.kind === 'zone' ? sel.id : '']);
+    map.setFilter('c-sz-sel', ['==', ['get', 'id'], sel?.kind === 'zone' ? sel.id : '']);
     map.setFilter('c-obs-sel', ['==', ['get', 'id'], sel?.kind === 'obs' ? sel.id : '']);
   };
 
@@ -361,6 +397,13 @@ export default function CaseMap(p: CaseMapProps) {
     ctl.overlay = null;
     ctl.render = () => {};
     map.addControl(new maplibregl.ScaleControl({ unit: 'metric', maxWidth: 100 }), 'bottom-left');
+    const ruScale = () => {
+      const sb = map.getContainer().querySelector('.maplibregl-ctrl-scale');
+      if (sb && /\d\s?k?m$/.test(sb.textContent ?? '')) sb.textContent = (sb.textContent ?? '').replace(/km$/, 'км').replace(/(\d\s?)m$/, '$1м');
+    };
+    map.on('move', ruScale);
+    map.on('load', ruScale);
+    map.on('zoomend', ruScale);
     appliedStyle.current = syncStyle(eff, p.projection) ? eff : null;
     let streak = 0;
     let lastOk = 0;
@@ -410,7 +453,7 @@ export default function CaseMap(p: CaseMapProps) {
       const c = map.getCenter();
       props.current.onCamera({ lon: c.lng, lat: c.lat, zoom: map.getZoom() });
     });
-    const HIT = ['c-obs-dens', 'c-obs-zero', 'c-obs-items', 'c-zones-fill', 'c-zone-pts'];
+    const HIT = ['c-obs-dens', 'c-obs-zero', 'c-obs-items', 'c-zones-fill', 'c-zone-pts', 'c-sz-pts', 'c-sz-fill'];
     const hit = (pt: maplibregl.PointLike) => {
       const layers = HIT.filter((l) => map.getLayer(l));
       if (!layers.length) return null;
@@ -420,7 +463,8 @@ export default function CaseMap(p: CaseMapProps) {
       ];
       const fs = map.queryRenderedFeatures(box, { layers });
       const o = fs.find((f) => f.layer.id.startsWith('c-obs'));
-      const z = fs.find((f) => f.layer.id.startsWith('c-zone'));
+      // a small scene zone wins over the whole-crop «не обнаружено» zone and over strips
+      const z = fs.find((f) => f.layer.id.startsWith('c-sz') && !f.properties?.full) ?? fs.find((f) => f.layer.id.startsWith('c-zone')) ?? fs.find((f) => f.layer.id.startsWith('c-sz'));
       const f = o ?? z;
       if (!f) return null;
       return { kind: (f === o ? 'obs' : 'zone') as 'obs' | 'zone', id: String(f.properties?.id) };
@@ -506,7 +550,7 @@ export default function CaseMap(p: CaseMapProps) {
   }, [p.projection]);
 
   // ---- data ----
-  useEffect(sync, [p.obs, p.zones, p.scenes, p.layers, p.selected, p.pairHl, p.meta, p.detections]);
+  useEffect(sync, [p.obs, p.zones, p.scenes, p.layers, p.selected, p.pairHl, p.meta, p.detections, p.szones]);
 
   // ---- scenes with a quality mask but no RGB preview: say so (the translucent mask alone is not a picture) ----
   const noPrevMarkers = useRef<maplibregl.Marker[]>([]);
@@ -546,16 +590,16 @@ export default function CaseMap(p: CaseMapProps) {
       const f = p.obs?.features.find((x) => x.id === s.id);
       at = f ? geomCenter(f.geometry) : null;
     } else {
-      const f = p.zones?.features.find((x) => x.id === s.id);
+      const f = p.zones?.features.find((x) => x.id === s.id) ?? p.szones?.features.find((x: any) => x.id === s.id);
       at = f ? geomCenter(f.geometry) : null;
     }
     if (!at) return;
     const d = document.createElement('div');
     d.className = `c-sel-tag ${s.kind}`;
-    d.textContent = s.kind === 'obs' ? 'измерение' : 'полоса обследования';
+    d.textContent = s.kind === 'obs' ? 'измерение' : s.id.startsWith('SZ-') ? 'зона детектора' : 'полоса обследования';
     d.setAttribute('data-testid', 'sel-tag');
     selMarker.current = new maplibregl.Marker({ element: d, anchor: 'left', offset: [14, 0] }).setLngLat(at).addTo(map);
-  }, [p.selected, p.obs, p.zones]);
+  }, [p.selected, p.obs, p.zones, p.szones]);
 
   return (
     <>

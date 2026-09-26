@@ -1,0 +1,51 @@
+{
+ "key": "live-guanabara-2025-06-26",
+ "kind": "live",
+ "region": "guanabara",
+ "region_name": "Залив Гуанабара (Рио-де-Жанейро)",
+ "date": "2025-06-26",
+ "datetime": "2025-06-26T13:03:11.025000Z",
+ "scene_id": "S2C_MSIL2A_20250626T130311_R095_T23KPQ_20250626T172059",
+ "tile": "23KPQ",
+ "bounds": [
+  -43.273417,
+  -22.934571,
+  -43.02608,
+  -22.705289
+ ],
+ "sun_zenith_deg": 53.6,
+ "water_b3_median": 0.0186,
+ "evaluable": true,
+ "low_sun": false,
+ "weak_signal": false,
+ "wind10m_ms": 1.2,
+ "wind_source": "ERA5 через Open-Meteo archive API, час съёмки",
+ "water_km2": 319.482,
+ "det_pixels": 170,
+ "det_area_m2": 17000,
+ "lwd_m2_km2": 53.21,
+ "model": {
+  "weights": "weights/lgbm",
+  "file": "weights/lgbm/model.txt",
+  "sha256": "0eeebf43fcccd8c7c07f053b7ec723229d1a3c9b92d12eec1bdb269258c51470",
+  "sha256_short": "0eeebf43fccc",
+  "trained_at": "2026-09-25T01:35:55Z",
+  "threshold": 0.63,
+  "harmonize": "none",
+  "class": "MARIDA Marine Debris (любой плавающий мусор, не только пластик)"
+ },
+ "crop_note": "вырезка вокруг района/сцены, не весь тайл",
+ "selection": "2025-06-01/2025-08-31; crop cloud<=0.2, valid>=0.95; ranked by glint among 12 OK of 19 screened",
+ "training_scene": null,
+ "rgb_file": "rgb.jpg",
+ "quality_file": "quality.png",
+ "rgb_note": "B4,B3,B2, растяжка 0..p98 по пригодной воде, гамма 1/1.4; EPSG:4326 по bounds",
+ "n_zones": 7,
+ "small_cluster_px": 77,
+ "n_zones_total": 7,
+ "by_status": {
+  "detected": 2,
+  "not_detected": 0,
+  "insufficient_data": 5
+ }
+}

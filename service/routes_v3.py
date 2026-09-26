@@ -58,7 +58,11 @@ PARAMS: dict = {
     "zone": set(), "metrics": set(), "query_list": set(), "query_get": set(), "query_run": set(),
     "query_add": set(), "query_delete": set(),
     "export": None,  # checked inside (depends on layer / query_id)
+    "scene_zones": None, "scene_zone": set(), "sz_scenes": set(), "sz_scene_png": set(), "sz_crop": set(),  # 3.10
 }
+_SZ_P = {"bbox", "date_from", "date_to", "status", "detection_status", "concentration_status", "scene_kind",
+         "scene_key", "limit", "offset"}
+PARAMS["scene_zones"] = _SZ_P
 ALIASES = {"sources": "source", "profiles": "profile", "scopes": "scope", "statuses": "status", "missions": "mission"}
 
 
@@ -165,6 +169,17 @@ def _zone_filters(q: dict) -> dict:
                                                 cs.DETECTION_STATUS_IDS),
             "concentration_statuses": cs.parse_list(q.get("concentration_status"), "concentration_status",
                                                     cs.CONCENTRATION_STATUS_IDS)}
+
+
+def _sz_filters(q: dict) -> dict:
+    a, b = cs.parse_dates(q.get("date_from"), q.get("date_to"))
+    return {"bbox": cs.parse_bbox(q.get("bbox")), "date_from": a, "date_to": b,
+            "statuses": cs.parse_list(q.get("status"), "status", cs.STATUS_IDS),
+            "detection_statuses": cs.parse_list(q.get("detection_status"), "detection_status", cs.DETECTION_STATUS_IDS),
+            "concentration_statuses": cs.parse_list(q.get("concentration_status"), "concentration_status",
+                                                    cs.CONCENTRATION_STATUS_IDS),
+            "scene_kinds": cs.parse_list(q.get("scene_kind"), "scene_kind", ["demo", "live", "drift"]),
+            "scene_key": q.get("scene_key") or None}
 
 
 def _scene_filters(q: dict) -> dict:
@@ -353,9 +368,9 @@ def _query_to_params(qr: dict, layer: str) -> dict:
 @api
 def export(request: Request):
     q = _q(request)
-    layer = cs.parse_choice(q.get("layer"), "layer", ["observations", "pairs", "zones", "detections"])
+    layer = cs.parse_choice(q.get("layer"), "layer", ["observations", "pairs", "zones", "detections", "scene_zones"])
     if layer is None:
-        raise ApiError(400, "BAD_PARAM", "layer: обязателен, observations | pairs | zones | detections",
+        raise ApiError(400, "BAD_PARAM", "layer: обязателен, observations | pairs | zones | detections | scene_zones",
                        {"param": "layer"})
     fmt = cs.parse_choice(q.get("format"), "format", ["geojson", "csv"], "geojson")
     base = {"layer", "format"}
@@ -365,14 +380,15 @@ def export(request: Request):
                            {"param": "query_id"})
         check_params(dict(request.query_params.items()), base | {"query_id", "geometry"}, "export (query_id)")
     else:
-        lay = {"observations": _OBS_P, "pairs": _PAIR_P, "zones": _ZONE_P, "detections": _ZONE_P}[layer]
+        lay = {"observations": _OBS_P, "pairs": _PAIR_P, "zones": _ZONE_P, "detections": _ZONE_P,
+               "scene_zones": _SZ_P}[layer]
         check_params(dict(request.query_params.items()), base | (lay - {"limit", "offset"}),
                      f"export (layer={layer})")
     ran = None
     if q.get("query_id"):
         qr = cs.get_query(q["query_id"])["query"]
         ran = cs.run_query_layers(qr)  # the same executor as /queries/{id}/run
-        q = {**_query_to_params(qr, "zones" if layer == "detections" else layer),
+        q = {**_query_to_params(qr, "zones" if layer in ("detections", "scene_zones") else layer),
              **{k: v for k, v in q.items() if k in ("geometry",)}}
     stamp = dt.date.today().isoformat()
     if layer == "observations":
@@ -390,6 +406,12 @@ def export(request: Request):
                    "empty_reason": cs.pairs_empty_reason(len(items)),
                    "features": [{"type": "Feature", "id": p["pair_id"], "geometry": p["geometry"],
                                  "properties": {k: v for k, v in p.items() if k != "geometry"}} for p in items]}
+    elif layer == "scene_zones":
+        feats = ran["scene_zones"] if ran is not None else cs.filter_scene_zones(**_sz_filters(q))
+        if fmt == "csv":
+            body = cs.scene_zones_csv(feats)
+        else:
+            obj = cs.scene_zones_fc(feats)
     elif layer == "detections":  # detector objects of the zones selected by the same zone filters
         dfc = cs.detections_fc(ran["zones"] if ran is not None else cs.filter_zones(**_zone_filters(q)))
         if fmt == "csv":
@@ -446,9 +468,12 @@ def query_run(query_id: str):
         by_status[f["properties"]["status"]] = by_status.get(f["properties"]["status"], 0) + 1
         cst = f["properties"]["concentration_status"]
         by_conc[cst] = by_conc.get(cst, 0) + 1
+    szf = ran.get("scene_zones") or []
     return _ok({"query_id": query_id, "name": rec.get("name"), "ran_at": cs.now_iso(), "query": qr,
                 "observations": cs.observations_fc(obs_rows), "zones": cs.zones_fc(zf), "scenes": sc,
+                "scene_zones": cs.scene_zones_fc(szf),
                 "summary": {"n_obs": len(obs_rows), "n_zones": len(zf), "n_scenes": len(sc),
+                            "n_scene_zones": len(szf),
                             "by_status": dict(sorted(by_status.items())),
                             "by_concentration_status": dict(sorted(by_conc.items()))}})
 
@@ -458,6 +483,58 @@ def query_run(query_id: str):
 def query_delete(query_id: str):
     cs.delete_query(query_id)
     return Response(status_code=204, headers=CORS)
+
+
+# ------------------------------------------------------------------ 3.10 satellite scene zones (L111)
+@router.get("/scene_zones", summary="Спутниковые зоны детекции: измерено / вероятно / сценарий")
+@api
+def scene_zones(request: Request):
+    q = _q(request)
+    feats = cs.filter_scene_zones(**_sz_filters(q))
+    limit, offset = _page(q)
+    fc = cs.scene_zones_fc(feats[offset:offset + limit])
+    fc["total"], fc["offset"], fc["limit"] = len(feats), offset, limit
+    return _ok(fc)
+
+
+@router.get("/scene_zones/scenes", summary="Сцены слоя спутниковых зон (снимок + маска качества)")
+@api
+def sz_scenes():
+    sc = cs.sz_scenes()
+    return _ok({"count": len(sc), "empty_reason": None if sc else "Слой не построен (scripts/case/scene_zones.py)",
+                "scenes": sc})
+
+
+@router.get("/scene_zones/scenes/{key}/crops/{zone_id}.jpg", summary="Вырезка зоны: снимок | маска детектора")
+@api
+def sz_crop(key: str, zone_id: str):
+    p = cs.sz_crop(key, zone_id)
+    if p is None:
+        raise ApiError(404, "NO_SCENE", f"Нет вырезки зоны {zone_id}", {"scene_key": key, "zone_id": zone_id})
+    return FileResponse(p, media_type="image/jpeg", headers={**CORS, "Cache-Control": "public, max-age=3600"})
+
+
+@router.get("/scene_zones/scenes/{key}/{name}", summary="rgb.jpg | quality.png сцены слоя")
+@api
+def sz_scene_png(key: str, name: str):
+    p = cs.sz_file(key, name)
+    if p is None:
+        raise ApiError(404, "NO_SCENE", f"Для сцены {key} нет {name}", {"scene_key": key, "name": name})
+    return FileResponse(p, media_type="image/jpeg" if name.endswith(".jpg") else "image/png",
+                        headers={**CORS, "Cache-Control": "public, max-age=3600"})
+
+
+@router.get("/scene_zones/{zone_id}", summary="Спутниковая зона + объекты детектора")
+@api
+def scene_zone(zone_id: str):
+    for f in cs.scene_zones_all():
+        if f["id"] == zone_id:
+            out = json.loads(json.dumps(f))
+            out["detections"] = cs.scene_zone_detections(zone_id)
+            out["scene"] = next((s for s in cs.sz_scenes() if s["scene_key"] == f["properties"]["scene_key"]), None)
+            out["examples"] = cs.sz_examples()
+            return _ok(out)
+    raise ApiError(404, "NOT_FOUND", f"Спутниковая зона {zone_id} не найдена", {"zone_id": zone_id})
 
 
 @router.get("/{rest:path}", include_in_schema=False)

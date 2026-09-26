@@ -1,0 +1,44 @@
+{
+ "what": "gap from each val/test frame to the nearest TRAIN frame (capture time from file name), official FML split",
+ "val": {
+  "n": 1059,
+  "median_gap_s": 1.3014819622039795,
+  "share_le_2s": 0.8970727101038716,
+  "share_le_5s": 0.9981114258734656,
+  "max_gap_s": 5.2427978515625
+ },
+ "test": {
+  "n": 529,
+  "median_gap_s": 1.3037059307098389,
+  "share_le_2s": 0.8960302457466919,
+  "share_le_5s": 1.0,
+  "max_gap_s": 4.410329103469849
+ },
+ "grouped_val": {
+  "n": 838,
+  "sets": [
+   "set3",
+   "set4",
+   "set7",
+   "set24",
+   "set26",
+   "set27"
+  ],
+  "median_gap_s": 213.88300549983978,
+  "share_le_2s": 0.0,
+  "share_le_5s": 0.0
+ },
+ "grouped_test": {
+  "n": 1190,
+  "sets": [
+   "set5",
+   "set11",
+   "set12",
+   "set17",
+   "set20"
+  ],
+  "median_gap_s": 751.0457584857941,
+  "share_le_2s": 0.0,
+  "share_le_5s": 0.0
+ }
+}

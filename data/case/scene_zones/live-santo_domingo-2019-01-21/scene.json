@@ -1,0 +1,51 @@
+{
+ "key": "live-santo_domingo-2019-01-21",
+ "kind": "live",
+ "region": "santo_domingo",
+ "region_name": "Санто-Доминго (устье Осамы)",
+ "date": "2019-01-21",
+ "datetime": "2019-01-21T15:17:50.451000Z",
+ "scene_id": "S2A_19QDA_20190121_0_L2A",
+ "tile": "19QDA",
+ "bounds": [
+  -69.939213,
+  18.286338,
+  -69.700716,
+  18.513476
+ ],
+ "sun_zenith_deg": 44.6,
+ "water_b3_median": 0.0113,
+ "evaluable": true,
+ "low_sun": false,
+ "weak_signal": false,
+ "wind10m_ms": 1.71,
+ "wind_source": "ERA5 через Open-Meteo archive API, час съёмки",
+ "water_km2": 475.192,
+ "det_pixels": 5,
+ "det_area_m2": 500,
+ "lwd_m2_km2": 1.05,
+ "model": {
+  "weights": "weights/lgbm",
+  "file": "weights/lgbm/model.txt",
+  "sha256": "0eeebf43fcccd8c7c07f053b7ec723229d1a3c9b92d12eec1bdb269258c51470",
+  "sha256_short": "0eeebf43fccc",
+  "trained_at": "2026-09-25T01:35:55Z",
+  "threshold": 0.63,
+  "harmonize": "none",
+  "class": "MARIDA Marine Debris (любой плавающий мусор, не только пластик)"
+ },
+ "crop_note": "вырезка вокруг района/сцены, не весь тайл",
+ "selection": "2018-12-12/2019-02-10; crop cloud<=0.3, valid>=0.95; ranked by glint among 9 OK of 13 screened",
+ "training_scene": null,
+ "rgb_file": "rgb.jpg",
+ "quality_file": "quality.png",
+ "rgb_note": "B4,B3,B2, растяжка 0..p98 по пригодной воде, гамма 1/1.4; EPSG:4326 по bounds",
+ "n_zones": 0,
+ "small_cluster_px": 5,
+ "n_zones_total": 1,
+ "by_status": {
+  "detected": 0,
+  "not_detected": 1,
+  "insufficient_data": 0
+ }
+}

@@ -990,7 +990,7 @@
 }
 .c-lg-summary.clamp {
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 7;
   -webkit-box-orient: vertical;
   overflow: hidden;
   border: 0;
@@ -1035,4 +1035,91 @@
 .c-go-prof {
   color: var(--text-2);
   font-weight: 500;
+}
+
+/* ---- 3.10 satellite scene zones (L111) ---- */
+.c-zi-dot.sz {
+  border-style: solid;
+}
+.c-kind.szone {
+  border: 1.5px solid #ff8c42;
+  border-radius: 2px;
+}
+.sz-block {
+  border-left: 3px solid var(--line, #33363b);
+  padding-left: 10px;
+}
+.sz-measured {
+  border-left-color: #7eaec0;
+}
+.sz-probable {
+  border-left-color: #ff8c42;
+}
+.sz-scenario {
+  border-left-color: #b197fc;
+}
+.sz-field {
+  border-left-color: #e7e8ea;
+}
+.sz-warn {
+  color: var(--text-2, #aab);
+  font-style: italic;
+}
+.sz-on {
+  color: #ffd43b;
+  font-weight: 600;
+}
+.sz-basis summary {
+  cursor: pointer;
+  color: var(--text-2, #aab);
+  font-size: 12px;
+  margin-top: 4px;
+}
+.sz-basis .c-line {
+  font-size: 12px;
+}
+.sz-crop img {
+  width: 100%;
+  image-rendering: pixelated;
+  border-radius: 4px;
+}
+.sz-crop figcaption {
+  font-size: 11px;
+  color: var(--text-2, #aab);
+}
+.sz-ex {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.sz-ex-i {
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  font-size: 11px;
+  background: none;
+  border: 1px solid var(--line, #33363b);
+  border-radius: 4px;
+  padding: 4px;
+  color: inherit;
+  cursor: pointer;
+}
+.sz-ex-i img {
+  width: 100%;
+  image-rendering: pixelated;
+}
+.sz-ex-i.success {
+  border-color: #ff8c42;
+}
+.sz-block .c-line,
+.sz-field .c-line {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+.sz-field .c-ptable td:first-child {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

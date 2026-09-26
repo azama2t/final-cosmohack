@@ -196,10 +196,10 @@ def test_export_zones_csv_columns(client):
 
 def test_zones_no_invented_concentration(client):
     fc = client.get("/api/v3/zones").json()
-    assert fc["kind"] == "model_estimate"
+    assert fc["kind"] == "candidate_strip"  # 3.10: concentration null -> not labelled a model estimate
     for f in fc["features"]:
         p = f["properties"]
-        assert p["kind"] == "model_estimate"
+        assert p["kind"] == "candidate_strip"
         assert p["concentration"] is None and p["concentration_status"] == "unavailable"
         assert p["status"] == p["detection_status"] in ("detected", "not_detected", "insufficient_data")
         if p["support"].get("field_target_scope") == "all_litter":  # team rule: all_litter is never "plastic"
@@ -678,7 +678,7 @@ def test_meta_summary_and_detector_note(client):
     assert s["text"].startswith(f"{s['n_strips']} обследованных участков со снимками-кандидатами; "
                                 f"{s['n_confirmed_pairs']} подтверждённых пар")
     assert "не только пластик" in m["detector"]["note"]
-    assert [x["id"] for x in m["layers"]] == ["observations", "zones", "detections"]
+    assert [x["id"] for x in m["layers"]] == ["observations", "zones", "detections", "scene_zones"]
 
 
 def _fake_final_test(tmp_path, better):

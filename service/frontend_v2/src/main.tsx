@@ -8,9 +8,12 @@ import './styles.css';
 import { reloadOnceAfterBuild } from './lib/reload';
 
 // L66: «Кейс» (API v3) is the default mode; the earlier «живые снимки» scenario stays at ?mode=live.
-const LIVE = new URLSearchParams(location.search).get('mode') === 'live';
+const MODE = new URLSearchParams(location.search).get('mode');
+const LIVE = MODE === 'live';
+const PHOTO = MODE === 'photo'; // L109: счётчик предметов по фото (отдельный модуль, src/photo/)
 const App = lazy(() => import('./App'));
 const CaseApp = lazy(() => import('./case/CaseApp'));
+const PhotoApp = lazy(() => import('./photo/PhotoApp'));
 
 // after a rebuild the old hashed chunks are gone → a lazy import in an open tab fails: reload once
 window.addEventListener('vite:preloadError', (e) => {
@@ -20,6 +23,6 @@ window.addEventListener('load', () => setTimeout(() => sessionStorage.removeItem
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Suspense fallback={<div className="boot">Загрузка…</div>}>{LIVE ? <App /> : <CaseApp />}</Suspense>
+    <Suspense fallback={<div className="boot">Загрузка…</div>}>{PHOTO ? <PhotoApp /> : LIVE ? <App /> : <CaseApp />}</Suspense>
   </StrictMode>,
 );

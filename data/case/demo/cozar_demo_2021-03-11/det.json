@@ -1,0 +1,18 @@
+{
+ "scene_dir": "data/live/cozar_demo/2021-03-11",
+ "weights": "weights/lgbm",
+ "harmonize": "none",
+ "threshold": 0.63,
+ "min_px": 1,
+ "cloud_buffer_px": 5,
+ "pixels": 1913,
+ "objects": 367,
+ "objects_raw": 367,
+ "dropped_cloud_shadow": 0,
+ "water_px": 1979640,
+ "prob_max_water": 0.9993,
+ "glint_scene": false,
+ "runtime_s": 5.5,
+ "total_s": 6.3,
+ "created": "2026-09-26T04:36:22"
+}

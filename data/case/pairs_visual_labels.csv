@@ -1,0 +1,6 @@
+object_id,visual_id,scene,bbox,n_px,prob_max,class,confidence,note,level
+S3_HE460_MarLitter_transect03:N0001,V082,S3_HE460_MarLitter_transect03,291 1520 292 1521,1,0.939,foam_whitecap,medium,белая крапина на ряби,D
+S3_HE460_MarLitter_transect03:N0002,V015,S3_HE460_MarLitter_transect03,835 1475 836 1476,1,0.816,ship_wake,medium,"компактная яркая точка, яркая и в SWIR (сухой корпус лодки?)",D
+S3_HE460_MarLitter_transect03:N0003,V051,S3_HE460_MarLitter_transect03,978 165 979 166,1,0.678,foam_whitecap,medium,белая крапина на ряби,D
+S3_HE460_MarLitter_transect03:N0004,V073,S3_HE460_MarLitter_transect03,1370 621 1371 622,1,0.677,foam_whitecap,medium,белая крапина на ряби,D
+S3_HE460_MarLitter_transect03:N0005,V101,S3_HE460_MarLitter_transect03,1953 1068 1954 1069,1,0.78,foam_whitecap,medium,белая крапина на ряби,D

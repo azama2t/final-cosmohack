@@ -1,0 +1,51 @@
+{
+ "key": "live-honduras-2026-02-14",
+ "kind": "live",
+ "region": "honduras",
+ "region_name": "Гондурасский залив (Омоа – Пуэрто-Кортес – устье Мотагуа)",
+ "date": "2026-02-14",
+ "datetime": "2026-02-14T16:13:51.025000Z",
+ "scene_id": "S2C_MSIL2A_20260214T161351_R140_T16PCC_20260214T192111",
+ "tile": "16PCC",
+ "bounds": [
+  -88.337553,
+  15.686051,
+  -88.102629,
+  15.914048
+ ],
+ "sun_zenith_deg": 40.3,
+ "water_b3_median": 0.0164,
+ "evaluable": true,
+ "low_sun": false,
+ "weak_signal": false,
+ "wind10m_ms": 1.15,
+ "wind_source": "ERA5 через Open-Meteo archive API, час съёмки",
+ "water_km2": 521.367,
+ "det_pixels": 56,
+ "det_area_m2": 5600,
+ "lwd_m2_km2": 10.74,
+ "model": {
+  "weights": "weights/lgbm",
+  "file": "weights/lgbm/model.txt",
+  "sha256": "0eeebf43fcccd8c7c07f053b7ec723229d1a3c9b92d12eec1bdb269258c51470",
+  "sha256_short": "0eeebf43fccc",
+  "trained_at": "2026-09-25T01:35:55Z",
+  "threshold": 0.63,
+  "harmonize": "none",
+  "class": "MARIDA Marine Debris (любой плавающий мусор, не только пластик)"
+ },
+ "crop_note": "вырезка вокруг района/сцены, не весь тайл",
+ "selection": "2026-01-01/2026-02-28; crop cloud<=0.3, valid>=0.95; ranked by glint among 3 OK of 6 screened",
+ "training_scene": null,
+ "rgb_file": "rgb.jpg",
+ "quality_file": "quality.png",
+ "rgb_note": "B4,B3,B2, растяжка 0..p98 по пригодной воде, гамма 1/1.4; EPSG:4326 по bounds",
+ "n_zones": 4,
+ "small_cluster_px": 6,
+ "n_zones_total": 4,
+ "by_status": {
+  "detected": 3,
+  "not_detected": 0,
+  "insufficient_data": 1
+ }
+}
