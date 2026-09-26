@@ -2817,3 +2817,152 @@ a.c-head-r.c-head-link {
   align-self: center;
   cursor: help;
 }
+
+/* §55 п.1: папка «Реальное время» */
+.c-rt-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff6b6b;
+  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.25);
+}
+.c-rt-sub {
+  margin: 2px 6px 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.c-rt-sub > summary {
+  cursor: pointer;
+  padding: 5px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #e7e8ea;
+}
+.c-rt-counter {
+  padding: 2px 8px;
+  font-size: 12px;
+  color: #e7e8ea;
+}
+.c-rt-label {
+  display: inline-block;
+  margin: 2px 8px 4px;
+  padding: 1px 6px;
+  font-size: 11px;
+  border-radius: 4px;
+  background: rgba(255, 212, 59, 0.14);
+  color: #ffd43b;
+  border: 1px solid rgba(255, 212, 59, 0.4);
+}
+.c-fresh-tag .c-rt-label {
+  margin: 0 4px;
+}
+.c-rt-date {
+  padding: 3px 10px 3px 22px;
+  font-size: 11.5px;
+  line-height: 1.35;
+}
+.c-rt-date.on {
+  background: rgba(255, 255, 255, 0.05);
+}
+.c-rt-zones {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding: 3px 0 2px 8px;
+}
+.c-rt-zone {
+  font-size: 11px;
+  text-align: left;
+}
+.c-fresh-tag {
+  position: absolute;
+  z-index: 6;
+  top: 112px;
+  left: 16px;
+  max-width: min(440px, 45%);
+  padding: 5px 10px;
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: var(--text-2, #c9ccd1);
+  background: rgba(11, 12, 14, 0.9);
+  border: 1px solid rgba(255, 107, 107, 0.55);
+  border-radius: 6px;
+}
+.c-fresh-tag b {
+  color: #fff;
+}
+.c-fresh-tag .icon-btn {
+  margin-left: 6px;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+}
+
+/* §57: the one «Реальное время» button — prominent */
+.btn.c-nasa-btn {
+  border: 1px solid rgba(255, 107, 107, 0.75);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn.c-nasa-btn.on {
+  background: rgba(255, 107, 107, 0.2);
+  color: #fff;
+  border-color: #ff6b6b;
+}
+.c-tl-fresh circle,
+.c-tl-fresh rect {
+  fill: rgba(255, 107, 107, 0.25);
+  stroke: #ff6b6b;
+  stroke-width: 1.5;
+}
+.c-tl-fresh.on circle,
+.c-tl-fresh.on rect {
+  stroke: #fff;
+  stroke-width: 2.5;
+}
+.c-tl-n.fresh {
+  fill: #fff;
+}
+.drift-map-cap {
+  display: block;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.1;
+  opacity: 0.9;
+}
+
+/* §57а: the top bar holds «Реальное время» + PRIME + Демо + Слои (~550 px) — below ~1600 px of map it takes the
+   second row (right), «Что дальше» shrinks to its left; on a narrow map (card open) the hint goes to row 3 */
+.app.case .toolbar .prime-toggle {
+  min-height: 32px;
+  padding: 4px 10px;
+}
+@container (max-width: 1600px) {
+  .app.case .toolbar {
+    top: calc(var(--s2) + 46px);
+  }
+  .app.case .c-next {
+    max-width: calc(100% - 2 * var(--s2) - 570px);
+  }
+  .c-nasa-note {
+    top: 112px;
+  }
+  .c-fresh-tag {
+    top: 132px;
+  }
+}
+@container (max-width: 1000px) {
+  .app.case .c-next {
+    top: calc(var(--s2) + 92px);
+    max-width: calc(100% - 2 * var(--s2));
+  }
+  .c-nasa-note {
+    top: 164px;
+  }
+  .c-fresh-tag {
+    top: 164px;
+  }
+}

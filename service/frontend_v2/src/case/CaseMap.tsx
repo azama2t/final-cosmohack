@@ -62,6 +62,8 @@ export interface CaseMapProps {
   szones?: FC<any> | null;
   /** §54 п.1: NASA GIBS daily overview (tile URL of one layer + day), off by default; not a detection */
   nasa?: { url: string; maxzoom: number } | null;
+  /** §55 п.1: «Реальное время» — a fresh Sentinel-2 snapshot processed by our model (RGB + its zones), not human-checked */
+  fresh?: { key: string; img: string | null; bounds: number[] | null; zones: FC<any> | null } | null;
   /** §34 п.3: numbers of the zones of the snapshot opened in the left list (same numbers as the list) */
   numbered?: { id: string; n: number; at: [number, number]; ds: string }[];
 }
@@ -225,6 +227,7 @@ export default function CaseMap(p: CaseMapProps) {
   const selMarker = useRef<maplibregl.Marker | null>(null);
   const sceneKeys = useRef<string[]>([]);
   const nasaKey = useRef('');
+  const freshKey = useRef('');
 
   /** (re)create sources + layers after every style load; then update data */
   const sync = () => {
@@ -452,6 +455,30 @@ export default function CaseMap(p: CaseMapProps) {
         map.addLayer({ id: 'c-nasa', type: 'raster', source: 'c-nasa', paint: { 'raster-opacity': 0.9, 'raster-fade-duration': 0 } }, below);
       }
       nasaKey.current = nk;
+    }
+    // §55 п.1: fresh Sentinel-2 snapshot (image under the vectors) + its zones by detector status
+    {
+      const fr = cur.fresh;
+      const fk = fr?.img && fr.bounds ? fr.key : '';
+      if (map.getSource('c-rt-img') && freshKey.current !== fk) {
+        if (map.getLayer('c-rt-img')) map.removeLayer('c-rt-img');
+        map.removeSource('c-rt-img');
+      }
+      if (fk && fr && fr.img && fr.bounds && !map.getSource('c-rt-img')) {
+        const [x0, y0, x1, y1] = fr.bounds;
+        map.addSource('c-rt-img', { type: 'image', url: API_BASE + fr.img, coordinates: [[x0, y1], [x1, y1], [x1, y0], [x0, y0]] });
+        map.addLayer({ id: 'c-rt-img', type: 'raster', source: 'c-rt-img', paint: { 'raster-fade-duration': 0 } }, 'c-scene-fp');
+      }
+      freshKey.current = fk;
+      // NASA (daily overview) always under the fresh Sentinel-2 image and the case snapshots
+      if (map.getLayer('c-nasa')) {
+        const firstImg = [...(map.getLayer('c-rt-img') ? ['c-rt-img'] : []), ...sceneKeys.current.filter((k) => map.getLayer(k))][0];
+        if (firstImg) map.moveLayer('c-nasa', firstImg);
+      }
+      src('c-rt-zones', fr?.zones ?? EMPTY);
+      const col: any = ['match', ['get', 'detection_status'], 'detected', '#ff8c42', 'not_detected', '#51cf66', '#adb5bd'];
+      add({ id: 'c-rt-fill', type: 'fill', source: 'c-rt-zones', paint: { 'fill-color': col, 'fill-opacity': ['match', ['get', 'detection_status'], 'not_detected', 0.04, 0.18] } });
+      add({ id: 'c-rt-line', type: 'line', source: 'c-rt-zones', paint: { 'line-color': col, 'line-width': 2, 'line-dasharray': [2, 1] } });
     }
 
     // visibility + selection
@@ -686,7 +713,7 @@ export default function CaseMap(p: CaseMapProps) {
   }, [p.projection]);
 
   // ---- data ----
-  useEffect(sync, [p.obs, p.zones, p.scenes, p.layers, p.selected, p.pairHl, p.meta, p.detections, p.szones, p.nasa]);
+  useEffect(sync, [p.obs, p.zones, p.scenes, p.layers, p.selected, p.pairHl, p.meta, p.detections, p.szones, p.nasa, p.fresh]);
 
   // ---- scenes with a quality mask but no RGB preview: say so (the translucent mask alone is not a picture) ----
   const noPrevMarkers = useRef<maplibregl.Marker[]>([]);

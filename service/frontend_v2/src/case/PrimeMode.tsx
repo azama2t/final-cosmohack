@@ -6,7 +6,7 @@
 // The §54 6-scene variant is removed from the UI (it carried quality metrics; PRIME must not show any).
 // Real map layers are muted while on; NASA ('c-nasa') is untouched → NASA and PRIME toggle independently.
 // Inline toggle for a top bar: <PrimeToggle /> (then the floating one hides itself). Programmatic: setPrime(true|false).
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Component, useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { CsvCard, CsvExperiment, CsvList, DEMO_BADGE, flyToScene, useCsvIndex, usePrimeCsvLayer } from './PrimeCsv';
 import './prime.css';
 
@@ -52,9 +52,11 @@ function useDimRealLayers(on: boolean) {
     const hidden = new Set<string>();
     const dimmed = new Map<string, any>();
     let map: any = null;
+    const m0 = (window as any).__caseMap;
+    const cam = m0?.getCenter ? { center: m0.getCenter(), zoom: m0.getZoom() } : null; // restored on off
     const apply = () => {
       map = (window as any).__caseMap;
-      if (!map?.getStyle) return;
+      if (!map?.getStyle || !map.style) return;
       for (const l of map.getStyle()?.layers ?? []) {
         if (!l.id.startsWith('c-') || l.id.startsWith('c-nasa') || /live|rt-/.test(l.id)) continue;
         if (l.type === 'raster') {
@@ -70,15 +72,23 @@ function useDimRealLayers(on: boolean) {
         }
       }
     };
-    apply();
-    const t = window.setInterval(apply, 800); // CaseMap may (re)add layers; the map may mount later
+    const safe = () => {
+      try {
+        apply();
+      } catch {
+        /* style reloading */
+      }
+    };
+    safe();
+    const t = window.setInterval(safe, 800); // CaseMap may (re)add layers; the map may mount later
     document.body.classList.add('prime-on');
     return () => {
       window.clearInterval(t);
       document.body.classList.remove('prime-on');
-      if (map?.getLayer) {
+      if (map?.getLayer && map.style) {
         for (const id of hidden) if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'visible');
         for (const [id, v] of dimmed) if (map.getLayer(id)) map.setPaintProperty(id, 'raster-opacity', v);
+        if (cam && map === m0) map.jumpTo(cam);
       }
     };
   }, [on]);
@@ -231,7 +241,45 @@ function placeToggle(R: DOMRect, mobile: boolean, tw: number, th: number): Pos |
   return cands.find(free) ?? null; // no free spot (e.g. a card sheet covers the phone screen) → hide the toggle
 }
 
+/** PRIME must never take the whole app down: any render/effect error inside stays inside this boundary */
+class PrimeBoundary extends Component<{ children: ReactNode }, { err: string | null }> {
+  state = { err: null as string | null };
+  static getDerivedStateFromError(e: unknown) {
+    return { err: String((e as Error)?.message ?? e) };
+  }
+  componentDidCatch(e: unknown) {
+    console.warn('[PRIME] error contained:', e);
+  }
+  render() {
+    if (this.state.err)
+      return (
+        <div className="prime-wrap prime-crashed" style={{ top: 120, left: 16, width: 320 }}>
+          <section className="prime-panel" data-testid="prime-panel">
+            <header className="prime-head">
+              <span className="prime-badge" data-testid="prime-badge">
+                {DEMO_BADGE}
+              </span>
+              <button className="prime-x" onClick={() => { this.setState({ err: null }); setPrime(false); }} aria-label="Выключить PRIME MODE" data-testid="prime-close">
+                ✕
+              </button>
+            </header>
+            <p className="prime-err" style={{ padding: '8px 14px' }}>Демо-режим не открылся ({this.state.err}). Остальной сервис работает.</p>
+          </section>
+        </div>
+      );
+    return this.props.children;
+  }
+}
+
 export default function PrimeHost() {
+  return (
+    <PrimeBoundary>
+      <PrimeHostInner />
+    </PrimeBoundary>
+  );
+}
+
+function PrimeHostInner() {
   const on = usePrime();
   const [inlinePresent, setInlinePresent] = useState(false);
   const [pos, setPos] = useState<Pos | null | undefined>(undefined);

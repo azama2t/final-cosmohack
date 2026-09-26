@@ -222,6 +222,7 @@ export default function SceneZoneCard({
               title="Прогноз дрейфа ≤ 72 ч: OpenDrift по течениям (HYCOM) и ветру (GFS) на дату снимка — эксперимент"
             >
               {driftOn ? 'Дрейф ✓' : 'Дрейф ▶'}
+              <span className="drift-map-cap">модельный сценарий</span>
             </button>
           ) : (
             <span className="sz-drift-top-none" data-testid="sz-drift-top-none" title="Для даты этого снимка прогноз дрейфа (OpenDrift, HYCOM + GFS) не рассчитывался">

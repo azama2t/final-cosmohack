@@ -357,3 +357,55 @@
     height: 72px;
   }
 }
+
+/* §56: our model vs the set's labels */
+.dr-shape.pred.fp {
+  stroke: #ff9f43;
+}
+.dr-boxsw {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  background: rgba(0, 0, 0, 0.72);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.dr-boxsw button {
+  border: 0;
+  background: transparent;
+  color: #d5e0ea;
+  font: inherit;
+  font-size: 12px;
+  padding: 3px 9px;
+  cursor: pointer;
+}
+.dr-boxsw button.on {
+  background: var(--dr-pred);
+  color: #03141c;
+  font-weight: 600;
+}
+.dr-boxsw button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.dr-line {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 14px;
+}
+.dr-line b {
+  font-size: 18px;
+}
+.dr-warn {
+  color: #ffcf8a;
+}
+.dr-setsum {
+  margin: 6px 0;
+  padding: 6px 10px;
+  border-left: 3px solid var(--dr-pred);
+  background: rgba(95, 208, 255, 0.07);
+  font-size: 13px;
+}

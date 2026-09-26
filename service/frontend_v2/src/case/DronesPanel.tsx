@@ -13,17 +13,28 @@ export interface DroneObj {
   bbox: [number, number, number, number];
   poly?: [number, number][];
 }
-export interface DronePred {
-  model: string;
+/** §56: our photo counter on this frame (scripts/case/drones_pred.py -> data/case/drones/pred.json) */
+export interface DroneModelFrame {
   n: number;
-  n_labelled: number;
-  abs_error: number;
-  threshold: number;
-  density_m2: number | null;
-  density_km2: number | null;
   boxes: [number, number, number, number][];
-  metric: { count_mae_per_frame: number; n_test_frames: number; test: string; source: string };
-  classes: string;
+  scores: number[];
+  conf_mean: number | null;
+  conf_min: number | null;
+  tp?: number;
+  fp?: number;
+  fn?: number;
+  n_labelled?: number;
+  match?: number[];
+}
+export interface DroneModelSet {
+  survey: string;
+  model: string;
+  threshold: number;
+  iou: number;
+  trained_on_this_set: boolean;
+  training_note: string;
+  checked_metric: { count_mae_per_frame: number; n_test_frames: number; source: string } | null;
+  summary: { frames: number; n_pred: number; found: number | null; labelled: number | null; false: number | null; note?: string };
 }
 export interface DroneFrame {
   id: string;
@@ -46,7 +57,9 @@ export interface DroneFrame {
   station?: number;
   subregion?: string;
   published?: { density_m2: number; density_km2: number; scope: string; per_frame_expected: number; per_frame_note: string } | null;
-  prediction?: DronePred;
+  model?: DroneModelFrame | null;
+  sensor?: string;
+  date_note?: string;
 }
 export interface DroneSet {
   id: string;
@@ -68,7 +81,7 @@ export interface DroneSet {
   n_frames: number;
   groups_labelled: Group[];
   algae_note: string;
-  counter_checked: boolean;
+  model?: DroneModelSet | null;
   cover: string | null;
 }
 interface SetsResp {
@@ -118,10 +131,18 @@ function srcClasses(f: DroneFrame): string {
     .join(' · ');
 }
 
+export function modelSummaryText(m: DroneModelSet): string {
+  const s = m.summary;
+  if (s.found == null) return `модель нашла ${s.n_pred} предм. на ${s.frames} кадрах (рамок в наборе нет — сверить нельзя)`;
+  return `модель нашла ${s.found} из ${s.labelled} размеченных, ложных ${s.false}`;
+}
+const rule = (m: DroneModelSet) => `совпадение — IoU ≥ ${nf(m.iou, 2)}, порог уверенности ${nf(m.threshold, 2)}`;
+
 function FrameView({ set, frames, idx, onIdx, onBack }: { set: DroneSet; frames: DroneFrame[]; idx: number; onIdx: (i: number) => void; onBack: () => void }) {
   const f = frames[idx];
-  const [showLab, setShowLab] = useState(true);
-  const [showPred, setShowPred] = useState(false);
+  const [boxes, setBoxes] = useState<'model' | 'labels' | 'both'>(f.model ? 'model' : 'labels');
+  const showLab = boxes !== 'model';
+  const showPred = boxes !== 'labels';
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight') onIdx(Math.min(frames.length - 1, idx + 1));
@@ -130,7 +151,8 @@ function FrameView({ set, frames, idx, onIdx, onBack }: { set: DroneSet; frames:
     window.addEventListener('keydown', on);
     return () => window.removeEventListener('keydown', on);
   }, [idx, frames.length, onIdx]);
-  const p = f.prediction;
+  const p = f.model ?? null;
+  const ms = set.model ?? null;
   return (
     <div className="dr-frame" data-testid="drones-frame">
       <div className="dr-frame-nav">
@@ -162,28 +184,48 @@ function FrameView({ set, frames, idx, onIdx, onBack }: { set: DroneSet; frames:
               )}
             {showPred &&
               p &&
-              p.boxes.map((b, i) => <rect key={`p${i}`} className="dr-shape pred" x={b[0]} y={b[1]} width={b[2]} height={b[3]} vectorEffect="non-scaling-stroke" />)}
+              p.boxes.map((b, i) => (
+                <rect key={`p${i}`} className={`dr-shape pred ${p.match && !p.match[i] ? 'fp' : ''}`} x={b[0]} y={b[1]} width={b[2]} height={b[3]} vectorEffect="non-scaling-stroke" />
+              ))}
           </svg>
           <span className="dr-img-tag">{set.sensor_label.split(',')[0]} · не спутник</span>
+          <div className="dr-boxsw" role="tablist" aria-label="Рамки" data-testid="drones-boxes">
+            {(['model', 'labels', 'both'] as const).map((k) => (
+              <button key={k} className={boxes === k ? 'on' : ''} disabled={k !== 'labels' && !p} onClick={() => setBoxes(k)} data-testid={`drones-boxes-${k}`}>
+                {k === 'model' ? 'модель' : k === 'labels' ? 'разметка' : 'обе'}
+              </button>
+            ))}
+          </div>
         </div>
         <div className="dr-side">
           <div className="dr-sec">
-            <div className="dr-h">Предметы на кадре (разметка набора)</div>
-            {f.n_objects != null ? (
-              <div className="dr-big" data-testid="drones-count">
-                {f.n_objects} <span>шт. на кадре</span>
-              </div>
-            ) : (
-              <div className="dr-big na" data-testid="drones-count">
-                — <span>рамок в наборе нет</span>
+            <div className="dr-h">Предметы на кадре</div>
+            <div className="dr-line model" data-testid="drones-model-line">
+              <i className="dr-sw pred" aria-hidden /> наша модель:{' '}
+              {p ? (
+                <>
+                  <b>{p.n}</b> предм.{' '}
+                  <span className="faint">
+                    (порог {nf(ms?.threshold ?? 0, 2)}
+                    {p.conf_mean != null ? `, уверенность ср. ${nf(p.conf_mean, 2)}, мин. ${nf(p.conf_min ?? 0, 2)}` : ''})
+                  </span>
+                </>
+              ) : (
+                <span className="faint">нет прогона</span>
+              )}
+            </div>
+            <div className="dr-line" data-testid="drones-count">
+              <i className="dr-sw g-other" aria-hidden /> разметка набора: {f.n_objects != null ? <b>{f.n_objects}</b> : <span className="faint">рамок в наборе нет</span>}
+            </div>
+            {p && p.tp != null && (
+              <div className="faint" data-testid="drones-match">
+                совпало {p.tp}, ложных {p.fp} (оранжевые), пропущено {p.fn} · IoU ≥ {nf(ms?.iou ?? 0.5, 2)}
               </div>
             )}
+            {f.objects && <div className="dr-h">Классы разметки набора (модель классы не выдаёт)</div>}
             {f.objects && <Legend f={f} set={set} />}
             {f.objects && f.objects.length > 0 && <div className="dr-src-cls faint">классы набора: {srcClasses(f)}</div>}
             {!set.groups_labelled.includes('algae') && <div className="dr-note faint">Водоросли в этом наборе не размечены — класс не показывается.</div>}
-            <label className="dr-tg">
-              <input type="checkbox" checked={showLab} onChange={(e) => setShowLab(e.target.checked)} /> показать разметку
-            </label>
           </div>
           <div className="dr-sec" data-testid="drones-density">
             <div className="dr-h">Плотность</div>
@@ -209,23 +251,23 @@ function FrameView({ set, frames, idx, onIdx, onBack }: { set: DroneSet; frames:
             )}
           </div>
           <div className="dr-sec" data-testid="drones-counter">
-            <div className="dr-h">Наш счётчик по фото</div>
-            {p ? (
+            <div className="dr-h">Наш счётчик по фото (тот же, что «Счёт по фото», без дообучения)</div>
+            {ms ? (
               <>
                 <div>
-                  нашёл <b>{p.n}</b> шт. (по разметке {p.n_labelled}, разница {p.abs_error})
+                  по набору: <b>{modelSummaryText(ms)}</b>
                 </div>
-                <div className="faint">
-                  проверенная ошибка {nf(p.metric.count_mae_per_frame, 2)} шт./кадр на {nf(p.metric.n_test_frames)} отложенных кадрах ({p.metric.test}); {p.classes}
-                </div>
-                <label className="dr-tg">
-                  <input type="checkbox" checked={showPred} onChange={(e) => setShowPred(e.target.checked)} data-testid="drones-pred-toggle" /> показать рамки счётчика <i className="dr-sw pred" aria-hidden />
-                </label>
+                <div className="faint">{rule(ms)}</div>
+                <div className={ms.trained_on_this_set ? 'faint' : 'dr-warn'}>{ms.training_note}</div>
+                {ms.checked_metric && (
+                  <div className="faint">
+                    проверенная ошибка {nf(ms.checked_metric.count_mae_per_frame, 2)} шт./кадр на {nf(ms.checked_metric.n_test_frames)} отложенных кадрах
+                  </div>
+                )}
+                <div className="faint">Одна категория «предмет»: материал и водоросли модель не определяет.</div>
               </>
             ) : (
-              <div className="faint">
-                {set.counter_checked ? 'для этого кадра прогноза нет' : 'не показан: на этом наборе ошибка счётчика не проверена (прогноз — только где метрики проверены: FML, Winans)'}
-              </div>
+              <div className="faint">прогона модели по этому набору нет</div>
             )}
           </div>
           <div className="dr-sec dr-meta">
@@ -238,12 +280,10 @@ function FrameView({ set, frames, idx, onIdx, onBack }: { set: DroneSet; frames:
               {f.subregion ? ` · ${f.subregion}` : ''}
               {f.station != null ? ` · станция ${f.station}` : ''}
             </div>
-            {(f.date || f.lat != null) && (
-              <div className="faint">
-                {f.date ? `дата ${f.date}` : ''}
-                {f.lat != null && f.lon != null ? `${f.date ? ' · ' : ''}${nf(f.lat, 4)}, ${nf(f.lon, 4)}` : ''}
-              </div>
-            )}
+            <div className="faint" data-testid="drones-date">
+              {f.date ? `дата ${f.date}` : 'дата не указана'}
+              {f.lat != null && f.lon != null ? ` · ${nf(f.lat, 4)}, ${nf(f.lon, 4)}` : ''}
+            </div>
             <div>
               Лицензия: <b>{set.license}</b>
             </div>
@@ -283,14 +323,20 @@ function SetView({ set, onBack, initialFrame }: { set: DroneSet; onBack: () => v
         <div className="faint">
           <span className={`dr-sensor s-${set.sensor}`}>{set.sensor_label}</span> · {set.region} · {set.license} · в наборе {set.dataset_size}
         </div>
+        {set.model && (
+          <div className="dr-setsum" data-testid="drones-set-summary">
+            <b>{modelSummaryText(set.model)}</b> <span className="faint">· {rule(set.model)}</span>
+            <div className={set.model.trained_on_this_set ? 'faint' : 'dr-warn'}>{set.model.training_note}</div>
+          </div>
+        )}
         <div className="dr-note">{set.note}</div>
       </div>
       <div className="dr-grid" data-testid="drones-grid">
         {data.frames.map((f, i) => (
           <button key={f.id} className="dr-thumb" onClick={() => setIdx(i)} data-testid="drones-thumb" title={f.source_file}>
             <img src={f.image} alt="" loading="lazy" />
-            <span className="dr-thumb-n">{f.n_objects != null ? `${f.n_objects} шт.` : 'без рамок'}</span>
-            {f.prediction && <span className="dr-thumb-p">счётчик {f.prediction.n}</span>}
+            <span className="dr-thumb-n">разметка {f.n_objects != null ? f.n_objects : '—'}</span>
+            {f.model && <span className="dr-thumb-p">модель {f.model.n}</span>}
           </button>
         ))}
       </div>
@@ -328,7 +374,9 @@ export default function DronesPanel({ initialSet, onClose }: { initialSet?: stri
         </span>
         <span className="faint">
           {s.license}
-          {s.counter_checked ? ' · есть прогноз нашего счётчика' : ''}
+        </span>
+        <span className="faint">
+          {s.model ? `${modelSummaryText(s.model)} · ${s.model.trained_on_this_set ? 'обучался на этом наборе' : 'не обучался на этом наборе'}` : ''}
         </span>
       </span>
     </button>
@@ -356,7 +404,7 @@ export default function DronesPanel({ initialSet, onClose }: { initialSet?: stri
             <div className="dr-cards">{drones.map(card)}</div>
             {others.length > 0 && (
               <>
-                <div className="dr-grp">Другие детальные кадры (не дрон) — здесь проверен наш счётчик</div>
+                <div className="dr-grp">Другие детальные кадры (не дрон) — на них обучался и проверен наш счётчик</div>
                 <div className="dr-cards">{others.map(card)}</div>
               </>
             )}

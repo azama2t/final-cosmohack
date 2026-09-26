@@ -11,8 +11,9 @@ import { ObsCard, ZoneCard } from './Cards';
 import PairsDrawer from './PairsDrawer';
 import SceneZoneCard, { zoneTitle, type CardTab, type SceneZoneDetail, type SceneZoneProps } from './SceneZoneCard';
 import { SZ_COLORS, szKey, isFind, geomCenter } from './CaseMap';
-import { NasaFolder, NasaMapPanel, useNasaInfo } from './Nasa';
+import { NasaMapPanel, RealtimeFolder, useFreshInfo, useNasaInfo, type FreshScene } from './Nasa';
 import { DronesOptions, openDrones, openDronesFromValue } from './DronesHost';
+import { PrimeToggle, setPrime } from './PrimeMode';
 import { PhotoRolesLine } from './PhotoRoles';
 import ZoneStudio from './Studio'; // §50 P1-4/5/6 L142
 import { QualityToggle } from './QualityMask'; // §50 P1-6 L142
@@ -167,6 +168,32 @@ export default function CaseApp() {
   const [nasaLayerId, setNasaLayerId] = useState<string | null>(null);
   const [nasaDay, setNasaDay] = useState<string | null>(null);
   const nasaInfo = useNasaInfo(nasaOn);
+  // §55 п.1: папка «Реальное время» (the same one button): fresh Sentinel-2 by our model + NASA daily overview
+  const [nasaLayerOn, setNasaLayerOn] = useState(true);
+  const freshInfo = useFreshInfo(nasaOn);
+  const [freshScene, setFreshScene] = useState<FreshScene | null>(null);
+  const [freshZones, setFreshZones] = useState<FC<any> | null>(null);
+  useEffect(() => {
+    setFreshZones(null);
+    if (!freshScene?.zones_url) return;
+    const ac = new AbortController();
+    get<FC<any>>(freshScene.zones_url, {}, ac.signal).then(setFreshZones, () => undefined);
+    return () => ac.abort();
+  }, [freshScene]);
+  const freshAll = useMemo<FreshScene[]>(() => (freshInfo && freshInfo !== 'error' ? freshInfo.regions.flatMap((r) => r.dates) : []), [freshInfo]);
+  const tlFresh = useMemo(
+    () =>
+      nasaOn
+        ? freshAll
+            .map((f) => ({ key: f.key, t: Date.parse(f.datetime ?? f.date), label: `${f.region_name ?? f.region} · ${dateRu(f.date)}`, finds: f.by_status?.detected ?? 0 }))
+            .filter((f) => Number.isFinite(f.t))
+        : [],
+    [nasaOn, freshAll],
+  );
+  const freshMap = useMemo(
+    () => (nasaOn && freshScene ? { key: freshScene.key, img: freshScene.rgb_url ?? null, bounds: freshScene.bounds ?? null, zones: freshZones } : null),
+    [nasaOn, freshScene, freshZones],
+  );
   // «Запросы» live inside «Ещё ▾»: closing «Ещё» closes them too (no stale open state behind a closed menu)
   useEffect(() => {
     if (!moreMenu.open) queryMenu.setOpen(false);
@@ -305,8 +332,8 @@ export default function CaseApp() {
   const nasaDate = nasaDay ?? nasaInfo?.latestFull ?? new Date(Date.now() - 864e5).toISOString().slice(0, 10);
   const nasaLayer = nasaInfo ? nasaInfo.layers.find((x) => x.id === (nasaLayerId ?? nasaInfo.defaultLayer)) ?? nasaInfo.layers[0] : null;
   const nasa = useMemo(
-    () => (nasaOn && nasaLayer ? { url: nasaLayer.tile_url.replace('{date}', nasaDate), maxzoom: nasaLayer.max_native_zoom ?? 9 } : null),
-    [nasaOn, nasaLayer, nasaDate],
+    () => (nasaOn && nasaLayerOn && nasaLayer ? { url: nasaLayer.tile_url.replace('{date}', nasaDate), maxzoom: nasaLayer.max_native_zoom ?? 9 } : null),
+    [nasaOn, nasaLayerOn, nasaLayer, nasaDate],
   );
   // image overlays: the chosen snapshot; candidate scenes of the field pairs only with the «Полевые измерения» layer
   const sceneList = useMemo(() => {
@@ -976,7 +1003,22 @@ export default function CaseApp() {
         </div>
 
         <div className="left-body" data-testid="zone-list">
-          {nasaOn && !curScene && <NasaFolder info={nasaInfo} onRegion={(r) => flyToBox(r.bbox, { maxZoom: Math.min(r.zoom ?? 9, 9), duration: 1200 })} />}
+          {nasaOn && !curScene && (
+            <RealtimeFolder
+              fresh={freshInfo}
+              nasa={nasaInfo}
+              nasaLayerOn={nasaLayerOn}
+              onNasaLayer={() => setNasaLayerOn((v) => !v)}
+              freshKey={freshScene?.key ?? null}
+              freshZones={freshZones}
+              onFresh={(s) => {
+                setFreshScene(s);
+                if (s?.bounds) flyToBox(s.bounds as Bbox, { maxZoom: 12, duration: 1200 });
+              }}
+              onRegion={(b) => flyToBox(b as Bbox, { maxZoom: 11, duration: 1200 })}
+              onFreshZone={(f) => flyToFeat(f, 14)}
+            />
+          )}
           {!curScene ? (
             <SceneList rows={sceneRows} loading={!szones.data && !szones.err} err={szones.err} onPick={openScene} filtered={!isDefault(q)} fieldArea={!!q.source}
               drift={hasDrift}
@@ -1017,6 +1059,7 @@ export default function CaseApp() {
           szones={szMap}
           scenes={sceneList}
           nasa={nasa}
+          fresh={freshMap}
           layers={q.layers}
           selected={sel}
           pairHl={pairHl}
@@ -1143,9 +1186,20 @@ export default function CaseApp() {
                   onClick={() => setNasaOn((v) => !v)}
                   aria-pressed={nasaOn}
                   data-testid="more-nasa"
-                  title="Ежедневный обзорный снимок NASA GIBS — фон для облачности / цветения / пятен, не обнаружение пластика"
+                  title="Папка «Реальное время»: свежие Sentinel-2, обработанные нашей моделью + ежедневный обзор NASA — показать / скрыть целиком"
                 >
-                  <span className={`check ${nasaOn ? 'on' : ''}`} aria-hidden /> NASA: обзор (MODIS/VIIRS, ~250 м)
+                  <span className={`check ${nasaOn ? 'on' : ''}`} aria-hidden /> Реальное время (Sentinel-2 + NASA)
+                </button>
+                <button
+                  className="menu-row"
+                  onClick={() => {
+                    moreMenu.setOpen(false);
+                    setPrime(true);
+                  }}
+                  data-testid="more-prime"
+                  title="PRIME MODE: как сервис будет выглядеть на детальных снимках — демо-данные, не результат модели"
+                >
+                  PRIME MODE · демо-данные
                 </button>
                 <button
                   className="menu-row"
@@ -1236,10 +1290,11 @@ export default function CaseApp() {
             onClick={() => setNasaOn((v) => !v)}
             aria-pressed={nasaOn}
             data-testid="nasa-toggle"
-            title="NASA · ежедневно: показать / скрыть папку, слой и подписи (обзор, не обнаружение пластика)"
+            title="Реальное время: свежие Sentinel-2, обработанные нашей моделью (автоматически, не проверено человеком) + ежедневный обзор NASA — показать / скрыть всю папку, слои и подписи"
           >
-            NASA
+            <span className="c-rt-dot" aria-hidden /> Реальное время {nasaOn ? '✓' : ''}
           </button>
+          <PrimeToggle />
           <button className="btn" onClick={() => demoRef.current?.open()} data-testid="demo-tour-btn">
             Демо ▶
           </button>
@@ -1264,7 +1319,7 @@ export default function CaseApp() {
               ))}
               <button className="menu-row" onClick={() => setNasaOn((v) => !v)} data-testid="layer-nasa" aria-pressed={nasaOn}>
                 <span className={`check ${nasaOn ? 'on' : ''}`} aria-hidden />
-                <span>NASA: обзор (MODIS/VIIRS, ~250 м) · не обнаружение</span>
+                <span>Реальное время: Sentinel-2 нашей моделью + NASA-обзор</span>
               </button>
               <div className="menu-sep" />
               <div className="menu-group">Подложка{offline ? ' · сейчас офлайн' : ''}</div>
@@ -1371,7 +1426,16 @@ export default function CaseApp() {
           {' · Снимки: Copernicus Sentinel-2, USGS Landsat · Поле: данные организаторов (CSV)'}
           {nasa && ' · Обзор: NASA EOSDIS GIBS'}
         </div>
-        {nasaOn && (
+        {freshMap && freshScene && (
+          <div className="c-fresh-tag" data-testid="realtime-tag">
+            <b>Реальное время · Sentinel-2 {dateRu(freshScene.date)}</b> · {freshScene.region_name ?? freshScene.region} · обработано нашей моделью —{' '}
+            <span className="c-rt-label">автоматически, не проверено человеком</span>
+            <button className="icon-btn" onClick={() => setFreshScene(null)} aria-label="Скрыть свежий снимок" data-testid="realtime-tag-close">
+              ✕
+            </button>
+          </div>
+        )}
+        {nasaOn && nasaLayerOn && (
           <NasaMapPanel
             info={nasaInfo}
             layerId={nasaLayer?.id ?? ''}
@@ -1441,7 +1505,14 @@ export default function CaseApp() {
           }}
           period={[q.from ? Date.parse(q.from) : null, q.to ? Date.parse(q.to) + 86400e3 - 1 : null]}
           onDynamics={dynRegion || curScene ? () => openDynamics({ region: dynRegion, scene: curScene }) : null}
-          nasa={{ on: nasaOn, date: nasaDate, latest: nasaInfo?.latest ?? nasaDate }}
+          nasa={{ on: nasaOn && nasaLayerOn, date: nasaDate, latest: nasaInfo?.latest ?? nasaDate }}
+          fresh={tlFresh}
+          freshCur={freshScene?.key ?? null}
+          onFresh={(k) => {
+            const s = freshAll.find((x) => x.key === k) ?? null;
+            setFreshScene(s);
+            if (s?.bounds) flyToBox(s.bounds as Bbox, { maxZoom: 12, duration: 1200 });
+          }}
           onNasaDate={(d) => {
             setNasaDay(d);
             setNasaOn(true);
@@ -1451,7 +1522,7 @@ export default function CaseApp() {
           <div className="c-drift-wrap" data-testid="drift-wrap">
             <div className="c-drift-tag">
               {/* §48/§51 п.8: текст даёт driftCaption()/DRIFT_CORRIDOR_LABEL (DriftLayer.ts) — L141, одна строка на карте и в панели */}
-              {driftCaption(drift.forcing)} Линия — медианная траектория. {DRIFT_CORRIDOR_LABEL} ·{' '}
+              <b>Модельный сценарий, не наблюдаемое перемещение.</b> {driftCaption(drift.forcing)} Линия — медианная траектория. {DRIFT_CORRIDOR_LABEL} ·{' '}
               <span data-testid="drift-horizon">
                 горизонт ≤ {Math.min(72, drift.hours?.length ? drift.hours[drift.hours.length - 1] : 72)} ч, шаг расчёта {(drift.forcing as any)?.output_step_h ?? 1} ч
               </span>

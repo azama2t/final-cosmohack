@@ -95,7 +95,14 @@ export default function Timeline({
   nasa,
   onNasaDate,
   drones,
+  fresh,
+  freshCur,
+  onFresh,
 }: {
+  /** §55/§57: «Реальное время» — fresh Sentinel-2 processed by our model (shown in the Sentinel-2 lane, red ring) */
+  fresh?: { key: string; t: number; label: string; finds: number }[];
+  freshCur?: string | null;
+  onFresh?: (key: string) => void;
   /** §51 п.3: open the «Динамика района» panel (L140) */
   onDynamics?: (() => void) | null;
   scenes: TlScene[];
@@ -143,7 +150,10 @@ export default function Timeline({
       }
       return n;
     });
-  const shown = LANES.filter((l) => lanes[l.id]);
+  // §57 п.2: no drone lane without real shooting dates (none are invented)
+  const hasDrones = (drones ?? []).some((d) => Number.isFinite(d.t));
+  const avail = LANES.filter((l) => l.id !== 'drones' || hasDrones);
+  const shown = avail.filter((l) => lanes[l.id]);
   let yy = 0;
   const laneY: Partial<Record<LaneId, [number, number]>> = {};
   for (const l of shown) {
@@ -170,7 +180,7 @@ export default function Timeline({
   const nasaT = nasa ? Date.parse(nasa.date + 'T12:00:00Z') : NaN;
   const droneTs = useMemo(() => (drones ?? []).map((d) => d.t).filter((t) => Number.isFinite(t)), [drones]);
   const full = useMemo<[number, number]>(() => {
-    const ts = [...scenes.map((s) => s.t), ...obs, ...droneTs].filter((t) => Number.isFinite(t));
+    const ts = [...scenes.map((s) => s.t), ...obs, ...droneTs, ...(fresh ?? []).map((f) => f.t)].filter((t) => Number.isFinite(t));
     let a = period[0] ?? (ts.length ? Math.min(...ts) : Date.UTC(2018, 0, 1));
     let b = period[1] ?? (ts.length ? Math.max(...ts) : Date.now());
     if (b - a < 20 * DAY) {
@@ -180,7 +190,7 @@ export default function Timeline({
     }
     const pad = (b - a) * 0.04;
     return [a - pad, b + pad];
-  }, [scenes, obs, droneTs, period[0], period[1]]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [scenes, obs, droneTs, fresh, period[0], period[1]]); // eslint-disable-line react-hooks/exhaustive-deps
   const [win, setWin] = useState<[number, number]>(full);
   useEffect(() => setWin(full), [full]);
   const [t0, t1] = win;
@@ -260,6 +270,17 @@ export default function Timeline({
   };
   const obsBins = useMemo(() => bins(obs), [obs, t0, t1, W]); // eslint-disable-line react-hooks/exhaustive-deps
   const droneBins = useMemo(() => bins(droneTs), [droneTs, t0, t1, W]); // eslint-disable-line react-hooks/exhaustive-deps
+  // fresh snapshots: 14 px bins (a month of dates at a year scale → one mark with the count)
+  const freshBins = useMemo(() => {
+    const m = new Map<number, { key: string; t: number; label: string; finds: number }[]>();
+    for (const f of fresh ?? []) {
+      if (f.t < t0 || f.t > t1) continue;
+      const px = Math.round(x(f.t) / 14) * 14;
+      if (!m.has(px)) m.set(px, []);
+      m.get(px)!.push(f);
+    }
+    return [...m.entries()];
+  }, [fresh, t0, t1, W]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!open)
     return (
@@ -299,7 +320,7 @@ export default function Timeline({
       <div className="c-tl-main" ref={box}>
         <div className="c-tl-key">
           <span className="faint">дорожки:</span>
-          {LANES.map((l) => (
+          {avail.map((l) => (
             <button
               key={l.id}
               className={`c-tl-chip ${l.id} ${lanes[l.id] ? 'on' : ''}`}
@@ -365,13 +386,13 @@ export default function Timeline({
               {obs.length ? 'нет измерений в этом окне' : 'слой «Полевые измерения» выключен или нет дат'}
             </text>
           )}
-          {lanes.drones &&
+          {lanes.drones && hasDrones &&
             droneBins.map(([px, n]) => (
               <rect key={'dr' + px} x={px - 2} y={mid('drones') - 4} width={4} height={8} rx={1} className="c-tl-drone">
                 <title>кадры с дронов (не спутник): {n}</title>
               </rect>
             ))}
-          {lanes.drones && !droneBins.length && (
+          {lanes.drones && hasDrones && !droneBins.length && (
             <text x={LBL + 6} y={mid('drones') + 3.5} className="c-tl-empty">
               {droneTs.length ? 'нет кадров в этом окне' : 'у кадров с дронов нет дат съёмки в данных'}
             </text>
@@ -398,6 +419,39 @@ export default function Timeline({
               )}
             </g>
           )}
+          {lanes.s2 &&
+            freshBins.map(([px, fs]) => {
+              const cy = mid('s2');
+              const on = fs.some((f) => f.key === freshCur);
+              if (fs.length === 1)
+                return (
+                  <g key={'f' + fs[0].key} className={`c-tl-fresh ${on ? 'on' : ''}`} onClick={() => !moved() && onFresh?.(fs[0].key)} data-testid="timeline-fresh" data-scene={fs[0].key} style={{ cursor: 'pointer' }}>
+                    <circle cx={px} cy={cy} r={on ? 6 : 4.5} />
+                    <title>Реальное время · {fs[0].label} · {fs[0].finds ? `${fs[0].finds} наход.` : '0 находок'} — автоматически, не проверено человеком</title>
+                  </g>
+                );
+              const a = Math.min(...fs.map((f) => f.t));
+              const b = Math.max(...fs.map((f) => f.t));
+              return (
+                <g
+                  key={'fg' + px}
+                  className={`c-tl-fresh c-tl-g ${on ? 'on' : ''}`}
+                  onClick={() => {
+                    if (moved()) return;
+                    const pad = Math.max(2 * DAY, (b - a) * 0.3);
+                    setWin([a - pad, b + pad]);
+                  }}
+                  data-testid="timeline-fresh-group"
+                  style={{ cursor: 'zoom-in' }}
+                >
+                  <rect x={px - 9} y={cy - 7} width={18} height={14} rx={7} />
+                  <text x={px} y={cy + 3.5} className="c-tl-n fresh">
+                    {fs.length}
+                  </text>
+                  <title>Реальное время: {fs.length} свежих снимков Sentinel-2 ({ru(a)} – {ru(b)}) — нажмите, чтобы приблизить</title>
+                </g>
+              );
+            })}
           {curS && curS.t >= t0 && curS.t <= t1 && (
             <g className="c-tl-curmark" data-testid="timeline-current">
               <line x1={x(curS.t)} x2={x(curS.t)} y1={0} y2={H - AXIS} />

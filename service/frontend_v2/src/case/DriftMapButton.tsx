@@ -93,6 +93,7 @@ export default function DriftMapButton({ zone, path, on, onToggle }: DriftMapBut
           title="Дрейф: сценарий OpenDrift по реальным течениям (HYCOM) и ветру (GFS) на дату сцены, горизонт ≤ 72 ч"
         >
           {on ? 'Дрейф ✓' : 'Дрейф ▶'}
+          <span className="drift-map-cap">модельный сценарий, не наблюдаемое перемещение</span>
         </button>
       ) : (
         <div className="drift-map-none" data-testid="drift-map-none" title={reason}>

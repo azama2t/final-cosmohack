@@ -27,6 +27,12 @@ export interface CsvScene {
   imgDetail: string | null;
   img10: string | null;
   preview: string | null;
+  image: string | null;
+  boxes: { cls: string; box: [number, number, number, number] }[];
+  frameNote: string;
+  frameClasses: { cls: string; n: number }[];
+  numbersLabel: string;
+  counter: { label: string; gsd: number | null; note: string } | null;
   categories: { category: string; items: number | null }[];
   windowKm2: number | null;
   windowSideM: number | null;
@@ -49,12 +55,13 @@ export interface CsvIndex {
   about: string;
   generator: string;
   stub: boolean;
+  imageSources: string[];
   scenes: CsvScene[];
   metrics: CsvMetrics | null;
 }
 
-export const DEMO_BADGE = 'ДЕМО: как сервис будет выглядеть на детальных снимках. Изображения и числа — демонстрационные, не результат модели';
-export const DEMO_VAL = 'демо-значение (из CSV организаторов)';
+export const DEMO_BADGE = 'ДЕМО: изображения и числа демонстрационные, не результат модели';
+export const DEMO_VAL = 'данные CSV организаторов';
 type O = Record<string, any>;
 const pick = (o: O | undefined | null, ...keys: string[]): any => {
   if (!o) return undefined;
@@ -74,6 +81,15 @@ const imgUrl = (v: any): string | null => {
   if (v.startsWith('/api/') || v.startsWith('http')) return v;
   return `/api/prime/csv_img/${v.replace(/^.*\//, '').replace(/\.png$/, '')}.png`;
 };
+
+function aggCats(a: { category: string; items: number | null }[]) {
+  const m = new Map<string, number | null>();
+  for (const c of a) {
+    const p = m.get(c.category);
+    m.set(c.category, p === undefined ? c.items : p == null || c.items == null ? null : p + c.items);
+  }
+  return [...m].map(([category, items]) => ({ category, items }));
+}
 
 function normScene(o: O, i: number): CsvScene | null {
   const lat = num(pick(o, 'lat', 'latitude', 'event.lat', 'coords.lat', 'center.1'));
@@ -115,19 +131,32 @@ function normScene(o: O, i: number): CsvScene | null {
     category: String(pick(o, 'category', 'litter_category', 'categories') ?? ''),
     size: String(pick(o, 'size_class', 'sizes') ?? ''),
     source: String(pick(o, 'source_short', 'source') ?? ''),
-    nCsv: num(pick(o, 'n_csv', 'items_count', 'csv.n', 'n_truth')),
+    nCsv: num(pick(o, 'n_items', 'n_csv', 'items_count', 'csv.n', 'n_truth')),
     areaKm2: num(pick(o, 'area_km2', 'sampled_area_km2', 'csv.area_km2')),
-    windowNote: String(pick(o, 'window_note', 'note', 'window.note') ?? ''),
-    nFound: num(pick(o, 'n_found', 'found', 'n_pred', 'count_found')),
-    concCsv: num(pick(o, 'conc_csv', 'conc_csv_items_km2', 'csv_items_km2', 'concentration_items_km2', 'csv.items_km2')),
-    concPred: num(pick(o, 'conc_pred', 'conc_pred_items_km2', 'pred_items_km2', 'predicted_items_km2', 'pred.items_km2')),
+    windowNote: String(pick(o, 'window_note', 'window.note') ?? ''),
+    nFound: num(pick(o, 'counter.n_found', 'counter.found', 'n_found', 'found', 'n_pred', 'count_found')),
+    concCsv: num(pick(o, 'items_per_km2', 'conc_csv', 'conc_csv_items_km2', 'csv_items_km2', 'concentration_items_km2', 'csv.items_km2')),
+    concPred: num(pick(o, 'counter.conc_pred', 'counter.items_per_km2', 'conc_pred', 'conc_pred_items_km2', 'pred_items_km2', 'predicted_items_km2', 'pred.items_km2')),
     gsd,
     byGsd,
     imgDetail: im(gsd, 'img_detail', 'img_005', 'img_main'),
     img10: im(10, 'img_10m', 'img_10', 'img_s2', 'preview_10m'),
-    preview: imgUrl(pick(o, 'preview', 'preview_url')),
+    preview: imgUrl(pick(o, 'image_boxes', 'preview', 'preview_url')),
+    image: imgUrl(pick(o, 'image')),
+    boxes: Array.isArray(o.boxes)
+      ? o.boxes
+          .filter((b: any) => Array.isArray(b?.box) && b.box.length === 4)
+          .map((b: any) => ({ cls: String(pick(b, 'cls_ru', 'cls') ?? ''), box: b.box.map(Number) as [number, number, number, number] }))
+      : [],
+    frameNote: String(pick(o, 'frame_note') ?? ''),
+    frameClasses: o.frame_classes && typeof o.frame_classes === 'object' ? Object.entries(o.frame_classes).map(([cls, n]) => ({ cls, n: Number(n) })) : [],
+    numbersLabel: String(pick(o, 'numbers_label') ?? ''),
+    counter:
+      o.counter && typeof o.counter === 'object'
+        ? { label: String(o.counter.label ?? 'найдено счётчиком (эксперимент)'), gsd: num(o.counter.gsd_m), note: String(o.counter.note ?? '') }
+        : null,
     categories: Array.isArray(o.categories)
-      ? o.categories.map((c: any) => (typeof c === 'string' ? { category: c, items: null } : { category: String(pick(c, 'category', 'name') ?? ''), items: num(pick(c, 'items', 'n')) }))
+      ? aggCats(o.categories.map((c: any) => (typeof c === 'string' ? { category: c, items: null } : { category: String(pick(c, 'category', 'name') ?? ''), items: num(pick(c, 'items', 'n')) })))
       : [],
     windowKm2: num(pick(o, 'window_area_km2')),
     windowSideM: num(pick(o, 'window_side_m')),
@@ -172,10 +201,11 @@ export function normIndex(o: O): CsvIndex {
   return {
     badge: DEMO_BADGE,
     about: String(pick(o, 'about', 'description') ?? ''),
+    imageSources: (pick(o, 'meta.image_sources') as string[] | undefined) ?? [],
     generator: String(pick(o, 'generator', 'script', 'meta.generator') ?? 'scripts/case/prime_csv.py'),
     stub: !!pick(o, 'stub'),
     scenes: arr.map(normScene).filter((x): x is CsvScene => !!x),
-    metrics: normMetrics(pick(o, 'metrics', 'summary') ?? (o && o.metrics_by_gsd ? { metrics_by_gsd: o.metrics_by_gsd, file: 'reports/prime/metrics.json' } : null)),
+    metrics: normMetrics(pick(o, 'metrics', 'summary', 'meta.counter_experiment') ?? (o && o.metrics_by_gsd ? { metrics_by_gsd: o.metrics_by_gsd, file: 'reports/prime/metrics.json' } : null)),
   };
 }
 
@@ -187,18 +217,8 @@ export function useCsvIndex(on: boolean) {
     let dead = false;
     fetch(apiUrl('/api/prime/csv_scenes'))
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(r.status === 404 ? 'данные ещё не собраны' : `HTTP ${r.status}`))))
-      .then(async (j) => {
+      .then((j) => {
         const x = normIndex(j);
-        if (!x.metrics) {
-          // метрики могут отдаваться отдельным маршрутом
-          for (const u of ['/api/prime/csv_metrics', '/api/prime/metrics']) {
-            const r = await fetch(apiUrl(u)).catch(() => null);
-            if (r?.ok) {
-              x.metrics = normMetrics(await r.json());
-              break;
-            }
-          }
-        }
         if (!dead) setIx(x);
       })
       .catch((e) => !dead && setErr(String(e.message ?? e)));
@@ -235,7 +255,7 @@ export function usePrimeCsvLayer(on: boolean, scenes: CsvScene[] | undefined, se
     let map: any = null;
     const ensure = () => {
       map = (window as any).__caseMap;
-      if (!map?.getStyle || !map.isStyleLoaded?.()) return;
+      if (!map?.getStyle || !map.style || !map.isStyleLoaded?.()) return;
       try {
         if (!map.getSource(SRC)) map.addSource(SRC, { type: 'geojson', data: fc });
         if (!map.getLayer(L_HALO))
@@ -268,12 +288,13 @@ export function usePrimeCsvLayer(on: boolean, scenes: CsvScene[] | undefined, se
         else map.setFilter(L_SEL, ['==', ['get', 'id'], selRef.current ?? '']);
         if (!bound.has(map)) {
           bound.add(map);
-          map.on('click', L_PT, (e: any) => {
-            const id = e.features?.[0]?.properties?.id;
-            if (id) pickRef.current(String(id));
+          const mm = map;
+          mm.on('mouseenter', L_PT, () => {
+            mm.getCanvas().style.cursor = 'pointer';
           });
-          map.on('mouseenter', L_PT, () => (map.getCanvas().style.cursor = 'pointer'));
-          map.on('mouseleave', L_PT, () => (map.getCanvas().style.cursor = ''));
+          mm.on('mouseleave', L_PT, () => {
+            mm.getCanvas().style.cursor = '';
+          });
         }
         if (!fitted.current) {
           fitted.current = true;
@@ -282,7 +303,7 @@ export function usePrimeCsvLayer(on: boolean, scenes: CsvScene[] | undefined, se
           const W = map.getContainer().clientWidth;
           map.fitBounds(
             [[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]],
-            { padding: mobile ? { top: 40, bottom: 40, left: 20, right: 20 } : { top: 60, bottom: 60, left: Math.min(460, W * 0.45), right: 40 }, maxZoom: 5, duration: 600 },
+            { padding: mobile ? { top: 110, bottom: Math.round(window.innerHeight * 0.55), left: 20, right: 20 } : { top: 60, bottom: 60, left: Math.min(460, W * 0.45), right: 40 }, maxZoom: 5, duration: 600 },
           );
         }
       } catch {
@@ -291,25 +312,56 @@ export function usePrimeCsvLayer(on: boolean, scenes: CsvScene[] | undefined, se
     };
     ensure();
     const t = window.setInterval(ensure, 700);
+    // click on a demo point: handled here in the capture phase and NOT passed on to the case map,
+    // so the real selection (scene / zone) survives PRIME and comes back when it is switched off
+    const onClick = (e: MouseEvent) => {
+      const m = (window as any).__caseMap;
+      if (!m?.style || !m.getLayer(L_PT)) return;
+      const c = m.getCanvasContainer?.() as HTMLElement | undefined;
+      if (!c || !(e.target instanceof Node) || !c.contains(e.target)) return;
+      const r = c.getBoundingClientRect();
+      const x = e.clientX - r.left, y = e.clientY - r.top;
+      let f: any[] = [];
+      try {
+        f = m.queryRenderedFeatures([[x - 6, y - 6], [x + 6, y + 6]], { layers: [L_PT] });
+      } catch {
+        return;
+      }
+      const id = f[0]?.properties?.id;
+      if (!id) return;
+      e.stopPropagation();
+      e.preventDefault();
+      window.setTimeout(() => pickRef.current(String(id)), 0);
+    };
+    window.addEventListener('click', onClick, true);
     return () => {
+      window.removeEventListener('click', onClick, true);
       window.clearInterval(t);
       fitted.current = false;
       const m = (window as any).__caseMap;
-      if (m?.getLayer) {
-        for (const id of [L_SEL, L_PT, L_HALO]) if (m.getLayer(id)) m.removeLayer(id);
-        if (m.getSource(SRC)) m.removeSource(SRC);
+      try {
+        if (m?.getLayer && m.style) {
+          for (const id of [L_SEL, L_PT, L_HALO]) if (m.getLayer(id)) m.removeLayer(id);
+          if (m.getSource(SRC)) m.removeSource(SRC);
+        }
+      } catch {
+        /* map already removed */
       }
     };
   }, [on, scenes]);
   useEffect(() => {
     const m = (window as any).__caseMap;
-    if (on && m?.getLayer?.(L_SEL)) m.setFilter(L_SEL, ['==', ['get', 'id'], sel ?? '']);
+    try {
+      if (on && m?.style && m.getLayer(L_SEL)) m.setFilter(L_SEL, ['==', ['get', 'id'], sel ?? '']);
+    } catch {
+      /* style reloading */
+    }
   }, [on, sel]);
 }
 
 export function flyToScene(s: CsvScene) {
   const m = (window as any).__caseMap;
-  if (!m?.flyTo) return;
+  if (!m?.flyTo || !m.style) return;
   const mobile = window.innerWidth <= 820;
   const W = m.getContainer().clientWidth;
   m.flyTo({
@@ -326,6 +378,59 @@ const nf = (v: number | null | undefined, d = 0) =>
 const nfa = (v: number | null | undefined) => (v == null ? '—' : nf(v, Math.abs(v) >= 100 ? 0 : Math.abs(v) >= 10 ? 1 : 2));
 const dateRu = (s: string) => (/^\d{4}-\d{2}-\d{2}/.test(s) ? s.slice(0, 10).split('-').reverse().join('.') : s);
 const gsdTxt = (g: number) => `${nf(g, 2)} м`;
+
+const CLS_COL = ['#ffd23d', '#5ee0ff', '#ff8a5c', '#9cff6b', '#ff6bd5', '#c9b6ff'];
+function DemoFrame({ s }: { s: CsvScene }) {
+  const [boxes, setBoxes] = useState(true);
+  const classes = s.frameClasses.length
+    ? s.frameClasses
+    : [...s.boxes.reduce((m, b) => m.set(b.cls, (m.get(b.cls) ?? 0) + 1), new Map<string, number>())].map(([cls, n]) => ({ cls, n }));
+  const col = (c: string) => CLS_COL[Math.max(0, classes.findIndex((x) => x.cls === c)) % CLS_COL.length];
+  return (
+    <figure className="pc-prev" data-testid="prime-csv-imgs">
+      <div className="pc-frame">
+        <img src={apiUrl(s.image!)} alt={`Демо-снимок по строке CSV ${s.id}`} loading="lazy" />
+        {boxes && (
+          <svg viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden data-testid="prime-csv-boxes">
+            {s.boxes.map((b, i) => {
+              const [x0, y0, x1, y1] = b.box;
+              const pad = 4; // tiny items: make the frame visible
+              return (
+                <rect
+                  key={i}
+                  x={x0 * 1000 - pad}
+                  y={y0 * 1000 - pad}
+                  width={(x1 - x0) * 1000 + 2 * pad}
+                  height={(y1 - y0) * 1000 + 2 * pad}
+                  fill="none"
+                  stroke={col(b.cls)}
+                  strokeWidth={2.5}
+                  vectorEffect="non-scaling-stroke"
+                />
+              );
+            })}
+          </svg>
+        )}
+        <span className="prime-wm">ДЕМО</span>
+      </div>
+      <figcaption>
+        <span className="pc-legend">
+          {classes.map((c) => (
+            <span key={c.cls}>
+              <i style={{ borderColor: col(c.cls) }} /> {c.cls} · {nf(c.n)}
+            </span>
+          ))}
+          <button className="pc-boxbtn" onClick={() => setBoxes(!boxes)} aria-pressed={boxes} data-testid="prime-csv-boxes-toggle">
+            рамки {boxes ? 'вкл.' : 'выкл.'}
+          </button>
+        </span>
+        {s.frameNote && <span className="pc-fnote">{s.frameNote}. </span>}
+        Демо-снимок: реальная вода + вырезки реальных предметов из дрон-наборов; рамки — известные генератору положения (так будут выглядеть
+        находки), не детекции.
+      </figcaption>
+    </figure>
+  );
+}
 
 export function CsvCard({ s, onBack }: { s: CsvScene; onBack: () => void }) {
   const cats = s.categories.length ? s.categories : s.category ? [{ category: s.category, items: s.nCsv }] : [];
@@ -345,29 +450,15 @@ export function CsvCard({ s, onBack }: { s: CsvScene; onBack: () => void }) {
         {s.date && ` · ${dateRu(s.date)}`}
         {s.source && ` · ${s.source}`}
       </p>
-      {s.preview ? (
+      {s.image && s.boxes.length ? (
+        <DemoFrame s={s} />
+      ) : s.preview ? (
         <figure className="pc-prev" data-testid="prime-csv-imgs">
           <img src={apiUrl(s.preview)} alt={`Демо-снимок по строке CSV ${s.id}`} loading="lazy" />
-          <figcaption>
-            Демо-снимок: реальная вода + вырезки реальных предметов из дрон-наборов; рамки — так будут выглядеть найденные предметы. Слева
-            направо — детальный кадр и он же в худшем разрешении (до 10 м, как Sentinel-2).
-          </figcaption>
+          <figcaption>Демо-снимок: реальная вода + вырезки реальных предметов из дрон-наборов; рамки — так будут выглядеть найденные предметы.</figcaption>
           <span className="prime-wm">ДЕМО</span>
         </figure>
-      ) : (
-        <div className="prime-imgs" data-testid="prime-csv-imgs">
-          <figure>
-            {s.imgDetail ? <img src={apiUrl(s.imgDetail)} alt={`Демо-снимок ${s.id}, ${gsdTxt(s.gsd)}`} loading="lazy" /> : <div className="pc-noimg">нет превью</div>}
-            <figcaption>Детальный кадр {gsdTxt(s.gsd)}/пикс.</figcaption>
-            <span className="prime-wm">ДЕМО</span>
-          </figure>
-          <figure>
-            {s.img10 ? <img className="px" src={apiUrl(s.img10)} alt={`Демо-снимок ${s.id}, 10 м`} loading="lazy" /> : <div className="pc-noimg">нет превью 10 м</div>}
-            <figcaption>Тот же кадр в 10 м (как Sentinel-2)</figcaption>
-            <span className="prime-wm">ДЕМО</span>
-          </figure>
-        </div>
-      )}
+      ) : null}
       <dl className="prime-facts pc-facts" data-testid="prime-csv-facts">
         <div className="pc-wide">
           <dt>класс предметов</dt>
@@ -399,16 +490,19 @@ export function CsvCard({ s, onBack }: { s: CsvScene; onBack: () => void }) {
         </div>
         <div>
           <dt>разрешение кадра</dt>
-          <dd>{gsdTxt(s.gsd)}</dd>
+          <dd>{nf(s.gsd, 2)} м</dd>
         </div>
       </dl>
       <p className="pc-demo" data-testid="prime-demo-val">
         Числа — {DEMO_VAL}, строка {s.id}
-        {s.event && `, событие ${s.event}`}; не результат модели.
+        {s.event && `, событие ${s.event}`}; не предсказание счётчика и не метрика качества.
       </p>
       {s.nFound != null && (
         <p className="pc-exp" data-testid="prime-csv-found">
-          найдено счётчиком (эксперимент): <b>{nf(s.nFound)}</b> шт. на кадре {gsdTxt(s.gsd)}
+          {s.counter?.label ?? 'найдено счётчиком (эксперимент)'}: <b>{nf(s.nFound)}</b> шт.
+          {s.concPred != null && <> (≈ {nfa(s.concPred)} шт./км²)</>}
+          {s.counter?.gsd != null && <> на кадрах {gsdTxt(s.counter.gsd)}</>}
+          {s.counter?.note && <> — {s.counter.note}</>}
         </p>
       )}
     </article>

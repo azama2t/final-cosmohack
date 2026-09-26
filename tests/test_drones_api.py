@@ -85,18 +85,42 @@ def test_martin_has_no_boxes_but_published_density(client):
         assert f["published"]["density_km2"] == pytest.approx(f["published"]["density_m2"] * 1e6, rel=1e-3)
 
 
-def test_prediction_only_where_metrics_checked(client, sets):
+def test_model_on_every_frame_and_summary(client, sets):
+    """§56: our counter ran on all frames; summary X of Y / false Z = sum over frames; honest training note."""
     fn = json.loads((ROOT / "reports" / "final_numbers.json").read_text(encoding="utf-8"))["case"]["sections"]["photo_count"]
-    checked = {"winans2023": fn["area"]["count_mae"], "fml": fn["frame"]["mae"]}
+    for s in sets["sets"]:
+        m = s["model"]
+        assert m is not None, s["id"]
+        assert m["trained_on_this_set"] == (s["id"] in ("winans2023", "fml"))
+        assert ("не обучался" in m["training_note"]) != m["trained_on_this_set"]
+        assert m["iou"] == 0.5 and m["threshold"] > 0
+        j = client.get(f"/api/v3/drones/{s['id']}/frames").json()
+        tp = fp = gt = n = 0
+        for f in j["frames"]:
+            p = f["model"]
+            assert p is not None and p["n"] == len(p["boxes"]) == len(p["scores"])
+            assert all(sc >= m["threshold"] - 1e-6 for sc in p["scores"])
+            assert f["sensor"] == s["sensor"]
+            assert f["date"] or f["date_note"] == "дата не указана"
+            n += p["n"]
+            if f["objects"] is not None:
+                assert p["n_labelled"] == f["n_objects"] and p["tp"] + p["fp"] == p["n"] and p["tp"] + p["fn"] == p["n_labelled"]
+                tp, fp, gt = tp + p["tp"], fp + p["fp"], gt + p["n_labelled"]
+        sm = m["summary"]
+        assert sm["n_pred"] == n
+        if sm["found"] is not None:
+            assert (sm["found"], sm["labelled"], sm["false"]) == (tp, gt, fp)
+        if s["id"] == "winans2023":
+            assert m["checked_metric"]["count_mae_per_frame"] == fn["area"]["count_mae"]
+        if s["id"] == "fml":
+            assert m["checked_metric"]["count_mae_per_frame"] == fn["frame"]["mae"]
+
+
+def test_no_src_paths_and_no_algae_claim(client, sets):
     for s in sets["sets"]:
         j = client.get(f"/api/v3/drones/{s['id']}/frames").json()
-        preds = [f["prediction"] for f in j["frames"] if f.get("prediction")]
-        if s["id"] not in checked:
-            assert not preds, s["id"]
-            continue
-        for p in preds:
-            assert p["metric"]["count_mae_per_frame"] == checked[s["id"]]
-            assert p["n"] == len(p["boxes"])
+        assert all("src" not in f for f in j["frames"])
+        assert "algae" not in s["groups_labelled"]
 
 
 def test_image_and_errors(client, sets):

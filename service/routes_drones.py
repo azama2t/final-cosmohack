@@ -23,6 +23,7 @@ from fastapi.responses import FileResponse
 ROOT = Path(__file__).resolve().parents[1]
 DIR = ROOT / "data" / "case" / "drones"
 INDEX = DIR / "index.json"
+PRED = DIR / "pred.json"  # §56: our photo counter on every frame (scripts/case/drones_pred.py)
 BANNER = "дрон, не спутник — со спутника считаются зоны, не отдельные предметы"
 _ID = re.compile(r"^[a-z0-9_]{1,40}$")
 
@@ -40,6 +41,33 @@ def _index() -> dict:
     return _cache["d"]
 
 
+def _pred() -> dict:
+    if not PRED.is_file():
+        return {}
+    m = PRED.stat().st_mtime
+    if _cache.get("pm") != m:
+        _cache.update(pm=m, p=json.loads(PRED.read_text(encoding="utf-8")))
+    return _cache["p"]
+
+
+def _model_meta(set_id: str):
+    p = _pred().get("sets", {}).get(set_id)
+    if not p:
+        return None
+    return {k: p[k] for k in ("survey", "model", "threshold", "iou", "trained_on_this_set", "training_note",
+                              "checked_metric", "summary")}
+
+
+def _frame_out(meta: dict, f: dict, pset: dict | None) -> dict:
+    out = {k: v for k, v in f.items() if k not in ("src", "prediction")}
+    out["sensor"], out["sensor_label"] = meta["sensor"], meta["sensor_label"]
+    out.setdefault("date", None)  # only real dates (Martin: survey date of the beach; FML: time in the file name)
+    if not out["date"]:
+        out["date"], out["date_note"] = None, "дата не указана"
+    out["model"] = (pset or {}).get("frames", {}).get(f["id"])
+    return out
+
+
 def _set(set_id: str) -> dict:
     if not _ID.match(set_id):
         raise HTTPException(404, {"code": "NO_SET", "message": f"набора «{set_id}» нет"})
@@ -54,7 +82,8 @@ def drones_sets():
     d = _index()
     return {"banner": d.get("banner", BANNER), "groups": d["groups"], "catalog": d.get("catalog"),
             "built": d.get("built"), "not_included": d.get("not_included", []),
-            "sets": [{**s["meta"], "frames_url": f"/api/v3/drones/{s['meta']['id']}/frames",
+            "model": {k: _pred().get(k) for k in ("classes", "match_rule", "total", "built")} if _pred() else None,
+            "sets": [{**s["meta"], "model": _model_meta(s["meta"]["id"]), "frames_url": f"/api/v3/drones/{s['meta']['id']}/frames",
                       "cover": s["frames"][0]["image"] if s["frames"] else None} for s in d["sets"]]}
 
 
@@ -62,7 +91,9 @@ def drones_sets():
 def drones_frames(set_id: str):
     s = _set(set_id)
     d = _index()
-    return {"set": s["meta"], "banner": d.get("banner", BANNER), "groups": d["groups"], "frames": s["frames"]}
+    pset = _pred().get("sets", {}).get(set_id)
+    return {"set": {**s["meta"], "model": _model_meta(set_id)}, "banner": d.get("banner", BANNER), "groups": d["groups"],
+            "frames": [_frame_out(s["meta"], f, pset) for f in s["frames"]]}
 
 
 @router.get("/drones/{set_id}/img/{name}", summary="Превью кадра (JPEG ≤ 200 КБ)")

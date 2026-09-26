@@ -1,6 +1,6 @@
 {
  "version": 1,
- "built": "2026-09-26T21:12:09",
+ "built": "2026-09-26T22:08:13",
  "builder": "scripts/case/drones_index.py",
  "catalog": "docs/COUNT_DATASETS.md",
  "banner": "дрон, не спутник — со спутника считаются зоны, не отдельные предметы",
@@ -61,8 +61,7 @@
      "plastic",
      "other"
     ],
-    "algae_note": "водоросли в этом наборе не размечены",
-    "counter_checked": false
+    "algae_note": "водоросли в этом наборе не размечены"
    },
    "frames": [
     {
@@ -184,7 +183,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)"
+     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)",
+     "src": "data/extra/count_ds/ucwd/UCWD.coco/test/batch_01_frame_12_jpg.rf.b19c683c443d8daa8143fa3db9ac2e13.jpg"
     },
     {
      "id": "ucwd_01",
@@ -234,7 +234,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)"
+     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)",
+     "src": "data/extra/count_ds/ucwd/UCWD.coco/test/batch_01_frame_14_jpg.rf.6f3b18109003ebc1116875a40a400c1f.jpg"
     },
     {
      "id": "ucwd_02",
@@ -355,7 +356,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)"
+     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)",
+     "src": "data/extra/count_ds/ucwd/UCWD.coco/test/batch_01_frame_1_jpg.rf.87a82f4d12da0029cf4edb8b6977319f.jpg"
     },
     {
      "id": "ucwd_03",
@@ -426,7 +428,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)"
+     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)",
+     "src": "data/extra/count_ds/ucwd/UCWD.coco/test/batch_01_frame_33_jpg.rf.384d7219b745446f8b5ed33c5a6ccbd8.jpg"
     },
     {
      "id": "ucwd_04",
@@ -507,7 +510,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)"
+     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)",
+     "src": "data/extra/count_ds/ucwd/UCWD.coco/test/batch_01_frame_34_jpg.rf.37666db52a8e596a325db3437121854e.jpg"
     },
     {
      "id": "ucwd_05",
@@ -537,7 +541,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)"
+     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)",
+     "src": "data/extra/count_ds/ucwd/UCWD.coco/test/batch_02_img_360_jpg.rf.7b2524a77791f0dbf2f2af0a87cda07d.jpg"
     },
     {
      "id": "ucwd_06",
@@ -577,7 +582,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)"
+     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)",
+     "src": "data/extra/count_ds/ucwd/UCWD.coco/test/batch_02_img_860_jpg.rf.662c146085414c0f41a0ed723badb6ee.jpg"
     },
     {
      "id": "ucwd_07",
@@ -628,7 +634,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)"
+     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)",
+     "src": "data/extra/count_ds/ucwd/UCWD.coco/test/batch_03_img_660_jpg.rf.9650e469bf80fee5439e8ecd0794f49f.jpg"
     },
     {
      "id": "ucwd_08",
@@ -678,7 +685,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)"
+     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)",
+     "src": "data/extra/count_ds/ucwd/UCWD.coco/test/batch_04_img_1620_jpg.rf.d11c63d76a88ade705ea8dd0eb437919.jpg"
     },
     {
      "id": "ucwd_09",
@@ -728,7 +736,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)"
+     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)",
+     "src": "data/extra/count_ds/ucwd/UCWD.coco/test/batch_04_img_1640_jpg.rf.2ee36b28eb51984d11bcc43b81debce1.jpg"
     },
     {
      "id": "ucwd_10",
@@ -758,7 +767,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)"
+     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)",
+     "src": "data/extra/count_ds/ucwd/UCWD.coco/test/batch_04_img_3080_jpg.rf.d261427a860e77069f948c04875f602d.jpg"
     },
     {
      "id": "ucwd_11",
@@ -799,7 +809,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)"
+     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)",
+     "src": "data/extra/count_ds/ucwd/UCWD.coco/test/batch_04_img_3180_jpg.rf.5459f303aa79113ed3b2b453f22a5c23.jpg"
     },
     {
      "id": "ucwd_12",
@@ -869,7 +880,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)"
+     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)",
+     "src": "data/extra/count_ds/ucwd/UCWD.coco/valid/CD_10181_jpg.rf.31fd741b6e5e0493f2fd1ba70caa962e.jpg"
     },
     {
      "id": "ucwd_13",
@@ -970,7 +982,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)"
+     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)",
+     "src": "data/extra/count_ds/ucwd/UCWD.coco/valid/DJI_0003_JPG.rf.02547ee8886ec0efcb919bd8147d0fa3.jpg"
     },
     {
      "id": "ucwd_14",
@@ -1000,7 +1013,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)"
+     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)",
+     "src": "data/extra/count_ds/ucwd/UCWD.coco/valid/VID_20230622_133111_0001_MP4-110_jpg.rf.096b0c7b63c7714ae34557c4a15f9921.jpg"
     },
     {
      "id": "ucwd_15",
@@ -1170,7 +1184,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)"
+     "area_note": "площадь кадра неизвестна (GSD нет: EXIF удалён)",
+     "src": "data/extra/count_ds/ucwd/UCWD.coco/valid/VID_20230622_133111_0001_MP4-118_jpg.rf.09d939443206b1bc9b50bb97dbb74ba3.jpg"
     }
    ]
   },
@@ -1214,8 +1229,7 @@
      "wood",
      "other"
     ],
-    "algae_note": "водоросли в этом наборе не размечены",
-    "counter_checked": false
+    "algae_note": "водоросли в этом наборе не размечены"
    },
    "frames": [
     {
@@ -1401,7 +1415,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)"
+     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)",
+     "src": "data/extra/count_ds/tun_marinelitter/Data/test/images/frame_0_patch_1180_0_jpg.rf.7ea5356f8d4e95913251794ee86d9da6.jpg"
     },
     {
      "id": "tun_01",
@@ -1758,7 +1773,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)"
+     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)",
+     "src": "data/extra/count_ds/tun_marinelitter/Data/test/images/frame_4134_patch_960_960_jpg.rf.bcb7bf97c62d709314802920cf7e733a.jpg"
     },
     {
      "id": "tun_02",
@@ -2315,7 +2331,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)"
+     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)",
+     "src": "data/extra/count_ds/tun_marinelitter/Data/test/images/frame_45_patch_2560_1280_jpg.rf.956932a31780b0d1704a3050be2c2723.jpg"
     },
     {
      "id": "tun_03",
@@ -2680,7 +2697,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)"
+     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)",
+     "src": "data/extra/count_ds/tun_marinelitter/Data/test/images/renamed_DJI_0325_tile_1_0_jpg.rf.3cc67687569de6cb283a393145afa539.jpg"
     },
     {
      "id": "tun_04",
@@ -3489,7 +3507,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)"
+     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)",
+     "src": "data/extra/count_ds/tun_marinelitter/Data/valid/images/frame_1068_patch_1920_0_jpg.rf.c2707ad640637ccf5d6b76c491701571.jpg"
     },
     {
      "id": "tun_05",
@@ -4391,7 +4410,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)"
+     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)",
+     "src": "data/extra/count_ds/tun_marinelitter/Data/valid/images/frame_1152_patch_640_960_jpg.rf.8f7e092cfe88b04fb4555bdbee4073b1.jpg"
     },
     {
      "id": "tun_06",
@@ -4652,7 +4672,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)"
+     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)",
+     "src": "data/extra/count_ds/tun_marinelitter/Data/valid/images/frame_1674_patch_1920_320_jpg.rf.b305c6f8bd8fa7bad7994a3f545a9cf3.jpg"
     },
     {
      "id": "tun_07",
@@ -4969,7 +4990,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)"
+     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)",
+     "src": "data/extra/count_ds/tun_marinelitter/Data/valid/images/frame_2148_patch_2880_0_jpg.rf.9175cc96e98337a3ed5cee07c07bfd69.jpg"
     },
     {
      "id": "tun_08",
@@ -5310,7 +5332,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)"
+     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)",
+     "src": "data/extra/count_ds/tun_marinelitter/Data/valid/images/frame_4392_patch_2560_1280_jpg.rf.d4e890570256632dbe21dadf4f75a2af.jpg"
     },
     {
      "id": "tun_09",
@@ -5816,7 +5839,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)"
+     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)",
+     "src": "data/extra/count_ds/tun_marinelitter/Data/valid/images/frame_4461_patch_320_0_jpg.rf.2387705565da5dfdc45d7c03879f4634.jpg"
     },
     {
      "id": "tun_10",
@@ -6262,7 +6286,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)"
+     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)",
+     "src": "data/extra/count_ds/tun_marinelitter/Data/valid/images/frame_4497_patch_0_0_jpg.rf.c8150f899c10bb257bab106dbdbd05e0.jpg"
     },
     {
      "id": "tun_11",
@@ -6683,7 +6708,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)"
+     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)",
+     "src": "data/extra/count_ds/tun_marinelitter/Data/valid/images/frame_5535_patch_320_960_jpg.rf.478bc1c1d8ed644063470b089a147e7a.jpg"
     },
     {
      "id": "tun_12",
@@ -7048,7 +7074,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)"
+     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)",
+     "src": "data/extra/count_ds/tun_marinelitter/Data/valid/images/frame_6714_patch_1920_960_jpg.rf.cc69b21c57af8ced3bdce7957e8fcf52.jpg"
     },
     {
      "id": "tun_13",
@@ -7217,7 +7244,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)"
+     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)",
+     "src": "data/extra/count_ds/tun_marinelitter/Data/valid/images/frame_7494_patch_2560_320_jpg.rf.c0c3b0cbe972f72232b117970cb35f61.jpg"
     },
     {
      "id": "tun_14",
@@ -7578,7 +7606,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)"
+     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)",
+     "src": "data/extra/count_ds/tun_marinelitter/Data/valid/images/renamed_DJI_0323_tile_4_9_jpg.rf.bee7f9c97865aa87cf12607a1d4c3431.jpg"
     },
     {
      "id": "tun_15",
@@ -7943,7 +7972,8 @@
      "frame_area_m2": null,
      "density_m2": null,
      "density_km2": null,
-     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)"
+     "area_note": "площадь кадра неизвестна (GSD в наборе не указан)",
+     "src": "data/extra/count_ds/tun_marinelitter/Data/valid/images/renamed_DJI_0477_tile_4_4_jpg.rf.76d6ef92b89e9f00fa7dae0e86e8427e.jpg"
     }
    ]
   },
@@ -7970,8 +8000,7 @@
     "note": "Рамок нет — классы и число предметов на кадре не размечены; показана опубликованная плотность пляжа (шт./м²) и площадь кадра 138,6 м².",
     "n_frames": 5,
     "groups_labelled": [],
-    "algae_note": "водоросли в этом наборе не размечены",
-    "counter_checked": false
+    "algae_note": "водоросли в этом наборе не размечены"
    },
    "frames": [
     {
@@ -7990,6 +8019,7 @@
      "density_m2": null,
      "density_km2": null,
      "area_note": "рамок в наборе нет: число на кадре не размечено; плотность — опубликованная по пляжу",
+     "src": "data/extra/count_ds/martin_redsea_uav/images/st21_DJI_0490.JPG",
      "station": 21,
      "lat": 27.785,
      "lon": 35.1792,
@@ -8018,6 +8048,7 @@
      "density_m2": null,
      "density_km2": null,
      "area_note": "рамок в наборе нет: число на кадре не размечено; плотность — опубликованная по пляжу",
+     "src": "data/extra/count_ds/martin_redsea_uav/images/st23_DJI_0010.JPG",
      "station": 23,
      "lat": 25.7008,
      "lon": 36.8118,
@@ -8046,6 +8077,7 @@
      "density_m2": null,
      "density_km2": null,
      "area_note": "рамок в наборе нет: число на кадре не размечено; плотность — опубликованная по пляжу",
+     "src": "data/extra/count_ds/martin_redsea_uav/images/st30_DJI_0020.JPG",
      "station": 30,
      "lat": 20.7501,
      "lon": 39.4539,
@@ -8074,6 +8106,7 @@
      "density_m2": null,
      "density_km2": null,
      "area_note": "рамок в наборе нет: число на кадре не размечено; плотность — опубликованная по пляжу",
+     "src": "data/extra/count_ds/martin_redsea_uav/images/st40_DJI_0010.JPG",
      "station": 40,
      "lat": 18.5069,
      "lon": 40.663,
@@ -8102,6 +8135,7 @@
      "density_m2": null,
      "density_km2": null,
      "area_note": "рамок в наборе нет: число на кадре не размечено; плотность — опубликованная по пляжу",
+     "src": "data/extra/count_ds/martin_redsea_uav/images/st44_DJI_0020.JPG",
      "station": 44,
      "lat": 18.1505,
      "lon": 41.5352,
@@ -8137,13 +8171,12 @@
     },
     "gsd_m": 0.0082,
     "frame_area_m2": 4.0,
-    "note": "Плитка 2 × 2 м (GSD 0,82 см) — шт./м² считаются на площади плитки. Наш счётчик на этом наборе не переносится (AP50 0,01 без дообучения) — его прогноз не показан.",
+    "note": "Плитка 2 × 2 м (GSD 0,82 см) — шт./м² считаются на площади плитки. Наш счётчик на этом наборе не обучался (прогон — аэро-модель без дообучения; итог «нашла X из Y» — в карточке набора).",
     "n_frames": 16,
     "groups_labelled": [
      "plastic"
     ],
-    "algae_note": "водоросли в этом наборе не размечены",
-    "counter_checked": false
+    "algae_note": "водоросли в этом наборе не размечены"
    },
    "frames": [
     {
@@ -8185,6 +8218,7 @@
      "density_m2": 0.5,
      "density_km2": 500000,
      "area_note": null,
+     "src": "data/extra/count_ds/maharjan_river_uav/Nisha-main/Datagithub/train_data_v5_Laos/images/file06_106.png",
      "subregion": "Лаос"
     },
     {
@@ -8226,6 +8260,7 @@
      "density_m2": 0.5,
      "density_km2": 500000,
      "area_note": null,
+     "src": "data/extra/count_ds/maharjan_river_uav/Nisha-main/Datagithub/train_data_v5_Laos/images/file141_20.png",
      "subregion": "Лаос"
     },
     {
@@ -8267,6 +8302,7 @@
      "density_m2": 0.5,
      "density_km2": 500000,
      "area_note": null,
+     "src": "data/extra/count_ds/maharjan_river_uav/Nisha-main/Datagithub/train_data_v5_Laos/images/file29_100.png",
      "subregion": "Лаос"
     },
     {
@@ -8308,6 +8344,7 @@
      "density_m2": 0.5,
      "density_km2": 500000,
      "area_note": null,
+     "src": "data/extra/count_ds/maharjan_river_uav/Nisha-main/Datagithub/train_data_v5_Laos/images/file57_118.png",
      "subregion": "Лаос"
     },
     {
@@ -8349,6 +8386,7 @@
      "density_m2": 0.5,
      "density_km2": 500000,
      "area_note": null,
+     "src": "data/extra/count_ds/maharjan_river_uav/Nisha-main/Datagithub/train_data_v5_Laos/images/file68_124.png",
      "subregion": "Лаос"
     },
     {
@@ -8420,6 +8458,7 @@
      "density_m2": 1.25,
      "density_km2": 1250000,
      "area_note": null,
+     "src": "data/extra/count_ds/maharjan_river_uav/Nisha-main/Datagithub/train_data_v5_Laos/images/file73_114.png",
      "subregion": "Лаос"
     },
     {
@@ -8471,6 +8510,7 @@
      "density_m2": 0.75,
      "density_km2": 750000,
      "area_note": null,
+     "src": "data/extra/count_ds/maharjan_river_uav/Nisha-main/Datagithub/train_data_v5_Laos/images/file79_65.png",
      "subregion": "Лаос"
     },
     {
@@ -8522,6 +8562,7 @@
      "density_m2": 0.75,
      "density_km2": 750000,
      "area_note": null,
+     "src": "data/extra/count_ds/maharjan_river_uav/Nisha-main/Datagithub/train_data_v5_Laos/images/file95_95.png",
      "subregion": "Лаос"
     },
     {
@@ -8563,6 +8604,7 @@
      "density_m2": 0.5,
      "density_km2": 500000,
      "area_note": null,
+     "src": "data/extra/count_ds/maharjan_river_uav/Nisha-main/Datagithub/train_data_v5_talathai/images/file01_21.png",
      "subregion": "Таиланд"
     },
     {
@@ -8624,6 +8666,7 @@
      "density_m2": 1.0,
      "density_km2": 1000000,
      "area_note": null,
+     "src": "data/extra/count_ds/maharjan_river_uav/Nisha-main/Datagithub/train_data_v5_talathai/images/file113_26.png",
      "subregion": "Таиланд"
     },
     {
@@ -8675,6 +8718,7 @@
      "density_m2": 0.75,
      "density_km2": 750000,
      "area_note": null,
+     "src": "data/extra/count_ds/maharjan_river_uav/Nisha-main/Datagithub/train_data_v5_talathai/images/file136_10.png",
      "subregion": "Таиланд"
     },
     {
@@ -8726,6 +8770,7 @@
      "density_m2": 0.75,
      "density_km2": 750000,
      "area_note": null,
+     "src": "data/extra/count_ds/maharjan_river_uav/Nisha-main/Datagithub/train_data_v5_talathai/images/file155_10.png",
      "subregion": "Таиланд"
     },
     {
@@ -8777,6 +8822,7 @@
      "density_m2": 0.75,
      "density_km2": 750000,
      "area_note": null,
+     "src": "data/extra/count_ds/maharjan_river_uav/Nisha-main/Datagithub/train_data_v5_talathai/images/file187_07.png",
      "subregion": "Таиланд"
     },
     {
@@ -8868,6 +8914,7 @@
      "density_m2": 1.75,
      "density_km2": 1750000,
      "area_note": null,
+     "src": "data/extra/count_ds/maharjan_river_uav/Nisha-main/Datagithub/train_data_v5_talathai/images/file222_28.png",
      "subregion": "Таиланд"
     },
     {
@@ -8909,6 +8956,7 @@
      "density_m2": 0.5,
      "density_km2": 500000,
      "area_note": null,
+     "src": "data/extra/count_ds/maharjan_river_uav/Nisha-main/Datagithub/train_data_v5_talathai/images/file75_25.png",
      "subregion": "Таиланд"
     },
     {
@@ -8960,6 +9008,7 @@
      "density_m2": 0.75,
      "density_km2": 750000,
      "area_note": null,
+     "src": "data/extra/count_ds/maharjan_river_uav/Nisha-main/Datagithub/train_data_v5_talathai/images/file99_26.png",
      "subregion": "Таиланд"
     }
    ]
@@ -9008,8 +9057,7 @@
      "wood",
      "other"
     ],
-    "algae_note": "водоросли в этом наборе не размечены",
-    "counter_checked": true
+    "algae_note": "водоросли в этом наборе не размечены"
    },
    "frames": [
     {
@@ -9061,26 +9109,9 @@
      "density_m2": 0.0183,
      "density_km2": 18311,
      "area_note": null,
+     "src": "data/extra/count_ds/winans2023_hawaii_aerial/imagery_and_labels/processed_image_chips/hawaii_1_13093_20136_13904.jpg",
      "lat": 19.87866,
-     "lon": -155.11047,
-     "prediction": {
-      "model": "winans-frcnn-spatial-2026-09-26",
-      "survey": "aerial",
-      "threshold": 0.8,
-      "n": 0,
-      "n_labelled": 3,
-      "abs_error": 3,
-      "density_m2": 0.0,
-      "density_km2": 0,
-      "boxes": [],
-      "metric": {
-       "count_mae_per_frame": 1.85,
-       "n_test_frames": 397,
-       "test": "Winans 2023, отложенные участки берега",
-       "source": "reports/final_numbers.json case.sections.photo_count.area"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "lon": -155.11047
     },
     {
      "id": "winans_01",
@@ -9212,99 +9243,9 @@
      "density_m2": 0.0671,
      "density_km2": 67139,
      "area_note": null,
+     "src": "data/extra/count_ds/winans2023_hawaii_aerial/imagery_and_labels/processed_image_chips/hawaii_2_187_23757_5753.jpg",
      "lat": 18.92004,
-     "lon": -155.66137,
-     "prediction": {
-      "model": "winans-frcnn-spatial-2026-09-26",
-      "survey": "aerial",
-      "threshold": 0.8,
-      "n": 12,
-      "n_labelled": 11,
-      "abs_error": 1,
-      "density_m2": 0.0732,
-      "density_km2": 73242,
-      "boxes": [
-       [
-        0.0025,
-        0.7049,
-        0.0483,
-        0.0523
-       ],
-       [
-        0.1812,
-        0.528,
-        0.0392,
-        0.0465
-       ],
-       [
-        0.0268,
-        0.6271,
-        0.0362,
-        0.038
-       ],
-       [
-        0.2311,
-        0.5275,
-        0.0394,
-        0.0389
-       ],
-       [
-        0.7125,
-        0.1727,
-        0.1091,
-        0.0438
-       ],
-       [
-        0.7731,
-        0.2197,
-        0.0292,
-        0.0274
-       ],
-       [
-        0.2804,
-        0.5121,
-        0.0493,
-        0.0467
-       ],
-       [
-        0.4051,
-        0.2082,
-        0.3866,
-        0.3766
-       ],
-       [
-        0.2481,
-        0.5558,
-        0.0491,
-        0.0506
-       ],
-       [
-        0.0571,
-        0.8334,
-        0.0512,
-        0.0442
-       ],
-       [
-        0.7603,
-        0.2995,
-        0.0401,
-        0.0364
-       ],
-       [
-        0.7641,
-        0.1901,
-        0.2359,
-        0.0941
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 1.85,
-       "n_test_frames": 397,
-       "test": "Winans 2023, отложенные участки берега",
-       "source": "reports/final_numbers.json case.sections.photo_count.area"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "lon": -155.66137
     },
     {
      "id": "winans_02",
@@ -9356,39 +9297,9 @@
      "density_m2": 0.0183,
      "density_km2": 18311,
      "area_note": null,
+     "src": "data/extra/count_ds/winans2023_hawaii_aerial/imagery_and_labels/processed_image_chips/kahoolawe_171_496_1762.jpg",
      "lat": 20.60068,
-     "lon": -156.56414,
-     "prediction": {
-      "model": "winans-frcnn-spatial-2026-09-26",
-      "survey": "aerial",
-      "threshold": 0.8,
-      "n": 2,
-      "n_labelled": 3,
-      "abs_error": 1,
-      "density_m2": 0.0122,
-      "density_km2": 12207,
-      "boxes": [
-       [
-        0.7771,
-        0.6113,
-        0.2229,
-        0.1137
-       ],
-       [
-        0.1203,
-        0.2404,
-        0.032,
-        0.0361
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 1.85,
-       "n_test_frames": 397,
-       "test": "Winans 2023, отложенные участки берега",
-       "source": "reports/final_numbers.json case.sections.photo_count.area"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "lon": -156.56414
     },
     {
      "id": "winans_03",
@@ -9450,45 +9361,9 @@
      "density_m2": 0.0244,
      "density_km2": 24414,
      "area_note": null,
+     "src": "data/extra/count_ds/winans2023_hawaii_aerial/imagery_and_labels/processed_image_chips/kauai_1_2_950_4669_9908.jpg",
      "lat": 21.95987,
-     "lon": -159.33113,
-     "prediction": {
-      "model": "winans-frcnn-spatial-2026-09-26",
-      "survey": "aerial",
-      "threshold": 0.8,
-      "n": 3,
-      "n_labelled": 4,
-      "abs_error": 1,
-      "density_m2": 0.0183,
-      "density_km2": 18311,
-      "boxes": [
-       [
-        0.455,
-        0.2282,
-        0.0773,
-        0.0699
-       ],
-       [
-        0.2741,
-        0.0139,
-        0.0915,
-        0.098
-       ],
-       [
-        0.6943,
-        0.1155,
-        0.0398,
-        0.0337
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 1.85,
-       "n_test_frames": 397,
-       "test": "Winans 2023, отложенные участки берега",
-       "source": "reports/final_numbers.json case.sections.photo_count.area"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "lon": -159.33113
     },
     {
      "id": "winans_04",
@@ -9540,45 +9415,9 @@
      "density_m2": 0.0183,
      "density_km2": 18311,
      "area_note": null,
+     "src": "data/extra/count_ds/winans2023_hawaii_aerial/imagery_and_labels/processed_image_chips/lanai_2038_14470_4661.jpg",
      "lat": 20.89203,
-     "lon": -156.86933,
-     "prediction": {
-      "model": "winans-frcnn-spatial-2026-09-26",
-      "survey": "aerial",
-      "threshold": 0.8,
-      "n": 3,
-      "n_labelled": 3,
-      "abs_error": 0,
-      "density_m2": 0.0183,
-      "density_km2": 18311,
-      "boxes": [
-       [
-        0.1846,
-        0.5677,
-        0.0871,
-        0.0601
-       ],
-       [
-        0.2028,
-        0.28,
-        0.358,
-        0.2997
-       ],
-       [
-        0.3332,
-        0.5199,
-        0.0329,
-        0.0384
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 1.85,
-       "n_test_frames": 397,
-       "test": "Winans 2023, отложенные участки берега",
-       "source": "reports/final_numbers.json case.sections.photo_count.area"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "lon": -156.86933
     },
     {
      "id": "winans_05",
@@ -9719,93 +9558,9 @@
      "density_m2": 0.0732,
      "density_km2": 73242,
      "area_note": null,
+     "src": "data/extra/count_ds/winans2023_hawaii_aerial/imagery_and_labels/processed_image_chips/maui_38371_7153_31.jpg",
      "lat": 20.61931,
-     "lon": -156.22276,
-     "prediction": {
-      "model": "winans-frcnn-spatial-2026-09-26",
-      "survey": "aerial",
-      "threshold": 0.8,
-      "n": 11,
-      "n_labelled": 12,
-      "abs_error": 1,
-      "density_m2": 0.0671,
-      "density_km2": 67139,
-      "boxes": [
-       [
-        0.5479,
-        0.7781,
-        0.0796,
-        0.0803
-       ],
-       [
-        0.5241,
-        0.5434,
-        0.0695,
-        0.061
-       ],
-       [
-        0.3655,
-        0.6098,
-        0.06,
-        0.0616
-       ],
-       [
-        0.2962,
-        0.508,
-        0.077,
-        0.0605
-       ],
-       [
-        0.4436,
-        0.4126,
-        0.1223,
-        0.1627
-       ],
-       [
-        0.4382,
-        0.3631,
-        0.0359,
-        0.0377
-       ],
-       [
-        0.0024,
-        0.6974,
-        0.0715,
-        0.0916
-       ],
-       [
-        0.7562,
-        0.0,
-        0.1206,
-        0.0624
-       ],
-       [
-        0.4701,
-        0.9059,
-        0.0618,
-        0.0692
-       ],
-       [
-        0.4648,
-        0.4748,
-        0.1027,
-        0.0922
-       ],
-       [
-        0.856,
-        0.4842,
-        0.1132,
-        0.0965
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 1.85,
-       "n_test_frames": 397,
-       "test": "Winans 2023, отложенные участки берега",
-       "source": "reports/final_numbers.json case.sections.photo_count.area"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "lon": -156.22276
     },
     {
      "id": "winans_06",
@@ -9926,171 +9681,9 @@
      "density_m2": 0.061,
      "density_km2": 61035,
      "area_note": null,
+     "src": "data/extra/count_ds/winans2023_hawaii_aerial/imagery_and_labels/processed_image_chips/molokai_1302_4126_10839.jpg",
      "lat": 21.20796,
-     "lon": -157.19322,
-     "prediction": {
-      "model": "winans-frcnn-spatial-2026-09-26",
-      "survey": "aerial",
-      "threshold": 0.8,
-      "n": 24,
-      "n_labelled": 10,
-      "abs_error": 14,
-      "density_m2": 0.1465,
-      "density_km2": 146484,
-      "boxes": [
-       [
-        0.3982,
-        0.596,
-        0.0521,
-        0.0476
-       ],
-       [
-        0.4637,
-        0.4639,
-        0.0765,
-        0.0783
-       ],
-       [
-        0.4367,
-        0.639,
-        0.037,
-        0.0375
-       ],
-       [
-        0.4958,
-        0.5992,
-        0.0705,
-        0.0611
-       ],
-       [
-        0.4442,
-        0.1728,
-        0.0463,
-        0.0405
-       ],
-       [
-        0.7629,
-        0.5634,
-        0.0433,
-        0.0476
-       ],
-       [
-        0.2249,
-        0.2448,
-        0.0453,
-        0.0439
-       ],
-       [
-        0.9573,
-        0.8561,
-        0.042,
-        0.0406
-       ],
-       [
-        0.3485,
-        0.024,
-        0.0619,
-        0.0554
-       ],
-       [
-        0.9508,
-        0.433,
-        0.0442,
-        0.0354
-       ],
-       [
-        0.8726,
-        0.3795,
-        0.0526,
-        0.0469
-       ],
-       [
-        0.8738,
-        0.0898,
-        0.0722,
-        0.0576
-       ],
-       [
-        0.5099,
-        0.2134,
-        0.0428,
-        0.0405
-       ],
-       [
-        0.4286,
-        0.3825,
-        0.0491,
-        0.0425
-       ],
-       [
-        0.3564,
-        0.2925,
-        0.038,
-        0.0355
-       ],
-       [
-        0.2998,
-        0.1892,
-        0.0414,
-        0.0373
-       ],
-       [
-        0.8361,
-        0.9435,
-        0.0502,
-        0.0487
-       ],
-       [
-        0.4759,
-        0.2486,
-        0.0402,
-        0.0355
-       ],
-       [
-        0.5792,
-        0.1016,
-        0.0464,
-        0.0656
-       ],
-       [
-        0.458,
-        0.2976,
-        0.058,
-        0.048
-       ],
-       [
-        0.2539,
-        0.2935,
-        0.0365,
-        0.0355
-       ],
-       [
-        0.2109,
-        0.0863,
-        0.0435,
-        0.0404
-       ],
-       [
-        0.675,
-        0.6596,
-        0.0392,
-        0.0401
-       ],
-       [
-        0.6787,
-        0.7347,
-        0.0516,
-        0.0446
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 1.85,
-       "n_test_frames": 397,
-       "test": "Winans 2023, отложенные участки берега",
-       "source": "reports/final_numbers.json case.sections.photo_count.area"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "lon": -157.19322
     },
     {
      "id": "winans_07",
@@ -10211,81 +9804,9 @@
      "density_m2": 0.061,
      "density_km2": 61035,
      "area_note": null,
+     "src": "data/extra/count_ds/winans2023_hawaii_aerial/imagery_and_labels/processed_image_chips/molokai_657_13079_5960.jpg",
      "lat": 21.21741,
-     "lon": -157.23472,
-     "prediction": {
-      "model": "winans-frcnn-spatial-2026-09-26",
-      "survey": "aerial",
-      "threshold": 0.8,
-      "n": 9,
-      "n_labelled": 10,
-      "abs_error": 1,
-      "density_m2": 0.0549,
-      "density_km2": 54932,
-      "boxes": [
-       [
-        0.7055,
-        0.9034,
-        0.0498,
-        0.0449
-       ],
-       [
-        0.5897,
-        0.7102,
-        0.042,
-        0.0436
-       ],
-       [
-        0.5502,
-        0.8284,
-        0.0405,
-        0.0404
-       ],
-       [
-        0.9071,
-        0.4681,
-        0.0804,
-        0.138
-       ],
-       [
-        0.8935,
-        0.7222,
-        0.0394,
-        0.0406
-       ],
-       [
-        0.8268,
-        0.5733,
-        0.0431,
-        0.0442
-       ],
-       [
-        0.5434,
-        0.8936,
-        0.0419,
-        0.0415
-       ],
-       [
-        0.4812,
-        0.4714,
-        0.0388,
-        0.0475
-       ],
-       [
-        0.8793,
-        0.4201,
-        0.0386,
-        0.0416
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 1.85,
-       "n_test_frames": 397,
-       "test": "Winans 2023, отложенные участки берега",
-       "source": "reports/final_numbers.json case.sections.photo_count.area"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "lon": -157.23472
     },
     {
      "id": "winans_08",
@@ -10346,39 +9867,9 @@
      "density_m2": 0.0244,
      "density_km2": 24414,
      "area_note": null,
+     "src": "data/extra/count_ds/winans2023_hawaii_aerial/imagery_and_labels/processed_image_chips/niihau_1_1749_6177_17104.jpg",
      "lat": 21.97542,
-     "lon": -160.11383,
-     "prediction": {
-      "model": "winans-frcnn-spatial-2026-09-26",
-      "survey": "aerial",
-      "threshold": 0.8,
-      "n": 2,
-      "n_labelled": 4,
-      "abs_error": 2,
-      "density_m2": 0.0122,
-      "density_km2": 12207,
-      "boxes": [
-       [
-        0.1865,
-        0.1411,
-        0.0779,
-        0.0792
-       ],
-       [
-        0.4533,
-        0.4643,
-        0.0953,
-        0.073
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 1.85,
-       "n_test_frames": 397,
-       "test": "Winans 2023, отложенные участки берега",
-       "source": "reports/final_numbers.json case.sections.photo_count.area"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "lon": -160.11383
     },
     {
      "id": "winans_09",
@@ -10429,51 +9920,9 @@
      "density_m2": 0.0183,
      "density_km2": 18311,
      "area_note": null,
+     "src": "data/extra/count_ds/winans2023_hawaii_aerial/imagery_and_labels/processed_image_chips/niihau_2_1290_12774_9172.jpg",
      "lat": 21.94115,
-     "lon": -160.07986,
-     "prediction": {
-      "model": "winans-frcnn-spatial-2026-09-26",
-      "survey": "aerial",
-      "threshold": 0.8,
-      "n": 4,
-      "n_labelled": 3,
-      "abs_error": 1,
-      "density_m2": 0.0244,
-      "density_km2": 24414,
-      "boxes": [
-       [
-        0.4773,
-        0.476,
-        0.0451,
-        0.0537
-       ],
-       [
-        0.5788,
-        0.4295,
-        0.0455,
-        0.0458
-       ],
-       [
-        0.5141,
-        0.6772,
-        0.0549,
-        0.0528
-       ],
-       [
-        0.3782,
-        0.5329,
-        0.0345,
-        0.0443
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 1.85,
-       "n_test_frames": 397,
-       "test": "Winans 2023, отложенные участки берега",
-       "source": "reports/final_numbers.json case.sections.photo_count.area"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "lon": -160.07986
     },
     {
      "id": "winans_10",
@@ -10555,63 +10004,9 @@
      "density_m2": 0.0366,
      "density_km2": 36621,
      "area_note": null,
+     "src": "data/extra/count_ds/winans2023_hawaii_aerial/imagery_and_labels/processed_image_chips/niihau_2_1698_13113_11468.jpg",
      "lat": 21.99134,
-     "lon": -160.05462,
-     "prediction": {
-      "model": "winans-frcnn-spatial-2026-09-26",
-      "survey": "aerial",
-      "threshold": 0.8,
-      "n": 6,
-      "n_labelled": 6,
-      "abs_error": 0,
-      "density_m2": 0.0366,
-      "density_km2": 36621,
-      "boxes": [
-       [
-        0.4767,
-        0.4815,
-        0.0388,
-        0.0382
-       ],
-       [
-        0.6425,
-        0.412,
-        0.0607,
-        0.0602
-       ],
-       [
-        0.5026,
-        0.4899,
-        0.036,
-        0.0333
-       ],
-       [
-        0.2544,
-        0.5902,
-        0.0588,
-        0.0575
-       ],
-       [
-        0.7672,
-        0.4037,
-        0.0339,
-        0.0348
-       ],
-       [
-        0.9338,
-        0.5019,
-        0.0455,
-        0.0407
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 1.85,
-       "n_test_frames": 397,
-       "test": "Winans 2023, отложенные участки берега",
-       "source": "reports/final_numbers.json case.sections.photo_count.area"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "lon": -160.05462
     },
     {
      "id": "winans_11",
@@ -10692,45 +10087,9 @@
      "density_m2": 0.0366,
      "density_km2": 36621,
      "area_note": null,
+     "src": "data/extra/count_ds/winans2023_hawaii_aerial/imagery_and_labels/processed_image_chips/niihau_2_1699_12764_33361.jpg",
      "lat": 21.9874,
-     "lon": -160.05179,
-     "prediction": {
-      "model": "winans-frcnn-spatial-2026-09-26",
-      "survey": "aerial",
-      "threshold": 0.8,
-      "n": 3,
-      "n_labelled": 6,
-      "abs_error": 3,
-      "density_m2": 0.0183,
-      "density_km2": 18311,
-      "boxes": [
-       [
-        0.3913,
-        0.4417,
-        0.0545,
-        0.0542
-       ],
-       [
-        0.3674,
-        0.2631,
-        0.045,
-        0.0371
-       ],
-       [
-        0.4736,
-        0.9337,
-        0.0452,
-        0.0438
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 1.85,
-       "n_test_frames": 397,
-       "test": "Winans 2023, отложенные участки берега",
-       "source": "reports/final_numbers.json case.sections.photo_count.area"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "lon": -160.05179
     },
     {
      "id": "winans_12",
@@ -11142,183 +10501,9 @@
      "density_m2": 0.238,
      "density_km2": 238037,
      "area_note": null,
+     "src": "data/extra/count_ds/winans2023_hawaii_aerial/imagery_and_labels/processed_image_chips/niihau_2_408_4430_23810.jpg",
      "lat": 21.83063,
-     "lon": -160.18188,
-     "prediction": {
-      "model": "winans-frcnn-spatial-2026-09-26",
-      "survey": "aerial",
-      "threshold": 0.8,
-      "n": 26,
-      "n_labelled": 39,
-      "abs_error": 13,
-      "density_m2": 0.1587,
-      "density_km2": 158691,
-      "boxes": [
-       [
-        0.4743,
-        0.4783,
-        0.0507,
-        0.049
-       ],
-       [
-        0.0958,
-        0.2331,
-        0.0476,
-        0.0465
-       ],
-       [
-        0.5293,
-        0.6195,
-        0.0547,
-        0.0551
-       ],
-       [
-        0.1628,
-        0.0226,
-        0.0925,
-        0.0946
-       ],
-       [
-        0.1441,
-        0.2378,
-        0.0406,
-        0.0414
-       ],
-       [
-        0.0411,
-        0.5222,
-        0.0366,
-        0.0374
-       ],
-       [
-        0.374,
-        0.3428,
-        0.0451,
-        0.0472
-       ],
-       [
-        0.1729,
-        0.3768,
-        0.0388,
-        0.0372
-       ],
-       [
-        0.2725,
-        0.1367,
-        0.0455,
-        0.049
-       ],
-       [
-        0.0848,
-        0.4992,
-        0.0403,
-        0.0398
-       ],
-       [
-        0.3665,
-        0.5286,
-        0.0367,
-        0.0486
-       ],
-       [
-        0.0341,
-        0.2583,
-        0.0413,
-        0.0423
-       ],
-       [
-        0.0167,
-        0.9497,
-        0.0369,
-        0.0393
-       ],
-       [
-        0.0995,
-        0.4099,
-        0.0391,
-        0.0404
-       ],
-       [
-        0.608,
-        0.2065,
-        0.047,
-        0.046
-       ],
-       [
-        0.0155,
-        0.4092,
-        0.0417,
-        0.0441
-       ],
-       [
-        0.1189,
-        0.3265,
-        0.034,
-        0.0367
-       ],
-       [
-        0.0483,
-        0.5868,
-        0.0423,
-        0.0401
-       ],
-       [
-        0.122,
-        0.4997,
-        0.0428,
-        0.0323
-       ],
-       [
-        0.0679,
-        0.5131,
-        0.0301,
-        0.0369
-       ],
-       [
-        0.1805,
-        0.3549,
-        0.0337,
-        0.0346
-       ],
-       [
-        0.0815,
-        0.4437,
-        0.0366,
-        0.0339
-       ],
-       [
-        0.6172,
-        0.1712,
-        0.0353,
-        0.0412
-       ],
-       [
-        0.0115,
-        0.2341,
-        0.0395,
-        0.0347
-       ],
-       [
-        0.3358,
-        0.7218,
-        0.0644,
-        0.0607
-       ],
-       [
-        0.1341,
-        0.1181,
-        0.0432,
-        0.0529
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 1.85,
-       "n_test_frames": 397,
-       "test": "Winans 2023, отложенные участки берега",
-       "source": "reports/final_numbers.json case.sections.photo_count.area"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "lon": -160.18188
     },
     {
      "id": "winans_13",
@@ -11559,183 +10744,9 @@
      "density_m2": 0.1343,
      "density_km2": 134277,
      "area_note": null,
+     "src": "data/extra/count_ds/winans2023_hawaii_aerial/imagery_and_labels/processed_image_chips/niihau_2_510_8446_11178.jpg",
      "lat": 21.84375,
-     "lon": -160.17362,
-     "prediction": {
-      "model": "winans-frcnn-spatial-2026-09-26",
-      "survey": "aerial",
-      "threshold": 0.8,
-      "n": 26,
-      "n_labelled": 22,
-      "abs_error": 4,
-      "density_m2": 0.1587,
-      "density_km2": 158691,
-      "boxes": [
-       [
-        0.3952,
-        0.5918,
-        0.0486,
-        0.0481
-       ],
-       [
-        0.4763,
-        0.4745,
-        0.0443,
-        0.0509
-       ],
-       [
-        0.2461,
-        0.5549,
-        0.0439,
-        0.0536
-       ],
-       [
-        0.8509,
-        0.1947,
-        0.0526,
-        0.0449
-       ],
-       [
-        0.3428,
-        0.7794,
-        0.0414,
-        0.0395
-       ],
-       [
-        0.3877,
-        0.8066,
-        0.0372,
-        0.0392
-       ],
-       [
-        0.034,
-        0.6356,
-        0.0522,
-        0.0464
-       ],
-       [
-        0.62,
-        0.8128,
-        0.0362,
-        0.0397
-       ],
-       [
-        0.3306,
-        0.5315,
-        0.0367,
-        0.0373
-       ],
-       [
-        0.5366,
-        0.3756,
-        0.0461,
-        0.0429
-       ],
-       [
-        0.3515,
-        0.5552,
-        0.0467,
-        0.0545
-       ],
-       [
-        0.6021,
-        0.6753,
-        0.0468,
-        0.0411
-       ],
-       [
-        0.326,
-        0.5865,
-        0.0477,
-        0.0497
-       ],
-       [
-        0.4754,
-        0.2034,
-        0.0393,
-        0.0419
-       ],
-       [
-        0.1205,
-        0.5972,
-        0.0377,
-        0.038
-       ],
-       [
-        0.6261,
-        0.8963,
-        0.0632,
-        0.0699
-       ],
-       [
-        0.6458,
-        0.2074,
-        0.0353,
-        0.0344
-       ],
-       [
-        0.1863,
-        0.596,
-        0.0391,
-        0.0366
-       ],
-       [
-        0.6666,
-        0.3148,
-        0.0354,
-        0.0333
-       ],
-       [
-        0.8784,
-        0.8066,
-        0.0421,
-        0.0361
-       ],
-       [
-        0.2801,
-        0.5346,
-        0.0393,
-        0.0335
-       ],
-       [
-        0.3514,
-        0.8617,
-        0.0488,
-        0.0484
-       ],
-       [
-        0.6138,
-        0.7663,
-        0.034,
-        0.0335
-       ],
-       [
-        0.8514,
-        0.6641,
-        0.0315,
-        0.0312
-       ],
-       [
-        0.7911,
-        0.794,
-        0.0381,
-        0.0371
-       ],
-       [
-        0.1331,
-        0.499,
-        0.0347,
-        0.0303
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 1.85,
-       "n_test_frames": 397,
-       "test": "Winans 2023, отложенные участки берега",
-       "source": "reports/final_numbers.json case.sections.photo_count.area"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "lon": -160.17362
     },
     {
      "id": "winans_14",
@@ -12016,177 +11027,9 @@
      "density_m2": 0.1587,
      "density_km2": 158691,
      "area_note": null,
+     "src": "data/extra/count_ds/winans2023_hawaii_aerial/imagery_and_labels/processed_image_chips/niihau_2_665_13390_7274.jpg",
      "lat": 21.86531,
-     "lon": -160.15829,
-     "prediction": {
-      "model": "winans-frcnn-spatial-2026-09-26",
-      "survey": "aerial",
-      "threshold": 0.8,
-      "n": 25,
-      "n_labelled": 26,
-      "abs_error": 1,
-      "density_m2": 0.1526,
-      "density_km2": 152588,
-      "boxes": [
-       [
-        0.828,
-        0.1581,
-        0.049,
-        0.0468
-       ],
-       [
-        0.9347,
-        0.104,
-        0.0498,
-        0.0446
-       ],
-       [
-        0.4671,
-        0.4693,
-        0.0644,
-        0.0556
-       ],
-       [
-        0.5076,
-        0.4079,
-        0.0483,
-        0.0488
-       ],
-       [
-        0.818,
-        0.7925,
-        0.0448,
-        0.0458
-       ],
-       [
-        0.0072,
-        0.8575,
-        0.0511,
-        0.0634
-       ],
-       [
-        0.239,
-        0.876,
-        0.0461,
-        0.0566
-       ],
-       [
-        0.8576,
-        0.9098,
-        0.038,
-        0.0359
-       ],
-       [
-        0.8633,
-        0.79,
-        0.0488,
-        0.0555
-       ],
-       [
-        0.2884,
-        0.8817,
-        0.044,
-        0.0374
-       ],
-       [
-        0.8818,
-        0.5447,
-        0.0435,
-        0.0408
-       ],
-       [
-        0.4927,
-        0.0248,
-        0.0401,
-        0.0287
-       ],
-       [
-        0.0008,
-        0.5071,
-        0.0447,
-        0.0466
-       ],
-       [
-        0.9219,
-        0.3979,
-        0.0432,
-        0.0398
-       ],
-       [
-        0.7082,
-        0.4903,
-        0.0353,
-        0.0385
-       ],
-       [
-        0.1373,
-        0.2619,
-        0.0378,
-        0.0344
-       ],
-       [
-        0.0039,
-        0.3384,
-        0.0399,
-        0.0344
-       ],
-       [
-        0.0819,
-        0.7655,
-        0.0396,
-        0.0417
-       ],
-       [
-        0.7331,
-        0.0483,
-        0.0307,
-        0.0367
-       ],
-       [
-        0.803,
-        0.6785,
-        0.0345,
-        0.0328
-       ],
-       [
-        0.2917,
-        0.6885,
-        0.034,
-        0.0355
-       ],
-       [
-        0.6013,
-        0.8537,
-        0.0452,
-        0.0592
-       ],
-       [
-        0.6984,
-        0.8019,
-        0.0414,
-        0.0437
-       ],
-       [
-        0.1469,
-        0.5719,
-        0.0352,
-        0.0382
-       ],
-       [
-        0.2668,
-        0.7787,
-        0.0343,
-        0.0366
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 1.85,
-       "n_test_frames": 397,
-       "test": "Winans 2023, отложенные участки берега",
-       "source": "reports/final_numbers.json case.sections.photo_count.area"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "lon": -160.15829
     },
     {
      "id": "winans_15",
@@ -12237,33 +11080,9 @@
      "density_m2": 0.0183,
      "density_km2": 18311,
      "area_note": null,
+     "src": "data/extra/count_ds/winans2023_hawaii_aerial/imagery_and_labels/processed_image_chips/oahu_3_6055_10136_11771.jpg",
      "lat": 21.63913,
-     "lon": -157.91828,
-     "prediction": {
-      "model": "winans-frcnn-spatial-2026-09-26",
-      "survey": "aerial",
-      "threshold": 0.8,
-      "n": 1,
-      "n_labelled": 3,
-      "abs_error": 2,
-      "density_m2": 0.0061,
-      "density_km2": 6104,
-      "boxes": [
-       [
-        0.3418,
-        0.5564,
-        0.038,
-        0.037
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 1.85,
-       "n_test_frames": 397,
-       "test": "Winans 2023, отложенные участки берега",
-       "source": "reports/final_numbers.json case.sections.photo_count.area"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "lon": -157.91828
     }
    ]
   },
@@ -12293,8 +11112,7 @@
     "groups_labelled": [
      "other"
     ],
-    "algae_note": "водоросли в этом наборе не размечены",
-    "counter_checked": true
+    "algae_note": "водоросли в этом наборе не размечены"
    },
    "frames": [
     {
@@ -12376,62 +11194,8 @@
      "density_m2": null,
      "density_km2": null,
      "area_note": "площадь кадра неизвестна (косой вид с судна, GSD/GPS нет) — только шт./кадр",
-     "date": "2024-10-04 08:46",
-     "prediction": {
-      "model": "fml-frcnn-grouped-2026-09-26",
-      "survey": "water_camera",
-      "threshold": 0.8,
-      "n": 6,
-      "n_labelled": 6,
-      "abs_error": 0,
-      "density_m2": null,
-      "density_km2": null,
-      "boxes": [
-       [
-        0.5074,
-        0.1981,
-        0.057,
-        0.0418
-       ],
-       [
-        0.886,
-        0.2579,
-        0.113,
-        0.0791
-       ],
-       [
-        0.6386,
-        0.2189,
-        0.0831,
-        0.0483
-       ],
-       [
-        0.7165,
-        0.2071,
-        0.1547,
-        0.0939
-       ],
-       [
-        0.3899,
-        0.1846,
-        0.024,
-        0.0248
-       ],
-       [
-        0.2953,
-        0.174,
-        0.0226,
-        0.0232
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 0.59,
-       "n_test_frames": 1190,
-       "test": "FML, отложенные сессии съёмки",
-       "source": "reports/final_numbers.json case.sections.photo_count.frame"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "src": "data/extra/fml/fml_version2/full_dataset/images/val/image_20241004_084611_344800.jpg",
+     "date": "2024-10-04 08:46"
     },
     {
      "id": "fml_01",
@@ -12532,44 +11296,8 @@
      "density_m2": null,
      "density_km2": null,
      "area_note": "площадь кадра неизвестна (косой вид с судна, GSD/GPS нет) — только шт./кадр",
-     "date": "2024-10-04 14:32",
-     "prediction": {
-      "model": "fml-frcnn-grouped-2026-09-26",
-      "survey": "water_camera",
-      "threshold": 0.8,
-      "n": 3,
-      "n_labelled": 8,
-      "abs_error": 5,
-      "density_m2": null,
-      "density_km2": null,
-      "boxes": [
-       [
-        0.3506,
-        0.1417,
-        0.0177,
-        0.0208
-       ],
-       [
-        0.7428,
-        0.1667,
-        0.0179,
-        0.0183
-       ],
-       [
-        0.3251,
-        0.1403,
-        0.0264,
-        0.0197
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 0.59,
-       "n_test_frames": 1190,
-       "test": "FML, отложенные сессии съёмки",
-       "source": "reports/final_numbers.json case.sections.photo_count.frame"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "src": "data/extra/fml/fml_version2/full_dataset/images/train/image_20241004_143241_471195.jpg",
+     "date": "2024-10-04 14:32"
     },
     {
      "id": "fml_02",
@@ -12650,56 +11378,8 @@
      "density_m2": null,
      "density_km2": null,
      "area_note": "площадь кадра неизвестна (косой вид с судна, GSD/GPS нет) — только шт./кадр",
-     "date": "2024-10-04 14:34",
-     "prediction": {
-      "model": "fml-frcnn-grouped-2026-09-26",
-      "survey": "water_camera",
-      "threshold": 0.8,
-      "n": 5,
-      "n_labelled": 6,
-      "abs_error": 1,
-      "density_m2": null,
-      "density_km2": null,
-      "boxes": [
-       [
-        0.5015,
-        0.2458,
-        0.049,
-        0.0413
-       ],
-       [
-        0.8234,
-        0.3169,
-        0.0448,
-        0.0493
-       ],
-       [
-        0.6067,
-        0.239,
-        0.0884,
-        0.0724
-       ],
-       [
-        0.8848,
-        0.2932,
-        0.0827,
-        0.0491
-       ],
-       [
-        0.9787,
-        0.3183,
-        0.0213,
-        0.0402
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 0.59,
-       "n_test_frames": 1190,
-       "test": "FML, отложенные сессии съёмки",
-       "source": "reports/final_numbers.json case.sections.photo_count.frame"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "src": "data/extra/fml/fml_version2/full_dataset/images/train/image_20241004_143442_835519.jpg",
+     "date": "2024-10-04 14:34"
     },
     {
      "id": "fml_03",
@@ -12860,104 +11540,8 @@
      "density_m2": null,
      "density_km2": null,
      "area_note": "площадь кадра неизвестна (косой вид с судна, GSD/GPS нет) — только шт./кадр",
-     "date": "2024-10-04 14:40",
-     "prediction": {
-      "model": "fml-frcnn-grouped-2026-09-26",
-      "survey": "water_camera",
-      "threshold": 0.8,
-      "n": 13,
-      "n_labelled": 14,
-      "abs_error": 1,
-      "density_m2": null,
-      "density_km2": null,
-      "boxes": [
-       [
-        0.5591,
-        0.1986,
-        0.0453,
-        0.035
-       ],
-       [
-        0.3702,
-        0.1678,
-        0.0295,
-        0.0208
-       ],
-       [
-        0.3299,
-        0.1707,
-        0.0289,
-        0.0197
-       ],
-       [
-        0.5198,
-        0.1767,
-        0.0191,
-        0.0178
-       ],
-       [
-        0.6568,
-        0.1916,
-        0.0457,
-        0.0337
-       ],
-       [
-        0.5531,
-        0.1845,
-        0.0229,
-        0.0186
-       ],
-       [
-        0.611,
-        0.19,
-        0.0255,
-        0.0191
-       ],
-       [
-        0.4806,
-        0.1766,
-        0.0238,
-        0.0244
-       ],
-       [
-        0.4286,
-        0.1703,
-        0.0251,
-        0.021
-       ],
-       [
-        0.7989,
-        0.1632,
-        0.0415,
-        0.0235
-       ],
-       [
-        0.2903,
-        0.1718,
-        0.0224,
-        0.0176
-       ],
-       [
-        0.2693,
-        0.1703,
-        0.0212,
-        0.0173
-       ],
-       [
-        0.6488,
-        0.1874,
-        0.0312,
-        0.026
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 0.59,
-       "n_test_frames": 1190,
-       "test": "FML, отложенные сессии съёмки",
-       "source": "reports/final_numbers.json case.sections.photo_count.frame"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "src": "data/extra/fml/fml_version2/full_dataset/images/test/image_20241004_144007_948521.jpg",
+     "date": "2024-10-04 14:40"
     },
     {
      "id": "fml_04",
@@ -13038,62 +11622,8 @@
      "density_m2": null,
      "density_km2": null,
      "area_note": "площадь кадра неизвестна (косой вид с судна, GSD/GPS нет) — только шт./кадр",
-     "date": "2024-10-07 08:41",
-     "prediction": {
-      "model": "fml-frcnn-grouped-2026-09-26",
-      "survey": "water_camera",
-      "threshold": 0.8,
-      "n": 6,
-      "n_labelled": 6,
-      "abs_error": 0,
-      "density_m2": null,
-      "density_km2": null,
-      "boxes": [
-       [
-        0.7224,
-        0.274,
-        0.0203,
-        0.0183
-       ],
-       [
-        0.3335,
-        0.2649,
-        0.0233,
-        0.0168
-       ],
-       [
-        0.7623,
-        0.2755,
-        0.0346,
-        0.021
-       ],
-       [
-        0.7024,
-        0.2731,
-        0.0204,
-        0.0181
-       ],
-       [
-        0.1927,
-        0.2704,
-        0.0216,
-        0.0149
-       ],
-       [
-        0.2476,
-        0.2681,
-        0.0184,
-        0.0129
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 0.59,
-       "n_test_frames": 1190,
-       "test": "FML, отложенные сессии съёмки",
-       "source": "reports/final_numbers.json case.sections.photo_count.frame"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "src": "data/extra/fml/fml_version2/full_dataset/images/train/image_20241007_084142_284896.jpg",
+     "date": "2024-10-07 08:41"
     },
     {
      "id": "fml_05",
@@ -13184,80 +11714,8 @@
      "density_m2": null,
      "density_km2": null,
      "area_note": "площадь кадра неизвестна (косой вид с судна, GSD/GPS нет) — только шт./кадр",
-     "date": "2024-10-07 09:21",
-     "prediction": {
-      "model": "fml-frcnn-grouped-2026-09-26",
-      "survey": "water_camera",
-      "threshold": 0.8,
-      "n": 9,
-      "n_labelled": 7,
-      "abs_error": 2,
-      "density_m2": null,
-      "density_km2": null,
-      "boxes": [
-       [
-        0.8058,
-        0.1116,
-        0.1218,
-        0.1031
-       ],
-       [
-        0.618,
-        0.1188,
-        0.0674,
-        0.0611
-       ],
-       [
-        0.4818,
-        0.1059,
-        0.0307,
-        0.049
-       ],
-       [
-        0.3068,
-        0.0818,
-        0.0464,
-        0.0349
-       ],
-       [
-        0.3473,
-        0.0874,
-        0.038,
-        0.0366
-       ],
-       [
-        0.2024,
-        0.0668,
-        0.0378,
-        0.032
-       ],
-       [
-        0.2457,
-        0.0794,
-        0.0228,
-        0.0337
-       ],
-       [
-        0.1618,
-        0.068,
-        0.0188,
-        0.0182
-       ],
-       [
-        0.5084,
-        0.1266,
-        0.0399,
-        0.0209
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 0.59,
-       "n_test_frames": 1190,
-       "test": "FML, отложенные сессии съёмки",
-       "source": "reports/final_numbers.json case.sections.photo_count.frame"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "src": "data/extra/fml/fml_version2/full_dataset/images/test/image_20241007_092102_446667.jpg",
+     "date": "2024-10-07 09:21"
     },
     {
      "id": "fml_06",
@@ -13318,50 +11776,8 @@
      "density_m2": null,
      "density_km2": null,
      "area_note": "площадь кадра неизвестна (косой вид с судна, GSD/GPS нет) — только шт./кадр",
-     "date": "2024-10-07 13:13",
-     "prediction": {
-      "model": "fml-frcnn-grouped-2026-09-26",
-      "survey": "water_camera",
-      "threshold": 0.8,
-      "n": 4,
-      "n_labelled": 4,
-      "abs_error": 0,
-      "density_m2": null,
-      "density_km2": null,
-      "boxes": [
-       [
-        0.2923,
-        0.5073,
-        0.0467,
-        0.0363
-       ],
-       [
-        0.0442,
-        0.5017,
-        0.0689,
-        0.0459
-       ],
-       [
-        0.218,
-        0.5259,
-        0.0705,
-        0.0267
-       ],
-       [
-        0.0314,
-        0.5193,
-        0.0406,
-        0.03
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 0.59,
-       "n_test_frames": 1190,
-       "test": "FML, отложенные сессии съёмки",
-       "source": "reports/final_numbers.json case.sections.photo_count.frame"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "src": "data/extra/fml/fml_version2/full_dataset/images/train/image_20241007_131345_876737.jpg",
+     "date": "2024-10-07 13:13"
     },
     {
      "id": "fml_07",
@@ -13432,50 +11848,8 @@
      "density_m2": null,
      "density_km2": null,
      "area_note": "площадь кадра неизвестна (косой вид с судна, GSD/GPS нет) — только шт./кадр",
-     "date": "2024-10-07 13:16",
-     "prediction": {
-      "model": "fml-frcnn-grouped-2026-09-26",
-      "survey": "water_camera",
-      "threshold": 0.8,
-      "n": 4,
-      "n_labelled": 5,
-      "abs_error": 1,
-      "density_m2": null,
-      "density_km2": null,
-      "boxes": [
-       [
-        0.4808,
-        0.49,
-        0.0354,
-        0.0347
-       ],
-       [
-        0.2129,
-        0.5215,
-        0.0501,
-        0.03
-       ],
-       [
-        0.0004,
-        0.5161,
-        0.0293,
-        0.0553
-       ],
-       [
-        0.7118,
-        0.474,
-        0.0236,
-        0.0303
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 0.59,
-       "n_test_frames": 1190,
-       "test": "FML, отложенные сессии съёмки",
-       "source": "reports/final_numbers.json case.sections.photo_count.frame"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "src": "data/extra/fml/fml_version2/full_dataset/images/val/image_20241007_131622_850522.jpg",
+     "date": "2024-10-07 13:16"
     },
     {
      "id": "fml_08",
@@ -13556,68 +11930,8 @@
      "density_m2": null,
      "density_km2": null,
      "area_note": "площадь кадра неизвестна (косой вид с судна, GSD/GPS нет) — только шт./кадр",
-     "date": "2024-11-18 11:25",
-     "prediction": {
-      "model": "fml-frcnn-grouped-2026-09-26",
-      "survey": "water_camera",
-      "threshold": 0.8,
-      "n": 7,
-      "n_labelled": 6,
-      "abs_error": 1,
-      "density_m2": null,
-      "density_km2": null,
-      "boxes": [
-       [
-        0.3206,
-        0.0834,
-        0.0416,
-        0.0292
-       ],
-       [
-        0.577,
-        0.0765,
-        0.0351,
-        0.03
-       ],
-       [
-        0.2184,
-        0.0952,
-        0.0346,
-        0.0263
-       ],
-       [
-        0.3912,
-        0.0812,
-        0.0333,
-        0.0272
-       ],
-       [
-        0.4713,
-        0.0854,
-        0.0309,
-        0.0213
-       ],
-       [
-        0.296,
-        0.0941,
-        0.028,
-        0.0207
-       ],
-       [
-        0.119,
-        0.1054,
-        0.0404,
-        0.0237
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 0.59,
-       "n_test_frames": 1190,
-       "test": "FML, отложенные сессии съёмки",
-       "source": "reports/final_numbers.json case.sections.photo_count.frame"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "src": "data/extra/fml/fml_version2/full_dataset/images/train/image_20241118_112503_719913.jpg",
+     "date": "2024-11-18 11:25"
     },
     {
      "id": "fml_09",
@@ -13698,62 +12012,8 @@
      "density_m2": null,
      "density_km2": null,
      "area_note": "площадь кадра неизвестна (косой вид с судна, GSD/GPS нет) — только шт./кадр",
-     "date": "2024-11-18 11:26",
-     "prediction": {
-      "model": "fml-frcnn-grouped-2026-09-26",
-      "survey": "water_camera",
-      "threshold": 0.8,
-      "n": 6,
-      "n_labelled": 6,
-      "abs_error": 0,
-      "density_m2": null,
-      "density_km2": null,
-      "boxes": [
-       [
-        0.5378,
-        0.1818,
-        0.0526,
-        0.0366
-       ],
-       [
-        0.6913,
-        0.1991,
-        0.0671,
-        0.0457
-       ],
-       [
-        0.4572,
-        0.178,
-        0.0435,
-        0.0294
-       ],
-       [
-        0.6158,
-        0.1824,
-        0.0879,
-        0.0447
-       ],
-       [
-        0.3609,
-        0.1711,
-        0.0359,
-        0.0303
-       ],
-       [
-        0.5901,
-        0.2012,
-        0.0287,
-        0.0199
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 0.59,
-       "n_test_frames": 1190,
-       "test": "FML, отложенные сессии съёмки",
-       "source": "reports/final_numbers.json case.sections.photo_count.frame"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "src": "data/extra/fml/fml_version2/full_dataset/images/train/image_20241118_112626_720570.jpg",
+     "date": "2024-11-18 11:26"
     },
     {
      "id": "fml_10",
@@ -13874,80 +12134,8 @@
      "density_m2": null,
      "density_km2": null,
      "area_note": "площадь кадра неизвестна (косой вид с судна, GSD/GPS нет) — только шт./кадр",
-     "date": "2024-11-18 11:32",
-     "prediction": {
-      "model": "fml-frcnn-grouped-2026-09-26",
-      "survey": "water_camera",
-      "threshold": 0.8,
-      "n": 9,
-      "n_labelled": 10,
-      "abs_error": 1,
-      "density_m2": null,
-      "density_km2": null,
-      "boxes": [
-       [
-        0.5425,
-        0.1616,
-        0.0273,
-        0.0375
-       ],
-       [
-        0.2533,
-        0.1687,
-        0.0277,
-        0.0245
-       ],
-       [
-        0.4505,
-        0.1681,
-        0.0383,
-        0.0328
-       ],
-       [
-        0.936,
-        0.1592,
-        0.0332,
-        0.0297
-       ],
-       [
-        0.7438,
-        0.1683,
-        0.0194,
-        0.0264
-       ],
-       [
-        0.2077,
-        0.1659,
-        0.0193,
-        0.0229
-       ],
-       [
-        0.863,
-        0.1643,
-        0.0339,
-        0.0359
-       ],
-       [
-        0.3136,
-        0.1731,
-        0.0185,
-        0.0212
-       ],
-       [
-        0.381,
-        0.1717,
-        0.0242,
-        0.0226
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 0.59,
-       "n_test_frames": 1190,
-       "test": "FML, отложенные сессии съёмки",
-       "source": "reports/final_numbers.json case.sections.photo_count.frame"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "src": "data/extra/fml/fml_version2/full_dataset/images/train/image_20241118_113226_670150.jpg",
+     "date": "2024-11-18 11:32"
     },
     {
      "id": "fml_11",
@@ -14048,74 +12236,8 @@
      "density_m2": null,
      "density_km2": null,
      "area_note": "площадь кадра неизвестна (косой вид с судна, GSD/GPS нет) — только шт./кадр",
-     "date": "2024-11-18 11:33",
-     "prediction": {
-      "model": "fml-frcnn-grouped-2026-09-26",
-      "survey": "water_camera",
-      "threshold": 0.8,
-      "n": 8,
-      "n_labelled": 8,
-      "abs_error": 0,
-      "density_m2": null,
-      "density_km2": null,
-      "boxes": [
-       [
-        0.7277,
-        0.1914,
-        0.0803,
-        0.0538
-       ],
-       [
-        0.4178,
-        0.1551,
-        0.0875,
-        0.058
-       ],
-       [
-        0.4963,
-        0.1732,
-        0.0511,
-        0.0441
-       ],
-       [
-        0.1629,
-        0.1569,
-        0.0752,
-        0.0411
-       ],
-       [
-        0.569,
-        0.1831,
-        0.0559,
-        0.0408
-       ],
-       [
-        0.1022,
-        0.165,
-        0.0471,
-        0.03
-       ],
-       [
-        0.3597,
-        0.1715,
-        0.041,
-        0.0328
-       ],
-       [
-        0.2785,
-        0.1619,
-        0.0547,
-        0.0424
-       ]
-      ],
-      "metric": {
-       "count_mae_per_frame": 0.59,
-       "n_test_frames": 1190,
-       "test": "FML, отложенные сессии съёмки",
-       "source": "reports/final_numbers.json case.sections.photo_count.frame"
-      },
-      "classes": "без классов: счётчик считает предметы, материал не определяет"
-     }
+     "src": "data/extra/fml/fml_version2/full_dataset/images/train/image_20241118_113349_873039.jpg",
+     "date": "2024-11-18 11:33"
     }
    ]
   }
