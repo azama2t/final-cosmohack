@@ -35,6 +35,34 @@ REGION_GROUP = {
     "ucwd": "Регион не указан в наборе",
     "fml": "Регион не указан в наборе",
 }
+# §62 п.2 / §63 п.4: one map marker per set. "exact" = a real frame location from the set (Martin: station GPS from the
+# published table; Winans: chip georeference) — the frame nearest to the mean of the set's frames, never an invented point.
+# "region" = the centre of the country/region the set names, set HERE explicitly (not a shooting location).
+# None = the set gives no place at all -> list only.
+REGION_CENTER = {
+    "tun_marinelitter": {"lon": 9.6, "lat": 34.9, "label": "Тунис (центр страны)"},
+    "maharjan2022": {"lon": 102.6, "lat": 17.97, "label": "Лаос / Таиланд (Меконг у Вьентьяна, граница стран)"},
+}
+NO_PLACE = {"ucwd": "место съёмки в наборе не указано — только в списке",
+            "fml": "место съёмки в наборе не указано — только в списке"}
+
+
+def _map_point(meta: dict, frames: list) -> dict:
+    sid = meta["id"]
+    pts = [(f["lon"], f["lat"], f["id"]) for f in frames if f.get("lat") is not None and f.get("lon") is not None]
+    if pts:
+        mx = sum(p[0] for p in pts) / len(pts)
+        my = sum(p[1] for p in pts) / len(pts)
+        lon, lat, fid = min(pts, key=lambda p: (p[0] - mx) ** 2 + (p[1] - my) ** 2)
+        return {"kind": "exact", "lon": lon, "lat": lat, "frame": fid, "n_located_frames": len(pts),
+                "note": "координаты кадра из набора" + (" (GPS станции из опубликованной таблицы)" if sid == "martin2021" else
+                                                        " (геопривязка кадра)" if sid == "winans2023" else "")}
+    rc = REGION_CENTER.get(sid)
+    if rc:
+        return {"kind": "region", "lon": rc["lon"], "lat": rc["lat"], "frame": None, "label": rc["label"],
+                "note": "точное место съёмки неизвестно — метка в центре региона, указанного в наборе"}
+    return {"kind": "none", "lon": None, "lat": None, "frame": None,
+            "note": NO_PLACE.get(sid, "место съёмки в наборе не указано — только в списке")}
 
 router = APIRouter(prefix="/api/v3", tags=["v3-drones"])
 _cache: dict = {}
@@ -93,6 +121,7 @@ def drones_sets():
             "built": d.get("built"), "not_included": d.get("not_included", []),
             "model": {k: _pred().get(k) for k in ("classes", "match_rule", "total", "built")} if _pred() else None,
             "sets": [{**s["meta"], "region_group": REGION_GROUP.get(s["meta"]["id"], "Регион не указан в наборе"),
+                      "map_point": _map_point(s["meta"], s["frames"]),
                       "model": _model_meta(s["meta"]["id"]), "frames_url": f"/api/v3/drones/{s['meta']['id']}/frames",
                       "cover": s["frames"][0]["image"] if s["frames"] else None} for s in d["sets"]]}
 

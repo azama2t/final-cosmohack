@@ -12,7 +12,7 @@ import PairsDrawer from './PairsDrawer';
 import SceneZoneCard, { zoneTitle, type CardTab, type SceneZoneDetail, type SceneZoneProps } from './SceneZoneCard';
 import { SZ_COLORS, szKey, isFind, geomCenter } from './CaseMap';
 import { NasaBlock, useNasaInfo } from './Nasa';
-import { RealtimeFolder, useFreshInfo, type FreshScene } from './Realtime';
+import { FreshScenePanel, RealtimeFolder, useFreshInfo, type FreshScene } from './Realtime';
 import { DronesOptions, openDrones, openDronesFromValue } from './DronesHost';
 import { PrimeToggle, setPrime } from './PrimeMode';
 import { PhotoRolesLine } from './PhotoRoles';
@@ -1056,7 +1056,11 @@ export default function CaseApp() {
           date={nasaDate}
           onLayer={setNasaLayerId}
           onDate={setNasaDay}
-          onLayerOn={setNasaLayerOn}
+          onLayerOn={(v) => {
+            // §63 п.2: one NASA state — «Выключить NASA» in the block = the top button off
+            if (!v) setNasaOn(false);
+            setNasaLayerOn(true);
+          }}
         />
         <div className="left-body" data-testid="zone-list">
           {!curScene && !q.layers.zones && !freshOn && !q.layers.obs && !src.drones && (
@@ -1095,6 +1099,9 @@ export default function CaseApp() {
                 </button>
               ))}
             </details>
+          )}
+          {freshOn && freshScene && !curScene && (
+            <FreshScenePanel s={freshScene} zones={freshZones} onClose={() => setFreshScene(null)} onZone={(f) => flyToFeat(f, 14)} />
           )}
           {freshOn && !curScene && (
             <RealtimeFolder

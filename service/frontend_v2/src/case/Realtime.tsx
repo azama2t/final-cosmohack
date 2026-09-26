@@ -184,3 +184,61 @@ export function RealtimeFolder({
     </details>
   );
 }
+
+
+/** §63а: the chosen fresh snapshot in the left column — like an archive snapshot: dates, statuses, zones */
+export function FreshScenePanel({ s, zones, onClose, onZone }: { s: FreshScene; zones: { features: any[] } | null; onClose: () => void; onZone: (f: any) => void }) {
+  const [sel, setSel] = useState<string | null>(null);
+  const bs = s.by_status ?? {};
+  const fs = (zones?.features ?? []).filter((f: any) => !/-000$/.test(f.properties?.zone_id ?? ''));
+  const whole = (zones?.features ?? []).find((f: any) => /-000$/.test(f.properties?.zone_id ?? ''));
+  return (
+    <div className="c-fresh-panel" data-testid="fresh-panel">
+      <div className="c-fresh-panel-h">
+        <b>
+          <span className="c-mk rt" aria-hidden /> {s.region_name ?? s.region}
+        </b>
+        <button className="icon-btn" onClick={onClose} aria-label="Закрыть свежий снимок" data-testid="fresh-panel-close">
+          ✕
+        </button>
+      </div>
+      <div className="c-rt-label">автоматически, не проверено человеком</div>
+      <div className="note c-pad-s" data-testid="fresh-dates">
+        Sentinel-2 {s.tile ?? ''} · съёмка {s.datetime ? `${dateRu(s.datetime.slice(0, 10))} ${s.datetime.slice(11, 16)} UTC` : dateRu(s.date)}
+        {s.processed_at ? ` · обработан нашей моделью ${hhmm(s.processed_at)}` : ''}
+        {s.crop_cloud_frac !== null && s.crop_cloud_frac !== undefined ? ` · облачность ${Math.round(s.crop_cloud_frac * 100)} %` : ''}
+        {s.wind10m_ms !== null && s.wind10m_ms !== undefined ? ` · ветер ${s.wind10m_ms.toFixed(1).replace('.', ',')} м/с` : ''}
+      </div>
+      <div className="c-rt-counter" data-testid="fresh-status">
+        {bs.detected ? `находок ${bs.detected}` : 'находок нет'} · не обнаружено {bs.not_detected ?? 0} · недостаточно данных {bs.insufficient_data ?? 0}
+      </div>
+      {!zones && <div className="note c-pad-s">зоны…</div>}
+      {whole && !fs.length && <div className="note c-pad-s">вся вырезка: {ZST[whole.properties?.detection_status] ?? whole.properties?.detection_status}</div>}
+      {fs.map((f: any, i: number) => {
+        const p = f.properties ?? {};
+        const on = sel === p.zone_id;
+        return (
+          <div key={p.zone_id ?? i} className={`c-fresh-zone ${on ? 'on' : ''}`}>
+            <button
+              className="link"
+              onClick={() => {
+                setSel(on ? null : p.zone_id);
+                onZone(f);
+              }}
+              data-testid="fresh-zone"
+            >
+              зона {i + 1}: {ZST[p.detection_status] ?? p.detection_status}
+            </button>
+            {on && (
+              <div className="note" data-testid="fresh-zone-card">
+                {p.detection_status === 'detected' ? 'модель обнаружила вероятный плавающий материал' : ZST[p.detection_status] ?? ''}
+                {p.measured?.zone_area_km2 !== undefined ? ` · площадь зоны ${String(p.measured.zone_area_km2).replace('.', ',')} км²` : ''}
+                {p.flags?.length ? ` · признаки: ${p.flags.join(', ')}` : ''} · пластик и штуки по снимку не подтверждены · автоматически, не проверено человеком
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}

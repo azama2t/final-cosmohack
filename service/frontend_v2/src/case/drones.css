@@ -414,3 +414,50 @@
   display: flex;
   gap: 8px;
 }
+
+/* §62 п.2: map markers «Дроны и фото» — green diamond as in the legend (.c-mk.dr) */
+.dr-mk {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.dr-mk-d {
+  position: absolute;
+  inset: 2px;
+  background: #51cf66;
+  border: 2px solid #0b1a10;
+  transform: rotate(45deg);
+  box-shadow: 0 0 0 1px rgba(81, 207, 102, 0.6), 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+.dr-mk.region .dr-mk-d {
+  background: rgba(81, 207, 102, 0.35);
+  border: 2px dashed #51cf66;
+}
+.dr-mk-lab {
+  position: absolute;
+  left: 22px;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  font-size: 11.5px;
+  color: #d8f5dd;
+  background: rgba(7, 8, 10, 0.72);
+  padding: 1px 5px;
+  border-radius: 3px;
+  pointer-events: none;
+}
+.dr-mk.pulse .dr-mk-d {
+  animation: dr-pulse 1.2s ease-out 2;
+}
+@keyframes dr-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(81, 207, 102, 0.9);
+  }
+  100% {
+    box-shadow: 0 0 0 16px rgba(81, 207, 102, 0);
+  }
+}

@@ -16,6 +16,11 @@
   position: fixed;
   z-index: 960;
   width: min(320px, calc(100vw - 24px));
+  /* §63 п.3: safety net for very tall content (long step-1 text at a short viewport) — DemoTour.tsx already
+     positions the card fully inside the viewport using its real measured height, this only guarantees the
+     «Далее/Назад» row is never pushed off-screen if the text is longer than the available height. */
+  max-height: calc(100vh - 28px);
+  overflow-y: auto;
   background: #10131a;
   border: 1px solid #2a3340;
   border-radius: 10px;
@@ -23,6 +28,75 @@
   color: #e7edf5;
   font: 400 13px/1.4 Inter, system-ui, sans-serif;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
+}
+/* §63 п.3 (Глеб, скрины 3–4): the tooltip must sit NEXT TO the target with a visible arrow pointing at it, never
+   on top of it. One triangle per side, placed on the card's edge that faces the target; DemoTour.tsx sets the
+   perpendicular offset (top for left/right, left for top/bottom) to line up with the target's own centre. */
+.dt-arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.dt-arrow-right {
+  left: -8px;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 8px solid #2a3340;
+}
+.dt-arrow-right::after {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: -7px;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-right: 7px solid #10131a;
+}
+.dt-arrow-left {
+  right: -8px;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 8px solid #2a3340;
+}
+.dt-arrow-left::after {
+  content: '';
+  position: absolute;
+  right: 2px;
+  top: -7px;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-left: 7px solid #10131a;
+}
+.dt-arrow-bottom {
+  top: -8px;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid #2a3340;
+}
+.dt-arrow-bottom::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: -7px;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-bottom: 7px solid #10131a;
+}
+.dt-arrow-top {
+  bottom: -8px;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid #2a3340;
+}
+.dt-arrow-top::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: -7px;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 7px solid #10131a;
 }
 .dt-card b {
   color: #fff;

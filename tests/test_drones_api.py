@@ -152,3 +152,24 @@ def test_items_export_csv_json(client, sets):
     assert c.status_code == 200 and c.headers["content-type"].startswith("text/csv")
     assert len(c.text.strip().split("\n")) == 1 + len(r["items"])
     assert client.get("/api/v3/drones/tun_marinelitter/frames/nope/items").status_code == 404
+
+
+def test_map_points_honest(sets):
+    """§62 п.2 / §63 п.4: exact only from real frame coordinates; region centre explicit and labelled; UCWD/FML — list only."""
+    mp = {s["id"]: s["map_point"] for s in sets["sets"]}
+    for sid in ("martin2021", "winans2023"):
+        assert mp[sid]["kind"] == "exact" and mp[sid]["frame"]
+    for sid in ("tun_marinelitter", "maharjan2022"):
+        assert mp[sid]["kind"] == "region" and "точное место съёмки неизвестно" in mp[sid]["note"]
+        assert mp[sid]["lon"] is not None and mp[sid]["lat"] is not None
+    for sid in ("ucwd", "fml"):
+        assert mp[sid]["kind"] == "none" and mp[sid]["lon"] is None and "не указано" in mp[sid]["note"]
+
+
+def test_exact_point_is_a_real_frame(client, sets):
+    for s in sets["sets"]:
+        p = s["map_point"]
+        if p["kind"] != "exact":
+            continue
+        f = next(f for f in client.get(f"/api/v3/drones/{s['id']}/frames").json()["frames"] if f["id"] == p["frame"])
+        assert (f["lon"], f["lat"]) == (p["lon"], p["lat"])

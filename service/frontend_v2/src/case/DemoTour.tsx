@@ -9,7 +9,7 @@
 // sibling of «Слои» inside .toolbar (one group, fixed gaps, same responsive rule), and calls this component's
 // imperative `open()` via a ref. DemoTour itself only renders the walkthrough overlay (ring + tooltip card),
 // portalled into document.body so it still works above the mobile bottom sheet at 390px.
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import './DemoTour.css';
 
@@ -138,17 +138,57 @@ async function reachStep(n: number) {
   el?.scrollIntoView({ block: 'center', behavior: 'instant' as ScrollBehavior });
 }
 
-/** clamp a tooltip card near `rect` inside the viewport (§48 скрин 02: no clipped/overlapping popovers) */
-function place(rect: DOMRect, cardW: number, cardH: number) {
+type Side = 'right' | 'left' | 'bottom' | 'top';
+const clampNum = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(v, Math.max(lo, hi)));
+
+/** §63 п.3 (Глеб, скрины 3–4): the tooltip used to sit ON TOP of its target (fixed `top = rect.bottom + margin`
+ *  with a guessed, too-small `cardH` — the real card is much taller once the text wraps at 1366×768, so it still
+ *  covered the highlighted row and the list below it after "flipping" above). Now: place the card NEXT TO the
+ *  target — prefer the side (right, then left) with room, since that never covers the scrollable list at all;
+ *  fall back to below/above only if there is no room on either side; whichever side has the least room is never
+ *  chosen if a better one fits. `cardW`/`cardH` are the card's real measured size (DemoTour.tsx useLayoutEffect),
+ *  not a guess, so short/tall content is placed correctly either way. Final clamp guarantees the whole card
+ *  (including the «Далее/Назад» row at the bottom) stays inside the viewport — never off-screen, never clipped. */
+function place(rect: DOMRect, cardW: number, cardH: number): { top: number; left: number; side: Side } {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  const margin = 10;
-  let top = rect.bottom + margin;
-  if (top + cardH > vh - margin) top = Math.max(margin, rect.top - cardH - margin);
-  let left = rect.left;
-  if (left + cardW > vw - margin) left = vw - margin - cardW;
-  if (left < margin) left = margin;
-  return { top, left };
+  const margin = 14;
+  const gap = 16; // room for the arrow between the card and its target
+  const spaceRight = vw - rect.right - margin;
+  const spaceLeft = rect.left - margin;
+  const spaceBelow = vh - rect.bottom - margin;
+  const spaceAbove = rect.top - margin;
+
+  let side: Side;
+  if (spaceRight >= cardW + gap) side = 'right';
+  else if (spaceLeft >= cardW + gap) side = 'left';
+  else if (spaceBelow >= cardH + gap) side = 'bottom';
+  else if (spaceAbove >= cardH + gap) side = 'top';
+  else {
+    // nothing fits cleanly (very small viewport) — pick whichever side has the most room and clamp into view
+    const opts: [Side, number][] = [
+      ['right', spaceRight],
+      ['left', spaceLeft],
+      ['bottom', spaceBelow],
+      ['top', spaceAbove],
+    ];
+    opts.sort((a, b) => b[1] - a[1]);
+    side = opts[0][0];
+  }
+
+  let top: number;
+  let left: number;
+  if (side === 'right' || side === 'left') {
+    top = clampNum(rect.top + rect.height / 2 - cardH / 2, margin, vh - margin - cardH);
+    left = side === 'right' ? rect.right + gap : rect.left - gap - cardW;
+  } else {
+    left = clampNum(rect.left + rect.width / 2 - cardW / 2, margin, vw - margin - cardW);
+    top = side === 'bottom' ? rect.bottom + gap : rect.top - gap - cardH;
+  }
+  // never let the card leave the viewport — «Далее»/«Назад» must always be reachable (§63 п.3)
+  left = clampNum(left, margin, vw - margin - cardW);
+  top = clampNum(top, margin, vh - margin - cardH);
+  return { top, left, side };
 }
 
 export default forwardRef<DemoTourHandle>(function DemoTour(_props, ref) {
@@ -206,9 +246,27 @@ export default forwardRef<DemoTourHandle>(function DemoTour(_props, ref) {
   };
 
   const s = STEPS[step];
-  const cardW = 320;
-  const cardH = 180;
-  const pos = rect ? place(rect, cardW, cardH) : { top: 80, left: Math.max(10, window.innerWidth - cardW - 20) };
+  const [pos, setPos] = useState<{ top: number; left: number; side: Side }>({ top: 80, left: Math.max(10, window.innerWidth - 340), side: 'left' });
+
+  // §63 п.3: place using the card's REAL measured size (not a guessed constant) — a useLayoutEffect runs
+  // synchronously after the DOM commits but before the browser paints, so there is no visible flash at the old
+  // spot even though the card's height changes a lot between steps (short step 5 vs. the long step-1 text).
+  useLayoutEffect(() => {
+    if (!rect || !cardRef.current) return;
+    const cw = cardRef.current.offsetWidth || 320;
+    const ch = cardRef.current.offsetHeight || 180;
+    setPos(place(rect, cw, ch));
+  }, [rect, step]);
+
+  // arrow: on the edge of the card facing the target, offset to line up with the target's own centre (clamped to
+  // stay on the card's edge — e.g. a short target near the viewport corner shouldn't push the arrow off the card)
+  const arrowStyle: Record<string, number> = {};
+  if (rect && cardRef.current) {
+    const cw = cardRef.current.offsetWidth || 320;
+    const ch = cardRef.current.offsetHeight || 180;
+    if (pos.side === 'right' || pos.side === 'left') arrowStyle.top = clampNum(rect.top + rect.height / 2 - pos.top, 14, ch - 14);
+    else arrowStyle.left = clampNum(rect.left + rect.width / 2 - pos.left, 14, cw - 14);
+  }
 
   return (
     <>
@@ -222,7 +280,14 @@ export default forwardRef<DemoTourHandle>(function DemoTour(_props, ref) {
                 style={{ top: rect.top - 4, left: rect.left - 4, width: rect.width + 8, height: rect.height + 8 }}
               />
             )}
-            <div className="dt-card" ref={cardRef} data-testid="demo-tour-card" style={{ top: pos.top, left: pos.left }}>
+            <div
+              className="dt-card"
+              ref={cardRef}
+              data-testid="demo-tour-card"
+              data-side={pos.side}
+              style={{ top: pos.top, left: pos.left }}
+            >
+              {rect && <div className={`dt-arrow dt-arrow-${pos.side}`} style={arrowStyle} aria-hidden />}
               <div className="dt-step-n">Демо · шаг {s.title}</div>
               <div className="dt-what">
                 <b>Что показано:</b> {s.what}

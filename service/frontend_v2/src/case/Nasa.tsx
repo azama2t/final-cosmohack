@@ -205,6 +205,7 @@ export function NasaBlock({
   onLayerOn: (v: boolean) => void;
 }) {
   const active = on && layerOn;
+  const [why, setWhy] = useState(false); // §63 п.1: the explanation lives behind (i)
   useNasaRegionalOnly(active);
   const zoom = useMapZoom(active);
   if (!on) return null;
@@ -221,10 +222,25 @@ export function NasaBlock({
   const max = info?.latest ?? date;
   const partial = !!info && date === info.latest && info.latest !== info.latestFull;
   const lowZoom = zoom != null && zoom < NASA_MIN_ZOOM;
+  // §63 п.1: a normal block in the column flow (no overlay / sticky), compact: header · one control row · one status line
   return (
     <details className="c-nasa-block" open data-testid="nasa-block">
       <summary>
-        <span className="c-nasa-dot" aria-hidden /> NASA · ежедневный обзор
+        <span className="c-nasa-dot" aria-hidden />
+        <span className="c-nasa-title">NASA · ежедневный обзор</span>
+        <button
+          className={`c-nasa-i ${why ? 'on' : ''}`}
+          aria-expanded={why}
+          aria-label="Что это за слой"
+          title="Что это за слой"
+          data-testid="nasa-why"
+          onClick={(e) => {
+            e.preventDefault();
+            setWhy(!why);
+          }}
+        >
+          i
+        </button>
         <button
           className="c-nasa-block-off"
           onClick={(e) => {
@@ -234,65 +250,69 @@ export function NasaBlock({
           data-testid="nasa-off"
           title="Выключить NASA: подложка, элемент таймлайна и это управление"
         >
-          Выключить NASA
+          Выкл.
         </button>
       </summary>
       <div className="c-nasa-block-body">
-        <div className="note" data-testid="nasa-caption">
-          Обзорный снимок {L.sensor ?? ''} ~{L.resolution_m} м — облака, цветение, пятна. <b>Не обнаружение пластика</b>: наш детектор на кадрах NASA не
-          запускается.
-        </div>
-        <label className="c-nasa-lab" htmlFor="nasa-date-input">
-          Дата обзора NASA <span className="faint">(день подложки; не связана с периодом снимков Sentinel-2)</span>
-        </label>
-        <span className="c-nasa-date">
-          <button onClick={() => onDate(shiftDay(date, -1))} data-testid="nasa-prev" title="Предыдущий день" aria-label="Предыдущий день">
-            ◀
-          </button>
-          <input
-            id="nasa-date-input"
-            type="date"
-            value={date}
-            min="2012-01-19"
-            max={max}
-            onChange={(e) => e.target.value && onDate(e.target.value)}
-            data-testid="nasa-date"
-            aria-label="Дата обзора NASA"
-          />
-          <button onClick={() => onDate(shiftDay(date, 1))} disabled={date >= max} data-testid="nasa-next" title="Следующий день" aria-label="Следующий день">
-            ▶
-          </button>
-          {info && date !== info.latestFull && (
-            <button onClick={() => onDate(info.latestFull)} data-testid="nasa-latest" title="Последний полный день">
-              последний
-            </button>
-          )}
-        </span>
-        <span className="c-nasa-sw" role="radiogroup" aria-label="Спутник NASA">
-          {layers.map((x) => (
-            <button
-              key={x.id}
-              role="radio"
-              aria-checked={x.id === L.id}
-              className={x.id === L.id ? 'on' : ''}
-              onClick={() => onLayer(x.id)}
-              data-testid={`nasa-layer-${x.sensor?.toLowerCase() ?? x.id}`}
-              title={x.title}
-            >
-              {x.id.startsWith('VIIRS') ? 'VIIRS' : x.id.includes('Aqua') ? 'MODIS Aqua' : 'MODIS Terra'}
-            </button>
-          ))}
-        </span>
-        <div className="faint" data-testid="nasa-date-line">
-          Изображение: {L.sensor ?? ''} {L.satellite ? `(${L.satellite})` : ''} за {dateRu(date)} (UTC), ~{L.resolution_m} м
-          {partial ? ' · день ещё собирается, часть Земли может быть пустой' : ''}. Чёрные полосы — в этот день там нет съёмки.
-        </div>
-        {lowZoom && (
-          <div className="c-nasa-zoomhint" data-testid="nasa-zoomhint">
-            На глобусе NASA не рисуется (у полюса тайлы дают чёрное пятно) — приблизьте карту к району, обзор появится.
+        {why && (
+          <div className="note c-nasa-why" data-testid="nasa-caption">
+            Обзорный снимок {L.sensor ?? ''} ~{L.resolution_m} м — облака, цветение, пятна. <b>Не обнаружение пластика</b>: наш детектор на кадрах NASA не
+            запускается. Дата обзора — день подложки, не связана с периодом снимков Sentinel-2. Чёрные полосы — в этот день там нет съёмки. На глобусе слой не
+            рисуется (у полюса тайлы дают чёрное пятно), только при приближении. {info?.attribution ?? 'Снимки: NASA EOSDIS GIBS'}.
           </div>
         )}
-        <div className="faint c-nasa-attr">{info?.attribution ?? 'Снимки: NASA EOSDIS GIBS'}</div>
+        <div className="c-nasa-row">
+          <span className="c-nasa-date">
+            <button onClick={() => onDate(shiftDay(date, -1))} data-testid="nasa-prev" title="Предыдущий день" aria-label="Предыдущий день">
+              ◀
+            </button>
+            <input
+              type="date"
+              value={date}
+              min="2012-01-19"
+              max={max}
+              onChange={(e) => e.target.value && onDate(e.target.value)}
+              data-testid="nasa-date"
+              aria-label="Дата обзора NASA (день подложки; не связана с периодом Sentinel-2)"
+              title="Дата обзора NASA (день подложки; не связана с периодом Sentinel-2)"
+            />
+            <button onClick={() => onDate(shiftDay(date, 1))} disabled={date >= max} data-testid="nasa-next" title="Следующий день" aria-label="Следующий день">
+              ▶
+            </button>
+          </span>
+          <span className="c-nasa-sw" role="radiogroup" aria-label="Спутник NASA">
+            {layers.map((x) => (
+              <button
+                key={x.id}
+                role="radio"
+                aria-checked={x.id === L.id}
+                className={x.id === L.id ? 'on' : ''}
+                onClick={() => onLayer(x.id)}
+                data-testid={`nasa-layer-${x.sensor?.toLowerCase() ?? x.id}`}
+                title={x.title}
+              >
+                {x.id.startsWith('VIIRS') ? 'VIIRS' : x.id.includes('Aqua') ? 'Aqua' : 'Terra'}
+              </button>
+            ))}
+          </span>
+        </div>
+        <div className="faint c-nasa-line" data-testid="nasa-date-line">
+          {L.sensor ?? ''} {dateRu(date)} · ~{L.resolution_m} м · не обнаружение
+          {partial ? ' · день ещё собирается' : ''}
+          {info && date !== info.latestFull && (
+            <>
+              {' · '}
+              <button className="link" onClick={() => onDate(info.latestFull)} data-testid="nasa-latest" title="Последний полный день">
+                последний
+              </button>
+            </>
+          )}
+        </div>
+        {lowZoom && (
+          <div className="c-nasa-zoomhint" data-testid="nasa-zoomhint" title="На глобусе обзор NASA не рисуется (у полюса тайлы дают чёрное пятно)">
+            Приблизьте карту к району
+          </div>
+        )}
       </div>
     </details>
   );
