@@ -23,14 +23,14 @@ NAME = "my_unmix_v1"
 
 def predict(window_bands, meta):
     # window_bands: 'B1','B2','B3','B4','B5','B6','B7','B8','B8A','B11','B12' -> float32 (128, 128), отражение, 10 м,
-    #               NaN = нет данных; 'SCL' -> uint8 (0 = неизвестно; у MARIDA SCL нет)
+    # NaN = нет данных; 'SCL' -> uint8 (0 = неизвестно; у MARIDA SCL нет)
     # meta: roi (bool 128×128) — зона, где считать; roi_area_km2; pixel_m; epsg; bounds; lon, lat; date; datetime; has_scl
-    return N, lo, hi          # или None — «нет надёжной оценки» (воздержание)
+    return N, lo, hi # или None — «нет надёжной оценки» (воздержание)
 
-def predict_cover(window_bands, meta):   # необязательно: площадь пластика в ROI, м² (проверяется на PLP2021)
+def predict_cover(window_bands, meta): # необязательно: площадь пластика в ROI, м² (проверяется на PLP2021)
     return m2, lo, hi
 
-def fit(train):               # необязательно
+def fit(train): # необязательно
     # train: [{'bands', 'meta', 'N' (nan у PLP2021), 'cover_m2' (nan у дат со счётом), 'campaign'}] — только мишени A1,
     # без удерживаемой кампании (leave-one-CAMPAIGN-out)
     ...
@@ -50,7 +50,7 @@ set CUDA_VISIBLE_DEVICES=-1
 .venv\Scripts\python.exe scripts\discovery\harness.py check --deep
 ```
 
-- Строки в лидерборд пишет **только** `harness.record()`, его вызывает `run`.
+- Строки в лидерборд пишет **только** `harness.record`, его вызывает `run`.
 - `--sets …` и `--no-record` — отладочные прогоны, они не записываются.
 - Предсказания каждого прогона сохраняются в `data/discovery/v2/runs/<метод>__<хэш>.csv`, ложные зоны по окнам — в `…__zones.csv`.
 
@@ -90,7 +90,7 @@ set CUDA_VISIBLE_DEVICES=-1
 
 ## 4. Что запрещено
 
-1. **Подбирать под A1.** Параметры задаются только в `fit()`, а `fit()` не видит удерживаемую кампанию. Каждое изменение кода — это новая строка лидерборда, и все строки остаются.
+1. **Подбирать под A1.** Параметры задаются только в `fit`, а `fit` не видит удерживаемую кампанию. Каждое изменение кода — это новая строка лидерборда, и все строки остаются.
 2. **Поля-ответы как признаки.** Нельзя читать `labels.csv`, `tile_types.csv`, `p1_*.csv`, `adis_candidates.csv`, `pair_quality.csv`, `registry_cozar*.csv`, `features_*.npz` с метками. Нельзя использовать id образца, класс фона, плотность поля.
 3. **Угадывать набор по meta** (наличие SCL, дата, координаты, размер ROI) и ветвиться по нему.
 4. **Учиться на окнах A2–A5**, в том числе на MARIDA test. Источник обучения нужно указать в `--note`.

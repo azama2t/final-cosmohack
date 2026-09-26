@@ -88,6 +88,16 @@ def scenario_text(cfg: dict, cal: dict) -> Optional[str]:
     return t.format(lo=cal["lo"], hi=cal["hi"], cov_lo=cal["coverage_pct_lo"], cov_hi=cal["coverage_pct_hi"]) if t else None
 
 
+def firing_caveat(cfg: dict) -> Optional[str]:
+    """P1: firing is not monotonic in the number of items — the 470–670 scenario is two points, not a law."""
+    f = cfg.get("firing") or {}
+    if not f:
+        return None
+    return (f"срабатывание не монотонно по числу: из {f['n_water_pixels_ge400']} водных пикселей мишеней с ≥ 400 "
+            f"бутылками детектор сработал на {f['n_fired']}; пиксель {f.get('max_not_fired_campaign', 'PLP')} с ≈ "
+            f"{fmt(int(f['max_not_fired']))} бутылками — без срабатывания; сценарий — две точки, не закон")
+
+
 def natural_pair_note(cfg: dict) -> Optional[str]:
     """The natural-pair sentence (ISPRA 604) — only after it is confirmed (natural_pair.confirmed in the config)."""
     np_ = cfg.get("natural_pair") or {}
@@ -151,8 +161,9 @@ def estimate(p: dict, cfg: dict, cal: Optional[dict] = None, field_range: Option
     # verification: level_B_cozar = crosses a Cózar filament (independent human labels) -> normal; «требует проверки» -> muted
     muted = p.get("verification") != "level_B_cozar"
     fr = (f"с полевыми шт./км² (среднее по маршруту: {fmt_ru(field_range[0])}–{fmt_ru(field_range[1])}) не сравнивать "
-          "напрямую: разница в 3–4 порядка ожидаема") if field_range else (
-          "с полевыми шт./км² (среднее по маршруту) не сравнивать напрямую: разница в 3–4 порядка ожидаема")
+          "напрямую: другой масштаб (внутри нити против среднего по маршруту)") if field_range else (
+          "с полевыми шт./км² (среднее по маршруту) не сравнивать напрямую: другой масштаб (внутри нити против среднего по "
+          "маршруту)")
     scen = scenario_text(cfg, cal)
     nat = natural_pair_note(cfg)
     return {
@@ -177,7 +188,8 @@ def estimate(p: dict, cfg: dict, cal: Optional[dict] = None, field_range: Option
         "calibration_id": cfg.get("calibration_id", "flat_plp"),
         "calibration_name": cfg.get("calibration_name"),
         "method_essence": (f"по сути доля покрытия пикселей детектора × калибровка PLP; независимая проверка — "
-                           f"{npx_d}"),
+                           f"{npx_d}" + (f"; {firing_caveat(cfg)}" if firing_caveat(cfg) else "")),
+        "firing_caveat": firing_caveat(cfg),
         "context": ("плотность внутри контура нити в пересчёте на бутылки PET 1,5 л — не среднее по маршруту; " + fr
                     + (f"; {nat}" if nat else "")),
         "muted": muted,
@@ -222,6 +234,7 @@ def summary(props: Iterable[dict], cfg: dict) -> dict:
     out = {"status": cfg.get("status"), "method": cfg.get("method"), "note": cfg.get("note"), "unit": cfg.get("unit"),
            "scenario": scenario_text(cfg, cal), "kind": "scenario", "natural_pair_note": natural_pair_note(cfg),
            "calibration_id": cfg.get("calibration_id", "flat_plp"), "calibration_name": cfg.get("calibration_name"),
+           "firing_caveat": firing_caveat(cfg), "firing": dict(cfg.get("firing") or {}) or None,
            "formula_short": f"пиксели маски × {cal['lo']}–{cal['hi']} / площадь контура = пересчёт доли покрытия",
            "coverage_pct_lo": cal["coverage_pct_lo"], "coverage_pct_hi": cal["coverage_pct_hi"],
            "items_per_pixel_lo": cal["lo"], "items_per_pixel_hi": cal["hi"], "items_per_pixel_value": cal["value"],

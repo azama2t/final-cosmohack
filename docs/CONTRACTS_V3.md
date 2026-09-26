@@ -835,3 +835,11 @@ GET /api/v3/photo/meta: + headline {count_mae_per_frame, count_mae_ci95, n_image
   (жюри 14:06) research_estimate: + formula_short «пиксели маски × 470–670 / площадь контура = пересчёт доли покрытия» (для (i)),
     + calibration_id ("flat_plp") и calibration_name (действующая калибровка, из configs/zone_estimate.yaml; при смене модели —
     меняется там). CSV: + research_formula_short, research_calibration_name. Сводка: + calibration_id, calibration_name, formula_short.
+  (оркестратор 14:2x) research_estimate.context: «разница в 3–4 порядка ожидаема» → «другой масштаб (внутри нити против среднего по
+    маршруту)»; + firing_caveat «срабатывание не монотонно по числу: из 9 водных пикселей мишеней с ≥ 400 бутылками детектор сработал
+    на 2; пиксель PLP2018 с ≈ 1 670 бутылками — без срабатывания; сценарий — две точки, не закон» (числа — configs/zone_estimate.yaml
+    firing), он же в конце method_essence. Интервал 470–670 не менялся. CSV: + research_firing_caveat. Сводка: + firing_caveat, firing.
+  (§38 п.6) natural_pair_note включён (configs/zone_estimate.yaml natural_pair.confirmed = true) — формулировка критика пар
+    (docs/research/pairs/CRITIC.md): «на природной паре ISPRA 604 (16.09.2019; протокол SNPA Modulo 2bis: …) ни один из 16
+    предметов не ближе 50 м к пикселю детектора, ближайший — 85 м; их суммарная площадь ~10⁻⁵ площади полосы — сигнал нити дают
+    не посчитанные предметы»; он же в конце context у всех оценок и в CSV research_natural_pair_note. Числа оценки не менялись.

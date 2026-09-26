@@ -104,7 +104,13 @@ def test_formula_equals_api_equals_export_on_5_zones(client):
         assert "доля покрытия пикселей детектора × калибровка PLP" in re["method_essence"]
         assert "2 пикселя на 2 датах" in re["method_essence"]
         assert re["context"].startswith("плотность внутри контура нити в пересчёте на бутылки PET 1,5 л — не среднее по маршруту")
-        assert "(среднее по маршруту: 1,5–54)" in re["context"] and "3–4 порядка" in re["context"]
+        assert "(среднее по маршруту: 1,5–54)" in re["context"] and "3–4 порядка" not in re["context"]
+        assert "другой масштаб (внутри нити против среднего по маршруту)" in re["context"]
+        # P1: firing is not monotonic in N — the 470–670 scenario is two points, not a law (interval unchanged)
+        assert re["firing_caveat"] == ("срабатывание не монотонно по числу: из 9 водных пикселей мишеней с ≥ 400 бутылками "
+                                       "детектор сработал на 2; пиксель PLP2018 с ≈ 1 670 бутылками — без срабатывания; "
+                                       "сценарий — две точки, не закон")
+        assert re["method_essence"].endswith(re["firing_caveat"]) and re["items_per_pixel"]["lo"] == 470
         assert re["muted"] == (p["verification"] != "level_B_cozar")
         # §36 п.2: 470–670 per pixel — a research scenario on artificial PLP targets, not a CI, not checked on nature
         assert re["kind"] == "scenario" and re["scenario"] in re["label"] and "сценарий" in re["method"]
@@ -237,7 +243,8 @@ def test_summary_same_code_as_final_numbers(client):
         assert s_dir[k] == s_api[k] == h[k], k
     vals = sorted(f["properties"]["research_estimate"]["value"] for f in fc["features"] if f["properties"]["research_estimate"])
     assert s_api["n_zones_with_estimate"] == len(vals) and (s_api["c_min"], s_api["c_max"]) == (vals[0], vals[-1])
-    for k in ("lower_bound_median", "lower_bound_min", "lower_bound_max", "n_muted", "n_not_muted"):
+    for k in ("lower_bound_median", "lower_bound_min", "lower_bound_max", "n_muted", "n_not_muted", "firing_caveat",
+              "firing", "scenario", "calibration_name", "formula_short"):
         assert s_dir[k] == s_api[k] == h[k], k
 
 
@@ -262,7 +269,26 @@ def test_natural_pair_note_only_when_confirmed():
     off = ZE.estimate(p, {**cfg, "natural_pair": {**cfg["natural_pair"], "confirmed": False}}, field_range=(1.54, 53.9))
     on = ZE.estimate(p, {**cfg, "natural_pair": {**cfg["natural_pair"], "confirmed": True}}, field_range=(1.54, 53.9))
     assert off["natural_pair_note"] is None and "ISPRA" not in off["context"]
-    assert on["natural_pair_note"].startswith("на природной паре ISPRA 604 (16.09.2019) видимая нить содержала лишь 2–4")
-    assert on["context"].endswith("сигнал нити даёт в основном не посчитанный мусор")
+    assert on["natural_pair_note"].startswith("на природной паре ISPRA 604 (16.09.2019; протокол SNPA Modulo 2bis")
+    assert on["context"].endswith("сигнал нити дают не посчитанные предметы")
+    for w in ("15 из 16 — полимеры", "ширина полосы в файле 2019 г. не записана", "протокол 2024 — ≤ 5 м",
+              "часовой пояс не указан", "ни один из 16 предметов не ближе 50 м к пикселю детектора, ближайший — 85 м",
+              "~10⁻⁵ площади полосы"):
+        assert w in on["natural_pair_note"], w
     s_on = ZE.summary([p], {**cfg, "natural_pair": {**cfg["natural_pair"], "confirmed": True}})
     assert s_on["natural_pair_note"] == on["natural_pair_note"] and s_on["kind"] == "scenario" and s_on["scenario"]
+
+
+def test_natural_pair_on_in_api_and_no_old_wording(client):
+    """§38 п.6: ISPRA 604 (critic's wording) is on — in natural_pair_note, context, CSV; «2–4 предмета на га» nowhere."""
+    cfg = ZE.load_config()
+    assert cfg["natural_pair"]["confirmed"] is True
+    fc = client.get("/api/v3/scene_zones", params={"is_find": "true"}).json()
+    body = json.dumps(fc, ensure_ascii=False) + client.get(
+        "/api/v3/export", params={"layer": "scene_zones", "format": "csv"}).content.decode("utf-8-sig")
+    assert "2–4 предмет" not in body and "2-4 предмет" not in body
+    for f in fc["features"]:
+        re = f["properties"]["research_estimate"]
+        assert re["natural_pair_note"] == ZE.natural_pair_note(cfg) and re["context"].endswith(re["natural_pair_note"])
+    rows = _csv_rows(client, is_find="true")
+    assert rows and all(r["research_natural_pair_note"] == ZE.natural_pair_note(cfg) for r in rows)
