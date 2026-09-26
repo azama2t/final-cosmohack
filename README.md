@@ -2,6 +2,8 @@
 
 **Демо: https://5-231-59-204.sslip.io:8443** (запасной адрес: http://5.231.59.204). Это демо-стенд команды: он работает, пока включён наш сервер. Если адрес не открывается, всё запускается локально командой из раздела «Запуск с нуля» ниже. Первая загрузка стенда занимает до ~15 секунд: надпись «Загрузка…» — не сбой. Подробный отчёт — [reports/report.pdf](reports/report.pdf), таблица критериев — [docs/CRITERIA_CHECK.md](docs/CRITERIA_CHECK.md), ограничения — [docs/LIMITATIONS.md](docs/LIMITATIONS.md).
 
+**Материалы:** научный отчёт [reports/report.pdf](reports/report.pdf) · дека [presentation/deck_latest.pdf](presentation/deck_latest.pdf) · скринкаст с субтитрами [presentation/screencast_final.mp4](presentation/screencast_final.mp4) · скрины [presentation/screens_final/](presentation/screens_final/) · сдача [reports/FINAL_HANDOFF.md](reports/FINAL_HANDOFF.md)
+
 ![Карта сервиса: снимок Sentinel-2 с зонами, найденными детектором, и карточка зоны](docs/screenshots/02_scene_zones.jpg)
 
 *Снимок Sentinel-2 (спутник, пиксель 10 м) с зонами-кандидатами детектора на отложенной сцене. Скриншоты интерфейса с подписями источника — [docs/screenshots/](docs/screenshots/README.md).*
