@@ -86,7 +86,7 @@ def _key_strings(s: dict) -> dict:
     ad, ld, bl, v2, q, oil = (s[k] for k in ("adis_pairs", "labeled_data", "baselines", "detector_v2", "quantity", "oil"))
     c = q["calibration"]
     return {
-        "ADIS пар A": f"{ad['A']} пар A",
+        "ADIS пар по месту и времени": f"{ad['A']} пар по месту и времени",
         "ADIS A с предметами": f"{ad['A_with_items']} пар",
         "ADIS плотность": f"{ad['A_with_items_density_min']:.1f}–{ad['A_with_items_density_max']:.1f}",
         "B новых съёмок": str(ld["b_new_acq"]),
@@ -94,7 +94,7 @@ def _key_strings(s: dict) -> dict:
         "LightGBM test F1": f"{bl['test']['lgbm']['f1']:.3f}",
         "пар для калибровки": f"{c['n_pairs_k_x2_min']}–{c['n_pairs_k_x2_max']}",
         "нефть test F1": f"{oil['test_f1']:.3f}",
-        "дообучение вариантов": f"{v2['n_variants']} вариантов",
+        "дообучение вариантов": f"{v2['n_variants']} вариантов с новыми данными",
     }
 
 
@@ -112,7 +112,7 @@ def test_key_numbers_in_deck_and_qa(sec, deck_texts):
     assert not bad, f"дека: нет чисел расследования {bad}"
     qa = texts["QA.md"]
     ad, q = sec["adis_pairs"], sec["quantity"]["calibration"]
-    for v in (f"Все {ad['A']} пар A".lower(), f"{q['n_pairs_k_x2_min']}–{q['n_pairs_k_x2_max']}"):
+    for v in (f"Все {ad['A']} пар".lower(), f"{q['n_pairs_k_x2_min']}–{q['n_pairs_k_x2_max']}"):
         assert v in qa.lower(), f"QA.md: нет «{v}»"
     for question in ("пары уровня A", "калибровк", "Откуда B и D", "утечки"):
         assert question.lower() in qa.lower(), f"QA.md: нет вопроса про «{question}»"
@@ -122,7 +122,8 @@ def test_deck_file_contains_search_slides(sec):
     pptx = pytest.importorskip("pptx")
     prs = pptx.Presentation(str(ROOT / "reports" / "case_deck.pptx"))
     text = "\n".join(sh.text_frame.text for sl in prs.slides for sh in sl.shapes if sh.has_text_frame)
-    for v in ("Как мы искали данные", "Пары уровня A", "Новые размеченные данные B/D", "Приложение · Нефтяное пятно — эксперимент",
+    for v in ("Как мы искали данные", "Пары по месту и времени (ADIS)", "Новые размеченные данные B/D", "Разбор ошибок на сложном фоне",
+              "Приложение · Нефтяное пятно — эксперимент",
               _key_strings(sec)["U-Net test F1"]):
         assert v in text, f"reports/case_deck.pptx: нет «{v}» — пересоберите make_deck_case.py"
 
@@ -153,4 +154,21 @@ def test_wording_no_mass_no_coverage_as_litter():
     assert "не мусор и не шт./км²" in part
     assert not re.search(r"\b(кг|тонн\w*|т/км²|г/м²)\b", part), "в разделе заявлена масса"
     assert "эксперимент" in part.lower() and "нефт" in part.lower()
-    assert "предел обнаружения" in part
+    assert "не задаёт общий предел для всех скоплений" in part
+    assert "пар по месту и времени" in part
+
+
+FORBIDDEN = (r"предел обнаружения доказан", r"(это|—) предел обнаружения", r"\d+ пар A\b", r"калибровочн\w* пар\w* \(ADIS",
+             r"доверительн\w* интервал\w* сценари")
+
+
+def test_wording_section15(deck_texts):
+    """INBOX §15: нет «предел обнаружения» как доказанного факта; 66 ADIS — «пары по месту и времени», не калибровочные."""
+    slides, texts = deck_texts
+    docs = {"README.md": (ROOT / "README.md").read_text(encoding="utf-8"),
+            "reports/report.md": (ROOT / "reports/report.md").read_text(encoding="utf-8"),
+            "docs/QUANTITY.md": (ROOT / "docs/QUANTITY.md").read_text(encoding="utf-8"), "slides": slides, **texts}
+    bad = [(name, pat) for name, txt in docs.items() for pat in FORBIDDEN if re.search(pat, txt)]
+    assert not bad, f"формулировки §15 нарушены: {bad}"
+    q = docs["docs/QUANTITY.md"]
+    assert "Пара по месту и времени" in q and "Калибровочная пара" in q and "Видимый сигнал" in q

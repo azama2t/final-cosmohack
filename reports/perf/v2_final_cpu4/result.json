@@ -1,0 +1,1259 @@
+{
+ "url": "http://127.0.0.1:8070/",
+ "label": "v2_final_cpu4",
+ "gl": "gpu",
+ "cpu_throttle": 4.0,
+ "headless": true,
+ "started": "2026-09-26 04:38:06",
+ "sizes": {
+  "1920x1080": {
+   "first_show": {
+    "gl_context_ms": 980,
+    "first_gl_draw_ms": 1462,
+    "first_tile_response_ms": 1823,
+    "first_tile_draw_ms": 2027,
+    "tiles_idle_ms": 7314,
+    "n_tile_requests": 122,
+    "map_handle": "__caseMap",
+    "map_ready_at_ms": null,
+    "dom_content_loaded_ms": 202,
+    "load_event_ms": 203,
+    "fcp_ms": 432,
+    "lcp_ms": null,
+    "first_show_s": 2.03,
+    "first_show_basis": "first GL draw after first tile"
+   },
+   "map_style": {
+    "projection": "globe",
+    "n_sources": 36,
+    "sources_by_type": {
+     "raster": 1,
+     "geojson": 8,
+     "image": 27
+    },
+    "n_layers": 45,
+    "n_canvas": 1,
+    "dpr": 1,
+    "n_dom": 346
+   },
+   "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "map_box": {
+    "x": 336,
+    "y": 0,
+    "w": 1584,
+    "h": 1080,
+    "cx": 1128,
+    "cy": 540
+   },
+   "idle": {
+    "fps": 144,
+    "frames": 432,
+    "dur_ms": 3000,
+    "long50": 0,
+    "long50_share": 0,
+    "long33": 0,
+    "over17_share": 0,
+    "p95_ms": 7.1,
+    "max_ms": 7.2,
+    "long50_ms_total": 0,
+    "events_max_ms": null,
+    "events": [],
+    "wall_s": 3.01
+   },
+   "pan": [
+    {
+     "fps": 61.2,
+     "frames": 841,
+     "dur_ms": 13736,
+     "long50": 4,
+     "long50_share": 0.005,
+     "long33": 52,
+     "over17_share": 0.334,
+     "p95_ms": 34.7,
+     "max_ms": 76.3,
+     "long50_ms_total": 243,
+     "events_max_ms": 40,
+     "events": [
+      {
+       "name": "pointerover",
+       "t": 12053,
+       "dur": 40,
+       "proc": 7
+      },
+      {
+       "name": "pointerenter",
+       "t": 12053,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 12053,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 12053,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 12053,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 12053,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 12053,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 12053,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 12053,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 12053,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "mouseover",
+       "t": 12053,
+       "dur": 40,
+       "proc": 5
+      },
+      {
+       "name": "pointerdown",
+       "t": 12073,
+       "dur": 24,
+       "proc": 1
+      },
+      {
+       "name": "mousedown",
+       "t": 12073,
+       "dur": 24,
+       "proc": 4
+      },
+      {
+       "name": "pointerup",
+       "t": 25384,
+       "dur": 40,
+       "proc": 1
+      },
+      {
+       "name": "mouseup",
+       "t": 25384,
+       "dur": 40,
+       "proc": 4
+      },
+      {
+       "name": "click",
+       "t": 25384,
+       "dur": 40,
+       "proc": 0
+      }
+     ],
+     "wall_s": 13.77
+    },
+    {
+     "fps": 64.3,
+     "frames": 829,
+     "dur_ms": 12889,
+     "long50": 0,
+     "long50_share": 0,
+     "long33": 20,
+     "over17_share": 0.32,
+     "p95_ms": 27.8,
+     "max_ms": 41.8,
+     "long50_ms_total": 0,
+     "events_max_ms": 48,
+     "events": [
+      {
+       "name": "pointerdown",
+       "t": 25850,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "mousedown",
+       "t": 25850,
+       "dur": 40,
+       "proc": 2
+      },
+      {
+       "name": "pointerup",
+       "t": 38327,
+       "dur": 48,
+       "proc": 0
+      },
+      {
+       "name": "mouseup",
+       "t": 38327,
+       "dur": 48,
+       "proc": 2
+      },
+      {
+       "name": "click",
+       "t": 38327,
+       "dur": 48,
+       "proc": 0
+      }
+     ],
+     "wall_s": 12.92
+    }
+   ],
+   "wheel_zoom": {
+    "fps": 46.5,
+    "frames": 200,
+    "dur_ms": 4299,
+    "long50": 6,
+    "long50_share": 0.03,
+    "long33": 40,
+    "over17_share": 0.5,
+    "p95_ms": 48.6,
+    "max_ms": 138.9,
+    "long50_ms_total": 618,
+    "events_max_ms": null,
+    "events": [],
+    "wall_s": 4.3
+   },
+   "flyto": {
+    "fps": 36.5,
+    "frames": 205,
+    "dur_ms": 5611,
+    "long50": 4,
+    "long50_share": 0.02,
+    "long33": 71,
+    "over17_share": 0.849,
+    "p95_ms": 41.8,
+    "max_ms": 62.5,
+    "long50_ms_total": 243,
+    "events_max_ms": null,
+    "events": [],
+    "wall_s": 5.63,
+    "from": {
+     "lon": -42.30919777715246,
+     "lat": 30.0000000002383,
+     "zoom": 2.5583867250773755,
+     "minZoom": -2,
+     "maxZoom": 22
+    },
+    "to": {
+     "lon": -17.309,
+     "lat": 25.0,
+     "zoom": 5.5583867250773755
+    },
+    "fly_wall_s": 5.62
+   },
+   "left_toggle": {
+    "fps": 55.3,
+    "frames": 311,
+    "dur_ms": 5625,
+    "long50": 16,
+    "long50_share": 0.051,
+    "long33": 25,
+    "over17_share": 0.257,
+    "p95_ms": 55.5,
+    "max_ms": 270.8,
+    "long50_ms_total": 2021,
+    "events_max_ms": 296,
+    "events": [
+     {
+      "name": "pointerout",
+      "t": 50124,
+      "dur": 296,
+      "proc": 1
+     },
+     {
+      "name": "pointerleave",
+      "t": 50124,
+      "dur": 296,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 50124,
+      "dur": 296,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 50124,
+      "dur": 296,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 50124,
+      "dur": 296,
+      "proc": 0
+     },
+     {
+      "name": "pointerover",
+      "t": 50124,
+      "dur": 296,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 50124,
+      "dur": 296,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 50124,
+      "dur": 296,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 50124,
+      "dur": 296,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 50124,
+      "dur": 296,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 50124,
+      "dur": 296,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 50124,
+      "dur": 296,
+      "proc": 0
+     },
+     {
+      "name": "mouseout",
+      "t": 50124,
+      "dur": 296,
+      "proc": 1
+     },
+     {
+      "name": "mouseover",
+      "t": 50124,
+      "dur": 296,
+      "proc": 0
+     },
+     {
+      "name": "pointerdown",
+      "t": 50124,
+      "dur": 296,
+      "proc": 2
+     },
+     {
+      "name": "mousedown",
+      "t": 50124,
+      "dur": 296,
+      "proc": 0
+     },
+     {
+      "name": "pointerup",
+      "t": 50124,
+      "dur": 296,
+      "proc": 0
+     },
+     {
+      "name": "mouseup",
+      "t": 50124,
+      "dur": 296,
+      "proc": 1
+     },
+     {
+      "name": "click",
+      "t": 50124,
+      "dur": 296,
+      "proc": 123
+     },
+     {
+      "name": "pointerout",
+      "t": 52043,
+      "dur": 136,
+      "proc": 0
+     }
+    ],
+    "wall_s": 5.63,
+    "how": "no left-column toggle; fallback: open zone card from the list + close it ×2 (includes the map flyTo to the zone)"
+   },
+   "views": {
+    "fps": 137.3,
+    "frames": 549,
+    "dur_ms": 4000,
+    "long50": 2,
+    "long50_share": 0.004,
+    "long33": 4,
+    "over17_share": 0.009,
+    "p95_ms": 7.2,
+    "max_ms": 62.6,
+    "long50_ms_total": 118,
+    "events_max_ms": 64,
+    "events": [
+     {
+      "name": "pointerout",
+      "t": 56026,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 56026,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 56026,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 56026,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerover",
+      "t": 56026,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 56026,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 56026,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 56026,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseout",
+      "t": 56026,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseover",
+      "t": 56026,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerdown",
+      "t": 56026,
+      "dur": 16,
+      "proc": 2
+     },
+     {
+      "name": "mousedown",
+      "t": 56026,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "pointerup",
+      "t": 56026,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "mouseup",
+      "t": 56026,
+      "dur": 16,
+      "proc": 0
+     },
+     {
+      "name": "click",
+      "t": 56026,
+      "dur": 16,
+      "proc": 2
+     },
+     {
+      "name": "pointerout",
+      "t": 56769,
+      "dur": 64,
+      "proc": 1
+     },
+     {
+      "name": "pointerleave",
+      "t": 56769,
+      "dur": 64,
+      "proc": 0
+     },
+     {
+      "name": "pointerover",
+      "t": 56769,
+      "dur": 64,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 56769,
+      "dur": 64,
+      "proc": 0
+     },
+     {
+      "name": "mouseout",
+      "t": 56769,
+      "dur": 64,
+      "proc": 0
+     }
+    ],
+    "wall_s": 4.01,
+    "tabs": [
+     {
+      "tab": "tab-zones|Полосы",
+      "max_frame_ms": 7,
+      "click_wall_ms": 745
+     },
+     {
+      "tab": "tab-obs|Измерения",
+      "max_frame_ms": 56,
+      "click_wall_ms": 846
+     },
+     {
+      "tab": "tab-go|Куда идти",
+      "max_frame_ms": 35,
+      "click_wall_ms": 804
+     },
+     {
+      "tab": "tab-metrics|Метрики",
+      "max_frame_ms": 63,
+      "click_wall_ms": 772
+     },
+     {
+      "tab": "tab-zones|Полосы",
+      "max_frame_ms": 35,
+      "click_wall_ms": 828
+     }
+    ]
+   },
+   "studio": {
+    "skipped": "no studio in this UI (no data-testid=nav-studio)"
+   },
+   "console_errors_this_size": [],
+   "first_show_loads": [
+    {
+     "first_show_s": 1.7,
+     "gl_context_ms": 660,
+     "first_tile_draw_ms": 1703,
+     "tiles_idle_ms": 7085,
+     "fcp_ms": 284
+    },
+    {
+     "first_show_s": 1.72,
+     "gl_context_ms": 714,
+     "first_tile_draw_ms": 1723,
+     "tiles_idle_ms": 7483,
+     "fcp_ms": 312
+    }
+   ],
+   "first_show_median_s": 1.72,
+   "first_show_all_s": [
+    1.7,
+    1.72,
+    2.03
+   ]
+  },
+  "1366x768": {
+   "first_show": {
+    "gl_context_ms": 718,
+    "first_gl_draw_ms": 1079,
+    "first_tile_response_ms": 1383,
+    "first_tile_draw_ms": 1570,
+    "tiles_idle_ms": 4874,
+    "n_tile_requests": 34,
+    "map_handle": "__caseMap",
+    "map_ready_at_ms": null,
+    "dom_content_loaded_ms": 173,
+    "load_event_ms": 174,
+    "fcp_ms": 328,
+    "lcp_ms": null,
+    "first_show_s": 1.57,
+    "first_show_basis": "first GL draw after first tile"
+   },
+   "map_style": {
+    "projection": "globe",
+    "n_sources": 36,
+    "sources_by_type": {
+     "raster": 1,
+     "geojson": 8,
+     "image": 27
+    },
+    "n_layers": 45,
+    "n_canvas": 1,
+    "dpr": 1,
+    "n_dom": 312
+   },
+   "map_box": {
+    "x": 312,
+    "y": 0,
+    "w": 1054,
+    "h": 768,
+    "cx": 839,
+    "cy": 384
+   },
+   "idle": {
+    "fps": 144,
+    "frames": 432,
+    "dur_ms": 3000,
+    "long50": 0,
+    "long50_share": 0,
+    "long33": 0,
+    "over17_share": 0,
+    "p95_ms": 7.1,
+    "max_ms": 7.2,
+    "long50_ms_total": 0,
+    "events_max_ms": null,
+    "events": [],
+    "wall_s": 3.01
+   },
+   "pan": [
+    {
+     "fps": 101.6,
+     "frames": 1067,
+     "dur_ms": 10500,
+     "long50": 0,
+     "long50_share": 0,
+     "long33": 2,
+     "over17_share": 0.072,
+     "p95_ms": 20.8,
+     "max_ms": 34.7,
+     "long50_ms_total": 0,
+     "events_max_ms": 40,
+     "events": [
+      {
+       "name": "pointerover",
+       "t": 9531,
+       "dur": 40,
+       "proc": 7
+      },
+      {
+       "name": "pointerenter",
+       "t": 9531,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 9531,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 9531,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 9531,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 9531,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 9531,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 9531,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 9531,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "pointerenter",
+       "t": 9531,
+       "dur": 40,
+       "proc": 0
+      },
+      {
+       "name": "mouseover",
+       "t": 9531,
+       "dur": 40,
+       "proc": 4
+      },
+      {
+       "name": "pointerdown",
+       "t": 9551,
+       "dur": 24,
+       "proc": 1
+      },
+      {
+       "name": "mousedown",
+       "t": 9551,
+       "dur": 24,
+       "proc": 3
+      },
+      {
+       "name": "pointerup",
+       "t": 19614,
+       "dur": 24,
+       "proc": 1
+      },
+      {
+       "name": "mouseup",
+       "t": 19614,
+       "dur": 24,
+       "proc": 2
+      },
+      {
+       "name": "click",
+       "t": 19614,
+       "dur": 24,
+       "proc": 0
+      }
+     ],
+     "wall_s": 10.52
+    },
+    {
+     "fps": 118.8,
+     "frames": 1204,
+     "dur_ms": 10132,
+     "long50": 0,
+     "long50_share": 0,
+     "long33": 0,
+     "over17_share": 0.021,
+     "p95_ms": 13.9,
+     "max_ms": 28,
+     "long50_ms_total": 0,
+     "events_max_ms": 24,
+     "events": [
+      {
+       "name": "pointerdown",
+       "t": 20072,
+       "dur": 24,
+       "proc": 0
+      },
+      {
+       "name": "mousedown",
+       "t": 20072,
+       "dur": 24,
+       "proc": 2
+      },
+      {
+       "name": "pointerup",
+       "t": 29781,
+       "dur": 16,
+       "proc": 0
+      },
+      {
+       "name": "mouseup",
+       "t": 29781,
+       "dur": 16,
+       "proc": 1
+      },
+      {
+       "name": "click",
+       "t": 29781,
+       "dur": 16,
+       "proc": 0
+      }
+     ],
+     "wall_s": 10.14
+    }
+   ],
+   "wheel_zoom": {
+    "fps": 80.5,
+    "frames": 290,
+    "dur_ms": 3604,
+    "long50": 1,
+    "long50_share": 0.003,
+    "long33": 16,
+    "over17_share": 0.217,
+    "p95_ms": 34.7,
+    "max_ms": 55.5,
+    "long50_ms_total": 56,
+    "events_max_ms": null,
+    "events": [],
+    "wall_s": 3.61
+   },
+   "flyto": {
+    "fps": 76.7,
+    "frames": 428,
+    "dur_ms": 5583,
+    "long50": 0,
+    "long50_share": 0,
+    "long33": 2,
+    "over17_share": 0.164,
+    "p95_ms": 20.9,
+    "max_ms": 41.7,
+    "long50_ms_total": 0,
+    "events_max_ms": null,
+    "events": [],
+    "wall_s": 5.58,
+    "from": {
+     "lon": -43.287690170224664,
+     "lat": 29.80619535108111,
+     "zoom": 1.9941525873899157,
+     "minZoom": -2,
+     "maxZoom": 22
+    },
+    "to": {
+     "lon": -18.288,
+     "lat": 34.806,
+     "zoom": 5
+    },
+    "fly_wall_s": 5.57
+   },
+   "left_toggle": {
+    "fps": 77.4,
+    "frames": 378,
+    "dur_ms": 4882,
+    "long50": 15,
+    "long50_share": 0.04,
+    "long33": 23,
+    "over17_share": 0.122,
+    "p95_ms": 48.5,
+    "max_ms": 145.9,
+    "long50_ms_total": 1229,
+    "events_max_ms": 176,
+    "events": [
+     {
+      "name": "pointerout",
+      "t": 40549,
+      "dur": 176,
+      "proc": 1
+     },
+     {
+      "name": "pointerleave",
+      "t": 40549,
+      "dur": 176,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 40549,
+      "dur": 176,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 40549,
+      "dur": 176,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 40549,
+      "dur": 176,
+      "proc": 0
+     },
+     {
+      "name": "pointerover",
+      "t": 40549,
+      "dur": 176,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 40549,
+      "dur": 176,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 40549,
+      "dur": 176,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 40549,
+      "dur": 176,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 40549,
+      "dur": 176,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 40549,
+      "dur": 176,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 40549,
+      "dur": 176,
+      "proc": 0
+     },
+     {
+      "name": "mouseout",
+      "t": 40549,
+      "dur": 176,
+      "proc": 1
+     },
+     {
+      "name": "mouseover",
+      "t": 40549,
+      "dur": 176,
+      "proc": 0
+     },
+     {
+      "name": "pointerdown",
+      "t": 40549,
+      "dur": 176,
+      "proc": 1
+     },
+     {
+      "name": "mousedown",
+      "t": 40549,
+      "dur": 176,
+      "proc": 0
+     },
+     {
+      "name": "pointerup",
+      "t": 40549,
+      "dur": 176,
+      "proc": 0
+     },
+     {
+      "name": "mouseup",
+      "t": 40549,
+      "dur": 176,
+      "proc": 0
+     },
+     {
+      "name": "click",
+      "t": 40549,
+      "dur": 176,
+      "proc": 98
+     },
+     {
+      "name": "pointerout",
+      "t": 41926,
+      "dur": 96,
+      "proc": 1
+     }
+    ],
+    "wall_s": 4.89,
+    "how": "no left-column toggle; fallback: open zone card from the list + close it ×2 (includes the map flyTo to the zone)"
+   },
+   "views": {
+    "fps": 139.9,
+    "frames": 543,
+    "dur_ms": 3882,
+    "long50": 0,
+    "long50_share": 0,
+    "long33": 3,
+    "over17_share": 0.007,
+    "p95_ms": 7.2,
+    "max_ms": 41.6,
+    "long50_ms_total": 0,
+    "events_max_ms": 56,
+    "events": [
+     {
+      "name": "pointerout",
+      "t": 46510,
+      "dur": 56,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 46510,
+      "dur": 56,
+      "proc": 0
+     },
+     {
+      "name": "pointerover",
+      "t": 46510,
+      "dur": 56,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 46510,
+      "dur": 56,
+      "proc": 0
+     },
+     {
+      "name": "mouseout",
+      "t": 46510,
+      "dur": 56,
+      "proc": 0
+     },
+     {
+      "name": "mouseover",
+      "t": 46510,
+      "dur": 56,
+      "proc": 0
+     },
+     {
+      "name": "pointerdown",
+      "t": 46510,
+      "dur": 48,
+      "proc": 1
+     },
+     {
+      "name": "mousedown",
+      "t": 46510,
+      "dur": 48,
+      "proc": 0
+     },
+     {
+      "name": "pointerup",
+      "t": 46510,
+      "dur": 48,
+      "proc": 0
+     },
+     {
+      "name": "mouseup",
+      "t": 46510,
+      "dur": 48,
+      "proc": 0
+     },
+     {
+      "name": "click",
+      "t": 46510,
+      "dur": 48,
+      "proc": 17
+     },
+     {
+      "name": "pointerout",
+      "t": 47302,
+      "dur": 48,
+      "proc": 0
+     },
+     {
+      "name": "pointerleave",
+      "t": 47302,
+      "dur": 48,
+      "proc": 0
+     },
+     {
+      "name": "pointerover",
+      "t": 47302,
+      "dur": 48,
+      "proc": 0
+     },
+     {
+      "name": "pointerenter",
+      "t": 47302,
+      "dur": 48,
+      "proc": 0
+     },
+     {
+      "name": "mouseout",
+      "t": 47302,
+      "dur": 48,
+      "proc": 0
+     },
+     {
+      "name": "mouseover",
+      "t": 47302,
+      "dur": 48,
+      "proc": 0
+     },
+     {
+      "name": "pointerdown",
+      "t": 47302,
+      "dur": 48,
+      "proc": 1
+     },
+     {
+      "name": "mousedown",
+      "t": 47302,
+      "dur": 48,
+      "proc": 0
+     },
+     {
+      "name": "pointerup",
+      "t": 47302,
+      "dur": 48,
+      "proc": 0
+     }
+    ],
+    "wall_s": 3.9,
+    "tabs": [
+     {
+      "tab": "tab-zones|Полосы",
+      "max_frame_ms": 7,
+      "click_wall_ms": 745
+     },
+     {
+      "tab": "tab-obs|Измерения",
+      "max_frame_ms": 42,
+      "click_wall_ms": 785
+     },
+     {
+      "tab": "tab-go|Куда идти",
+      "max_frame_ms": 35,
+      "click_wall_ms": 802
+     },
+     {
+      "tab": "tab-metrics|Метрики",
+      "max_frame_ms": 28,
+      "click_wall_ms": 753
+     },
+     {
+      "tab": "tab-zones|Полосы",
+      "max_frame_ms": 35,
+      "click_wall_ms": 797
+     }
+    ]
+   },
+   "studio": {
+    "skipped": "no studio in this UI (no data-testid=nav-studio)"
+   },
+   "console_errors_this_size": [],
+   "first_show_loads": [
+    {
+     "first_show_s": 1.41,
+     "gl_context_ms": 480,
+     "first_tile_draw_ms": 1409,
+     "tiles_idle_ms": 4454,
+     "fcp_ms": 244
+    },
+    {
+     "first_show_s": 1.22,
+     "gl_context_ms": 514,
+     "first_tile_draw_ms": 1219,
+     "tiles_idle_ms": 4439,
+     "fcp_ms": 268
+    }
+   ],
+   "first_show_median_s": 1.41,
+   "first_show_all_s": [
+    1.22,
+    1.41,
+    1.57
+   ]
+  }
+ },
+ "notes": [],
+ "browser_version": "153.0.8010.12",
+ "bundle": {
+  "files": 7,
+  "js_css_bytes": 2613867,
+  "js_css_gzip_bytes": 699016,
+  "js_css_gzip_mb": 0.699,
+  "largest": [
+   {
+    "file": "deck-DtYNjI0N.js",
+    "bytes": 1180918,
+    "gzip": 311864
+   },
+   {
+    "file": "maplibre-D9xxkaV4.js",
+    "bytes": 1053003,
+    "gzip": 282295
+   },
+   {
+    "file": "index-D6pMOx42.js",
+    "bytes": 144697,
+    "gzip": 46539
+   },
+   {
+    "file": "CaseApp-Dw7lYcGv.js",
+    "bytes": 104911,
+    "gzip": 32383
+   },
+   {
+    "file": "index-BiTfTwON.css",
+    "bytes": 103388,
+    "gzip": 16523
+   },
+   {
+    "file": "Info-CjefpWeA.js",
+    "bytes": 13272,
+    "gzip": 6204
+   },
+   {
+    "file": "CaseApp-Pvl2eKAw.css",
+    "bytes": 13678,
+    "gzip": 3208
+   }
+  ],
+  "note": "every JS/CSS response of the first viewport session (initial + lazy chunks actually loaded), gzip -9 of the body"
+ },
+ "build": {
+  "entry_js": [
+   "index-D6pMOx42.js"
+  ],
+  "index_html_sha1": "b76ffd96d386"
+ },
+ "console": {
+  "errors": [],
+  "n_errors": 0,
+  "failed_local": [],
+  "external": [],
+  "n_external": 0,
+  "warnings": [
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "Deprecated API for given entry type.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback.",
+   "performance warning: READ-usage buffer was written, then fenced, but written again before being read back. This discarded the shadow copy that was created to accelerate readback."
+  ]
+ },
+ "finished": "2026-09-26 04:40:28"
+}

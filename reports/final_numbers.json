@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-26T04:09:25+03:00",
+ "generated": "2026-09-26T04:40:53+03:00",
  "note": "генерируется scripts/final_numbers.py; руками не править; null = ещё не посчитано",
  "l3_lgbm": {
   "available": true,
@@ -209,8 +209,8 @@
   }
  },
  "live": {
-  "n_scenes": 64,
-  "n_regions": 18,
+  "n_scenes": 65,
+  "n_regions": 19,
   "n_fresh_2025_2026": 52,
   "scenes": [
    {
@@ -331,6 +331,20 @@
      "lgbm",
      "mdd"
     ]
+   },
+   {
+    "region": "cozar_demo",
+    "date": "2021-03-11",
+    "scene_id": "S2B_30SXE_20210311_0_L2A",
+    "tile": "30SXE",
+    "source": "earth-search",
+    "crop_cloud_frac": 0.0,
+    "water_frac": 1.0,
+    "size_px": [
+     1410,
+     1404
+    ],
+    "models": []
    },
    {
     "region": "danang",
@@ -5667,7 +5681,8 @@
     "largest_item_m2": 0.67,
     "largest_item_pct_px": 0.7,
     "coverage_frac_text": "6.6·10⁻⁸",
-    "verdict": "пары A есть, но все вида «0 на снимке при ≈ 0–4 шт./км²» — это предел обнаружения Sentinel-2 для предметов 5 см – 5 м в открытом море, калибровку «снимок → шт./км²» на них построить нельзя"
+    "A_eval_items_with_signal": 0,
+    "verdict": "пары по месту и времени, не калибровочные: на 6 синхронных отрезках ADIS с единичными предметами детектор предметы не увидел (оценивается на 3 из 6 — на всех 0); это согласуется с физикой (доля покрытия ~10⁻⁷), но не задаёт общий предел для всех скоплений"
    },
    "baselines": {
     "available": true,
@@ -5771,7 +5786,11 @@
      "nonzero": 52,
      "ppm_median": 3.2,
      "ppm_max": 82.0,
-     "thr_ratio_median": 9.0
+     "thr_ratio_median": 9.0,
+     "ppm_p90": 39.6,
+     "pooled_ppm": 10.3,
+     "thr_median_min": 0.84,
+     "thr_median_max": 18.2
     },
     "pairs": {
      "strips": 11,
@@ -5787,16 +5806,132 @@
      "n_pairs_r03": 85,
      "floor_factor": 3.5,
      "median_factor": 5.1,
-     "pairs_A_with_S_pos": 0
+     "pairs_A_with_S_pos": 0,
+     "scenarios": [
+      {
+       "sd_sat": 0.3,
+       "basis": "допущение",
+       "n_x2": 4,
+       "n_x1_5": 12
+      },
+      {
+       "sd_sat": 0.5,
+       "basis": "допущение",
+       "n_x2": 6,
+       "n_x1_5": 16
+      },
+      {
+       "sd_sat": 0.562,
+       "basis": "измерено: только разброс по порогу 0.10–0.88 на сценах",
+       "n_x2": 6,
+       "n_x1_5": 17
+      },
+      {
+       "sd_sat": 1.0,
+       "basis": "допущение",
+       "n_x2": 12,
+       "n_x1_5": 33
+      }
+     ],
+     "n_pairs_r07": 14
     },
     "scenario": {
      "label": "исследовательский сценарий (допущения), не измерение",
      "mask_m2": 200.0,
      "items_min": 160,
-     "items_max": 500000
+     "items_max": 500000,
+     "adis_items_median_m2": 0.27,
+     "lebreton_items_median_m2": 0.19,
+     "adis_min": 64,
+     "adis_max": 1526,
+     "fill_min": 0.2,
+     "fill_max": 1.0
     },
     "detection_factor_vs_median": 147000.0,
-    "adis_rate_ge20m2_per_km2": 0.0016
+    "adis_rate_ge20m2_per_km2": 0.0016,
+    "profiles": {
+     "S2": {
+      "profile": "S2_visual_total_plastic",
+      "size_class": ">2 cm (macro)",
+      "n": 63,
+      "c_median": 36.1,
+      "c_p25": 20.5,
+      "c_p75": 76.4,
+      "pooled_N": 697,
+      "pooled_A_km2": 12.94,
+      "pooled_C": 53.9,
+      "lo95": 49.9,
+      "hi95": 58.0,
+      "has_N": true
+     },
+     "S1": {
+      "profile": "S1_trawl_total_plastic",
+      "size_class": "5-50 cm (macroplastic)",
+      "n": 83,
+      "c_median": 633.7,
+      "c_p25": 346.5,
+      "c_p75": 955.7,
+      "pooled_N": null,
+      "pooled_A_km2": null,
+      "pooled_C": null,
+      "lo95": null,
+      "hi95": null,
+      "has_N": false
+     },
+     "S3": {
+      "profile": "S3_visual_all_litter",
+      "size_class": ">2 cm (macro)",
+      "n": 41,
+      "c_median": 29.5,
+      "c_p25": 16.8,
+      "c_p75": 34.2,
+      "pooled_N": 199,
+      "pooled_A_km2": 5.86,
+      "pooled_C": 34.0,
+      "lo95": 29.4,
+      "hi95": 39.0,
+      "has_N": true
+     },
+     "S4": {
+      "profile": "S4_visual_all_litter",
+      "size_class": ">2.5 cm (macro)",
+      "n": 33,
+      "c_median": 224.9,
+      "c_p25": 102.4,
+      "c_p75": 356.6,
+      "pooled_N": null,
+      "pooled_A_km2": null,
+      "pooled_C": null,
+      "lo95": null,
+      "hi95": null,
+      "has_N": false
+     }
+    },
+    "variance_S2": {
+     "sd_total": 0.84,
+     "sd_poisson": 0.43,
+     "poisson_share_pct": 27.0,
+     "sd_within_day": 0.46
+    },
+    "adis_field": {
+     "segments": 21444,
+     "area_km2": 14549.0,
+     "zero_share_pct": 72.0,
+     "pooled_items_km2": 1.55,
+     "items_ge20m2": 23
+    },
+    "levels": {
+     "pairs_place_time": 66,
+     "pairs_place_time_eval": 28,
+     "pairs_place_time_label": "пара по месту и времени (уровень A): снимок и полевой счёт совпадают по времени, месту и площади",
+     "visible_signal": 0,
+     "visible_signal_of": 3,
+     "visible_signal_label": "видимый сигнал на снимке: в паре с предметами в поле и оцениваемым детектором есть срабатывания в полосе",
+     "calibration_pairs": 0,
+     "calibration_pairs_label": "калибровочная пара «снимок → шт./км²»: пара по месту и времени с ненулевым сигналом снимка",
+     "calibration_needed_min": 4,
+     "calibration_needed_max": 12
+    }
    },
    "oil": {
     "available": true,
@@ -5839,9 +5974,10 @@
    "detector_v2": {
     "available": true,
     "source": "reports/detector_v2/experiments_snapshot.json (снимок experiments.json L92), reports/detector_v2/decision.json (решение оркестратора), configs/detector_v2_eval.yaml",
-    "snapshot_generated": "2026-09-26T04:06:24",
+    "snapshot_generated": "2026-09-26T04:22:15",
     "protocol": "проверка зафиксирована до экспериментов (sha256 в experiments.json): MARIDA val + 3-fold по снимкам для новых B/D; 3 seed; правило принятия записано заранее (ΔF1 val ≥ max(0.01, 2σ) и не хуже на D/B); test MARIDA не читался; порог каждой модели — по val",
-    "n_variants": 10,
+    "n_variants": 13,
+    "n_control": 1,
     "n_seeds": 3,
     "n_accept": 0,
     "accepted": [],
@@ -5869,7 +6005,8 @@
      "vessels_pct": 4.0,
      "pairs_d_fa": 0,
      "pairs_d_n": 97,
-     "df1": 0.001
+     "df1": 0.001,
+     "foam_fa": 0
     },
     "mix": {
      "cozar_hit": 218,
@@ -5883,9 +6020,31 @@
      "df1": -0.017
     },
     "reference_val_f1": 0.923,
+    "natural_b": {
+     "variants": [
+      "czL2A_w005",
+      "foB_w01",
+      "foB_w03"
+     ],
+     "n": 3,
+     "cozar_pct_min": 77.0,
+     "cozar_pct_max": 97.0,
+     "vessels_pct_min": 74.0,
+     "vessels_pct_max": 91.0,
+     "water_pct_min": 6.0,
+     "water_pct_max": 7.0,
+     "df1_min": -0.057,
+     "df1_max": -0.031,
+     "foam_fa_max": 50,
+     "foam_n": 50
+    },
+    "reference_foam_fa": 4,
+    "reference_foam_n": 50,
+    "decision_recorded": true,
+    "decided_at": "2026-09-26T04:35",
     "orchestrator_accepted": false,
     "current_model": "weights/lgbm",
-    "decision_note": "ни один вариант не прошёл заранее записанное правило — в сервисе остаётся откат weights/lgbm"
+    "decision_note": "правило принятия (записано до экспериментов) не прошёл ни один из 13 вариантов с новыми данными (×3 seed) и контрольный r0 → остаётся weights/lgbm"
    }
   },
   "clean_clone": {
@@ -6005,8 +6164,8 @@
    "passed": 242,
    "skipped": 2,
    "failed": 0,
-   "seconds": 19.3,
-   "when": "26.09.2026 04:09",
+   "seconds": 20.7,
+   "when": "26.09.2026 04:40",
    "command": "python -m pytest -q tests/test_case_conc_model.py tests/test_case_concentration.py tests/test_case_consistency.py tests/test_case_coverage.py tests/test_case_docs_numbers.py tests/test_case_geometry.py tests/test_case_geometry_integration.py tests/test_case_pairfinder.py tests/test_case_run_all.py tests/test_api_v3.py"
   },
   "n_test_funcs": 155,

@@ -321,8 +321,11 @@ def collect_adis(wind_split: float = 7.0) -> dict:
         m, e = f"{out['coverage_frac']:.1e}".split("e")
         sup = str.maketrans("-0123456789", "⁻⁰¹²³⁴⁵⁶⁷⁸⁹")
         out["coverage_frac_text"] = f"{m}·10{str(int(e)).translate(sup)}"
-    out["verdict"] = ("пары A есть, но все вида «0 на снимке при ≈ 0–4 шт./км²» — это предел обнаружения Sentinel-2 для "
-                      "предметов 5 см – 5 м в открытом море, калибровку «снимок → шт./км²» на них построить нельзя")
+    # «видимый сигнал на снимке»: пары A с оцениваемым детектором и предметами в поле, где в полосе есть срабатывания
+    out["A_eval_items_with_signal"] = int((Ei.det_pixels.fillna(0) > 0).sum())
+    out["verdict"] = (f"пары по месту и времени, не калибровочные: на {len(Ai)} синхронных отрезках ADIS с единичными предметами детектор "
+                      f"предметы не увидел (оценивается на {len(Ei)} из {len(Ai)} — на всех 0); это согласуется с физикой (доля покрытия "
+                      f"~10⁻⁷), но не задаёт общий предел для всех скоплений")
     return out
 
 
@@ -399,6 +402,34 @@ def collect_quantity() -> dict:
     f = fvd.get("factor_vs_field_median")
     out["detection_factor_vs_median"] = _r(f[0] if isinstance(f, list) else f, -3)
     out["adis_rate_ge20m2_per_km2"] = _r(af.get("rate_items_ge20m2_per_km2"), 4)
+    # --- для docs/QUANTITY.md (шаблон templates/docs/QUANTITY.md.tmpl)
+    names = {"S2_SARGASSO_MSM41": "S2", "S1_GPGP2018": "S1", "S3_SE_NORTH_SEA": "S3", "S4_BLACK_SEA_DOORS3": "S4"}
+    for pr in fld.get("profiles") or []:
+        key = names.get(pr.get("source_id"))
+        if not key or (key == "S1" and "aerial" in str(pr.get("profile"))):
+            continue
+        out.setdefault("profiles", {})[key] = {
+            "profile": pr.get("profile"), "size_class": pr.get("size_class"), "n": _i(pr.get("n_events")),
+            "c_median": _r(pr.get("C_median"), 1), "c_p25": _r(pr.get("C_p25"), 1), "c_p75": _r(pr.get("C_p75"), 1),
+            "pooled_N": _i(pr.get("pooled_N")), "pooled_A_km2": _r(pr.get("pooled_A_km2"), 2), "pooled_C": _r(pr.get("pooled_C"), 1),
+            "lo95": _r(pr.get("pooled_lo95"), 1), "hi95": _r(pr.get("pooled_hi95"), 1), "has_N": bool(pr.get("n_with_N"))}
+    v2 = fld.get("variance_S2") or {}
+    vd = fld.get("variance_S2_within_day") or {}
+    out["variance_S2"] = {"sd_total": _r(v2.get("sd_lnC_total"), 2), "sd_poisson": _r(v2.get("sd_poisson"), 2),
+                          "poisson_share_pct": _r(100 * (v2.get("poisson_share") or 0), 0), "sd_within_day": _r(vd.get("sd_extra_within_day"), 2)}
+    out["adis_field"] = {"segments": af.get("n_segments"), "area_km2": _r(af.get("area_km2"), 0), "zero_share_pct": _r(100 * (af.get("zero_share") or 0), 0),
+                         "pooled_items_km2": _r(af.get("pooled_items_km2_raw"), 2), "items_ge20m2": (af.get("items_by_area") or {}).get("ge_20m2")}
+    out["coverage_live"].update({"ppm_p90": _r(cur.get("ppm_p90"), 1), "pooled_ppm": _r(cur.get("pooled_ppm"), 1),
+                                 "thr_median_min": _r(cur.get("range_ppm_median_min"), 2), "thr_median_max": _r(cur.get("range_ppm_median_max"), 1)})
+    out["calibration"]["scenarios"] = [{"sd_sat": s.get("sd_satellite_ln"), "basis": s.get("basis"), "n_x2": s.get("n_factor_2"),
+                                        "n_x1_5": s.get("n_factor_1_5")} for s in scen]
+    out["calibration"]["n_pairs_r07"] = (cal.get("n_pairs_correlation") or {}).get("r0.7")
+    sd = sc.get("data_item_sizes") or {}
+    out["scenario"].update({"adis_items_median_m2": _r((sd.get("ADIS_Objects") or {}).get("median_m2"), 2),
+                            "lebreton_items_median_m2": _r((sd.get("Lebreton2018_mosaic") or {}).get("median_m2"), 2),
+                            "adis_min": _i((((sc.get("one_minimal_object_200m2") or {}).get("data_sizes_ADIS_Objects")) or {}).get("items_min")),
+                            "adis_max": _i((((sc.get("one_minimal_object_200m2") or {}).get("data_sizes_ADIS_Objects")) or {}).get("items_max")),
+                            "fill_min": (sc.get("fill_frac") or [None, None])[0], "fill_max": (sc.get("fill_frac") or [None, None])[-1]})
     return out
 
 
@@ -456,7 +487,8 @@ def collect_detector_v2() -> dict:
     decs = [(x.get("decision") or {}) for x in cands]
     acc = [x.get("exp") for x, d in zip(cands, decs) if str(d.get("decision", "")).startswith("ACCEPT")]
     dfs = [d.get("dF1_vs_ref") for d in decs if d.get("dF1_vs_ref") is not None]
-    out.update({"n_variants": len(cands), "n_seeds": max((x.get("n_seeds") or 0) for x in cands) if cands else None,
+    ctrl = [x for x in ex if x.get("kind") == "lightgbm retrain" and x.get("exp") == "r0"]
+    out.update({"n_variants": len(cands), "n_control": len(ctrl), "n_seeds": max((x.get("n_seeds") or 0) for x in cands) if cands else None,
                 "n_accept": len(acc), "accepted": acc, "need_df1": (decs[0].get("need") if decs else None),
                 "df1_min": _r(min(dfs), 3) if dfs else None, "df1_max": _r(max(dfs), 3) if dfs else None,
                 "eval_sha256_short": (e.get("eval_yaml_sha256") or "")[:12] or None})
@@ -476,19 +508,66 @@ def collect_detector_v2() -> dict:
                      "df1": _r(((x.get("decision") or {}).get("dF1_vs_ref")), 3)}
     val = (ref.get("val_per_seed") or [{}])[0] if ref.get("val_per_seed") else {}
     out["reference_val_f1"] = _r(val.get("f1"), 3)
+
+    def foam(x):
+        s = str((x.get("pairs_D_by_class_none") or {}).get("foam") or "")
+        return tuple(int(v) for v in s.split("/")) if "/" in s else (None, None)
+    # «естественные B без D судов/облаков» (Cózar, линии FloatingObjects): компромисс полнота ↔ ложные на сложном фоне
+    nat = [x for x in cands if (x.get("train_kw") or {}).get("extra_b_w")
+           and any(s.startswith(("features_cozar", "features_folines")) for s in ((x.get("train_kw") or {}).get("extra_srcs") or []))
+           and not any(s.startswith(("features_vessels", "features_clouds")) for s in ((x.get("train_kw") or {}).get("extra_srcs") or []))
+           and not (x.get("train_kw") or {}).get("pairs_w")]
+    if nat:
+        cz = [100 * (src(x, "features_cozar2024_l2a", "B_recall").get("rate") or 0) for x in nat]
+        vs = [100 * (src(x, "features_vessels_fi", "D_false_alarm").get("rate") or 0) for x in nat]
+        wf = [100 * sum(x.get("water_flag_none") or [0]) / max(1, len(x.get("water_flag_none") or [0])) for x in nat]
+        d1 = [(x.get("decision") or {}).get("dF1_vs_ref") for x in nat]
+        fm = [foam(x) for x in nat]
+        out["natural_b"] = {"variants": [x.get("exp") for x in nat], "n": len(nat),
+                            "cozar_pct_min": _r(min(cz), 0), "cozar_pct_max": _r(max(cz), 0),
+                            "vessels_pct_min": _r(min(vs), 0), "vessels_pct_max": _r(max(vs), 0),
+                            "water_pct_min": _r(min(wf), 0), "water_pct_max": _r(max(wf), 0),
+                            "df1_min": _r(min(d1), 3), "df1_max": _r(max(d1), 3),
+                            "foam_fa_max": max(f[0] for f in fm if f[0] is not None), "foam_n": max(f[1] for f in fm if f[1] is not None)}
+    fr = foam(ref)
+    out["reference_foam_fa"], out["reference_foam_n"] = fr
+    vd = next((y for y in ex if y.get("exp") == "vesD_w03"), {})
+    if vd:
+        out["vessels_d"]["foam_fa"] = foam(vd)[0]
+    out["decision_recorded"] = bool(dec)
+    out["decided_at"] = dec.get("decided_at")
     if dec.get("accepted") is True:
-        out.update({"orchestrator_accepted": True, "current_model": dec.get("model"), "decision_note": dec.get("note")})
+        out.update({"orchestrator_accepted": True, "current_model": dec.get("model"),
+                    "decision_note": f"вариант {dec.get('model')} принят оркестратором по заранее записанному правилу"})
     else:
-        out.update({"orchestrator_accepted": False, "current_model": "weights/lgbm",
-                    "decision_note": "ни один вариант не прошёл заранее записанное правило — в сервисе остаётся откат weights/lgbm"
-                    if not acc else "есть кандидаты по правилу; решение оркестратора ещё не записано — в сервисе weights/lgbm"})
+        out.update({"orchestrator_accepted": False, "current_model": dec.get("model") or "weights/lgbm",
+                    "decision_note": (f"правило принятия (записано до экспериментов) не прошёл ни один из {len(cands)} вариантов с новыми "
+                                      f"данными (×{out['n_seeds']} seed)" + (" и контрольный r0" if ctrl else "") +
+                                      " → остаётся weights/lgbm") if not acc else
+                    "есть кандидаты по правилу; решение оркестратора ещё не записано — в сервисе weights/lgbm"})
     return out
+
+
+def quantity_levels(ad: dict, q: dict) -> dict:
+    """§15: единая логика количества — три уровня связи «снимок ↔ полевое число» (не путать между собой)."""
+    return {
+        "pairs_place_time": ad.get("A"), "pairs_place_time_eval": ad.get("A_eval"),
+        "pairs_place_time_label": "пара по месту и времени (уровень A): снимок и полевой счёт совпадают по времени, месту и площади",
+        "visible_signal": ad.get("A_eval_items_with_signal"), "visible_signal_of": ad.get("A_with_items_eval"),
+        "visible_signal_label": "видимый сигнал на снимке: в паре с предметами в поле и оцениваемым детектором есть срабатывания в полосе",
+        "calibration_pairs": (q.get("calibration") or {}).get("pairs_A_with_S_pos"),
+        "calibration_pairs_label": "калибровочная пара «снимок → шт./км²»: пара по месту и времени с ненулевым сигналом снимка",
+        "calibration_needed_min": (q.get("calibration") or {}).get("n_pairs_k_x2_min"),
+        "calibration_needed_max": (q.get("calibration") or {}).get("n_pairs_k_x2_max"),
+    }
 
 
 def collect() -> dict:
     """Все разделы расследования данных → для case.sections (final_numbers.py)."""
-    return {"search": collect_search(), "labeled_data": collect_labeled(), "adis_pairs": collect_adis(),
-            "baselines": collect_baselines(), "quantity": collect_quantity(), "oil": collect_oil(),
+    ad, q = collect_adis(), collect_quantity()
+    q["levels"] = quantity_levels(ad, q)
+    return {"search": collect_search(), "labeled_data": collect_labeled(), "adis_pairs": ad,
+            "baselines": collect_baselines(), "quantity": q, "oil": collect_oil(),
             "detector_v2": collect_detector_v2()}
 
 

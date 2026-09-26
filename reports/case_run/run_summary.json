@@ -70,7 +70,7 @@
  },
  "command": "run_all.py all --offline",
  "last_subcommand": "all",
- "finished": "2026-09-26T00:18:27",
+ "finished": "2026-09-26T03:52:00",
  "offline": true,
  "force": false,
  "workdir": null,
@@ -85,7 +85,7 @@
   "shapely": "2.1.2",
   "fastapi": "0.141.1",
   "yaml": "6.0.3",
-  "git_commit": "71c050037dd98912b2a2c075d7a75981c5676129"
+  "git_commit": "f976592efe860566223a9c1558274f268bc395bc"
  },
  "inputs": {
   "task/macroplastic_marine_samples.csv": "30ce0a65e3880b833b5dfe3bc6f528ee5f5af14a0d22f25995f4ef8af585a764",
@@ -131,7 +131,7 @@
    "step": "2_pairs",
    "ok": true,
    "note": "строк 1774, запросов мимо кэша 0, ошибок 0",
-   "seconds": 1.6
+   "seconds": 1.8
   },
   "3_quality_detector": {
    "step": "3_quality_detector",
@@ -154,7 +154,7 @@
    "step": "4_concentration",
    "ok": true,
    "note": "S2_visual_total_plastic: median MAE 35.9 vs knn5 31.3; S1_trawl_total_plastic: median MAE 456.4 vs knn5 448.9",
-   "seconds": 2.4
+   "seconds": 2.8
   },
   "total_eval": {
    "step": "total_eval",
@@ -171,7 +171,7 @@
    "step": "6_export_api_v3",
    "ok": true,
    "note": "observations.geojson: 935, observations.csv: 935, pairs.geojson: 4436, pairs.csv: 4436, zones.geojson: 29, zones.csv: 29",
-   "seconds": 0.9
+   "seconds": 1.0
   },
   "total_export": {
    "step": "total_export",
@@ -181,7 +181,13 @@
   "total_all": {
    "step": "total_all",
    "ok": true,
-   "seconds": 6.9
+   "seconds": 7.7
+  },
+  "5b_search_numbers": {
+   "step": "5b_search_numbers",
+   "ok": true,
+   "note": "поиск A/B/C/D {'A': 66, 'B': 0, 'C': 12, 'D': 273}; ADIS A 66, с предметами 6, пикселей детектора 0",
+   "seconds": 0.2
   }
  },
  "concentration": {

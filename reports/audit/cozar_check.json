@@ -1,0 +1,130 @@
+{
+ "marida": {
+  "n_scenes": 63,
+  "cozar_same_tile_date": 0,
+  "cozar_same_tile": [],
+  "marida_tiles_in_med_like_box": []
+ },
+ "mados": {
+  "n_scenes": 0,
+  "scenes_whose_bbox_contains_cozar_filaments": [],
+  "note": "MADOS GeoTIFFs: identity transform, anonymous Scene_N -> no tile/date/footprint; only content (LBP) check possible"
+ },
+ "used_L98_tile_dates": [
+  "30SUE_20190414",
+  "30SVE_20210311",
+  "31SDB_20210325",
+  "31SEB_20210325",
+  "32SPD_20190928",
+  "32TMP_20201018",
+  "32TNP_20190206",
+  "32TQQ_20180824",
+  "32TQR_20180705",
+  "33STB_20181107",
+  "33STU_20191129",
+  "33SUB_20181107",
+  "33SXC_20181007",
+  "33TUF_20210311",
+  "33TUL_20210425"
+ ],
+ "used_L92_tile_dates_n": 234,
+ "recall_36": {
+  "threshold": 0.63,
+  "n_filaments": 234,
+  "hits": 85,
+  "n_tile_dates": 234,
+  "n_dates": 216,
+  "n_date_orbits": 224,
+  "n_cells_1deg": 107,
+  "cluster_acq": {
+   "n_clusters": 234,
+   "rate": 0.3632,
+   "ci95": [
+    0.3034,
+    0.4274
+   ]
+  },
+  "cluster_dt_orbit": {
+   "n_clusters": 224,
+   "rate": 0.3632,
+   "ci95": [
+    0.303,
+    0.4236
+   ]
+  },
+  "cluster_date": {
+   "n_clusters": 216,
+   "rate": 0.3632,
+   "ci95": [
+    0.3017,
+    0.4256
+   ]
+  },
+  "cluster_cell1": {
+   "n_clusters": 107,
+   "rate": 0.3632,
+   "ci95": [
+    0.2968,
+    0.4246
+   ]
+  },
+  "cluster_year": {
+   "n_clusters": 7,
+   "rate": 0.3632,
+   "ci95": [
+    0.3033,
+    0.4306
+   ]
+  },
+  "recall_ge_1px": 0.3632,
+  "recall_ge_2px": 0.2991,
+  "recall_ge_3px": 0.2137,
+  "recall_ge_5px": 0.1667,
+  "recall_frac_ge_10pct": 0.2094,
+  "pixel_rate": 0.0718,
+  "by_year": {
+   "2015": [
+    7,
+    14
+   ],
+   "2016": [
+    8,
+    21
+   ],
+   "2017": [
+    8,
+    24
+   ],
+   "2018": [
+    21,
+    53
+   ],
+   "2019": [
+    17,
+    48
+   ],
+   "2020": [
+    13,
+    53
+   ],
+   "2021": [
+    11,
+    21
+   ]
+  },
+  "hit_rate_by_filament_size_tercile": {
+   "small": [
+    20,
+    78
+   ],
+   "mid": [
+    33,
+    78
+   ],
+   "large": [
+    32,
+    78
+   ]
+  }
+ }
+}

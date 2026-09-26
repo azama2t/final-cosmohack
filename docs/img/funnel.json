@@ -100,19 +100,23 @@
    "total": 177
   },
   {
-   "label": "Уровень A (время, дрейф, площадь, пиксели полосы годны)",
+   "label": "Пары по месту и времени (уровень A: время, дрейф, площадь, годные пиксели)",
    "total": 66
   },
   {
-   "label": "Детектор оценивается (солнце, сигнал воды)",
-   "total": 28
+   "label": "…с единичными предметами (3.5–4.4 шт./км²)",
+   "total": 6
   },
   {
-   "label": "…из них с предметами в поле",
+   "label": "…из них детектор оценивается (солнце, сигнал воды)",
    "total": 3
   },
   {
-   "label": "Срабатываний детектора в полосе у них, пикс.",
+   "label": "Срабатываний детектора в полосе (на всех с предметами), пикс.",
+   "total": 0
+  },
+  {
+   "label": "Калибровочные пары «снимок → шт./км²» (A с сигналом на снимке)",
    "total": 0
   }
  ],
@@ -151,6 +155,17 @@
   "tiles": 322,
   "definition": "съёмка = уникальная пара тайл MGRS + дата (единица проверки утечек, как у PLP/FO/судов); продукт L1C = уникальный scene_id; 4 472 в отчёте L98 — это продукты, не тайл+дата",
   "source": "reports/extra_data/registry_cozar2024.csv.gz"
+ },
+ "detector_v2": {
+  "n_variants": 13,
+  "n_seeds": 3,
+  "has_r0": true,
+  "n_accept": 0,
+  "accepted": [],
+  "orchestrator_accepted": false,
+  "current_model": "weights/lgbm",
+  "snapshot_generated": "2026-09-26T04:22:15",
+  "source": "reports/detector_v2/experiments_snapshot.json (снимок experiments.json L92), reports/detector_v2/decision.json (решение оркестратора), configs/detector_v2_eval.yaml"
  },
  "quality_reject_reasons": {
   "glint": 10,

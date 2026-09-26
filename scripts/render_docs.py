@@ -23,7 +23,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DASH = "—"
-PAIRS = [("templates/README.md.tmpl", "README.md"), ("templates/reports/report.md.tmpl", "reports/report.md"), ("templates/docs/PREP.md.tmpl", "docs/PREP.md")]
+PAIRS = [("templates/README.md.tmpl", "README.md"), ("templates/reports/report.md.tmpl", "reports/report.md"), ("templates/docs/PREP.md.tmpl", "docs/PREP.md"),
+         ("templates/docs/QUANTITY.md.tmpl", "docs/QUANTITY.md")]
 PH = re.compile(r"\{\{\s*([A-Za-z_][\w.]*)\s*(?:\|\s*(\w+)(?::([^{}]*?))?\s*)?\}\}")
 
 
@@ -625,6 +626,38 @@ def case_labeled_table(fn: dict) -> str:
     return "\n".join(rows)
 
 
+def case_quantity_levels_table(fn: dict) -> str:
+    """§15: три уровня связи «снимок ↔ полевое число» (case.sections.quantity.levels)."""
+    lv = _sec(fn, "quantity").get("levels") or {}
+    if not lv:
+        return DASH
+    return "\n".join([
+        "| Уровень связи | Сколько | Что это значит |", "|---|---:|---|",
+        f"| Пара по месту и времени (уровень A, ADIS) | **{fmt(lv.get('pairs_place_time'), None)}** (детектор оценивается на "
+        f"{fmt(lv.get('pairs_place_time_eval'), None)}) | {lv.get('pairs_place_time_label')}; не калибровочная пара |",
+        f"| Видимый сигнал на снимке | **{fmt(lv.get('visible_signal'), None)}** из {fmt(lv.get('visible_signal_of'), None)} "
+        f"| {lv.get('visible_signal_label')} |",
+        f"| Калибровочная пара «снимок → шт./км²» | **{fmt(lv.get('calibration_pairs'), None)}** (нужно "
+        f"{fmt(lv.get('calibration_needed_min'), None)}–{fmt(lv.get('calibration_needed_max'), None)}) | {lv.get('calibration_pairs_label')} |"])
+
+
+def case_quantity_profiles_table(fn: dict) -> str:
+    """Полевые профили для docs/QUANTITY.md (case.sections.quantity.profiles)."""
+    pr = _sec(fn, "quantity").get("profiles") or {}
+    names = {"S2": "S2 Саргассы, визуально, пластик > 2 см (основной)", "S1": "S1 GPGP, трал, пластик 5–50 см",
+             "S3": "справка: S3 Сев. море, весь мусор", "S4": "справка: S4 Чёрное море, весь мусор"}
+    rows = ["| профиль | событий | ΣN / ΣA | C [95 % Пуассон] | медиана событий [p25–p75] |", "|---|---:|---|---|---|"]
+    for key in ("S2", "S1", "S3", "S4"):
+        r = pr.get(key)
+        if not r:
+            continue
+        pooled = (f"{fmt(r.get('pooled_N'), None)} / {fmt(r.get('pooled_A_km2'), 'f2')} км²" if r.get("has_N") else "N нет в источнике")
+        ci = (f"{fmt(r.get('pooled_C'), 'f1')} [{fmt(r.get('lo95'), 'f1')}–{fmt(r.get('hi95'), 'f1')}]" if r.get("has_N") else DASH)
+        rows.append(f"| {names[key]} | {fmt(r.get('n'), None)} | {pooled} | {ci} | {fmt(r.get('c_median'), 'f1')} "
+                    f"[{fmt(r.get('c_p25'), 'f1')}–{fmt(r.get('c_p75'), 'f1')}] |")
+    return "\n".join(rows)
+
+
 def case_baselines_u_table(fn: dict) -> str:
     """Бейзлайны детектора на одном test MARIDA: LightGBM, RandomForest, U-Net MARIDA (официальные веса), FDI × NDVI."""
     b = _sec(fn, "baselines")
@@ -792,7 +825,9 @@ def derived(fn: dict) -> dict:
             "case_pairs_table": case_pairs_table(fn), "case_schemes_table": case_schemes_table(fn),"case_drift_table": case_drift_table(fn),
             "case_final_test_text": case_final_test_text(fn), "case_sections_table": case_sections_table(fn),
             "case_search_table": case_search_table(fn), "case_labeled_table": case_labeled_table(fn),
-            "case_baselines_u_table": case_baselines_u_table(fn)}
+            "case_baselines_u_table": case_baselines_u_table(fn),
+            "case_quantity_levels_table": case_quantity_levels_table(fn),
+            "case_quantity_profiles_table": case_quantity_profiles_table(fn)}
 
 
 def render(text: str, ctx: dict, missing: list) -> str:

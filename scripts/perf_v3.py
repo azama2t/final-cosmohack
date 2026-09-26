@@ -838,6 +838,49 @@ def render_md(res: dict) -> str:
     return "\n".join(x for x in L if x is not None) + "\n"
 
 
+FINAL_PAIR = ("v2_final", "v3_iter8_final")
+
+
+def final_summary() -> list[str]:
+    """Top block of compare.md: v2 vs v3 final (both viewports, CPU×1 and ×4), if those labels were measured."""
+    rs = {}
+    for lab in FINAL_PAIR:
+        for suf in ("", "_cpu4"):
+            f = ROOT / "reports" / "perf" / (lab + suf) / "result.json"
+            if f.exists():
+                rs[lab + suf] = json.loads(f.read_text(encoding="utf-8"))
+    if len(rs) < 2:
+        return []
+
+    def pan(R):
+        v = [p["fps"] for p in R.get("pan") or [] if p and p.get("fps")]
+        return round(sum(v) / len(v)) if v else "—"
+
+    def row(name, fn):
+        cells = []
+        for lab in FINAL_PAIR:
+            for suf in ("", "_cpu4"):
+                r = rs.get(lab + suf)
+                cells.append(" / ".join(str(fn(R, r)) for R in r["sizes"].values()) if r else "—")
+        return f"| {name} | " + " | ".join(cells) + " |"
+
+    def ui_max(R, r):
+        return round(max((R.get(k) or {}).get("max_ms") or 0 for k in ("left_toggle", "views", "studio")))
+    L = ["# Perf: v2 против v3 — финальный замер", "",
+         f"Метки: {', '.join(rs)}. Ячейка: 1920×1080 / 1366×768. Первый показ — медиана 3 холодных загрузок.", "",
+         "| метрика | v2 | v2 CPU×4 | v3 iter8 | v3 iter8 CPU×4 |", "|---|---|---|---|---|",
+         row("первый показ, с", lambda R, r: R.get("first_show_median_s")),
+         row("pan, fps", lambda R, r: pan(R)),
+         row("flyTo, fps", lambda R, r: round((R.get("flyto") or {}).get("fps") or 0)),
+         row("flyTo, доля кадров > 17.5 мс", lambda R, r: (R.get("flyto") or {}).get("over17_share")),
+         row("UI (колонка/карточка, разделы, студия): max кадр, мс", ui_max),
+         row("источников карты / из них image", lambda R, r: f"{(R.get('map_style') or {}).get('n_sources')}/{((R.get('map_style') or {}).get('sources_by_type') or {}).get('image', 0)}"),
+         row("бандл JS+CSS gzip, МБ", lambda R, r: r["bundle"]["js_css_gzip_mb"]),
+         row("ошибки консоли (внешние хосты подложки)", lambda R, r: f"{r['console']['n_errors']} ({r['console']['n_external']})"),
+         "", "Ниже — все замеры (история итераций).", ""]
+    return L
+
+
 def compare(labels: list[str]) -> str:
     """reports/perf/compare.md: one row per label × viewport (first show, fps / long-frame share per scenario, bundle, errors)."""
     L = ["# Perf — сравнение (scripts/perf_v3.py --compare)", "",
@@ -857,7 +900,7 @@ def compare(labels: list[str]) -> str:
             L.append(f"| {lab} | {tag} | {r.get('cpu_throttle', 1)} | {R.get('first_show_median_s') or (R.get('first_show') or {}).get('first_show_s')} | {pf} | "
                      f"{fl.get('fps', '—')} ({fl.get('over17_share', '—')}) | {cell(R.get('left_toggle'))} | {cell(R.get('views'))} | "
                      f"{ms.get('n_sources', '—')}/{(ms.get('sources_by_type') or {}).get('image', 0)} | {r['bundle']['js_css_gzip_mb']} | {r['console']['n_errors']} |")
-    md = "\n".join(L) + "\n"
+    md = "\n".join(final_summary() + L) + "\n"
     (ROOT / "reports" / "perf" / "compare.md").write_text(md, encoding="utf-8")
     return md
 

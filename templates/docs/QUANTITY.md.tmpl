@@ -1,0 +1,47 @@
+# QUANTITY — количество: поле, снимок и сценарий раздельно (§11 п.5, §15)
+
+Генерируется `scripts/render_docs.py` из `reports/final_numbers.json` (`case.sections.quantity`, `adis_pairs`, `field_test`); руками не править.
+Исходные расчёты — `reports/quantity/*.json` (L93: `scripts/case/quantity_report.py`, `quantity_live.py`; код `src/macroplastic/case/coverage.py`, `concentration.py`), пары ADIS — `reports/search/adis_candidates.csv` (L100).
+
+## 0. Единая логика: три уровня связи «снимок ↔ полевое число»
+
+{{derived.case_quantity_levels_table}}
+
+- **Пара по месту и времени** — снимок и полевой счёт совпадают по времени, месту и обследованной площади (ADIS, камера судна, > 5 см). Это не калибровочная пара.
+- **Видимый сигнал на снимке.** На {{case.sections.adis_pairs.A_with_items}} синхронных отрезках ADIS с единичными предметами ({{case.sections.adis_pairs.A_with_items_density_min|f1}}–{{case.sections.adis_pairs.A_with_items_density_max|f1}} шт./км²) детектор предметы не увидел: оценивается на {{case.sections.adis_pairs.A_with_items_eval}} из {{case.sections.adis_pairs.A_with_items}} — на всех {{case.sections.adis_pairs.A_with_items_eval_det_px}} пикселей. Это согласуется с физикой (доля покрытия ≈ {{case.sections.adis_pairs.coverage_frac_text}}, крупнейший предмет {{case.sections.adis_pairs.largest_item_pct_px|f1}} % пикселя), но не задаёт общий предел для всех скоплений: плотные полосы мусора эти пары не проверяют.
+- **Калибровочная пара «снимок → шт./км²»** — пара по месту и времени с ненулевым сигналом снимка. Их {{case.sections.quantity.levels.calibration_pairs}}, поэтому перевода «снимок → шт./км²» нет.
+
+## 1. Поле: концентрация, шт./км² (измерение)
+
+Формула `C = N / A`; для полосы `A = L[км] × W[м] / 1000`; по профилю `C = ΣN / ΣA`. Интервал Гарвуда 95 % (только счётная ошибка): `N_lo = χ²(0.025; 2N)/2`, `N_hi = χ²(0.975; 2N+2)/2`, обе границы делим на A.
+
+{{derived.case_quantity_profiles_table}}
+
+- Профили не смешиваются; «весь мусор» (S3, S4) — не пластик.
+- Оценка по полевым данным на карте — **медиана профиля**: на отложенном test модель не лучше медианы (S2 {{case.sections.field_test.S2.main_model}} {{case.sections.field_test.S2.main_mae|f1}} против медианы {{case.sections.field_test.S2.median_mae|f1}}; S1 {{case.sections.field_test.S1.main_mae|f1}} против {{case.sections.field_test.S1.median_mae|f1}}). Подпись — «оценка по полевым данным, не по снимку».
+- Изменчивость S2 в ln C: между событиями sd {{case.sections.quantity.variance_S2.sd_total|f2}}, из неё пуассоновская часть sd {{case.sections.quantity.variance_S2.sd_poisson|f2}} ({{case.sections.quantity.variance_S2.poisson_share_pct|f0}} % дисперсии); между трансектами одних суток сверх Пуассона sd {{case.sections.quantity.variance_S2.sd_within_day|f2}} — мелкомасштабная пятнистость.
+- ADIS для сравнения: {{case.sections.quantity.adis_field.segments|int}} отрезков по 10 км, {{case.sections.quantity.adis_field.area_km2|int}} км²; нулевых отрезков {{case.sections.quantity.adis_field.zero_share_pct|f0}} %; ΣN/ΣA = {{case.sections.quantity.adis_field.pooled_items_km2|f2}} шт./км² (> 5 см, без поправки на пропуски); предметов ≥ 20 м² — {{case.sections.quantity.adis_field.items_ge20m2}} ({{case.sections.quantity.adis_rate_ge20m2_per_km2}} на км²).
+
+## 2. Снимок: площадь маски и доля покрытия, м²/км² (измерение по маске, не штуки)
+
+Величина та же, что LWD у Cózar et al. 2024 (Nat. Commun. 15:4637): `S = пиксели маски на пригодной воде / пиксели пригодной воды · 10⁶` (м² на км²). Это **доля покрытия подозрительного материала**: пена, водоросли и суда не исключены, поэтому это не мусор и не шт./км². Ноль — «ниже порога срабатывания», а не «чисто».
+
+- Живые сцены, текущий детектор (weights/lgbm без гармонизации): > 0 у {{case.sections.quantity.coverage_live.nonzero}} из {{case.sections.quantity.coverage_live.n_scenes}}; медиана {{case.sections.quantity.coverage_live.ppm_median|f1}}, p90 {{case.sections.quantity.coverage_live.ppm_p90|f1}}, максимум {{case.sections.quantity.coverage_live.ppm_max|f0}} м²/км²; по всем сценам {{case.sections.quantity.coverage_live.pooled_ppm|f1}}.
+- От выбора порога (все пороги, которые MARIDA val не отличает от рабочего) медиана меняется от {{case.sections.quantity.coverage_live.thr_median_min|f2}} до {{case.sections.quantity.coverage_live.thr_median_max|f1}} — в {{case.sections.quantity.coverage_live.thr_ratio_median|f0}} раз (медиана отношения по сценам).
+- Сцены пар CSV: в {{case.sections.quantity.pairs.strips}} принятых полосах сигнал {{case.sections.quantity.pairs.strips_nonzero}}.
+
+## 3. Калибровка «доля покрытия → шт./км²» (нужна, сейчас невозможна)
+
+Модель `{{case.sections.quantity.calibration.model}}` (S — доля покрытия в том же следе и в то же время, что и полевой счёт). Для неё нужны калибровочные пары — пары по месту и времени с S > 0; их {{case.sections.quantity.levels.calibration_pairs}}.
+
+- Для множителя k в пределах ×/÷2 нужно {{case.sections.quantity.calibration.n_pairs_k_x2_min}}–{{case.sections.quantity.calibration.n_pairs_k_x2_max}} независимых калибровочных пар (в зависимости от шума спутника); чтобы обнаружить связь: r = 0,3 — {{case.sections.quantity.calibration.n_pairs_r03}} пар, r = 0,5 — {{case.sections.quantity.calibration.n_pairs_r05}}, r = 0,7 — {{case.sections.quantity.calibration.n_pairs_r07}}.
+- Доля полос с сигналом сейчас ≤ {{case.sections.quantity.pairs.p_nonzero_upper95|f2}} (95 %), значит обследований нужно в ≥ {{case.sections.quantity.pairs.survey_multiplier|f1}} раза больше, чем пар.
+- Пол точности: пятнистость и Пуассон не дают интервалу одной оценки быть уже ×/÷{{case.sections.quantity.calibration.floor_factor|f1}} даже при идеальном спутнике (у медианы профиля ×/÷{{case.sections.quantity.calibration.median_factor|f1}}).
+- Пары ADIS «0 на снимке при N шт./км²» годятся для проверки согласованности нуля и оценки ложных тревог, но не для регрессии: сигнал снимка в них нулевой.
+
+## 4. Сценарий шт./км² (НЕ измерение, НЕ доверительный интервал, НЕ результат модели)
+
+`N = S_маски · f / ā`: f — доля пикселя, занятая мусором ({{case.sections.quantity.scenario.fill_min}}–{{case.sections.quantity.scenario.fill_max}}, порог по Cózar — нижняя граница), ā — средняя площадь предмета (допущение). Показывается только как условный диапазон «если это мусорная полоса», с явными допущениями; для зон с признаками пены, блика или судна не показывается.
+
+- {{case.sections.quantity.scenario.mask_m2|f0}} м² маски: по границам размерного класса S2 — {{case.sections.quantity.scenario.items_min|int}}–{{case.sections.quantity.scenario.items_max|int}} предметов; по размерам предметов ADIS (медиана {{case.sections.quantity.scenario.adis_items_median_m2|f2}} м²) — {{case.sections.quantity.scenario.adis_min|int}}–{{case.sections.quantity.scenario.adis_max|int}}; Lebreton 2018 — медиана предмета {{case.sections.quantity.scenario.lebreton_items_median_m2|f2}} м².
+- Разброс — на порядки, он держится только на допущениях. Массу и физическую концентрацию не оцениваем.

@@ -125,10 +125,12 @@ def adis_stages(sn: dict) -> list[tuple[str, int | None]]:
         ("Отрезки ADIS по 10 км (камера судна, счёт предметов)", total),
         ("Есть снимок Sentinel-2 L2A в ±1 сут", with_s2),
         (f"|dt| ≤ {ap['dt_max_h']:.0f} ч и облачность сцены ≤ {ap['cloud_max_pct']} %", ap["segments"]),
-        ("Уровень A (время, дрейф, площадь, пиксели полосы годны)", ap["A"]),
-        ("Детектор оценивается (солнце, сигнал воды)", ap["A_eval"]),
-        ("…из них с предметами в поле", ap["A_with_items_eval"]),
-        ("Срабатываний детектора в полосе у них, пикс.", ap["A_with_items_eval_det_px"]),
+        ("Пары по месту и времени (уровень A: время, дрейф, площадь, годные пиксели)", ap["A"]),
+        (f"…с единичными предметами ({ap['A_with_items_density_min']:.1f}–{ap['A_with_items_density_max']:.1f} шт./км²)",
+         ap["A_with_items"]),
+        ("…из них детектор оценивается (солнце, сигнал воды)", ap["A_with_items_eval"]),
+        ("Срабатываний детектора в полосе (на всех с предметами), пикс.", ap["A_with_items_det_px"]),
+        ("Калибровочные пары «снимок → шт./км²» (A с сигналом на снимке)", sn["quantity"]["calibration"]["pairs_A_with_S_pos"]),
     ]
 
 
@@ -165,6 +167,27 @@ def bd_block(sn: dict, cz: dict) -> list[tuple[str, str, int, str]]:
     ]
 
 
+def detector_v2_check(sn: dict) -> dict:
+    """Строка про детектор v2 — только из search_numbers.json → detector_v2 (зафиксированный снимок L102),
+    не из живого reports/detector_v2/experiments.json. Проверка: пересчёт по experiments_snapshot.json
+    тем же правилом, что в scripts/case/collect_search.py (lightgbm retrain, кроме r0; ACCEPT*)."""
+    dv = sn.get("detector_v2") or {}
+    snap_p = os.path.join(REP, "detector_v2", "experiments_snapshot.json")
+    if os.path.exists(snap_p) and dv.get("available"):
+        e = _load_json(snap_p)
+        cands = [x for x in (e.get("experiments") or []) if x.get("kind") == "lightgbm retrain" and x.get("exp") != "r0"]
+        acc = [x.get("exp") for x in cands
+               if str((x.get("decision") or {}).get("decision", "")).startswith("ACCEPT")]
+        assert (len(cands), len(acc)) == (dv.get("n_variants"), dv.get("n_accept")), (
+            f"детектор v2: снимок {len(cands)}/{len(acc)} против search_numbers.json "
+            f"{dv.get('n_variants')}/{dv.get('n_accept')} — пересобрать collect_search.py")
+        dv = dict(dv, has_r0=any(x.get("exp") == "r0" for x in (e.get("experiments") or [])))
+        if dv.get("snapshot_generated"):
+            assert dv["snapshot_generated"] == e.get("generated"), "search_numbers.json собран по другому снимку"
+    return {k: dv.get(k) for k in ("n_variants", "n_seeds", "has_r0", "n_accept", "accepted", "orchestrator_accepted", "current_model",
+                                   "snapshot_generated", "source")}
+
+
 # ------------------------------------------------------------------ рисунок
 def _fmt(n) -> str:
     return "—" if n is None else f"{int(n):,}".replace(",", " ")
@@ -184,7 +207,7 @@ def _bar_rows(ax, rows, colors_fn, xmax, label_w, big=14):
         ax.text(left + xmax * 0.015, y, _fmt(val), ha="left", va="center", fontsize=big, fontweight="bold",
                 color=INK)
     ax.set_xlim(-label_w, xmax * 1.18)
-    ax.set_ylim(-0.7, n - 0.3)
+    ax.set_ylim(-1.2, n - 0.3)
     ax.set_xticks([])
     ax.set_yticks([])
     for sp in ax.spines.values():
@@ -246,6 +269,9 @@ def main() -> None:
     _bar_rows(ax2, rows2, None, lg(vmax), label_w=lg(vmax) * 0.95)
     ax2.set_title("2. ADIS, The Ocean Cleanup — найден нами, в CSV нет (длина полосы — логарифмическая шкала)",
                   loc="left", fontsize=12.5, color=INK, fontweight="bold")
+    ax2.text(0, -0.95, "0 срабатываний на единичных предметах согласуется с физикой (доля покрытия ~10⁻⁷), "
+             "но не задаёт общий предел для всех скоплений: плотных полос среди пар ADIS нет.",
+             ha="left", va="center", fontsize=9.5, color=INK2)
 
     # --- 3. блок B/D: плитки (единицы разные — не столбики)
     ax3.set_xlim(0, 1)
@@ -264,11 +290,13 @@ def main() -> None:
         ax3.text(0.15, y - 0.112, sub, fontsize=9.5, color=INK2, va="top")
         y -= 0.19
     ld = sn["labeled_data"]
-    dv = sn.get("detector_v2", {})
+    dv = detector_v2_check(sn)
     ax3.text(0.04, y + 0.02,
              f"Утечек с MARIDA/MADOS/нашими сценами: {ld.get('leaks_total', '—')}. "
              f"Дообучение на B + D: принято вариантов {dv.get('n_accept', '—')} из {dv.get('n_variants', '—')}"
-             f" — в сервисе прежняя модель.",
+             f" (× {dv.get('n_seeds') or 3} seed{' + контроль r0' if dv.get('has_r0') else ''};"
+             f" снимок {str(dv.get('snapshot_generated') or '—')[:16]})"
+             f" — в сервисе {dv.get('current_model') or 'weights/lgbm'}.",
              fontsize=9.5, color=INK2, va="top", wrap=True)
 
     fig.text(0.01, 0.02,
@@ -285,6 +313,7 @@ def main() -> None:
         "adis_total_source": adis_src,
         "labeled_BD": [{"level": lv, "label": name, "total": val, "note": sub} for lv, name, val, sub in bd],
         "cozar_units": cz,
+        "detector_v2": dv,
         **extra,
     }
     with open(OUT_JSON, "w", encoding="utf-8") as f:
