@@ -1394,7 +1394,18 @@ def _case_s55() -> dict:
             "rt_days": 30, "rt_last_update": fs.get("last_update"), "rt_n_scenes": fs.get("scenes_30d"),
             "rt_n_zones": fs.get("zones_30d"), "rt_n_finds": fs.get("finds_30d"),
             "rt_n_regions": len(fs.get("regions_30d") or []) if isinstance(fs.get("regions_30d"), (list, dict)) else fs.get("regions_30d"),
-            "prime_demo_n_scenes": len(pc.get("scenes") or []) or None, "prime_quality_metrics": None}
+            "prime_demo_n_scenes": len(pc.get("scenes") or []) or None, "prime_quality_metrics": None,
+            # §57/§58 funnel as stored by scripts/case/fresh_s2.py (found → downloaded → quality → processed → finds)
+            "rt_funnel": {k: v for k, v in (fs.get("funnel") or {}).items() if not isinstance(v, (dict, list))} or None}
+
+
+def _case_s56() -> dict:
+    """INBOX §56: our photo counter as-is on the drone/aircraft/vessel frames (data/case/drones/pred.json, IoU match)."""
+    pr = _load_json(ROOT / "data" / "case" / "drones" / "pred.json") or {}
+    t = pr.get("total") or {}
+    return {"source": "data/case/drones/pred.json", "match_rule": pr.get("match_rule"),
+            "drones_pred_tp": t.get("found"), "drones_n_labels": t.get("labelled"),
+            "drones_pred_fp": t.get("false"), "drones_n_pred": t.get("n_pred")}
 
 
 def collect_case() -> dict:
@@ -1477,6 +1488,7 @@ def collect_case() -> dict:
     out["sections"].update(_case_search())  # §11: search, labeled_data, adis_pairs, baselines, quantity, oil, detector_v2
     out["sections"]["s54"] = _case_s54()
     out["sections"]["s55"] = _case_s55()
+    out["sections"]["s56"] = _case_s56()
     out["splits_files"] = len(glob.glob(str(ROOT / "reports" / "case_splits" / "*.csv"))) or None
     tests = 0
     for p in glob.glob(str(ROOT / "tests" / "test_case_*.py")) + [str(ROOT / "tests" / "test_api_v3.py")]:
