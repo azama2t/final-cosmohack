@@ -1790,3 +1790,19 @@ a.c-head-r.c-head-link {
 .c-scene-row .ri-sub {
   grid-column: 1 / -1;
 }
+/* §34: «требует проверки» — the estimate is muted */
+.c-zi-est.muted {
+  color: #9d93b8;
+  opacity: 0.75;
+}
+.sz-est.muted b {
+  color: #b9b2cc;
+  font-weight: 500;
+}
+.sz-est-ctx {
+  font-size: 12px;
+  color: #c9b8ff;
+}
+.sz-est.muted .sz-est-ctx {
+  color: #a79fc0;
+}

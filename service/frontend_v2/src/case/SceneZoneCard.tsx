@@ -6,7 +6,7 @@ import Info from '../components/Info';
 import { API_BASE, type Feat, type FC, type Meta } from './api3';
 import { dateRu, dateTimeRu, num, pct } from './fmt';
 import { geomCenter, szKey } from './CaseMap';
-import { estTxt, RES_CAPTION, RES_NOTE, researchEst } from './estimate';
+import { estLine, nItemsTxt, RES_CAPTION, RES_CONTEXT, RES_NOTE, researchEst } from './estimate';
 
 /** §33: the source of every number next to it */
 function Src({ k }: { k: 'image' | 'field' | 'photo' | 'research' | 'none' | 'model' | 'era5' | 'mask' }) {
@@ -177,25 +177,30 @@ export default function SceneZoneCard({
             <span className="faint">Статус детекции:</span> <span data-testid="sz-status">{p.detection_label}</span> <Src k="model" />
           </div>
           {est ? (
-            <div className="c-line sz-qty sz-est" data-testid="sz-plain-qty">
+            <div className={`c-line sz-qty sz-est ${est.muted ? 'muted' : ''}`} data-testid="sz-plain-qty">
               <span data-testid="sz-est">
-                <b>Количество: {estTxt(est)}</b> <Src k="research" />
+                <b>Количество: {estLine(est)}</b> <Src k="research" />
               </span>
+              <span className="sz-est-ctx" data-testid="sz-est-ctx">
+                {est.context ?? RES_CONTEXT}
+              </span>
+              {nItemsTxt(est) && (
+                <span className="sz-est-note" data-testid="sz-est-n">
+                  в зоне {nItemsTxt(est)}
+                </span>
+              )}
               <span className="sz-est-note" data-testid="sz-est-note">
-                {RES_CAPTION}{' '}
+                {RES_CAPTION}
+                {est.muted ? '; находка не подтверждена разметкой Cózar — требует проверки' : ''}{' '}
                 <Info label="Как получено" align="right" testid="sz-est-info">
+                  {est.essence ? `${est.essence.charAt(0).toUpperCase()}${est.essence.slice(1)}. ` : ''}
                   {RES_NOTE}
-                  {est.nItemsLabel ? ` ${est.nItemsLabel}` : ''}
-                  {est.basis ? ` (${est.basis}).` : ''}
-                  {est.notWhat ? ` Интервал: ${est.notWhat}.` : ''}
+                  {est.basis ? ` Площадь — ${est.basis}.` : ''}
+                  {est.spread ? ` ${est.spread.charAt(0).toUpperCase()}${est.spread.slice(1)}.` : ''}
+                  {est.notWhat ? ` ${est.notWhat}.` : ''}
                   {est.caveats.length ? ` Ограничения: ${est.caveats.join('; ')}.` : ''}
                 </Info>
               </span>
-              {est.nItemsLabel && (
-                <span className="sz-est-note faint" data-testid="sz-est-n">
-                  {est.nItemsLabel}
-                </span>
-              )}
             </div>
           ) : (
             <div className="c-line sz-qty" data-testid="sz-plain-qty">
@@ -297,7 +302,7 @@ export default function SceneZoneCard({
         {/* ------------------------------------------------ 1. measured */}
         <div className="sec sz-block sz-measured" data-testid="sz-measured">
           <div className="sec-h">
-            <h3>Измерено по снимку</h3>
+            <h3>По снимку: маска детектора и маска качества</h3>
             <Info label="Что измерено" align="right">
               Величины сняты со снимка и маски детектора без допущений о мусоре. LWD — м² подозрительных пикселей на км² пригодной воды зоны, как «litter windrow
               density» у Cózar et al. 2024. Это площадь покрытия, не число предметов.

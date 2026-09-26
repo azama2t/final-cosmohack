@@ -13,7 +13,7 @@ import SceneZoneCard, { type SceneZoneDetail, type SceneZoneProps } from './Scen
 import { SZ_COLORS, szKey, isFind, geomCenter } from './CaseMap';
 import MetricsPanel from './MetricsPanel';
 import { plural, dateRu, eventRu, label, missionShort, num, profileRu, scopeRu, sourceShort } from './fmt';
-import { estTxt, RES_CAPTION, RES_CAPTION_LIST, RES_NOTE, researchEst } from './estimate';
+import { estLine, estTxt, RES_CAPTION, RES_CAPTION_LIST, RES_CONTEXT, RES_NOTE, researchEst } from './estimate';
 import { shortName } from '../lib/data';
 import {
   DEFAULT_QUERY,
@@ -1392,7 +1392,7 @@ function SceneZones({
       {anyEst && (
         <div className="c-list-note c-est-cap" data-testid="est-caption">
           <span>
-            <span className="c-est-sw" aria-hidden /> шт./км² — {RES_CAPTION_LIST}
+            <span className="c-est-sw" aria-hidden /> шт./км² — нижняя граница, {RES_CONTEXT}; {RES_CAPTION_LIST}
           </span>
           <Info label="Как получено" align="left">
             {RES_CAPTION}. {RES_NOTE}
@@ -1411,7 +1411,7 @@ function SceneZones({
             onClick={() => onPick(f.id)}
             data-testid="sz-item"
             data-zone={f.id}
-            title={`${p.title} · ${p.detection_label} · площадь зоны ${num(p.measured.zone_area_km2 !== null && p.measured.zone_area_km2 !== undefined ? p.measured.zone_area_km2 * 1e6 : null, 0)} м², пикселей детектора ${num(p.measured.suspicious_area_m2, 0)} м²${est ? ` · ${estTxt(est)} — ${RES_CAPTION}` : ''}`}
+            title={`${p.title} · ${p.detection_label} · площадь зоны ${num(p.measured.zone_area_km2 !== null && p.measured.zone_area_km2 !== undefined ? p.measured.zone_area_km2 * 1e6 : null, 0)} м², пикселей детектора ${num(p.measured.suspicious_area_m2, 0)} м²${est ? ` · ${estLine(est)} — ${RES_CONTEXT}; ${RES_CAPTION}` : ''}`}
           >
             <span className={`c-znum-i ${szKey(p)}`} aria-hidden>
               {n}
@@ -1422,8 +1422,8 @@ function SceneZones({
                 <span className="c-zi-st"> · {SZ_STATUS_SHORT[szKey(p)] ?? p.detection_label.split(' (')[0]}{flags ? ` · ${flags}` : ''}</span>
               </span>
               {est && (
-                <span className="c-zi-est" data-testid="sz-item-est">
-                  {estTxt(est)}
+                <span className={`c-zi-est ${est.muted ? 'muted' : ''}`} data-testid="sz-item-est">
+                  {estTxt(est)} · нижняя граница
                 </span>
               )}
             </span>
@@ -1615,7 +1615,7 @@ function HoverTip({ meta, h, obs, zones, szones }: { meta: Meta; h: HoverInfo; o
     const p = f.properties;
     const est = researchEst(p);
     t = `${isFind(p) ? 'Находка детектора' : 'Спутниковая зона'} · ${p.detection_label}`;
-    s = `снимок Sentinel-2 ${dateRu(p.datetime)} · ${p.title} · площадь пикселей ${num(p.measured.suspicious_area_m2, 0)} м²${est ? ` · ${estTxt(est)} (исследовательская оценка)` : ''}`;
+    s = `снимок Sentinel-2 ${dateRu(p.datetime)} · ${p.title} · площадь пикселей ${num(p.measured.suspicious_area_m2, 0)} м²${est ? ` · ${estLine(est)}` : ''}`;
   } else {
     const f = zones?.features.find((x) => x.id === h.id);
     if (!f) return null;

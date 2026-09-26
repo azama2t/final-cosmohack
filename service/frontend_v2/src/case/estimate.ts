@@ -17,7 +17,23 @@ export interface ResEst {
   method: string | null;
   caveats: string[];
   notWhat: string | null;
+  /** the number shown after «≥ ~» (a lower bound: detector pixels below the threshold are not counted) */
+  lb: number;
+  /** items in the zone (bottles PET 1.5 l equivalent) */
+  nItems: number | null;
+  /** «требует проверки» (not confirmed by the Cózar catalogue) — shown muted */
+  muted: boolean;
+  /** API wording, if it gives one (L131 «оценка: формулировки») */
+  short: string | null;
+  context: string | null;
+  /** n_items_display is the lower bound of the zone's items (API ≥ 14:01) */
+  nItemsLower: boolean;
+  essence: string | null;
+  spread: string | null;
 }
+
+/** §34 (оркестратор 13:5x): context next to every estimate */
+export const RES_CONTEXT = 'плотность внутри нити, в пересчёте на бутылки PET 1,5 л; с полевыми шт./км² не сравнивать';
 
 /** the short caption required next to every estimate (§34 п.3) */
 export const RES_CAPTION =
@@ -60,6 +76,14 @@ export function researchEst(p: any): ResEst | null {
     method: str(r.method),
     caveats: Array.isArray(r.caveats) ? r.caveats.filter((x: any) => typeof x === 'string') : [],
     notWhat: str(r.not_what),
+    lb: n(r.display_value) ?? n(r.lower_bound) ?? v,
+    nItems: n(r.n_items_display) ?? n(r.n_items?.value) ?? null,
+    muted: typeof r.muted === 'boolean' ? r.muted : p.verification !== 'level_B_cozar',
+    short: str(r.label_short) ?? str(r.display),
+    context: str(r.context),
+    nItemsLower: n(r.n_items_display) !== null,
+    essence: str(r.method_essence),
+    spread: str(r.calibration_spread?.label),
   };
 }
 
@@ -67,7 +91,20 @@ const nf0 = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 });
 /** the API value as is (it is already rounded to 3 significant digits — the same number as in the CSV export) */
 export const approx = (v: number | null) => (v === null ? '—' : nf0.format(v));
 
-/** «≈ 470 000 [390 000–560 000] шт./км²» */
+const sig2 = new Intl.NumberFormat('ru-RU', { maximumSignificantDigits: 2 });
+/** «~» numbers: 2 significant digits (the calibration spread is not estimated — no false precision) */
+export const rough = (v: number | null) => (v === null ? '—' : sig2.format(v));
+
+/** «≥ ~93 000 шт./км²» */
 export function estTxt(e: ResEst): string {
-  return `≈ ${approx(e.v)}${e.lo !== null && e.hi !== null ? ` [${approx(e.lo)}–${approx(e.hi)}]` : ''} шт./км²`;
+  return `≥ ~${rough(e.lb)} шт./км²`;
+}
+/** «≥ ~93 000 шт./км² · нижняя граница · исследовательская оценка» (or the API's own short wording) */
+export function estLine(e: ResEst): string {
+  return e.short ?? `${estTxt(e)} · нижняя граница · исследовательская оценка`;
+}
+/** «≈ 390 000 шт. в пересчёте на бутылки PET 1,5 л» */
+export function nItemsTxt(e: ResEst): string | null {
+  if (e.nItems === null) return null;
+  return e.nItemsLower ? `≥ ~${rough(e.nItems)} шт. в пересчёте на бутылки PET 1,5 л (нижняя граница)` : `≈ ${rough(e.nItems)} шт. в пересчёте на бутылки PET 1,5 л`;
 }

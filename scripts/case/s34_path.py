@@ -97,8 +97,15 @@ def run(base: str, W: int, H: int, pw, api: dict) -> dict:
     re_api = (feat or {}).get("properties", {}).get("research_estimate")
     card["api_estimate"] = None if not re_api else {k: re_api.get(k) for k in ("value", "lo", "hi")}
     if re_api:
-        fmt = lambda v: f"{int(v):,}".replace(",", " ")  # noqa: E731
-        card["ui_equals_api"] = all(fmt(re_api[k]) in card.get("sz-plain-qty", "") for k in ("value", "lo", "hi"))
+        # §34 (13:5x): «≥ ~X шт./км² · нижняя граница» — X = API value (or display_value / lower_bound), 2 significant digits
+        from math import floor, log10
+        x = re_api.get("display_value") or re_api.get("lower_bound") or re_api["value"]
+        r2 = round(x, -int(floor(log10(abs(x)))) + 1) if x else 0
+        want = "≥ ~" + f"{int(r2):,}".replace(",", " ") + " шт./км²"
+        card["ui_expected"] = want
+        card["ui_equals_api"] = want in card.get("sz-plain-qty", "") and "нижняя граница" in card.get("sz-plain-qty", "")
+        card["muted_expected"] = feat["properties"].get("verification") != "level_B_cozar"
+        card["muted_ui"] = pg.evaluate("() => !!document.querySelector('[data-testid=sz-plain-qty].muted')")
     res["card"] = card
     shot("03_card")
     # 4. studio → back to the card → back to the map
@@ -186,13 +193,16 @@ def run(base: str, W: int, H: int, pw, api: dict) -> dict:
     tid("q-save").click()
     pg.wait_for_timeout(1500)
     tid("f-reset").click()
-    pg.wait_for_function("() => window.__app.szReady", timeout=60000)
-    pg.wait_for_timeout(2500)
+    pg.wait_for_function(f"() => window.__app.szReady && window.__app.counts.szones !== {n_ui}", timeout=60000)
+    pg.wait_for_timeout(1500)
     n_reset = pg.evaluate("() => window.__app.counts.szones")
     tid("act-queries").click()
     pg.locator("[data-testid=q-item]", has_text=f"s34 {W}").first.locator("[data-testid=q-run]").click()
-    pg.wait_for_function("() => window.__app.szReady", timeout=60000)
-    pg.wait_for_timeout(3000)
+    try:  # the run replaces the filter: wait until the zone count left the «all zones» state
+        pg.wait_for_function(f"() => window.__app.szReady && window.__app.counts.szones !== {n_reset}", timeout=30000)
+    except Exception:  # noqa: BLE001
+        pass
+    pg.wait_for_timeout(2000)
     ids_run = sorted(pg.evaluate("() => window.__app.szIds()"))
     res["query"] = {"n_after_reset": n_reset, "n_after_run": len(ids_run), "same_as_saved": ids_run == ids_ui,
                     "area_after_run": pg.evaluate("() => window.__app.q.area"), "toast": tid("toast").inner_text() if tid("toast").count() else None}
