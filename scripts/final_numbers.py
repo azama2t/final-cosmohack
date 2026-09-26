@@ -1385,6 +1385,18 @@ def _case_s54() -> dict:
     return out
 
 
+def _case_s55() -> dict:
+    """INBOX §55: real time = our detector on fresh Sentinel-2 (data/case/fresh_s2/index.json, not human-checked,
+    separate from the case numbers); PRIME = demo mode on organizer CSV rows (data/case/prime_csv/index.json, no metrics)."""
+    fs = _load_json(ROOT / "data" / "case" / "fresh_s2" / "index.json") or {}
+    pc = _load_json(ROOT / "data" / "case" / "prime_csv" / "index.json") or {}
+    return {"source": "data/case/fresh_s2/index.json; data/case/prime_csv/index.json",
+            "rt_days": 30, "rt_last_update": fs.get("last_update"), "rt_n_scenes": fs.get("scenes_30d"),
+            "rt_n_zones": fs.get("zones_30d"), "rt_n_finds": fs.get("finds_30d"),
+            "rt_n_regions": len(fs.get("regions_30d") or []) if isinstance(fs.get("regions_30d"), (list, dict)) else fs.get("regions_30d"),
+            "prime_demo_n_scenes": len(pc.get("scenes") or []) or None, "prime_quality_metrics": None}
+
+
 def collect_case() -> dict:
     """Case «макропластик, шт./км²»: selection, pairs, detector on MARIDA test, concentration (dev CV + frozen test),
     pairs experiment, run_all summary. Sources: reports/case_run/run_summary.json, reports/case_conc/*, configs/case_*.yaml,
@@ -1464,6 +1476,7 @@ def collect_case() -> dict:
                                               "visual_precision_pct": (dc.get("visual_review") or {}).get("h_out_precision_pct")}
     out["sections"].update(_case_search())  # §11: search, labeled_data, adis_pairs, baselines, quantity, oil, detector_v2
     out["sections"]["s54"] = _case_s54()
+    out["sections"]["s55"] = _case_s55()
     out["splits_files"] = len(glob.glob(str(ROOT / "reports" / "case_splits" / "*.csv"))) or None
     tests = 0
     for p in glob.glob(str(ROOT / "tests" / "test_case_*.py")) + [str(ROOT / "tests" / "test_api_v3.py")]:
