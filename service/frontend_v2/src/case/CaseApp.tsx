@@ -1648,7 +1648,7 @@ export default function CaseApp() {
           nasa={{ on: nasaOn && nasaLayerOn, date: nasaDate, latest: nasaInfo?.latest ?? nasaDate }}
           fresh={tlFresh}
           show={{ s2: q.layers.zones, fresh: freshOn, field: q.layers.obs, drift: q.layers.zones }}
-          onRange={(from, to) => setFilter({ from, to })}
+          onRange={() => { /* §75: the timeline never filters map points; dates only via «с / по» */ }}
           freshCur={freshScene?.key ?? null}
           onFresh={(k) => {
             const s = freshAll.find((x) => x.key === k) ?? null;
