@@ -1,0 +1,118 @@
+{
+ "region": "guanabara",
+ "region_name": "\u0417\u0430\u043b\u0438\u0432 \u0413\u0443\u0430\u043d\u0430\u0431\u0430\u0440\u0430 (\u0420\u0438\u043e-\u0434\u0435-\u0416\u0430\u043d\u0435\u0439\u0440\u043e)",
+ "region_name_en": "Guanabara Bay, Rio de Janeiro",
+ "country": "\u0411\u0440\u0430\u0437\u0438\u043b\u0438\u044f",
+ "date": "2026-07-21",
+ "datetime": "2026-07-21T13:02:51.025000Z",
+ "scene_id": "S2C_MSIL2A_20260721T130251_R095_T23KPQ_20260721T172903",
+ "tile": "23KPQ",
+ "cloud_cover": 0.01359,
+ "crop_cloud_frac": 0.0002,
+ "crop_shadow_frac": 0.0,
+ "water_frac": 0.5101,
+ "valid_frac": 1.0,
+ "water_b8_median": 0.0027,
+ "water_b11_median": 0.0025,
+ "glint_or_haze": false,
+ "source": "planetary-computer",
+ "crs": "EPSG:32723",
+ "transform": [
+  10.0,
+  0.0,
+  677340.0,
+  0.0,
+  -10.0,
+  7487760.0
+ ],
+ "width": 2508,
+ "height": 2508,
+ "bounds_utm": [
+  677340.0,
+  7462680.0,
+  702420.0,
+  7487760.0
+ ],
+ "bounds_wgs84": [
+  -43.273417,
+  -22.934571,
+  -43.02608,
+  -22.705289
+ ],
+ "scale_offset_note": "reflectance = DN*scale + offset per asset from STAC metadata (product-metadata BOA_ADD_OFFSET); offset check: PC: offset from product metadata; scale/offset used: {\"B1\": [0.0001, -0.1], \"B2\": [0.0001, -0.1], \"B3\": [0.0001, -0.1], \"B4\": [0.0001, -0.1], \"B5\": [0.0001, -0.1], \"B6\": [0.0001, -0.1], \"B7\": [0.0001, -0.1], \"B8\": [0.0001, -0.1], \"B8A\": [0.0001, -0.1], \"B9\": [0.0001, -0.1], \"B11\": [0.0001, -0.1], \"B12\": [0.0001, -0.1]}; no date-based -1000 DN rule; no clipping (values as computed); DN==0 -> NaN; 20/60 m bands resampled to 10 m by nearest (SCL always nearest)",
+ "scale_offset": {
+  "B1": [
+   0.0001,
+   -0.1
+  ],
+  "B2": [
+   0.0001,
+   -0.1
+  ],
+  "B3": [
+   0.0001,
+   -0.1
+  ],
+  "B4": [
+   0.0001,
+   -0.1
+  ],
+  "B5": [
+   0.0001,
+   -0.1
+  ],
+  "B6": [
+   0.0001,
+   -0.1
+  ],
+  "B7": [
+   0.0001,
+   -0.1
+  ],
+  "B8": [
+   0.0001,
+   -0.1
+  ],
+  "B8A": [
+   0.0001,
+   -0.1
+  ],
+  "B9": [
+   0.0001,
+   -0.1
+  ],
+  "B11": [
+   0.0001,
+   -0.1
+  ],
+  "B12": [
+   0.0001,
+   -0.1
+  ]
+ },
+ "processing_baseline": "05.12",
+ "boa_offset_applied_property": null,
+ "band_names": [
+  "B1",
+  "B2",
+  "B3",
+  "B4",
+  "B5",
+  "B6",
+  "B7",
+  "B8",
+  "B8A",
+  "B9",
+  "B11",
+  "B12"
+ ],
+ "water_mask_rule": "1 = SCL 6, or SCL 2/7 with NDWI(B3,B8)>0; + enclosed non-water holes <=100 px (not cloud/shadow/nodata) filled as water; then 2 px buffer next to any non-water and 5 px next to cloud/shadow removed; 0 = land/cloud 8-10/shadow 3/snow/saturated/nodata/buffer",
+ "transform_order": "affine a,b,c,d,e,f (rasterio): x = a*col + b*row + c; y = d*col + e*row + f",
+ "read_s": 35.8,
+ "marida_md_px_tile": 0,
+ "marida_dates": [],
+ "created": "2026-09-25T13:08:16",
+ "drift_check_pair_of": "guanabara/2026-07-16",
+ "water_b8a_median_20m": 0.0025,
+ "selection": "L45: next snapshot 2026-07-17/2026-07-21 of the same crop (bounds_utm of 2026-07-16); crop cloud<0.4, valid>=0.5; not for the service layer"
+}

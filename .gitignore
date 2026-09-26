@@ -76,3 +76,7 @@ reports/extra_data/registry_cozar2024.csv
 /data/live/**
 !/data/live/**/
 !/data/live/**/scene.json
+!/data/drift_check/
+/data/drift_check/**
+!/data/drift_check/**/
+!/data/drift_check/**/scene.json

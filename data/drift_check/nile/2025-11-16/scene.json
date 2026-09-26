@@ -1,0 +1,118 @@
+{
+ "region": "nile",
+ "region_name": "\u0414\u0435\u043b\u044c\u0442\u0430 \u041d\u0438\u043b\u0430 (\u0443\u0441\u0442\u044c\u0435 \u0420\u043e\u0437\u0435\u0442\u0442\u044b)",
+ "region_name_en": "Nile Delta (Rosetta mouth), Egypt",
+ "country": "\u0415\u0433\u0438\u043f\u0435\u0442",
+ "date": "2025-11-16",
+ "datetime": "2025-11-16T08:41:29.024000Z",
+ "scene_id": "S2B_MSIL2A_20251116T084129_R064_T36RTV_20251116T112027",
+ "tile": "36RTV",
+ "cloud_cover": 35.442412,
+ "crop_cloud_frac": 0.284,
+ "crop_shadow_frac": 0.0506,
+ "water_frac": 0.4855,
+ "valid_frac": 0.9998,
+ "water_b8_median": 0.002,
+ "water_b11_median": 0.0049,
+ "glint_or_haze": false,
+ "source": "planetary-computer",
+ "crs": "EPSG:32636",
+ "transform": [
+  10.0,
+  0.0,
+  238560.0,
+  0.0,
+  -10.0,
+  3498840.0
+ ],
+ "width": 2508,
+ "height": 2502,
+ "bounds_utm": [
+  238560.0,
+  3473820.0,
+  263640.0,
+  3498840.0
+ ],
+ "bounds_wgs84": [
+  30.244659,
+  31.369508,
+  30.514729,
+  31.600418
+ ],
+ "scale_offset_note": "reflectance = DN*scale + offset per asset from STAC metadata (product-metadata BOA_ADD_OFFSET); offset check: PC: offset from product metadata; scale/offset used: {\"B1\": [0.0001, -0.1], \"B2\": [0.0001, -0.1], \"B3\": [0.0001, -0.1], \"B4\": [0.0001, -0.1], \"B5\": [0.0001, -0.1], \"B6\": [0.0001, -0.1], \"B7\": [0.0001, -0.1], \"B8\": [0.0001, -0.1], \"B8A\": [0.0001, -0.1], \"B9\": [0.0001, -0.1], \"B11\": [0.0001, -0.1], \"B12\": [0.0001, -0.1]}; no date-based -1000 DN rule; no clipping (values as computed); DN==0 -> NaN; 20/60 m bands resampled to 10 m by nearest (SCL always nearest)",
+ "scale_offset": {
+  "B1": [
+   0.0001,
+   -0.1
+  ],
+  "B2": [
+   0.0001,
+   -0.1
+  ],
+  "B3": [
+   0.0001,
+   -0.1
+  ],
+  "B4": [
+   0.0001,
+   -0.1
+  ],
+  "B5": [
+   0.0001,
+   -0.1
+  ],
+  "B6": [
+   0.0001,
+   -0.1
+  ],
+  "B7": [
+   0.0001,
+   -0.1
+  ],
+  "B8": [
+   0.0001,
+   -0.1
+  ],
+  "B8A": [
+   0.0001,
+   -0.1
+  ],
+  "B9": [
+   0.0001,
+   -0.1
+  ],
+  "B11": [
+   0.0001,
+   -0.1
+  ],
+  "B12": [
+   0.0001,
+   -0.1
+  ]
+ },
+ "processing_baseline": "05.11",
+ "boa_offset_applied_property": null,
+ "band_names": [
+  "B1",
+  "B2",
+  "B3",
+  "B4",
+  "B5",
+  "B6",
+  "B7",
+  "B8",
+  "B8A",
+  "B9",
+  "B11",
+  "B12"
+ ],
+ "water_mask_rule": "1 = SCL 6, or SCL 2/7 with NDWI(B3,B8)>0; + enclosed non-water holes <=100 px (not cloud/shadow/nodata) filled as water; then 2 px buffer next to any non-water and 5 px next to cloud/shadow removed; 0 = land/cloud 8-10/shadow 3/snow/saturated/nodata/buffer",
+ "transform_order": "affine a,b,c,d,e,f (rasterio): x = a*col + b*row + c; y = d*col + e*row + f",
+ "read_s": 30.3,
+ "marida_md_px_tile": 0,
+ "marida_dates": [],
+ "created": "2026-09-25T13:09:19",
+ "drift_check_pair_of": "nile/2025-11-11",
+ "water_b8a_median_20m": 0.0016,
+ "selection": "L45: next snapshot 2025-11-12/2025-11-16 of the same crop (bounds_utm of 2025-11-11); crop cloud<0.4, valid>=0.5; not for the service layer"
+}
