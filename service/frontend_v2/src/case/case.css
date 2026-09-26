@@ -1806,3 +1806,22 @@ a.c-head-r.c-head-link {
 .sz-est.muted .sz-est-ctx {
   color: #a79fc0;
 }
+.c-est-cap {
+  align-items: center;
+}
+.c-est-cap-t {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.c-est-cap .c-est-cap-t {
+  font-size: 11px;
+}
+.c-est-cap .c-est-sw {
+  margin-right: 5px;
+}
+.c-list-note.c-est-cap {
+  gap: 4px;
+  padding-right: 16px;
+}

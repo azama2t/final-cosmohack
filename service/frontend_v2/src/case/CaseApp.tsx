@@ -1392,13 +1392,15 @@ function SceneZones({
       </div>
       {anyEst && (
         <div className="c-list-note c-est-cap" data-testid="est-caption">
-          <span>
-            <span className="c-est-sw" aria-hidden /> шт./км² — нижняя граница, {RES_CONTEXT}; {est0?.scenarioShort ?? est0?.scenario ?? RES_CAPTION_LIST}
+          <span className="c-est-cap-t">
+            нижняя граница · исследовательская оценка
           </span>
           <Info label="Как получено" align="left">
+            {RES_CONTEXT}. {est0?.context ? `${est0.context}. ` : ''}
+            {est0?.scenario ? `${est0.scenario}. ` : `${RES_CAPTION}. ${RES_NOTE} `}
             {est0?.formula ? `${est0.formula}. ` : ''}
-            {est0?.scenario ? `${est0.scenario}. ` : `${RES_CAPTION}. ${RES_NOTE}`}
-            {est0?.calibration ? ` Действующая калибровка: ${est0.calibration}.` : ''}
+            {est0?.calibration ? `Действующая калибровка: ${est0.calibration}. ` : ''}
+            Приглушённые — находки «требует проверки» (не совпадают с разметкой Cózar).
           </Info>
         </div>
       )}

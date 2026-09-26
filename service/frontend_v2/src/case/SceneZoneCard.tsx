@@ -6,7 +6,7 @@ import Info from '../components/Info';
 import { API_BASE, type Feat, type FC, type Meta } from './api3';
 import { dateRu, dateTimeRu, num, pct } from './fmt';
 import { geomCenter, szKey } from './CaseMap';
-import { estLine, nItemsTxt, RES_CAPTION, RES_CONTEXT, RES_NOTE, researchEst } from './estimate';
+import { cap, estLine, nItemsTxt, RES_CAPTION, RES_CONTEXT_SHORT, RES_NOTE, researchEst } from './estimate';
 
 /** §33: the source of every number next to it */
 function Src({ k }: { k: 'image' | 'field' | 'photo' | 'research' | 'none' | 'model' | 'era5' | 'mask' }) {
@@ -179,32 +179,21 @@ export default function SceneZoneCard({
           {est ? (
             <div className={`c-line sz-qty sz-est ${est.muted ? 'muted' : ''}`} data-testid="sz-plain-qty">
               <span data-testid="sz-est">
-                <b>Количество: {estLine(est)}</b> <Src k="research" />
+                <b>Количество: {estLine(est)}</b>
               </span>
               <span className="sz-est-ctx" data-testid="sz-est-ctx">
-                {est.context ?? RES_CONTEXT}
-              </span>
-              {nItemsTxt(est) && (
-                <span className="sz-est-note" data-testid="sz-est-n">
-                  в зоне {nItemsTxt(est)}
-                </span>
-              )}
-              {est.calibration && (
-                <span className="sz-est-note" data-testid="sz-est-calib">
-                  действующая калибровка: {est.calibration}
-                </span>
-              )}
-              <span className="sz-est-note" data-testid="sz-est-note">
-                {est.scenario ?? RES_CAPTION}
-                {est.muted ? '; находка не подтверждена разметкой Cózar — требует проверки' : ''}{' '}
+                {RES_CONTEXT_SHORT}{' '}
                 <Info label="Как получено" align="right" testid="sz-est-info">
-                  {est.formula ? `${est.formula.charAt(0).toUpperCase()}${est.formula.slice(1)}. ` : ''}
-                  {est.essence ? `${est.essence.charAt(0).toUpperCase()}${est.essence.slice(1)}. ` : ''}
-                  {est.scenario ? `${est.scenario}. ` : RES_NOTE}
-                  {est.basis ? ` Площадь — ${est.basis}.` : ''}
-                  {est.spread ? ` ${est.spread.charAt(0).toUpperCase()}${est.spread.slice(1)}.` : ''}
-                  {est.notWhat ? ` ${est.notWhat}.` : ''}
-                  {est.caveats.length ? ` Ограничения: ${est.caveats.join('; ')}.` : ''}
+                  {est.muted ? 'Находка не подтверждена разметкой Cózar — требует проверки. ' : ''}
+                  {est.context ? `${cap(est.context)}. ` : ''}
+                  {nItemsTxt(est) ? `В зоне ${nItemsTxt(est)}. ` : ''}
+                  {est.calibration ? `Действующая калибровка: ${est.calibration}. ` : ''}
+                  {est.scenario ? `${cap(est.scenario)}. ` : `${RES_CAPTION}. ${RES_NOTE} `}
+                  {est.formula ? `${cap(est.formula)}. ` : ''}
+                  {est.essence ? `${cap(est.essence)}. ` : ''}
+                  {est.basis ? `Площадь — ${est.basis}. ` : ''}
+                  {est.spread ? `${cap(est.spread)}. ` : ''}
+                  {est.caveats.length ? `Ограничения: ${est.caveats.join('; ')}.` : ''}
                 </Info>
               </span>
             </div>

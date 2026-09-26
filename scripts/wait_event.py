@@ -19,6 +19,8 @@ def md5(p: Path) -> str:
 
 
 def main():
+    import sys
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     ap = argparse.ArgumentParser()
     ap.add_argument("--timeout", type=int, default=900)
     a = ap.parse_args()

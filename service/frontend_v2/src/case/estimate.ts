@@ -39,6 +39,11 @@ export interface ResEst {
   scenarioShort: string | null;
 }
 
+/** jury 14:30: one short line under the number; everything else — under (i) */
+export const RES_CONTEXT_SHORT = 'внутри нити, с полевыми шт./км² не сравнивать: другой масштаб';
+export const cap = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
+/** jury 14:30: «разница в 3–4 порядка ожидаема» → «другой масштаб» */
+const scaleWording = (t: string | null) => (t ? t.replace(/разница в 3[–-]4 порядка ожидаема/g, 'другой масштаб') : t);
 /** §34 (оркестратор 13:5x): context next to every estimate */
 export const RES_CONTEXT = 'плотность внутри нити, в пересчёте на бутылки PET 1,5 л; с полевыми шт./км² не сравнивать';
 
@@ -87,7 +92,7 @@ export function researchEst(p: any): ResEst | null {
     nItems: n(r.n_items_display) ?? n(r.n_items?.value) ?? null,
     muted: typeof r.muted === 'boolean' ? r.muted : p.verification !== 'level_B_cozar',
     short: str(r.label_short) ?? str(r.display),
-    context: str(r.context),
+    context: scaleWording(str(r.context)),
     nItemsLower: n(r.n_items_display) !== null,
     essence: str(r.method_essence),
     spread: str(r.calibration_spread?.label),

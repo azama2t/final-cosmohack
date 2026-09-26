@@ -93,6 +93,12 @@ def run(base: str, W: int, H: int, pw, api: dict) -> dict:
     zid = pg.evaluate("() => window.__app.sel && window.__app.sel.id")
     card = {k: tid(k).inner_text() for k in ("card-title", "sz-plain-what", "sz-plain-qty", "sz-plain-comp", "sz-plain-area") if tid(k).count()}
     card["zone_id"] = zid
+    # jury 14:30: status and «Количество» visible without scrolling the card
+    card["above_fold"] = pg.evaluate("""() => ['sz-plain-what', 'sz-plain-qty'].every(k => {
+      const e = document.querySelector(`[data-testid=${k}]`); if (!e) return false; const r = e.getBoundingClientRect();
+      return r.top >= 0 && r.bottom <= innerHeight; })""")
+    card["qty_lines"] = pg.evaluate("() => { const e = document.querySelector('[data-testid=sz-plain-qty]'); return e ? Math.round(e.getBoundingClientRect().height / 18) : null }")
+    card["no_orders_wording"] = "порядка" not in pg.evaluate("() => document.body.innerText")
     feat = next((f for f in api["features"] if f["id"] == zid), None)
     re_api = (feat or {}).get("properties", {}).get("research_estimate")
     card["api_estimate"] = None if not re_api else {k: re_api.get(k) for k in ("value", "lo", "hi")}
