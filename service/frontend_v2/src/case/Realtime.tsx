@@ -187,8 +187,22 @@ export function RealtimeFolder({
 
 
 /** §63а: the chosen fresh snapshot in the left column — like an archive snapshot: dates, statuses, zones */
-export function FreshScenePanel({ s, zones, onClose, onZone }: { s: FreshScene; zones: { features: any[] } | null; onClose: () => void; onZone: (f: any) => void }) {
-  const [sel, setSel] = useState<string | null>(null);
+export function FreshScenePanel({
+  s,
+  zones,
+  onClose,
+  onZone,
+  zoneId,
+}: {
+  s: FreshScene;
+  zones: { features: any[] } | null;
+  onClose: () => void;
+  onZone: (f: any) => void;
+  /** §70 A: the zone picked by a click on its green marker — its card opens at once */
+  zoneId?: string | null;
+}) {
+  const [sel, setSel] = useState<string | null>(zoneId ?? null);
+  useEffect(() => setSel(zoneId ?? null), [zoneId, s.key]);
   const bs = s.by_status ?? {};
   const fs = (zones?.features ?? []).filter((f: any) => !/-000$/.test(f.properties?.zone_id ?? ''));
   const whole = (zones?.features ?? []).find((f: any) => /-000$/.test(f.properties?.zone_id ?? ''));
@@ -231,9 +245,13 @@ export function FreshScenePanel({ s, zones, onClose, onZone }: { s: FreshScene; 
             </button>
             {on && (
               <div className="note" data-testid="fresh-zone-card">
-                {p.detection_status === 'detected' ? 'модель обнаружила вероятный плавающий материал' : ZST[p.detection_status] ?? ''}
+                <b>{p.detection_status === 'detected' ? 'вероятный плавающий материал; пластик и штуки по снимку не подтверждены' : ZST[p.detection_status] ?? ''}</b>
+                <br />
+                съёмка {s.datetime ? `${dateRu(s.datetime.slice(0, 10))} ${s.datetime.slice(11, 16)} UTC` : dateRu(s.date)}
+                {p.processed_at || s.processed_at ? ` · обработка ${hhmm(p.processed_at ?? s.processed_at)}` : ''}
+                <br />
                 {p.measured?.zone_area_km2 !== undefined ? ` · площадь зоны ${String(p.measured.zone_area_km2).replace('.', ',')} км²` : ''}
-                {p.flags?.length ? ` · признаки: ${p.flags.join(', ')}` : ''} · пластик и штуки по снимку не подтверждены · автоматически, не проверено человеком
+                {p.flags?.length ? ` · признаки: ${p.flags.join(', ')}` : ''} · автоматически, не проверено человеком
               </div>
             )}
           </div>

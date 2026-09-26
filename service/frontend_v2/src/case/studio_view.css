@@ -1,0 +1,28 @@
+/* §70 D (L163): studio = one large view + switch «Снимок · Детекция · Качество»; side-by-side only on «Сравнить рядом» */
+.sv-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 6px 0 8px; }
+.sv-seg { flex: 1 1 auto; min-width: 0; }
+.sv-cmp { flex: 0 0 auto; white-space: nowrap; }
+.sv-main { display: flex; flex-direction: column; gap: 6px; }
+.sv-main-i {
+  position: relative; display: block; width: 100%; padding: 0; margin: 0;
+  border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 6px; overflow: hidden;
+  background: #0b1622; cursor: zoom-in;
+}
+.sv-main-i img {
+  display: block; width: 100%; height: auto; max-height: 56vh; object-fit: contain;
+  image-rendering: pixelated; background: #0b1622;
+}
+.sv-main-i .c-studio-th-over { position: absolute; left: 6px; right: 6px; bottom: 6px; }
+.sv-main-z {
+  position: absolute; top: 6px; right: 6px; padding: 2px 6px; border-radius: 4px;
+  font-size: 11px; background: rgba(0, 0, 0, 0.55); color: #fff; pointer-events: none;
+}
+.sv-main-e {
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  min-height: 180px; padding: 12px; border: 1px dashed rgba(255, 255, 255, 0.18); border-radius: 6px;
+  font-size: 12px; opacity: 0.8;
+}
+.sv-cap { font-size: 12px; line-height: 1.4; }
+.sv-cap .c-lb-key { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 4px; }
+.sv-cap .c-lb-key i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: middle; }
+@media (max-height: 800px) { .sv-main-i img { max-height: 46vh; } }

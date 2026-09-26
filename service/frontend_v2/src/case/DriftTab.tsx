@@ -27,29 +27,44 @@ export interface DriftTabProps {
   mapOn?: boolean;
 }
 
-type State = { loading: boolean; path: string | null; drift: DriftFile | null; sum: any };
+type State = { loading: boolean; path: string | null; drift: DriftFile | null; sum: any; reason: string | null };
+
+// §70 п.B: the old version could hang forever on «Проверяю, есть ли опубликованный прогноз…» if the manifest or
+// drift.json fetch stalled (no per-request timeout) — under load that showed as an endless spinner on the
+// published site. Hard 5 s backstop: whatever is still in flight when the timer fires, the tab reports «нет
+// расчёта: …» instead of spinning — it never waits longer than this for a real result.
+const TIMEOUT_MS = 5000;
 
 function useDriftInfo(zone: DriftTabZone | null): State {
-  const [state, setState] = useState<State>({ loading: true, path: null, drift: null, sum: null });
+  const [state, setState] = useState<State>({ loading: true, path: null, drift: null, sum: null, reason: null });
   useEffect(() => {
     let alive = true;
-    setState({ loading: true, path: null, drift: null, sum: null });
+    let settled = false;
+    setState({ loading: true, path: null, drift: null, sum: null, reason: null });
     if (!zone) return;
-    driftPaths().then(async (paths) => {
-      if (!alive) return;
-      const path = paths.get(driftKey(zone)) ?? null;
-      if (!path) {
-        setState({ loading: false, path: null, drift: null, sum: null });
-        return;
+    const done = (next: Omit<State, 'loading'>) => {
+      if (settled || !alive) return;
+      settled = true;
+      clearTimeout(timer);
+      setState({ loading: false, ...next });
+    };
+    const timer = setTimeout(() => done({ path: null, drift: null, sum: null, reason: 'проверка не ответила за 5 с' }), TIMEOUT_MS);
+    (async () => {
+      let paths;
+      try {
+        paths = await driftPaths();
+      } catch {
+        return done({ path: null, drift: null, sum: null, reason: 'не удалось проверить наличие прогноза' });
       }
-      const [drift, sum] = await Promise.all([
-        loadDrift(path).catch(() => null),
-        get<any>('/api/drift_check').catch(() => null),
-      ]);
-      if (alive) setState({ loading: false, path, drift, sum });
-    });
+      const path = paths.get(driftKey(zone)) ?? null;
+      if (!path) return done({ path: null, drift: null, sum: null, reason: 'для этой сцены нет опубликованного прогноза дрейфа (OpenDrift не запускался на дату снимка)' });
+      const [drift, sum] = await Promise.all([loadDrift(path).catch(() => null), get<any>('/api/drift_check').catch(() => null)]);
+      if (!drift) return done({ path, drift: null, sum, reason: 'файл прогноза не загрузился' });
+      done({ path, drift, sum, reason: null });
+    })();
     return () => {
       alive = false;
+      clearTimeout(timer);
     };
   }, [zone?.region, zone?.datetime]);
   return state;
@@ -66,14 +81,15 @@ function fmtTime(iso?: string | null): string {
 }
 
 export default function DriftTab({ zone, onShowOnMap, mapOn }: DriftTabProps) {
-  const { loading, path, drift, sum } = useDriftInfo(zone);
+  const { loading, path, drift, sum, reason } = useDriftInfo(zone);
 
   if (!zone) return null;
 
+  // §70 п.B: ≤ 5 с — see useDriftInfo's TIMEOUT_MS; never spins forever.
   if (loading)
     return (
       <div className="sec sz-drift-tab" data-testid="drift-tab-loading">
-        <div className="c-line tiny faint">Проверяю, есть ли опубликованный прогноз дрейфа для этой сцены…</div>
+        <div className="c-line tiny faint">Проверяю, есть ли опубликованный прогноз дрейфа для этой сцены… (до 5 с)</div>
       </div>
     );
 
@@ -81,11 +97,9 @@ export default function DriftTab({ zone, onShowOnMap, mapOn }: DriftTabProps) {
     return (
       <div className="sec sz-drift-tab" data-testid="drift-tab-inactive">
         <div className="c-line">
-          <b>Вкладка недоступна</b>
+          <b>нет расчёта:</b> {reason ?? 'для этой сцены нет опубликованного прогноза дрейфа'}
         </div>
-        <div className="c-line tiny faint">
-          Для этой сцены нет опубликованного прогноза дрейфа — расчёт течений и ветра (OpenDrift) не выполнялся на дату снимка. Ничего не имитируем.
-        </div>
+        <div className="c-line tiny faint">Ничего не имитируем — расчёт течений и ветра (OpenDrift) появится здесь только после реального запуска на дату снимка.</div>
       </div>
     );
 

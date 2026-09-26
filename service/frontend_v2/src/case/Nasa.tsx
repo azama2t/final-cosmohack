@@ -154,8 +154,8 @@ export const NASA_MIN_ZOOM = 3;
 function useNasaRegionalOnly(active: boolean) {
   useEffect(() => {
     if (!active) return;
+    let m: any = null;
     const fix = () => {
-      const m = (window as any).__caseMap;
       try {
         if (!m?.style || !m.getLayer('c-nasa')) return;
         const l = m.getLayer('c-nasa');
@@ -164,9 +164,22 @@ function useNasaRegionalOnly(active: boolean) {
         /* style reloading */
       }
     };
-    fix();
-    const t = window.setInterval(fix, 400);
-    return () => window.clearInterval(t);
+    // §70 C: the same layer 'c-nasa' is only adjusted (never re-created here); 'styledata' fires right after addLayer,
+    // so the world-scale globe never gets a frame of NASA texture before the zoom range is set
+    const attach = () => {
+      const mm = (window as any).__caseMap;
+      if (!mm?.on || mm === m) return;
+      m?.off?.('styledata', fix);
+      m = mm;
+      m.on('styledata', fix);
+      fix();
+    };
+    attach();
+    const t = window.setInterval(attach, 1000); // the map may mount / be replaced later
+    return () => {
+      window.clearInterval(t);
+      m?.off?.('styledata', fix);
+    };
   }, [active]);
 }
 
@@ -174,13 +187,22 @@ function useMapZoom(active: boolean) {
   const [z, setZ] = useState<number | null>(null);
   useEffect(() => {
     if (!active) return;
-    const upd = () => {
-      const m = (window as any).__caseMap;
-      if (m?.getZoom) setZ(Math.round(m.getZoom() * 10) / 10);
+    let m: any = null;
+    const upd = () => m?.getZoom && setZ(Math.round(m.getZoom() * 10) / 10);
+    const attach = () => {
+      const mm = (window as any).__caseMap;
+      if (!mm?.on || mm === m) return;
+      m?.off?.('zoomend', upd);
+      m = mm;
+      m.on('zoomend', upd);
+      upd();
     };
-    upd();
-    const t = window.setInterval(upd, 700);
-    return () => window.clearInterval(t);
+    attach();
+    const t = window.setInterval(attach, 1000);
+    return () => {
+      window.clearInterval(t);
+      m?.off?.('zoomend', upd);
+    };
   }, [active]);
   return z;
 }
@@ -194,6 +216,7 @@ export function NasaBlock({
   onLayer,
   onDate,
   onLayerOn,
+  sceneDate,
 }: {
   on: boolean; // «Реальное время» mode (nasaOn in CaseApp)
   info: NasaInfo | null;
@@ -203,6 +226,8 @@ export function NasaBlock({
   onLayer: (id: string) => void;
   onDate: (d: string) => void;
   onLayerOn: (v: boolean) => void;
+  /** date of the open Sentinel-2 snapshot (YYYY-MM-DD…), if any — for the caption «не часть снимка Sentinel-2 от …» */
+  sceneDate?: string | null;
 }) {
   const active = on && layerOn;
   const [why, setWhy] = useState(false); // §63 п.1: the explanation lives behind (i)
@@ -296,8 +321,8 @@ export function NasaBlock({
             ))}
           </span>
         </div>
-        <div className="faint c-nasa-line" data-testid="nasa-date-line">
-          {L.sensor ?? ''} {dateRu(date)} · ~{L.resolution_m} м · не обнаружение
+        <div className="c-nasa-line" data-testid="nasa-date-line" title={`${L.title} · ~${L.resolution_m} м · не обнаружение пластика`}>
+          NASA обзор, дата {dateRu(date)} — не часть снимка Sentinel-2{sceneDate ? ` от ${dateRu(sceneDate.slice(0, 10))}` : ''}
           {partial ? ' · день ещё собирается' : ''}
           {info && date !== info.latestFull && (
             <>
@@ -310,7 +335,7 @@ export function NasaBlock({
         </div>
         {lowZoom && (
           <div className="c-nasa-zoomhint" data-testid="nasa-zoomhint" title="На глобусе обзор NASA не рисуется (у полюса тайлы дают чёрное пятно)">
-            Приблизьте карту к району
+            На этом масштабе обзор NASA не показывается — приблизьте карту к району
           </div>
         )}
       </div>

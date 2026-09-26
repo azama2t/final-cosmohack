@@ -200,6 +200,35 @@ export default function CaseApp() {
     get<FC<any>>(freshScene.zones_url, {}, ac.signal).then(setFreshZones, () => undefined);
     return () => ac.abort();
   }, [freshScene]);
+  // §70 A: green markers = only zones with status «обнаружено» (centre of the zone, not of the scene); 0-find scenes — folder/funnel only
+  const [freshZoneId, setFreshZoneId] = useState<string | null>(null);
+  const [freshDet, setFreshDet] = useState<{ key: string; scene: string; zid: string; c: number[]; label: string; feat: any }[]>([]);
+  useEffect(() => {
+    if (!freshOn || !freshInfo || freshInfo === 'error') return;
+    const ac = new AbortController();
+    const withFinds = freshInfo.regions.flatMap((r) => r.dates).filter((f) => (f.by_status?.detected ?? 0) > 0 && f.zones_url);
+    Promise.all(
+      withFinds.map((f) =>
+        get<FC<any>>(f.zones_url!, {}, ac.signal).then(
+          (fc) =>
+            (fc?.features ?? [])
+              .filter((z: any) => z.properties?.detection_status === 'detected' && z.geometry)
+              .map((z: any) => {
+                const b = geomBounds(z.geometry);
+                const zid = String(z.properties.zone_id);
+                return b
+                  ? { key: `${f.key}|${zid}`, scene: f.key, zid, c: [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2], label: `${f.region_name ?? f.region} · ${dateRu(f.date)}`, feat: z }
+                  : null;
+              })
+              .filter(Boolean) as any[],
+          () => [],
+        ),
+      ),
+    ).then((xs) => {
+      if (!ac.signal.aborted) setFreshDet(xs.flat());
+    });
+    return () => ac.abort();
+  }, [freshOn, freshInfo]);
   const freshAll = useMemo<FreshScene[]>(() => (freshInfo && freshInfo !== 'error' ? freshInfo.regions.flatMap((r) => r.dates) : []), [freshInfo]);
   const tlFresh = useMemo(
     () =>
@@ -218,12 +247,10 @@ export default function CaseApp() {
             img: freshScene?.rgb_url ?? null,
             bounds: freshScene?.bounds ?? null,
             zones: freshScene ? freshZones : null,
-            pts: freshAll
-              .filter((f) => f.bounds)
-              .map((f) => ({ key: f.key, c: [(f.bounds![0] + f.bounds![2]) / 2, (f.bounds![1] + f.bounds![3]) / 2], finds: f.by_status?.detected ?? 0, label: `${f.region_name ?? f.region} · ${dateRu(f.date)}` })),
+            pts: freshDet.map((d) => ({ key: d.key, c: d.c, finds: 1, label: d.label })),
           }
         : null,
-    [freshOn, freshScene, freshZones, freshAll],
+    [freshOn, freshScene, freshZones, freshDet],
   );
   // «Запросы» live inside «Ещё ▾»: closing «Ещё» closes them too (no stale open state behind a closed menu)
   useEffect(() => {
@@ -1101,7 +1128,16 @@ export default function CaseApp() {
             </details>
           )}
           {freshOn && freshScene && !curScene && (
-            <FreshScenePanel s={freshScene} zones={freshZones} onClose={() => setFreshScene(null)} onZone={(f) => flyToFeat(f, 14)} />
+            <FreshScenePanel
+              s={freshScene}
+              zones={freshZones}
+              zoneId={freshZoneId}
+              onClose={() => {
+                setFreshScene(null);
+                setFreshZoneId(null);
+              }}
+              onZone={(f) => flyToFeat(f, 14)}
+            />
           )}
           {freshOn && !curScene && (
             <RealtimeFolder
@@ -1110,6 +1146,7 @@ export default function CaseApp() {
               freshZones={freshZones}
               onFresh={(s) => {
                 setFreshScene(s);
+                setFreshZoneId(null);
                 if (s?.bounds) flyToBox(s.bounds as Bbox, { maxZoom: 12, duration: 1200 });
               }}
               onRegion={(b) => flyToBox(b as Bbox, { maxZoom: 11, duration: 1200 })}
@@ -1165,10 +1202,14 @@ export default function CaseApp() {
           nasa={nasa}
           fresh={freshMap}
           onFreshPick={(k) => {
-            const s = freshAll.find((x) => x.key === k) ?? null;
+            // §70 A: one click → fly to the zone → rgb.jpg in bounds → zone outline → its card open
+            const d = freshDet.find((x) => x.key === k);
+            const s = freshAll.find((x) => x.key === (d?.scene ?? k)) ?? null;
             if (!s) return;
             setFreshScene(s);
-            if (s.bounds) flyToBox(s.bounds as Bbox, { maxZoom: 12, duration: 1200 });
+            setFreshZoneId(d?.zid ?? null);
+            if (d) flyToFeat(d.feat, 14);
+            else if (s.bounds) flyToBox(s.bounds as Bbox, { maxZoom: 12, duration: 1200 });
           }}
           layers={q.layers}
           selected={sel}
@@ -1612,6 +1653,7 @@ export default function CaseApp() {
           onFresh={(k) => {
             const s = freshAll.find((x) => x.key === k) ?? null;
             setFreshScene(s);
+            setFreshZoneId(null);
             if (s?.bounds) flyToBox(s.bounds as Bbox, { maxZoom: 12, duration: 1200 });
           }}
           onNasaDate={(d) => {

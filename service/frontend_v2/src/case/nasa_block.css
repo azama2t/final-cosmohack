@@ -116,12 +116,11 @@
   padding: 1px 4px;
   font-size: 12px;
 }
+/* §70 C: «NASA обзор, дата … — не часть снимка Sentinel-2 от …» (may take two lines) */
 .c-nasa-line {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   font-size: 11.5px;
   line-height: 1.3;
+  color: #cfe9f7;
 }
 .c-nasa-line .link {
   font-size: inherit;

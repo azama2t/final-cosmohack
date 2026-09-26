@@ -12,6 +12,7 @@ import { API_BASE } from './api3';
 import { dateRu, num } from './fmt';
 import { zoneTitle, type SceneZoneDetail, type SceneZoneProps } from './SceneZoneCard';
 import { loadImg, pxBox, QualityToggle, Q_CLASSES, statsLine, useMaskStats } from './QualityMask';
+import './studio_view.css';
 
 type Mode = 'rgb' | 'det' | 'mask';
 const MODES: { k: Mode; t: string }[] = [
@@ -319,6 +320,11 @@ export default function ZoneStudio({
   const ms = useMaskStats(sc, box);
   const stats = ms.info?.box ? statsLine(ms.info.box) : null;
   const [open, setOpen] = useState<Mode | null>(null);
+  const [view, setView] = useState<Mode>('rgb');
+  const [side, setSide] = useState(false);
+  useEffect(() => {
+    setSide(false);
+  }, [zone.id]);
   const title = `${zoneTitle(p)} · ${dateRu(p.datetime)}`;
   return (
     <div className="right-inner" data-testid="zone-studio">
@@ -357,6 +363,44 @@ export default function ZoneStudio({
           </div>
           {!media && <div className="note">Загрузка вырезок…</div>}
           {media && (
+            <div className="sv-bar">
+              <div className="seg sv-seg" role="tablist" aria-label="Что показать">
+                {MODES.map((m) => (
+                  <button key={m.k} role="tab" className={view === m.k ? 'on' : ''} aria-selected={view === m.k} onClick={() => setView(m.k)} data-testid={`studio-view-${m.k}`}>
+                    {m.k === 'mask' ? 'Качество' : m.t}
+                  </button>
+                ))}
+              </div>
+              <button className={`btn sm ${side ? '' : 'ghost'} sv-cmp`} onClick={() => setSide((v) => !v)} aria-pressed={side} data-testid="studio-compare">
+                {side ? 'Один просмотр' : 'Сравнить рядом'}
+              </button>
+            </div>
+          )}
+          {media && !side && (
+            <div className="sv-main" data-testid="studio-main">
+              {media[view] ? (
+                <button className="sv-main-i" onClick={() => setOpen(view)} title="Открыть крупно: масштаб, сдвиг" data-testid={`studio-main-${view}`}>
+                  <img src={media[view]!} alt={MODES.find((m) => m.k === view)!.t} style={{ aspectRatio: `${media.w} / ${media.h}` }} />
+                  {view === 'mask' && ms.info?.box && ms.info.box.bad === 0 && <span className="c-studio-th-over">вся вода годная — непригодных пикселей 0</span>}
+                  <span className="sv-main-z">⤢ крупно</span>
+                </button>
+              ) : (
+                <div className="sv-main-e" data-testid="studio-main-empty">
+                  {view === 'mask' ? media.maskWhy || 'маски для этой области нет' : 'Вырезки этой зоны нет.'}
+                </div>
+              )}
+              <div className="sv-cap faint">
+                {view === 'rgb' && 'Исходный снимок Sentinel-2 (RGB, 10 м) — область зоны + 300 м.'}
+                {view === 'det' && (
+                  <>
+                    Та же область: <span style={{ color: '#ff2842' }}>красные</span> пиксели — детектор; <span style={{ color: '#ffd43b' }}>жёлтые</span> — снятые фильтрами.
+                  </>
+                )}
+                {view === 'mask' && <>Маска качества этой сцены и области (SCL + блик). {MASK_KEY}</>}
+              </div>
+            </div>
+          )}
+          {media && side && (
             <div className="c-studio-tri">
               {MODES.map((m) => {
                 const src = media[m.k];
