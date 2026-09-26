@@ -584,3 +584,71 @@ GET /api/v3/studio/scenes/{id}/view/{kind}.png?px=&variant=
   mtime/размер исходных файлов.
   Уровень доказательности — ТОЛЬКО из data/search/*/candidates.csv (поле level; сначала event_id+scene_id, затем
   scene_id; при нескольких записях — сильнейший, все записи в level_records). Нет записи → null («не оценивался»).
+
+3.9 НЕФТЬ (ДОБАВЛЕНИЯ, 26.09 02:00, L101, INBOX §14) — новые эндпоинты, старые не менялись. ЭКСПЕРИМЕНТАЛЬНЫЙ слой
+Код: service/routes_v3_oil.py (маршруты встраиваются в router routes_v3 перед его catch-all, как 3.8). Тесты: tests/test_oil.py.
+Данные — только с диска: data/case/oil/index.json + data/case/oil/<scene_key>.geojson (scripts/oil/train_oil.py infer;
+scene_key = live.<region>.<date> | pair.<event_dir>, те же id, что у студии без префикса типа). Описание — docs/OIL.md.
+Общие правила как в 1, 3.6, 3.8: charset=utf-8, ошибки {"error": {code, message, details}}, неизвестный параметр → 400
+BAD_PARAM {unknown, allowed}; bbox/даты — как в 3.6 (400 BAD_BBOX / BAD_DATE); нет данных → 200 + пусто + empty_reason; CORS *.
+Единица — ПЛОЩАДЬ пятна, км² (+ доля пикселей наблюдаемой воды сцены); «площадь, не объём/масса»; штуки к нефти НЕ применяются.
+
+GET /api/v3/oil/meta  (параметров нет)
+  {class:"oil_spill", class_label:"Нефтяное пятно", experimental:true, unit:"km²", unit_note, counts_applicable:false,
+   color:{fill, fill_opacity, line, line_width, note}, model, selected_run, threshold, min_px, harmonize,
+   gates:{min_valid_water_frac, max_cloud_frac, max_scene_frac, note},
+   metrics:{dataset, val, val_ci95, test, test_ci95, baseline_osi}, n_scenes, generated_at, domain_note, limitations[], doc}
+
+GET /api/v3/oil/scenes?bbox=&date_from=&date_to=&region=&kind=&scene_id=&limit=&offset=
+  kind: live,pair; scene_id: список scene_id ИЛИ scene_key. Ответ {items, total, limit, offset, class, unit_note, empty_reason};
+  item = {scene_key, scene_id, date, region, kind, source, class, experimental, status, status_reason, oil_km2,
+          oil_frac_water, n_spills, water_km2, valid_water_frac, bbox[4] (EPSG:4326), unit_note}.
+  status: ok | no_estimate_low_water (пригодной воды < 50 % нессушной части кадра) | skipped_cloudy (облака+тени > 0.2)
+          | suspect_scene_wide (> 5 % воды отмечено — дымка/блик, не карта пятен). При status ≠ ok: oil_km2,
+          oil_frac_water, n_spills = null — «нет оценки», НЕ 0; фронт показывает status_reason. 0 бывает только при ok.
+
+GET /api/v3/oil/spills?bbox=&date_from=&date_to=&region=&kind=&scene_id=&min_area_km2=&limit=&offset=
+  application/geo+json; charset=utf-8. FeatureCollection {features, total, count, class, class_label, experimental,
+  total_area_km2 (по странице), unit_note, color, empty_reason}. Feature: Polygon | MultiPolygon, EPSG:4326, id "oil.<hash>";
+  properties {id, class:"oil_spill", class_label, scene_id, scene_key, date, region, source, experimental(bool),
+  area_km2, n_px, scene_frac (доля пикселей наблюдаемой воды сцены), prob_mean, lon, lat (центр), model, unit_note}.
+  bbox — пересечение рамки полигона; сортировка: площадь по убыванию, затем id. limit по умолчанию 1000 (все сцены
+  сразу ≈ 13 000 полигонов / 29 МБ — запрашивайте по scene_id или bbox), максимум 100000; offset — как в 3.6.
+
+GET /api/v3/oil/export?format=geojson|csv&<фильтры spills>
+  Отдельный класс: Content-Disposition: attachment; filename="oil_spill.<fmt>"; limit по умолчанию 100000 (всё). geojson — как /oil/spills;
+  csv (text/csv; charset=utf-8) — колонки id, class, class_label, scene_id, scene_key, date, region, source, experimental,
+  area_km2, n_px, scene_frac, prob_mean, lon, lat, model, unit_note. Неверный format → 400 BAD_PARAM.
+Цвет слоя (предложение для фронта v3, не пересекается с мусором #ff2d55/оранжевым/жёлтым и дрейфом #9ad0ff):
+  заливка #c026d3 (фуксия) 0.45, контур #f0abfc 1.5 px; подпись «Нефтяное пятно · эксперимент · площадь, не объём/масса».
+3.8.1 СТУДИЯ: ДЕТЕКТОР ТОЛЬКО В ТЕКУЩЕМ РЕЖИМЕ (26.09 02:00, L95)
+  Scene.detector (всегда объект): {run, weights:"lgbm"|null, harmonization:false|null, threshold (0.63 — weights/lgbm,
+    как у пар, configs/case_pairs.yaml harmonize: none), pixels, objects (вся вырезка, после фильтров облака/тени),
+    scope:"вся вырезка", strip {objects, pixels}|null (пары: в полосе наблюдения), source, label (готовая подпись
+    по-русски: «Детектор (текущий режим: веса lgbm, без гармонизации, порог 0,63): N объектов, M пикселей на всей
+    вырезке[; в полосе наблюдения — K объектов]» или «Детектор на этой сцене не запускался: <причина>»),
+    legacy {weights:"lgbm_live", harmonization:"water_median", threshold, note:"прежний режим …, отвергнут"}|null}.
+  Прежние поля detector (n_det, n_det_crop, prob_max, n_above_threshold, harmonize, note) УДАЛЕНЫ (раздел 3.8 был
+    черновым 2 ч, потребитель один — фронт v3). Вид «Детекция» строится только из текущего режима:
+    пары/розыск — prob.tif прогонов с harmonize none (meta.detector.harmonize_offset = null); районы/дрейф —
+    out/studio_cache/detector_current/<live|drift>/<region>/<date>/ (scripts/case/studio_detector_current.py;
+    правило маски = pair_quality.py). prob_lgbm.tif/prob_mdd.tif data/live не показываются никогда; нет расчёта
+    текущего режима → вида нет, reason «…ещё не рассчитан; прежний режим не показывается». variant у detection убран.
+    X-Detection-Pixels = detector.pixels. Красный — пиксели объектов детектора; жёлтый — 0,2 ≤ P < порога на воде.
+  Районы/дрейф с расчётом текущего режима: «Качество» — маска как у пар (облака SCL + спектральный тест, блики).
+  quality: + decision_label, reason_label (по-русски). level_records[]: reason — по-русски (текст реестра, если он
+    кириллицей, иначе определение уровня), reason_raw — текст реестра как есть. field.sampling_method удалено.
+3.8.2 СТУДИЯ: ОСВЕЩЁННОСТЬ, ПОЛЕВОЙ СЧЁТ, RGB ПО ВОДЕ (26.09 03:10, L95)
+  Scene.illumination {sun_zenith_deg (расчёт по времени и центру сцены, NOAA), water_b3_median (медиана B3 пригодной
+    воды; считается только если может изменить вывод), low_sun, weak_signal, rule}.
+  Детектор «не оценивается» при зените Солнца ≥ 58° или B3 воды < 0.003: detector.status = "not_evaluated",
+    pixels/objects/strip = null, числа — в detector.raw {pixels, objects, strip, note: «шум, не мусор»}, label
+    «Детектор не оценивается: низкое солнце (зенит 61°) — …»; вида «Детекция» нет (reason тот же).
+    detector.status: "evaluated" | "not_evaluated" | "not_run".
+  Числа детектора = реестр розыска: detector.strip {objects, pixels} = candidates.csv n_det_strip / det_pixels
+    (ADIS: 157/157 совпадают); detector.objects/pixels — вся вырезка (scope «вся вырезка»).
+  Scene.field для сцен с уровнем из реестра с полевыми числами (ADIS: field_count_by_size, survey_area_km2,
+    dhat_5cm_km2; S3: field_items_km2): + count, count_by_size {"> 5 см": n, …}, size_class, survey_area_km2,
+    items_km2, field_source, label («Полевой счёт: 1 предмет > 5 см на 0,56 км² обзора; оценка 3,5 шт./км² (…)»).
+  «Снимок»: variants ["water", "natural"]; water (по умолчанию) — растяжка 0..p98 по пикселям пригодной воды (все три
+    канала одной шкалой, гамма 1/1,4; суша может пересвечиваться), natural — прежние 0..0,16, гамма 1/1,8.

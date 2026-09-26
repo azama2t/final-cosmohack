@@ -1,0 +1,235 @@
+{
+ "opened_at": "2026-09-26T01:38:10",
+ "model": "win_pw1_l15_s0",
+ "lgbm": {
+  "threshold": 0.06,
+  "test": {
+   "pooled": {
+    "precision": 0.5815,
+    "recall": 0.993,
+    "f1": 0.7334,
+    "iou": 0.5791,
+    "tp": 51169,
+    "fp": 36833,
+    "fn": 359
+   },
+   "ci95": {
+    "precision": [
+     0.4414,
+     0.9062
+    ],
+    "recall": [
+     0.9797,
+     0.9982
+    ],
+    "f1": [
+     0.6115,
+     0.9468
+    ],
+    "iou": [
+     0.4404,
+     0.899
+    ]
+   },
+   "per_oil_scene_f1": {
+    "Scene_132": 0.4444,
+    "Scene_134": 0.4638,
+    "Scene_136": 0.9826,
+    "Scene_137": 0.9742,
+    "Scene_138": 0.2609,
+    "Scene_145": 0.9953,
+    "Scene_146": 0.9486,
+    "Scene_151": 0.9988,
+    "Scene_153": 0.9583,
+    "Scene_154": 0.3433,
+    "Scene_155": 0.9996,
+    "Scene_156": 0.5516,
+    "Scene_159": 0.9724,
+    "Scene_165": 0.9987,
+    "Scene_168": 0.9701,
+    "Scene_171": 0.9162,
+    "Scene_172": 0.9387,
+    "Scene_173": 0.999
+   },
+   "median_oil_scene_f1": 0.9642,
+   "n_scenes": 27,
+   "n_oil_scenes": 18,
+   "n_px": 202776,
+   "n_oil_px": 51528
+  },
+  "fp_by_class_test": {
+   "Marine Debris": {
+    "n": 592,
+    "pred_oil": 0
+   },
+   "Dense Sargassum": {
+    "n": 543,
+    "pred_oil": 0
+   },
+   "Sparse Floating Algae": {
+    "n": 905,
+    "pred_oil": 364
+   },
+   "Natural Organic Material": {
+    "n": 229,
+    "pred_oil": 225
+   },
+   "Ship": {
+    "n": 2400,
+    "pred_oil": 103
+   },
+   "Marine Water": {
+    "n": 115930,
+    "pred_oil": 34421
+   },
+   "Sediment-Laden Water": {
+    "n": 217,
+    "pred_oil": 0
+   },
+   "Turbid Water": {
+    "n": 9942,
+    "pred_oil": 0
+   },
+   "Shallow Water": {
+    "n": 10226,
+    "pred_oil": 401
+   },
+   "Waves & Wakes": {
+    "n": 2966,
+    "pred_oil": 1222
+   },
+   "Oil Spill": {
+    "n": 51528,
+    "pred_oil": 51169
+   },
+   "Oil Platform": {
+    "n": 4790,
+    "pred_oil": 72
+   },
+   "Jellyfish": {
+    "n": 274,
+    "pred_oil": 25
+   },
+   "Sea snot": {
+    "n": 2234,
+    "pred_oil": 0
+   }
+  }
+ },
+ "baseline_osi": {
+  "sign": 1,
+  "threshold": 1.3101205396652222,
+  "test": {
+   "pooled": {
+    "precision": 0.2327,
+    "recall": 0.5329,
+    "f1": 0.3239,
+    "iou": 0.1932,
+    "tp": 27457,
+    "fp": 90555,
+    "fn": 24071
+   },
+   "ci95": {
+    "precision": [
+     0.1134,
+     0.419
+    ],
+    "recall": [
+     0.3122,
+     0.8785
+    ],
+    "f1": [
+     0.1834,
+     0.4848
+    ],
+    "iou": [
+     0.1009,
+     0.3199
+    ]
+   },
+   "per_oil_scene_f1": {
+    "Scene_132": 0.0947,
+    "Scene_134": 0.2156,
+    "Scene_136": 0.6463,
+    "Scene_137": 0.3439,
+    "Scene_138": 1.0,
+    "Scene_145": 0.6737,
+    "Scene_146": 0.0184,
+    "Scene_151": 0.8512,
+    "Scene_153": 0.0295,
+    "Scene_154": 0.1231,
+    "Scene_155": 0.8679,
+    "Scene_156": 0.2468,
+    "Scene_159": 0.3018,
+    "Scene_165": 0.008,
+    "Scene_168": 0.5559,
+    "Scene_171": 0.7632,
+    "Scene_172": 0.4909,
+    "Scene_173": 0.6564
+   },
+   "median_oil_scene_f1": 0.4174,
+   "n_scenes": 27,
+   "n_oil_scenes": 18,
+   "n_px": 202776,
+   "n_oil_px": 51528
+  },
+  "fp_by_class_test": {
+   "Marine Debris": {
+    "n": 592,
+    "pred_oil": 528
+   },
+   "Dense Sargassum": {
+    "n": 543,
+    "pred_oil": 539
+   },
+   "Sparse Floating Algae": {
+    "n": 905,
+    "pred_oil": 850
+   },
+   "Natural Organic Material": {
+    "n": 229,
+    "pred_oil": 229
+   },
+   "Ship": {
+    "n": 2400,
+    "pred_oil": 2393
+   },
+   "Marine Water": {
+    "n": 115930,
+    "pred_oil": 57865
+   },
+   "Sediment-Laden Water": {
+    "n": 217,
+    "pred_oil": 217
+   },
+   "Turbid Water": {
+    "n": 9942,
+    "pred_oil": 9942
+   },
+   "Shallow Water": {
+    "n": 10226,
+    "pred_oil": 7997
+   },
+   "Waves & Wakes": {
+    "n": 2966,
+    "pred_oil": 2697
+   },
+   "Oil Spill": {
+    "n": 51528,
+    "pred_oil": 27457
+   },
+   "Oil Platform": {
+    "n": 4790,
+    "pred_oil": 4790
+   },
+   "Jellyfish": {
+    "n": 274,
+    "pred_oil": 274
+   },
+   "Sea snot": {
+    "n": 2234,
+    "pred_oil": 2234
+   }
+  }
+ }
+}

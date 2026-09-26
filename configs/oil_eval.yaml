@@ -1,0 +1,409 @@
+# FROZEN before oil training (L101). Do not edit the composition; a new check = a new file.
+version: 1
+frozen_at: '2026-09-26T01:30:28'
+frozen_by: L101 (INBOX §14), before any oil training
+task: binary pixel head 'oil spill' (MADOS 6) vs every other labelled MADOS pixel (incl. 13 Oil Platform)
+source:
+  dataset: MADOS (Kikaki, Kakogeorgiou et al. 2024, ISPRS J.; Zenodo 10664073; CC BY 4.0)
+  root: data/MADOS
+  positive_class:
+    mados: 6
+    name: Oil Spill
+  context_negative:
+    mados: 13
+    name: Oil Platform
+  radiometry: ACOLITE rhorc (Rayleigh-corrected, from L1C)
+  split_files_sha256:
+    train: 452f76c17c177aa11e75ea8c097cf7608a106973c8dc393d8364ef29594f3a33
+    val: cbeed9b8381c8c67be628169b3346cc5d4afef6368c7faccec59902b7319250f
+    test: fabba047bf7fb2c84aa149cffb50bf9b87b0589ed457b69b387f0e0c5e79bee7
+split_rule: 'official MADOS split (scene-level: verified every Scene_k lies in one split) minus exclusions'
+exclusions:
+  rule:
+  - MADOS scene = same S2 acquisition as a MARIDA val/test scene (reports/mados_overlap.csv, out/l13_cache/mados_overlap_with_test.csv
+    — image LBP match, no MARIDA test labels read)
+  - MADOS train scene = same acquisition as a MADOS val/test scene (LBP B4/B8 match, out/l101/intra_mados_overlap.json) ->
+    dropped from training
+  scenes:
+    Scene_4: same acquisition as MARIDA val (S2_18-9-20_16PCC)
+    Scene_98: same acquisition as MARIDA val (S2_18-1-18_48PZC)
+    Scene_99: same acquisition as MARIDA val (S2_18-9-20_16PCC)
+    Scene_101: same acquisition as MARIDA val (S2_29-8-17_51RVQ)
+    Scene_108: same acquisition as MARIDA val (S2_19-9-18_16PCC)
+    Scene_113: same acquisition as MARIDA val (S2_29-12-20_18QYF)
+    Scene_114: same acquisition as MARIDA val (S2_28-9-20_16PDC)
+    Scene_117: same acquisition as MARIDA val (S2_21-2-18_16PCC)
+    Scene_119: same acquisition as MARIDA val (S2_24-3-20_18QYF)
+    Scene_120: same acquisition as MARIDA val (S2_12-1-17_16PEC)
+    Scene_125: same acquisition as MARIDA val (S2_7-3-20_18QYG)
+    Scene_127: same acquisition as MARIDA val (S2_11-6-18_16PCC)
+    Scene_128: same acquisition as MARIDA val (S2_14-3-20_18QYF)
+    Scene_133: same acquisition as MARIDA test (S2_17-7-16_51PTS)
+    Scene_135: same acquisition as MARIDA test (S2_14-9-18_16PCC)
+    Scene_139: same acquisition as MARIDA test (S2_16-2-18_16PEC)
+    Scene_140: same acquisition as MARIDA test (S2_14-11-18_48PZC)
+    Scene_141: same acquisition as MARIDA test (S2_30-8-18_16PCC)
+    Scene_142: same acquisition as MARIDA test (S2_27-1-19_16QED)
+    Scene_143: same acquisition as MARIDA test (S2_22-12-20_18QYF)
+    Scene_157: same acquisition as MARIDA test (S2_3-11-16_16PDC)
+    Scene_160: same acquisition as MARIDA test (S2_4-3-18_50LLR)
+    Scene_162: same acquisition as MARIDA test (S2_12-12-20_16PCC)
+    Scene_163: same acquisition as MARIDA test (S2_27-1-19_16PCC)
+    Scene_164: same acquisition as MARIDA test (S2_15-11-20_16PCC)
+    Scene_166: same acquisition as MARIDA test (S2_28-9-20_16PCC)
+    Scene_169: same acquisition as MARIDA test (S2_19-9-18_16PDC)
+    Scene_170: same acquisition as MARIDA test (S2_18-5-19_51PTS)
+  overlap_tables_sha256:
+    reports/mados_overlap.csv: d142ade4066ff5b00414eda70d3fef1177382eedfb8101029691c1cede80bd4b
+    out/l13_cache/mados_overlap_with_test.csv: f6c011eaac7908105db96decea391e24e575dba29ff05fa9e56c82a80d3b90f7
+  intra_mados_same_place_other_date:
+    Scene_102:
+    - Scene_2
+    Scene_114:
+    - Scene_4
+    Scene_120:
+    - Scene_9
+    Scene_139:
+    - Scene_51
+    Scene_165:
+    - Scene_59
+    Scene_166:
+    - Scene_12
+    Scene_173:
+    - Scene_57
+    - Scene_59
+    - Scene_70
+    - Scene_79
+    Scene_99:
+    - Scene_12
+    - Scene_50
+  note_ours: MADOS scenes do not include the case pairs/live scenes (2015-2022 ACOLITE crops vs our 2018-2026 L2A scenes);
+    MARIDA has no oil class
+composition:
+  train:
+    scenes:
+    - Scene_0
+    - Scene_1
+    - Scene_2
+    - Scene_3
+    - Scene_5
+    - Scene_6
+    - Scene_7
+    - Scene_8
+    - Scene_9
+    - Scene_10
+    - Scene_11
+    - Scene_12
+    - Scene_13
+    - Scene_14
+    - Scene_15
+    - Scene_16
+    - Scene_17
+    - Scene_18
+    - Scene_19
+    - Scene_20
+    - Scene_21
+    - Scene_22
+    - Scene_23
+    - Scene_24
+    - Scene_25
+    - Scene_26
+    - Scene_27
+    - Scene_28
+    - Scene_29
+    - Scene_30
+    - Scene_31
+    - Scene_32
+    - Scene_33
+    - Scene_34
+    - Scene_35
+    - Scene_36
+    - Scene_37
+    - Scene_38
+    - Scene_39
+    - Scene_40
+    - Scene_41
+    - Scene_42
+    - Scene_43
+    - Scene_44
+    - Scene_45
+    - Scene_46
+    - Scene_47
+    - Scene_48
+    - Scene_49
+    - Scene_50
+    - Scene_51
+    - Scene_52
+    - Scene_53
+    - Scene_54
+    - Scene_55
+    - Scene_56
+    - Scene_57
+    - Scene_58
+    - Scene_59
+    - Scene_60
+    - Scene_61
+    - Scene_62
+    - Scene_63
+    - Scene_64
+    - Scene_65
+    - Scene_66
+    - Scene_67
+    - Scene_68
+    - Scene_69
+    - Scene_70
+    - Scene_71
+    - Scene_72
+    - Scene_73
+    - Scene_74
+    - Scene_75
+    - Scene_76
+    - Scene_77
+    - Scene_78
+    - Scene_79
+    - Scene_80
+    - Scene_81
+    - Scene_82
+    - Scene_83
+    - Scene_84
+    - Scene_85
+    - Scene_86
+    - Scene_87
+    - Scene_88
+    - Scene_89
+    - Scene_90
+    - Scene_91
+    - Scene_92
+    - Scene_93
+    - Scene_94
+    - Scene_95
+    n_scenes: 95
+    oil_scenes:
+    - Scene_0
+    - Scene_5
+    - Scene_6
+    - Scene_7
+    - Scene_27
+    - Scene_30
+    - Scene_31
+    - Scene_33
+    - Scene_34
+    - Scene_38
+    - Scene_39
+    - Scene_40
+    - Scene_41
+    - Scene_56
+    - Scene_57
+    - Scene_59
+    - Scene_60
+    - Scene_62
+    - Scene_69
+    - Scene_70
+    - Scene_72
+    - Scene_79
+    - Scene_81
+    - Scene_86
+    - Scene_87
+    - Scene_88
+    - Scene_89
+    - Scene_94
+    - Scene_95
+    n_oil_scenes: 29
+    n_crops: 1400
+    oil_px: 140584
+    oil_crops: 204
+    platform_px: 6988
+    labelled_px: 729668
+    oil_px_by_scene:
+      Scene_0: 2996
+      Scene_5: 917
+      Scene_6: 2683
+      Scene_7: 23001
+      Scene_27: 3131
+      Scene_30: 2414
+      Scene_31: 3747
+      Scene_33: 7350
+      Scene_34: 624
+      Scene_38: 6113
+      Scene_39: 6645
+      Scene_40: 8743
+      Scene_41: 1616
+      Scene_56: 16374
+      Scene_57: 1671
+      Scene_59: 607
+      Scene_60: 210
+      Scene_62: 12313
+      Scene_69: 4964
+      Scene_70: 1085
+      Scene_72: 11240
+      Scene_79: 3185
+      Scene_81: 51
+      Scene_86: 2247
+      Scene_87: 1850
+      Scene_88: 7417
+      Scene_89: 2373
+      Scene_94: 3390
+      Scene_95: 1627
+    scenes_sha256: 6d674711f9b635f586bb41a8a294f4507de2eae5475d0e93fbcf9916c0b30767
+  val:
+    scenes:
+    - Scene_96
+    - Scene_97
+    - Scene_100
+    - Scene_102
+    - Scene_103
+    - Scene_104
+    - Scene_105
+    - Scene_106
+    - Scene_107
+    - Scene_109
+    - Scene_110
+    - Scene_111
+    - Scene_112
+    - Scene_115
+    - Scene_116
+    - Scene_118
+    - Scene_121
+    - Scene_122
+    - Scene_123
+    - Scene_124
+    - Scene_126
+    - Scene_129
+    - Scene_130
+    - Scene_131
+    n_scenes: 24
+    oil_scenes:
+    - Scene_96
+    - Scene_97
+    - Scene_100
+    - Scene_104
+    - Scene_105
+    - Scene_109
+    - Scene_110
+    - Scene_111
+    - Scene_112
+    - Scene_116
+    - Scene_118
+    - Scene_121
+    - Scene_124
+    - Scene_131
+    n_oil_scenes: 14
+    n_crops: 280
+    oil_px: 42456
+    oil_crops: 77
+    platform_px: 3923
+    labelled_px: 166685
+    oil_px_by_scene:
+      Scene_96: 435
+      Scene_97: 613
+      Scene_100: 1436
+      Scene_104: 10871
+      Scene_105: 1934
+      Scene_109: 2498
+      Scene_110: 2793
+      Scene_111: 256
+      Scene_112: 4853
+      Scene_116: 2177
+      Scene_118: 6569
+      Scene_121: 5739
+      Scene_124: 113
+      Scene_131: 2169
+    scenes_sha256: 9872293857229de7994a6f0a482424d0674c32b97bc0c6520e4ac4cf8015bccb
+  test:
+    scenes:
+    - Scene_132
+    - Scene_134
+    - Scene_136
+    - Scene_137
+    - Scene_138
+    - Scene_144
+    - Scene_145
+    - Scene_146
+    - Scene_147
+    - Scene_148
+    - Scene_149
+    - Scene_150
+    - Scene_151
+    - Scene_152
+    - Scene_153
+    - Scene_154
+    - Scene_155
+    - Scene_156
+    - Scene_158
+    - Scene_159
+    - Scene_161
+    - Scene_165
+    - Scene_167
+    - Scene_168
+    - Scene_171
+    - Scene_172
+    - Scene_173
+    n_scenes: 27
+    oil_scenes:
+    - Scene_132
+    - Scene_134
+    - Scene_136
+    - Scene_137
+    - Scene_138
+    - Scene_145
+    - Scene_146
+    - Scene_151
+    - Scene_153
+    - Scene_154
+    - Scene_155
+    - Scene_156
+    - Scene_159
+    - Scene_165
+    - Scene_168
+    - Scene_171
+    - Scene_172
+    - Scene_173
+    n_oil_scenes: 18
+    n_crops: 354
+    oil_px: 51528
+    oil_crops: 80
+    platform_px: 4790
+    labelled_px: 202776
+    oil_px_by_scene:
+      Scene_132: 106
+      Scene_134: 2249
+      Scene_136: 1811
+      Scene_137: 437
+      Scene_138: 314
+      Scene_145: 6748
+      Scene_146: 1375
+      Scene_151: 853
+      Scene_153: 402
+      Scene_154: 190
+      Scene_155: 5969
+      Scene_156: 16685
+      Scene_159: 4674
+      Scene_165: 1983
+      Scene_168: 2387
+      Scene_171: 2323
+      Scene_172: 2042
+      Scene_173: 980
+    scenes_sha256: 52371f58d3e4c6fd2ac22886a9f8c15a5f9d347466c8961c1eead0e85a1302f5
+composition_sha256: a540b7e6b9824e518353b332f79fd0184b872550df949f4cd2d8bc340a6570ff
+metric:
+  unit: labelled pixels only (unlabelled MADOS pixels excluded, as the MADOS/MARIDA protocol)
+  primary: pooled F1 of oil vs rest over all labelled pixels of the split
+  also:
+  - precision
+  - recall
+  - IoU
+  - per-scene F1 on oil scenes
+  ci: scene bootstrap 2000 reps, numpy default_rng(0), percentile 2.5/97.5
+  nan_rule: pixel with a NaN band -> not oil
+selection:
+  only_on: val
+  lgbm_threshold_grid:
+  - 0.02
+  - 0.98
+  - 0.01
+  baseline: OSI = (B3+B4)/B2 (Rajendran et al. 2021, MethodsX 8:101327); sign and threshold chosen on val (grid = 1..99 percentiles
+    of val OSI)
+  variants: a few LightGBM variants (features, pos_weight), seed 0; best val F1 -> final
+test_policy: MADOS test oil scenes are evaluated ONCE at the end with frozen model + thresholds; the opening is recorded below
+  (test_opened)
+test_opened: '2026-09-26T01:38:10 by L101, once, model win_pw1_l15_s0 + OSI baseline, frozen thresholds -> reports/oil/test.json'

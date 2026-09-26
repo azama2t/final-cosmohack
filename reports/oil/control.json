@@ -1,0 +1,20 @@
+[
+ {
+  "key": "control.wakashio.2020-08-11",
+  "water_km2": 159.887,
+  "oil_km2": 0.1654,
+  "n_spills": 12,
+  "oil_frac_water": 0.00103,
+  "osi_km2": 43.3923,
+  "cloud_frac_scl": 0.061
+ },
+ {
+  "key": "control.wakashio.2020-08-16",
+  "water_km2": 160.513,
+  "oil_km2": 62.4091,
+  "n_spills": 86,
+  "oil_frac_water": 0.38881,
+  "osi_km2": 46.1608,
+  "cloud_frac_scl": 0.0021
+ }
+]

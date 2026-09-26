@@ -1,0 +1,1943 @@
+{
+ "win_pw1_s0": {
+  "variant": "win_pw1",
+  "seed": 0,
+  "threshold": 0.005,
+  "val": {
+   "pooled": {
+    "precision": 0.8512,
+    "recall": 0.8436,
+    "f1": 0.8474,
+    "iou": 0.7352,
+    "tp": 35815,
+    "fp": 6260,
+    "fn": 6641
+   },
+   "ci95": {
+    "precision": [
+     0.6673,
+     0.9549
+    ],
+    "recall": [
+     0.6808,
+     0.9813
+    ],
+    "f1": [
+     0.7041,
+     0.926
+    ],
+    "iou": [
+     0.5434,
+     0.8622
+    ]
+   },
+   "per_oil_scene_f1": {
+    "Scene_100": 0.999,
+    "Scene_104": 0.8652,
+    "Scene_105": 0.0577,
+    "Scene_109": 0.7803,
+    "Scene_110": 0.5219,
+    "Scene_111": 0.3052,
+    "Scene_112": 0.9967,
+    "Scene_116": 0.9189,
+    "Scene_118": 0.9843,
+    "Scene_121": 0.9891,
+    "Scene_124": 0.0348,
+    "Scene_131": 0.8546,
+    "Scene_96": 0.6971,
+    "Scene_97": 0.3209
+   },
+   "median_oil_scene_f1": 0.8175,
+   "n_scenes": 24,
+   "n_oil_scenes": 14,
+   "n_px": 166685,
+   "n_oil_px": 42456
+  },
+  "fp_by_class_val": {
+   "Marine Debris": {
+    "n": 87,
+    "pred_oil": 0
+   },
+   "Sparse Floating Algae": {
+    "n": 242,
+    "pred_oil": 40
+   },
+   "Natural Organic Material": {
+    "n": 3,
+    "pred_oil": 0
+   },
+   "Ship": {
+    "n": 2400,
+    "pred_oil": 64
+   },
+   "Marine Water": {
+    "n": 73361,
+    "pred_oil": 1776
+   },
+   "Turbid Water": {
+    "n": 510,
+    "pred_oil": 286
+   },
+   "Shallow Water": {
+    "n": 39008,
+    "pred_oil": 2271
+   },
+   "Waves & Wakes": {
+    "n": 1065,
+    "pred_oil": 603
+   },
+   "Oil Spill": {
+    "n": 42456,
+    "pred_oil": 35815
+   },
+   "Oil Platform": {
+    "n": 3923,
+    "pred_oil": 1168
+   },
+   "Jellyfish": {
+    "n": 928,
+    "pred_oil": 1
+   },
+   "Sea snot": {
+    "n": 2702,
+    "pred_oil": 51
+   }
+  },
+  "train_px": 330400,
+  "train_oil_px": 140584,
+  "seconds": 7.0
+ },
+ "win_pw3_s0": {
+  "variant": "win_pw3",
+  "seed": 0,
+  "threshold": 0.02,
+  "val": {
+   "pooled": {
+    "precision": 0.873,
+    "recall": 0.7739,
+    "f1": 0.8205,
+    "iou": 0.6956,
+    "tp": 32858,
+    "fp": 4780,
+    "fn": 9598
+   },
+   "ci95": {
+    "precision": [
+     0.7069,
+     0.9693
+    ],
+    "recall": [
+     0.5824,
+     0.9721
+    ],
+    "f1": [
+     0.6753,
+     0.9306
+    ],
+    "iou": [
+     0.5098,
+     0.8702
+    ]
+   },
+   "per_oil_scene_f1": {
+    "Scene_100": 0.9972,
+    "Scene_104": 0.7001,
+    "Scene_105": 0.0456,
+    "Scene_109": 0.8088,
+    "Scene_110": 0.3896,
+    "Scene_111": 0.2627,
+    "Scene_112": 0.9857,
+    "Scene_116": 0.9658,
+    "Scene_118": 0.9851,
+    "Scene_121": 0.9991,
+    "Scene_124": 0.0,
+    "Scene_131": 0.873,
+    "Scene_96": 0.7989,
+    "Scene_97": 0.3638
+   },
+   "median_oil_scene_f1": 0.8038,
+   "n_scenes": 24,
+   "n_oil_scenes": 14,
+   "n_px": 166685,
+   "n_oil_px": 42456
+  },
+  "fp_by_class_val": {
+   "Marine Debris": {
+    "n": 87,
+    "pred_oil": 0
+   },
+   "Sparse Floating Algae": {
+    "n": 242,
+    "pred_oil": 19
+   },
+   "Natural Organic Material": {
+    "n": 3,
+    "pred_oil": 0
+   },
+   "Ship": {
+    "n": 2400,
+    "pred_oil": 40
+   },
+   "Marine Water": {
+    "n": 73361,
+    "pred_oil": 1254
+   },
+   "Turbid Water": {
+    "n": 510,
+    "pred_oil": 182
+   },
+   "Shallow Water": {
+    "n": 39008,
+    "pred_oil": 1860
+   },
+   "Waves & Wakes": {
+    "n": 1065,
+    "pred_oil": 538
+   },
+   "Oil Spill": {
+    "n": 42456,
+    "pred_oil": 32858
+   },
+   "Oil Platform": {
+    "n": 3923,
+    "pred_oil": 847
+   },
+   "Jellyfish": {
+    "n": 928,
+    "pred_oil": 0
+   },
+   "Sea snot": {
+    "n": 2702,
+    "pred_oil": 40
+   }
+  },
+  "train_px": 330400,
+  "train_oil_px": 140584,
+  "seconds": 6.3
+ },
+ "min_pw1_s0": {
+  "variant": "min_pw1",
+  "seed": 0,
+  "threshold": 0.85,
+  "val": {
+   "pooled": {
+    "precision": 0.5661,
+    "recall": 0.6158,
+    "f1": 0.5899,
+    "iou": 0.4184,
+    "tp": 26146,
+    "fp": 20039,
+    "fn": 16310
+   },
+   "ci95": {
+    "precision": [
+     0.32,
+     0.8299
+    ],
+    "recall": [
+     0.4075,
+     0.8368
+    ],
+    "f1": [
+     0.3908,
+     0.7689
+    ],
+    "iou": [
+     0.2429,
+     0.6246
+    ]
+   },
+   "per_oil_scene_f1": {
+    "Scene_100": 0.6579,
+    "Scene_104": 0.4637,
+    "Scene_105": 0.3006,
+    "Scene_109": 0.4841,
+    "Scene_110": 0.1185,
+    "Scene_111": 0.0559,
+    "Scene_112": 0.8837,
+    "Scene_116": 0.7453,
+    "Scene_118": 0.8478,
+    "Scene_121": 0.9583,
+    "Scene_124": 0.1167,
+    "Scene_131": 0.839,
+    "Scene_96": 0.1875,
+    "Scene_97": 0.4681
+   },
+   "median_oil_scene_f1": 0.4761,
+   "n_scenes": 24,
+   "n_oil_scenes": 14,
+   "n_px": 166685,
+   "n_oil_px": 42456
+  },
+  "fp_by_class_val": {
+   "Marine Debris": {
+    "n": 87,
+    "pred_oil": 0
+   },
+   "Sparse Floating Algae": {
+    "n": 242,
+    "pred_oil": 8
+   },
+   "Natural Organic Material": {
+    "n": 3,
+    "pred_oil": 0
+   },
+   "Ship": {
+    "n": 2400,
+    "pred_oil": 44
+   },
+   "Marine Water": {
+    "n": 73361,
+    "pred_oil": 8535
+   },
+   "Turbid Water": {
+    "n": 510,
+    "pred_oil": 0
+   },
+   "Shallow Water": {
+    "n": 39008,
+    "pred_oil": 10317
+   },
+   "Waves & Wakes": {
+    "n": 1065,
+    "pred_oil": 293
+   },
+   "Oil Spill": {
+    "n": 42456,
+    "pred_oil": 26146
+   },
+   "Oil Platform": {
+    "n": 3923,
+    "pred_oil": 804
+   },
+   "Jellyfish": {
+    "n": 928,
+    "pred_oil": 0
+   },
+   "Sea snot": {
+    "n": 2702,
+    "pred_oil": 38
+   }
+  },
+  "train_px": 330400,
+  "train_oil_px": 140584,
+  "seconds": 3.7
+ },
+ "win_pw1_l31_s0": {
+  "variant": "win_pw1_l31",
+  "seed": 0,
+  "threshold": 0.015,
+  "val": {
+   "pooled": {
+    "precision": 0.8681,
+    "recall": 0.874,
+    "f1": 0.871,
+    "iou": 0.7715,
+    "tp": 37107,
+    "fp": 5640,
+    "fn": 5349
+   },
+   "ci95": {
+    "precision": [
+     0.6889,
+     0.9641
+    ],
+    "recall": [
+     0.7075,
+     0.9808
+    ],
+    "f1": [
+     0.727,
+     0.9389
+    ],
+    "iou": [
+     0.5711,
+     0.8848
+    ]
+   },
+   "per_oil_scene_f1": {
+    "Scene_100": 0.9926,
+    "Scene_104": 0.9312,
+    "Scene_105": 0.0633,
+    "Scene_109": 0.7879,
+    "Scene_110": 0.566,
+    "Scene_111": 0.3228,
+    "Scene_112": 0.9958,
+    "Scene_116": 0.963,
+    "Scene_118": 0.987,
+    "Scene_121": 0.9807,
+    "Scene_124": 0.0517,
+    "Scene_131": 0.8633,
+    "Scene_96": 0.7747,
+    "Scene_97": 0.3369
+   },
+   "median_oil_scene_f1": 0.8256,
+   "n_scenes": 24,
+   "n_oil_scenes": 14,
+   "n_px": 166685,
+   "n_oil_px": 42456
+  },
+  "fp_by_class_val": {
+   "Marine Debris": {
+    "n": 87,
+    "pred_oil": 1
+   },
+   "Sparse Floating Algae": {
+    "n": 242,
+    "pred_oil": 31
+   },
+   "Natural Organic Material": {
+    "n": 3,
+    "pred_oil": 0
+   },
+   "Ship": {
+    "n": 2400,
+    "pred_oil": 43
+   },
+   "Marine Water": {
+    "n": 73361,
+    "pred_oil": 1653
+   },
+   "Turbid Water": {
+    "n": 510,
+    "pred_oil": 178
+   },
+   "Shallow Water": {
+    "n": 39008,
+    "pred_oil": 2118
+   },
+   "Waves & Wakes": {
+    "n": 1065,
+    "pred_oil": 562
+   },
+   "Oil Spill": {
+    "n": 42456,
+    "pred_oil": 37107
+   },
+   "Oil Platform": {
+    "n": 3923,
+    "pred_oil": 1048
+   },
+   "Jellyfish": {
+    "n": 928,
+    "pred_oil": 1
+   },
+   "Sea snot": {
+    "n": 2702,
+    "pred_oil": 5
+   }
+  },
+  "train_px": 330400,
+  "train_oil_px": 140584,
+  "seconds": 4.9
+ },
+ "baseline_osi": {
+  "variant": "OSI=(B3+B4)/B2 threshold",
+  "sign": 1,
+  "threshold": 1.3101205396652222,
+  "val": {
+   "pooled": {
+    "precision": 0.2876,
+    "recall": 0.9711,
+    "f1": 0.4438,
+    "iou": 0.2852,
+    "tp": 41228,
+    "fp": 102121,
+    "fn": 1228
+   },
+   "ci95": {
+    "precision": [
+     0.1482,
+     0.4706
+    ],
+    "recall": [
+     0.9392,
+     0.9971
+    ],
+    "f1": [
+     0.2568,
+     0.6347
+    ],
+    "iou": [
+     0.1473,
+     0.4649
+    ]
+   },
+   "per_oil_scene_f1": {
+    "Scene_100": 0.4368,
+    "Scene_104": 0.9619,
+    "Scene_105": 0.2015,
+    "Scene_109": 0.5358,
+    "Scene_110": 0.9613,
+    "Scene_111": 0.0424,
+    "Scene_112": 0.7264,
+    "Scene_116": 0.1858,
+    "Scene_118": 0.6261,
+    "Scene_121": 0.8242,
+    "Scene_124": 0.1644,
+    "Scene_131": 0.7046,
+    "Scene_96": 0.1593,
+    "Scene_97": 0.0655
+   },
+   "median_oil_scene_f1": 0.4863,
+   "n_scenes": 24,
+   "n_oil_scenes": 14,
+   "n_px": 166685,
+   "n_oil_px": 42456
+  },
+  "fp_by_class_val": {
+   "Marine Debris": {
+    "n": 87,
+    "pred_oil": 86
+   },
+   "Sparse Floating Algae": {
+    "n": 242,
+    "pred_oil": 242
+   },
+   "Natural Organic Material": {
+    "n": 3,
+    "pred_oil": 3
+   },
+   "Ship": {
+    "n": 2400,
+    "pred_oil": 2400
+   },
+   "Marine Water": {
+    "n": 73361,
+    "pred_oil": 51332
+   },
+   "Turbid Water": {
+    "n": 510,
+    "pred_oil": 510
+   },
+   "Shallow Water": {
+    "n": 39008,
+    "pred_oil": 38947
+   },
+   "Waves & Wakes": {
+    "n": 1065,
+    "pred_oil": 1064
+   },
+   "Oil Spill": {
+    "n": 42456,
+    "pred_oil": 41228
+   },
+   "Oil Platform": {
+    "n": 3923,
+    "pred_oil": 3923
+   },
+   "Jellyfish": {
+    "n": 928,
+    "pred_oil": 912
+   },
+   "Sea snot": {
+    "n": 2702,
+    "pred_oil": 2702
+   }
+  }
+ },
+ "win_pw1_s1": {
+  "variant": "win_pw1",
+  "seed": 1,
+  "threshold": 0.005,
+  "val": {
+   "pooled": {
+    "precision": 0.8625,
+    "recall": 0.8621,
+    "f1": 0.8623,
+    "iou": 0.7579,
+    "tp": 36600,
+    "fp": 5834,
+    "fn": 5856
+   },
+   "ci95": {
+    "precision": [
+     0.6855,
+     0.9554
+    ],
+    "recall": [
+     0.6826,
+     0.9797
+    ],
+    "f1": [
+     0.7102,
+     0.9331
+    ],
+    "iou": [
+     0.5506,
+     0.8746
+    ]
+   },
+   "per_oil_scene_f1": {
+    "Scene_100": 0.999,
+    "Scene_104": 0.9235,
+    "Scene_105": 0.052,
+    "Scene_109": 0.7863,
+    "Scene_110": 0.4345,
+    "Scene_111": 0.2836,
+    "Scene_112": 0.9968,
+    "Scene_116": 0.9248,
+    "Scene_118": 0.9845,
+    "Scene_121": 0.9764,
+    "Scene_124": 0.0,
+    "Scene_131": 0.8613,
+    "Scene_96": 0.7274,
+    "Scene_97": 0.3559
+   },
+   "median_oil_scene_f1": 0.8238,
+   "n_scenes": 24,
+   "n_oil_scenes": 14,
+   "n_px": 166685,
+   "n_oil_px": 42456
+  },
+  "fp_by_class_val": {
+   "Marine Debris": {
+    "n": 87,
+    "pred_oil": 1
+   },
+   "Sparse Floating Algae": {
+    "n": 242,
+    "pred_oil": 53
+   },
+   "Natural Organic Material": {
+    "n": 3,
+    "pred_oil": 0
+   },
+   "Ship": {
+    "n": 2400,
+    "pred_oil": 60
+   },
+   "Marine Water": {
+    "n": 73361,
+    "pred_oil": 1795
+   },
+   "Turbid Water": {
+    "n": 510,
+    "pred_oil": 254
+   },
+   "Shallow Water": {
+    "n": 39008,
+    "pred_oil": 1899
+   },
+   "Waves & Wakes": {
+    "n": 1065,
+    "pred_oil": 570
+   },
+   "Oil Spill": {
+    "n": 42456,
+    "pred_oil": 36600
+   },
+   "Oil Platform": {
+    "n": 3923,
+    "pred_oil": 1159
+   },
+   "Jellyfish": {
+    "n": 928,
+    "pred_oil": 2
+   },
+   "Sea snot": {
+    "n": 2702,
+    "pred_oil": 41
+   }
+  },
+  "train_px": 330400,
+  "train_oil_px": 140584,
+  "seconds": 6.1
+ },
+ "win_pw1_s2": {
+  "variant": "win_pw1",
+  "seed": 2,
+  "threshold": 0.002,
+  "val": {
+   "pooled": {
+    "precision": 0.8199,
+    "recall": 0.8278,
+    "f1": 0.8239,
+    "iou": 0.7005,
+    "tp": 35147,
+    "fp": 7720,
+    "fn": 7309
+   },
+   "ci95": {
+    "precision": [
+     0.6384,
+     0.928
+    ],
+    "recall": [
+     0.6683,
+     0.9809
+    ],
+    "f1": [
+     0.6841,
+     0.909
+    ],
+    "iou": [
+     0.5198,
+     0.8332
+    ]
+   },
+   "per_oil_scene_f1": {
+    "Scene_100": 1.0,
+    "Scene_104": 0.8171,
+    "Scene_105": 0.0788,
+    "Scene_109": 0.7526,
+    "Scene_110": 0.5571,
+    "Scene_111": 0.3288,
+    "Scene_112": 0.9873,
+    "Scene_116": 0.8579,
+    "Scene_118": 0.9825,
+    "Scene_121": 0.9646,
+    "Scene_124": 0.3134,
+    "Scene_131": 0.8418,
+    "Scene_96": 0.6105,
+    "Scene_97": 0.317
+   },
+   "median_oil_scene_f1": 0.7849,
+   "n_scenes": 24,
+   "n_oil_scenes": 14,
+   "n_px": 166685,
+   "n_oil_px": 42456
+  },
+  "fp_by_class_val": {
+   "Marine Debris": {
+    "n": 87,
+    "pred_oil": 1
+   },
+   "Sparse Floating Algae": {
+    "n": 242,
+    "pred_oil": 83
+   },
+   "Natural Organic Material": {
+    "n": 3,
+    "pred_oil": 0
+   },
+   "Ship": {
+    "n": 2400,
+    "pred_oil": 85
+   },
+   "Marine Water": {
+    "n": 73361,
+    "pred_oil": 2522
+   },
+   "Turbid Water": {
+    "n": 510,
+    "pred_oil": 307
+   },
+   "Shallow Water": {
+    "n": 39008,
+    "pred_oil": 2528
+   },
+   "Waves & Wakes": {
+    "n": 1065,
+    "pred_oil": 704
+   },
+   "Oil Spill": {
+    "n": 42456,
+    "pred_oil": 35147
+   },
+   "Oil Platform": {
+    "n": 3923,
+    "pred_oil": 1418
+   },
+   "Jellyfish": {
+    "n": 928,
+    "pred_oil": 4
+   },
+   "Sea snot": {
+    "n": 2702,
+    "pred_oil": 68
+   }
+  },
+  "train_px": 330400,
+  "train_oil_px": 140584,
+  "seconds": 6.7
+ },
+ "win_pw1_l31_s1": {
+  "variant": "win_pw1_l31",
+  "seed": 1,
+  "threshold": 0.03,
+  "val": {
+   "pooled": {
+    "precision": 0.8873,
+    "recall": 0.864,
+    "f1": 0.8755,
+    "iou": 0.7786,
+    "tp": 36684,
+    "fp": 4660,
+    "fn": 5772
+   },
+   "ci95": {
+    "precision": [
+     0.7225,
+     0.9709
+    ],
+    "recall": [
+     0.6788,
+     0.9761
+    ],
+    "f1": [
+     0.7246,
+     0.9434
+    ],
+    "iou": [
+     0.5681,
+     0.893
+    ]
+   },
+   "per_oil_scene_f1": {
+    "Scene_100": 0.9873,
+    "Scene_104": 0.9329,
+    "Scene_105": 0.0409,
+    "Scene_109": 0.8278,
+    "Scene_110": 0.4331,
+    "Scene_111": 0.2771,
+    "Scene_112": 0.9962,
+    "Scene_116": 0.9733,
+    "Scene_118": 0.9861,
+    "Scene_121": 0.9793,
+    "Scene_124": 0.0,
+    "Scene_131": 0.8732,
+    "Scene_96": 0.9072,
+    "Scene_97": 0.3682
+   },
+   "median_oil_scene_f1": 0.8902,
+   "n_scenes": 24,
+   "n_oil_scenes": 14,
+   "n_px": 166685,
+   "n_oil_px": 42456
+  },
+  "fp_by_class_val": {
+   "Marine Debris": {
+    "n": 87,
+    "pred_oil": 0
+   },
+   "Sparse Floating Algae": {
+    "n": 242,
+    "pred_oil": 23
+   },
+   "Natural Organic Material": {
+    "n": 3,
+    "pred_oil": 0
+   },
+   "Ship": {
+    "n": 2400,
+    "pred_oil": 35
+   },
+   "Marine Water": {
+    "n": 73361,
+    "pred_oil": 1388
+   },
+   "Turbid Water": {
+    "n": 510,
+    "pred_oil": 38
+   },
+   "Shallow Water": {
+    "n": 39008,
+    "pred_oil": 1820
+   },
+   "Waves & Wakes": {
+    "n": 1065,
+    "pred_oil": 496
+   },
+   "Oil Spill": {
+    "n": 42456,
+    "pred_oil": 36684
+   },
+   "Oil Platform": {
+    "n": 3923,
+    "pred_oil": 856
+   },
+   "Jellyfish": {
+    "n": 928,
+    "pred_oil": 0
+   },
+   "Sea snot": {
+    "n": 2702,
+    "pred_oil": 4
+   }
+  },
+  "train_px": 330400,
+  "train_oil_px": 140584,
+  "seconds": 5.0
+ },
+ "win_pw1_l31_s2": {
+  "variant": "win_pw1_l31",
+  "seed": 2,
+  "threshold": 0.01,
+  "val": {
+   "pooled": {
+    "precision": 0.8543,
+    "recall": 0.8365,
+    "f1": 0.8453,
+    "iou": 0.732,
+    "tp": 35513,
+    "fp": 6058,
+    "fn": 6943
+   },
+   "ci95": {
+    "precision": [
+     0.68,
+     0.9515
+    ],
+    "recall": [
+     0.6775,
+     0.9761
+    ],
+    "f1": [
+     0.7127,
+     0.9221
+    ],
+    "iou": [
+     0.5537,
+     0.8555
+    ]
+   },
+   "per_oil_scene_f1": {
+    "Scene_100": 0.9955,
+    "Scene_104": 0.8495,
+    "Scene_105": 0.062,
+    "Scene_109": 0.7849,
+    "Scene_110": 0.5472,
+    "Scene_111": 0.3681,
+    "Scene_112": 0.9825,
+    "Scene_116": 0.9227,
+    "Scene_118": 0.9839,
+    "Scene_121": 0.9739,
+    "Scene_124": 0.3259,
+    "Scene_131": 0.8566,
+    "Scene_96": 0.7342,
+    "Scene_97": 0.3439
+   },
+   "median_oil_scene_f1": 0.8172,
+   "n_scenes": 24,
+   "n_oil_scenes": 14,
+   "n_px": 166685,
+   "n_oil_px": 42456
+  },
+  "fp_by_class_val": {
+   "Marine Debris": {
+    "n": 87,
+    "pred_oil": 1
+   },
+   "Sparse Floating Algae": {
+    "n": 242,
+    "pred_oil": 44
+   },
+   "Natural Organic Material": {
+    "n": 3,
+    "pred_oil": 0
+   },
+   "Ship": {
+    "n": 2400,
+    "pred_oil": 47
+   },
+   "Marine Water": {
+    "n": 73361,
+    "pred_oil": 1946
+   },
+   "Turbid Water": {
+    "n": 510,
+    "pred_oil": 168
+   },
+   "Shallow Water": {
+    "n": 39008,
+    "pred_oil": 2083
+   },
+   "Waves & Wakes": {
+    "n": 1065,
+    "pred_oil": 586
+   },
+   "Oil Spill": {
+    "n": 42456,
+    "pred_oil": 35513
+   },
+   "Oil Platform": {
+    "n": 3923,
+    "pred_oil": 1160
+   },
+   "Jellyfish": {
+    "n": 928,
+    "pred_oil": 2
+   },
+   "Sea snot": {
+    "n": 2702,
+    "pred_oil": 21
+   }
+  },
+  "train_px": 330400,
+  "train_oil_px": 140584,
+  "seconds": 4.8
+ },
+ "win_pw1_l15_s0": {
+  "variant": "win_pw1_l15",
+  "seed": 0,
+  "threshold": 0.06,
+  "val": {
+   "pooled": {
+    "precision": 0.8866,
+    "recall": 0.8901,
+    "f1": 0.8883,
+    "iou": 0.7991,
+    "tp": 37788,
+    "fp": 4831,
+    "fn": 4668
+   },
+   "ci95": {
+    "precision": [
+     0.7275,
+     0.968
+    ],
+    "recall": [
+     0.7265,
+     0.9829
+    ],
+    "f1": [
+     0.7538,
+     0.9495
+    ],
+    "iou": [
+     0.6049,
+     0.9038
+    ]
+   },
+   "per_oil_scene_f1": {
+    "Scene_100": 0.9951,
+    "Scene_104": 0.9529,
+    "Scene_105": 0.0401,
+    "Scene_109": 0.8106,
+    "Scene_110": 0.654,
+    "Scene_111": 0.2973,
+    "Scene_112": 0.9957,
+    "Scene_116": 0.9434,
+    "Scene_118": 0.9864,
+    "Scene_121": 0.982,
+    "Scene_124": 0.5513,
+    "Scene_131": 0.8685,
+    "Scene_96": 0.9355,
+    "Scene_97": 0.388
+   },
+   "median_oil_scene_f1": 0.902,
+   "n_scenes": 24,
+   "n_oil_scenes": 14,
+   "n_px": 166685,
+   "n_oil_px": 42456
+  },
+  "fp_by_class_val": {
+   "Marine Debris": {
+    "n": 87,
+    "pred_oil": 0
+   },
+   "Sparse Floating Algae": {
+    "n": 242,
+    "pred_oil": 35
+   },
+   "Natural Organic Material": {
+    "n": 3,
+    "pred_oil": 0
+   },
+   "Ship": {
+    "n": 2400,
+    "pred_oil": 41
+   },
+   "Marine Water": {
+    "n": 73361,
+    "pred_oil": 1529
+   },
+   "Turbid Water": {
+    "n": 510,
+    "pred_oil": 0
+   },
+   "Shallow Water": {
+    "n": 39008,
+    "pred_oil": 1630
+   },
+   "Waves & Wakes": {
+    "n": 1065,
+    "pred_oil": 601
+   },
+   "Oil Spill": {
+    "n": 42456,
+    "pred_oil": 37788
+   },
+   "Oil Platform": {
+    "n": 3923,
+    "pred_oil": 984
+   },
+   "Jellyfish": {
+    "n": 928,
+    "pred_oil": 1
+   },
+   "Sea snot": {
+    "n": 2702,
+    "pred_oil": 10
+   }
+  },
+  "train_px": 330400,
+  "train_oil_px": 140584,
+  "seconds": 3.5
+ },
+ "win_pw1_l15_s1": {
+  "variant": "win_pw1_l15",
+  "seed": 1,
+  "threshold": 0.08,
+  "val": {
+   "pooled": {
+    "precision": 0.8983,
+    "recall": 0.8824,
+    "f1": 0.8903,
+    "iou": 0.8023,
+    "tp": 37465,
+    "fp": 4242,
+    "fn": 4991
+   },
+   "ci95": {
+    "precision": [
+     0.754,
+     0.9684
+    ],
+    "recall": [
+     0.7065,
+     0.9781
+    ],
+    "f1": [
+     0.7542,
+     0.9486
+    ],
+    "iou": [
+     0.6054,
+     0.9023
+    ]
+   },
+   "per_oil_scene_f1": {
+    "Scene_100": 0.9912,
+    "Scene_104": 0.9548,
+    "Scene_105": 0.041,
+    "Scene_109": 0.8411,
+    "Scene_110": 0.5675,
+    "Scene_111": 0.2988,
+    "Scene_112": 0.9956,
+    "Scene_116": 0.9573,
+    "Scene_118": 0.9832,
+    "Scene_121": 0.9749,
+    "Scene_124": 0.3259,
+    "Scene_131": 0.8705,
+    "Scene_96": 0.9416,
+    "Scene_97": 0.4291
+   },
+   "median_oil_scene_f1": 0.9061,
+   "n_scenes": 24,
+   "n_oil_scenes": 14,
+   "n_px": 166685,
+   "n_oil_px": 42456
+  },
+  "fp_by_class_val": {
+   "Marine Debris": {
+    "n": 87,
+    "pred_oil": 0
+   },
+   "Sparse Floating Algae": {
+    "n": 242,
+    "pred_oil": 25
+   },
+   "Natural Organic Material": {
+    "n": 3,
+    "pred_oil": 0
+   },
+   "Ship": {
+    "n": 2400,
+    "pred_oil": 26
+   },
+   "Marine Water": {
+    "n": 73361,
+    "pred_oil": 1348
+   },
+   "Turbid Water": {
+    "n": 510,
+    "pred_oil": 0
+   },
+   "Shallow Water": {
+    "n": 39008,
+    "pred_oil": 1331
+   },
+   "Waves & Wakes": {
+    "n": 1065,
+    "pred_oil": 582
+   },
+   "Oil Spill": {
+    "n": 42456,
+    "pred_oil": 37465
+   },
+   "Oil Platform": {
+    "n": 3923,
+    "pred_oil": 923
+   },
+   "Jellyfish": {
+    "n": 928,
+    "pred_oil": 3
+   },
+   "Sea snot": {
+    "n": 2702,
+    "pred_oil": 4
+   }
+  },
+  "train_px": 330400,
+  "train_oil_px": 140584,
+  "seconds": 4.0
+ },
+ "win_pw1_l15_s2": {
+  "variant": "win_pw1_l15",
+  "seed": 2,
+  "threshold": 0.06,
+  "val": {
+   "pooled": {
+    "precision": 0.8796,
+    "recall": 0.878,
+    "f1": 0.8788,
+    "iou": 0.7838,
+    "tp": 37278,
+    "fp": 5103,
+    "fn": 5178
+   },
+   "ci95": {
+    "precision": [
+     0.7373,
+     0.9547
+    ],
+    "recall": [
+     0.7193,
+     0.9789
+    ],
+    "f1": [
+     0.7497,
+     0.9369
+    ],
+    "iou": [
+     0.5997,
+     0.8813
+    ]
+   },
+   "per_oil_scene_f1": {
+    "Scene_100": 0.9933,
+    "Scene_104": 0.9307,
+    "Scene_105": 0.0409,
+    "Scene_109": 0.8328,
+    "Scene_110": 0.6517,
+    "Scene_111": 0.2648,
+    "Scene_112": 0.9949,
+    "Scene_116": 0.8661,
+    "Scene_118": 0.9842,
+    "Scene_121": 0.9676,
+    "Scene_124": 0.473,
+    "Scene_131": 0.8629,
+    "Scene_96": 0.9119,
+    "Scene_97": 0.4196
+   },
+   "median_oil_scene_f1": 0.8645,
+   "n_scenes": 24,
+   "n_oil_scenes": 14,
+   "n_px": 166685,
+   "n_oil_px": 42456
+  },
+  "fp_by_class_val": {
+   "Marine Debris": {
+    "n": 87,
+    "pred_oil": 1
+   },
+   "Sparse Floating Algae": {
+    "n": 242,
+    "pred_oil": 30
+   },
+   "Natural Organic Material": {
+    "n": 3,
+    "pred_oil": 0
+   },
+   "Ship": {
+    "n": 2400,
+    "pred_oil": 45
+   },
+   "Marine Water": {
+    "n": 73361,
+    "pred_oil": 1943
+   },
+   "Turbid Water": {
+    "n": 510,
+    "pred_oil": 0
+   },
+   "Shallow Water": {
+    "n": 39008,
+    "pred_oil": 1375
+   },
+   "Waves & Wakes": {
+    "n": 1065,
+    "pred_oil": 616
+   },
+   "Oil Spill": {
+    "n": 42456,
+    "pred_oil": 37278
+   },
+   "Oil Platform": {
+    "n": 3923,
+    "pred_oil": 1068
+   },
+   "Jellyfish": {
+    "n": 928,
+    "pred_oil": 2
+   },
+   "Sea snot": {
+    "n": 2702,
+    "pred_oil": 23
+   }
+  },
+  "train_px": 330400,
+  "train_oil_px": 140584,
+  "seconds": 7.0
+ },
+ "win_pw1_l15_r200_s0": {
+  "variant": "win_pw1_l15_r200",
+  "seed": 0,
+  "threshold": 0.13,
+  "val": {
+   "pooled": {
+    "precision": 0.8811,
+    "recall": 0.8779,
+    "f1": 0.8795,
+    "iou": 0.7849,
+    "tp": 37274,
+    "fp": 5031,
+    "fn": 5182
+   },
+   "ci95": {
+    "precision": [
+     0.7285,
+     0.9585
+    ],
+    "recall": [
+     0.7116,
+     0.9759
+    ],
+    "f1": [
+     0.7388,
+     0.9415
+    ],
+    "iou": [
+     0.5858,
+     0.8895
+    ]
+   },
+   "per_oil_scene_f1": {
+    "Scene_100": 0.9958,
+    "Scene_104": 0.9458,
+    "Scene_105": 0.0392,
+    "Scene_109": 0.8225,
+    "Scene_110": 0.5757,
+    "Scene_111": 0.26,
+    "Scene_112": 0.9933,
+    "Scene_116": 0.8932,
+    "Scene_118": 0.9695,
+    "Scene_121": 0.9959,
+    "Scene_124": 0.5419,
+    "Scene_131": 0.8631,
+    "Scene_96": 0.9034,
+    "Scene_97": 0.4194
+   },
+   "median_oil_scene_f1": 0.8781,
+   "n_scenes": 24,
+   "n_oil_scenes": 14,
+   "n_px": 166685,
+   "n_oil_px": 42456
+  },
+  "fp_by_class_val": {
+   "Marine Debris": {
+    "n": 87,
+    "pred_oil": 1
+   },
+   "Sparse Floating Algae": {
+    "n": 242,
+    "pred_oil": 22
+   },
+   "Natural Organic Material": {
+    "n": 3,
+    "pred_oil": 0
+   },
+   "Ship": {
+    "n": 2400,
+    "pred_oil": 49
+   },
+   "Marine Water": {
+    "n": 73361,
+    "pred_oil": 1407
+   },
+   "Turbid Water": {
+    "n": 510,
+    "pred_oil": 0
+   },
+   "Shallow Water": {
+    "n": 39008,
+    "pred_oil": 1406
+   },
+   "Waves & Wakes": {
+    "n": 1065,
+    "pred_oil": 730
+   },
+   "Oil Spill": {
+    "n": 42456,
+    "pred_oil": 37274
+   },
+   "Oil Platform": {
+    "n": 3923,
+    "pred_oil": 1300
+   },
+   "Jellyfish": {
+    "n": 928,
+    "pred_oil": 0
+   },
+   "Sea snot": {
+    "n": 2702,
+    "pred_oil": 116
+   }
+  },
+  "train_px": 330400,
+  "train_oil_px": 140584,
+  "seconds": 4.4
+ },
+ "win_pw1_l15_r200_s1": {
+  "variant": "win_pw1_l15_r200",
+  "seed": 1,
+  "threshold": 0.18,
+  "val": {
+   "pooled": {
+    "precision": 0.8991,
+    "recall": 0.8631,
+    "f1": 0.8807,
+    "iou": 0.7869,
+    "tp": 36645,
+    "fp": 4114,
+    "fn": 5811
+   },
+   "ci95": {
+    "precision": [
+     0.76,
+     0.9674
+    ],
+    "recall": [
+     0.6857,
+     0.9672
+    ],
+    "f1": [
+     0.7439,
+     0.9417
+    ],
+    "iou": [
+     0.5922,
+     0.8898
+    ]
+   },
+   "per_oil_scene_f1": {
+    "Scene_100": 0.993,
+    "Scene_104": 0.9367,
+    "Scene_105": 0.0384,
+    "Scene_109": 0.8472,
+    "Scene_110": 0.482,
+    "Scene_111": 0.2595,
+    "Scene_112": 0.9925,
+    "Scene_116": 0.9229,
+    "Scene_118": 0.9614,
+    "Scene_121": 0.9999,
+    "Scene_124": 0.2481,
+    "Scene_131": 0.8702,
+    "Scene_96": 0.9216,
+    "Scene_97": 0.4676
+   },
+   "median_oil_scene_f1": 0.8959,
+   "n_scenes": 24,
+   "n_oil_scenes": 14,
+   "n_px": 166685,
+   "n_oil_px": 42456
+  },
+  "fp_by_class_val": {
+   "Marine Debris": {
+    "n": 87,
+    "pred_oil": 1
+   },
+   "Sparse Floating Algae": {
+    "n": 242,
+    "pred_oil": 17
+   },
+   "Natural Organic Material": {
+    "n": 3,
+    "pred_oil": 0
+   },
+   "Ship": {
+    "n": 2400,
+    "pred_oil": 28
+   },
+   "Marine Water": {
+    "n": 73361,
+    "pred_oil": 1043
+   },
+   "Turbid Water": {
+    "n": 510,
+    "pred_oil": 0
+   },
+   "Shallow Water": {
+    "n": 39008,
+    "pred_oil": 1154
+   },
+   "Waves & Wakes": {
+    "n": 1065,
+    "pred_oil": 652
+   },
+   "Oil Spill": {
+    "n": 42456,
+    "pred_oil": 36645
+   },
+   "Oil Platform": {
+    "n": 3923,
+    "pred_oil": 1133
+   },
+   "Jellyfish": {
+    "n": 928,
+    "pred_oil": 2
+   },
+   "Sea snot": {
+    "n": 2702,
+    "pred_oil": 84
+   }
+  },
+  "train_px": 330400,
+  "train_oil_px": 140584,
+  "seconds": 4.5
+ },
+ "win_pw1_l15_r200_s2": {
+  "variant": "win_pw1_l15_r200",
+  "seed": 2,
+  "threshold": 0.12,
+  "val": {
+   "pooled": {
+    "precision": 0.8622,
+    "recall": 0.8696,
+    "f1": 0.8659,
+    "iou": 0.7634,
+    "tp": 36919,
+    "fp": 5903,
+    "fn": 5537
+   },
+   "ci95": {
+    "precision": [
+     0.7137,
+     0.9425
+    ],
+    "recall": [
+     0.7099,
+     0.9718
+    ],
+    "f1": [
+     0.7361,
+     0.9254
+    ],
+    "iou": [
+     0.5824,
+     0.8612
+    ]
+   },
+   "per_oil_scene_f1": {
+    "Scene_100": 0.9955,
+    "Scene_104": 0.9254,
+    "Scene_105": 0.0402,
+    "Scene_109": 0.8303,
+    "Scene_110": 0.6276,
+    "Scene_111": 0.249,
+    "Scene_112": 0.9873,
+    "Scene_116": 0.799,
+    "Scene_118": 0.9656,
+    "Scene_121": 0.9709,
+    "Scene_124": 0.6049,
+    "Scene_131": 0.8591,
+    "Scene_96": 0.8914,
+    "Scene_97": 0.4173
+   },
+   "median_oil_scene_f1": 0.8447,
+   "n_scenes": 24,
+   "n_oil_scenes": 14,
+   "n_px": 166685,
+   "n_oil_px": 42456
+  },
+  "fp_by_class_val": {
+   "Marine Debris": {
+    "n": 87,
+    "pred_oil": 1
+   },
+   "Sparse Floating Algae": {
+    "n": 242,
+    "pred_oil": 25
+   },
+   "Natural Organic Material": {
+    "n": 3,
+    "pred_oil": 0
+   },
+   "Ship": {
+    "n": 2400,
+    "pred_oil": 42
+   },
+   "Marine Water": {
+    "n": 73361,
+    "pred_oil": 2224
+   },
+   "Turbid Water": {
+    "n": 510,
+    "pred_oil": 0
+   },
+   "Shallow Water": {
+    "n": 39008,
+    "pred_oil": 1424
+   },
+   "Waves & Wakes": {
+    "n": 1065,
+    "pred_oil": 714
+   },
+   "Oil Spill": {
+    "n": 42456,
+    "pred_oil": 36919
+   },
+   "Oil Platform": {
+    "n": 3923,
+    "pred_oil": 1347
+   },
+   "Jellyfish": {
+    "n": 928,
+    "pred_oil": 2
+   },
+   "Sea snot": {
+    "n": 2702,
+    "pred_oil": 124
+   }
+  },
+  "train_px": 330400,
+  "train_oil_px": 140584,
+  "seconds": 2.9
+ },
+ "win_pw1_l31_ff5_s0": {
+  "variant": "win_pw1_l31_ff5",
+  "seed": 0,
+  "threshold": 0.04,
+  "val": {
+   "pooled": {
+    "precision": 0.8893,
+    "recall": 0.871,
+    "f1": 0.88,
+    "iou": 0.7857,
+    "tp": 36978,
+    "fp": 4605,
+    "fn": 5478
+   },
+   "ci95": {
+    "precision": [
+     0.7303,
+     0.9705
+    ],
+    "recall": [
+     0.686,
+     0.9785
+    ],
+    "f1": [
+     0.7333,
+     0.9458
+    ],
+    "iou": [
+     0.5789,
+     0.8972
+    ]
+   },
+   "per_oil_scene_f1": {
+    "Scene_100": 0.9905,
+    "Scene_104": 0.9425,
+    "Scene_105": 0.0427,
+    "Scene_109": 0.8074,
+    "Scene_110": 0.4593,
+    "Scene_111": 0.3004,
+    "Scene_112": 0.998,
+    "Scene_116": 0.9449,
+    "Scene_118": 0.9818,
+    "Scene_121": 0.9898,
+    "Scene_124": 0.0175,
+    "Scene_131": 0.8712,
+    "Scene_96": 0.9197,
+    "Scene_97": 0.407
+   },
+   "median_oil_scene_f1": 0.8954,
+   "n_scenes": 24,
+   "n_oil_scenes": 14,
+   "n_px": 166685,
+   "n_oil_px": 42456
+  },
+  "fp_by_class_val": {
+   "Marine Debris": {
+    "n": 87,
+    "pred_oil": 0
+   },
+   "Sparse Floating Algae": {
+    "n": 242,
+    "pred_oil": 27
+   },
+   "Natural Organic Material": {
+    "n": 3,
+    "pred_oil": 0
+   },
+   "Ship": {
+    "n": 2400,
+    "pred_oil": 36
+   },
+   "Marine Water": {
+    "n": 73361,
+    "pred_oil": 1513
+   },
+   "Turbid Water": {
+    "n": 510,
+    "pred_oil": 9
+   },
+   "Shallow Water": {
+    "n": 39008,
+    "pred_oil": 1504
+   },
+   "Waves & Wakes": {
+    "n": 1065,
+    "pred_oil": 536
+   },
+   "Oil Spill": {
+    "n": 42456,
+    "pred_oil": 36978
+   },
+   "Oil Platform": {
+    "n": 3923,
+    "pred_oil": 959
+   },
+   "Jellyfish": {
+    "n": 928,
+    "pred_oil": 1
+   },
+   "Sea snot": {
+    "n": 2702,
+    "pred_oil": 20
+   }
+  },
+  "train_px": 330400,
+  "train_oil_px": 140584,
+  "seconds": 4.4
+ },
+ "win_pw1_l31_ff5_s1": {
+  "variant": "win_pw1_l31_ff5",
+  "seed": 1,
+  "threshold": 0.08,
+  "val": {
+   "pooled": {
+    "precision": 0.9043,
+    "recall": 0.859,
+    "f1": 0.8811,
+    "iou": 0.7874,
+    "tp": 36468,
+    "fp": 3858,
+    "fn": 5988
+   },
+   "ci95": {
+    "precision": [
+     0.7674,
+     0.9719
+    ],
+    "recall": [
+     0.6585,
+     0.9728
+    ],
+    "f1": [
+     0.7286,
+     0.9463
+    ],
+    "iou": [
+     0.5731,
+     0.8981
+    ]
+   },
+   "per_oil_scene_f1": {
+    "Scene_100": 0.9834,
+    "Scene_104": 0.9454,
+    "Scene_105": 0.0301,
+    "Scene_109": 0.8431,
+    "Scene_110": 0.2527,
+    "Scene_111": 0.2652,
+    "Scene_112": 0.998,
+    "Scene_116": 0.9806,
+    "Scene_118": 0.9802,
+    "Scene_121": 0.9689,
+    "Scene_124": 0.0517,
+    "Scene_131": 0.8811,
+    "Scene_96": 0.9539,
+    "Scene_97": 0.4614
+   },
+   "median_oil_scene_f1": 0.9133,
+   "n_scenes": 24,
+   "n_oil_scenes": 14,
+   "n_px": 166685,
+   "n_oil_px": 42456
+  },
+  "fp_by_class_val": {
+   "Marine Debris": {
+    "n": 87,
+    "pred_oil": 0
+   },
+   "Sparse Floating Algae": {
+    "n": 242,
+    "pred_oil": 21
+   },
+   "Natural Organic Material": {
+    "n": 3,
+    "pred_oil": 0
+   },
+   "Ship": {
+    "n": 2400,
+    "pred_oil": 18
+   },
+   "Marine Water": {
+    "n": 73361,
+    "pred_oil": 1353
+   },
+   "Turbid Water": {
+    "n": 510,
+    "pred_oil": 3
+   },
+   "Shallow Water": {
+    "n": 39008,
+    "pred_oil": 1194
+   },
+   "Waves & Wakes": {
+    "n": 1065,
+    "pred_oil": 467
+   },
+   "Oil Spill": {
+    "n": 42456,
+    "pred_oil": 36468
+   },
+   "Oil Platform": {
+    "n": 3923,
+    "pred_oil": 799
+   },
+   "Jellyfish": {
+    "n": 928,
+    "pred_oil": 0
+   },
+   "Sea snot": {
+    "n": 2702,
+    "pred_oil": 3
+   }
+  },
+  "train_px": 330400,
+  "train_oil_px": 140584,
+  "seconds": 4.0
+ },
+ "win_pw1_l31_ff5_s2": {
+  "variant": "win_pw1_l31_ff5",
+  "seed": 2,
+  "threshold": 0.03,
+  "val": {
+   "pooled": {
+    "precision": 0.8644,
+    "recall": 0.8687,
+    "f1": 0.8666,
+    "iou": 0.7645,
+    "tp": 36882,
+    "fp": 5785,
+    "fn": 5574
+   },
+   "ci95": {
+    "precision": [
+     0.7112,
+     0.9492
+    ],
+    "recall": [
+     0.6827,
+     0.9829
+    ],
+    "f1": [
+     0.7224,
+     0.9303
+    ],
+    "iou": [
+     0.5655,
+     0.8696
+    ]
+   },
+   "per_oil_scene_f1": {
+    "Scene_100": 0.9902,
+    "Scene_104": 0.9374,
+    "Scene_105": 0.0453,
+    "Scene_109": 0.7987,
+    "Scene_110": 0.4243,
+    "Scene_111": 0.408,
+    "Scene_112": 0.9976,
+    "Scene_116": 0.8771,
+    "Scene_118": 0.9844,
+    "Scene_121": 0.9392,
+    "Scene_124": 0.192,
+    "Scene_131": 0.8615,
+    "Scene_96": 0.8878,
+    "Scene_97": 0.4054
+   },
+   "median_oil_scene_f1": 0.8693,
+   "n_scenes": 24,
+   "n_oil_scenes": 14,
+   "n_px": 166685,
+   "n_oil_px": 42456
+  },
+  "fp_by_class_val": {
+   "Marine Debris": {
+    "n": 87,
+    "pred_oil": 0
+   },
+   "Sparse Floating Algae": {
+    "n": 242,
+    "pred_oil": 40
+   },
+   "Natural Organic Material": {
+    "n": 3,
+    "pred_oil": 0
+   },
+   "Ship": {
+    "n": 2400,
+    "pred_oil": 47
+   },
+   "Marine Water": {
+    "n": 73361,
+    "pred_oil": 2483
+   },
+   "Turbid Water": {
+    "n": 510,
+    "pred_oil": 13
+   },
+   "Shallow Water": {
+    "n": 39008,
+    "pred_oil": 1515
+   },
+   "Waves & Wakes": {
+    "n": 1065,
+    "pred_oil": 552
+   },
+   "Oil Spill": {
+    "n": 42456,
+    "pred_oil": 36882
+   },
+   "Oil Platform": {
+    "n": 3923,
+    "pred_oil": 1128
+   },
+   "Jellyfish": {
+    "n": 928,
+    "pred_oil": 0
+   },
+   "Sea snot": {
+    "n": 2702,
+    "pred_oil": 7
+   }
+  },
+  "train_px": 330400,
+  "train_oil_px": 140584,
+  "seconds": 4.3
+ }
+}
