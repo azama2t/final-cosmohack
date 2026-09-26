@@ -1428,7 +1428,7 @@ def demo_md(k: dict) -> str:
 6. **«Выгрузка»** GeoJSON/CSV и **«Запросы»** → сохранить → повторить.
 
 Запасное видео этого пути (1920×1080, ≈ 2 мин, без звука, на случай, если сервис не поднимется): `presentation/demo.mp4`
-(`presentation/demo.webm`), запись — `presentation/make_demo_video.py`.
+(запись — `presentation/make_demo_video.py`; копия `demo.webm` создаётся тем же скриптом, в git не входит).
 
 Подробный сценарий с репликами — ниже.
 
