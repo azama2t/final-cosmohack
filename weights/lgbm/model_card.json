@@ -1,0 +1,8 @@
+{
+ "weights": "weights/lgbm/model.txt",
+ "sha256": "0eeebf43fcccd8c7c07f053b7ec723229d1a3c9b92d12eec1bdb269258c51470",
+ "trained_at": "2026-09-25T01:36:30Z",
+ "trained_at_source": "дата коммита 6454eba, в котором добавлен weights/lgbm/model.txt (не время файла на диске: на клоне это время клонирования)",
+ "threshold_source": "weights/lgbm/meta.json (threshold)",
+ "note": "версия модели для легенды и API (/api/v3/meta detector.version)"
+}

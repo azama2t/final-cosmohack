@@ -134,7 +134,7 @@ def collect_search() -> dict:
     out = {"available": bool(stages), "source": "reports/search/{s1,s2,s3,s4}_candidates.csv, reports/search/adis_candidates.csv, "
            "docs/img/funnel.json",
            "protocol": "розыск снимков под события CSV организаторов (L86–L88, L98) и под отрезки ADIS (L100); уровень "
-                       "доказательности A–D у каждой строки; стоп-правило §11: нет A или убедительного C за пилот — поиск "
+                       "доказательности A–D у каждой строки; стоп-правило: нет A или убедительного C за пилот — поиск "
                        "по дрейфу не расширяем; дрейф — область поиска, не доказательство",
            "events_total": stages[0].get("total") if stages else None,
            "funnel": [{"label": s.get("label"), "total": s.get("total")} for s in stages],

@@ -1,4 +1,4 @@
-# Отложенная демо-сцена Cózar 2024 — доказательство (L111, INBOX §15 «ДЕМО»)
+# Отложенная демо-сцена Cózar 2024 — доказательство («карта и демо», задание команды «ДЕМО»)
 
 **Сцена:** Sentinel-2B, тайл **30SXE**, **11.03.2021**, 11:01 UTC (Альборанское море у побережья Алжира/Марокко, центр ≈ 35.50° с. ш., 1.62° з. д.).
 L1C каталога Cózar: `S2B_MSIL1C_20210311T104749_N0209_R051_T30SXE_20210311T132631`; L2A той же съёмки (Earth Search, baseline 02.14):
@@ -16,18 +16,18 @@ L1C каталога Cózar: `S2B_MSIL1C_20210311T104749_N0209_R051_T30SXE_20210
 |---|---|---|---|---|---|
 | MARIDA (train/val/test) | обучение weights/lgbm, подбор порога 0.63 (val), test | `data/MARIDA/splits` + patches | 63 / 17 | нет | нет |
 | MADOS | обучение weights/lgbm | `data/MADOS` | тайл/дата неизвестны (имена анонимные, нет геопривязки) | **по содержимому: нет** (ниже) | — |
-| L98 Cózar, 15 съёмок | эксперименты L92 | `data/extra/features_cozar2024.npz` (acq, acq_bg) | 15 / 15 | нет | нет |
-| L92 Cózar, 240 съёмок (234 скачано) | эксперименты L92 (полнота 36 %) | `out/detector_v2/cozar_sample.csv`, `features_cozar2024_l2a.npz` | 240 / 121 | нет | нет |
-| PLP / FloatingObjects | B в L92 | `reports/extra_data/registry.csv` | 66 / 29 | нет | нет |
-| суда Финляндии, облака CMC | D в L92 | `reports/extra_data/registry_negatives.csv` | 47 / 34 | нет | нет |
-| пары кейса | D пар в L92 | `data/pairs/candidates.csv` | 105 / 37 | нет | нет |
+| «каталог Cózar» Cózar, 15 съёмок | эксперименты «детектор v2» | `data/extra/features_cozar2024.npz` (acq, acq_bg) | 15 / 15 | нет | нет |
+| «детектор v2» Cózar, 240 съёмок (234 скачано) | эксперименты «детектор v2» (полнота 36 %) | `out/detector_v2/cozar_sample.csv`, `features_cozar2024_l2a.npz` | 240 / 121 | нет | нет |
+| PLP / FloatingObjects | B в «детектор v2» | `reports/extra_data/registry.csv` | 66 / 29 | нет | нет |
+| суда Финляндии, облака CMC | D в «детектор v2» | `reports/extra_data/registry_negatives.csv` | 47 / 34 | нет | нет |
+| пары кейса | D пар в «детектор v2» | `data/pairs/candidates.csv` | 105 / 37 | нет | нет |
 | районы сервиса, дрейф | — | `data/live`, `data/drift_check` | 82 / 18 | нет | нет |
 
 **MADOS по содержимому** (`reports/case_demo/mados_content_check.json`): тот же метод, что `scripts/extra_data/mados_content_check.py`
 (LBP 48 бит по B8/B4, индекс всех патчей MADOS + MARIDA `out/l89_ref_lbp_index.npz`). Демо-вырезка: 1 937 209 ключей, лучший кандидат — 3 голоса
 («no match»; порог совпадения 30, случайные ≤ 7). Положительный контроль (durban 2019-04-24 = MARIDA S2_24-4-19_36JUN): 7 579 голосов, MATCH.
 
-**В ту же дату** есть использованные съёмки на других тайлах: 30SVE_20210311 и 33TUF_20210311 (L98), 32TQL_20210311 (L92). 30SVE — через тайл
+**В ту же дату** есть использованные съёмки на других тайлах: 30SVE_20210311 и 33TUF_20210311 («каталог Cózar»), 32TQL_20210311 («детектор v2»). 30SVE — через тайл
 к западу (~200 км), 33TUF/32TQL — Адриатика/Тирренское море; пересечения следов с 30SXE нет (аудитор: `reports/audit/heldout_same_date.csv`,
 0 км²). Пиксели не общие; общая только дата (другая атмосфера и поле течений, та же орбита у 30SVE).
 

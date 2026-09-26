@@ -1416,3 +1416,20 @@
 a.c-head-r.c-head-link {
   display: block;
 }
+/* jury 10:10: the description goes under the number on one full-width line */
+.c-head-r {
+  grid-template-columns: 70px 52px 1fr;
+}
+.c-head-r .c-head-d {
+  grid-column: 1 / -1;
+  padding-left: 0;
+  margin-top: -1px;
+  white-space: normal;
+}
+.c-head-sat .c-head-link {
+  white-space: normal;
+  flex: 1;
+}
+.c-head {
+  max-height: 54vh;
+}

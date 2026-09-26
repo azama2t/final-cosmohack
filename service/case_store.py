@@ -1709,10 +1709,18 @@ def detector_metrics_block(test: dict, val: dict, tmd: dict, fdi_val: dict) -> d
         if box:
             box["setting"] = (st.get("fdi_ndvi_box") or {}).get("setting")
             box["note"] = "4 порога (окно FDI и NDVI, идея Biermann 2020) подобраны на val"
-        rows = [x for x in (main, base, box, fdi) if x]
+        # жюри 10:10: the published U-Net MARIDA weights (Kikaki et al. 2022) — baseline on the same test
+        un = ((((_cached("final_numbers", PATHS["final_numbers"], _read_json) or {}).get("case") or {}).get("sections") or {})
+              .get("baselines") or {}).get("test", {}).get("unet_argmax") or {}
+        unet = ({"name": "U-Net MARIDA (опубликованные веса)", "split": "test", "f1": un.get("f1"),
+                 "precision": un.get("precision"), "recall": un.get("recall"), "ci95_f1": un.get("ci95"),
+                 "setting": "веса авторов MARIDA (Kikaki et al. 2022), argmax классов; тот же test и та же метрика",
+                 "source": "reports/final_numbers.json · case.sections.baselines.test.unet_argmax"}
+                if un.get("f1") is not None else None)
+        rows = [x for x in (main, base, box, fdi) if x]  # U-Net: separate field (no IoU / CI for P, R)
         return {"split": f"MARIDA test ({(dt_['lgbm'].get('n_scenes'))} сцен), один прогон после заморозки; "
                          "ДИ — бутстреп по сценам", "metric": det.get("metric"),
-                "main": main, "baseline": base, "fdi": fdi, "fdi_ndvi": box, "rows": rows}
+                "main": main, "baseline": base, "unet": unet, "fdi": fdi, "fdi_ndvi": box, "rows": rows}
     return {  # fallback when reports/case_detector/metrics.json is absent
         "split": "MARIDA val (сплит по сценам); test — один прогон после заморозки",
         "baseline": {"name": "FDI threshold", "f1": _r(fdi_val.get("f1_md")), "iou": _r(fdi_val.get("iou_md")),
@@ -2167,6 +2175,13 @@ def _sz_enrich(f: dict, idx: dict) -> dict:
     if p.get("scene_kind") == "demo":  # short list title: tile of the held-out scene
         p["title"] = p["title"].replace("Демо Cózar 2024 (отложенная сцена)", "30SXE")  # §31 д: «30SXE · зона 16»
     m = p.get("measured") or {}
+    if isinstance(m.get("model"), dict):
+        m["model"] = {**m["model"], "trained_at": detector_model_info().get("trained_at") or m["model"].get("trained_at")}
+    # жюри-7: a detection on an acquisition of the detector's training set (MARIDA / MADOS) is not counted as a find
+    p["is_find"] = st == "detected" and not p.get("training_scene")
+    if st == "detected" and p.get("training_scene"):
+        p["verification"] = "training_scene"
+        p["detection_label"] = "обнаружено детектором · снимок из обучения детектора — находкой не считается"
     p["area_km2"] = m.get("zone_area_km2")
     p["area_basis"] = "геодезическая площадь контура зоны (кластер объектов детектора + 150 м)"
     p["detected_area_m2"] = m.get("suspicious_area_m2")
@@ -2307,9 +2322,12 @@ def filter_scene_zones(bbox=None, date_from=None, date_to=None, detection_status
 
 def scene_zones_fc(feats: list[dict]) -> dict:
     idx = scene_zones_index()
+    mi = dict(idx.get("model") or {})
+    if mi:
+        mi["trained_at"] = detector_model_info().get("trained_at") or mi.get("trained_at")
     fc = {"type": "FeatureCollection", "kind": "detection_zone", "layer_kind": "scene_zone",
           "label": "Спутниковые зоны детекции (текущий детектор)", "count": len(feats), "empty_reason": None,
-          "model": idx.get("model"), "rules": idx.get("rules"), "status_note": SZ_STATUS_NOTE,
+          "model": mi or None, "rules": idx.get("rules"), "status_note": SZ_STATUS_NOTE,
           "quantity": dict(SZ_QUANTITY),
           "blocks_note": ("measured — измерено по снимку; probable — вероятность и признаки; quantity — «концентрация по "
                           "снимку не подтверждена» (scenario = null: перевод площади в штуки не показываем)"),
@@ -2373,8 +2391,9 @@ def detector_model_info() -> dict:
     def load(path):
         h = hashlib.sha256(path.read_bytes()).hexdigest()
         return {"weights": "weights/lgbm", "file": "weights/lgbm/model.txt", "sha256": h, "sha256_short": h[:12],
-                "trained_at": dt.datetime.fromtimestamp(path.stat().st_mtime, dt.timezone.utc).strftime(
-                    "%Y-%m-%dT%H:%M:%SZ"),
+                # жюри-7: from weights/lgbm/model_card.json (the weights commit), not the mtime (= clone time on a clone)
+                "trained_at": (_read_json(path.parent / "model_card.json") or {}).get("trained_at")
+                if (path.parent / "model_card.json").is_file() else None,
                 "threshold": (_cached("lgbm_meta", PATHS["lgbm_meta"], _read_json) or {}).get("threshold"),
                 "harmonize": "none"}
     return (_cached("lgbm_model_info", p, load) or {}) if p.is_file() else {}
@@ -2424,10 +2443,10 @@ def headline() -> dict:
         pr = prof.get(key) or {}
         if key == "S2" and f2.get("boot_lo95") is not None:
             v, lo, hi = f2.get("pooled_C"), f2.get("boot_lo95"), f2.get("boot_hi95")
-            stat, il = "среднее", "бутстреп 95 % по дням рейса"
+            stat, il = "среднее", "бутстреп по дням рейса"
         elif pr.get("pooled_C") is not None:
             v, lo, hi = pr.get("pooled_C"), pr.get("lo95"), pr.get("hi95")
-            stat, il = "среднее", "95 %, только ошибка счёта (Пуассон)"
+            stat, il = "среднее", "Пуассон (только ошибка счёта)"
         elif pr.get("c_median") is not None:
             v, lo, hi = pr.get("c_median"), pr.get("c_p25"), pr.get("c_p75")
             stat, il = "медиана", "межквартильный размах"
@@ -2440,7 +2459,7 @@ def headline() -> dict:
     if af.get("C") is not None:
         rows.append({"key": "ADIS", "short": "ADIS", "source": None, "source_label": "ADIS, судовая камера",
                      "profile": None, "value": af.get("C"), "lo": af.get("lo"), "hi": af.get("hi"), "stat": "среднее",
-                     "interval_label": "95 %, только ошибка счёта (Пуассон)", "material": "пластик", "size_class": "> 10 см",
+                     "interval_label": "Пуассон (только ошибка счёта)", "material": "все объекты (не только пластик)", "size_class": "> 10 см",
                      "n": af.get("n_segments"), "kind": "measurement", "unit": "items/km2"})
     zs = scene_zones_all()
     ex = sz_examples() if zs else []
@@ -2450,7 +2469,8 @@ def headline() -> dict:
         "field_label": "Концентрация по полевым данным (измерение, шт./км²)",
         "field_note": "числа сравнимы только внутри одного профиля (размерный класс, материал, метод счёта)",
         "satellite": {"n_zones": len(zs),
-                      "n_finds": sum(1 for f in zs if f["properties"]["detection_status"] == "detected"),
+                      "n_finds": sum(1 for f in zs if f["properties"].get("is_find")),
+                      "finds_note": "снимки обучения детектора (MARIDA/MADOS) находками не считаем",
                       "n_level_b": sum(1 for f in zs if f["properties"].get("verification") == "level_B_cozar"),
                       "quantity_label": SZ_QUANTITY["label"], "why": SZ_QUANTITY["detail"],
                       "open_zone_id": good["zone_id"] if good else None},

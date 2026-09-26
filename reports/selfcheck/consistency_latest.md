@@ -1,16 +1,16 @@
-# Самопроверка согласованности API v3 (2026-09-26T00:14:25)
+# Самопроверка согласованности API v3 (2026-09-26T10:09:57)
 
-Проверок: 284; ok: 284; 26.8 с. Изоляция: case_store.PATHS['queries'] -> C:\Users\User\AppData\Local\Temp\selfcheck_wdfx677e\queries.jsonl.
+Проверок: 259; ok: 259; 14.0 с. Изоляция: case_store.PATHS['queries'] -> C:\Users\User\AppData\Local\Temp\selfcheck__m3h0qmk\queries.jsonl.
 
 ## Запросы
 
 | запрос | query_id | набл. | зон | сцен | пар (принято) | ok | fail | SHA-256 run |
 |---|---|---|---|---|---|---|---|---|
-| S2 Саргассово море (total_plastic — через selection) | q_d3745d8a | 330 | 0 | 0 | 1320 (0) | 39 | 0 | f02d8e88f68a |
-| Чёрное море, все пары | q_c2365d89 | 33 | 24 | 217 | 596 (0) | 34 | 0 | 93554246bf6a |
-| Северное море, 2016 | q_30c1bf00 | 27 | 2 | 9 | 193 (0) | 34 | 0 | 437b262e108f |
-| ГПМП, трал 5–50 см | q_0caed58f | 83 | 0 | 0 | 1400 (0) | 39 | 0 | eda3563674db |
-| Пустой bbox (Южная Атлантика, наблюдений нет) | q_bd462e69 | 0 | 0 | 0 | — (—) | 29 | 0 | c42c726eef7b |
+| S2 Саргассово море (total_plastic — через selection) | q_c9b70937 | 330 | 0 | 0 | 1320 (0) | 39 | 0 | cc1e18c0d7f4 |
+| Чёрное море, все пары | q_d90e3893 | 33 | 24 | 217 | 596 (0) | 34 | 0 | ef3ba1bd3331 |
+| Северное море, 2016 | q_63fc0e78 | 27 | 2 | 9 | 193 (0) | 34 | 0 | 12faa9cc8d26 |
+| ГПМП, трал 5–50 см | q_1cd561f9 | 83 | 0 | 0 | 1400 (0) | 39 | 0 | c329c7f5eec7 |
+| Пустой bbox (Южная Атлантика, наблюдений нет) | q_8313ef0e | 0 | 0 | 0 | — (—) | 29 | 0 | 370e9bdde5a9 |
 | Некорректные даты (задом наперёд) | — | — | — | — | — (—) | 1 | 0 | — |
 
 ## Расхождения (для владельцев)
@@ -24,7 +24,7 @@
 | S2_sargasso | POST /queries 201 | ok | 201 |
 | S2_sargasso | GET /queries/{id} = POST | ok |  |
 | S2_sargasso | run.http_200 | ok | 200/200 |
-| S2_sargasso | run.sha256_repeat | ok | f02d8e88f68a57cb vs f02d8e88f68a57cb |
+| S2_sargasso | run.sha256_repeat | ok | cc1e18c0d7f45f5c vs cc1e18c0d7f45f5c |
 | S2_sargasso | summary.counts | ok | n_obs=330 n_zones=0 n_scenes=0 |
 | S2_sargasso | summary.by_status | ok | {} |
 | S2_sargasso | empty.zones_reason | ok | Нет зон под выбранные фильтры |
@@ -63,7 +63,7 @@
 | S4_black_sea | POST /queries 201 | ok | 201 |
 | S4_black_sea | GET /queries/{id} = POST | ok |  |
 | S4_black_sea | run.http_200 | ok | 200/200 |
-| S4_black_sea | run.sha256_repeat | ok | 93554246bf6ad8a4 vs 93554246bf6ad8a4 |
+| S4_black_sea | run.sha256_repeat | ok | ef3ba1bd33310bad vs ef3ba1bd33310bad |
 | S4_black_sea | summary.counts | ok | n_obs=33 n_zones=24 n_scenes=217 |
 | S4_black_sea | summary.by_status | ok | {"insufficient_data": 24} |
 | S4_black_sea | obs.ids algo=api | ok | {"only_left": [], "only_right": [], "n_left": 33, "n_right": 33} |
@@ -97,7 +97,7 @@
 | S3_north_sea_2016 | POST /queries 201 | ok | 201 |
 | S3_north_sea_2016 | GET /queries/{id} = POST | ok |  |
 | S3_north_sea_2016 | run.http_200 | ok | 200/200 |
-| S3_north_sea_2016 | run.sha256_repeat | ok | 437b262e108f7b80 vs 437b262e108f7b80 |
+| S3_north_sea_2016 | run.sha256_repeat | ok | 12faa9cc8d26a45a vs 12faa9cc8d26a45a |
 | S3_north_sea_2016 | summary.counts | ok | n_obs=27 n_zones=2 n_scenes=9 |
 | S3_north_sea_2016 | summary.by_status | ok | {"insufficient_data": 2} |
 | S3_north_sea_2016 | obs.ids algo=api | ok | {"only_left": [], "only_right": [], "n_left": 27, "n_right": 27} |
@@ -131,7 +131,7 @@
 | S1_gpgp_trawl | POST /queries 201 | ok | 201 |
 | S1_gpgp_trawl | GET /queries/{id} = POST | ok |  |
 | S1_gpgp_trawl | run.http_200 | ok | 200/200 |
-| S1_gpgp_trawl | run.sha256_repeat | ok | eda3563674db2877 vs eda3563674db2877 |
+| S1_gpgp_trawl | run.sha256_repeat | ok | c329c7f5eec70d4d vs c329c7f5eec70d4d |
 | S1_gpgp_trawl | summary.counts | ok | n_obs=83 n_zones=0 n_scenes=0 |
 | S1_gpgp_trawl | summary.by_status | ok | {} |
 | S1_gpgp_trawl | empty.zones_reason | ok | Нет зон под выбранные фильтры |
@@ -170,7 +170,7 @@
 | empty_bbox | POST /queries 201 | ok | 201 |
 | empty_bbox | GET /queries/{id} = POST | ok |  |
 | empty_bbox | run.http_200 | ok | 200/200 |
-| empty_bbox | run.sha256_repeat | ok | c42c726eef7b84d2 vs c42c726eef7b84d2 |
+| empty_bbox | run.sha256_repeat | ok | 370e9bdde5a9071e vs 370e9bdde5a9071e |
 | empty_bbox | summary.counts | ok | n_obs=0 n_zones=0 n_scenes=0 |
 | empty_bbox | summary.by_status | ok | {} |
 | empty_bbox | empty.reason | ok | Нет наблюдений под выбранные фильтры |
@@ -226,8 +226,8 @@
 | invalid | GET /api/v3/observations?limit=0 | ok | 400 BAD_PARAM: limit: нужно целое в [1, 100000] |
 | invalid | GET /api/v3/pairs?status=maybe | ok | 400 BAD_PARAM: status: допустимо accepted / rejected / all |
 | invalid | GET /api/v3/pairs?max_dt_hours=-1 | ok | 400 BAD_PARAM: max_dt_hours: нужно число в [0, 1000000.0] |
-| invalid | GET /api/v3/export?layer=foo | ok | 400 BAD_PARAM: layer: допустимо observations / pairs / zones / detections |
-| invalid | GET /api/v3/export | ok | 400 BAD_PARAM: layer: обязателен, observations / pairs / zones / detections |
+| invalid | GET /api/v3/export?layer=foo | ok | 400 BAD_PARAM: layer: допустимо observations / pairs / zones / detections / scene_zones |
+| invalid | GET /api/v3/export | ok | 400 BAD_PARAM: layer: обязателен, observations / pairs / zones / detections / scene_zones |
 | invalid | GET /api/v3/export?layer=zones&format=xml | ok | 400 BAD_PARAM: format: допустимо geojson / csv |
 | invalid | GET /api/v3/observations/MPL-99999 | ok | 404 NOT_FOUND: Наблюдение MPL-99999 не найдено |
 | invalid | GET /api/v3/zones/Z-nope | ok | 404 NOT_FOUND: Зона Z-nope не найдена |
@@ -255,67 +255,35 @@
 | empty | GET /api/v3/export?layer=zones&format=geojson&bbox=-30,-50,-29,-49 | ok | 200: Нет зон под выбранные фильтры |
 | empty | GET /api/v3/export?layer=observations&format=csv&bbox=-30,-50,-29,-49 | ok | 200: только заголовок CSV |
 | empty | GET /api/v3/export?layer=pairs&format=csv&sample_id=MPL-99999 | ok | 200: только заголовок CSV |
-| live | live run sha256 repeat | ok | fdfbfaf4b18c6205 |
-| isolation | service/labels/queries.jsonl не изменён | ok | sha256 e3b0c44298fc1c14 |
+| isolation | service/labels/queries.jsonl не изменён | ok | sha256 e54f54056ba7d7c1 |
 
 ## Скорость: TestClient
 
 | эндпоинт | n | холодный, мс | p50, мс | p95, мс | max, мс | цель | ок | байт |
 |---|---|---|---|---|---|---|---|---|
-| GET /meta | 20 | 5.2 | 4.9 | 5.2 | 5.2 | <300 | да | 6396 |
-| GET /observations (все 935) | 20 | 82.0 | 58.8 | 73.5 | 86.5 | <300 | да | 1873109 |
-| GET /observations?source=S2 | 20 | 22.2 | 22.9 | 28.1 | 55.6 | <300 | да | 711310 |
-| GET /observations/{id} | 20 | 3.1 | 2.7 | 3.2 | 3.3 | <300 | да | 5177 |
-| GET /pairs (все) | 20 | 53.2 | 54.5 | 66.8 | 69.1 | <300 | да | 3801991 |
-| GET /pairs?status=accepted | 20 | 3.0 | 1.8 | 2.3 | 2.3 | <300 | да | 130 |
-| GET /scenes | 20 | 18.2 | 18.6 | 21.3 | 21.5 | <300 | да | 130878 |
-| GET /scenes/{id} | 20 | 19.2 | 19.2 | 21.6 | 24.7 | <3000 | да | 31717 |
-| GET /scenes/{id}/rgb.png | 20 | 1.8 | 1.5 | 1.7 | 1.7 | <3000 | да | 165 |
-| GET /scenes/{id}/quality.png | 20 | 215.8 | 1.5 | 1.7 | 2.7 | <3000 | да | 2443 |
-| GET /scenes/{id}/mask.png | 20 | 1.7 | 1.5 | 1.6 | 1.6 | <3000 | да | 166 |
-| GET /zones | 20 | 6.3 | 6.5 | 6.8 | 7.0 | <300 | да | 103782 |
-| GET /zones/{id} | 20 | 5.9 | 6.4 | 7.6 | 9.0 | <300 | да | 15843 |
-| GET /metrics | 20 | 2.6 | 2.5 | 2.6 | 2.7 | <300 | да | 21709 |
-| GET /export observations csv | 20 | 38.6 | 36.9 | 44.6 | 45.1 | <300 | да | 959949 |
-| GET /export zones geojson | 20 | 7.5 | 7.1 | 9.3 | 24.1 | <300 | да | 109479 |
-| GET /export pairs csv | 20 | 51.7 | 51.3 | 64.0 | 95.1 | <300 | да | 1416475 |
-| GET /export zones csv query_id | 20 | 23.1 | 21.0 | 21.9 | 25.3 | <300 | да | 15354 |
-| GET /queries | 20 | 2.8 | 1.8 | 4.4 | 6.1 | <300 | да | 1457 |
-| GET /queries/{id} | 20 | 1.6 | 1.7 | 2.8 | 12.0 | <300 | да | 265 |
-| GET /queries/{id}/run | 20 | 26.1 | 26.8 | 34.6 | 72.5 | <300 | да | 262095 |
-| POST /queries | 20 | 1.7 | 1.5 | 1.6 | 1.7 | <300 | да | 242 |
-| DELETE /queries/{id} | 20 | 6.8 | 6.0 | 6.7 | 6.9 | <300 | да | 0 |
-| GET /observations?bbox=1,2,3 (400) | 20 | 1.6 | 1.3 | 1.5 | 1.6 | <300 | да | 126 |
-
-## Скорость: живой экземпляр
-
-http://127.0.0.1:8091 старт 1.1 с. 
-
-| эндпоинт | n | холодный, мс | p50, мс | p95, мс | max, мс | цель | ок | байт |
-|---|---|---|---|---|---|---|---|---|
-| GET /meta | 20 | 222.0 | 16.0 | 30.0 | 30.1 | <300 | да | 6396 |
-| GET /observations (все 935) | 20 | 641.3 | 59.1 | 104.4 | 113.5 | <300 | да | 1873109 |
-| GET /observations?source=S2 | 20 | 24.4 | 30.5 | 36.6 | 39.6 | <300 | да | 711310 |
-| GET /observations/{id} | 20 | 20.1 | 15.4 | 26.6 | 27.3 | <300 | да | 5177 |
-| GET /pairs (все) | 20 | 58.7 | 45.2 | 50.9 | 63.8 | <300 | да | 3801991 |
-| GET /pairs?status=accepted | 20 | 1.9 | 15.0 | 24.4 | 26.0 | <300 | да | 130 |
-| GET /scenes | 20 | 15.2 | 31.3 | 40.8 | 47.2 | <300 | да | 130878 |
-| GET /scenes/{id} | 20 | 35.2 | 30.5 | 38.5 | 40.4 | <3000 | да | 31717 |
-| GET /scenes/{id}/rgb.png | 20 | 1.8 | 15.4 | 16.6 | 24.5 | <3000 | да | 165 |
-| GET /scenes/{id}/quality.png | 20 | 245.9 | 1.6 | 16.0 | 16.3 | <3000 | да | 2443 |
-| GET /scenes/{id}/mask.png | 20 | 2.4 | 15.2 | 16.1 | 21.3 | <3000 | да | 166 |
-| GET /zones | 20 | 8.4 | 15.5 | 27.0 | 27.2 | <300 | да | 103782 |
-| GET /zones/{id} | 20 | 5.7 | 15.7 | 29.7 | 37.3 | <300 | да | 15843 |
-| GET /metrics | 20 | 13.7 | 7.3 | 16.7 | 20.2 | <300 | да | 21709 |
-| GET /export observations csv | 20 | 27.3 | 45.6 | 52.3 | 54.4 | <300 | да | 959949 |
-| GET /export zones geojson | 20 | 24.5 | 15.5 | 26.5 | 26.8 | <300 | да | 109479 |
-| GET /export pairs csv | 20 | 38.9 | 52.7 | 67.3 | 72.7 | <300 | да | 1416475 |
-| GET /export zones csv query_id | 20 | 45.3 | 30.5 | 43.6 | 62.9 | <300 | да | 15354 |
-| GET /queries | 20 | 22.9 | 7.1 | 16.2 | 26.5 | <300 | да | 255 |
-| GET /queries/{id} | 20 | 1.6 | 7.4 | 23.8 | 24.6 | <300 | да | 241 |
-| GET /queries/{id}/run | 20 | 37.3 | 43.0 | 49.6 | 49.8 | <300 | да | 262071 |
-| POST /queries | 20 | 22.1 | 13.1 | 22.6 | 25.2 | <300 | да | 242 |
-| DELETE /queries/{id} | 20 | 33.2 | 21.2 | 30.6 | 31.1 | <300 | да | 0 |
-| GET /observations?bbox=1,2,3 (400) | 20 | 26.1 | 1.5 | 16.0 | 17.2 | <300 | да | 126 |
+| GET /meta | 20 | 68.2 | 69.1 | 101.3 | 104.0 | <300 | да | 10812 |
+| GET /observations (все 935) | 20 | 102.3 | 60.1 | 89.2 | 89.8 | <300 | да | 2019167 |
+| GET /observations?source=S2 | 20 | 24.1 | 23.9 | 37.2 | 54.0 | <300 | да | 776718 |
+| GET /observations/{id} | 20 | 3.1 | 2.5 | 2.6 | 2.7 | <300 | да | 5177 |
+| GET /pairs (все) | 20 | 51.0 | 53.2 | 58.6 | 65.2 | <300 | да | 3801991 |
+| GET /pairs?status=accepted | 20 | 3.1 | 1.8 | 2.5 | 2.6 | <300 | да | 130 |
+| GET /scenes | 20 | 19.8 | 18.6 | 21.0 | 22.4 | <300 | да | 130878 |
+| GET /scenes/{id} | 20 | 21.3 | 19.5 | 20.7 | 24.1 | <3000 | да | 31823 |
+| GET /scenes/{id}/rgb.png | 20 | 2.2 | 1.6 | 1.8 | 2.2 | <3000 | да | 165 |
+| GET /scenes/{id}/quality.png | 20 | 237.4 | 1.5 | 1.9 | 2.3 | <3000 | да | 2443 |
+| GET /scenes/{id}/mask.png | 20 | 1.7 | 1.6 | 1.8 | 2.0 | <3000 | да | 166 |
+| GET /zones | 20 | 7.6 | 7.3 | 9.5 | 10.5 | <300 | да | 103914 |
+| GET /zones/{id} | 20 | 5.9 | 5.8 | 6.3 | 6.4 | <300 | да | 16316 |
+| GET /metrics | 20 | 2.7 | 2.7 | 4.8 | 24.2 | <300 | да | 21709 |
+| GET /export observations csv | 20 | 36.9 | 37.7 | 46.4 | 49.4 | <300 | да | 959949 |
+| GET /export zones geojson | 20 | 8.1 | 7.1 | 8.0 | 8.4 | <300 | да | 109613 |
+| GET /export pairs csv | 20 | 50.5 | 51.8 | 54.8 | 59.1 | <300 | да | 1416475 |
+| GET /export zones csv query_id | 20 | 21.2 | 21.1 | 24.8 | 25.8 | <300 | да | 15378 |
+| GET /queries | 20 | 1.9 | 1.6 | 2.0 | 2.3 | <300 | да | 1457 |
+| GET /queries/{id} | 20 | 1.5 | 1.5 | 1.6 | 1.6 | <300 | да | 265 |
+| GET /queries/{id}/run | 20 | 94.9 | 58.6 | 106.3 | 112.1 | <300 | да | 265067 |
+| POST /queries | 20 | 2.6 | 2.0 | 2.5 | 2.8 | <300 | да | 242 |
+| DELETE /queries/{id} | 20 | 8.4 | 6.8 | 10.0 | 26.8 | <300 | да | 0 |
+| GET /observations?bbox=1,2,3 (400) | 20 | 1.6 | 1.7 | 1.8 | 1.8 | <300 | да | 126 |
 
 UI: {'status': 'skipped', 'reason': '--ui-url не задан'}

@@ -126,7 +126,7 @@ def main():
     ap.add_argument("--base-url", default="http://127.0.0.1:8070")
     a = ap.parse_args()
     fc = json.loads(urllib.request.urlopen(a.base_url + "/api/v3/scene_zones?limit=1000", timeout=60).read())
-    finds = {f["id"] for f in fc["features"] if f["properties"]["detection_status"] == "detected"}
+    finds = {f["id"] for f in fc["features"] if f["properties"].get("is_find", f["properties"]["detection_status"] == "detected")}
     out = {"base": a.base_url, "n_finds_api": len(finds),
            "n_finds_b": sum(1 for f in fc["features"] if f["properties"].get("verification") == "level_B_cozar"),
            "n_zones_api": fc["total"]}

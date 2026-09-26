@@ -412,7 +412,7 @@ def check_query(c, ck: Checker, spec: dict, src: dict, qrec: dict) -> dict:
         if p["concentration"] is not None or p["concentration_status"] not in ("unavailable", "research_estimate",
                                                                                "measured_nearby"):
             badst.append({"id": z["id"], "concentration": p["concentration"], "cs": p["concentration_status"]})
-        if p["kind"] != "model_estimate":
+        if p["kind"] != "candidate_strip":  # 3.10: strips are candidate_strip (was model_estimate)
             badst.append({"id": z["id"], "kind": p["kind"]})
         g = z["geometry"]
         ga = geodesic_area_km2(g) if g else None
@@ -474,7 +474,7 @@ def check_query(c, ck: Checker, spec: dict, src: dict, qrec: dict) -> dict:
         if r["linked_sample_ids"] != ";".join(p["support"]["linked_sample_ids"]) \
                 or int(r["n_linked_samples"]) != p["support"]["n_linked_samples"]:
             probs.append("linked")
-        if r["kind"] != "model_estimate":
+        if r["kind"] != "candidate_strip":
             probs.append("kind")
         if r["zone_id"] in zgj and canon_hash(zgj[r["zone_id"]]) != canon_hash(z):
             probs.append("geojson!=json")

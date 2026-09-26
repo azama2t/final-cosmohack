@@ -9,6 +9,17 @@
 
 **Три числа Саргассова моря (профиль S2, пластик > 2 см) — не путать:** {{case.sections.quantity.field_S2.pooled_C|f1}} шт./км² — среднее профиля ΣN/ΣA по всем событиям (измерение, 95 % с разбросом между днями [{{case.sections.quantity.field_S2.boot_lo95|f1}}–{{case.sections.quantity.field_S2.boot_hi95|f1}}]); {{case.conc.S2.dev_median_c|f1}} шт./км² — медиана события, её карта показывает как оценку для нового места; {{case.sections.field_test.S2.median_mae|f1}} шт./км² — средняя ошибка этой медианы на отложенном test. Пересчёт: `scripts\case\expert_check.py --n {{case.sections.quantity.field_S2.pooled_N}} --area {{case.sections.quantity.field_S2.pooled_A_km2|f2}}` (ΣN/ΣA и интервал Пуассона), `scripts\case\field_interval_check.py` (интервал между днями), отложенный test — `reports/case_conc/final_test.json` (§2, §7).
 
+**Проверить главные числа за 2 минуты** (после `git clone`, из корня, Windows; первый запуск ставит пакеты ≈ 3 мин):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File run.ps1 -Case all -Offline      # маршрут кейса; в логе шага 5: «test F1 lgbm {{case.detector.test.lgbm.f1|f3}}…»
+.venv\Scripts\python.exe scripts\case\expert_check.py --n {{case.sections.quantity.field_S2.pooled_N}} --area {{case.sections.quantity.field_S2.pooled_A_km2|f2}}   # ΣN и ΣA — суммы по всем {{case.sections.quantity.field_S2.n}} событиям профиля S2 (dev и отложенный test вместе) из CSV организаторов: task/macroplastic_marine_samples.csv, строки transect_density, профиль S2_visual_GT2, total_plastic, столбцы density_numerator_items и sampled_area_km2; C = ΣN/ΣA = {{case.sections.quantity.field_S2.pooled_C|f1}} шт./км² [Пуассон {{case.sections.quantity.field_S2.lo95|f1}}–{{case.sections.quantity.field_S2.hi95|f1}}]
+.venv\Scripts\python.exe scripts\case\field_interval_check.py       # тот же {{case.sections.quantity.field_S2.pooled_C|f1}} с интервалом между днями [{{case.sections.quantity.field_S2.boot_lo95|f1}}–{{case.sections.quantity.field_S2.boot_hi95|f1}}] → reports/quantity/field_intervals.md
+.venv\Scripts\python.exe scripts\case\expert_check.py --sample-id MPL-0197   # любая запись поля: C = N/A, интервал, сверка с API и выгрузкой
+```
+
+Все числа документов — в `reports/final_numbers.json`; `scripts\case\build_docs.py` пересобирает README, отчёт и деку и проверяет, что числа совпадают. F1 {{case.detector.test.lgbm.f1|f3}} берётся из сохранённых предсказаний; пересчёт TP/FP/FN требует разметки MARIDA (4,5 ГБ, см. ниже).
+
 Полосы обследования кейса ({{case.run.export.zones}}) — отдельный слой: **0 подтверждённых пар** «снимок ↔ полевое измерение» среди событий CSV организаторов, для пластика снимков нет. Пары по месту и времени нашлись только в открытых данных ADIS — все вида «0 на снимке при нескольких шт./км²» (раздел «Как мы искали данные»).
 
 **Демо на отложенной сцене.** Слой «Спутниковые зоны»: {{case.sections.scene_zones.n_finds}} находок из {{case.sections.scene_zones.n_zones}} обработанных зон на {{case.sections.scene_zones.n_scenes_eval}} оцениваемых сценах. Главный пример — «{{case.sections.scene_zones.demo_zone_title}}» на сцене Cózar {{case.sections.scene_zones.demo.tile}}, {{case.sections.scene_zones.demo.date}}: она не участвовала в обучении, подборе порога и экспериментах детектора. На ней {{case.sections.scene_zones.demo.n_zones}} зон, из них {{case.sections.scene_zones.demo.n_zones_cozar}} совпадают с нитями каталога Cózar (уровень B). Карточка зоны: площадь зоны и доля покрытия — оценка детектора по маске; погода — ERA5 (модель); маска качества — SCL снимка; версия модели; уверенность детектора и признаки пены, блика, судна. Главный статус зоны — «{{case.sections.scene_zones.zone_main_status}}»; перевод площади маски в штуки не показываем — нет калибровочных пар «снимок → шт./км²». Путь — [docs/DEMO.md](docs/DEMO.md).
@@ -38,6 +49,8 @@
 Постановка (Т3) допускает отдельную проверку на полевых данных. Наш количественный результат — **полевой алгоритм**: C = N/A с интервалом Пуассона, эталон — опубликованные счёты, бейзлайн — медиана профиля на том же отложенном сплите (участок маршрута + буфер 1 сут, состав зафиксирован до моделей, test посчитан один раз, {{case.sections.field_test.when}}). Спутникового количества в штуках нет; эксперименты переноса на снимки — проверки, а не результат.
 
 {{derived.case_field_table}}
+
+Интервалы в таблицах разного рода: у отложенного test — покрытие 90 %-интервала прогноза; у среднего профиля — Пуассон (только ошибка счёта) и бутстреп по дням рейса (с разбросом между событиями). Строки с разными интервалами не сравнивать. S3 и S4 — весь мусор, не пластик: это справка, не целевая величина.
 
 - **Полевой прогноз для ADIS** (объекты детектора ADIS > 10 см, 7 % — животное/растение по классу модели; {{case.sections.quantity.adis_forecast.n_segments|int}} отрезков): ΣN/ΣA = {{case.sections.quantity.adis_forecast.C|f2}} [{{case.sections.quantity.adis_forecast.lo|f2}}–{{case.sections.quantity.adis_forecast.hi|f2}}] шт./км², нулевых отрезков {{case.sections.quantity.adis_forecast.zero_pct|f0}} % ({{case.sections.quantity.adis_forecast.note_zero}}). Прогноз по координатам и сезону с правилом, записанным до метрик, и разбиением {{case.sections.quantity.adis_forecast.split}}: {{case.sections.quantity.adis_forecast.verdict}}. На отложенных регионах ({{case.sections.quantity.adis_forecast.test_n|int}} отрезков) медиана — MAE {{case.sections.quantity.adis_forecast.test_mae_median|f2}}, RMSE {{case.sections.quantity.adis_forecast.test_rmse_median|f2}} шт./км², покрытие 90 %-интервала {{case.sections.quantity.adis_forecast.test_cov90_median|f0}} % (`reports/quantity/adis_forecast.md`). Для сравнения — {{case.sections.quantity.adis_forecast.authors_calibrated.label}}: {{case.sections.quantity.adis_forecast.authors_calibrated.C|f2}} шт./км² (типичный интервал отрезка {{case.sections.quantity.adis_forecast.authors_calibrated.lo_typ|f2}}–{{case.sections.quantity.adis_forecast.authors_calibrated.hi_typ|f1}}; {{case.sections.quantity.adis_forecast.authors_calibrated.source}}); наша — {{case.sections.quantity.adis_forecast.authors_calibrated.ours_raw_C|f2}}. Оговорка: {{case.sections.quantity.adis_forecast.authors_calibrated.caveat}}.
 
@@ -140,16 +153,8 @@
 
 Windows 10/11, Python 3.12, из корня репозитория. GPU не нужен.
 
-**Проверить главные числа за 2 минуты** (после `git clone`, из корня, Windows; первый запуск ставит пакеты ≈ 3 мин):
+Проверка главных чисел за 2 минуты — в начале README (раздел «Проверить главные числа за 2 минуты»).
 
-```powershell
-powershell -ExecutionPolicy Bypass -File run.ps1 -Case all -Offline      # маршрут кейса; в логе шага 5: «test F1 lgbm {{case.detector.test.lgbm.f1|f3}}…»
-.venv\Scripts\python.exe scripts\case\expert_check.py --n {{case.sections.quantity.field_S2.pooled_N}} --area {{case.sections.quantity.field_S2.pooled_A_km2|f2}}   # C = ΣN/ΣA профиля S2 = {{case.sections.quantity.field_S2.pooled_C|f1}} шт./км² [Пуассон {{case.sections.quantity.field_S2.lo95|f1}}–{{case.sections.quantity.field_S2.hi95|f1}}]
-.venv\Scripts\python.exe scripts\case\field_interval_check.py       # тот же {{case.sections.quantity.field_S2.pooled_C|f1}} с интервалом между днями [{{case.sections.quantity.field_S2.boot_lo95|f1}}–{{case.sections.quantity.field_S2.boot_hi95|f1}}] → reports/quantity/field_intervals.md
-.venv\Scripts\python.exe scripts\case\expert_check.py --sample-id MPL-0197   # любая запись поля: C = N/A, интервал, сверка с API и выгрузкой
-```
-
-Все числа документов — в `reports/final_numbers.json`; `scripts\case\build_docs.py` пересобирает README, отчёт и деку и проверяет, что числа совпадают. F1 {{case.detector.test.lgbm.f1|f3}} берётся из сохранённых предсказаний; пересчёт TP/FP/FN требует разметки MARIDA (4,5 ГБ, см. ниже).
 
 ```powershell
 # весь маршрут кейса: CSV → отбор → пары → маски качества → детектор → реестры → метрики → экспорт
@@ -402,11 +407,11 @@ MAPE не используется: в реестре есть нули. Осн�
 - Эталон и предсказания концентрации лежат в git: `reports/case_conc/predictions.csv` (y_true, y_pred и полевой ДИ для каждой строки, схемы и модели) и `dev_predictions.csv`.
 
 
-**Пересчёт чисел расследования данных (§11).** Главные числа раздела «Как мы искали данные» собирает `scripts\case\collect_search.py` (шаг `5b_search_numbers` маршрута, офлайн, < 1 с) из реестров в git. Сырые данные (архивы наборов, пиксели L2A, `data/search/*`, `data/extra/*`) в git не входят (лимит 2 ГБ), поэтому полный пересчёт реестров требует сети; без неё числа **проверяются по сохранённому реестру в git** (последний столбец).
+**Пересчёт чисел расследования данных.** Главные числа раздела «Как мы искали данные» собирает `scripts\case\collect_search.py` (шаг `5b_search_numbers` маршрута, офлайн, < 1 с) из реестров в git. Сырые данные (архивы наборов, пиксели L2A, `data/search/*`, `data/extra/*`) в git не входят (лимит 2 ГБ), поэтому полный пересчёт реестров требует сети; без неё числа **проверяются по сохранённому реестру в git** (последний столбец).
 
 | Что | Команда | Входы → выходы | Сеть, время | Без внешних данных проверяется по |
 |---|---|---|---|---|
-| сборка чисел §11 | `scripts\case\collect_search.py` (`--sync` — копия ADIS из `data/search`, снимок экспериментов детектора v2, вырезки) | реестры ниже → `reports/search/search_numbers.json`, `case.sections.{search, adis_pairs, labeled_data, detector_v2, baselines, quantity, oil}` | нет, < 1 с | — |
+| сборка чисел расследования данных | `scripts\case\collect_search.py` (`--sync` — копия ADIS из `data/search`, снимок экспериментов детектора v2, вырезки) | реестры ниже → `reports/search/search_numbers.json`, `case.sections.{search, adis_pairs, labeled_data, detector_v2, baselines, quantity, oil}` | нет, < 1 с | — |
 | пары ADIS ↔ S2 | `scripts\search\adis_pairs.py --summary-only` (полный прогон — без ключа) | `data/extra/field/adis_s2_match.csv`, `Objects.csv`, вырезки `data/search/adis/seg/` → `data/search/adis/candidates.csv`, `reports/search/adis.md` | полный — да (STAC, ≈ десятки минут); `--summary-only` — нет, если есть `data/search/adis/seg/` | `reports/search/adis_candidates.csv`, `reports/search/adis.md` |
 | B: PLP, FloatingObjects | `scripts\extra_data\build_registry.py` | архивы PLP/FO, пиксели L2A → `reports/extra_data/registry.csv`, `overlap.csv` | да | `reports/extra_data/registry.csv`, `overlap.csv`, `content_overlap.csv` |
 | D: суда, облака | `scripts\extra_data\l90_registry.py` (после `l90_vessels_fi.py`, `l90_clouds_cmc.py`) | реестры судов и облаков → `reports/extra_data/registry_negatives.csv` | да | `reports/extra_data/registry_negatives.csv`, `fp_current_detector.json` |
@@ -418,7 +423,7 @@ MAPE не используется: в реестре есть нули. Осн�
 | полевой прогноз ADIS (> 10 см; медиана остаётся) | `scripts\case\adis_forecast.py val`, затем `final` (правило — `configs/adis_forecast.yaml`, sha256 сверяется) | отрезки ADIS → `reports/quantity/adis_forecast.{json,md}` | нужны Segments.csv ADIS (не в git); ≈ 20 с CPU | `reports/quantity/adis_forecast.json` |
 | калибровка по ячейкам (отрицательный результат) | `scripts\case\cell_calibration.py run` (проверка — `configs/cell_calibration.yaml`, sha256 сверяется) | каталог Cózar, ADIS, CSV организаторов, STAC-облачность → `reports/quantity/cell_calibration.{json,md}` | да (STAC, чтение NetCDF по HTTP); ≈ минуты | `reports/quantity/cell_calibration.json` |
 | мост «дрон / PlanetScope → Sentinel-2» | `scripts\count_bridge\plp_bridge_s2.py`, `nasa_ps_bridge_s2.py`, итог — `plp_bridge_summary.py` | мишени PLP, рамки PlanetScope + L2A того же дня → `out/l115/*.csv` | да (L2A, STAC) | отчёт `reports/count_datasets/` |
-| интервал профиля «между событиями» (§28 А) | `scripts\case\field_interval_check.py` | CSV организаторов, `reports/case_conc/final_test_predictions.csv` (состав test) | нет; ≈ 5 с | `reports/quantity/field_intervals.{json,md}` |
+| интервал профиля «между событиями» | `scripts\case\field_interval_check.py` | CSV организаторов, `reports/case_conc/final_test_predictions.csv` (состав test) | нет; ≈ 5 с | `reports/quantity/field_intervals.{json,md}` |
 | повтор расчёта экспертом | `scripts\case\expert_check.py --sample-id <id>` / `--zone-id <id>` / `--n 12 --area 0.20 --pred 75` | CSV, реестр пар, маски и вероятности → сверка с API и выгрузкой | нет; секунды | — (пересчёт из файлов в git) |
 | демо на отложенной сцене и слой зон | `scripts\case\demo_scene.py select`, `fetch --acq <тайл_дата>`, `detect`; `scripts\case\scene_zones.py` | L2A сцены → `data/case/scene_zones/`, `reports/case_demo/` | `fetch` — да; `scene_zones.py` — нет | `data/case/scene_zones/`, `reports/case_demo/heldout_check.json` |
 | счётчик предметов по фото (штуки на кадр) | `scripts\photo_count\eval.py infer ...` (GPU), затем `eval.py score --tag <tag>` | фото FML (сплит по сессиям) → `reports/photo_count/eval_<tag>.json` | веса и фото — локально; вывод на GPU | `reports/photo_count/` |

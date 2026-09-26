@@ -174,10 +174,31 @@ def test_wording_section15(deck_texts):
             "docs/DEMO.md(file)": (ROOT / "docs/DEMO.md").read_text(encoding="utf-8")}
     bad = [(name, pat) for name, txt in docs.items() for pat in FORBIDDEN if re.search(pat, txt)]
     assert not bad, f"формулировки §15 нарушены: {bad}"
-    trace = re.compile(r"\bL\d{2,3}\b|оркестрат|INBOX|SPEC-GAPS|tasklog")
+    trace = re.compile(r"\bL\d{2,3}\b|оркестрат|INBOX(?!_REQUESTS)|SPEC-GAPS|tasklog|§\s*(?:1[1-9]|[2-9]\d)")
     leaks = [(name, m.group(0)) for name, txt in docs.items() for m in [trace.search(txt)] if m]
     assert not leaks, f"следы внутреннего процесса в сдаче: {leaks}"
     ft = (ROOT / "README.md").read_text(encoding="utf-8")
     assert "Главный количественный результат" in ft and "медиана профиля (на карте)" in ft
     q = docs["docs/QUANTITY.md"]
     assert "Пара по месту и времени" in q and "Калибровочная пара" in q and "Видимый сигнал" in q
+
+
+SCRUBBED = ["reports/case_demo/heldout_scene.md", "docs/PHOTO_COUNT.md", "docs/COUNT_DATASETS.md", "docs/LABELS.md",
+            "docs/CRITERIA_CHECK.md", "docs/OIL.md", "docs/QUANTITY.md", "reports/report_final.md"]
+
+
+def test_no_process_marks_in_submission_docs():
+    """Жюри-7 п.5: в документах сдачи нет номеров задач (L86…), ссылок на внутренние указания («INBOX §NN», «§NN») и слова
+    «оркестратор». Журналы работы (docs/LOG.md, docs/SEARCH_LOG.md) — исключение. Правка: scripts/case/scrub_process_marks.py."""
+    import glob as _g
+    trace = re.compile(r"\bL\d{2,3}\b|INBOX(?!_REQUESTS)|оркестрат|§\s*(?:1[1-9]|[2-9]\d)")
+    files = SCRUBBED + sorted(str(Path(p).relative_to(ROOT)).replace("\\", "/")
+                              for p in _g.glob(str(ROOT / "docs" / "research" / "**" / "*.md"), recursive=True))
+    bad = {}
+    for rel in files:
+        p = ROOT / rel
+        if p.is_file():
+            hits = trace.findall(p.read_text(encoding="utf-8"))
+            if hits:
+                bad[rel] = sorted(set(hits))[:5]
+    assert not bad, f"метки процесса в документах сдачи: {bad}"

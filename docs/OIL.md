@@ -1,4 +1,4 @@
-# OIL — класс «Нефтяное пятно» (ЭКСПЕРИМЕНТАЛЬНЫЙ слой; INBOX §14, L101)
+# OIL — класс «Нефтяное пятно» (ЭКСПЕРИМЕНТАЛЬНЫЙ слой; задание команды, «нефть»)
 
 Отдельная бинарная голова «нефть» рядом с детектором мусора. Основной детектор (`weights/lgbm`) не менялся.
 Единица — **площадь пятна, км²** (+ доля пикселей наблюдаемой воды сцены). **Площадь, не объём и не масса.** Штуки к нефти не применяются.
@@ -41,7 +41,7 @@
 Правила (без подбора на test), по порядку:
 1. Маска качества ДО поиска пятен: только наблюдаемая вода — у районов `water_mask.tif` (SCL-вода, буфер 2 пикс. от суши и 5 пикс. от облака/тени), у пар `quality.tif == 1` (без облака/тени/перистых, спектрального облака, суши, блика, буфера края воды).
 2. Порог val 0.06; компоненты ≥ 15 пикс. (≈ 5-й перцентиль размера пятен разметки MADOS train, медиана 108 пикс.; 0.0015 км²).
-3. Ворота сцены (сцена остаётся в списке, но **«нет оценки» = null, не 0**): пригодной воды < 50 % нессушной части кадра → `no_estimate_low_water` (указание оркестратора 02:30); облака+тени > 0.2 → `skipped_cloudy` (как `max_cloud_frac` пар); > 5 % воды отмечено → `suspect_scene_wide` (сплошная дымка/блик/сдвиг L2A; эвристика добавлена после первых 10 сцен: Бали 27.02.2018 — 31 % воды под дымкой).
+3. Ворота сцены (сцена остаётся в списке, но **«нет оценки» = null, не 0**): пригодной воды < 50 % нессушной части кадра → `no_estimate_low_water` (указание команды 02:30); облака+тени > 0.2 → `skipped_cloudy` (как `max_cloud_frac` пар); > 5 % воды отмечено → `suspect_scene_wide` (сплошная дымка/блик/сдвиг L2A; эвристика добавлена после первых 10 сцен: Бали 27.02.2018 — 31 % воды под дымкой).
 
 Итоги пересчёта (26.09 03:00, `data/case/oil/index.json`: n_spills_no_mask / n_spills_after_mask / n_spills):
 
@@ -66,10 +66,10 @@
 ## Воспроизведение
 ```
 set CUDA_VISIBLE_DEVICES=
-.venv\Scripts\python.exe scripts\oil\train_oil.py split      # только если configs/oil_eval.yaml нет (иначе отказ)
+.venv\Scripts\python.exe scripts\oil\train_oil.py split # только если configs/oil_eval.yaml нет (иначе отказ)
 .venv\Scripts\python.exe scripts\oil\train_oil.py train --seeds 0 1 2
 .venv\Scripts\python.exe scripts\oil\train_oil.py final
-.venv\Scripts\python.exe scripts\oil\train_oil.py test       # один раз; повтор запрещён
+.venv\Scripts\python.exe scripts\oil\train_oil.py test # один раз; повтор запрещён
 .venv\Scripts\python.exe scripts\oil\train_oil.py infer
 .venv\Scripts\python.exe -m pytest tests\test_oil.py -q
 ```

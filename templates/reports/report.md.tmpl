@@ -366,7 +366,7 @@
 {{derived.case_search_table}}
 
 - **События CSV организаторов.** Уровень A — {{case.sections.search.csv_A}}, C — {{case.sections.search.csv_C}}. Для пластика (S1 Тихий океан, S2 Саргассово море) в нужные сутки снимков нет: открытый океан Sentinel-2 почти не снимает. В Северном море полосы закрыты облаками или маршрут вне снимка; единственная чистая полоса (HE460 т.03) снята на следующий день, и вода за это время ушла дальше допуска. В Чёрном море снимки того же дня есть, но время и площадь трансект не опубликованы — это C, не A; детектор в полосах C дал {{case.sections.search.by_source.S4.c_det_in_strip}} пикселей.
-- **Стоп-правило** §11: без A или убедительного C за пилот массовый поиск по дрейфу не расширяли. Дрейф (HYCOM/SMOC + ERA5 через Open-Meteo) — только область поиска.
+- **Стоп-правило**: без A или убедительного C за пилот массовый поиск по дрейфу не расширяли. Дрейф (HYCOM/SMOC + ERA5 через Open-Meteo) — только область поиска.
 - **ADIS (The Ocean Cleanup, CC BY 4.0)** — полевые данные с числами, которых нет в CSV: камера на борту считает предметы > 5 / 10 / 50 см на отрезках 10 км, с временем GPS и площадью обследования. Отбор: |dt| ≤ {{case.sections.adis_pairs.dt_max_h|f0}} ч, облачность сцены ≤ {{case.sections.adis_pairs.cloud_max_pct}} % — {{case.sections.adis_pairs.segments}} отрезков на {{case.sections.adis_pairs.scenes}} сценах S2 L2A. Итог: пар по месту и времени (A) **{{case.sections.adis_pairs.A}}** (≈ {{case.sections.adis_pairs.A_passes}} независимых проходов, {{case.sections.adis_pairs.A_ships}} судов), C {{case.sections.adis_pairs.C}}, D {{case.sections.adis_pairs.D}} (причины D: {{case.sections.adis_pairs.d_reasons}}).
 
 ### 10.3 Пары ADIS по месту и времени: что видит снимок

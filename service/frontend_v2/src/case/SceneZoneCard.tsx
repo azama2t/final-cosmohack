@@ -5,7 +5,7 @@
 import Info from '../components/Info';
 import { API_BASE, type Feat, type FC, type Meta } from './api3';
 import { dateRu, dateTimeRu, num, pct } from './fmt';
-import { geomCenter } from './CaseMap';
+import { geomCenter, szKey } from './CaseMap';
 
 /** §33: the source of every number next to it */
 function Src({ k }: { k: 'image' | 'field' | 'photo' | 'research' | 'none' | 'model' | 'era5' | 'mask' }) {
@@ -232,7 +232,7 @@ export default function SceneZoneCard({
           <summary>Подробности: признаки ложных, модель, примеры</summary>
         <div className="sec">
           <span className="c-chip" data-testid="sz-status-chip">
-            <i style={{ background: SZ_COLOR[p.detection_status === 'detected' && p.verification !== 'level_B_cozar' ? 'unverified' : p.detection_status] ?? '#868e96' }} />
+            <i style={{ background: SZ_COLOR[szKey(p)] ?? '#868e96' }} />
             {p.detection_label}
           </span>
           {p.detection_reason && <div className="c-line" data-testid="sz-reason">{p.detection_reason}</div>}

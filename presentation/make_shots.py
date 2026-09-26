@@ -1,7 +1,7 @@
 r"""Скрины сервиса v2 для деки (основная часть, слайды «Сервис»): http://localhost:8070, 1920×1080, без фикстур.
 
 Путь §33: обзор Земли (наведение на находку — тултип) → клик по точке → сцена и карточка зоны → «В студию» →
-«← Назад» → «Выгрузка» → режим «Фото». Пишет presentation/img/{earth,card,studio,export,photo}.png; затем
+«← Назад» → «Выгрузка» → режим «Фото». Пишет presentation/img/{earth,card,studio,export,photo}.jpg; затем
     .venv\Scripts\python.exe scripts\make_deck_case.py --pdf
 вставит их в presentation/deck.pptx и reports/case_deck.pptx (кандидаты — IMAGES_MAIN в make_deck_case.py).
 Сервис не перезапускает. Ошибки консоли печатает; при ошибках код возврата 1 (такие скрины в деку не годятся).
@@ -49,7 +49,7 @@ def main(argv=None) -> int:
             pg.wait_for_timeout(900)
         else:
             notes.append("точек-находок через __app.findPoints нет — Земля без тултипа")
-        pg.screenshot(path=str(out / "earth.png")); made.append("earth")
+        pg.screenshot(path=str(out / "earth.jpg"), type="jpeg", quality=90); made.append("earth")
         # 2. точка → сцена и карточка. Для деки — находка отложенной сцены Cózar (первая в списке «Находки», уровень B);
         #    клик по точке карты проверен L111 (scripts/case/s33_path.py), здесь — --by-map
         opened = False
@@ -71,7 +71,7 @@ def main(argv=None) -> int:
             pg.locator("[data-testid=sz-item]").first.click()
         pg.wait_for_selector("[data-testid=scene-zone-card]", timeout=30000)
         pg.wait_for_timeout(6000)
-        pg.screenshot(path=str(out / "card.png")); made.append("card")
+        pg.screenshot(path=str(out / "card.jpg"), type="jpeg", quality=90); made.append("card")
         # 3. студия → назад
         st = pg.locator("[data-testid=sz-studio]")
         if not st.count():
@@ -79,7 +79,7 @@ def main(argv=None) -> int:
         if st.count():
             st.first.click()
             pg.wait_for_timeout(6000)
-            pg.screenshot(path=str(out / "studio.png")); made.append("studio")
+            pg.screenshot(path=str(out / "studio.jpg"), type="jpeg", quality=90); made.append("studio")
             bk = pg.locator("[data-testid=studio-back]")
             if bk.count():
                 bk.first.click()
@@ -92,7 +92,7 @@ def main(argv=None) -> int:
         # 4. выгрузка
         pg.click("[data-testid=act-export]")
         pg.wait_for_timeout(1500)
-        pg.screenshot(path=str(out / "export.png")); made.append("export")
+        pg.screenshot(path=str(out / "export.jpg"), type="jpeg", quality=90); made.append("export")
         pg.keyboard.press("Escape")
         # 5. «Фото»: пример уже открыт — ждём конца счёта
         pg.click("[data-testid=mode-photo]")
@@ -101,7 +101,7 @@ def main(argv=None) -> int:
             if "Считаю" not in pg.inner_text("body"):
                 break
         pg.wait_for_timeout(1500)
-        pg.screenshot(path=str(out / "photo.png")); made.append("photo")
+        pg.screenshot(path=str(out / "photo.jpg"), type="jpeg", quality=90); made.append("photo")
         b.close()
     print("скрины:", ", ".join(made), "->", out)
     for n in notes:

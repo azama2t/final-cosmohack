@@ -63,7 +63,9 @@ export interface CaseMapProps {
 /** colours of the satellite scene zones by detection status (detector verdict, no field confirmation) */
 export const SZ_COLORS: Record<string, string> = { detected: '#ff8c42', unverified: '#d9b870', not_detected: '#2b8a3e', insufficient_data: '#9aa0a8' };
 /** map colour key: a detector hit without level-B evidence is «unverified», not «detected» */
-export const szKey = (p: any) => (p.detection_status === 'detected' && p.verification !== 'level_B_cozar' ? 'unverified' : p.detection_status);
+export const isFind = (p: any) => (p.is_find ?? p.detection_status === 'detected') as boolean;
+export const szKey = (p: any) =>
+  p.detection_status === 'detected' && !isFind(p) ? 'insufficient_data' : p.detection_status === 'detected' && p.verification !== 'level_B_cozar' ? 'unverified' : p.detection_status;
 
 /** §33: field points and survey strips are not satellite finds — hidden on the Earth overview, shown when zoomed in */
 export const FIELD_MINZOOM = 3.2;
@@ -79,7 +81,7 @@ function szFeatures(fc: FC<any> | null | undefined) {
     const c = geomCenter(f.geometry);
     // §33: overview points = real finds only (detection_status «detected»); «недостаточно данных», false alarms and
     // «не обнаружено» never become points
-    if (c && f.properties.detection_status === 'detected') pts.push({ type: 'Feature', geometry: { type: 'Point', coordinates: c }, properties: props });
+    if (c && isFind(f.properties)) pts.push({ type: 'Feature', geometry: { type: 'Point', coordinates: c }, properties: props });
   }
   return { polys: { type: 'FeatureCollection', features: polys }, pts: { type: 'FeatureCollection', features: pts } };
 }
@@ -527,9 +529,17 @@ export default function CaseMap(p: CaseMapProps) {
       raf = requestAnimationFrame(() => {
         raf = 0;
         if (performance.now() < quietUntil) return;
-        const h = hit(e.point);
+        const h: any = hit(e.point);
         map.getCanvas().style.cursor = h ? 'pointer' : '';
         props.current.onHover(h ? { ...h, x: e.point.x, y: e.point.y } : null);
+        if (h && h.id.startsWith('CL-')) {
+          const cid = Number(h.id.split('-')[1]);
+          const src: any = map.getSource('c-sz-pts');
+          Promise.resolve(src.getClusterLeaves(cid, 500, 0)).then((lv: any[]) => {
+            if (performance.now() < quietUntil) return;
+            props.current.onHover({ ...h, x: e.point.x, y: e.point.y, leaves: lv.map((f) => f.properties.id) } as any);
+          }, () => undefined);
+        }
       });
     });
     map.on('mouseout', () => props.current.onHover(null));
@@ -543,7 +553,22 @@ export default function CaseMap(p: CaseMapProps) {
         // a cluster of finds: zoom in until it splits
         const cid = Number(h.id.split('-')[1]);
         const srcP = map.getSource('c-sz-pts') as any;
-        Promise.resolve(srcP.getClusterExpansionZoom(cid)).then((zz: number) => map.easeTo({ center: h.lngLat, zoom: Math.max(zz, map.getZoom() + 1.5), duration: 900 }));
+        Promise.resolve(srcP.getClusterLeaves(cid, 500, 0)).then(
+          (lv: any[]) => {
+            const ids: string[] = lv.map((f) => f.properties.id);
+            if (ids.length === 1) return props.current.onPick({ kind: 'zone', id: ids[0] });
+            const sk = new Set(ids.map((id) => id.replace(/-\d{3}$/, '')));
+            if (sk.size === 1) {
+              const xs = lv.map((f) => f.geometry.coordinates[0]);
+              const ys = lv.map((f) => f.geometry.coordinates[1]);
+              const pad = 0.02;
+              map.fitBounds([[Math.min(...xs) - pad, Math.min(...ys) - pad], [Math.max(...xs) + pad, Math.max(...ys) + pad]], { padding: 60, maxZoom: 12, duration: 1200 });
+              return;
+            }
+            Promise.resolve(srcP.getClusterExpansionZoom(cid)).then((zz: number) => map.easeTo({ center: h.lngLat, zoom: Math.max(zz, map.getZoom() + 1.5), duration: 900 }));
+          },
+          () => undefined,
+        );
         return;
       }
       props.current.onPick(h);

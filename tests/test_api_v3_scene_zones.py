@@ -44,6 +44,8 @@ def test_scene_zones_blocks_and_statuses(client):
             assert not p["flags"] and p["detection_label"].startswith("обнаружено детектором")
             if p["n_cozar_filaments"]:
                 assert p["verification"] == "level_B_cozar" and "совпадает с разметкой Cózar (B)" in p["detection_label"]
+            elif p.get("training_scene"):  # жюри-7: detector-training acquisition — not a find
+                assert p["verification"] == "training_scene" and not p["is_find"]
             else:
                 assert p["verification"] == "unverified" and "требует проверки" in p["detection_label"]
         fn = p["field_nearby"]
@@ -203,3 +205,28 @@ def test_export_no_far_field_numbers(client):
     for r in rows:
         nos = by[r["zone_id"]]["field_nearby"]["nearest_organizer_sample"]
         assert r["field_nearest_sample_id"] == nos["sample_id"] and float(r["field_nearest_km"]) == nos["distance_km"]
+
+
+def test_jury7_finds_and_model_date(client):
+    """жюри-7: finds exclude detector-training acquisitions; model date from weights/lgbm/meta.json (not mtime)."""
+    meta = json.loads((cs.REPO / "weights" / "lgbm" / "model_card.json").read_text(encoding="utf-8"))
+    m = client.get("/api/v3/meta").json()
+    assert m["detector"]["version"]["trained_at"] == meta["trained_at"]
+    fc = client.get("/api/v3/scene_zones").json()
+    assert fc["model"]["trained_at"] == meta["trained_at"]
+    finds = [f["properties"] for f in fc["features"] if f["properties"]["is_find"]]
+    assert all(p["detection_status"] == "detected" and not p.get("training_scene") for p in finds)
+    for f in fc["features"]:
+        p = f["properties"]
+        if p["detection_status"] == "detected" and p.get("training_scene"):
+            assert not p["is_find"] and "находкой не считается" in p["detection_label"]
+    assert m["headline"]["satellite"]["n_finds"] == len(finds)
+    adis = next(r for r in m["headline"]["field"] if r["key"] == "ADIS")
+    assert "не только пластик" in adis["material"]
+
+
+def test_metrics_unet_baseline_row(client):
+    fnb = json.loads((cs.REPO / "reports" / "final_numbers.json").read_text(encoding="utf-8"))["case"]["sections"]["baselines"]
+    d = client.get("/api/v3/metrics").json()["detector"]
+    assert d["unet"]["f1"] == fnb["test"]["unet_argmax"]["f1"]
+    assert d["unet"]["name"].startswith("U-Net") and d["unet"]["split"] == "test"

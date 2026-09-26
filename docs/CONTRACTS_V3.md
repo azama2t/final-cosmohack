@@ -779,3 +779,4 @@ GET /api/v3/photo/meta: + headline {count_mae_per_frame, count_mae_ci95, n_image
   {nearest_organizer_sample {sample_id, source_id, distance_km}, note}; items[] (отрезки ADIS с c_items_km2, ci95, калибровкой
   авторов) и authors_calibration удалены (шт./км² другого места не выдаются за плотность зоны). scene_kind_label demo —
   «отложенная сцена Cózar 2024 (не участвовала в обучении)». meta.headline.satellite: + n_finds.
+3.10f (26.09, L111, жюри-7): scene_zones properties + is_find (detected и не снимок обучения детектора); verification "training_scene" у detected на съёмке MARIDA/MADOS; meta.headline.satellite.n_finds = число is_find; detector.version.trained_at — из weights/lgbm/model_card.json; /metrics detector + unet {name, split, f1, precision, recall, ci95_f1} (вне rows).

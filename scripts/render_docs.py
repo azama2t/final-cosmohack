@@ -544,7 +544,7 @@ def case_sections_table(fn: dict) -> str:
     qn, oil, v2 = s.get("quantity") or {}, s.get("oil") or {}, s.get("detector_v2") or {}
     if sr.get("available"):
         tt_ = sr.get("totals") or {}
-        rows.append(f"| 7. Розыск снимков (§11) | события CSV: A {fmt(sr.get('csv_A'), None)}, C {fmt(sr.get('csv_C'), None)}; все строки-кандидаты "
+        rows.append(f"| 7. Розыск снимков | события CSV: A {fmt(sr.get('csv_A'), None)}, C {fmt(sr.get('csv_C'), None)}; все строки-кандидаты "
                     f"вместе с ADIS: A {fmt(tt_.get('A'), None)} / C {fmt(tt_.get('C'), None)} / D {fmt(tt_.get('D'), None)} | {sr.get('protocol')} | "
                     f"`{sr.get('source')}` |")
     if ad.get("available"):

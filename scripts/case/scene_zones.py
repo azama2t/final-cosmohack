@@ -88,7 +88,7 @@ def model_info() -> dict:
     p = ROOT / "weights" / "lgbm" / "model.txt"
     h = hashlib.sha256(p.read_bytes()).hexdigest()
     return {"weights": "weights/lgbm", "file": "weights/lgbm/model.txt", "sha256": h, "sha256_short": h[:12],
-            "trained_at": dt.datetime.fromtimestamp(p.stat().st_mtime, dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "trained_at": json.loads((ROOT / "weights" / "lgbm" / "model_card.json").read_text(encoding="utf-8")).get("trained_at"),
             "threshold": 0.63, "harmonize": "none", "class": "MARIDA Marine Debris (любой плавающий мусор, не только пластик)"}
 
 

@@ -42,7 +42,7 @@ export default function MetricsPanel({ m, err }: { m: any | null; err: string | 
   if (err) return <div className="c-err c-pad">{err}</div>;
   if (!m) return <div className="note c-pad">Загрузка…</div>;
   const d = m.detector ?? {};
-  const models = detModels(d);
+  const models = detModels(d).sort((a, b) => (a === d.main ? -1 : b === d.main ? 1 : 0));
   const c = m.concentration ?? {};
   const profiles: [string, any][] = c.profiles && Object.keys(c.profiles).length ? Object.entries(c.profiles) : c.main ? [[c.profile ?? '', { baseline: c.baseline, main: c.main, main_split: c.main?.split }]] : [];
   profiles.sort((a, b) => (a[0] === c.profile ? -1 : b[0] === c.profile ? 1 : 0));

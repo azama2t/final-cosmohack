@@ -10,7 +10,7 @@ import CaseMap, { ACCENT, CONC_BREAKS, CONC_COLORS, STRIP_NO, STRIP_OK, flyToBox
 import { ObsCard, ZoneCard } from './Cards';
 import PairsDrawer from './PairsDrawer';
 import SceneZoneCard, { type SceneZoneDetail, type SceneZoneProps } from './SceneZoneCard';
-import { SZ_COLORS, szKey } from './CaseMap';
+import { SZ_COLORS, szKey, isFind } from './CaseMap';
 import MetricsPanel from './MetricsPanel';
 import GoList, { rankSites } from './GoList';
 import { plural, color, dateRu, eventRu, label, missionShort, num, profileRu, scopeRu, sourceShort } from './fmt';
@@ -198,7 +198,7 @@ export default function CaseApp() {
   /** §33 / jury 08:51: the first-screen count is finds (detector «detected»), the rest is secondary */
   const nFinds = useMemo(() => {
     const fs = szones.data?.features ?? [];
-    return { n: fs.filter((f) => f.properties.detection_status === 'detected').length, b: fs.filter((f) => (f.properties as any).verification === 'level_B_cozar').length };
+    return { n: fs.filter((f) => isFind(f.properties)).length, b: fs.filter((f) => (f.properties as any).verification === 'level_B_cozar').length };
   }, [szones.data]);
   const szList = useMemo(() => (szOn ? szones.data?.features ?? [] : []), [szOn, szones.data]);
   const selSz = selSzId ? szList.find((f) => f.id === selSzId) ?? null : null;
@@ -1153,15 +1153,23 @@ function HoverTip({ meta, h, obs, zones, szones }: { meta: Meta; h: HoverInfo; o
     s = `${profileRu(meta, p.measurement_profile)} · ${dateRu(p.date_utc)} · ${scopeRu(meta, p.target_scope)}`;
   } else if (h.id.startsWith('CL-')) {
     const [, , n0, nb0, d0, d1] = h.id.split('-');
+    const leaves: string[] = (h as any).leaves ?? [];
+    const scenes = new Map<string, string>();
+    for (const id of leaves) {
+      const f = szones.find((x) => x.id === id);
+      if (f) scenes.set(f.properties.scene_key, `${f.properties.title.split(' · ')[0]} · ${dateRu(f.properties.datetime)}`);
+    }
     const n = Number(n0), nb = Number(nb0);
     const dd = (v: string) => (v && v !== '0' ? `${v.slice(6, 8)}.${v.slice(4, 6)}.${v.slice(0, 4)}` : '—');
     t = `${plural(n, 'находка', 'находки', 'находок')} детектора рядом${nb ? `, из них ${nb} совпали с Cózar` : ' — требуют проверки'}`;
-    s = `снимки Sentinel-2 ${d0 === d1 ? dd(d0) : `${dd(d0)} – ${dd(d1)}`} · нажмите — приблизить и раскрыть`;
+    s = scenes.size
+      ? `${scenes.size === 1 ? 'сцена' : `сцен: ${scenes.size}`} — ${[...scenes.values()].slice(0, 3).join('; ')}${scenes.size > 3 ? '…' : ''} · нажмите — ${scenes.size === 1 ? 'к сцене' : 'приблизить'}`
+      : `снимки Sentinel-2 ${d0 === d1 ? dd(d0) : `${dd(d0)} – ${dd(d1)}`} · нажмите — приблизить и раскрыть`;
   } else if (h.id.startsWith('SZ-')) {
     const f = szones.find((x) => x.id === h.id);
     if (!f) return null;
     const p = f.properties;
-    t = `${p.detection_status === 'detected' ? 'Находка детектора' : 'Спутниковая зона'} · ${p.detection_label}`;
+    t = `${isFind(p) ? 'Находка детектора' : 'Спутниковая зона'} · ${p.detection_label}`;
     s = `снимок Sentinel-2 ${dateRu(p.datetime)} · обработан детектором · ${p.title} · площадь пикселей ${num(p.measured.suspicious_area_m2, 0)} м²`;
   } else {
     const f = zones?.features.find((x) => x.id === h.id);
@@ -1208,7 +1216,7 @@ function SzList({ szOn, fc, err, list, sel, onPick }: { szOn: boolean; fc: FC<Sc
   return (
     <div data-testid="sz-list">
       <div className="c-list-note">
-        Находки · {err ? '—' : list.filter((f) => f.properties.detection_status === 'detected').length} из {err ? '—' : list.length} зон
+        Находки · {err ? '—' : list.filter((f) => isFind(f.properties)).length} из {err ? '—' : list.length} зон
         <Info label="Спутниковые зоны">
           Зоны, где текущий детектор (weights/lgbm, порог 0,63) нашёл подозрительные пиксели на реальных снимках: отложенная сцена Cózar 2024 и снимки районов.
           «Обнаружено детектором» — только после фильтров судов/кильватера, пены, блика, облаков, берега и мелководья; с нитью каталога Cózar 2024 (разметка
@@ -1438,7 +1446,8 @@ function Headline({ open, onToggle, meta, photo, onField, onZone }: { open: bool
       <div className="c-head-t">
         {h.field_label}
         <Info label="Как читать" testid="headline-info">
-          {h.field_note}. Интервал S2 — бутстреп по дням рейса (учитывает пятнистость); у остальных — только ошибка счёта или межквартильный размах. Источник: {h.source}.
+          Интервалы разного рода (бутстреп по дням рейса, Пуассон — только ошибка счёта, межквартильный размах): строки между собой не сравнивать. S3 и S4 — весь
+          мусор, не только пластик; ADIS — все объекты крупнее 10 см. {h.field_note}. Источник: {h.source}.
         </Info>
       </div>
       {h.field.map((r: any) => (
@@ -1460,7 +1469,8 @@ function Headline({ open, onToggle, meta, photo, onField, onZone }: { open: bool
             </small>
           </span>
           <span className="c-head-d">
-            {r.size_class} · {r.material} · измерение{r.stat === 'медиана' ? ' (нет N — только медиана)' : ''}
+            {r.size_class} · {r.material} · измерение · интервал: {r.interval_label}
+            {r.stat === 'медиана' ? ' (нет N — только медиана)' : ''}
           </span>
         </button>
       ))}
@@ -1474,10 +1484,10 @@ function Headline({ open, onToggle, meta, photo, onField, onZone }: { open: bool
       {sat && (
         <div className="c-head-r c-head-sat">
           <button className="c-head-link" onClick={() => sat.open_zone_id && onZone(sat.open_zone_id)} data-testid="headline-sat">
-            Спутник: {num(sat.n_finds ?? null, 0)} находок из {num(sat.n_zones, 0)} зон ({num(sat.n_level_b, 0)} совпали с Cózar); {sat.quantity_label}
+            Спутник: {num(sat.n_finds ?? null, 0)} находок из {num(sat.n_zones, 0)} зон ({num(sat.n_level_b, 0)} совпали с Cózar); шт./км² по снимку не подтверждены
           </button>
           <Info label="почему →" testid="headline-why" align="left">
-            {sat.why}. {(meta as any).quantity_levels?.calibration_pairs?.note ?? ''}
+            {sat.why}. {(meta as any).quantity_levels?.calibration_pairs?.note ?? ''} {sat.finds_note ? `Находки: ${sat.finds_note}.` : ''}
           </Info>
         </div>
       )}

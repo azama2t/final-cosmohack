@@ -51,13 +51,13 @@ IMAGES = {
 # основная часть §32 Б: ключ -> (кандидаты от корня репо по приоритету, имя в reports/case_deck_img, обрезка)
 # свежие скрины v2 (http://localhost:8070, 1920×1080) кладутся в presentation/img/; пока их нет — прежние скрины
 IMAGES_MAIN = {
-    "photo": (("presentation/img/photo.png", "reports/photo_count/ui_photo_v2.png"), "20_photo.jpg", None),
-    "svc_earth": (("presentation/img/earth.png",), "21_svc_earth.jpg", (336, 0, 1920, 1080)),
-    "sz_card": (("presentation/img/card.png", "reports/case_demo/1920_02_zone_card.png"), "26_sz_card.jpg", (336, 0, 1920, 1080)),
-    "svc_card": (("presentation/img/card.png", "reports/case_demo/1920_02_zone_card.png"), "22_svc_card.jpg", None),
-    "svc_studio": (("presentation/img/studio.png",), "25_svc_studio.jpg", (336, 0, 1920, 1080)),
-    "svc_photo": (("presentation/img/photo.png", "reports/photo_count/ui_photo_v2.png"), "23_svc_photo.jpg", None),
-    "svc_export": (("presentation/img/export.png", "reports/case_demo/1920_07_export_menu.png"), "24_svc_export.jpg", None),
+    "photo": (("presentation/img/photo.jpg", "reports/photo_count/ui_photo_v2.png"), "20_photo.jpg", None),
+    "svc_earth": (("presentation/img/earth.jpg",), "21_svc_earth.jpg", (336, 0, 1920, 1080)),
+    "sz_card": (("presentation/img/card.jpg", "reports/case_demo/1920_02_zone_card.png"), "26_sz_card.jpg", (336, 0, 1920, 1080)),
+    "svc_card": (("presentation/img/card.jpg", "reports/case_demo/1920_02_zone_card.png"), "22_svc_card.jpg", None),
+    "svc_studio": (("presentation/img/studio.jpg",), "25_svc_studio.jpg", (336, 0, 1920, 1080)),
+    "svc_photo": (("presentation/img/photo.jpg", "reports/photo_count/ui_photo_v2.png"), "23_svc_photo.jpg", None),
+    "svc_export": (("presentation/img/export.jpg", "reports/case_demo/1920_07_export_menu.png"), "24_svc_export.jpg", None),
 }
 
 # основная часть деки и речи (SPEC-GAPS.md: ТЗ не задаёт время → основная речь ≤ 5:00, ≤ 14 слайдов); остальное — «Приложение»
@@ -573,7 +573,7 @@ def main_slides(k: dict) -> list[dict]:
                ["S1 GPGP, трал", f"суммарный пластик {size_ru(k['pr_S1_size'])}", num(k["pr_S1_n"], 0)],
                ["S3 / S4, с судна", f"весь мусор {size_ru(k['pr_S3_size'])} / {size_ru(k['pr_S4_size'])} — не пластик",
                 f"{num(k['pr_S3_n'], 0)} · {num(k['pr_S4_n'], 0)}"],
-               ["ADIS, камера судна", f"плавающие предметы {adis_size(k['af_profile'])}", num(k["af_n_segments"], 0)]],
+               ["ADIS, камера судна", f"все плавающие предметы {adis_size(k['af_profile'])} (не только пластик)", num(k["af_n_segments"], 0)]],
         table_w=(0.3, 0.52, 0.18),
         caption="Вывод: основная целевая величина — суммарный пластик S2, шт./км²; весь мусор S3/S4 — только для экспериментов",
         source="configs/case_selection.yaml; reports/quantity/*.json (final_numbers → case.sections.quantity.profiles)",
@@ -660,7 +660,7 @@ def main_slides(k: dict) -> list[dict]:
         title=f"Главный количественный результат: {num(k['q_pooled_C'], 1)} шт./км² [{rng(k['qf_boot_lo95'], k['qf_boot_hi95'])}] — пластик S2 по полю",
         kpis=[(num(k["q_pooled_C"], 1), f"шт./км², суммарный пластик {size_ru(k['pr_S2_size'])}: {num(k['q_pooled_N'], 0)} шт. / "
                                         f"{num(k['q_pooled_A_km2'], 2)} км²; 95 % по дням рейса [{rng(k['qf_boot_lo95'], k['qf_boot_hi95'])}]"),
-              (num(k["af_C"], 2), f"шт./км², ADIS, предметы {adis_size(k['af_profile'])} [{rng(k['af_lo'], k['af_hi'], 2)}]; калибровка авторов по тралу — "
+              (num(k["af_C"], 2), f"шт./км², ADIS: все предметы {adis_size(k['af_profile'])} (не только пластик), измерение ΣN/ΣA [{rng(k['af_lo'], k['af_hi'], 2)}]; калибровка авторов по тралу — "
                                   f"{num(k['afa_C'], 2)}")],
         bullets=[f"На карте — медиана профиля {num(k['S2_dev_median_c'], 1)} шт./км² (типичное событие); "
                  f"{num(k['q_pooled_C'], 1)} — ΣN/ΣA всех событий; ошибка медианы на отложенном test — MAE {num(k['S2_t_median_mae'], 1)}"],
@@ -725,7 +725,7 @@ def main_slides(k: dict) -> list[dict]:
                 ("svc_card", "2. Точка → сцена и карточка: что найдено, когда, площадь, уверенность"),
                 ("svc_studio", "3. «В студию» — работа с зоной; «Назад к карте» — к той же точке обзора")],
         caption="Вывод: путь эколога — Земля → точка → карточка → студия → назад к следующей находке",
-        source="presentation/img/*.png (presentation/make_shots.py, http://localhost:8070, 1920×1080, без фикстур); docs/DEMO.md",
+        source="presentation/img/*.jpg (presentation/make_shots.py, http://localhost:8070, 1920×1080, без фикстур); docs/DEMO.md",
         speech=("Сервис. При открытии — Земля с реальными находками обработанных сцен. Клик по точке — сцена и карточка зоны: "
                 "что найдено, когда, площадь, уверенность и откуда каждое число. Из карточки — в студию, кнопкой «Назад» — "
                 "к той же точке обзора и к следующей находке."),
@@ -738,7 +738,7 @@ def main_slides(k: dict) -> list[dict]:
         images=[("svc_photo", "«Фото»: рамки и число предметов, площадь кадра → шт./км²; состав не определён"),
                 ("svc_export", "Выгрузка GeoJSON/CSV того, что на карте; запросы сохраняются и повторяются")],
         caption="Вывод: у каждого числа подписан источник — поле, фото, снимок или «нет данных»",
-        source="presentation/img/*.png (presentation/make_shots.py, http://localhost:8070, 1920×1080); docs/CONTRACTS_V3.md",
+        source="presentation/img/*.jpg (presentation/make_shots.py, http://localhost:8070, 1920×1080); docs/CONTRACTS_V3.md",
         speech=("Режим «Фото» открывается с готовым примером: рамки и число предметов, а при известной площади кадра — штуки на "
                 "квадратный километр. У каждого числа подписан источник. Выгрузка GeoJSON и CSV совпадает с картой, запрос можно "
                 "сохранить и повторить."),
@@ -950,14 +950,14 @@ def slides(k: dict) -> list[dict]:
         title=f"Карта: отложенная сцена Cózar {k['sz_demo_tile']} — {num(k['sz_demo_n_zones'], 0)} зон, {num(k['sz_demo_n_zones_cozar'], 0)} совпали с нитями Cózar; концентрация по снимку не подтверждена",
         bullets=[
             f"Сцена {k['sz_demo_tile']}, {k['sz_demo_date']} не участвовала в обучении, подборе порога и экспериментах детектора; всего в слое {num(k['sz_n_zones'], 0)} зон на {num(k['sz_n_scenes_eval'], 0)} оцениваемых сценах",
-            f"Карточка зоны: измерено (площадь {num(k['sz_example_area_km2'], 2)} км², LWD, маска качества, версия модели) · вероятно (статус, признаки пены/блика/судна) · главный статус — «{k['sz_zone_main_status']}»",
+            f"Карточка зоны: оценка детектора по снимку (площадь {num(k['sz_example_area_km2'], 2)} км², LWD, маска качества, версия модели) · вероятно (статус, признаки пены/блика/судна) · главный статус — «{k['sz_zone_main_status']}»",
             f"«Обнаружено» только при совпадении с нитью Cózar ({num(k['sz_by_level_b'], 0)}); признаки пены, блика, судна, берега → «недостаточно данных» ({num(k['sz_by_insufficient'], 0)})",
             f"Полосы кейса ({num(k['zones'], 0)}): связь с полем не подтверждена, концентрация по снимку недоступна; выгрузка = карта ({num(k['sz_export_ui'], 0)} = {num(k['sz_export_csv'], 0)} строк CSV)",
         ],
         image="demo_card",
-        caption="Отложенная сцена Cózar: контуры зон детектора и карточка «Измерено / Вероятно»",
+        caption="Отложенная сцена Cózar: контуры зон детектора и карточка зоны",
         source=f"data/case/scene_zones; reports/case_demo/demo_path.json (final_numbers → case.sections.scene_zones); {k['sc_file']}",
-        speech=("Карта на сцене, которую модель не видела. Каждая зона — измерено по снимку, вероятность с признаками ложных и, "
+        speech=("Карта на сцене, которую модель не видела. Каждая зона — оценка детектора по снимку, вероятность с признаками ложных и, "
                 "статус «концентрация по снимку не подтверждена» — штук по снимку мы не показываем. Выгрузка равна карте."),
     ))
     st, rb = k["S2_sch_st"], k["S2_sch_route_buf1"]
@@ -1374,10 +1374,10 @@ def _sz_block(k: dict) -> str:
 | Время | Действие | Что говорим | Что видно |
 |---|---|---|---|
 | 0:00–0:15 | Обзор Земли → находка **«{k['sz_demo_zone_title']}»** (или вкладка «Зоны») | «Сцена, которую модель не видела. Снимок, маска качества, контуры зон детектора — всё с этой сцены.» | снимок, маска качества, контуры зон |
-| 0:15–0:40 | Карточка, блок **«Измерено по снимку»** | «Площадь зоны {num(k['sz_example_area_km2'], 2)} км², подозрительные пиксели {num(k['sz_example_susp_m2'], 0)} м² ({num(k['sz_example_n_px'], 0)} пикс.), LWD {num(k['sz_example_lwd_m2_km2'], 0)} м² на км² пригодной воды — как у Cózar 2024. Вода в зоне {num(k['sz_example_water_pct'], 0)} %. Модель weights/lgbm, порог {num(k['thr'], 2)}, sha256 {k['sz_example_sha256_short']}.» | вырезка «снимок / пиксели детектора», «Измерено» |
-| 0:40–0:55 | Блок **«Вероятно»** | «Вероятность детектора {num(k['sz_example_prob_mean'], 2)} / {num(k['sz_example_prob_max'], 2)}. Признаков пены, блика, судна, берега нет. Контур пересекает {num(k['sz_example_n_cozar'], 0)} нити каталога Cózar — их отметили люди по снимку. Поэтому «обнаружено»; без такой разметки зона — «срабатывание, не проверено».» | статус, признаки, «Каталог Cózar 2024» |
+| 0:15–0:40 | Карточка: строки **«Снимок»**, **«Маска качества»**, **«Площадь зоны»**, **«Доля покрытия»** | «Это оценки детектора по маске, не счёт предметов. Площадь зоны {num(k['sz_example_area_km2'], 2)} км², подозрительные пиксели {num(k['sz_example_susp_m2'], 0)} м² ({num(k['sz_example_n_px'], 0)} пикс.), LWD {num(k['sz_example_lwd_m2_km2'], 0)} м² на км² пригодной воды — как у Cózar 2024. Вода в зоне {num(k['sz_example_water_pct'], 0)} %. Модель weights/lgbm, порог {num(k['thr'], 2)}, sha256 {k['sz_example_sha256_short']}.» | миниатюра снимка с контуром; у чисел подписи «оценка детектора», SCL, ERA5 |
+| 0:40–0:55 | Строки **«Статус детекции»**, **«Уверенность»**; признаки — в «Подробности» | «Вероятность детектора {num(k['sz_example_prob_mean'], 2)} / {num(k['sz_example_prob_max'], 2)}. Признаков пены, блика, судна, берега нет. Контур пересекает {num(k['sz_example_n_cozar'], 0)} нити каталога Cózar — их отметили люди по снимку. Поэтому «обнаружено»; без такой разметки зона — «срабатывание, не проверено».» | статус, признаки, «Каталог Cózar 2024» |
 | 0:55–1:10 | Статус **«Концентрация»** | «Главный статус зоны — «{k['sz_zone_main_status']}». Перевод площади в штуки не показываем: калибровочных пар «снимок → шт./км²» у нас {num(k['ql_calibration_pairs'], 0)}; {num(k['ad_A'], 0)} пар ADIS — пары по месту и времени, не калибровочные.» | статус концентрации |
-| 1:10–1:20 | Блок **«Поле рядом»** | «Ближайшее полевое измерение — ADIS за {num(k['sz_field_nearby_distance_km'], 0)} км, {k['sz_field_nearby_date']}: C = N/A = {num(k['sz_field_nearby_c'], 1)} [{num(k['sz_field_nearby_lo'], 1)}–{num(k['sz_field_nearby_hi'], 1)}] шт./км² (> 5 см). Измерение ≠ оценка: это другое время и место.» | таблица N / A / C |
+| 1:10–1:20 | Строка **«Ближайшее полевое измерение — … км»** | «Полевое измерение — другое место и время; его шт./км² мы не выдаём за плотность этой зоны. Ссылка включает слой «Полевые измерения» — там C = N/A с интервалом.» | строка-ссылка, слой «Полевые измерения» |
 | 1:20–1:30 | **Сложный случай:** «Как выглядит удача и ошибка» → «ложное срабатывание: судно / кильватер» | «Яркая точка со следом — судно. Статус «недостаточно данных». Суда — известная слабость: {num(k['v2_reference_vessels_pct'], 0)} % судов как мусор.» | вырезка судна, статус |
 | 1:30–1:40 | Даты сцены → **«Выгрузка»** → «Спутниковые зоны» CSV; **«Запросы»** → сохранить → «сбросить» → запустить | «Выгрузка — те же поля и статусы; сохранённый запрос восстанавливает вид.» | зон на карте {num(k['sz_export_ui'], 0)} = строк CSV {num(k['sz_export_csv'], 0)} = объектов GeoJSON {num(k['sz_export_geojson'], 0)} |
 
@@ -1469,7 +1469,7 @@ def qa_items(k: dict) -> list[tuple[str, str, str]]:
          f"{num(k['p_events_accept_drift'], 0)} из {num(k['p_events'], 0)} событий; для профилей пластика сцен нет вообще; на "
          f"{num(k['e_n_accept_s2'], 0)} парах со всем мусором связь признаков снимка с плотностью не установлена. Выдать число "
          f"значило бы выдать калибровку, которой нет. Поэтому у всех {num(k['zones'], 0)} полос статус «концентрация недоступна», "
-         f"поле `concentration` у зоны всегда `null`, а у {num(k['sz_n_zones'], 0)} спутниковых зон — «{k['sz_zone_main_status']}». "
+         f"поле `concentration` у зоны всегда `null`, а у {num(k['sz_n_finds'], 0)} находок детектора из {num(k['sz_n_zones'], 0)} обработанных зон — «{k['sz_zone_main_status']}». "
          f"Калибровочных пар «снимок → шт./км²» {num(k['ql_calibration_pairs'], 0)}, и не только у нас: авторы крупнейшего каталога "
          f"полос пишут «{k['q_quote_short']}» (Cózar и др., 2024, doi {k['q_quote_doi']}).",
          "README.md «Главное», §6; reports/case_pairs/summary.md; reports/case_pairs/experiment.md; docs/QUANTITY.md"),
