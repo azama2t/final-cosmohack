@@ -819,9 +819,10 @@ export default function CaseApp() {
             <span className="brand-dot" />
             Плавающий мусор: снимки и поле
             <Info label="О карте" testid="info-about">
-              Точки на Земле — находки детектора на обработанных снимках Sentinel-2 (после фильтров судов, пены, блика, облаков и ветра). Слева — снимки по районам;
-              клик — снимок на карте и его зоны по номерам, клик по зоне — карточка. Количество штук на км² у находок — исследовательская оценка (калибровка на мишенях
-              PLP), не измерение. Полевые измерения организаторов — отдельный слой (кнопка «Полевые измерения»).
+              Точки на Земле — находки детектора на обработанных снимках Sentinel-2 (после фильтров судов, пены, блика, облаков и ветра). Путь — полоса шагов сверху:
+              район и даты → снимок → зона → качество и статус → выгрузка. Количество предметов по снимку не определяется (принятых пар 0); оценка шт./км² — по
+              полевым данным (профиль акватории), исследовательский сценарий PLP — во вкладке «Подробно» карточки. Полевые измерения организаторов — отдельный слой
+              («Ещё ▾ → Полевые измерения»).
             </Info>
           </div>
         </div>
@@ -1515,6 +1516,10 @@ function buildSceneRows(scenes: SzScene[], zones: Feat<SceneZoneProps>[], q: Cas
   return { finds, nofinds, noeval, all: [...finds, ...nofinds, ...noeval], withZones: finds.length + nofinds.length };
 }
 
+/** §-review 19:1x: area of the zone contour — ≥ 0.1 км² in км², else in м² */
+export const areaTxt = (km2: number | null | undefined) =>
+  km2 === null || km2 === undefined ? '—' : km2 >= 0.1 ? `${num(km2, 2)} км²` : `${num(km2 * 1e6, 0)} м²`;
+
 /** the word only (the number is printed separately) */
 const pluralW = (n: number, one: string, few: string, many: string) => plural(n, one, few, many).replace(/^\S+\s/, '');
 
@@ -1774,18 +1779,18 @@ function SceneZones({
             onClick={() => onPick(f.id)}
             data-testid="sz-item"
             data-zone={f.id}
-            title={`${zoneTitle(p)} · ${classShort(p)} · ${statusLabel(p)}${confirmation(p) ? ` · подтверждение: ${confirmation(p)}` : ''} · площадь зоны ${num(p.measured.zone_area_km2 !== null && p.measured.zone_area_km2 !== undefined ? p.measured.zone_area_km2 * 1e6 : null, 0)} м², пикселей детектора ${num(p.measured.suspicious_area_m2, 0)} м²`}
+            title={`${zoneTitle(p)} · ${classShort(p)} · ${statusLabel(p)}${confirmation(p) ? ` · подтверждение: ${confirmation(p)}` : ''} · площадь контура ${areaTxt(p.measured.zone_area_km2)}, пикселей детектора ${num(p.measured.suspicious_area_m2, 0)} м²`}
           >
             <span className={`c-znum-i ${szKey(p)}`} aria-hidden>
               {n}
             </span>
             <span className="c-zi-main">
               <span className="c-zi-t">
-                {num(p.measured.zone_area_km2 !== null && p.measured.zone_area_km2 !== undefined ? p.measured.zone_area_km2 * 1e6 : null, 0)} м²
+                <span title="площадь контура зоны">{areaTxt(p.measured.zone_area_km2)}</span>
                 <span className="c-zi-st"> · {statusLabel(p)}</span>
               </span>
               {(p as any).is_large && (
-                <span className="c-large c-large-row" data-testid="sz-large" title="Крупное скопление: площадь контура ≥ 0,1 км²">
+                <span className="c-large c-large-row" data-testid="sz-large" title={`Крупное скопление: ${(p as any).large_reason ?? 'маска ≥ 0,1 км² или длина ≥ 500 м'}`}>
                   крупное скопление
                 </span>
               )}

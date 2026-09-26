@@ -223,7 +223,7 @@ export default function SceneZoneCard({
         {/* §47 п.4: the conclusion in a frame first, then tabs «Главное | Качество | Подробно | Дрейф | Выгрузка» */}
         <div className={`sz-verdict ${szKey(p)}`} data-testid="sz-verdict">
           {(p as any).is_large && (
-            <span className="c-large" data-testid="sz-card-large" title="Площадь контура ≥ 0,1 км²">
+            <span className="c-large" data-testid="sz-card-large" title={(p as any).large_reason ?? 'маска ≥ 0,1 км² или длина ≥ 500 м'}>
               крупное скопление
             </span>
           )}
@@ -738,9 +738,9 @@ function QuantityBlock({ p }: { p: SceneZoneProps }) {
       <div className="c-line" data-testid="sz-q-photo">
         <span className="faint">По фото:</span> доступно при детальном снимке зоны (счёт по фото)
       </div>
-      {fe?.method_note && (
+      {(fe?.basin_profile?.method || fe?.method_note) && (
         <div className="c-line tiny faint" data-testid="sz-q-method">
-          Метод: {fe.method_note}
+          Метод: {fe.basis === 'basin_profile' && fe.basin_profile?.method ? fe.basin_profile.method : fe.method_note}
         </div>
       )}
     </div>

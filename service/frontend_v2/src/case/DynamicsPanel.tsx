@@ -68,7 +68,7 @@ export function SceneIntegral({ s }: { s: Partial<DynRow> & { large_threshold_km
       </span>
       {!!s.n_large && (
         <span>
-          · крупных (≥ {num(s.large_threshold_km2 ?? 0.1, 1)} км²): <b>{s.n_large}</b>, {km2(s.large_area_km2)}
+          · крупных (маска ≥ {num(s.large_threshold_km2 ?? 0.1, 1)} км² или длина ≥ 500 м): <b>{s.n_large}</b>, {km2(s.large_area_km2)}
         </span>
       )}
       <span>

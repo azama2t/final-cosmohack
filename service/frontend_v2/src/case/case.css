@@ -1759,6 +1759,28 @@ a.c-head-r.c-head-link {
     display: inline;
   }
 }
+/* L144/§50 п.8: at ~824 px map-column width, WITHOUT a card open (so the .right-open rule above never applied),
+   the 5-step bar's full labels ("Район и даты", "Качество и статус"…) needed more room than was left before
+   .toolbar («Демо ▶» + «Слои») — the two absolutely-positioned bars overlapped. Same abbreviation, but keyed to
+   the map container's width, not to whether a card is open. */
+@container (max-width: 900px) {
+  .app.case .c-al {
+    display: none;
+  }
+  .app.case .c-as {
+    display: inline;
+  }
+  /* abbreviating the labels alone still left the two absolutely-positioned bars fighting for the same row at
+     ~824 px (5 short-label steps + «Ещё ▾» already need ~500 px) — drop «Демо ▶ / Слои» to the row below,
+     clear of the step bar; «Что дальше» (.c-next) is on that same row on the left, so give it less width too,
+     or its text now runs under the two buttons instead */
+  .app.case .toolbar {
+    top: calc(var(--s2) + 46px);
+  }
+  .app.case .c-next {
+    max-width: calc(100% - 2 * var(--s2) - 180px);
+  }
+}
 .app.case .c-counts {
   display: flex;
   flex-wrap: wrap;
