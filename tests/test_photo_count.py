@@ -64,6 +64,9 @@ class _Stub:
     threshold = 0.9
     device = "cpu"
     card = {"version": "stub-1", "gsd_train_m": 0.02,
+            "count_interval": {"by_pred_count": [{"pred_from": 0, "pred_to": 0, "q025": 0, "q975": 1},
+                                                 {"pred_from": 1, "pred_to": 999, "q025": -1, "q975": 2}],
+                               "overall_val": [-1, 2], "coverage_on_test": 0.95, "method": "stub"},
             "correction": {"factor": [2.0, 1.0, 1.0, 1.0],
                            "factor_ci95": [[1.5, 2.5], [0.9, 1.1], [0.9, 1.1], [0.9, 1.1]]}}
 
@@ -149,3 +152,15 @@ def test_corrected_count_bins():
     b = np.array([[0, 0, 10, 10], [0, 0, 40, 10]])  # 20 cm and 80 cm at GSD 0.02
     assert corrected_count(b, 0.02, [2.0, 1.5, 1.0, 1.0]) == pytest.approx(3.0)
     assert corrected_count(np.zeros((0, 4)), 0.02, [2.0, 1, 1, 1]) == 0.0
+
+
+def test_api_count_interval_and_composition(client):
+    r = client.post("/api/v3/photo/count?frame_area_m2=100", content=_jpeg())  # default threshold 0.9 -> 1 box
+    j = r.json()
+    assert j["count"] == 1 and j["count_interval"]["interval"] == [0.0, 3.0]
+    assert j["density"]["items_per_km2_count_interval"] == [0.0, pytest.approx(3 / 1e-4)]
+    assert j["composition"]["status"] in ("not_determined", "by_class")
+    r = client.post("/api/v3/photo/count?threshold=0.5", content=_jpeg())
+    assert r.json()["count_interval"] is None  # interval is calibrated only for the default threshold
+    m = client.get("/api/v3/photo/meta").json()
+    assert "composition_rule" in m and "headline" in m

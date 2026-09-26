@@ -1,0 +1,2 @@
+source,scene_id,platform,datetime,gsd_m,cloud_pct,off_nadir_deg,sun_elev_deg,sensor,note,error,target_id,dt_h,dist_km,drift_radius_km,drift_ok,water_cover_frac,water_frac_of_circle,usable,reason
+OpenAerialMap,6665812ef1cf8e0001fb2db9,uav,2024-06-08T21:15:15.000Z,0.049997496402431015,,,,optical,,,S4:DOORS3:T22,-14.75,24.45,12.6,False,0.0,0.82,False,outside drift radius; covers < 10 % of drift-circle water

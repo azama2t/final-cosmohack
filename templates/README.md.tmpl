@@ -40,6 +40,17 @@
 
 - **Полевой прогноз для ADIS** (> 10 см, {{case.sections.quantity.adis_forecast.n_segments|int}} отрезков): ΣN/ΣA = {{case.sections.quantity.adis_forecast.C|f2}} [{{case.sections.quantity.adis_forecast.lo|f2}}–{{case.sections.quantity.adis_forecast.hi|f2}}] шт./км², нулевых отрезков {{case.sections.quantity.adis_forecast.zero_pct|f0}} % ({{case.sections.quantity.adis_forecast.note_zero}}). Прогноз по координатам и сезону с правилом, записанным до метрик, и разбиением {{case.sections.quantity.adis_forecast.split}}: {{case.sections.quantity.adis_forecast.verdict}}. На отложенных регионах ({{case.sections.quantity.adis_forecast.test_n|int}} отрезков) медиана — MAE {{case.sections.quantity.adis_forecast.test_mae_median|f2}}, RMSE {{case.sections.quantity.adis_forecast.test_rmse_median|f2}} шт./км², покрытие 90 %-интервала {{case.sections.quantity.adis_forecast.test_cov90_median|f0}} % (`reports/quantity/adis_forecast.md`). Для сравнения — {{case.sections.quantity.adis_forecast.authors_calibrated.label}}: {{case.sections.quantity.adis_forecast.authors_calibrated.C|f2}} шт./км² (типичный интервал отрезка {{case.sections.quantity.adis_forecast.authors_calibrated.lo_typ|f2}}–{{case.sections.quantity.adis_forecast.authors_calibrated.hi_typ|f1}}; {{case.sections.quantity.adis_forecast.authors_calibrated.source}}); наша — {{case.sections.quantity.adis_forecast.authors_calibrated.ours_raw_C|f2}}. Оговорка: {{case.sections.quantity.adis_forecast.authors_calibrated.caveat}}.
 
+**Лестница единиц** — у каждой ступени своя проверка и своя метрика; перевода между ступенями без калибровки нет:
+
+![Лестница единиц: предмет на кадре → шт./м² кадра → шт./км² маршрута → спутниковая зона](docs/img/units_ladder.png)
+
+| Ступень | Единица | Проверка | Метрика |
+|---|---|---|---|
+| 1. Предмет на кадре (фото, счётчик) | шт. на кадр | отложенный test FML ({{case.sections.photo_count.frame.n_images|int}} кадров, по сессиям) | MAE {{case.sections.photo_count.frame.mae|f2}} шт./кадр [{{case.sections.photo_count.frame.mae_ci95.0|f2}}–{{case.sections.photo_count.frame.mae_ci95.1|f2}}] |
+| 2. Плотность на кадре (известная площадь) | шт./м² → шт./км² | аэро Winans, кадр {{case.sections.photo_count.area.frame_area_m2|int}} м², {{case.sections.photo_count.area.n_test_frames|int}} кадров | MAE {{case.sections.photo_count.area.density_mae_km2|int}} против {{case.sections.photo_count.area.baseline_density_mae_km2|int}} шт./км² у медианы |
+| 3. Маршрут судна (поле, C = N/A) — главный результат | шт./км² | отложенный test, модель против медианы | S2 {{case.sections.quantity.field_S2.pooled_C|f1}} [{{case.sections.quantity.field_S2.boot_lo95|f1}}–{{case.sections.quantity.field_S2.boot_hi95|f1}}]; ADIS > 10 см {{case.sections.quantity.adis_forecast.C|f2}} |
+| 4. Спутниковая зона | м² маски, LWD м²/км² | {{case.sections.scene_zones.n_zones}} зон; калибровочных пар «снимок → шт./км²» {{case.sections.quantity.levels.calibration_pairs}} | концентрация по снимку не подтверждена |
+
 По правилу, записанному до открытия test, на карте и в API оценка по полевым данным — **медиана профиля** с подписью «оценка по полевым данным, не по снимку». Подробно — §5 и [docs/QUANTITY.md](docs/QUANTITY.md).
 
 ## Как мы искали данные
@@ -419,6 +430,8 @@ MAPE не используется: в реестре есть нули. Осн�
 
 Роутер `service/routes_v3.py`, слой данных `service/case_store.py`, контракт [docs/CONTRACTS_V3.md](docs/CONTRACTS_V3.md).
 
+Интерфейс для людей и демо — **v2** (карта кейса, по умолчанию). Есть экспериментальный интерфейс (`MACROPLASTIC_UI=v3`), не основной; основной — v2.
+
 | Эндпоинт | Что отдаёт |
 |---|---|
 | `GET /api/v3/meta` | словари профилей, статусов, причин отказа, классов маски качества с цветами, диапазон дат снимков |
@@ -493,6 +506,28 @@ Invoke-WebRequest "$base/api/v3/export?layer=zones&format=geojson&query_id=$($q.
 - Скорость: 300 чипов — {{speed_threads.final.gpu|f2}} с на GPU, {{speed_threads.final.cpu8|f1}} с на CPU с 8 потоками.
 
 Всё подробно, без сокращений — в [docs/PREP.md](docs/PREP.md): модель, бейзлайны на val, скорость, данные и лицензии, воспроизведение, ограничения. Отчёт подготовительного этапа — раздел «Подготовка» в [reports/report.md](reports/report.md).
+
+## Источники и лицензии
+
+| Что | Где взяли | Лицензия / условия | Как используем |
+|---|---|---|---|
+| Полевые данные кейса | CSV организаторов (`task/`) | условия хакатона | эталон концентрации, отбор, пары |
+| MARIDA | Zenodo doi 10.5281/zenodo.5151941 | CC BY 4.0 | обучение и test детектора |
+| MADOS | Zenodo 10664073 | CC BY 4.0 | обучение детектора; нефть — эксперимент |
+| U-Net MARIDA (веса авторов) | github.com/marine-debris/marine-debris.github.io | условия авторов репозитория | только бейзлайн, не переобучали |
+| ADIS (The Ocean Cleanup) | 4TU doi 10.4121/ddede7f5-aca5-42ae-b851-e0bbb9a2c4c2 | CC BY 4.0 | пары по месту и времени, полевой прогноз |
+| Каталог нитей Cózar et al. 2024 | Zenodo 11045944 | CC BY 4.0 | метки B, демо-сцена, аналогия LWD |
+| PLP (Plastic Litter Project) | Zenodo 3752719, зеркало marinedebrisdetector | CC BY 4.0 / не указана (зеркало MIT) | метки B (мишени), попытка «спектр → доля» |
+| FloatingObjects / Refined | github.com/ESA-PhiLab/floatingobjects, marinedebrisdetector | Apache-2.0 / MIT | метки B и D |
+| Суда у Финляндии | Zenodo 15019034 | CC BY 4.0 | метки D |
+| Cloud Mask Catalogue | Zenodo 4172871 | CC BY 4.0 | метки D |
+| FML (фото с воды) | SEANOE doi 10.17882/106148 | CC BY | обучение и test счётчика по фото |
+| Winans 2023 (аэро 2 см) | Zenodo 8381113 | CC BY | шт./м² на кадре с известной площадью |
+| The Ocean Cleanup River Monitoring | 4TU | CC BY-NC 4.0 — только исследовательское использование | проверка счётчика на реках |
+| DebrisScan | github.com/orbtl-ai/DebrisScan | Apache-2.0 | бейзлайн счётчика |
+| Снимки Sentinel-2 / Landsat | Copernicus (Earth Search, Planetary Computer, CDSE), USGS | открытые условия Copernicus / USGS | пары, демо, живые снимки |
+| Ветер ERA5 | Open-Meteo archive API | CC BY 4.0 (Open-Meteo) | дрейф, правило ветра |
+| Подложка карты | Esri World Imagery | атрибуция Esri на карте | только фон |
 
 ## Ограничения
 

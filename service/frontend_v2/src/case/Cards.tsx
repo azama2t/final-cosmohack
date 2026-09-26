@@ -450,7 +450,7 @@ export function ObsCard({
               </div>
               {v === 0 && <div className="c-line">измеренный ноль{p.zero_scope ? ' — только для указанной категории' : ''}</div>}
               <div className="c-line" data-testid="obs-interval">
-                {obsInterval(p)}
+                {obsInterval(p, meta)}
               </div>
             </>
           )}
@@ -552,16 +552,19 @@ export function ObsCard({
 }
 
 /** §28 А (L108): the record interval is the counting error only; patchiness (sd of ln C ≈ 0.46) is not in it */
-const POISSON_NOTE = '95 % интервал счёта (Пуассон); пятнистость (разброс ln C ≈ 0.46) не входит';
+const poissonNote = (meta: Meta) => {
+  const sd = (meta as any).quantity_levels?.patchiness?.sd_ln_c;
+  return `95 % интервал счёта (Пуассон); пятнистость${typeof sd === 'number' ? ` (разброс ln C ≈ ${num(sd, 2)})` : ''} не входит`;
+};
 /** 95 % interval of a field density: from the API (ci95_lo/hi), else exact Poisson from N (numerator) and the area */
-function obsInterval(p: ObsProps): string {
+function obsInterval(p: ObsProps, meta: Meta): string {
   const n = p.density_numerator_items ?? p.items_count ?? null;
-  const nTxt = n !== null ? `, Пуассон по N=${num(n, 0)}` : ', Пуассон';
+  const nTxt = n !== null ? `, N = ${num(n, 0)}` : '';
   if (p.ci95_lo !== null && p.ci95_lo !== undefined && p.ci95_hi !== null && p.ci95_hi !== undefined)
-    return `[${num(p.ci95_lo)}; ${num(p.ci95_hi)}] шт./км² — ${POISSON_NOTE}${nTxt}`;
+    return `[${num(p.ci95_lo)}; ${num(p.ci95_hi)}] шт./км² — ${poissonNote(meta)}${nTxt}`;
   if (n !== null && p.sampled_area_km2) {
     const [lo, hi] = poissonCI(n, p.sampled_area_km2);
-    return `[${num(lo)}; ${num(hi)}] шт./км² — ${POISSON_NOTE}${nTxt}`;
+    return `[${num(lo)}; ${num(hi)}] шт./км² — ${poissonNote(meta)}${nTxt}`;
   }
   return 'интервал: нет данных N';
 }

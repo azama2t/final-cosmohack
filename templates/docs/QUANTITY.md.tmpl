@@ -11,6 +11,17 @@
 - **Видимый сигнал на снимке.** На {{case.sections.adis_pairs.A_with_items}} синхронных отрезках ADIS с единичными предметами ({{case.sections.adis_pairs.A_with_items_density_min|f1}}–{{case.sections.adis_pairs.A_with_items_density_max|f1}} шт./км²) детектор предметы не увидел: оценивается на {{case.sections.adis_pairs.A_with_items_eval}} из {{case.sections.adis_pairs.A_with_items}} — на всех {{case.sections.adis_pairs.A_with_items_eval_det_px}} пикселей. Это согласуется с физикой (доля покрытия ≈ {{case.sections.adis_pairs.coverage_frac_text}}, крупнейший предмет {{case.sections.adis_pairs.largest_item_pct_px|f1}} % пикселя), но не задаёт общий предел для всех скоплений: плотные полосы мусора эти пары не проверяют.
 - **Калибровочная пара «снимок → шт./км²»** — пара по месту и времени с ненулевым сигналом снимка. Их {{case.sections.quantity.levels.calibration_pairs}}, поэтому перевода «снимок → шт./км²» нет.
 
+**Лестница единиц** — у каждой ступени своя проверка и своя метрика; перевода между ступенями без калибровки нет:
+
+![Лестница единиц: предмет на кадре → шт./м² кадра → шт./км² маршрута → спутниковая зона](img/units_ladder.png)
+
+| Ступень | Единица | Проверка | Метрика |
+|---|---|---|---|
+| 1. Предмет на кадре (фото, счётчик) | шт. на кадр | отложенный test FML ({{case.sections.photo_count.frame.n_images|int}} кадров, по сессиям) | MAE {{case.sections.photo_count.frame.mae|f2}} шт./кадр [{{case.sections.photo_count.frame.mae_ci95.0|f2}}–{{case.sections.photo_count.frame.mae_ci95.1|f2}}] |
+| 2. Плотность на кадре (известная площадь) | шт./м² → шт./км² | аэро Winans, кадр {{case.sections.photo_count.area.frame_area_m2|int}} м², {{case.sections.photo_count.area.n_test_frames|int}} кадров | MAE {{case.sections.photo_count.area.density_mae_km2|int}} против {{case.sections.photo_count.area.baseline_density_mae_km2|int}} шт./км² у медианы |
+| 3. Маршрут судна (поле, C = N/A) — главный результат | шт./км² | отложенный test, модель против медианы | S2 {{case.sections.quantity.field_S2.pooled_C|f1}} [{{case.sections.quantity.field_S2.boot_lo95|f1}}–{{case.sections.quantity.field_S2.boot_hi95|f1}}]; ADIS > 10 см {{case.sections.quantity.adis_forecast.C|f2}} |
+| 4. Спутниковая зона | м² маски, LWD м²/км² | {{case.sections.scene_zones.n_zones}} зон; калибровочных пар «снимок → шт./км²» {{case.sections.quantity.levels.calibration_pairs}} | концентрация по снимку не подтверждена |
+
 ## 1. Поле: концентрация, шт./км² (измерение) — главный количественный результат
 
 {{derived.case_field_table}}

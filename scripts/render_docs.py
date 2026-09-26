@@ -24,7 +24,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DASH = "—"
 PAIRS = [("templates/README.md.tmpl", "README.md"), ("templates/reports/report.md.tmpl", "reports/report.md"), ("templates/docs/PREP.md.tmpl", "docs/PREP.md"),
-         ("templates/docs/QUANTITY.md.tmpl", "docs/QUANTITY.md")]
+         ("templates/docs/QUANTITY.md.tmpl", "docs/QUANTITY.md"),
+         ("templates/reports/report_final.md.tmpl", "reports/report_final.md")]
 PH = re.compile(r"\{\{\s*([A-Za-z_][\w.]*)\s*(?:\|\s*(\w+)(?::([^{}]*?))?\s*)?\}\}")
 
 

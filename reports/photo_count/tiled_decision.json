@@ -1,0 +1,13 @@
+{
+ "rule": "accept tiled if MAE_t <= 0.9*MAE_full and CI95(MAE_t-MAE_full)<0 and AP50 drop <= 0.01",
+ "mae_full": 0.5949579831932773,
+ "mae_tiled": 0.795798319327731,
+ "diff": 0.2008403361344538,
+ "diff_ci95": [
+  0.1403361344537815,
+  0.254642857142857
+ ],
+ "ap50_full": 0.9138740799201077,
+ "ap50_tiled": 0.9040048055312494,
+ "decision": "rejected"
+}

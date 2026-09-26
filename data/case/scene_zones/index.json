@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-26T03:00:16Z",
+ "generated": "2026-09-26T03:21:29Z",
  "model": {
   "weights": "weights/lgbm",
   "file": "weights/lgbm/model.txt",
@@ -65,6 +65,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "L111 held-out Cózar 2024 scene 30SXE_20210311 (reports/case_demo/heldout_scene.md)",
+   "in_observed_area": true,
+   "observed_water_km2": 197.964,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -75,7 +77,6 @@
    "by_status": {
     "detected": 23,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -118,6 +119,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "L45: next snapshot 2025-05-12/2025-05-16 of the same crop (bounds_utm of 2025-05-11); crop cloud<0.4, valid>=0.5; not for the service layer",
+   "in_observed_area": true,
+   "observed_water_km2": 497.922,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -128,7 +131,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -157,7 +159,7 @@
    "water_km2": 454.724,
    "det_pixels": 5,
    "det_area_m2": 500,
-   "lwd_m2_km2": 1.1,
+   "lwd_m2_km2": null,
    "wind_high": true,
    "model": {
     "weights": "weights/lgbm",
@@ -171,6 +173,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "L45: next snapshot 2025-05-12/2025-05-16 of the same crop (bounds_utm of 2025-05-11); crop cloud<0.4, valid>=0.5; not for the service layer",
+   "in_observed_area": false,
+   "observed_water_km2": 0.0,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -181,8 +185,7 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 1,
-    "insufficient_data": 0
+    "insufficient_data": 1
    }
   },
   {
@@ -224,6 +227,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "L45: next snapshot 2025-07-29/2025-08-02 of the same crop (bounds_utm of 2025-07-28); crop cloud<0.4, valid>=0.5; not for the service layer",
+   "in_observed_area": true,
+   "observed_water_km2": 337.765,
    "training_scene": null,
    "not_evaluated_reason": "низкое солнце (зенит 60°)",
    "rgb_file": "rgb.jpg",
@@ -233,7 +238,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -276,6 +280,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "L45: next snapshot 2026-05-05/2026-05-09 of the same crop (bounds_utm of 2026-05-04); crop cloud<0.4, valid>=0.5; not for the service layer",
+   "in_observed_area": true,
+   "observed_water_km2": 337.146,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -286,7 +292,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -329,6 +334,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "L45: next snapshot 2026-01-14/2026-01-18 of the same crop (bounds_utm of 2026-01-13); crop cloud<0.4, valid>=0.5; not for the service layer",
+   "in_observed_area": true,
+   "observed_water_km2": 529.095,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -339,7 +346,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -382,6 +388,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "L45: next snapshot 2025-06-27/2025-07-01 of the same crop (bounds_utm of 2025-06-26); crop cloud<0.4, valid>=0.5; not for the service layer",
+   "in_observed_area": true,
+   "observed_water_km2": 309.325,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -392,7 +400,6 @@
    "by_status": {
     "detected": 2,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 7
    }
   },
@@ -435,6 +442,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "L45: next snapshot 2025-09-05/2025-09-09 of the same crop (bounds_utm of 2025-09-04); crop cloud<0.4, valid>=0.5; not for the service layer",
+   "in_observed_area": true,
+   "observed_water_km2": 318.69,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -443,10 +452,9 @@
    "small_cluster_px": 121,
    "n_zones_total": 16,
    "by_status": {
-    "detected": 2,
+    "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
-    "insufficient_data": 14
+    "insufficient_data": 16
    }
   },
   {
@@ -488,6 +496,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "L45: next snapshot 2026-07-17/2026-07-21 of the same crop (bounds_utm of 2026-07-16); crop cloud<0.4, valid>=0.5; not for the service layer",
+   "in_observed_area": true,
+   "observed_water_km2": 320.556,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -498,7 +508,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 3
    }
   },
@@ -541,6 +550,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "L45: next snapshot 2026-02-15/2026-02-19 of the same crop (bounds_utm of 2026-02-14); crop cloud<0.4, valid>=0.5; not for the service layer",
+   "in_observed_area": true,
+   "observed_water_km2": 521.239,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -551,7 +562,6 @@
    "by_status": {
     "detected": 3,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 4
    }
   },
@@ -594,6 +604,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "L45: next snapshot 2026-01-16/2026-01-20 of the same crop (bounds_utm of 2026-01-15); crop cloud<0.4, valid>=0.5; not for the service layer",
+   "in_observed_area": true,
+   "observed_water_km2": 210.938,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -604,7 +616,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 1
    }
   },
@@ -647,6 +658,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "L45: next snapshot 2026-02-15/2026-02-19 of the same crop (bounds_utm of 2026-02-14); crop cloud<0.4, valid>=0.5; not for the service layer",
+   "in_observed_area": true,
+   "observed_water_km2": 214.681,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -657,7 +670,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 2
    }
   },
@@ -700,6 +712,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "L45: next snapshot 2025-12-18/2025-12-22 of the same crop (bounds_utm of 2025-12-17); crop cloud<0.4, valid>=0.5; not for the service layer",
+   "in_observed_area": true,
+   "observed_water_km2": 304.927,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -710,7 +724,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -739,7 +752,7 @@
    "water_km2": 269.02,
    "det_pixels": 20,
    "det_area_m2": 2000,
-   "lwd_m2_km2": 7.43,
+   "lwd_m2_km2": null,
    "wind_high": true,
    "model": {
     "weights": "weights/lgbm",
@@ -753,6 +766,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "L45: next snapshot 2025-11-12/2025-11-16 of the same crop (bounds_utm of 2025-11-11); crop cloud<0.4, valid>=0.5; not for the service layer",
+   "in_observed_area": false,
+   "observed_water_km2": 0.0,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -763,7 +778,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 2
    }
   },
@@ -806,6 +820,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "L45: next snapshot 2025-11-12/2025-11-16 of the same crop (bounds_utm of 2025-11-11); crop cloud<0.4, valid>=0.5; not for the service layer",
+   "in_observed_area": true,
+   "observed_water_km2": 290.165,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -816,7 +832,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -859,6 +874,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "L45: next snapshot 2025-02-24/2025-02-28 of the same crop (bounds_utm of 2025-02-23); crop cloud<0.4, valid>=0.5; not for the service layer",
+   "in_observed_area": true,
+   "observed_water_km2": 457.816,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -869,7 +886,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -912,6 +928,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "L45: next snapshot 2026-02-19/2026-02-23 of the same crop (bounds_utm of 2026-02-18); crop cloud<0.4, valid>=0.5; not for the service layer",
+   "in_observed_area": true,
+   "observed_water_km2": 484.505,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -922,7 +940,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -965,6 +982,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "L45: next snapshot 2026-07-20/2026-07-24 of the same crop (bounds_utm of 2026-07-19); crop cloud<0.4, valid>=0.5; not for the service layer",
+   "in_observed_area": true,
+   "observed_water_km2": 608.94,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -975,7 +994,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -1018,6 +1036,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "L45: next snapshot 2025-11-06/2025-11-10 of the same crop (bounds_utm of 2025-11-05); crop cloud<0.4, valid>=0.5; not for the service layer",
+   "in_observed_area": true,
+   "observed_water_km2": 468.53,
    "training_scene": null,
    "not_evaluated_reason": "низкое солнце (зенит 60°)",
    "rgb_file": "rgb.jpg",
@@ -1027,7 +1047,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -1070,6 +1089,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-01-01/2026-09-25; crop cloud<=0.2, valid>=0.95; ranked by glint among 21 OK of 25 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 490.192,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -1080,7 +1101,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -1123,6 +1143,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2018-02-02/2018-04-03; crop cloud<=0.3, valid>=0.95; ranked by glint among 6 OK of 10 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 567.124,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -1133,7 +1155,6 @@
    "by_status": {
     "detected": 2,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 2
    }
   },
@@ -1162,7 +1183,7 @@
    "water_km2": 617.437,
    "det_pixels": 21,
    "det_area_m2": 2100,
-   "lwd_m2_km2": 3.4,
+   "lwd_m2_km2": null,
    "wind_high": true,
    "model": {
     "weights": "weights/lgbm",
@@ -1176,6 +1197,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-05-01/2025-06-30; crop cloud<=0.3, valid>=0.95; ranked by glint among 9 OK of 13 screened",
+   "in_observed_area": false,
+   "observed_water_km2": 0.0,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -1186,8 +1209,7 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 1,
-    "insufficient_data": 0
+    "insufficient_data": 1
    }
   },
   {
@@ -1215,7 +1237,7 @@
    "water_km2": 594.328,
    "det_pixels": 46,
    "det_area_m2": 4600,
-   "lwd_m2_km2": 7.74,
+   "lwd_m2_km2": null,
    "wind_high": true,
    "model": {
     "weights": "weights/lgbm",
@@ -1229,6 +1251,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-07-01/2025-08-31; crop cloud<=0.3, valid>=0.95; ranked by glint among 6 OK of 14 screened",
+   "in_observed_area": false,
+   "observed_water_km2": 0.0,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -1239,7 +1263,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 1
    }
   },
@@ -1282,6 +1305,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2026-03-01/2026-04-30; crop cloud<=0.3, valid>=0.95; ranked by glint among 6 OK of 13 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 571.763,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -1292,7 +1317,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -1335,6 +1359,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-01-01/2026-09-25; crop cloud<=0.2, valid>=0.95; ranked by glint among 15 OK of 15 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 618.962,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -1345,7 +1371,6 @@
    "by_status": {
     "detected": 1,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 1
    }
   },
@@ -1388,6 +1413,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2026-07-01/2026-09-20; crop cloud<=0.3, valid>=0.95; ranked by glint among 17 OK of 19 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 580.783,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -1398,7 +1425,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -1441,6 +1467,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2018-10-15/2018-12-14; crop cloud<=0.3, valid>=0.95; ranked by glint among 4 OK of 7 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 521.379,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -1451,7 +1479,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -1494,6 +1521,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-09-01/2026-02-28; crop cloud<=0.2, valid>=0.95; ranked by glint among 6 OK of 14 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 459.717,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -1504,7 +1533,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -1547,6 +1575,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2019-03-25/2019-05-24; crop cloud<=0.3, valid>=0.95; ranked by glint among 9 OK of 10 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 755.522,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -1557,7 +1587,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -1586,7 +1615,7 @@
    "water_km2": 98.583,
    "det_pixels": 113,
    "det_area_m2": 11300,
-   "lwd_m2_km2": 114.62,
+   "lwd_m2_km2": null,
    "wind_high": true,
    "model": {
     "weights": "weights/lgbm",
@@ -1600,6 +1629,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": null,
+   "in_observed_area": false,
+   "observed_water_km2": 0.0,
    "training_scene": "MARIDA (train:21)",
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -1610,7 +1641,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 7
    }
   },
@@ -1653,6 +1683,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-05-01/2025-06-30; crop cloud<=0.3, valid>=0.8; ranked by glint among 12 OK of 12 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 337.396,
    "training_scene": null,
    "not_evaluated_reason": "низкое солнце (зенит 63°)",
    "rgb_file": "rgb.jpg",
@@ -1662,7 +1694,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -1705,6 +1736,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-07-01/2025-08-31; crop cloud<=0.3, valid>=0.8; ranked by glint among 10 OK of 14 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 337.754,
    "training_scene": null,
    "not_evaluated_reason": "низкое солнце (зенит 60°)",
    "rgb_file": "rgb.jpg",
@@ -1714,7 +1747,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -1757,6 +1789,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-09-01/2025-10-31; crop cloud<=0.3, valid>=0.8; ranked by glint among 3 OK of 5 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 336.211,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -1767,7 +1801,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 6
    }
   },
@@ -1810,6 +1843,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": null,
+   "in_observed_area": true,
+   "observed_water_km2": 337.064,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -1820,7 +1855,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 2
    }
   },
@@ -1863,6 +1897,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-01-01/2026-09-25; crop cloud<=0.1, valid>=0.8; ranked by glint among 20 OK of 20 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 201.409,
    "training_scene": null,
    "not_evaluated_reason": "низкое солнце (зенит 59°)",
    "rgb_file": "rgb.jpg",
@@ -1872,7 +1908,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -1915,6 +1950,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-01-01/2026-09-25; crop cloud<=0.1, valid>=0.8; ranked by glint among 15 OK of 15 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 336.796,
    "training_scene": null,
    "not_evaluated_reason": "низкое солнце (зенит 62°)",
    "rgb_file": "rgb.jpg",
@@ -1924,7 +1961,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -1967,6 +2003,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-11-01/2025-12-31; crop cloud<=0.2, valid>=0.95; ranked by glint among 12 OK of 13 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 529.504,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -1977,7 +2015,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -2006,7 +2043,7 @@
    "water_km2": 521.517,
    "det_pixels": 8,
    "det_area_m2": 800,
-   "lwd_m2_km2": 1.53,
+   "lwd_m2_km2": null,
    "wind_high": true,
    "model": {
     "weights": "weights/lgbm",
@@ -2020,6 +2057,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2026-01-01/2026-02-28; crop cloud<=0.2, valid>=0.95; ranked by glint among 13 OK of 13 screened",
+   "in_observed_area": false,
+   "observed_water_km2": 0.0,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -2030,7 +2069,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 1
    }
   },
@@ -2073,6 +2111,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2026-02-01/2026-03-15; crop cloud<=0.2, valid>=0.95; ranked by glint among 7 OK of 9 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 522.927,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -2083,7 +2123,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 1
    }
   },
@@ -2126,6 +2165,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-06-01/2025-08-31; crop cloud<=0.2, valid>=0.95; ranked by glint among 12 OK of 19 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 319.482,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -2134,10 +2175,9 @@
    "small_cluster_px": 77,
    "n_zones_total": 7,
    "by_status": {
-    "detected": 2,
+    "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
-    "insufficient_data": 5
+    "insufficient_data": 7
    }
   },
   {
@@ -2179,6 +2219,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-09-01/2025-11-30; crop cloud<=0.2, valid>=0.95; ranked by glint among 7 OK of 12 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 319.105,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -2189,7 +2231,6 @@
    "by_status": {
     "detected": 1,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 22
    }
   },
@@ -2232,6 +2273,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2026-05-01/2026-08-31; crop cloud<=0.2, valid>=0.95; ranked by glint among 16 OK of 17 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 318.709,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -2240,10 +2283,9 @@
    "small_cluster_px": 132,
    "n_zones_total": 15,
    "by_status": {
-    "detected": 5,
+    "detected": 3,
     "not_detected": 0,
-    "not_informative": 0,
-    "insufficient_data": 10
+    "insufficient_data": 12
    }
   },
   {
@@ -2285,6 +2327,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2020-12-05/2020-12-31; crop cloud<=0.3, valid>=0.95; ranked by glint among 4 OK of 4 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 513.535,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -2295,7 +2339,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 4
    }
   },
@@ -2338,6 +2381,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": null,
+   "in_observed_area": true,
+   "observed_water_km2": 513.507,
    "training_scene": "MARIDA (train:5)",
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -2348,7 +2393,6 @@
    "by_status": {
     "detected": 1,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 2
    }
   },
@@ -2391,6 +2435,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-01-01/2026-09-25; crop cloud<=0.03, valid>=0.95; ranked by glint among 20 OK of 20 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 513.196,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -2401,7 +2447,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -2444,6 +2489,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-06-01/2026-09-25; crop cloud<=0.1, valid>=0.95; ranked by glint among 14 OK of 15 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 513.243,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -2454,7 +2501,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -2497,6 +2543,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2018-12-28/2019-02-26; crop cloud<=0.3, valid>=0.95; ranked by glint among 10 OK of 10 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 521.639,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -2507,7 +2555,6 @@
    "by_status": {
     "detected": 2,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -2550,6 +2597,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": null,
+   "in_observed_area": true,
+   "observed_water_km2": 519.974,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -2558,10 +2607,9 @@
    "small_cluster_px": 57,
    "n_zones_total": 10,
    "by_status": {
-    "detected": 5,
+    "detected": 4,
     "not_detected": 0,
-    "not_informative": 0,
-    "insufficient_data": 5
+    "insufficient_data": 6
    }
   },
   {
@@ -2603,6 +2651,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-01-01/2026-09-25; crop cloud<=0.02, valid>=0.95; ranked by glint among 16 OK of 20 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 519.63,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -2613,7 +2663,6 @@
    "by_status": {
     "detected": 8,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -2656,6 +2705,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-02-19; crop cloud<=0.05, valid>=0.95; ranked by glint among 1 OK of 1 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 521.154,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -2666,7 +2717,6 @@
    "by_status": {
     "detected": 1,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -2709,6 +2759,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-11-01/2025-12-31; crop cloud<=0.3, valid>=0.95; ranked by glint among 7 OK of 11 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 519.764,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -2719,7 +2771,6 @@
    "by_status": {
     "detected": 5,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 4
    }
   },
@@ -2762,6 +2813,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2026-01-01/2026-02-28; crop cloud<=0.3, valid>=0.95; ranked by glint among 3 OK of 6 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 521.367,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -2772,7 +2825,6 @@
    "by_status": {
     "detected": 3,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 1
    }
   },
@@ -2815,6 +2867,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2026-03-01/2026-04-30; crop cloud<=0.3, valid>=0.95; ranked by glint among 8 OK of 12 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 521.23,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -2823,10 +2877,9 @@
    "small_cluster_px": 19,
    "n_zones_total": 6,
    "by_status": {
-    "detected": 5,
+    "detected": 4,
     "not_detected": 0,
-    "not_informative": 0,
-    "insufficient_data": 1
+    "insufficient_data": 2
    }
   },
   {
@@ -2868,6 +2921,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2026-01-01/2026-09-25; crop cloud<=0.1, valid>=0.95; ranked by glint among 13 OK of 15 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 512.817,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -2878,7 +2933,6 @@
    "by_status": {
     "detected": 2,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 1
    }
   },
@@ -2921,6 +2975,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2019-04-25/2019-06-24; crop cloud<=0.3, valid>=0.95; ranked by glint among 7 OK of 12 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 607.623,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -2931,7 +2987,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -2974,6 +3029,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-01-01/2026-09-25; crop cloud<=0.2, valid>=0.95; ranked by glint among 20 OK of 20 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 623.628,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -2982,10 +3039,9 @@
    "small_cluster_px": 33,
    "n_zones_total": 5,
    "by_status": {
-    "detected": 3,
+    "detected": 2,
     "not_detected": 0,
-    "not_informative": 0,
-    "insufficient_data": 2
+    "insufficient_data": 3
    }
   },
   {
@@ -3027,6 +3083,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-10-01/2025-11-30; crop cloud<=0.2, valid>=0.95; ranked by glint among 8 OK of 20 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 387.273,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -3037,7 +3095,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 7
    }
   },
@@ -3080,6 +3137,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-12-01/2026-01-31; crop cloud<=0.2, valid>=0.95; ranked by glint among 9 OK of 20 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 333.699,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -3090,7 +3149,6 @@
    "by_status": {
     "detected": 1,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 5
    }
   },
@@ -3133,6 +3191,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2026-02-01/2026-03-31; crop cloud<=0.2, valid>=0.95; ranked by glint among 9 OK of 20 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 388.872,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -3141,10 +3201,9 @@
    "small_cluster_px": 121,
    "n_zones_total": 7,
    "by_status": {
-    "detected": 3,
+    "detected": 1,
     "not_detected": 0,
-    "not_informative": 0,
-    "insufficient_data": 4
+    "insufficient_data": 6
    }
   },
   {
@@ -3186,6 +3245,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-01-01/2026-09-25; crop cloud<=0.2, valid>=0.6; ranked by glint among 22 OK of 25 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 324.107,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -3196,7 +3257,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -3239,6 +3299,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2019-04-18/2019-06-17; crop cloud<=0.3, valid>=0.95; ranked by glint among 7 OK of 11 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 560.385,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -3249,7 +3311,6 @@
    "by_status": {
     "detected": 5,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 5
    }
   },
@@ -3292,6 +3353,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-01-01/2026-09-25; crop cloud<=0.2, valid>=0.95; ranked by glint among 14 OK of 15 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 619.119,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -3302,7 +3365,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 1
    }
   },
@@ -3345,6 +3407,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-05-01/2025-06-30; crop cloud<=0.3, valid>=0.95; ranked by glint among 6 OK of 10 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 620.042,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -3353,10 +3417,9 @@
    "small_cluster_px": 40,
    "n_zones_total": 4,
    "by_status": {
-    "detected": 1,
+    "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
-    "insufficient_data": 3
+    "insufficient_data": 4
    }
   },
   {
@@ -3398,6 +3461,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-07-01/2025-09-30; crop cloud<=0.3, valid>=0.95; ranked by glint among 2 OK of 6 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 619.826,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -3408,7 +3473,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 2
    }
   },
@@ -3451,6 +3515,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-11-01/2025-12-31; crop cloud<=0.3, valid>=0.95; ranked by glint among 4 OK of 9 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 556.014,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -3461,7 +3527,6 @@
    "by_status": {
     "detected": 1,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 3
    }
   },
@@ -3504,6 +3569,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-12-01/2026-01-31; crop cloud<=0.3, valid>=0.95; ranked by glint among 2 OK of 8 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 620.182,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -3512,10 +3579,9 @@
    "small_cluster_px": 186,
    "n_zones_total": 9,
    "by_status": {
-    "detected": 2,
+    "detected": 1,
     "not_detected": 0,
-    "not_informative": 0,
-    "insufficient_data": 7
+    "insufficient_data": 8
    }
   },
   {
@@ -3557,6 +3623,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2026-03-01/2026-04-30; crop cloud<=0.3, valid>=0.95; ranked by glint among 13 OK of 13 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 622.581,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -3567,7 +3635,6 @@
    "by_status": {
     "detected": 1,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 9
    }
   },
@@ -3610,6 +3677,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2026-02-01/2026-03-31; crop cloud<=0.2, valid>=0.95; ranked by glint among 4 OK of 7 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 410.43,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -3620,7 +3689,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -3663,6 +3731,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-01-01/2025-03-15; crop cloud<=0.2, valid>=0.95; ranked by glint among 13 OK of 15 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 357.689,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -3673,7 +3743,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 5
    }
   },
@@ -3716,6 +3785,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-11-01/2025-12-31; crop cloud<=0.2, valid>=0.95; ranked by glint among 11 OK of 12 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 357.898,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -3726,7 +3797,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -3769,6 +3839,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2026-01-01/2026-03-15; crop cloud<=0.2, valid>=0.95; ranked by glint among 16 OK of 17 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 356.937,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -3779,7 +3851,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -3822,6 +3893,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-10-01/2025-12-15; crop cloud<=0.2, valid>=0.95; ranked by glint among 14 OK of 20 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 475.752,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -3832,7 +3905,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -3875,6 +3947,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-12-16/2026-02-28; crop cloud<=0.2, valid>=0.95; ranked by glint among 10 OK of 16 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 476.105,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -3885,7 +3959,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 1
    }
   },
@@ -3928,6 +4001,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2026-03-01/2026-05-31; crop cloud<=0.2, valid>=0.95; ranked by glint among 15 OK of 20 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 474.693,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -3938,7 +4013,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -3981,6 +4055,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2018-12-12/2019-02-10; crop cloud<=0.3, valid>=0.95; ranked by glint among 9 OK of 13 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 475.192,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -3991,7 +4067,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -4034,6 +4109,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-01-01/2025-02-28; crop cloud<=0.3, valid>=0.95; ranked by glint among 8 OK of 10 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 439.007,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -4044,7 +4121,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -4087,6 +4163,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-03-01/2025-04-30; crop cloud<=0.3, valid>=0.95; ranked by glint among 13 OK of 14 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 458.88,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -4097,7 +4175,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -4140,6 +4217,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-10-01/2025-12-20; crop cloud<=0.3, valid>=0.95; ranked by glint among 11 OK of 18 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 431.416,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -4150,7 +4229,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 1
    }
   },
@@ -4193,6 +4271,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-01-01/2026-09-25; crop cloud<=0.2, valid>=0.95; ranked by glint among 12 OK of 15 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 484.664,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -4203,7 +4283,6 @@
    "by_status": {
     "detected": 1,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -4232,7 +4311,7 @@
    "water_km2": 410.082,
    "det_pixels": 8,
    "det_area_m2": 800,
-   "lwd_m2_km2": 1.95,
+   "lwd_m2_km2": null,
    "wind_high": true,
    "model": {
     "weights": "weights/lgbm",
@@ -4246,6 +4325,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2026-02-01/2026-03-31; crop cloud<=0.3, valid>=0.95; ranked by glint among 5 OK of 13 screened",
+   "in_observed_area": false,
+   "observed_water_km2": 0.0,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -4256,8 +4337,7 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 1,
-    "insufficient_data": 0
+    "insufficient_data": 1
    }
   },
   {
@@ -4299,6 +4379,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2018-03-21/2018-05-20; crop cloud<=0.3, valid>=0.95; ranked by glint among 10 OK of 14 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 607.792,
    "training_scene": null,
    "rgb_file": "rgb.jpg",
    "quality_file": "quality.png",
@@ -4309,7 +4391,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 1,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -4352,6 +4433,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-01-01/2026-09-25; crop cloud<=0.2, valid>=0.95; ranked by glint among 14 OK of 15 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 430.827,
    "training_scene": null,
    "not_evaluated_reason": "слабый сигнал воды (медиана B3 < 0.003)",
    "rgb_file": "rgb.jpg",
@@ -4361,7 +4444,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   },
@@ -4404,6 +4486,8 @@
    },
    "crop_note": "вырезка вокруг района/сцены, не весь тайл",
    "selection": "2025-01-01/2026-09-25; crop cloud<=0.1, valid>=0.95; ranked by glint among 15 OK of 15 screened",
+   "in_observed_area": true,
+   "observed_water_km2": 364.172,
    "training_scene": null,
    "not_evaluated_reason": "низкое солнце (зенит 58°)",
    "rgb_file": "rgb.jpg",
@@ -4413,7 +4497,6 @@
    "by_status": {
     "detected": 0,
     "not_detected": 0,
-    "not_informative": 0,
     "insufficient_data": 0
    }
   }

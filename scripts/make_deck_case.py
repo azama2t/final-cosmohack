@@ -45,6 +45,7 @@ IMAGES = {
     "s4": ("../../../../docs/img/search_s4_t30.jpg", "07_s4_t30.jpg", None),
     "independent": ("../../../../docs/img/independent_adis_pairs.jpg", "08_independent_adis.jpg", None),
     "demo_card": ("../../../case_demo/1920_02_zone_card.png", "09_demo_zone_card.jpg", (336, 0, 1920, 1080)),
+    "ladder": ("../../../../docs/img/units_ladder.png", "10_units_ladder.jpg", None),
 }
 
 # основная часть деки и речи (SPEC-GAPS.md: ТЗ не задаёт время → основная речь ≤ 5:00, ≤ 14 слайдов); остальное — «Приложение»
@@ -326,7 +327,7 @@ def load() -> dict:
     for key in ("pairs.n", "routes_gt50", "routes_same_day_s2", "plp.rho_fdi"):
         k["ic_" + key.replace(".", "_")] = N(ic + key)
     sz = c + "sections.scene_zones."
-    for key in ("n_zones", "n_scenes_eval", "n_scenes", "by_level_b", "by_unverified", "by_insufficient", "by_not_detected",
+    for key in ("n_zones", "n_scenes_eval", "n_scenes", "by_level_b", "by_unverified", "by_insufficient", "by_not_detected", "by_not_informative",
                 "demo.tile", "demo.date", "demo.n_zones", "demo.n_zones_cozar", "demo.det_pixels", "demo.mados_votes",
                 "example.zone_id", "example.n_cozar", "example.area_km2", "example.susp_m2", "example.n_px", "example.lwd_m2_km2",
                 "example.water_pct", "example.prob_mean", "example.prob_max", "example.sha256_short",
@@ -360,12 +361,46 @@ def load() -> dict:
     k["q_cc_rho"] = N(qn + "cell_calibration.v3_rho"); k["q_cc_cells"] = N(qn + "cell_calibration.v3_cells")
     k["q_cc_dates"] = N(qn + "cell_calibration.same_period_common_dates")
     k["q_quote"] = N(qn + "cozar2024_quote.text"); k["q_quote_ref"] = N(qn + "cozar2024_quote.ref")
+    k["q_quote_short"] = N(qn + "cozar2024_quote.short"); k["q_quote_doi"] = N(qn + "cozar2024_quote.doi")
+    k["ad_seg_total"] = N(c + "sections.adis_pairs.adis_segments_total")
+    k["ad_seg_items"] = N(c + "sections.adis_pairs.adis_segments_with_items")
+    k["ad_vhr"] = N(c + "sections.adis_pairs.adis_vhr_same_day")
     oi = c + "sections.oil."
     for key in ("val_f1", "val_osi_f1", "test_f1", "test_osi_f1", "test_f1_ci95", "test_precision", "test_recall"):
         k["oil_" + key] = N(oi + key)
     k["oil_w1_km2"] = N(oi + "wakashio.0.oil_km2"); k["oil_w2_km2"] = N(oi + "wakashio.1.oil_km2")
     k["oil_w1_date"] = N(oi + "wakashio.0.date"); k["oil_w2_date"] = N(oi + "wakashio.1.date")
+    # --- основная часть деки §32 Б: поле с честным интервалом, ADIS, счётчик по фото, профили (материал · размер · единица)
+    fs = qn + "field_S2."
+    for key in ("boot_lo95", "boot_hi95", "event_lo95", "event_hi95", "event_n_test", "test_mean", "nb2_lo95", "nb2_hi95"):
+        k["qf_" + key] = N(fs + key)
+    k["qf_event_cov"] = N(fs + "event_cov_test")
+    k["q_sd_day"] = N(qn + "variance_S2.sd_within_day")
+    af = qn + "adis_forecast."
+    for key in ("C", "lo", "hi", "n_segments", "profile", "test_n", "test_mae_median", "test_mae_b1", "verdict", "zero_pct"):
+        k["af_" + key] = N(af + key)
+    for key in ("C", "lo_typ", "hi_typ", "source"):
+        k["afa_" + key] = N(af + "authors_calibrated." + key)
+    for pr in ("S1", "S2", "S3", "S4"):
+        k[f"pr_{pr}_size"] = N(qn + f"profiles.{pr}.size_class"); k[f"pr_{pr}_n"] = N(qn + f"profiles.{pr}.n")
+    pc = c + "sections.photo_count."
+    for key in ("n_images", "mae", "mae_ci95", "ap50", "exact_pct", "baseline_median_count", "license"):
+        k["pc_" + key] = N(pc + "frame." + key)
+    for key in ("dataset", "gsd_m", "frame_area_m2", "n_test_frames", "count_mae", "density_mae_km2", "baseline_density_mae_km2",
+                "license"):
+        k["pa_" + key] = N(pc + "area." + key)
+    k["sz_demo_scene_id"] = N(sz + "demo.scene_id"); k["sz_demo_wind"] = N(sz + "demo.wind10m_ms")
+    k["sz_demo_marida_same_tile"] = N(sz + "demo.marida_same_tile"); k["sz_demo_mados_verdict"] = N(sz + "demo.mados_verdict")
+    k["mt_n_scenes"] = N(c + "sections.marida_test.n_scenes")
     return k
+
+
+def size_ru(s) -> str:
+    """Размерный класс профиля из final_numbers (например «>2 cm (macro)») по-русски: «> 2 см»."""
+    if not s:
+        return "—"
+    s = str(s).split(" (")[0].replace("cm", "см").replace("-", "–")
+    return s.replace(">", "> ").replace(">  ", "> ")
 
 
 def search_slides(k: dict) -> list[dict]:
@@ -402,10 +437,10 @@ def search_slides(k: dict) -> list[dict]:
         image="independent",
         caption="Независимая проверка: пары ADIS ↔ S2 по предметам > 50 см — маршрут судна (жёлтый), поиск с учётом дрейфа (голубой); предметы на снимке не различимы",
         source="reports/search/adis_candidates.csv, reports/search/adis.md (final_numbers → case.sections.adis_pairs, quantity.levels)",
-        speech=(f"Пар по месту и времени — {num(k['ad_A'], 0)}, время подтверждено даже по самому судну на снимке. Это не калибровочные пары. "
-                f"На {num(k['ad_A_with_items'], 0)} отрезках с единичными предметами детектор их не увидел: предмет меньше процента пикселя. "
-                f"Это согласуется с физикой, но общий предел для плотных скоплений не задаёт. Калибровочных пар — "
-                f"{num(k['ql_calibration_pairs'], 0)}, поэтому перевода «снимок в штуки» мы не заявляем."),
+        speech=(f"Пар по месту и времени — {num(k['ad_A'], 0)}, но это не калибровочные пары: на {num(k['ad_A_with_items'], 0)} отрезках с "
+                f"предметами детектор их не увидел, предмет меньше процента пикселя. Калибровочных пар «снимок — штуки» "
+                f"{num(k['ql_calibration_pairs'], 0)}: мы проверили {num(k['sr_events'], 0)} событий CSV и {num(k['ad_segments'], 0)} синхронных "
+                f"отрезков ADIS. У авторов крупнейшего набора полос тоже: «{k['q_quote_short']}» (Cózar и др., 2024, doi {k['q_quote_doi']})."),
     ))
     S.append(dict(
         section="Новые размеченные данные B/D",
@@ -474,7 +509,8 @@ def search_slides(k: dict) -> list[dict]:
             f"Штуки по снимку не показываем: {k['q_sc_reason']}; перевод «площадь / размер предмета» дал бы разброс в {num(k['q_sc_ratio'], 0)} раз",
             f"Аналогия: {k['q_an_text']}. Для мусора — {k['q_an_not']}: общих дат поле × спутник {num(k['q_cc_dates'], 0)}, климатологии ρ = {num(k['q_cc_rho'], 2)} на {num(k['q_cc_cells'], 0)} ячейках",
         ],
-        big=(num(k["ql_calibration_pairs"], 0), f"калибровочных пар «снимок → шт./км²» (нужно {num(k['q_n_pairs_k_x2_min'], 0)}–{num(k['q_n_pairs_k_x2_max'], 0)})"),
+        image="ladder",
+        caption="Лестница единиц: предмет на кадре → шт./м² кадра → шт./км² маршрута → спутниковая зона; у каждой ступени своя метрика",
         source="docs/QUANTITY.md; reports/quantity/*.json (final_numbers → case.sections.quantity)",
         speech=("Количество: штуки на квадратный километр — только по полю. Со снимка — площадь маски и доля покрытия; перевода в "
                 "штуки нет, калибровочных пар ноль, калибровка по ячейкам дала отрицательный результат."),
@@ -672,8 +708,8 @@ def slides(k: dict) -> list[dict]:
             "Готовое, не наше: разметка MARIDA и MADOS, протокол RandomForest MARIDA, индекс FDI, каталоги STAC",
         ],
         source="reports/case_pairs/summary.md; reports/case_conc/metrics.json; configs/case_selection.yaml; docs/DECISIONS.md; reports/case_geometry/summary.md",
-        speech=("Наш вклад — не модель, а решения, которые защищают выводы от самообмана. Допуск по дрейфу в реестре пар, "
-                "сплит по участкам маршрута, найденный после утечки через соседей дня, test один раз по заранее записанному "
+        speech=("Наш вклад — решения, которые защищают выводы от самообмана. Допуск по дрейфу в реестре пар, "
+                "сплит по участкам маршрута, test один раз по заранее записанному "
                 "правилу, отказ от гармонизации по val, геометрия трансект по первоисточникам и один источник чисел с тестом. "
                 "Разметка MARIDA, протокол RandomForest и индекс FDI — готовые, мы с ними сравниваемся."),
     ))
@@ -963,7 +999,7 @@ def _sz_block(k: dict) -> str:
 
 Всего в слое {num(k['sz_n_zones'], 0)} зон на {num(k['sz_n_scenes_eval'], 0)} оцениваемых сценах из {num(k['sz_n_scenes'], 0)} (на остальных низкое солнце или слабый
 сигнал воды — детектор не оценивается): обнаружено с подтверждением уровня B — {num(k['sz_by_level_b'], 0)}, срабатываний без проверки —
-{num(k['sz_by_unverified'], 0)}, недостаточно данных (пена/блик/судно/берег/мелководье) — {num(k['sz_by_insufficient'], 0)}, не обнаружено — {num(k['sz_by_not_detected'], 0)}.
+{num(k['sz_by_unverified'], 0)}, недостаточно данных (пена/блик/судно/берег/мелководье) — {num(k['sz_by_insufficient'], 0)}, не обнаружено — {num(k['sz_by_not_detected'], 0)}, ноль не информативен (ветер ≥ 5 м/с) — {num(k['sz_by_not_informative'], 0)}.
 На демо-сцене {num(k['sz_demo_n_zones'], 0)} зон ({num(k['sz_demo_det_pixels'], 0)} пикс. детектора), из них с нитью Cózar — {num(k['sz_demo_n_zones_cozar'], 0)}.
 Живой проход без моков (окна 1920×1080 и 1366×768): `scripts/case/demo_path_v2.py` → `reports/case_demo/demo_path.json`, кадры `reports/case_demo/*.png`.
 
@@ -1268,7 +1304,9 @@ def qa_items(k: dict) -> list[tuple[str, str, str]]:
         ("Почему вы не откалибровали спутник по полю?",
          f"Потому что природных калибровочных пар «снимок → шт./км²» нет ни у нас ({num(k['ql_calibration_pairs'], 0)}), ни у авторов "
          f"крупнейшего каталога мусорных полос по Sentinel-2. Они пишут дословно: «{k['q_quote']}» ({k['q_quote_ref']}). У нас "
-         f"{num(k['ad_A'], 0)} пар ADIS — пары по месту и времени с нулевым сигналом снимка; для калибровки нужно "
+         f"{num(k['ad_A'], 0)} пар ADIS — пары по месту и времени с нулевым сигналом снимка (отобраны из {num(k['ad_seg_total'], 0)} "
+         f"отрезков; с предметами — {num(k['ad_seg_items'], 0)}, снимков сверхвысокого разрешения того же дня над ними — {num(k['ad_vhr'], 0)}); "
+         f"для калибровки нужно "
          f"{num(k['ql_calibration_needed_min'], 0)}–{num(k['ql_calibration_needed_max'], 0)} пар с сигналом.",
          "data/extra/cozar2024/paper.txt (проверено по тексту); docs/QUANTITY.md §0, §3"),
         ("Почему не откалибровать по ячейкам, как считают пальмы на гектар по Sentinel-2?",

@@ -319,6 +319,11 @@ def collect_adis(wind_split: float = 7.0) -> dict:
         out[f"fa_{name}"] = {"pairs": int(len(d)), "strip_km2": _r(su, 1), "px": int(px), "px_per_km2": _r(px / su, 1) if su else None,
                              "zone_km2": _r(zu, 0), "zone_obj": int(zn), "zone_obj_per_km2": _r(zn / zu, 2) if zu else None}
     out.update(_adis_md_numbers())
+    af0 = _load_json(REP / "quantity" / "adis_field.json") or {}
+    vhr = _load_json(ROOT / "docs" / "research" / "marine_quantity" / "results" / "vhr_adis_summary.json") or {}
+    out["adis_segments_total"] = af0.get("n_segments")
+    out["adis_segments_with_items"] = vhr.get("positive_segments")
+    out["adis_vhr_same_day"] = vhr.get("matches_rows")
     if out.get("coverage_frac"):
         m, e = f"{out['coverage_frac']:.1e}".split("e")
         sup = str.maketrans("-0123456789", "⁻⁰¹²³⁴⁵⁶⁷⁸⁹")
@@ -463,7 +468,8 @@ def collect_quantity() -> dict:
                 "caveat": "коэффициент в файле ≈ 1,5 не совпадает с приведённым в тексте статьи; приложение статьи не сверено"}
     paper = ROOT / "data" / "extra" / "cozar2024" / "paper.txt"
     q_txt = "The current matching of satellite detections and field observations is limited to fake targets (artificial LWs), and reports of dense LW sightings"
-    out["cozar2024_quote"] = {"text": q_txt, "ref": "Cózar et al. 2024, Nat Commun, раздел «A new scenario for research and management» (PMC11178853)",
+    q_short = "The current matching of satellite detections and field observations is limited to fake targets"
+    out["cozar2024_quote"] = {"text": q_txt, "short": q_short, "doi": "10.1038/s41467-024-48674-7", "ref": "Cózar et al. 2024, Nat Commun, раздел «A new scenario for research and management» (PMC11178853)",
                               "checked_in_text": (q_txt in paper.read_text(encoding="utf-8")) if paper.is_file() else None}
     out["analogy"] = {"text": "пальмы на гектар по Sentinel-2 с опорой на подсчёт по снимкам высокого разрешения (arXiv 2105.11207): "
                               "MAE ±7,3 пальмы/га",
@@ -708,6 +714,7 @@ def collect_scene_zones() -> dict:
         "n_zones": k.get("n_all"), "n_scenes_eval": k.get("n_scenes"), "n_scenes": k.get("n_scenes_total"),
         "by_level_b": by.get("level_B", 0), "by_unverified": by.get("unverified", 0),
         "by_insufficient": by.get("insufficient_data", 0), "by_not_detected": by.get("not_detected", 0),
+        "by_not_informative": by.get("not_informative", 0),
         "demo": {"tile": ds.get("tile"), "date": _dmy(ds.get("date")), "scene_id": ds.get("scene_id"),
                  "n_zones": k.get("n_demo"), "n_zones_cozar": k.get("n_demo_b"), "det_pixels": ds.get("det_pixels"),
                  "water_km2": _r(ds.get("water_km2"), 1), "lwd_m2_km2": _r(ds.get("lwd_m2_km2"), 0),
@@ -727,6 +734,31 @@ def collect_scene_zones() -> dict:
         "export": {"ui": (path.get("export") or {}).get("ui_count"), "csv": (path.get("export") or {}).get("csv"),
                    "geojson": (path.get("export") or {}).get("geojson")},
     })
+    return out
+
+
+def collect_photo_count() -> dict:
+    """Счётчик предметов по фото (отдельный модуль, не спутник): reports/photo_count/eval_grouped.json, area_winans.json."""
+    pcd = REP / "photo_count"
+    ev = _load_json(pcd / "eval_grouped.json") or {}
+    ar = _load_json(pcd / "area_winans.json") or {}
+    out = {"available": bool(ev), "source": "reports/photo_count/{eval_grouped,area_winans}.json",
+           "protocol": "Faster R-CNN на FML (сплит по сессиям съёмки, порог — только по val, test один раз); шт./м² — только на кадрах "
+                       "с известной площадью (Winans, GSD 2 см); это фото с воды/воздуха, не спутник"}
+    te = ev.get("test") or {}
+    if te:
+        out["frame"] = {"n_images": te.get("n_images"), "mae": _r(te.get("count_mae"), 2),
+                        "mae_ci95": [_r(x, 2) for x in ((te.get("ci95") or {}).get("count_mae") or [])] or None,
+                        "ap50": _r(te.get("ap50"), 3), "exact_pct": _r(100 * (te.get("count_exact") or 0), 0),
+                        "baseline_median_count": _r((ev.get("test_baselines") or {}).get("count_median_train"), 2),
+                        "license": "FML — CC BY (SEANOE doi:10.17882/106148)"}
+    if ar:
+        raw, base = ar.get("test_raw") or {}, ar.get("test_baseline_median") or {}
+        out["area"] = {"dataset": "Winans 2023 (аэро, берег/мелководье)", "gsd_m": ar.get("gsd_m"), "frame_area_m2": _r(ar.get("frame_area_m2"), 0),
+                       "n_test_frames": ar.get("n_test_frames"), "count_mae": _r(raw.get("count_mae"), 2),
+                       "density_mae_km2": _r(raw.get("density_mae_km2"), -1), "baseline_density_mae_km2": _r(base.get("density_mae_km2"), -1),
+                       "true_mean_density_km2": _r(ar.get("true_mean_density_km2"), -2),
+                       "license": "Winans 2023 — CC BY (Zenodo 8381113)"}
     return out
 
 
@@ -750,7 +782,8 @@ def collect() -> dict:
     q["levels"] = quantity_levels(ad, q)
     res = {"search": collect_search(), "labeled_data": collect_labeled(), "adis_pairs": ad,
            "baselines": collect_baselines(), "quantity": q, "oil": collect_oil(),
-           "detector_v2": collect_detector_v2(), "independent_check": collect_independent(), "scene_zones": collect_scene_zones()}
+           "detector_v2": collect_detector_v2(), "independent_check": collect_independent(), "scene_zones": collect_scene_zones(),
+           "photo_count": collect_photo_count()}
     return _clean_ids(res)
 
 

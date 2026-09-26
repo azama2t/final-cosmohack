@@ -182,6 +182,7 @@ export default function CaseApp() {
     const qr = !!zoneDetail.data?.properties?.suspicious_pixels?.quality_rejected;
     return { ...fc, features: fc.features.map((f) => ({ ...f, properties: { ...f.properties, qr } })) };
   }, [zoneDetail.data, szDetail.data, selSzId]);
+  const photoMeta = useLoad<any>(meta ? (s) => get('/api/v3/photo/meta', {}, s) : null, meta ? 'pm' : '');
   const metrics = useLoad<any>(meta && leftTab === 'metrics' ? (s) => get('/api/v3/metrics', {}, s) : null, meta && leftTab === 'metrics' ? 'm' : '');
 
   const szList = useMemo(() => (szOn ? szones.data?.features ?? [] : []), [szOn, szones.data]);
@@ -497,6 +498,18 @@ export default function CaseApp() {
             </Info>
           </div>
         </div>
+        <Headline
+          meta={meta}
+          photo={photoMeta.data}
+          onField={(r) => {
+            setFilter({ source: r.source, profile: r.profile });
+            setLeftTab('obs');
+          }}
+          onZone={(id) => {
+            setLeftTab('zones');
+            openZone(id);
+          }}
+        />
         {MOCK && (
           <div className="c-mock" data-testid="mock-banner">
             Демо-данные (?mock=1) — не настоящие
@@ -609,7 +622,13 @@ export default function CaseApp() {
               <b>{num(zones.data?.count ?? null, 0)}</b> полос
             </span>
             <span data-testid="count-szones">
-              <b>{num(szOn ? szones.data?.count ?? null : 0, 0)}</b> спутн. зон
+              {szOn && szones.err ? (
+                <span className="c-err-inline" title={szones.err}>спутн. зоны: данные недоступны</span>
+              ) : (
+                <>
+                  <b>{num(szOn ? szones.data?.count ?? null : 0, 0)}</b> спутн. зон
+                </>
+              )}
             </span>
             <span>
               <b>{num(scenes.data?.count ?? null, 0)}</b> снимков
@@ -730,7 +749,7 @@ export default function CaseApp() {
                 <div className="menu-group">То, что сейчас отфильтровано</div>
                 {(
                   [
-                    ['scene_zones', 'Спутниковые зоны', szOn ? szones.data?.count : 0],
+                    ['scene_zones', 'Спутниковые зоны', szOn ? (szones.err ? undefined : szones.data?.count) : 0],
                     ['zones', 'Полосы', zones.data?.count],
                     ['observations', 'Наблюдения', obs.data?.count],
                     ['pairs', 'Пары', pairs.data?.count],
@@ -1019,7 +1038,8 @@ function HoverTip({ meta, h, obs, zones, szones }: { meta: Meta; h: HoverInfo; o
     if (!f) return null;
     const p = f.properties;
     const v = p.concentration_items_km2;
-    t = `Измерение · ${v === null ? 'без плотности' : `${num(v)} шт./км²`}`;
+    const lo = (p as any).ci95_lo, hi = (p as any).ci95_hi;
+    t = `Измерение · ${v === null ? 'без плотности' : `${num(v)} шт./км²${lo !== null && lo !== undefined && hi !== null && hi !== undefined ? ` [${num(lo)}–${num(hi)}]` : ''}`}`;
     s = `${profileRu(meta, p.measurement_profile)} · ${dateRu(p.date_utc)} · ${scopeRu(meta, p.target_scope)}`;
   } else if (h.id.startsWith('SZ-')) {
     const f = szones.find((x) => x.id === h.id);
@@ -1049,8 +1069,8 @@ const DET_FILTER_RU: Record<string, string> = {
   detected: 'обнаружено',
 };
 
-const SZ_FLAG_RU: Record<string, string> = { foam: 'пена', glint: 'блик', ship: 'судно', seam: 'шов', coast: 'берег', shallow: 'мелководье', cloud: 'облака' };
-const SZ_ORDER = ['detected', 'unverified', 'insufficient_data', 'not_detected', 'not_informative'];
+const SZ_FLAG_RU: Record<string, string> = { foam: 'пена', glint: 'блик', ship: 'судно', seam: 'шов', coast: 'берег', shallow: 'мелководье', cloud: 'облака', wind: 'ветер > 5 м/с' };
+const SZ_ORDER = ['detected', 'unverified', 'insufficient_data', 'not_detected'];
 
 /** satellite scene zones of the current filter: the held-out Cózar scene first, then by status and pixel area */
 function SzList({ szOn, fc, err, list, sel, onPick }: { szOn: boolean; fc: FC<SceneZoneProps> | null; err: string | null; list: Feat<SceneZoneProps>[]; sel: string | null; onPick: (id: string) => void }) {
@@ -1073,8 +1093,8 @@ function SzList({ szOn, fc, err, list, sel, onPick }: { szOn: boolean; fc: FC<Sc
           Зоны, где текущий детектор (weights/lgbm, порог 0,63) нашёл подозрительные пиксели на реальных снимках: отложенная сцена Cózar 2024 и снимки районов.
           «Обнаружено детектором» — только после фильтров судов/кильватера, пены, блика, облаков, берега и мелководья; с нитью каталога Cózar 2024 (разметка
           людьми) — «совпадает с разметкой Cózar (B)», без неё — «вероятный плавающий материал, требует проверки». Суда и прочие признаки → «недостаточно данных»
-          (не «верное срабатывание»). Концентрация по снимку не подтверждена: шт./км² не выдаём. При ветре ≥ 5 м/с (Cózar 2024 исключают такую воду) «не обнаружено» —
-          «ноль не информативен», LWD с пометкой. Снимки с низким солнцем зон не дают.
+          (не «верное срабатывание»). Концентрация по снимку не подтверждена: шт./км² не выдаём. При ветре {'>'} 5 м/с (правило Cózar 2024: мусор перемешивается, полосы не
+          видны) — «недостаточно данных», сцена не входит в «обследовано», LWD не считается. Снимки с низким солнцем зон не дают.
         </Info>
       </div>
       {szOn && err && (
@@ -1156,7 +1176,12 @@ function CaseLegend({
       </div>
       {!open && (
         <button className="c-lg-compact" onClick={() => setOpen(true)} data-testid="legend-compact" title="Развернуть легенду">
-          {summaryText(meta, zones) && <span className="c-lg-summary clamp">{summaryText(meta, zones)}</span>}
+          <span className="c-lg-conc-t">Концентрация, шт./км² (полевые измерения)</span>
+          <span className="c-ramp c-ramp-mini" aria-hidden>
+            {CONC_COLORS.map((c) => (
+              <span key={c} style={{ background: c }} />
+            ))}
+          </span>
           <span className="c-lg-keys">
             <span className="c-sw-dot" /> измерение
             <span className="c-sw-strip-i" /> полоса
@@ -1166,16 +1191,11 @@ function CaseLegend({
       )}
       {open && (
         <>
-          {summaryText(meta, zones) && (
-            <div className="c-lg-summary" data-testid="legend-summary">
-              {summaryText(meta, zones)}
-            </div>
-          )}
           {layers.obs && (
             <>
-              <div className="lg-row">
+              <div className="lg-row c-lg-conc-t" data-testid="legend-conc-title">
                 <span className="c-sw-dot" />
-                Полевые измерения, шт./км²
+                Концентрация, шт./км² (полевые измерения)
               </div>
               <div className="c-ramp" aria-hidden>
                 {CONC_COLORS.map((c) => (
@@ -1188,6 +1208,11 @@ function CaseLegend({
                   <span key={b}>{num(b, 0)}</span>
                 ))}
               </div>
+              {summaryText(meta, zones) && (
+                <div className="c-lg-summary c-lg-second" data-testid="legend-summary">
+                  {summaryText(meta, zones)}
+                </div>
+              )}
               <div className="lg-row">
                 <span className="c-sw-ring" />
                 измеренный ноль
@@ -1232,8 +1257,8 @@ function CaseLegend({
                   не обнаружено
                 </span>
                 <span className="c-chip" data-testid="legend-sz-wind">
-                  <i className="sq" style={{ background: SZ_COLORS.not_informative }} />
-                  ноль не информативен (ветер ≥ 5 м/с)
+                  <i className="sq" style={{ background: SZ_COLORS.insufficient_data }} />
+                  недостаточно данных: ветер {'>'} 5 м/с (правило Cózar 2024)
                 </span>
               </div>
               <div className="c-lg-note">класс MARIDA Marine Debris = любой плавающий мусор, не только пластик; без полевого подтверждения</div>
@@ -1259,6 +1284,64 @@ function CaseLegend({
             </>
           )}
         </>
+      )}
+    </div>
+  );
+}
+
+
+/** §31 п.2 а: «Главное» — numbers visible at once (field concentration per profile = measurement; photo counter; satellite) */
+function Headline({ meta, photo, onField, onZone }: { meta: Meta; photo: any; onField: (r: any) => void; onZone: (id: string) => void }) {
+  const h = (meta as any).headline;
+  if (!h) return null;
+  const tg = photo?.model?.metrics?.test_grouped;
+  const sat = h.satellite;
+  return (
+    <div className="c-head" data-testid="headline">
+      <div className="c-head-t">
+        {h.field_label}
+        <Info label="Как читать" testid="headline-info">
+          {h.field_note}. Интервал S2 — бутстреп по дням рейса (учитывает пятнистость); у остальных — только ошибка счёта или межквартильный размах. Источник: {h.source}.
+        </Info>
+      </div>
+      {h.field.map((r: any) => (
+        <button
+          key={r.key}
+          className={`c-head-r ${r.source ? '' : 'static'}`}
+          onClick={() => r.source && onField(r)}
+          disabled={!r.source}
+          data-testid={`headline-${r.key}`}
+          title={`${r.source_label ?? ''} · ${r.stat}, ${r.interval_label}${r.n ? ` · n = ${num(r.n, 0)}` : ''}`}
+        >
+          <span className="c-head-k">{r.short ?? r.key}</span>
+          <span className="c-head-v">
+            <b>{num(r.value)}</b>
+            <small>
+              {' '}
+              [{num(r.lo)}–{num(r.hi)}]
+            </small>
+          </span>
+          <span className="c-head-d">
+            {r.size_class} · {r.material} · измерение
+          </span>
+        </button>
+      ))}
+      {tg?.count_mae !== undefined && (
+        <a className="c-head-r c-head-link" href="?mode=photo" data-testid="headline-photo">
+          <span className="c-head-d">
+            Счётчик предметов по фото: MAE <b>{num(tg.count_mae, 2)}</b> шт./кадр на независимом тесте{tg.count_mae_ci95 ? ` [${num(tg.count_mae_ci95[0], 2)}–${num(tg.count_mae_ci95[1], 2)}]` : ''} · открыть →
+          </span>
+        </a>
+      )}
+      {sat && (
+        <div className="c-head-r c-head-sat">
+          <button className="c-head-link" onClick={() => sat.open_zone_id && onZone(sat.open_zone_id)} data-testid="headline-sat">
+            Спутник: {num(sat.n_zones, 0)} зон, из них {num(sat.n_level_b, 0)} совпадают с разметкой Cózar; {sat.quantity_label}
+          </button>
+          <Info label="почему →" testid="headline-why" align="left">
+            {sat.why}. {(meta as any).quantity_levels?.calibration_pairs?.note ?? ''}
+          </Info>
+        </div>
       )}
     </div>
   );

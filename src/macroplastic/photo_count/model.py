@@ -7,7 +7,6 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[3]
 WEIGHTS_DIR = ROOT / "weights_exp" / "photo_count"
-CARD = WEIGHTS_DIR / "model_card.json"
 
 
 def build_model(num_classes=2, pretrained_backbone=False):
@@ -47,15 +46,22 @@ def predict_images(model, images, device="cpu", batch=4):
     return out
 
 
-def load_card():
-    if CARD.exists():
-        return json.loads(CARD.read_text(encoding="utf-8"))
+SURVEYS = {  # survey type -> model card (weights_exp/photo_count/, outside git)
+    "water_camera": "model_card.json",       # FML: camera at the water, first-person view
+    "aerial": "model_card_aerial.json",      # Winans 2023: nadir aerial/drone imagery of shorelines, GSD known
+}
+
+
+def load_card(survey="water_camera"):
+    p = WEIGHTS_DIR / SURVEYS[survey]
+    if p.exists():
+        return json.loads(p.read_text(encoding="utf-8"))
     return None
 
 
 class Counter:
-    """Lazy singleton used by the API: loads the weights named in model_card.json once."""
-    _inst = None
+    """Lazy per-survey singletons used by the API: load the weights named in the model card once."""
+    _inst = {}
 
     def __init__(self, card):
         import os
@@ -67,13 +73,15 @@ class Counter:
         self.threshold = float(card["threshold"])
 
     @classmethod
-    def get(cls):
-        if cls._inst is None:
-            card = load_card()
+    def get(cls, survey="water_camera"):
+        if survey not in SURVEYS:
+            raise KeyError(survey)
+        if survey not in cls._inst:
+            card = load_card(survey)
             if card is None:
-                raise FileNotFoundError(f"no model card at {CARD}")
-            cls._inst = cls(card)
-        return cls._inst
+                raise FileNotFoundError(f"no model card for {survey} in {WEIGHTS_DIR}")
+            cls._inst[survey] = cls(card)
+        return cls._inst[survey]
 
     def count(self, image, threshold=None):
         thr = self.threshold if threshold is None else float(threshold)
@@ -82,8 +90,57 @@ class Counter:
         return boxes[keep], scores[keep], thr
 
 
+BINS_CM = [0, 30, 60, 120, 1e9]  # size bins of the detection-probability correction (scripts/photo_count/eval_area.py)
+
+
+def corrected_count(boxes, gsd_m, factors):
+    """Sum over detections of precision/recall of its size bin (factors from VAL, model card)."""
+    b = np.asarray(boxes, float).reshape(-1, 4)
+    if not len(b) or not factors:
+        return float(len(b))
+    side_cm = np.maximum(b[:, 2] - b[:, 0], b[:, 3] - b[:, 1]) * gsd_m * 100
+    k = np.clip(np.digitize(side_cm, BINS_CM) - 1, 0, len(factors) - 1)
+    return float(np.asarray(factors, float)[k].sum())
+
+
 def density_per_km2(count, frame_area_m2):
     """Items per km^2 on the frame scale — only if the imaged water area is known (not a satellite estimate)."""
     if frame_area_m2 is None or not np.isfinite(frame_area_m2) or frame_area_m2 <= 0:
         return None
     return float(count) / (float(frame_area_m2) / 1e6)
+
+
+def predict_tiled(model, images, device="cpu", grid=2, overlap=0.2, include_full=True, nms_iou=0.5):
+    """Tiled inference without new packages (idea of SAHI, own code): full frame + grid x grid tiles with overlap,
+    boxes shifted back to frame coordinates and merged by NMS. Returns list of (boxes, scores)."""
+    import torch
+    from torchvision.ops import nms
+    out = []
+    for im in images:
+        W, H = im.size
+        tw, th = W / (grid - (grid - 1) * overlap), H / (grid - (grid - 1) * overlap)
+        crops, offs = [], []
+        for gy in range(grid):
+            for gx in range(grid):
+                x0, y0 = int(round(gx * tw * (1 - overlap))), int(round(gy * th * (1 - overlap)))
+                x1, y1 = min(W, int(round(x0 + tw))), min(H, int(round(y0 + th)))
+                crops.append(im.crop((x0, y0, x1, y1)))
+                offs.append((x0, y0))
+        preds = predict_images(model, crops, device, batch=len(crops))
+        bs, ss = [], []
+        for (b, s), (x0, y0) in zip(preds, offs):
+            if len(b):
+                bs.append(b + np.array([x0, y0, x0, y0], dtype=b.dtype))
+                ss.append(s)
+        if include_full:
+            b, s = predict_images(model, [im], device, batch=1)[0]
+            bs.append(b)
+            ss.append(s)
+        if not bs:
+            out.append((np.zeros((0, 4), np.float32), np.zeros(0, np.float32)))
+            continue
+        B = torch.as_tensor(np.concatenate(bs)).float()
+        S = torch.as_tensor(np.concatenate(ss)).float()
+        keep = nms(B, S, nms_iou).numpy()
+        out.append((B.numpy()[keep], S.numpy()[keep]))
+    return out

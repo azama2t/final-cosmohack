@@ -1,0 +1,91 @@
+{
+ "tag": "published",
+ "threshold": 0.9,
+ "rule": "threshold from FML val, not re-tuned; class-agnostic; IoU 0.5",
+ "sets": {
+  "maharjan": {
+   "source": "Maharjan et al. 2022 (Remote Sens. 14, 3049), github Nisha484/Nisha",
+   "split": "all tiles",
+   "survey": "дрон 30 м, надир; плитка 256x256 px = 2x2 м",
+   "tile_area_m2": 4.0,
+   "n_unreadable_skipped": 91,
+   "n_images": 855,
+   "n_boxes": 1708,
+   "ap50": 0.0054005400540054005,
+   "ap50_ci95": [
+    0.0030445544554455447,
+    0.009900990099009901
+   ],
+   "count_mae": 1.9906432748538012,
+   "count_bias": -1.9906432748538012,
+   "count_exact": 0.0011695906432748538,
+   "count_within1": 0.46900584795321637,
+   "count_total_pred": 6,
+   "count_total_true": 1708,
+   "count_mae_ci95": [
+    1.906374269005848,
+    2.0795614035087717
+   ],
+   "count_exact_ci95": [
+    0.0,
+    0.0035087719298245615
+   ],
+   "precision": 0.3333333333333333,
+   "recall": 0.00117096018735363,
+   "f1": 0.0023337222870478415,
+   "tp": 2,
+   "fp": 4,
+   "n_gt": 1708,
+   "baseline_count_mae_median": 0.9309941520467836,
+   "density": {
+    "unit": "шт./м² на площади плитки (дрон, не спутник)",
+    "tile_area_m2": 4.0,
+    "true_mean_per_m2": 0.4994152046783626,
+    "pred_mean_per_m2": 0.0017543859649122807,
+    "mae_per_m2": 0.4976608187134503,
+    "pred_mean_ci95": [
+     0.0005847953216374269,
+     0.003216374269005848
+    ],
+    "true_mean_ci95": [
+     0.4783479532163743,
+     0.5225146198830409
+    ]
+   }
+  },
+  "tud_gv": {
+   "source": "TUD-GV object detection (Zenodo 13730228), CC BY 4.0",
+   "split": "images present locally",
+   "survey": "камера 2.7/4.0 м над каналом (наклонная)",
+   "n_unreadable_skipped": 0,
+   "n_images": 60,
+   "n_boxes": 218,
+   "ap50": 0.29844464529205156,
+   "ap50_ci95": [
+    0.23604889524707234,
+    0.37993588922781074
+   ],
+   "count_mae": 2.3,
+   "count_bias": -1.6333333333333333,
+   "count_exact": 0.18333333333333332,
+   "count_within1": 0.4166666666666667,
+   "count_total_pred": 120,
+   "count_total_true": 218,
+   "count_mae_ci95": [
+    1.8495833333333334,
+    2.7666666666666666
+   ],
+   "count_exact_ci95": [
+    0.08333333333333333,
+    0.26708333333333295
+   ],
+   "precision": 0.5166666666666667,
+   "recall": 0.28440366972477066,
+   "f1": 0.3668639053254439,
+   "tp": 62,
+   "fp": 58,
+   "n_gt": 218,
+   "baseline_count_mae_median": 1.8333333333333333
+  }
+ }
+}

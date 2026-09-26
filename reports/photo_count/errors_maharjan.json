@@ -1,0 +1,25 @@
+{
+ "tag": "maharjan",
+ "split": "m:test",
+ "threshold": 0.7,
+ "n_frames": 355,
+ "n_true": 867,
+ "tp": 408,
+ "missed": 459,
+ "duplicate": 0,
+ "false": 249,
+ "count_precision": 0.6210045662100456,
+ "count_recall": 0.47058823529411764,
+ "per_frame_mean": {
+  "missed": 1.2929577464788733,
+  "duplicate": 0.0,
+  "false": 0.7014084507042253,
+  "net_error": -0.5915492957746479,
+  "abs_error": 1.2169014084507042
+ },
+ "share_of_abs_error": {
+  "missed": 0.6483050847457628,
+  "duplicate": 0.0,
+  "false": 0.3516949152542373
+ }
+}

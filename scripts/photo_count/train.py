@@ -60,7 +60,48 @@ def grouped_split(seed=0, test_frac=0.20, val_frac=0.15):
     return split
 
 
+def maharjan_items(which):
+    """Maharjan et al. 2022 drone tiles (256x256 px = 2x2 m). Site transfer, fixed before training:
+    test = all Thailand tiles (train_data_v5_talathai); Laos tiles -> val if crc32(file group) % 5 == 0 else train."""
+    import zlib
+    from PIL import Image
+    base = ROOT / "data" / "extra" / "count_ds" / "maharjan_river_uav" / "Nisha-main" / "Datagithub"
+    out = []
+    for sub, sp in (("train_data_v5_Laos", "laos"), ("train_data_v5_talathai", "test")):
+        for f in sorted((base / sub / "images").glob("*.png")):
+            lab = base / sub / "labels" / (f.stem + ".txt")
+            if not lab.exists():
+                continue
+            try:
+                with Image.open(f) as im:
+                    im.load()
+            except Exception:  # noqa: BLE001 - truncated files are skipped (reports/photo_count/cross_*.json)
+                continue
+            part = sp
+            if sp == "laos":
+                part = "val" if zlib.crc32(f.name.split("_")[0].encode()) % 5 == 0 else "train"
+            if part == which:
+                out.append((f, lab))
+    return out
+
+
+def winans_items(which):
+    """Winans 2023 aerial chips, spatial-component split (src/macroplastic/photo_count/winans.py), fixed before training."""
+    from macroplastic.photo_count import winans as W
+    ch = W.load_all()
+    sp, _ = W.spatial_split(ch)
+    return [(ch[n]["path"], ch[n]["boxes"]) for n in sorted(ch) if sp[n] == which]
+
+
+def gt_of(img_p, lab):
+    return np.asarray(lab, float).reshape(-1, 4) if isinstance(lab, np.ndarray) else D.yolo_boxes_img(img_p, lab)
+
+
 def items_for(split_name, which):
+    if split_name == "maharjan":
+        return maharjan_items(which)
+    if split_name == "winans":
+        return winans_items(which)
     loc = official_location()
     if split_name == "official":
         return [loc[f.stem] for f in D.split_files(which)]
@@ -69,8 +110,8 @@ def items_for(split_name, which):
 
 
 class FMLDataset:
-    def __init__(self, items, train):
-        self.items, self.train = items, train
+    def __init__(self, items, train, vflip=False):
+        self.items, self.train, self.vflip = items, train, vflip
 
     def __len__(self):
         return len(self.items)
@@ -82,7 +123,8 @@ class FMLDataset:
         img_p, lab_p = self.items[i]
         im = Image.open(img_p).convert("RGB")
         w, h = im.size
-        b = D.yolo_boxes(lab_p, w, h)
+        b = (np.asarray(lab_p, float).reshape(-1, 4).copy() if isinstance(lab_p, np.ndarray)
+             else D.yolo_boxes(lab_p, w, h).reshape(-1, 4))
         b[:, [0, 2]] = b[:, [0, 2]].clip(0, w)
         b[:, [1, 3]] = b[:, [1, 3]].clip(0, h)
         keep = (b[:, 2] - b[:, 0] > 1) & (b[:, 3] - b[:, 1] > 1)
@@ -92,6 +134,10 @@ class FMLDataset:
             t = t.flip(-1)
             b = b.copy()
             b[:, [0, 2]] = w - b[:, [2, 0]]
+        if self.train and self.vflip and np.random.rand() < 0.5:  # nadir imagery: vertical flip is also valid
+            t = t.flip(-2)
+            b = b.copy()
+            b[:, [1, 3]] = h - b[:, [3, 1]]
         tgt = {"boxes": torch.as_tensor(b, dtype=torch.float32).reshape(-1, 4),
                "labels": torch.ones(len(b), dtype=torch.int64)}
         return t, tgt
@@ -119,7 +165,8 @@ def evaluate(model, loader, dev, gts):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--split", default="grouped", choices=["grouped", "official"])
+    ap.add_argument("--split", default="grouped", choices=["grouped", "official", "maharjan", "winans"])
+    ap.add_argument("--init", default=None, help="start from these 2-class weights instead of COCO (e.g. FML model)")
     ap.add_argument("--epochs", type=int, default=6)
     ap.add_argument("--batch", type=int, default=4)
     ap.add_argument("--lr", type=float, default=0.01)
@@ -140,14 +187,18 @@ def main():
         grouped_split()
     tr, va = items_for(a.split, "train"), items_for(a.split, "val")
     print(f"{tag}: train {len(tr)} val {len(va)} on {dev}", flush=True)
-    model = build_model(num_classes=91)
-    model.load_state_dict(torch.load(PRETRAINED, map_location="cpu", weights_only=True))
-    model.roi_heads.box_predictor = FastRCNNPredictor(model.roi_heads.box_predictor.cls_score.in_features, 2)
+    if a.init:
+        model = build_model(num_classes=2)
+        model.load_state_dict(torch.load(a.init, map_location="cpu", weights_only=True))
+    else:
+        model = build_model(num_classes=91)
+        model.load_state_dict(torch.load(PRETRAINED, map_location="cpu", weights_only=True))
+        model.roi_heads.box_predictor = FastRCNNPredictor(model.roi_heads.box_predictor.cls_score.in_features, 2)
     model.to(dev).train()
-    dl = DataLoader(FMLDataset(tr, True), batch_size=a.batch, shuffle=True, num_workers=a.workers,
+    dl = DataLoader(FMLDataset(tr, True, vflip=a.split in ("maharjan", "winans")), batch_size=a.batch, shuffle=True, num_workers=a.workers,
                     collate_fn=collate, persistent_workers=a.workers > 0, drop_last=True)
     dv = DataLoader(FMLDataset(va, False), batch_size=4, shuffle=False, num_workers=0, collate_fn=collate)  # extra spawned workers hit WinError 1455 (page file)
-    gts_v = [D.yolo_boxes(l) for _, l in va]
+    gts_v = [gt_of(f, l) for f, l in va]  # real image size (Maharjan tiles are 256x256, not 1920x1080)
     params = [p for p in model.parameters() if p.requires_grad]
     opt = torch.optim.SGD(params, lr=a.lr, momentum=0.9, weight_decay=1e-4)
     total = a.epochs * len(dl)

@@ -53,8 +53,10 @@ MIN_ZONE_PX = 5
 GLINT_B11 = 0.01
 FOAM_WHITE = 0.8
 FOAM_WIND = 7.0
-WIND_ZERO = 5.0         # Г3-1 (Cózar et al. 2024 exclude sea with wind > 5 m/s: windrows do not form / hold) -> a zero
-                        # is not informative and the LWD denominator (usable water) is not comparable with Cózar
+WIND_ZERO = 5.0         # §29 А / Г3-1: Cózar et al. 2024 (Nat. Commun., data/extra/cozar2024/paper.txt, Methods, LWD):
+                        # «we removed from a0 the sea surface area associated with wind speeds higher than 5 m·s−1 … the
+                        # probability of detection dropped sharply above 5 m·s−1» — the same rule (u10 > 5), not tuned
+WIND_LABEL = "недостаточно данных (ветер > 5 м/с: мусор перемешивается, полосы не видны — правило Cózar 2024)"
 ART_FRAC = 0.3
 MAX_PX = 1024
 SHIP_NEAR_M = 500.0     # K2 (audit): a bright target (ship blob or dry hull) with SWIR response this close -> boat traffic
@@ -63,6 +65,12 @@ HULL_B11 = 0.03         # SWIR reflectance of a dry hull (water ~0.001-0.01)
 COAST_M = 300.0         # land (quality code 2) closer than this -> coast / surf, not evaluated
 SHALLOW_B3_RATIO = 2.0  # zone water B3 median >= 2 x scene water median and >= SHALLOW_B3_ABS -> shallow / turbid water
 SHALLOW_B3_ABS = 0.03
+# В12 (audit, 26.09): rules checked on the 8 named zones (4 boats with wake, 4 shoal / mud-bank edges) and on the 14 Cózar
+# (level B) zones of 30SXE — none of the 14 changes (out/case_demo/diag_b12.py on probable.signs.diag):
+BOAT_B11 = 0.01         # small bright object (<= 40 px, B8 >= max(0.04, 4x water)) within 500 m with SWIR B11 >= 0.01 -> boat
+                        # (boats 0.012-0.031; bright filament pixels of the Cózar scene <= 0.0032)
+SHOAL_B4 = 0.02         # zone water red B4 >= 0.02 and (>= 2x scene water B4 or NIR B8 >= 0.013) -> bright bottom / mud bank
+SHOAL_B8 = 0.013        # (shoals B4 0.022-0.026, B8 0.014-0.022; Cózar zones B4 <= 0.0036, B8 <= 0.0019)
 
 # INBOX §23 п.2 (26.09): no items/km2 scenario for satellite zones — the text in Cózar et al. 2021 gives only a lower
 # bound for windrows, a narrow honestly derived range does not exist; the zone's quantity status is «not confirmed».
@@ -71,8 +79,8 @@ QUANTITY = {
     "label": "концентрация по снимку не подтверждена",
     "detail": "перевод площади в штуки не показываем: нет калибровочных пар (см. docs/QUANTITY.md)",
 }
-LWD_WIND_NOTE = ("ветер ≥ 5 м/с: Cózar 2024 исключают такую воду из наблюдаемой площади (нити не формируются) — "
-                 "LWD не сравнимо с их значениями")
+LWD_WIND_NOTE = ("ветер > 5 м/с: по правилу Cózar 2024 эта вода не входит в знаменатель «обследовано» — LWD не "
+                 "считается")
 CLOUD_ZONE = 0.2        # cloud / cloud shadow (quality codes 3, 4) >= 20 % of the zone -> cloud sign
 
 
@@ -281,9 +289,14 @@ def build_scene(s: dict, cozar: pd.DataFrame, minfo: dict) -> dict:
             "water_km2": round(water_km2, 3), "det_pixels": int(det.sum()),
             "det_area_m2": int(det.sum()) * 100,
             "lwd_m2_km2": round(int(det.sum()) * 100 / water_km2, 2) if water_km2 > 0 else None,
-            "wind_high": bool(w10 is not None and w10 >= WIND_ZERO),
+            "wind_high": bool(w10 is not None and w10 > WIND_ZERO),
             "model": minfo, "crop_note": "вырезка вокруг района/сцены, не весь тайл",
             "selection": sj.get("selection")}
+    # §29 А: windy scenes are not part of the «observed» area (LWD denominator) at all
+    info["in_observed_area"] = not info["wind_high"]
+    info["observed_water_km2"] = info["water_km2"] if info["in_observed_area"] else 0.0
+    if info["wind_high"]:
+        info["lwd_m2_km2"] = None
     info["training_scene"] = training_scene(sj)
     if not ok:
         info["not_evaluated_reason"] = ("низкое солнце (зенит %.0f°)" % zen) if low else "слабый сигнал воды (медиана B3 < 0.003)"
@@ -343,6 +356,12 @@ def build_scene(s: dict, cozar: pd.DataFrame, minfo: dict) -> dict:
             keep[1:] = np.asarray(tmx) >= SHIP_TARGET_B11
             target = keep[tl]
         rs, rc = int(SHIP_NEAR_M / 10), int(COAST_M / 10)
+        # diagnostics (В12): any bright compact object (no SWIR condition), for rule design
+        bright_any = (blobs | ((np.nan_to_num(B["B8"]) >= max(0.04, 4 * wmed["B8"])) & ~land)) & ~det
+        bl, bn = ndimage.label(bright_any, structure=np.ones((3, 3), bool))
+        bsz = np.bincount(bl.ravel(), minlength=bn + 1)
+        bright_any = (bsz <= 40)[bl] & (bl > 0)
+        RD = 100  # 1 km diagnostic window
         cz = cozar[(cozar.tile == str(sj.get("tile") or "").lstrip("T")) & (cozar.date == s["date"])]
         cz_polys = []
         if len(cz):
@@ -377,7 +396,7 @@ def build_scene(s: dict, cozar: pd.DataFrame, minfo: dict) -> dict:
             b11z = float(np.nanmedian(B["B11"][wz])) if wz.sum() >= 20 else None
             glint_share = float((qa[m] == 6).mean())
             ys_, xs_ = np.nonzero(dm)
-            rw = max(rs, rc) + 1
+            rw = max(rs, rc, RD) + 1
             y0_, y1_ = max(ys_.min() - rw, 0), ys_.max() + rw + 1
             x0_, x1_ = max(xs_.min() - rw, 0), xs_.max() + rw + 1
             dmw = dm[y0_:y1_, x0_:x1_]
@@ -386,14 +405,30 @@ def build_scene(s: dict, cozar: pd.DataFrame, minfo: dict) -> dict:
             near_c = dd_ <= rc
             ship_near_px = int((target[y0_:y1_, x0_:x1_] & near_s).sum())
             land_near_px = int((land[y0_:y1_, x0_:x1_] & near_c).sum())
+            lw = land[y0_:y1_, x0_:x1_]
+            bw_ = bright_any[y0_:y1_, x0_:x1_]
+            diag = {"dist_land_m": round(float(dd_[lw].min()) * 10) if lw.any() else None,
+                    "dist_bright_m": round(float(dd_[bw_].min()) * 10) if bw_.any() else None,
+                    "n_bright_px_500m": int((bw_ & (dd_ <= 50)).sum()),
+                    "b11_bright_max_500m": round(float(np.nanmax(np.where(bw_ & (dd_ <= 50), B["B11"][y0_:y1_, x0_:x1_], np.nan))), 4) if (bw_ & (dd_ <= 50)).any() else None,
+                    "b4_water_zone": round(float(np.nanmedian(B["B4"][wz])), 4) if wz.sum() >= 20 else None,
+                    "b8_water_zone": round(float(np.nanmedian(B["B8"][wz])), 4) if wz.sum() >= 20 else None,
+                    "b11_det_median": round(float(np.nanmedian(B["B11"][dm])), 4),
+                    "b8_det_median": round(float(np.nanmedian(B["B8"][dm])), 4),
+                    "water_scene_b3": round(wmed["B3"], 4), "water_scene_b4": round(wmed["B4"], 4),
+                    "n_det_px": npx, "n_obj": int(len(ids))}
             b3z = float(np.nanmedian(B["B3"][wz])) if wz.sum() >= 20 else None
             b3_ratio = (b3z / wmed["B3"]) if (b3z is not None and wmed["B3"] > 1e-4) else None
             shallow = b3z is not None and b3_ratio is not None and b3_ratio >= SHALLOW_B3_RATIO and b3z >= SHALLOW_B3_ABS
+            b4z_, b8z_ = diag["b4_water_zone"], diag["b8_water_zone"]
+            shoal = (b4z_ is not None and b4z_ >= SHOAL_B4 and (b4z_ >= 2 * wmed["B4"] or (b8z_ or 0) >= SHOAL_B8))
+            boat = diag["b11_bright_max_500m"] is not None and diag["b11_bright_max_500m"] >= BOAT_B11
+            shallow = shallow or shoal
             cloud_share = float(np.isin(qa[m], (3, 4)).mean())
             flags = []
             if cloud_share >= CLOUD_ZONE:
                 flags.append("cloud")
-            if ship_near_px > 0 and not (art_share.get("ship", 0) + art_share.get("wake", 0) >= ART_FRAC):
+            if (ship_near_px > 0 or boat) and not (art_share.get("ship", 0) + art_share.get("wake", 0) >= ART_FRAC):
                 flags.append("ship")
             if land_near_px > 0:
                 flags.append("coast")
@@ -422,16 +457,17 @@ def build_scene(s: dict, cozar: pd.DataFrame, minfo: dict) -> dict:
                 "ship": {"flag": "ship" in flags, "share": round(art_share.get("ship", 0) + art_share.get("wake", 0), 3),
                          "bright_target_px_within_500m": ship_near_px,
                          "rule": "≥ 30 % пикселей — у яркой цели или кильватера (reports/artifacts.md) или яркая цель с откликом в "
-                                 "SWIR (судно, лодка: B11 ≥ 0,015) ближе 500 м"},
+                                 "SWIR (судно, лодка: B11 ≥ 0,015) ближе 500 м, или малый яркий объект (≤ 40 пикс.) с B11 ≥ 0,01 ближе 500 м (лодка с кильватером)"},
                 "coast": {"flag": "coast" in flags, "land_px_within_300m": land_near_px,
                           "rule": "суша (маска качества) ближе 300 м — прибой, кромка берега"},
                 "shallow": {"flag": "shallow" in flags, "b3_water_zone": None if b3z is None else round(b3z, 4),
                             "b3_ratio_to_scene_water": None if b3_ratio is None else round(b3_ratio, 2),
-                            "rule": "медиана B3 воды зоны ≥ 2× медианы воды снимка и ≥ 0,03 — мелководье или мутная вода"},
+                            "rule": "медиана B3 воды зоны ≥ 2× медианы воды снимка и ≥ 0,03, или B4 воды зоны ≥ 0,02 и (≥ 2× воды снимка или B8 ≥ 0,013) — мелководье, яркое дно, илистая банка"},
                 "seam": {"flag": "seam" in flags, "share": art_share.get("seam", 0),
                          "rule": "≥ 30 % пикселей — прямая линия вдоль трека/границы яркости (шов)"},
                 "cloud": {"flag": "cloud" in flags, "cloud_fraction": round(cloud_share, 3),
                           "rule": "облака или тени облаков (маска качества) ≥ 20 % зоны"},
+                "diag": diag,
                 "note": "эвристики, не классификатор; на размеченных данных не проверены",
             }
             area_m2 = npx * 100
@@ -447,7 +483,8 @@ def build_scene(s: dict, cozar: pd.DataFrame, minfo: dict) -> dict:
                 "flags": flags, "n_cozar_filaments": n_cz, "crop_file": crop,
                 "wind_high": info["wind_high"],
                 "measured": {"zone_area_km2": round(area_km2, 4), "suspicious_area_m2": area_m2, "n_pixels": npx,
-                             "n_objects": int(len(ids)), "water_km2": round(wz_km2, 4), "lwd_m2_km2": lwd,
+                             "n_objects": int(len(ids)), "water_km2": round(wz_km2, 4),
+                             "lwd_m2_km2": None if info["wind_high"] else lwd,
                              "lwd_note": LWD_WIND_NOTE if info["wind_high"] else None,
                              "quality": {"valid_water_fraction": round(float(wz.sum() / max(m.sum(), 1)), 3),
                                          "cloud_fraction": round(cloud_share, 3),
@@ -468,8 +505,8 @@ def build_scene(s: dict, cozar: pd.DataFrame, minfo: dict) -> dict:
         info["n_zones"] = k
         info["small_cluster_px"] = small_px
         if k == 0:  # evaluated, nothing (big enough) found: the observed water of the crop is «не обнаружено»
-            # Г3-1: with wind >= 5 m/s windrows do not form — a zero says nothing («ноль не информативен»)
-            zero_st = "not_informative" if info["wind_high"] else "not_detected"
+            # §29 А: with wind > 5 m/s windrows are mixed away — «не обнаружено» becomes «недостаточно данных (ветер …)»
+            zero_st = "insufficient_data" if info["wind_high"] else "not_detected"
             zid = f"SZ-{s['key']}-000"
             poly = box(*bw)
             gj = json.loads(json.dumps(mapping(poly)), parse_float=lambda x: round(float(x), 6))
@@ -480,7 +517,8 @@ def build_scene(s: dict, cozar: pd.DataFrame, minfo: dict) -> dict:
                 "detection_status": zero_st, "status": zero_st, "concentration_status": "unavailable",
                 "wind_high": info["wind_high"],
                 "quantity": QUANTITY,
-                "flags": [], "n_cozar_filaments": 0,
+                "flags": ["wind"] if info["wind_high"] else [], "n_cozar_filaments": 0,
+                "verification": "wind" if info["wind_high"] else None,
                 "measured": {"zone_area_km2": round(abs(Geod(ellps="WGS84").geometry_area_perimeter(poly)[0]) / 1e6, 3),
                              "suspicious_area_m2": int(det.sum()) * 100, "n_pixels": int(det.sum()), "n_objects": int(n),
                              "water_km2": round(water_km2, 3), "lwd_m2_km2": info["lwd_m2_km2"],
@@ -497,7 +535,7 @@ def build_scene(s: dict, cozar: pd.DataFrame, minfo: dict) -> dict:
             z["properties"]["field_nearby"] = fn
     info["n_zones_total"] = len(zones)
     info["by_status"] = {st: sum(1 for z in zones if z["properties"]["detection_status"] == st)
-                         for st in ("detected", "not_detected", "not_informative", "insufficient_data")}
+                         for st in ("detected", "not_detected", "insufficient_data")}
     (od / "zones.geojson").write_text(json.dumps({"type": "FeatureCollection", "features": zones}, ensure_ascii=False), encoding="utf-8")
     (od / "detections.geojson").write_text(json.dumps({"type": "FeatureCollection", "features": dets}, ensure_ascii=False), encoding="utf-8")
     (od / "scene.json").write_text(json.dumps(info, ensure_ascii=False, indent=1), encoding="utf-8")

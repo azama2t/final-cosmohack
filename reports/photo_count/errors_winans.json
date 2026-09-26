@@ -1,0 +1,25 @@
+{
+ "tag": "winans",
+ "split": "w:test",
+ "threshold": 0.8,
+ "n_frames": 397,
+ "n_true": 2433,
+ "tp": 1602,
+ "missed": 831,
+ "duplicate": 1,
+ "false": 700,
+ "count_precision": 0.6956144159791576,
+ "count_recall": 0.6584463625154131,
+ "per_frame_mean": {
+  "missed": 2.093198992443325,
+  "duplicate": 0.0025188916876574307,
+  "false": 1.7632241813602014,
+  "net_error": -0.327455919395466,
+  "abs_error": 1.853904282115869
+ },
+ "share_of_abs_error": {
+  "missed": 0.5424281984334204,
+  "duplicate": 0.0006527415143603133,
+  "false": 0.45691906005221933
+ }
+}

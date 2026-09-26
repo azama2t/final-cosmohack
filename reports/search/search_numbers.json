@@ -272,6 +272,9 @@
   "coverage_frac": 6.6e-08,
   "largest_item_m2": 0.67,
   "largest_item_pct_px": 0.7,
+  "adis_segments_total": 21444,
+  "adis_segments_with_items": 5996,
+  "adis_vhr_same_day": 0,
   "coverage_frac_text": "6.6·10⁻⁸",
   "A_eval_items_with_signal": 0,
   "verdict": "пары по месту и времени, не калибровочные: на 6 синхронных отрезках ADIS с единичными предметами детектор предметы не увидел (оценивается на 3 из 6 — на всех 0); это согласуется с физикой (доля покрытия ~10⁻⁷), но не задаёт общий предел для всех скоплений"
@@ -505,6 +508,8 @@
   },
   "cozar2024_quote": {
    "text": "The current matching of satellite detections and field observations is limited to fake targets (artificial LWs), and reports of dense LW sightings",
+   "short": "The current matching of satellite detections and field observations is limited to fake targets",
+   "doi": "10.1038/s41467-024-48674-7",
    "ref": "Cózar et al. 2024, Nat Commun, раздел «A new scenario for research and management» (PMC11178853)",
    "checked_in_text": true
   },
@@ -759,9 +764,10 @@
   "n_scenes_eval": 75,
   "n_scenes": 83,
   "by_level_b": 14,
-  "by_unverified": 77,
-  "by_insufficient": 164,
+  "by_unverified": 64,
+  "by_insufficient": 180,
   "by_not_detected": 28,
+  "by_not_informative": 0,
   "demo": {
    "tile": "30SXE",
    "date": "11.03.2021",
@@ -805,6 +811,34 @@
    "ui": 23,
    "csv": 23,
    "geojson": 23
+  }
+ },
+ "photo_count": {
+  "available": true,
+  "source": "reports/photo_count/{eval_grouped,area_winans}.json",
+  "protocol": "Faster R-CNN на FML (сплит по сессиям съёмки, порог — только по val, test один раз); шт./м² — только на кадрах с известной площадью (Winans, GSD 2 см); это фото с воды/воздуха, не спутник",
+  "frame": {
+   "n_images": 1190,
+   "mae": 0.59,
+   "mae_ci95": [
+    0.54,
+    0.66
+   ],
+   "ap50": 0.914,
+   "exact_pct": 64.0,
+   "baseline_median_count": 2.86,
+   "license": "FML — CC BY (SEANOE doi:10.17882/106148)"
+  },
+  "area": {
+   "dataset": "Winans 2023 (аэро, берег/мелководье)",
+   "gsd_m": 0.02,
+   "frame_area_m2": 164.0,
+   "n_test_frames": 397,
+   "count_mae": 1.85,
+   "density_mae_km2": 11320.0,
+   "baseline_density_mae_km2": 27930.0,
+   "true_mean_density_km2": 37400.0,
+   "license": "Winans 2023 — CC BY (Zenodo 8381113)"
   }
  }
 }

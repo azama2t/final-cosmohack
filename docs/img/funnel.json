@@ -165,7 +165,7 @@
   "orchestrator_accepted": false,
   "current_model": "weights/lgbm",
   "snapshot_generated": "2026-09-26T04:22:15",
-  "source": "reports/detector_v2/experiments_snapshot.json (снимок experiments.json L92), reports/detector_v2/decision.json (решение команды), configs/detector_v2_eval.yaml"
+  "source": "reports/detector_v2/experiments_snapshot.json (снимок experiments.json), reports/detector_v2/decision.json (решение команды), configs/detector_v2_eval.yaml"
  },
  "quality_reject_reasons": {
   "glint": 10,

@@ -37,6 +37,8 @@
  },
  "crop_note": "вырезка вокруг района/сцены, не весь тайл",
  "selection": "2025-07-01/2025-08-31; crop cloud<=0.3, valid>=0.8; ranked by glint among 10 OK of 14 screened",
+ "in_observed_area": true,
+ "observed_water_km2": 337.754,
  "training_scene": null,
  "not_evaluated_reason": "низкое солнце (зенит 60°)",
  "rgb_file": "rgb.jpg",
@@ -46,7 +48,6 @@
  "by_status": {
   "detected": 0,
   "not_detected": 0,
-  "not_informative": 0,
   "insufficient_data": 0
  }
 }

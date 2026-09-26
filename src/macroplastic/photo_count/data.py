@@ -28,6 +28,14 @@ def yolo_boxes(label_path, w=1920, h=1080):
     return np.asarray(rows, dtype=float).reshape(-1, 4)
 
 
+def yolo_boxes_img(img_path, label_path):
+    """YOLO labels scaled by the actual image size (header read only)."""
+    from PIL import Image
+    with Image.open(img_path) as im:
+        w, h = im.size
+    return yolo_boxes(label_path, w, h)
+
+
 def label_path(img_path, split, root=FML):
     return root / "labels" / "yolo_format" / split / (Path(img_path).stem + ".txt")
 

@@ -1,0 +1,318 @@
+{
+ "n_targets": 20,
+ "by_kind": {
+  "csv_event": 10,
+  "adis_segment": 10
+ },
+ "window_h": 48,
+ "box_deg": 0.3,
+ "v_drift_ms": 0.2,
+ "targets_with_any_scene": 1,
+ "targets_with_optical_le_0p5m": 1,
+ "targets_with_usable_scene": 0,
+ "maxar_collections_checked": 55,
+ "per_target": [
+  {
+   "target_id": "S1:41.3",
+   "n_scenes_any": 0,
+   "n_optical_le_0p5m": 0,
+   "n_drift_ok": 0,
+   "n_usable": 0,
+   "errors": []
+  },
+  {
+   "target_id": "S1:19.4",
+   "n_scenes_any": 0,
+   "n_optical_le_0p5m": 0,
+   "n_drift_ok": 0,
+   "n_usable": 0,
+   "errors": []
+  },
+  {
+   "target_id": "S1:58.4",
+   "n_scenes_any": 0,
+   "n_optical_le_0p5m": 0,
+   "n_drift_ok": 0,
+   "n_usable": 0,
+   "errors": []
+  },
+  {
+   "target_id": "S2:MSM41_litter-T58",
+   "n_scenes_any": 0,
+   "n_optical_le_0p5m": 0,
+   "n_drift_ok": 0,
+   "n_usable": 0,
+   "errors": []
+  },
+  {
+   "target_id": "S2:MSM41_litter-T55",
+   "n_scenes_any": 0,
+   "n_optical_le_0p5m": 0,
+   "n_drift_ok": 0,
+   "n_usable": 0,
+   "errors": []
+  },
+  {
+   "target_id": "S3:HE419_MarLitter_transect30",
+   "n_scenes_any": 0,
+   "n_optical_le_0p5m": 0,
+   "n_drift_ok": 0,
+   "n_usable": 0,
+   "errors": []
+  },
+  {
+   "target_id": "S3:HE419_MarLitter_transect23",
+   "n_scenes_any": 0,
+   "n_optical_le_0p5m": 0,
+   "n_drift_ok": 0,
+   "n_usable": 0,
+   "errors": []
+  },
+  {
+   "target_id": "S4:DOORS3:T25",
+   "n_scenes_any": 0,
+   "n_optical_le_0p5m": 0,
+   "n_drift_ok": 0,
+   "n_usable": 0,
+   "errors": []
+  },
+  {
+   "target_id": "S4:DOORS3:T22",
+   "n_scenes_any": 1,
+   "n_optical_le_0p5m": 1,
+   "n_drift_ok": 0,
+   "n_usable": 0,
+   "errors": []
+  },
+  {
+   "target_id": "S4:DOORS3:T3",
+   "n_scenes_any": 0,
+   "n_optical_le_0p5m": 0,
+   "n_drift_ok": 0,
+   "n_usable": 0,
+   "errors": []
+  },
+  {
+   "target_id": "ADIS:63553",
+   "n_scenes_any": 0,
+   "n_optical_le_0p5m": 0,
+   "n_drift_ok": 0,
+   "n_usable": 0,
+   "errors": []
+  },
+  {
+   "target_id": "ADIS:437805",
+   "n_scenes_any": 0,
+   "n_optical_le_0p5m": 0,
+   "n_drift_ok": 0,
+   "n_usable": 0,
+   "errors": []
+  },
+  {
+   "target_id": "ADIS:158080",
+   "n_scenes_any": 0,
+   "n_optical_le_0p5m": 0,
+   "n_drift_ok": 0,
+   "n_usable": 0,
+   "errors": []
+  },
+  {
+   "target_id": "ADIS:437793",
+   "n_scenes_any": 0,
+   "n_optical_le_0p5m": 0,
+   "n_drift_ok": 0,
+   "n_usable": 0,
+   "errors": []
+  },
+  {
+   "target_id": "ADIS:437820",
+   "n_scenes_any": 0,
+   "n_optical_le_0p5m": 0,
+   "n_drift_ok": 0,
+   "n_usable": 0,
+   "errors": []
+  },
+  {
+   "target_id": "ADIS:165424",
+   "n_scenes_any": 0,
+   "n_optical_le_0p5m": 0,
+   "n_drift_ok": 0,
+   "n_usable": 0,
+   "errors": []
+  },
+  {
+   "target_id": "ADIS:174187",
+   "n_scenes_any": 0,
+   "n_optical_le_0p5m": 0,
+   "n_drift_ok": 0,
+   "n_usable": 0,
+   "errors": []
+  },
+  {
+   "target_id": "ADIS:300760",
+   "n_scenes_any": 0,
+   "n_optical_le_0p5m": 0,
+   "n_drift_ok": 0,
+   "n_usable": 0,
+   "errors": []
+  },
+  {
+   "target_id": "ADIS:90806",
+   "n_scenes_any": 0,
+   "n_optical_le_0p5m": 0,
+   "n_drift_ok": 0,
+   "n_usable": 0,
+   "errors": []
+  },
+  {
+   "target_id": "ADIS:174202",
+   "n_scenes_any": 0,
+   "n_optical_le_0p5m": 0,
+   "n_drift_ok": 0,
+   "n_usable": 0,
+   "errors": []
+  }
+ ],
+ "sensitivity_ccm_any_date": [
+  {
+   "target_id": "S1:41.3",
+   "ccm_items_any_date_0p3deg": 0,
+   "ccm_optical_le_0p5m_any_date": 0,
+   "min_dist_km": null,
+   "query_failed": false
+  },
+  {
+   "target_id": "S1:19.4",
+   "ccm_items_any_date_0p3deg": 0,
+   "ccm_optical_le_0p5m_any_date": 0,
+   "min_dist_km": null,
+   "query_failed": false
+  },
+  {
+   "target_id": "S1:58.4",
+   "ccm_items_any_date_0p3deg": 0,
+   "ccm_optical_le_0p5m_any_date": 0,
+   "min_dist_km": null,
+   "query_failed": false
+  },
+  {
+   "target_id": "S2:MSM41_litter-T58",
+   "ccm_items_any_date_0p3deg": 0,
+   "ccm_optical_le_0p5m_any_date": 0,
+   "min_dist_km": null,
+   "query_failed": false
+  },
+  {
+   "target_id": "S2:MSM41_litter-T55",
+   "ccm_items_any_date_0p3deg": 0,
+   "ccm_optical_le_0p5m_any_date": 0,
+   "min_dist_km": null,
+   "query_failed": false
+  },
+  {
+   "target_id": "S3:HE419_MarLitter_transect30",
+   "ccm_items_any_date_0p3deg": 30,
+   "ccm_optical_le_0p5m_any_date": 0,
+   "min_dist_km": 17.0,
+   "query_failed": false
+  },
+  {
+   "target_id": "S3:HE419_MarLitter_transect23",
+   "ccm_items_any_date_0p3deg": 0,
+   "ccm_optical_le_0p5m_any_date": 0,
+   "min_dist_km": null,
+   "query_failed": false
+  },
+  {
+   "target_id": "S4:DOORS3:T25",
+   "ccm_items_any_date_0p3deg": 0,
+   "ccm_optical_le_0p5m_any_date": 0,
+   "min_dist_km": null,
+   "query_failed": false
+  },
+  {
+   "target_id": "S4:DOORS3:T22",
+   "ccm_items_any_date_0p3deg": 0,
+   "ccm_optical_le_0p5m_any_date": 0,
+   "min_dist_km": null,
+   "query_failed": false
+  },
+  {
+   "target_id": "S4:DOORS3:T3",
+   "ccm_items_any_date_0p3deg": 0,
+   "ccm_optical_le_0p5m_any_date": 0,
+   "min_dist_km": null,
+   "query_failed": false
+  },
+  {
+   "target_id": "ADIS:63553",
+   "ccm_items_any_date_0p3deg": 0,
+   "ccm_optical_le_0p5m_any_date": 0,
+   "min_dist_km": null,
+   "query_failed": false
+  },
+  {
+   "target_id": "ADIS:437805",
+   "ccm_items_any_date_0p3deg": 0,
+   "ccm_optical_le_0p5m_any_date": 0,
+   "min_dist_km": null,
+   "query_failed": false
+  },
+  {
+   "target_id": "ADIS:158080",
+   "ccm_items_any_date_0p3deg": 0,
+   "ccm_optical_le_0p5m_any_date": 0,
+   "min_dist_km": null,
+   "query_failed": false
+  },
+  {
+   "target_id": "ADIS:437793",
+   "ccm_items_any_date_0p3deg": 0,
+   "ccm_optical_le_0p5m_any_date": 0,
+   "min_dist_km": null,
+   "query_failed": false
+  },
+  {
+   "target_id": "ADIS:437820",
+   "ccm_items_any_date_0p3deg": 0,
+   "ccm_optical_le_0p5m_any_date": 0,
+   "min_dist_km": null,
+   "query_failed": false
+  },
+  {
+   "target_id": "ADIS:165424",
+   "ccm_items_any_date_0p3deg": 0,
+   "ccm_optical_le_0p5m_any_date": 0,
+   "min_dist_km": null,
+   "query_failed": false
+  },
+  {
+   "target_id": "ADIS:174187",
+   "ccm_items_any_date_0p3deg": 0,
+   "ccm_optical_le_0p5m_any_date": 0,
+   "min_dist_km": null,
+   "query_failed": false
+  },
+  {
+   "target_id": "ADIS:300760",
+   "ccm_items_any_date_0p3deg": 0,
+   "ccm_optical_le_0p5m_any_date": 0,
+   "min_dist_km": null,
+   "query_failed": false
+  },
+  {
+   "target_id": "ADIS:90806",
+   "ccm_items_any_date_0p3deg": 0,
+   "ccm_optical_le_0p5m_any_date": 0,
+   "min_dist_km": null,
+   "query_failed": false
+  },
+  {
+   "target_id": "ADIS:174202",
+   "ccm_items_any_date_0p3deg": 0,
+   "ccm_optical_le_0p5m_any_date": 0,
+   "min_dist_km": null,
+   "query_failed": false
+  }
+ ]
+}

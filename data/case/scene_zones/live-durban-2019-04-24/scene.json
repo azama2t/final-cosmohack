@@ -23,7 +23,7 @@
  "water_km2": 98.583,
  "det_pixels": 113,
  "det_area_m2": 11300,
- "lwd_m2_km2": 114.62,
+ "lwd_m2_km2": null,
  "wind_high": true,
  "model": {
   "weights": "weights/lgbm",
@@ -37,6 +37,8 @@
  },
  "crop_note": "вырезка вокруг района/сцены, не весь тайл",
  "selection": null,
+ "in_observed_area": false,
+ "observed_water_km2": 0.0,
  "training_scene": "MARIDA (train:21)",
  "rgb_file": "rgb.jpg",
  "quality_file": "quality.png",
@@ -47,7 +49,6 @@
  "by_status": {
   "detected": 0,
   "not_detected": 0,
-  "not_informative": 0,
   "insufficient_data": 7
  }
 }

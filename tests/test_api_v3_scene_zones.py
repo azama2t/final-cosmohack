@@ -28,7 +28,7 @@ def test_scene_zones_blocks_and_statuses(client):
     for f in fc["features"]:
         p = f["properties"]
         assert p["kind"] == "detection_zone" and p["concentration"] is None
-        assert p["detection_status"] in ("detected", "not_detected", "not_informative", "insufficient_data")
+        assert p["detection_status"] in ("detected", "not_detected", "insufficient_data")
         m = p["measured"]
         assert m["zone_area_km2"] > 0 and m["suspicious_area_m2"] == m["n_pixels"] * 100
         # INBOX §23 п.2: no items/km2 scenario at all; quantity status «концентрация по снимку не подтверждена»
@@ -133,22 +133,63 @@ def test_demo_scene_cozar_zones_detected_level_b(client):
         assert p["detection_label"] == "обнаружено детектором · совпадает с разметкой Cózar (B)"
 
 
-def test_wind_rule_zero_not_informative(client):
-    """Г3-1: wind >= 5 m/s — «не обнаружено» becomes «ноль не информативен», LWD gets a note."""
+def test_wind_rule_cozar2024(client):
+    """§29 А: wind > 5 m/s (Cózar 2024) — «не обнаружено» becomes «недостаточно данных (ветер …)», the scene leaves the
+    «observed» denominator (LWD null); found zones keep their status."""
     idx = cs.scene_zones_index()
-    wind = {s["key"]: s.get("wind10m_ms") for s in idx["scenes"]}
+    sc = {s["key"]: s for s in idx["scenes"]}
     fc = client.get("/api/v3/scene_zones").json()
     for f in fc["features"]:
         p = f["properties"]
-        w = wind.get(p["scene_key"])
-        high = w is not None and w >= 5
+        w = sc[p["scene_key"]].get("wind10m_ms")
+        high = w is not None and w > 5
         assert bool(p.get("wind_high")) == high
+        assert p["detection_status"] != "not_informative"
         if high:
-            assert p["detection_status"] != "not_detected" and p["measured"]["lwd_note"] and p["wind_note"]
+            assert p["measured"]["lwd_m2_km2"] is None and p["measured"]["lwd_note"] and p["wind_note"]
+            assert sc[p["scene_key"]]["in_observed_area"] is False and sc[p["scene_key"]]["lwd_m2_km2"] is None
+            assert p["detection_status"] != "not_detected"
             if p["zone_id"].endswith("-000"):
-                assert p["detection_status"] == "not_informative"
-                assert p["detection_label"] == "ноль не информативен (ветер ≥ 5 м/с)"
+                assert p["detection_status"] == "insufficient_data" and "ветер > 5 м/с" in p["detection_label"]
+                assert "Cózar 2024" in p["detection_label"]
         else:
-            assert p["detection_status"] != "not_informative" and not p["measured"].get("lwd_note")
-    ni = client.get("/api/v3/scene_zones", params={"detection_status": "not_informative"}).json()
-    assert all(f["properties"]["detection_status"] == "not_informative" for f in ni["features"])
+            assert "wind" not in p["flags"] and not p["measured"].get("lwd_note")
+
+
+
+def test_field_cards_s28(client):
+    """§28: profile interval = bootstrap over cruise days (+ one new place), Poisson labelled «только ошибка счёта»;
+    ADIS authors' trawl calibration next to our raw number; numbers from final_numbers (no hardcode)."""
+    fnq = json.loads((cs.REPO / "reports" / "final_numbers.json").read_text(encoding="utf-8"))["case"]["sections"]["quantity"]
+    pp = cs.profile_pooled("S2_visual_total_plastic")
+    f2 = fnq["field_S2"]
+    assert pp["mean"] == f2["pooled_C"] and (pp["boot_lo95"], pp["boot_hi95"]) == (f2["boot_lo95"], f2["boot_hi95"])
+    assert (pp["event_lo95"], pp["event_hi95"]) == (f2["event_lo95"], f2["event_hi95"])
+    assert pp["poisson_label"] == "только ошибка счёта (Пуассон)" and cs.profile_pooled("S1_trawl_total_plastic") is None
+    meta = client.get("/api/v3/meta").json()
+    assert meta["quantity_levels"]["patchiness"]["sd_ln_c"] == fnq["variance_S2"]["sd_within_day"]
+    ac = fnq["adis_forecast"]["authors_calibrated"]
+    p = client.get("/api/v3/scene_zones", params={"scene_kind": "demo"}).json()["features"][0]["properties"]
+    a = p["field_nearby"]["authors_calibration"]
+    assert (a["C"], a["lo_typ"], a["hi_typ"], a["ours_raw_C"]) == (ac["C"], ac["lo_typ"], ac["hi_typ"], ac["ours_raw_C"])
+    for it in p["field_nearby"]["items"]:
+        c = it.get("authors_cal_10cm_items_km2")
+        assert c is None or c >= 0
+
+
+def test_meta_headline_numbers_from_final_numbers(client):
+    """§31 п.2 а: first-screen «Главное» — field profiles (measurement) + ADIS + satellite, numbers not hardcoded."""
+    fnq = json.loads((cs.REPO / "reports" / "final_numbers.json").read_text(encoding="utf-8"))["case"]["sections"]["quantity"]
+    h = client.get("/api/v3/meta").json()["headline"]
+    by = {r["key"]: r for r in h["field"]}
+    assert (by["S2"]["value"], by["S2"]["lo"], by["S2"]["hi"]) == (
+        fnq["field_S2"]["pooled_C"], fnq["field_S2"]["boot_lo95"], fnq["field_S2"]["boot_hi95"])
+    assert "бутстреп" in by["S2"]["interval_label"]
+    af = fnq["adis_forecast"]
+    assert (by["ADIS"]["value"], by["ADIS"]["lo"], by["ADIS"]["hi"]) == (af["C"], af["lo"], af["hi"])
+    for r in h["field"]:
+        assert r["kind"] == "measurement" and r["size_class"] and r["material"] and r["lo"] <= r["value"] <= r["hi"]
+    fc = client.get("/api/v3/scene_zones").json()
+    assert h["satellite"]["n_zones"] == fc["total"]
+    assert h["satellite"]["n_level_b"] == sum(1 for f in fc["features"] if f["properties"]["verification"] == "level_B_cozar")
+    assert h["satellite"]["quantity_label"] == "концентрация по снимку не подтверждена"

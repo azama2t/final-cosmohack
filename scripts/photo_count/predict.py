@@ -24,6 +24,8 @@ def main():
     ap.add_argument("--out", default=None)
     ap.add_argument("--draw", default=None)
     a = ap.parse_args()
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")  # Windows console: "км²"
     os.environ.setdefault("MACROPLASTIC_PHOTO_DEVICE", "cpu")
     from PIL import Image, ImageDraw, ImageOps
     from macroplastic.photo_count import SURVEY_NOTE

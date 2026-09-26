@@ -84,6 +84,35 @@ def dataset(name):
         return _yolo_dir(b / "images", b / "labels"), {
             "source": "HF gonzz2026 floating rubbish on the surface of the water, CC BY 4.0 (declared)",
             "split": "val", "survey": "фото с судна/берега, 11 классов мусора"}
+    if name == "tocl_val":
+        import csv
+        base = CDS / "tocl_rms" / "Supplementary materials C - label dataset" / "val"
+        d = json.loads((base / "annotations" / "val_annotations.json").read_text(encoding="utf-8"))
+        cats = {c["id"]: c["name"] for c in d["categories"]}
+        by = {im["id"]: [] for im in d["images"]}
+        for a in d["annotations"]:
+            if cats[a["category_id"]] == "organics":  # natural debris is not litter
+                continue
+            x, y, w, h = a["bbox"]
+            by[a["image_id"]].append([x, y, x + w, y + h])
+        gsd = {}
+        with open(CDS / "tocl_rms" / "suppl" / "location_gsd_map.csv", encoding="utf-8") as fh:
+            for r in csv.DictReader(fh):
+                if r["gsd_m_per_px"] and r["confidence"] in ("high", "medium"):
+                    gsd[r["json_location"]] = float(r["gsd_m_per_px"])
+        items, areas, locs = [], [], []
+        for im in sorted(d["images"], key=lambda x: x["file_name"]):
+            f = base / "images" / im["file_name"]
+            if f.exists():
+                items.append((f, np.asarray(by[im["id"]], float).reshape(-1, 4)))
+                g = gsd.get(im.get("location"))
+                areas.append(im["width"] * im["height"] * g * g if g else None)
+                locs.append(im.get("location"))
+        return items, {"source": "The Ocean Cleanup River Monitoring System labelled dataset (4TU 10.4121/fad0aa03), "
+                                 "CC BY-NC 4.0 — только исследовательское использование",
+                       "split": "val (выборка: до 10 кадров на локацию)", "classes": "все, кроме organics",
+                       "survey": "камера над рекой (мост/опора, 3–50 м), почти надир, 4056x3130",
+                       "frame_area_m2": areas, "location": locs}
     raise KeyError(name)
 
 
@@ -156,6 +185,24 @@ def score(a):
              "count_exact_ci95": M.bootstrap_ci(lambda i: float((err[i] == 0).mean()), n, a.boot),
              **M.prf_at(preds, gts, a.thr),
              "baseline_count_mae_median": float(np.mean(np.abs(np.median(tc) - tc)))}
+        if info.get("frame_area_m2"):
+            ar = np.array([np.nan if x is None else x for x in info.pop("frame_area_m2")], float)
+            locs = info.pop("location")
+            k = np.isfinite(ar)
+            e2 = (pc - tc)[k] / ar[k]
+            tk, pk = tc[k], pc[k]
+            nk = int(k.sum())
+            r["density"] = {"unit": "шт./м² на площади кадра (камера над рекой, не спутник)", "n_frames_known_area": nk,
+                            "frame_area_m2_range": [float(np.nanmin(ar)), float(np.nanmax(ar))],
+                            "true_mean_per_m2": float((tk / ar[k]).mean()), "pred_mean_per_m2": float((pk / ar[k]).mean()),
+                            "mae_per_m2": float(np.abs(e2).mean()),
+                            "mae_per_m2_ci95": M.bootstrap_ci(lambda i: float(np.abs(e2[i]).mean()), nk, a.boot),
+                            "bias_per_m2": float(e2.mean()),
+                            "true_total_per_m2": float(tk.sum() / ar[k].sum()), "pred_total_per_m2": float(pk.sum() / ar[k].sum()),
+                            "pred_total_ci95": M.bootstrap_ci(lambda i: float(pk[i].sum() / ar[k][i].sum()), nk, a.boot),
+                            "true_total_ci95": M.bootstrap_ci(lambda i: float(tk[i].sum() / ar[k][i].sum()), nk, a.boot),
+                            "baseline_median_mae_per_m2": float(np.abs((np.median(tk) - tk) / ar[k]).mean()),
+                            "locations": sorted({l for l, kk in zip(locs, k) if kk})}
         if info.get("tile_area_m2"):
             A = info["tile_area_m2"]
             r["density"] = {"unit": "шт./м² на площади плитки (дрон, не спутник)", "tile_area_m2": A,
@@ -168,11 +215,28 @@ def score(a):
               f"exact={r['count_exact']:.2f} P={r['precision']:.2f} R={r['recall']:.2f} "
               f"(median-baseline MAE {r['baseline_count_mae_median']:.2f})")
     REP.mkdir(parents=True, exist_ok=True)
-    (REP / f"cross_{a.tag}.json").write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
+    fp = REP / f"cross_{a.tag}.json"
+    if fp.exists():  # merge: keep sets scored earlier (each set is scored once)
+        old = json.loads(fp.read_text(encoding="utf-8"))
+        out["sets"] = {**old.get("sets", {}), **out["sets"]}
+    fp.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
 def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
     i = sub.add_parser("infer")
-    
+    i.add_argument("--weights", required=True)
+    i.add_argument("--tag", required=True)
+    i.add_argument("--sets", nargs="+", required=True)
+    s = sub.add_parser("score")
+    s.add_argument("--tag", required=True)
+    s.add_argument("--thr", type=float, required=True)
+    s.add_argument("--sets", nargs="+", default=["rf100vl_test", "maharjan", "tud_gv", "floating_rubbish_val", "tocl_val"])
+    s.add_argument("--boot", type=int, default=1000)
+    a = ap.parse_args()
+    return infer(a) if a.cmd == "infer" else score(a)
+
+
+if __name__ == "__main__":
+    sys.exit(main() or 0)

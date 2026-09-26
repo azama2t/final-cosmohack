@@ -1,0 +1,164 @@
+{
+ "CTRL:ccm_corsica_pleiades": {
+  "src_ccm": {
+   "n": 4,
+   "errors": [],
+   "example": "pleiades-1a 2023-07-20T10:24:02.650000Z gsd=2.0"
+  },
+  "src_maxar": {
+   "n": 0,
+   "errors": [],
+   "example": null
+  },
+  "src_oam": {
+   "n": 0,
+   "errors": [],
+   "example": null
+  },
+  "src_naip": {
+   "n": 0,
+   "errors": [],
+   "example": null
+  },
+  "src_sar": {
+   "n": 0,
+   "errors": [],
+   "example": null
+  }
+ },
+ "CTRL:maxar_derna": {
+  "src_ccm": {
+   "n": 0,
+   "errors": [],
+   "example": null
+  },
+  "src_maxar": {
+   "n": 1,
+   "errors": [],
+   "example": "event collection 2023-01-22 09:24:17Z/2023-09-22 09:24:38Z gsd=None"
+  },
+  "src_oam": {
+   "n": 1,
+   "errors": [],
+   "example": "satellite 2023-09-13T06:00:00.000Z gsd=0.30517578125"
+  },
+  "src_naip": {
+   "n": 0,
+   "errors": [],
+   "example": null
+  },
+  "src_sar": {
+   "n": 6,
+   "errors": [],
+   "example": "capella-6 2023-09-11T04:21:36.171012Z gsd=0.38"
+  }
+ },
+ "CTRL:naip_tampa": {
+  "src_ccm": {
+   "n": 0,
+   "errors": [],
+   "example": null
+  },
+  "src_maxar": {
+   "n": 0,
+   "errors": [],
+   "example": null
+  },
+  "src_oam": {
+   "n": 0,
+   "errors": [],
+   "example": null
+  },
+  "src_naip": {
+   "n": 47,
+   "errors": [],
+   "example": "aerial 2023-01-08T16:00:00Z gsd=0.3"
+  },
+  "src_sar": {
+   "n": 0,
+   "errors": [],
+   "example": null
+  }
+ },
+ "CTRL:capella_2023-07-03": {
+  "src_ccm": {
+   "n": 0,
+   "errors": [],
+   "example": null
+  },
+  "src_maxar": {
+   "n": 0,
+   "errors": [],
+   "example": null
+  },
+  "src_oam": {
+   "n": 0,
+   "errors": [],
+   "example": null
+  },
+  "src_naip": {
+   "n": 0,
+   "errors": [],
+   "example": null
+  },
+  "src_sar": {
+   "n": 6,
+   "errors": [],
+   "example": "capella-9 2023-07-03T17:44:06.013457Z gsd=0.32"
+  }
+ },
+ "CTRL:umbra_2024-09-15": {
+  "src_ccm": {
+   "n": 0,
+   "errors": [],
+   "example": null
+  },
+  "src_maxar": {
+   "n": 0,
+   "errors": [],
+   "example": null
+  },
+  "src_oam": {
+   "n": 0,
+   "errors": [],
+   "example": null
+  },
+  "src_naip": {
+   "n": 0,
+   "errors": [],
+   "example": null
+  },
+  "src_sar": {
+   "n": 26,
+   "errors": [],
+   "example": "capella-15 2024-09-14T00:03:02.486068Z gsd=0.38"
+  }
+ },
+ "CTRL:oam_2023-04-05": {
+  "src_ccm": {
+   "n": 0,
+   "errors": [],
+   "example": null
+  },
+  "src_maxar": {
+   "n": 0,
+   "errors": [],
+   "example": null
+  },
+  "src_oam": {
+   "n": 1,
+   "errors": [],
+   "example": "uav 2023-04-05T16:00:00.000Z gsd=0.0009246271223709259"
+  },
+  "src_naip": {
+   "n": 0,
+   "errors": [],
+   "example": null
+  },
+  "src_sar": {
+   "n": 0,
+   "errors": [],
+   "example": null
+  }
+ }
+}

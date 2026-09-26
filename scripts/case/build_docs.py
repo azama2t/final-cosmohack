@@ -54,6 +54,7 @@ def run(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:
 
 def docs() -> None:
     run([PY, "scripts/final_numbers.py"])
+    run([PY, "scripts/case/units_ladder_fig.py"])  # лестница единиц docs/img/units_ladder.png из final_numbers
     run([PY, "scripts/render_docs.py"])
     run([PY, "scripts/make_deck_case.py"])
 
@@ -90,6 +91,7 @@ def main(argv=None) -> int:
     run([PY, "scripts/case/pairs_detector_summary.py"])  # текущий результат детектора на снимках пар
     run([PY, "scripts/case/collect_search.py"])  # §11 расследование данных -> reports/search/search_numbers.json
     first = run([PY, "scripts/final_numbers.py"])  # noqa: F841
+    run([PY, "scripts/case/units_ladder_fig.py"])
     run([PY, "scripts/render_docs.py"])
     run([PY, "scripts/make_deck_case.py"], check=False)  # при самом первом запуске ещё нет case_tests.json
     res = pytest_case()

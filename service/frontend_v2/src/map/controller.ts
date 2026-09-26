@@ -186,7 +186,8 @@ export function satelliteStyle(proj: Projection): any {
     {
       version: 8,
       name: 'satellite',
-      sources: { esri: { type: 'raster', tiles: [ESRI_TILES], tileSize: 256, maxzoom: 18, attribution: ATTRIBUTION.satellite } },
+      // §31 д: Esri World Imagery has no tiles over open sea above ~z10 («Map data not yet available» grey tiles) — overzoom z10
+      sources: { esri: { type: 'raster', tiles: [ESRI_TILES], tileSize: 256, maxzoom: 10, attribution: ATTRIBUTION.satellite } },
       layers: [
         // deep-ocean navy while tiles load (never a black hole); imagery at natural brightness — deep water in Esri
         // imagery is dark by itself, dimming it further made the open sea look black

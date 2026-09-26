@@ -1666,6 +1666,7 @@ def meta() -> dict:
                      "note": "класс MARIDA Marine Debris = любой плавающий мусор, не только пластик",
                      "version": detector_model_info()},
         "quantity_levels": quantity_levels(),
+        "headline": headline(),
         "scene_zone_statuses": [{"id": k, "label": v} for k, v in SZ_DET_LABEL.items()],
         "layers": [
             {"id": "observations", "kind": "measurement", "label": "Полевые измерения (настоящие шт./км²)"},
@@ -2107,19 +2108,20 @@ PATHS.setdefault("scene_zones_dir", REPO / "data" / "case" / "scene_zones")
 SZ_DET_LABEL = {
     "detected": "обнаружено детектором (без полевого подтверждения)",
     "not_detected": "не обнаружено (детектор оценивается, объектов нет)",
-    "not_informative": "ноль не информативен (ветер ≥ 5 м/с)",
     "insufficient_data": "недостаточно данных: признаки ложного срабатывания",
 }
 SZ_FLAG_RU = {"foam": "пена", "glint": "блик", "ship": "судно/кильватер", "seam": "шов/граница яркости",
-              "coast": "берег/прибой", "shallow": "мелководье/мутная вода", "cloud": "облака"}
+              "coast": "берег/прибой", "shallow": "мелководье/мутная вода", "cloud": "облака", "wind": "ветер > 5 м/с"}
 # INBOX §23 п.2: «обнаружено детектором» only after all false-alarm filters (ship/wake, foam, glint, cloud, coast, shallow)
 SZ_VERIFY_LABEL = {
     "level_B_cozar": "обнаружено детектором · совпадает с разметкой Cózar (B)",
     "unverified": "обнаружено детектором · вероятный плавающий материал, требует проверки",
     "false_alarm_signs": "недостаточно данных: признаки ложного срабатывания",
+    "wind": "недостаточно данных (ветер > 5 м/с: мусор перемешивается, полосы не видны — правило Cózar 2024)",
 }
-SZ_WIND_NOTE = ("ветер ≥ 5 м/с (ERA5, час съёмки): Cózar et al. 2024 исключают такую воду из наблюдаемой площади — нити "
-                "при сильном ветре не формируются и не держатся; отсутствие детекций ничего не говорит, LWD не сравнимо")
+SZ_WIND_NOTE = ("ветер > 5 м/с (ERA5, час съёмки): Cózar et al. 2024 убирают такую воду из наблюдаемой площади («we removed "
+                "from a0 the sea surface area associated with wind speeds higher than 5 m·s−1») — мусор перемешивается, "
+                "полосы не видны; сцена не входит в знаменатель «обследовано», LWD не считается")
 SZ_FALSE_LABEL = "ложное срабатывание (признаки судна / кильватера / шва) — недостаточно данных"
 SZ_QUANTITY = {"status": "not_confirmed", "label": "концентрация по снимку не подтверждена",
                "detail": "перевод площади в штуки не показываем: нет калибровочных пар (см. docs/QUANTITY.md)"}
@@ -2142,7 +2144,9 @@ def _sz_enrich(f: dict, idx: dict) -> dict:
     p = f["properties"]
     st = p["detection_status"]
     ver = p.get("verification") or ("false_alarm_signs" if p.get("flags") else None)
-    zero = st in ("not_detected", "not_informative")
+    if "wind" in (p.get("flags") or []):
+        ver = "wind"
+    zero = st == "not_detected"
     p["verification"] = ver if not zero else "none"
     p["detection_label"] = SZ_VERIFY_LABEL.get(ver) if not zero and ver else SZ_DET_LABEL.get(st, st)
     # Г3-1: Cózar 2024 exclude sea with wind > 5 m/s (windrows do not form / hold)
@@ -2151,8 +2155,8 @@ def _sz_enrich(f: dict, idx: dict) -> dict:
         p["detection_label"] = SZ_FALSE_LABEL
     p["training_scene_note"] = (f"снимок из обучающей выборки детектора ({p['training_scene']}) — не независимая проверка"
                                 if p.get("training_scene") else None)
-    if st == "not_informative":
-        p["detection_reason"] = None
+    if ver == "wind":
+        p["detection_reason"] = None  # the card shows wind_note
     elif p.get("flags"):
         p["detection_reason"] = ("признаки: " + ", ".join(SZ_FLAG_RU.get(x, x) for x in p["flags"])
                                  + " — вероятно, ложное срабатывание")
@@ -2161,7 +2165,7 @@ def _sz_enrich(f: dict, idx: dict) -> dict:
     p["status_note"] = SZ_STATUS_NOTE
     p["scene_kind_label"] = SZ_KIND_RU.get(p.get("scene_kind"), p.get("scene_kind"))
     if p.get("scene_kind") == "demo":  # short list title: tile of the held-out scene
-        p["title"] = p["title"].replace("Демо Cózar 2024 (отложенная сцена)", "Cózar, отложенная сцена 30SXE")
+        p["title"] = p["title"].replace("Демо Cózar 2024 (отложенная сцена)", "30SXE")  # §31 д: «30SXE · зона 16»
     m = p.get("measured") or {}
     p["area_km2"] = m.get("zone_area_km2")
     p["area_basis"] = "геодезическая площадь контура зоны (кластер объектов детектора + 150 м)"
@@ -2391,6 +2395,62 @@ def quantity_levels() -> dict:
                            "note": ("на синхронных отрезках ADIS с единичными предметами детектор предметы не увидел; "
                                     "это согласуется с физикой (доля покрытия ~10⁻⁷), но не задаёт общий предел для "
                                     "всех скоплений")},
+        "patchiness": {"sd_ln_c": ((s.get("quantity") or {}).get("variance_S2") or {}).get("sd_within_day"),
+                       "label": "пятнистость: разброс ln C внутри дня рейса (S2), не входит в интервал счёта Пуассона",
+                       "source": "reports/final_numbers.json · quantity.variance_S2.sd_within_day"},
         "calibration_pairs": {"n": cal.get("pairs_A_with_S_pos", 0), "label": "калибровочные пары «снимок → шт./км²»",
                               "note": "калибровочных пар 0: перевод «снимок → шт./км²» не обучен"},
+    }
+
+
+# ------------------------------------------------------------------------------------ §31 п.2: «Главное» (first screen)
+HEADLINE_FIELD = [  # (final_numbers profile key, source filter, profile filter, material, size class)
+    ("S2", "S2_SARGASSO_MSM41", "S2_visual_GT2", "пластик", "> 2 см", "Саргассово"),
+    ("S3", "S3_SE_NORTH_SEA", "S3_visual_GT2", "весь мусор", "> 2 см", "Сев. море"),
+    ("S4", "S4_BLACK_SEA_DOORS3", "S4_visual_GT2_5", "весь мусор", "> 2,5 см", "Чёрное м."),
+]
+
+
+def headline() -> dict:
+    """First-screen numbers (INBOX §31 п.2 а): field concentration per profile (measurement), ADIS, satellite zones.
+    All numbers from final_numbers.json / the scene-zone layer — no hardcoded values."""
+    q = _fn_quantity()
+    prof = q.get("profiles") or {}
+    f2 = q.get("field_S2") or {}
+    src_lab = dict(SOURCES)
+    rows = []
+    for key, src, pf, mat, size, short in HEADLINE_FIELD:
+        pr = prof.get(key) or {}
+        if key == "S2" and f2.get("boot_lo95") is not None:
+            v, lo, hi = f2.get("pooled_C"), f2.get("boot_lo95"), f2.get("boot_hi95")
+            stat, il = "среднее", "бутстреп 95 % по дням рейса"
+        elif pr.get("pooled_C") is not None:
+            v, lo, hi = pr.get("pooled_C"), pr.get("lo95"), pr.get("hi95")
+            stat, il = "среднее", "95 %, только ошибка счёта (Пуассон)"
+        elif pr.get("c_median") is not None:
+            v, lo, hi = pr.get("c_median"), pr.get("c_p25"), pr.get("c_p75")
+            stat, il = "медиана", "межквартильный размах"
+        else:
+            continue
+        rows.append({"key": key, "short": short, "source": src, "source_label": src_lab.get(src), "profile": pf, "value": v, "lo": lo,
+                     "hi": hi, "stat": stat, "interval_label": il, "material": mat, "size_class": size, "n": pr.get("n"),
+                     "kind": "measurement", "unit": "items/km2"})
+    af = q.get("adis_forecast") or {}
+    if af.get("C") is not None:
+        rows.append({"key": "ADIS", "short": "ADIS", "source": None, "source_label": "ADIS, судовая камера",
+                     "profile": None, "value": af.get("C"), "lo": af.get("lo"), "hi": af.get("hi"), "stat": "среднее",
+                     "interval_label": "95 %, только ошибка счёта (Пуассон)", "material": "пластик", "size_class": "> 10 см",
+                     "n": af.get("n_segments"), "kind": "measurement", "unit": "items/km2"})
+    zs = scene_zones_all()
+    ex = sz_examples() if zs else []
+    good = next((e for e in ex if e["kind"] == "success"), None)
+    return {
+        "field": rows,
+        "field_label": "Концентрация по полевым данным (измерение, шт./км²)",
+        "field_note": "числа сравнимы только внутри одного профиля (размерный класс, материал, метод счёта)",
+        "satellite": {"n_zones": len(zs),
+                      "n_level_b": sum(1 for f in zs if f["properties"].get("verification") == "level_B_cozar"),
+                      "quantity_label": SZ_QUANTITY["label"], "why": SZ_QUANTITY["detail"],
+                      "open_zone_id": good["zone_id"] if good else None},
+        "source": "reports/final_numbers.json · case.sections.quantity; слой data/case/scene_zones",
     }

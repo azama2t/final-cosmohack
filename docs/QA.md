@@ -166,7 +166,7 @@ S2 — один рейс: 63 события. Test — целый участок 
 
 ## 28. Какие тесты есть?
 
-Последний прогон тестов кейса (26.09.2026 06:03): 255 passed, 2 skipped, 0 failed за 26 с (166 тестовых функций, часть параметризована). Проверяют формулу и контрольные примеры, непересечение фолдов и test, утечки, однократность test, API, согласованность выгрузки и то, что числа README, деки, речи и ответов совпадают с final_numbers.json.
+Последний прогон тестов кейса (26.09.2026 06:32): 255 passed, 2 skipped, 0 failed за 72 с (166 тестовых функций, часть параметризована). Проверяют формулу и контрольные примеры, непересечение фолдов и test, утечки, однократность test, API, согласованность выгрузки и то, что числа README, деки, речи и ответов совпадают с final_numbers.json.
 
 *Доказательство:* tests/test_case_*.py, tests/test_api_v3.py; reports/case_run/case_tests.json; scripts/case/build_docs.py
 
@@ -238,7 +238,7 @@ S2 — один рейс: 63 события. Test — целый участок 
 
 ## 40. Почему вы не откалибровали спутник по полю?
 
-Потому что природных калибровочных пар «снимок → шт./км²» нет ни у нас (0), ни у авторов крупнейшего каталога мусорных полос по Sentinel-2. Они пишут дословно: «The current matching of satellite detections and field observations is limited to fake targets (artificial LWs), and reports of dense LW sightings» (Cózar et al. 2024, Nat Commun, раздел «A new scenario for research and management» (PMC11178853)). У нас 66 пар ADIS — пары по месту и времени с нулевым сигналом снимка; для калибровки нужно 4–12 пар с сигналом.
+Потому что природных калибровочных пар «снимок → шт./км²» нет ни у нас (0), ни у авторов крупнейшего каталога мусорных полос по Sentinel-2. Они пишут дословно: «The current matching of satellite detections and field observations is limited to fake targets (artificial LWs), and reports of dense LW sightings» (Cózar et al. 2024, Nat Commun, раздел «A new scenario for research and management» (PMC11178853)). У нас 66 пар ADIS — пары по месту и времени с нулевым сигналом снимка (отобраны из 21444 отрезков; с предметами — 5996, снимков сверхвысокого разрешения того же дня над ними — 0); для калибровки нужно 4–12 пар с сигналом.
 
 *Доказательство:* data/extra/cozar2024/paper.txt (проверено по тексту); docs/QUANTITY.md §0, §3
 

@@ -1,0 +1,6 @@
+# Separate environment for external baselines (NOT the main .venv): .venv-baseline
+# DebrisScan (github.com/orbtl-ai/DebrisScan, Apache-2.0): EfficientDet-D0 TF SavedModel (TF Object Detection API export).
+# Used only by scripts/photo_count/baseline_debrisscan.py (writes detections to JSON; scoring runs in the main .venv).
+tensorflow-cpu>=2.16,<2.19
+numpy
+pillow

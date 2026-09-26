@@ -89,8 +89,8 @@ export interface SceneZoneDetail extends Feat<SceneZoneProps> {
   scene: { preview_url: string | null; quality_url: string | null; wind10m_ms?: number | null; sun_zenith_deg?: number | null; lwd_m2_km2?: number | null; water_km2?: number | null } | null;
 }
 
-export const SZ_COLOR: Record<string, string> = { detected: '#ff8c42', unverified: '#d9b870', not_detected: '#2b8a3e', not_informative: '#5c7c8a', insufficient_data: '#868e96' };
-const SIGN_RU: Record<string, string> = { foam: 'пена', glint: 'блик', ship: 'судно / кильватер', seam: 'шов / граница яркости', coast: 'берег / прибой ближе 300 м', shallow: 'мелководье / мутная вода', cloud: 'облака ≥ 20 % зоны' };
+export const SZ_COLOR: Record<string, string> = { detected: '#ff8c42', unverified: '#d9b870', not_detected: '#2b8a3e', insufficient_data: '#868e96' };
+const SIGN_RU: Record<string, string> = { foam: 'пена', glint: 'блик', ship: 'судно / кильватер', seam: 'шов / граница яркости', coast: 'берег / прибой ближе 300 м', shallow: 'мелководье / мутная вода', cloud: 'облака ≥ 20 % зоны', wind: 'ветер > 5 м/с (правило Cózar 2024)' };
 
 
 export default function SceneZoneCard({
@@ -239,6 +239,20 @@ export default function SceneZoneCard({
           </details>
         </div>
 
+        {/* ------------------------------------------------ what next (§31 п.2 г, no numbers) */}
+        <div className="sec sz-block sz-next" data-testid="sz-next">
+          <div className="sec-h">
+            <h3>Что дальше</h3>
+          </div>
+          <ol className="sz-next-l">
+            <li>снять детально (дрон, камера с судна) — спутник даёт только площадь</li>
+            <li>
+              посчитать предметы — <a href="?mode=photo">пример в «Фото»</a>
+            </li>
+            <li>сверить с полем рядом (ниже)</li>
+          </ol>
+        </div>
+
         {/* ------------------------------------------------ field nearby */}
         <div className="sec sz-block sz-field" data-testid="sz-field">
           <div className="sec-h">
@@ -269,7 +283,7 @@ export default function SceneZoneCard({
                       {num(x.c_items_km2)} <span className="faint">[{num(x.ci95_lo)}–{num(x.ci95_hi)}]</span>
                       {(x as any).authors_cal_10cm_items_km2 !== null && (x as any).authors_cal_10cm_items_km2 !== undefined && (
                         <div className="faint tiny" data-testid="sz-field-cal" title="калибровка авторов ADIS (по тралу, de Vries 2026), класс > 10 см; не наша">
-                          авторы (> 10 см): {num((x as any).authors_cal_10cm_items_km2)}{' '}
+                          авторы ({">"} 10 см): {num((x as any).authors_cal_10cm_items_km2)}{' '}
                           {(x as any).authors_cal_10cm_lo95 !== null && (x as any).authors_cal_10cm_hi95 !== null
                             ? `[${num((x as any).authors_cal_10cm_lo95)}–${num((x as any).authors_cal_10cm_hi95)}]`
                             : '· интервал не дан'}{' '}

@@ -25,11 +25,11 @@ REP = ROOT / "reports" / "photo_count"
 
 def split_items(split, root=None):
     """'val'/'test'/'train' = official FML split; 'g:<name>' = grouped-by-set split (data/extra/fml/split_grouped.json)."""
-    if split.startswith("g:"):
+    if split.startswith(("g:", "m:", "w:")):
         sys.path.insert(0, str(ROOT / "scripts" / "photo_count"))
         import train as T
-        items = T.items_for("grouped", split[2:])
-        return [f for f, _ in items], [D.yolo_boxes(l) for _, l in items]
+        items = T.items_for({"g": "grouped", "m": "maharjan", "w": "winans"}[split[0]], split[2:])
+        return [f for f, _ in items], [T.gt_of(f, l) for f, l in items]
     root = Path(root) if root else D.FML
     return D.load_split(split, root)
 
@@ -52,7 +52,7 @@ def load_preds(path):
 def infer(a):
     import torch
     from PIL import Image
-    from macroplastic.photo_count.model import load_model, predict_images
+    from macroplastic.photo_count.model import load_model, predict_images, predict_tiled
     dev = "cuda" if torch.cuda.is_available() else "cpu"
     model = load_model(a.weights, dev)
     CACHE.mkdir(parents=True, exist_ok=True)
@@ -62,7 +62,7 @@ def infer(a):
         preds = []
         for k in range(0, len(files), a.batch):
             ims = [Image.open(f).convert("RGB") for f in files[k:k + a.batch]]
-            preds += predict_images(model, ims, dev, batch=a.batch)
+            preds += (predict_tiled(model, ims, dev, grid=a.tiles) if a.tiles else predict_images(model, ims, dev, batch=a.batch))
         dt = time.time() - t0
         save_preds(fname(a.tag, split), files, preds)
         print(f"{split}: {len(files)} images, {dt:.1f} s ({len(files) / max(dt, 1e-9):.1f} img/s) on {dev}", flush=True)
@@ -134,6 +134,17 @@ def score(a):
                 per[sname] = {"n_images": len(idx), "ap50": M.ap_at_iou(pp, gg), "count_mae": cm["mae"],
                               "count_exact": cm["exact"], "count_bias": cm["bias"]}
             res["test_per_set"] = per
+        if a.test_split.startswith("m:"):  # drone tiles 256x256 px = 2x2 m -> items per m^2 on the tile scale
+            A = 4.0
+            tcn = np.array([len(g) for g in tg])
+            pcn = M.counts_at(tp, thr)
+            res["density"] = {"unit": "шт./м² на площади плитки (дрон, не спутник)", "tile_area_m2": A,
+                              "true_mean_per_m2": float(tcn.mean() / A), "pred_mean_per_m2": float(pcn.mean() / A),
+                              "mae_per_m2": float(np.abs(pcn - tcn).mean() / A),
+                              "true_ci95": M.bootstrap_ci(lambda i: float(tcn[i].mean() / A), len(tcn), a.boot),
+                              "pred_ci95": M.bootstrap_ci(lambda i: float(pcn[i].mean() / A), len(tcn), a.boot),
+                              "items_per_km2_true": float(tcn.mean() / A * 1e6),
+                              "items_per_km2_pred": float(pcn.mean() / A * 1e6)}
         tcount = np.array([len(g) for g in tg])
         res["test_baselines"] = {
             "count_median_train": M.count_metrics(np.full(len(tg), a.median_count), tcount)["mae"]
@@ -157,6 +168,7 @@ def main():
     i.add_argument("--splits", nargs="+", default=["val", "test"])
     i.add_argument("--batch", type=int, default=4)
     i.add_argument("--root", default=None)
+    i.add_argument("--tiles", type=int, default=0, help="0 = full frame; N = full frame + NxN tiles (20 %% overlap) + NMS")
     s = sub.add_parser("score")
     s.add_argument("--tag", required=True)
     s.add_argument("--val-split", default="val")

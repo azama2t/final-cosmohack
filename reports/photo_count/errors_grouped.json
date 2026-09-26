@@ -1,0 +1,25 @@
+{
+ "tag": "grouped",
+ "split": "g:test",
+ "threshold": 0.8,
+ "n_frames": 1190,
+ "n_true": 4324,
+ "tp": 3763,
+ "missed": 561,
+ "duplicate": 3,
+ "false": 496,
+ "count_precision": 0.8829188174565932,
+ "count_recall": 0.870259019426457,
+ "per_frame_mean": {
+  "missed": 0.4714285714285714,
+  "duplicate": 0.0025210084033613447,
+  "false": 0.41680672268907565,
+  "net_error": -0.052100840336134456,
+  "abs_error": 0.5949579831932773
+ },
+ "share_of_abs_error": {
+  "missed": 0.529245283018868,
+  "duplicate": 0.002830188679245283,
+  "false": 0.4679245283018868
+ }
+}

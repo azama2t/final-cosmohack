@@ -704,7 +704,7 @@ GET /api/v3/scene_zones?bbox=&date_from=&date_to=&status=&detection_status=&conc
       Cózar 2024), quality {valid_water_fraction, cloud_fraction, glint_fraction}, model};
     probable {prob_max, prob_mean, status, signs {foam, glint, ship, seam, coast, shallow: {flag, rule, значения}, note}, n_cozar_filaments,
       cozar_note, context};
-    scenario {shown, label «Условный диапазон, ЕСЛИ это мусорная полоса», lo 1e4, typical_lo 1e6, typical_hi 1e7, hi 1e8 (шт./км²),
+    [ОТМЕНЕНО в 3.10a: scenario больше не отдаётся, главный статус — «концентрация по снимку не подтверждена»] scenario {shown, label «Условный диапазон, ЕСЛИ это мусорная полоса», lo 1e4, typical_lo 1e6, typical_hi 1e7, hi 1e8 (шт./км²),
       size_class, applies_to, assumption, not_what («не доверительный интервал, не измерение и не результат модели»), basis [{value, quote,
       where}] (Cózar et al. 2021, Front. Mar. Sci. 8:571796), source} | {shown:false, label, reason};
     field_nearby {items [{source ADIS, segment_id, ship, date, days_from_scene, distance_km, n_items, area_km2, size_class "> 5 см",
@@ -732,6 +732,33 @@ GET /api/v3/zones: model + weights_sha256, trained_at = дата файла weig
   облаков (+ flag "cloud": облака/тени ≥ 20 % зоны), берега, мелководья; признаки судна/шва → «ложное срабатывание (признаки
   судна / кильватера / шва) — недостаточно данных»; прочие признаки → «недостаточно данных: признаки ложного срабатывания».
 - CSV scene_zones: колонки scenario_* удалены; + verification, quantity_status, quantity_label, quantity_detail.
-3.10b ПРАВИЛО ВЕТРА (26.09, L111, гипотеза Г3-1): + detection_status "not_informative" («ноль не информативен (ветер ≥ 5 м/с)») —
-  у зоны «вся вырезка» (-000) сцены с ветром ERA5 ≥ 5 м/с вместо not_detected (Cózar 2024 исключают воду с ветром > 5 м/с); фильтр
-  detection_status=not_informative; + properties.wind_high, wind_note; measured.lwd_note у всех зон таких сцен; index.json scenes[].wind_high.
+3.10b ПРАВИЛО ВЕТРА (26.09, L111, Г3-1 → INBOX §29 А; заменяет черновик с "not_informative" — этого значения нет):
+  порог из Cózar et al. 2024 (Nat. Commun., Methods): «we removed from a0 the sea surface area associated with wind speeds higher
+  than 5 m·s−1 … the probability of detection dropped sharply above 5 m·s−1» → wind10m_ms (ERA5, час съёмки) > 5:
+  зона «вся вырезка» (-000) — detection_status "insufficient_data", flags ["wind"], verification "wind", detection_label
+  «недостаточно данных (ветер > 5 м/с: мусор перемешивается, полосы не видны — правило Cózar 2024)»; найденные зоны и уровень B не
+  меняются; сцена не входит в знаменатель «обследовано»: index.json scenes[].in_observed_area = false, observed_water_km2 = 0,
+  lwd_m2_km2 = null; у всех зон сцены measured.lwd_m2_km2 = null + measured.lwd_note; + properties.wind_high, wind_note.
+3.10c ПРИЗНАКИ (26.09, аудит В12): flag ship — ещё и малый яркий объект (≤ 40 пикс., B8 ≥ max(0,04; 4× воды)) с B11 ≥ 0,01 ближе
+  500 м; flag shallow — ещё и B4 воды зоны ≥ 0,02 и (≥ 2× воды снимка или B8 ≥ 0,013); probable.signs.diag — диагностические
+  величины (расстояния до суши/яркого объекта, B4/B8/B11) для проверки правил.
+
+3.10.1 ФОТО: ТИП СЪЁМКИ И GSD (ДОБАВЛЕНИЯ, 26.09 06:30, L109, INBOX §23 п.4, §24) — только новые параметры и поля
+POST /api/v3/photo/count: + ?survey=water_camera|aerial (по умолчанию water_camera — прежнее поведение), + ?gsd_m= (м/пикс, 1e-4…10).
+  survey=aerial — модель на Winans 2023 (аэро/дрон, надир, берег; GSD 0,02 м); веса weights_exp/photo_count/model_card_aerial.json.
+  Площадь кадра: frame_area_m2 (если задана) иначе W·H·gsd_m². Неизвестный survey → 400 BAD_PARAM {allowed}.
+  200: + survey_type, gsd_m, gsd_warning (null | «GSD не задан…» | «вне проверенного диапазона 0,01–0,04 м»),
+       density: + area_from ("frame_area_m2"|"gsd_m"); для aerial при пороге по умолчанию и заданном gsd_m:
+       + corrected_count, items_per_km2_corrected, items_per_km2_interval [lo, hi], correction_note
+       (поправка на пропуски p(размер) по отложенным кадрам val; интервал — неопределённость p).
+  503 MODEL_UNAVAILABLE details: {survey}.
+GET /api/v3/photo/meta: + surveys: {water_camera: {label, available, version, limitations[]},
+       aerial: {label, available, version, threshold, gsd_train_m, dataset, weights_license,
+                metrics: {n_frames, n_items, ap50, count_mae, count_mae_ci95, count_bias, count_mae_corrected,
+                          baseline_median_mae, density_mae_km2, density_mae_km2_ci95, true_km2, raw_km2, corrected_km2,
+                          corrected_km2_ci95, note},
+                correction: {bins[], bins_cm[], factor[], factor_ci95[[lo,hi]…], recall_val[], precision_val[]},
+                baseline: {name, status}, limitations[]}};
+       upload.params + "survey", "gsd_m". Прежние поля meta.model/metrics не менялись.
+Фронт v2 ?mode=photo: переключатель «Камера у воды / Аэро / дрон (надир)», поле GSD, поправка считается на клиенте по
+meta.surveys.aerial.correction (только при пороге по умолчанию).
